@@ -833,7 +833,8 @@ HRESULT CDirectInput::InitDI(HWND hWnd, HINSTANCE hInst, E_EXCLUSIVE ex)
 
     // Register with the DirectInput subsystem and get a pointer
     // to a IDirectInput interface we can use.
-    hr = DirectInputCreate( hInst, DIRECTINPUT_VERSION, &m_pDI, NULL );
+
+	hr = DirectInput8Create(hInst, DIRECTINPUT_VERSION, IID_IDirectInput8A, (void**)&m_pDI, NULL);
     if ( FAILED(hr) ) 
         return hr;
 
