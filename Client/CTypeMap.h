@@ -10,7 +10,7 @@
 #pragma warning(disable:4786)
 
 #include <map>
-#include <fstream.h>
+#include <fstream>
 
 //----------------------------------------------------------------------
 // CTypeMap (id, DataType*)ÀÇ map

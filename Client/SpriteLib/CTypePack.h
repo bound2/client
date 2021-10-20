@@ -596,7 +596,7 @@ bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFileRunning(LPCTSTR lpszFilenam
 
 	if(m_file == NULL)
 	{
-		m_file = new class ifstream;
+		m_file = new std::ifstream();
 	}
 	
 	m_file_index = new int[m_Size];

@@ -16,7 +16,7 @@
 #include <vector>
 #include "MString.h"
 //#include "stdafx.h"
-#include <fstream.h>
+#include <fstream>
 #include "RarFile.h"
 #include "VS_UI_filepath.h"
 
