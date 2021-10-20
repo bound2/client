@@ -71,8 +71,8 @@ WORD
 CDirect3D::GetNumberOfBits( DWORD dwMask )
 {
 	WORD wBits;
-    for( wBits = 0; dwMask; wBits++ )
-        dwMask = dwMask & ( dwMask - 1 );  
+	for( wBits = 0; dwMask; wBits++ )
+		dwMask = dwMask & ( dwMask - 1 );  
 
     return wBits;
 }
