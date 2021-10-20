@@ -146,7 +146,7 @@ Type &CTypePack<Type>::Get(WORD n)
 template <class Type>
 bool CTypePack<Type>::LoadFromFile(LPCTSTR lpszFilename)
 {
-	class ifstream file(lpszFilename, ios::binary);
+	std::ifstream file(lpszFilename, std::ios::binary);
 	bool re = LoadFromFile(file);
 	file.close();
 
@@ -159,8 +159,8 @@ bool CTypePack<Type>::SaveToFile(LPCTSTR lpszFilename)
 	char szIndexFilename[512];
 	sprintf(szIndexFilename, "%si", lpszFilename);
 
-	class ofstream dataFile(lpszFilename, ios::binary);
-	class ofstream indexFile(szIndexFilename, ios::binary);
+	std::ofstream dataFile(lpszFilename, std::ios::binary);
+	std::ofstream indexFile(szIndexFilename, std::ios::binary);
 
 	bool re = SaveToFile(dataFile, indexFile);
 
@@ -201,7 +201,7 @@ bool CTypePack<Type>::LoadFromFileRunning(LPCTSTR lpszFilename)
 	//인덱스 파일 로딩
 	std::string filename = lpszFilename;
 	filename += 'i';
-	class ifstream indexFile(filename.c_str(), ios::binary);
+	std::ifstream indexFile(filename.c_str(), std::ios::binary);
 	indexFile.read((char *)&m_Size, 2); 
 	Init(m_Size);
 
@@ -218,7 +218,7 @@ bool CTypePack<Type>::LoadFromFileRunning(LPCTSTR lpszFilename)
 	indexFile.close();
 	
 	// file에서 sprite 개수를 읽어온다.	
-	m_file->open(lpszFilename, ios::binary);
+	m_file->open(lpszFilename, std::ios::binary);
 	
 	m_file->read((char*)&m_Size, 2);
 	
@@ -350,14 +350,14 @@ bool CTypePack<Type>::LoadFromFileData(int dataID, int fileID, LPCTSTR packFilen
 		return false;
 	}
 
-	class ifstream dataFile(packFilename, ios::binary | ios::nocreate);
+	class ifstream dataFile(packFilename, std::ios::binary | std::ios::nocreate);
 	
 	if (!dataFile.is_open())
 	{
 		return false;
 	}
 	
-	class ifstream indexFile(indexFilename, ios::binary | ios::nocreate);
+	class ifstream indexFile(indexFilename, std::ios::binary | std::ios::nocreate);
 	
 	if (!indexFile.is_open())
 	{
@@ -535,7 +535,7 @@ TypeBase &CTypePack2<TypeBase, Type1, Type2>::Get(WORD n)
 template <class TypeBase, class Type1, class Type2>
 bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFile(LPCTSTR lpszFilename)
 {
-	class ifstream file(lpszFilename, ios::binary);
+	std::ifstream file(lpszFilename, std::ios::binary);
 	bool re = LoadFromFile(file);
 	file.close();
 
@@ -548,8 +548,8 @@ bool CTypePack2<TypeBase, Type1, Type2>::SaveToFile(LPCTSTR lpszFilename)
 	char szIndexFilename[512];
 	sprintf(szIndexFilename, "%si", lpszFilename);
 
-	class ofstream dataFile(lpszFilename, ios::binary);
-	class ofstream indexFile(szIndexFilename, ios::binary);
+	std::ofstream dataFile(lpszFilename, std::ios::binary);
+	std::ofstream indexFile(szIndexFilename, std::ios::binary);
 
 	bool re = SaveToFile(dataFile, indexFile);
 
@@ -590,7 +590,7 @@ bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFileRunning(LPCTSTR lpszFilenam
 	//인덱스 파일 로딩
 	std::string filename = lpszFilename;
 	filename += 'i';
-	class ifstream indexFile(filename.c_str(), ios::binary);
+	std::ifstream indexFile(filename.c_str(), std::ios::binary);
 	indexFile.read((char *)&m_Size, 2); 
 	Init(m_Size);
 
@@ -662,7 +662,7 @@ bool CTypePack2<TypeBase, Type1, Type2>::SaveToFile(std::ofstream &dataFile, std
 	//--------------------------------------------------
 	// index 저장
 	//--------------------------------------------------
-	for (i=0; i<vIndex.size(); i++)
+	for (int i=0; i<vIndex.size(); i++)
 	{
 		indexFile.write((const char*)&vIndex[i], 4);
 	}
@@ -739,14 +739,14 @@ bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFileData(int dataID, int fileID
 		return false;
 	}
 
-	class ifstream dataFile(packFilename, ios::binary | ios::nocreate);
+	std::ifstream dataFile(packFilename, std::ios::binary | std::ios::nocreate);
 	
 	if (!dataFile.is_open())
 	{
 		return false;
 	}
 	
-	class ifstream indexFile(indexFilename, ios::binary | ios::nocreate);
+	std::ifstream indexFile(indexFilename, std::ios::binary | std::ios::nocreate);
 	
 	if (!indexFile.is_open())
 	{

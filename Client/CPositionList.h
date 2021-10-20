@@ -74,8 +74,9 @@ class CPositionList {
 		//----------------------------------------------------------------------
 		// IMAGEOBJECT_INFO_LIST를 정의한다.
 		//----------------------------------------------------------------------
-		typedef	POSITION_NODE<Type>				POSITION_NODE_TYPE;
-		typedef	std::list<POSITION_NODE_TYPE>	POSITION_LIST;
+		typedef typename POSITION_NODE<Type>				                POSITION_NODE_TYPE;
+		typedef	typename std::list<POSITION_NODE_TYPE>	                    POSITION_LIST;
+		typedef typename std::list<POSITION_NODE_TYPE>::const_iterator      const_iterator;
 
 	public :
 		CPositionList();
@@ -99,8 +100,8 @@ class CPositionList {
 		//--------------------------------------------------------------
 		// Get 
 		//--------------------------------------------------------------
-		int								GetSize() const		{ return m_listPosition.size(); }
-		POSITION_LIST::const_iterator	GetIterator() const	{ return m_listPosition.begin(); }
+		int								GetSize()     const { return m_listPosition.size(); }
+		const_iterator	                GetIterator() const	{ return m_listPosition.begin(); }
 
 
 		//--------------------------------------------------------------

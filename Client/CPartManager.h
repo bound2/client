@@ -77,8 +77,8 @@
 template <class IndexType, class PartIndexType, class DataType>
 class CPartManager {
 	public :
-		typedef	std::list<PartIndexType>	PARTINDEX_LIST;				// PartIndex¿« ID
-		typedef	PARTINDEX_LIST::iterator	PARTINDEX_LIST_ITERATOR;
+		typedef typename std::list<PartIndexType>	        PARTINDEX_LIST;				// PartIndex¿« ID
+		typedef	typename std::list<PartIndexType>::iterator	PARTINDEX_LIST_ITERATOR;
 		
 	public :
 		CPartManager();

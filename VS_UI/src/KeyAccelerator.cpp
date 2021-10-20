@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------
 
 #include "client_PCH.h"
-#include <fstream.h>
+#include <fstream>
 #include "KeyAccelerator.h"
 #include "CDirectInput.h"
 #include <cstdio>
