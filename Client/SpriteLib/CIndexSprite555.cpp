@@ -18,7 +18,7 @@
 // Normal색에 대해서만 5:6:5로 바꿔주면 된다.
 //----------------------------------------------------------------------
 bool	
-CIndexSprite555::SaveToFile(ofstream& file)
+CIndexSprite555::SaveToFile(std::ofstream& file)
 {
 	// width와 height를 저장한다.
 	file.write((const char*)&m_Width , 2);
@@ -112,7 +112,7 @@ CIndexSprite555::SaveToFile(ofstream& file)
 // fstream에서 load한다.
 //----------------------------------------------------------------------
 bool	
-CIndexSprite555::LoadFromFile(ifstream& file)
+CIndexSprite555::LoadFromFile(std::ifstream& file)
 {
 	// 이미 잡혀있는 memory를 release한다.
 	Release();

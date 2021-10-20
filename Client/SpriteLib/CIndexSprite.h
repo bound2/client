@@ -55,8 +55,7 @@
 #define	__CINDEXSPRITE_H__
 
 #include <Windows.h>
-class ofstream;
-class ifstream;
+#include <fstream>
 
 //-----------------------------------------------------------------------------
 // Defines
@@ -92,8 +91,8 @@ class CIndexSprite {
 		//---------------------------------------------------------
 		// Static ColorSet Table을 초기화 해준다.
 		//---------------------------------------------------------
-		static	BOOL	SaveIndexTableToFile(class ofstream& file);
-		static	BOOL	LoadIndexTableFromFile(class ifstream& file);
+		static	BOOL	SaveIndexTableToFile(std::ofstream& file);
+		static	BOOL	LoadIndexTableFromFile(std::ifstream& file);
 		static	void	SetColorSet();
 		static	void	SetUsingColorSet(int set1, int set2);
 		static	void	SetUsingColorSetOnly(BYTE setNumber, int colorSet);
@@ -136,8 +135,8 @@ class CIndexSprite {
 		//---------------------------------------------------------
 		// fstream에서 save/load를 한다.
 		//---------------------------------------------------------
-		virtual bool		SaveToFile(class ofstream& file) = 0;
-		virtual bool		LoadFromFile(class ifstream& file) = 0;		
+		virtual bool		SaveToFile(std::ofstream& file) = 0;
+		virtual bool		LoadFromFile(std::ifstream& file) = 0;
 
 		//---------------------------------------------------------
 		// get functions		

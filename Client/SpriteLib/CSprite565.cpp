@@ -19,7 +19,7 @@
 // fstream에 save 한다.    ( file에는 5:6:5로 저장한다. )
 //----------------------------------------------------------------------
 bool	
-CSprite565::SaveToFile(ofstream& file)
+CSprite565::SaveToFile(std::ofstream& file)
 {
 	// width와 height를 저장한다.
 	file.write((const char*)&m_Width , 2);
@@ -69,7 +69,7 @@ CSprite565::SaveToFile(ofstream& file)
 // fstream에서 load한다.
 //----------------------------------------------------------------------
 bool	
-CSprite565::LoadFromFile(ifstream& file)
+CSprite565::LoadFromFile(std::ifstream& file)
 {
 	// 이거를 하나로 묶어야 하는데..
 	if (m_bLoading) 

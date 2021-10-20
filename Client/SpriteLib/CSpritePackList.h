@@ -10,6 +10,7 @@
 #pragma warning(disable:4786)
 
 #include <list>
+#include <fstream>
 #include "DrawTypeDef.h"
 #include "CSprite.h"
 
@@ -54,8 +55,8 @@ class CSpritePackList {
 		//---------------------------------------------------
 		// file I/O
 		//---------------------------------------------------
-		bool				SaveToFile(class ofstream& spkFile, class ofstream& indexFile);
-		virtual void		LoadFromFile(class ifstream& file) = 0;
+		bool				SaveToFile(std::ofstream& spkFile, std::ofstream& indexFile);
+		virtual void		LoadFromFile(std::ifstream& file) = 0;
 
 	protected :		
 		SPRITE_LIST		m_listSprite;		// CSprite들을 저장해둔다.

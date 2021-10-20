@@ -172,7 +172,7 @@ CFilter::SetFilterDarkness(const CFilter& filter, BYTE DarkBits)
 // Save To File
 //----------------------------------------------------------------------
 bool		
-CFilter::SaveToFile(ofstream& file)
+CFilter::SaveToFile(std::ofstream& file)
 {
 	// Size ¿˙¿Â
 	file.write((const char*)&m_Width, 2);
@@ -194,7 +194,7 @@ CFilter::SaveToFile(ofstream& file)
 // Load From File
 //----------------------------------------------------------------------
 bool		
-CFilter::LoadFromFile(ifstream& file)
+CFilter::LoadFromFile(std::ifstream& file)
 {
 	// Size Load
 	file.read((char*)&m_Width, 2);

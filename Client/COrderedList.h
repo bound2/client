@@ -30,7 +30,8 @@ class COrderedList {
 		//----------------------------------------------------------------------
 		// BUILDING_INFO_LIST를 정의한다.
 		//----------------------------------------------------------------------
-		typedef	std::list<Type>	DATA_LIST;
+		typedef	typename std::list<Type>	                  DATA_LIST;
+		typedef typename std::list<Type>::const_iterator      const_iterator;
 
 	public :
 		COrderedList();
@@ -54,8 +55,8 @@ class COrderedList {
 		//--------------------------------------------------------------
 		// Get 
 		//--------------------------------------------------------------
-		int								GetSize() const		{ return m_List.size(); }
-		DATA_LIST::const_iterator	GetIterator() const	{ return m_List.begin(); }
+		int	            GetSize()     const	{ return m_List.size(); }
+		const_iterator  GetIterator() const	{ return m_List.begin(); }
 
 		//--------------------------------------------------------------
 		// operator

@@ -16,7 +16,7 @@
 // fstream에 save 한다.    ( file에는 5:6:5로 저장한다. )
 //----------------------------------------------------------------------
 bool	
-CIndexSprite565::SaveToFile(ofstream& file)
+CIndexSprite565::SaveToFile(std::ofstream& file)
 {
 	// width와 height를 저장한다.
 	file.write((const char*)&m_Width , 2);
@@ -72,7 +72,7 @@ CIndexSprite565::SaveToFile(ofstream& file)
 // fstream에서 load한다.
 //----------------------------------------------------------------------
 bool	
-CIndexSprite565::LoadFromFile(ifstream& file)
+CIndexSprite565::LoadFromFile(std::ifstream& file)
 {
 	// 이미 잡혀있는 memory를 release한다.
 	Release();

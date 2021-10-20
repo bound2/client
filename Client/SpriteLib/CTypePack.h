@@ -1,8 +1,6 @@
 #ifndef __CTYPEPACK_H__
 #define __CTYPEPACK_H__
 
-using namespace std;
-
 #include <windows.h>
 #include <fstream>
 #include "CSpriteSetManager.h"
@@ -37,8 +35,8 @@ public:
 	//--------------------------------------------------------
 	// file I/O
 	//--------------------------------------------------------
-	virtual bool LoadFromFile(class ifstream &file);
-	virtual bool SaveToFile(class ofstream &dataFile, class ofstream &indexFile);
+	virtual bool LoadFromFile(std::ifstream &file);
+	virtual bool SaveToFile(std::ofstream &dataFile, std::ofstream &indexFile);
 	
 	virtual bool LoadFromFileRunning(LPCTSTR lpszFilename);
 	virtual bool LoadFromFile(LPCTSTR lpszFilename);
@@ -174,7 +172,7 @@ bool CTypePack<Type>::SaveToFile(LPCTSTR lpszFilename)
 
 
 template <class Type>
-bool CTypePack<Type>::LoadFromFile(class ifstream &file)
+bool CTypePack<Type>::LoadFromFile(std::ifstream &file)
 {
 //	Release();
 
@@ -231,7 +229,7 @@ bool CTypePack<Type>::LoadFromFileRunning(LPCTSTR lpszFilename)
 }
 
 template <class Type>
-bool CTypePack<Type>::SaveToFile(class ofstream &dataFile, class ofstream &indexFile)
+bool CTypePack<Type>::SaveToFile(std::ofstream &dataFile, std::ofstream &indexFile)
 {
 	//--------------------------------------------------
 	// index file을 생성하기 위한 정보
@@ -419,8 +417,8 @@ public:
 	//--------------------------------------------------------
 	// file I/O
 	//--------------------------------------------------------
-	virtual bool LoadFromFile(class ifstream &file);
-	virtual bool SaveToFile(class ofstream &dataFile, class ofstream &indexFile);
+	virtual bool LoadFromFile(std::ifstream &file);
+	virtual bool SaveToFile(std::ofstream &dataFile, std::ofstream &indexFile);
 	
 	virtual bool LoadFromFileRunning(LPCTSTR lpszFilename);
 	virtual bool LoadFromFile(LPCTSTR lpszFilename);
@@ -442,7 +440,7 @@ protected:
 
 	// runtime loading
 	WORD			m_nLoadData;	// Loading 된 CSprite의 개수
-	class ifstream	*m_file;
+	std::ifstream	*m_file;
 	int*			m_file_index;
 	bool			m_bSecond;
 };
@@ -563,7 +561,7 @@ bool CTypePack2<TypeBase, Type1, Type2>::SaveToFile(LPCTSTR lpszFilename)
 
 
 template <class TypeBase, class Type1, class Type2>
-bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFile(class ifstream &file)
+bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFile(std::ifstream &file)
 {
 //	Release();
 
@@ -620,7 +618,7 @@ bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFileRunning(LPCTSTR lpszFilenam
 }
 
 template <class TypeBase, class Type1, class Type2>
-bool CTypePack2<TypeBase, Type1, Type2>::SaveToFile(class ofstream &dataFile, class ofstream &indexFile)
+bool CTypePack2<TypeBase, Type1, Type2>::SaveToFile(std::ofstream &dataFile, std::ofstream &indexFile)
 {
 	//--------------------------------------------------
 	// index file을 생성하기 위한 정보

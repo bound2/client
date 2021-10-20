@@ -57,8 +57,8 @@ class CFilter {
 		//---------------------------------------------------------
 		// File I/O
 		//---------------------------------------------------------
-		bool		SaveToFile(class ofstream& file);
-		bool		LoadFromFile(class ifstream& file);
+		bool		SaveToFile(std::ofstream& file);
+		bool		LoadFromFile(std::ifstream& file);
 
 		//---------------------------------------------------------
 		// Get

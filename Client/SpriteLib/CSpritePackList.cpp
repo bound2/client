@@ -4,7 +4,7 @@
 
 #include "CSprite.h"
 #include "CSpritePackList.h"
-#include <fstream.h>
+#include <fstream>
 
 //----------------------------------------------------------------------
 //
@@ -178,7 +178,7 @@ CSpritePackList::ChangeSprite(TYPE_SPRITEID n, TYPE_SPRITEID m)
 	//------------------------------------------------------
 	temp = m-n;
 	SPRITE_LIST::iterator	iSecondSprite = iFirstSprite;
-	for (i=n; i<temp; i++)
+	for (short i=n; i<temp; i++)
 		iSecondSprite++;
 	
 	//------------------------------------------------------
@@ -195,7 +195,7 @@ CSpritePackList::ChangeSprite(TYPE_SPRITEID n, TYPE_SPRITEID m)
 // list를 따라가면서 file에 저장해야한다.
 //----------------------------------------------------------------------
 bool		
-CSpritePackList::SaveToFile(ofstream& spkFile, ofstream& indexFile)
+CSpritePackList::SaveToFile(std::ofstream& spkFile, std::ofstream& indexFile)
 {
 	// 초기화되지 않았으면 
 	if (m_listSprite.empty())

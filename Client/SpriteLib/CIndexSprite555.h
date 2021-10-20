@@ -8,10 +8,7 @@
 #define	__CINDEXSPRITE555_H__
 
 #include <Windows.h>
-class ofstream;
-class ifstream;
-
-
+#include <fstream>
 #include "CIndexSprite.h"
 
 
@@ -20,8 +17,8 @@ class CIndexSprite555 : public CIndexSprite {
 		//---------------------------------------------------------
 		// fstream에서 save/load를 한다.
 		//---------------------------------------------------------
-		bool		SaveToFile(class ofstream& file);
-		bool		LoadFromFile(class ifstream& file);		
+		bool		SaveToFile(std::ofstream& file);
+		bool		LoadFromFile(std::ifstream& file);
 
 };
 

@@ -6,11 +6,10 @@
 #define	__CSHADOWSPRITE_H__
 
 #include <Windows.h>
+#include <fstream>
 #include "CSpriteDef.h"
 #include "CIndexSprite.h"
 #include "CSprite.h"
-class ofstream;
-class ifstream;
 
 
 //----------------------------------------------------------------------
@@ -66,8 +65,8 @@ class CShadowSprite
 		//---------------------------------------------------------
 		// fstream에서 save/load를 한다.
 		//---------------------------------------------------------
-		bool		SaveToFile(class ofstream& file);
-		bool		LoadFromFile(class ifstream& file);
+		bool		SaveToFile(std::ofstream& file);
+		bool		LoadFromFile(std::ifstream& file);
 	
 		//---------------------------------------------------------
 		// CDirectDrawSurface의 영역을 읽어서 m_Pixels에 저장한다.
