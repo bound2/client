@@ -6,6 +6,7 @@
 #include "CAnimationFrameSetManager.h"
 #include "CFramePack.h"
 #include "CSpriteSetManager.h"
+#include "fstream"
 
 //----------------------------------------------------------------------
 //
@@ -35,7 +36,7 @@ CAnimationFrameSetManager::~CAnimationFrameSetManager()
 //----------------------------------------------------------------------
 bool		
 CAnimationFrameSetManager::SaveSpriteSetIndex(CAnimationFramePack* pAnimationFramePack, 
-										  ofstream& setIndex, ifstream& packIndex)
+										  std::ofstream& setIndex, std::ifstream& packIndex)
 {
 	CSpriteSetManager ssm;
 
