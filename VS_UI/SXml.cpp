@@ -413,7 +413,7 @@ XMLTree::Save( const char* pFilename )
 {
 	std::ofstream file( pFilename, ios::out | ios::trunc );
 
-	if ( file == NULL ) return;
+	if ( !file ) return;
 
 	file << "<?xml version=\"1.0\" encoding=\"euc-kr\"?>" << endl;
 	
