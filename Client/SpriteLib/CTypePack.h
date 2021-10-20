@@ -1,8 +1,10 @@
 #ifndef __CTYPEPACK_H__
 #define __CTYPEPACK_H__
 
+using namespace std;
+
 #include <windows.h>
-#include <fstream.h>
+#include <fstream>
 #include "CSpriteSetManager.h"
 #include "COrderedList.h"
 #include "CDirectDraw.h"

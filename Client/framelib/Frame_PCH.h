@@ -2,12 +2,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-using namespace std;
-
 
 #pragma warning(push)
 #pragma warning(disable:4018)
 #pragma warning(disable:4786)
+
+using namespace std;
+
 #include <string>
 #include <vector>
 #include <map>
