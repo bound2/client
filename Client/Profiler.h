@@ -21,7 +21,7 @@
 #include <Windows.h>
 #include <map>
 #include <string>
-#include <fstream.h>
+#include <fstream>
 #include "DebugInfo.h"
 
 //----------------------------------------------------------------------
@@ -51,7 +51,7 @@ class ProfilerInfo
 		//---------------------------------------------------------------
 		// File Out
 		//---------------------------------------------------------------
-		void		WriteToFile(ofstream& file) const;
+		void		WriteToFile(std::ofstream& file) const;
 
 	private :
 		DWORD		m_StartTime;		// 이번 loop 시작 시간

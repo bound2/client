@@ -1,15 +1,16 @@
 //----------------------------------------------------------------------
 // CDirectDrawSurface.cpp
 //----------------------------------------------------------------------
+#include <cmath>
 #include <stdio.h>
 #include "CDirectDrawSurface.h"
 //#include "DebugInfo.h"
+//#include "2D.h"
+//#include <assert.h>
+
 #ifdef _DEBUG
 	#define OUTPUT_DEBUG2
 #endif
-
-//#include "2D.h"
-//#include <assert.h>
 
 //----------------------------------------------------------------------
 // gamma - -; not my code~~ - from sigi
@@ -1388,7 +1389,7 @@ CDirectDrawSurface::ShowFPS(int x, int y, COLORREF fcolor, COLORREF bcolor)
 
 	frame++;
 	thisTickTime = GetTickCount();
-	if (abs(thisTickTime - oldTickTime) >= 1000)
+	if (fabs(thisTickTime - oldTickTime) >= 1000)
 	{
 		fps = frame;
 		frame = 0;

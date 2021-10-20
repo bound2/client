@@ -297,6 +297,7 @@ int MP3_Decode(MP3* mp3)
 		}
 		stereodecode(mp3, gr);
 		
+		int ch, sb, ss;
 		for (ch=0; (unsigned int)ch<mp3->channels; ch++)
 		{
 			reorder (mp3, mp3->lr[ch], ch, gr);

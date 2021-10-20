@@ -14,8 +14,7 @@
 #include <deque>
 #include <bitset>
 #include <algorithm>
-#include <iostream.h>
-#include <fstream.h>
+#include <fstream>
 #include <windows.h>
 #pragma warning(pop)
 
