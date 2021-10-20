@@ -3,6 +3,8 @@
 //----------------------------------------------------------------------
 #include "Frame_PCH.h"
 #include "CFrameSetManager.h"
+#include "fstream"
+
 //----------------------------------------------------------------------
 //
 // constructor/destructor
@@ -29,7 +31,7 @@ CFrameSetManager::~CFrameSetManager()
 // FramePack IndexFile로부터 FrameSet IndexFile을 생성한다.
 //----------------------------------------------------------------------
 bool		
-CFrameSetManager::SaveFrameSetIndex(ofstream& setIndex, ifstream& packIndex)
+CFrameSetManager::SaveFrameSetIndex(std::ofstream& setIndex, std::ifstream& packIndex)
 {
 	// m_List에 아무것도 없으면..
 	if (m_List.size() == 0)

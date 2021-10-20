@@ -20,6 +20,7 @@
 
 #include "DrawTypeDef.h"
 #include "CFrame.h"
+#include "fstream"
 
 template <class Type>
 class CFramePack : public TArray<Type, TYPE_FRAMEID> {
@@ -31,7 +32,7 @@ class CFramePack : public TArray<Type, TYPE_FRAMEID> {
 		//--------------------------------------------------------
 		// File I/O
 		//--------------------------------------------------------
-		bool		SaveToFile(class ofstream& packFile, class ofstream& indexFile);		
+		bool		SaveToFile(std::ofstream& packFile, std::ofstream& indexFile);		
 
 	protected :
 
@@ -73,7 +74,7 @@ CFramePack<Type>::~CFramePack<Type>()
 //----------------------------------------------------------------------
 template <class Type>
 bool
-CFramePack<Type>::SaveToFile(class ofstream& packFile, class ofstream& indexFile)
+CFramePack<Type>::SaveToFile(std::ofstream& packFile, std::ofstream& indexFile)
 {
 	//--------------------------------------------------
 	// Size저장 : 0이라도 개수는 저장한다.

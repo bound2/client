@@ -47,3 +47,5 @@ ipch/
 *.sdf
 *.cachefile
 *.VC.db
+.vs
+Client/.vs

@@ -6,6 +6,7 @@
 #include "CCreatureFrameSetManager.h"
 #include "CFramePack.h"
 #include "CSpriteSetManager.h"
+#include "fstream"
 
 //----------------------------------------------------------------------
 //
@@ -35,7 +36,7 @@ CCreatureFrameSetManager::~CCreatureFrameSetManager()
 //----------------------------------------------------------------------
 bool		
 CCreatureFrameSetManager::SaveSpriteSetIndex(CCreatureFramePack* pCreatureFramePack, 
-											 ofstream& setIndex, ifstream& packIndex)
+											 std::ofstream& setIndex, std::ifstream& packIndex)
 {
 	CSpriteSetManager ssm;
 
