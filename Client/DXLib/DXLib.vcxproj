@@ -15,9 +15,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <SccProjectName>"$/Client/SpriteLib", LXFAAAAA</SccProjectName>
+    <ProjectName>DirectXLib</ProjectName>
+    <SccProjectName>"$/Client/DirectXLib", FVFAAAAA</SccProjectName>
     <SccLocalPath>.</SccLocalPath>
-    <ProjectGuid>{9D44452E-12F8-40B2-9B67-3160B703C4E6}</ProjectGuid>
+    <ProjectGuid>{7388637F-DE79-4475-AD76-23B2301528A0}</ProjectGuid>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Template|Win32'" Label="Configuration">
@@ -66,17 +67,16 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <StringPooling>true</StringPooling>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <Optimization>MinSpace</Optimization>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>..\dxlib;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;__TEST_SUB_INVENTORY__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>.\Release\</AssemblerListingLocation>
-      <PrecompiledHeaderOutputFile>.\Release\SpriteLib.pch</PrecompiledHeaderOutputFile>
-      <PrecompiledHeader />
+      <PrecompiledHeaderOutputFile>.\Release\DXLib.pch</PrecompiledHeaderOutputFile>
       <ObjectFileName>.\Release\</ObjectFileName>
       <ProgramDataBaseFileName>.\Release\</ProgramDataBaseFileName>
     </ClCompile>
@@ -86,11 +86,11 @@
     </ResourceCompile>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\Release\SpriteLib.bsc</OutputFile>
+      <OutputFile>.\Release\DXLib.bsc</OutputFile>
     </Bscmake>
     <Lib>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>Release\SP.lib</OutputFile>
+      <OutputFile>Release\DX.lib</OutputFile>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -103,11 +103,10 @@
       <WarningLevel>Level3</WarningLevel>
       <MinimalRebuild>true</MinimalRebuild>
       <DebugInformationFormat>None</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\dxlib;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;__TEST_SUB_INVENTORY__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>.\Debug\</AssemblerListingLocation>
-      <PrecompiledHeaderOutputFile>.\Debug\SpriteLib.pch</PrecompiledHeaderOutputFile>
-      <PrecompiledHeader />
+      <PrecompiledHeaderOutputFile>.\Debug\DXLib.pch</PrecompiledHeaderOutputFile>
       <ObjectFileName>.\Debug\</ObjectFileName>
       <ProgramDataBaseFileName>.\Debug\</ProgramDataBaseFileName>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -118,72 +117,62 @@
     </ResourceCompile>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\Debug\SpriteLib.bsc</OutputFile>
+      <OutputFile>.\Debug\DXLib.bsc</OutputFile>
     </Bscmake>
     <Lib>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>Debug\SP.lib</OutputFile>
+      <OutputFile>Debug\DX.lib</OutputFile>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CAlphaSprite.cpp" />
-    <ClCompile Include="CAlphaSprite555.cpp" />
-    <ClCompile Include="CAlphaSprite565.cpp" />
-    <ClCompile Include="CAlphaSpritePal.cpp" />
-    <ClCompile Include="CFilter.cpp" />
-    <ClCompile Include="CIndexSprite.cpp" />
-    <ClCompile Include="CIndexSprite555.cpp" />
-    <ClCompile Include="CIndexSprite565.cpp" />
-    <ClCompile Include="CIndexSpritePack.cpp" />
-    <ClCompile Include="CShadowSprite.cpp" />
-    <ClCompile Include="CSprite.cpp" />
-    <ClCompile Include="CSprite555.cpp" />
-    <ClCompile Include="CSprite565.cpp" />
-    <ClCompile Include="CSpriteDef.cpp" />
-    <ClCompile Include="CSpriteOutlineManager.cpp" />
-    <ClCompile Include="CSpritePack.cpp" />
-    <ClCompile Include="CSpritePackList.cpp" />
-    <ClCompile Include="CSpritePal.cpp" />
-    <ClCompile Include="CSpritePalBase.cpp" />
-    <ClCompile Include="CSpriteSet.cpp" />
-    <ClCompile Include="CSpriteSetManager.cpp" />
-    <ClCompile Include="CSpriteSurface.cpp" />
-    <ClCompile Include="CStorageSurface.cpp" />
-    <ClCompile Include="MPalette.cpp" />
-    <ClCompile Include="MPalettePack.cpp" />
+    <ClCompile Include="..\CMP3.cpp" />
+    <ClCompile Include="..\COGGSTREAM.CPP" />
+    <ClCompile Include="BIT_RES.CPP" />
+    <ClCompile Include="CDirectDraw.cpp" />
+    <ClCompile Include="CDirectDrawSurface.cpp" />
+    <ClCompile Include="CDirectInput.cpp" />
+    <ClCompile Include="CDirectMusic.cpp" />
+    <ClCompile Include="CDirectSetupGetVersion.cpp" />
+    <ClCompile Include="CDirectSound.cpp" />
+    <ClCompile Include="CDirectSoundStream.cpp" />
+    <ClCompile Include="header.cpp" />
+    <ClCompile Include="huffman.cpp" />
+    <ClCompile Include="mp3.cpp" />
+    <ClCompile Include="reader.cpp" />
+    <ClCompile Include="soundbuf.cpp" />
+    <ClCompile Include="subdecoder.cpp" />
+    <ClCompile Include="synfilt.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CAlphaSpritePal.h" />
-    <ClInclude Include="CFileIndexTable.h" />
-    <ClInclude Include="CFilter.h" />
-    <ClInclude Include="CIndexSprite.h" />
-    <ClInclude Include="CIndexSprite555.h" />
-    <ClInclude Include="CIndexSprite565.h" />
-    <ClInclude Include="CIndexSpritePack.h" />
-    <ClInclude Include="CSetManager.h" />
-    <ClInclude Include="CShadowSprite.h" />
-    <ClInclude Include="CSprite.h" />
-    <ClInclude Include="CSprite555.h" />
-    <ClInclude Include="CSprite565.h" />
-    <ClInclude Include="CSpriteDef.h" />
-    <ClInclude Include="CSpriteOutlineManager.h" />
-    <ClInclude Include="CSpritePack.h" />
-    <ClInclude Include="CSpritePackList.h" />
-    <ClInclude Include="CSpritePackList555.h" />
-    <ClInclude Include="CSpritePackList565.h" />
-    <ClInclude Include="CSpritePal.h" />
-    <ClInclude Include="CSpritePalBase.h" />
-    <ClInclude Include="CSpriteSet.h" />
-    <ClInclude Include="CSpriteSetManager.h" />
-    <ClInclude Include="CSpriteSurface.h" />
-    <ClInclude Include="CStorageSurface.h" />
-    <ClInclude Include="CTypePack.h" />
-    <ClInclude Include="CTypePackVector.h" />
-    <ClInclude Include="DrawTypeDef.h" />
-    <ClInclude Include="MPalette.h" />
-    <ClInclude Include="MPalettePack.h" />
-    <ClInclude Include="SP.h" />
-    <ClInclude Include="TArray.h" />
+    <Library Include="ogg.lib" />
+    <Library Include="vorbis.lib" />
+    <Library Include="vorbisfile.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\CMP3.h" />
+    <ClInclude Include="..\COGGSTREAM.H" />
+    <ClInclude Include="BIT_RES.H" />
+    <ClInclude Include="CDirectDraw.h" />
+    <ClInclude Include="CDirectDrawSurface.h" />
+    <ClInclude Include="CDirectInput.h" />
+    <ClInclude Include="CDirectMusic.h" />
+    <ClInclude Include="CDirectSetup.h" />
+    <ClInclude Include="CDirectSound.h" />
+    <ClInclude Include="CDirectSoundStream.h" />
+    <ClInclude Include="codec.h" />
+    <ClInclude Include="common.h" />
+    <ClInclude Include="config_types.h" />
+    <ClInclude Include="DXLib.h" />
+    <ClInclude Include="header.h" />
+    <ClInclude Include="huffman.h" />
+    <ClInclude Include="l3types.h" />
+    <ClInclude Include="mp3.h" />
+    <ClInclude Include="ogg.h" />
+    <ClInclude Include="os_types.h" />
+    <ClInclude Include="reader.h" />
+    <ClInclude Include="soundbuf.h" />
+    <ClInclude Include="vorbisenc.h" />
+    <ClInclude Include="vorbisfile.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

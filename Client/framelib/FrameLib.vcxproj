@@ -15,9 +15,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <SccProjectName>"$/VolumeLib", LBAAAAAA</SccProjectName>
+    <SccProjectName>"$/Client/FrameLib", VWFAAAAA</SccProjectName>
     <SccLocalPath>.</SccLocalPath>
-    <ProjectGuid>{CB18A86D-CE1D-4B59-97DE-EA83756CA7BE}</ProjectGuid>
+    <ProjectGuid>{CF4487E6-F5ED-49AE-8684-176D83566AB9}</ProjectGuid>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Template|Win32'" Label="Configuration">
@@ -73,9 +73,12 @@
       <WarningLevel>Level3</WarningLevel>
       <MinimalRebuild>true</MinimalRebuild>
       <DebugInformationFormat>None</DebugInformationFormat>
+      <AdditionalIncludeDirectories>..\SpriteLib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;__TEST_SUB_INVENTORY__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>.\Debug\</AssemblerListingLocation>
-      <PrecompiledHeaderOutputFile>.\Debug\VolumeLib.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>.\Debug\FrameLib.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Frame_PCH.h</PrecompiledHeaderFile>
       <ObjectFileName>.\Debug\</ObjectFileName>
       <ProgramDataBaseFileName>.\Debug\</ProgramDataBaseFileName>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -86,11 +89,11 @@
     </ResourceCompile>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\Debug\VolumeLib.bsc</OutputFile>
+      <OutputFile>.\Debug\FrameLib.bsc</OutputFile>
     </Bscmake>
     <Lib>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>Debug\Volume.lib</OutputFile>
+      <OutputFile>Debug\FR.lib</OutputFile>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -102,9 +105,12 @@
       <Optimization>MinSpace</Optimization>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>..\SpriteLib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;__TEST_SUB_INVENTORY__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>.\Release\</AssemblerListingLocation>
-      <PrecompiledHeaderOutputFile>.\Release\VolumeLib.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>.\Release\FrameLib.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Frame_PCH.h</PrecompiledHeaderFile>
       <ObjectFileName>.\Release\</ObjectFileName>
       <ProgramDataBaseFileName>.\Release\</ProgramDataBaseFileName>
     </ClCompile>
@@ -114,22 +120,37 @@
     </ResourceCompile>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\Release\VolumeLib.bsc</OutputFile>
+      <OutputFile>.\Release\FrameLib.bsc</OutputFile>
     </Bscmake>
     <Lib>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>Release\Volume.lib</OutputFile>
+      <OutputFile>..\FrameLib\Release\FR.lib</OutputFile>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="VolumeOutMaster.cpp" />
-    <ClCompile Include="VolumeOutWave.cpp" />
+    <ClCompile Include="CAnimationFrame.cpp" />
+    <ClCompile Include="CAnimationFrameSetManager.cpp" />
+    <ClCompile Include="CCreatureFrameSetManager.cpp" />
+    <ClCompile Include="CFrame.cpp" />
+    <ClCompile Include="CFramePack.cpp" />
+    <ClCompile Include="CFrameSetManager.cpp" />
+    <ClCompile Include="Frame_PCH.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Frame_PCH.h</PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Frame_PCH.h</PrecompiledHeaderFile>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="IVolume.h" />
-    <ClInclude Include="VolumeLib.h" />
-    <ClInclude Include="VolumeOutMaster.h" />
-    <ClInclude Include="VolumeOutWave.h" />
+    <ClInclude Include="CAnimationFrame.h" />
+    <ClInclude Include="CAnimationFrameSetManager.h" />
+    <ClInclude Include="CCreatureFrameSetManager.h" />
+    <ClInclude Include="CFrame.h" />
+    <ClInclude Include="CFramePack.h" />
+    <ClInclude Include="CFrameSet.h" />
+    <ClInclude Include="CFrameSetManager.h" />
+    <ClInclude Include="FR.h" />
+    <ClInclude Include="Frame_PCH.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

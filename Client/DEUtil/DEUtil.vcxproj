@@ -15,9 +15,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <SccProjectName>"$/Client/SpriteLib", LXFAAAAA</SccProjectName>
+    <SccProjectName>"$/DEUtil", DBAAAAAA</SccProjectName>
     <SccLocalPath>.</SccLocalPath>
-    <ProjectGuid>{9D44452E-12F8-40B2-9B67-3160B703C4E6}</ProjectGuid>
+    <ProjectGuid>{6DD71EF4-C06D-4F8E-B06E-383DDCE752CD}</ProjectGuid>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Template|Win32'" Label="Configuration">
@@ -25,13 +25,13 @@
     <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <PlatformToolset>v142</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <PlatformToolset>v142</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
@@ -66,32 +66,42 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <StringPooling>true</StringPooling>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <Optimization>MinSpace</Optimization>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>..\dxlib;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;__TEST_SUB_INVENTORY__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;DEUTIL_EXPORTS;__TEST_SUB_INVENTORY__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>.\Release\</AssemblerListingLocation>
-      <PrecompiledHeaderOutputFile>.\Release\SpriteLib.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>.\Release\DEUtil.pch</PrecompiledHeaderOutputFile>
       <PrecompiledHeader />
       <ObjectFileName>.\Release\</ObjectFileName>
       <ProgramDataBaseFileName>.\Release\</ProgramDataBaseFileName>
     </ClCompile>
+    <Midl>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TypeLibraryName>.\Release\DEUtil.tlb</TypeLibraryName>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <TargetEnvironment>Win32</TargetEnvironment>
+    </Midl>
     <ResourceCompile>
       <Culture>0x0412</Culture>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\Release\SpriteLib.bsc</OutputFile>
+      <OutputFile>.\Release\DEUtil.bsc</OutputFile>
     </Bscmake>
-    <Lib>
+    <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>Release\SP.lib</OutputFile>
-    </Lib>
+      <LinkDLL>true</LinkDLL>
+      <SubSystem>Console</SubSystem>
+      <OutputFile>../../DARKEDEN/DEUtil.dll</OutputFile>
+      <ImportLibrary>.\Release\DEUtil.lib</ImportLibrary>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -103,87 +113,55 @@
       <WarningLevel>Level3</WarningLevel>
       <MinimalRebuild>true</MinimalRebuild>
       <DebugInformationFormat>None</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\dxlib;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;__TEST_SUB_INVENTORY__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;DEUTIL_EXPORTS;__TEST_SUB_INVENTORY__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>.\Debug\</AssemblerListingLocation>
-      <PrecompiledHeaderOutputFile>.\Debug\SpriteLib.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>.\Debug\DEUtil.pch</PrecompiledHeaderOutputFile>
       <PrecompiledHeader />
       <ObjectFileName>.\Debug\</ObjectFileName>
       <ProgramDataBaseFileName>.\Debug\</ProgramDataBaseFileName>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
     </ClCompile>
+    <Midl>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TypeLibraryName>.\Debug\DEUtil.tlb</TypeLibraryName>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <TargetEnvironment>Win32</TargetEnvironment>
+    </Midl>
     <ResourceCompile>
       <Culture>0x0412</Culture>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\Debug\SpriteLib.bsc</OutputFile>
+      <OutputFile>.\Debug\DEUtil.bsc</OutputFile>
     </Bscmake>
-    <Lib>
+    <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>Debug\SP.lib</OutputFile>
-    </Lib>
+      <LinkDLL>true</LinkDLL>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <OutputFile>.\Debug\DEUtil.dll</OutputFile>
+      <ImportLibrary>.\Debug\DEUtil.lib</ImportLibrary>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CAlphaSprite.cpp" />
-    <ClCompile Include="CAlphaSprite555.cpp" />
-    <ClCompile Include="CAlphaSprite565.cpp" />
-    <ClCompile Include="CAlphaSpritePal.cpp" />
-    <ClCompile Include="CFilter.cpp" />
-    <ClCompile Include="CIndexSprite.cpp" />
-    <ClCompile Include="CIndexSprite555.cpp" />
-    <ClCompile Include="CIndexSprite565.cpp" />
-    <ClCompile Include="CIndexSpritePack.cpp" />
-    <ClCompile Include="CShadowSprite.cpp" />
-    <ClCompile Include="CSprite.cpp" />
-    <ClCompile Include="CSprite555.cpp" />
-    <ClCompile Include="CSprite565.cpp" />
-    <ClCompile Include="CSpriteDef.cpp" />
-    <ClCompile Include="CSpriteOutlineManager.cpp" />
-    <ClCompile Include="CSpritePack.cpp" />
-    <ClCompile Include="CSpritePackList.cpp" />
-    <ClCompile Include="CSpritePal.cpp" />
-    <ClCompile Include="CSpritePalBase.cpp" />
-    <ClCompile Include="CSpriteSet.cpp" />
-    <ClCompile Include="CSpriteSetManager.cpp" />
-    <ClCompile Include="CSpriteSurface.cpp" />
-    <ClCompile Include="CStorageSurface.cpp" />
-    <ClCompile Include="MPalette.cpp" />
-    <ClCompile Include="MPalettePack.cpp" />
+    <ClCompile Include="..\MStatusManager.cpp" />
+    <ClCompile Include="DEUtil.cpp" />
+    <ClCompile Include="StdAfx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">stdafx.h</PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">stdafx.h</PrecompiledHeaderFile>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CAlphaSpritePal.h" />
-    <ClInclude Include="CFileIndexTable.h" />
-    <ClInclude Include="CFilter.h" />
-    <ClInclude Include="CIndexSprite.h" />
-    <ClInclude Include="CIndexSprite555.h" />
-    <ClInclude Include="CIndexSprite565.h" />
-    <ClInclude Include="CIndexSpritePack.h" />
-    <ClInclude Include="CSetManager.h" />
-    <ClInclude Include="CShadowSprite.h" />
-    <ClInclude Include="CSprite.h" />
-    <ClInclude Include="CSprite555.h" />
-    <ClInclude Include="CSprite565.h" />
-    <ClInclude Include="CSpriteDef.h" />
-    <ClInclude Include="CSpriteOutlineManager.h" />
-    <ClInclude Include="CSpritePack.h" />
-    <ClInclude Include="CSpritePackList.h" />
-    <ClInclude Include="CSpritePackList555.h" />
-    <ClInclude Include="CSpritePackList565.h" />
-    <ClInclude Include="CSpritePal.h" />
-    <ClInclude Include="CSpritePalBase.h" />
-    <ClInclude Include="CSpriteSet.h" />
-    <ClInclude Include="CSpriteSetManager.h" />
-    <ClInclude Include="CSpriteSurface.h" />
-    <ClInclude Include="CStorageSurface.h" />
-    <ClInclude Include="CTypePack.h" />
-    <ClInclude Include="CTypePackVector.h" />
-    <ClInclude Include="DrawTypeDef.h" />
-    <ClInclude Include="MPalette.h" />
-    <ClInclude Include="MPalettePack.h" />
-    <ClInclude Include="SP.h" />
-    <ClInclude Include="TArray.h" />
+    <ClInclude Include="..\MStatusManager.h" />
+    <ClInclude Include="StdAfx.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

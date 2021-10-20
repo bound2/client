@@ -3,6 +3,7 @@
 // Written By  : Reiot
 // Description : 
 //////////////////////////////////////////////////////////////////////////////
+using namespace std;
 
 #ifndef __SYSTEM_TYPES_H__
 #define __SYSTEM_TYPES_H__
@@ -18,7 +19,7 @@
 #endif#endif
  
 #include <iostream>
-#include <fstream.h>
+#include <fstream>
 #include <string>
 
 //using namespace std;
