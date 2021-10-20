@@ -55,8 +55,8 @@
     <OutDir>.\Debug\</OutDir>
     <IntDir>.\Debug\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\darude\Documents\directx\dx90bsdk\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\darude\Documents\directx\dx90bsdk\Lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Users\darude\Documents\directx\dx90bsdk\Include</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);C:\Users\darude\Documents\directx\dx90bsdk\Lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>.\Release\</OutDir>
