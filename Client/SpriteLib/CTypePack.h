@@ -607,7 +607,7 @@ bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFileRunning(LPCTSTR lpszFilenam
 	indexFile.close();
 	
 	// file에서 sprite 개수를 읽어온다.	
-	m_file->open(lpszFilename, ios::binary);
+	m_file->open(lpszFilename, std::ios::binary);
 	
 	m_file->read((char*)&m_Size, 2);
 	
