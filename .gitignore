@@ -47,5 +47,5 @@ ipch/
 *.sdf
 *.cachefile
 *.VC.db
-.vc
+.vs
 Client/.vs
