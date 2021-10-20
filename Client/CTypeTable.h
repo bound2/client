@@ -43,11 +43,11 @@ class CTypeTable {
 		//-------------------------------------------------------
 		// File I/O
 		//-------------------------------------------------------
-		void			SaveToFile(class ofstream& file);
-		void			LoadFromFile(class ifstream& file);
+		void			SaveToFile(std::ofstream& file);
+		void			LoadFromFile(std::ifstream& file);
 		void			SaveToFile(const char *filename);
 		void			LoadFromFile(const char *filename);
-		bool			LoadFromFile_NickNameString(class ifstream& file);
+		bool			LoadFromFile_NickNameString(std::ifstream& file);
 	protected :		
 		int			m_Size;					// Type 종류 수
 		Type*		m_pTypeInfo;			// Type 정보
@@ -122,7 +122,7 @@ CTypeTable<Type>::Release()
 //----------------------------------------------------------------------
 template <class Type>
 void			
-CTypeTable<Type>::SaveToFile(class ofstream& file)
+CTypeTable<Type>::SaveToFile(std::ofstream& file)
 {
 	// size 저장
 	file.write((const char*)&m_Size, 4);
@@ -147,7 +147,7 @@ CTypeTable<Type>::SaveToFile(class ofstream& file)
 //----------------------------------------------------------------------
 template <class Type>
 void			
-CTypeTable<Type>::LoadFromFile(class ifstream& file)
+CTypeTable<Type>::LoadFromFile(std::ifstream& file)
 {
 	int numSize=0;
 
@@ -201,7 +201,7 @@ CTypeTable<Type>::SaveToFile(const char* lpszFilename)
 //----------------------------------------------------------------------
 template <class Type>
 bool			
-CTypeTable<Type>::LoadFromFile_NickNameString(class ifstream& file)
+CTypeTable<Type>::LoadFromFile_NickNameString(std::ifstream& file)
 {
 	int numSize;
 	WORD wIndex;

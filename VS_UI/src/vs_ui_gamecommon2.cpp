@@ -415,7 +415,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 
 	g_FL2_GetDC();	
 	g_PrintColorStr(x+35, y+200, (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_SHOP].GetString(), gpC_base->m_chatting_pi, RGB_WHITE);
-	for(i=0;i<line_num;i++)
+	for(int i=0;i<line_num;i++)
 	{
 		COLORREF TitleColor,ShadowColor;
 		const COLORREF required_rgb = RGB(255, 128, 64);
@@ -1162,7 +1162,7 @@ void	C_VS_UI_IMAGE_NOTICE::AddNotice(const char* name, DWORD id)
 std::string C_VS_UI_IMAGE_NOTICE::LoadInfo(DWORD ID)
 {
 	CEventGiftInfo *Event = new CEventGiftInfo;
-	ifstream info("data\\info\\eventquest.inf", ios::binary );
+	std::ifstream info("data\\info\\eventquest.inf", std::ios::binary );
 	Event->LoadFromFile ( info );
 	info.close();
 	
@@ -1864,7 +1864,7 @@ void	C_VS_UI_REQUEST_RESURRECT::Show()
 	
 	if(gpC_base->m_p_DDSurface_back->Lock() )
 	{
-		for( i=0;i<RESURRECT_MODE_MAX; i++ )
+		for( int i=0;i<RESURRECT_MODE_MAX; i++ )
 		{
 			if( m_ResurrectButton[i].m_Enable == true && m_ResurrectButton[i].m_Image != -1 )
 			{
@@ -2513,7 +2513,8 @@ void	C_VS_UI_MIXING_FORGE::Show()
 			{
 				RECT rt;
 				rt.right = print_x;
-				for(int depth = 0, number = p_item->GetNumber(); number > 0; number/=10, depth++);
+				int depth, number;
+				for(depth = 0, number = p_item->GetNumber(); number > 0; number/=10, depth++);
 				if(depth == 0) depth = 1;
 				rt.left = print_x - 7*depth;
 				rt.top = print_y;
@@ -5834,7 +5835,7 @@ C_VS_UI_MAILBOX::C_VS_UI_MAIL::~C_VS_UI_MAIL()
 }
 
 
-void C_VS_UI_MAILBOX::C_VS_UI_MAIL::SaveToFile(class ofstream &file)
+void C_VS_UI_MAILBOX::C_VS_UI_MAIL::SaveToFile(std::ofstream &file)
 {
 	file.write((const char *)&id, sizeof(DWORD));
 	file.write((const char *)&mark, sizeof(bool));
@@ -5845,7 +5846,7 @@ void C_VS_UI_MAILBOX::C_VS_UI_MAIL::SaveToFile(class ofstream &file)
 	file.write((const char *)&windowSize, sizeof(SIZE));
 }
 
-bool C_VS_UI_MAILBOX::C_VS_UI_MAIL::LoadFromFile(class ifstream &file)
+bool C_VS_UI_MAILBOX::C_VS_UI_MAIL::LoadFromFile(std::ifstream &file)
 {
 	file.read((char *)&id, sizeof(DWORD));
 	file.read((char *)&mark, sizeof(bool));
@@ -5861,7 +5862,7 @@ bool C_VS_UI_MAILBOX::C_VS_UI_MAIL::LoadFromFile(class ifstream &file)
 
 void C_VS_UI_MAILBOX::C_VS_UI_MAIL::SaveToFile(std::string filename)
 {
-	ofstream file(filename.c_str(), ios::binary);
+	std::ofstream file(filename.c_str(), std::ios::binary);
 	
 	if(file)
 	{
@@ -5873,7 +5874,7 @@ void C_VS_UI_MAILBOX::C_VS_UI_MAIL::SaveToFile(std::string filename)
 
 void C_VS_UI_MAILBOX::C_VS_UI_MAIL::LoadFromFile(std::string filename)
 {
-	ifstream file(filename.c_str(), ios::binary | ios::nocreate);
+	std::ifstream file(filename.c_str(), std::ios::binary | std::ios::nocreate);
 	
 	if(file)
 	{
@@ -5882,7 +5883,7 @@ void C_VS_UI_MAILBOX::C_VS_UI_MAIL::LoadFromFile(std::string filename)
 	}
 }
 
-void C_VS_UI_MAILBOX::SaveToFile(class ofstream &file)
+void C_VS_UI_MAILBOX::SaveToFile(std::ofstream &file)
 {
 	DWORD flag = 0;
 	file.write((const char *)&flag, sizeof(DWORD));
@@ -5906,7 +5907,7 @@ void C_VS_UI_MAILBOX::SaveToFile(class ofstream &file)
 	}
 }
 
-void C_VS_UI_MAILBOX::LoadFromFile(class ifstream &file)
+void C_VS_UI_MAILBOX::LoadFromFile(std::ifstream &file)
 {
 	DWORD flag = 0;
 	file.read((char *)&flag, sizeof(DWORD));
@@ -5934,7 +5935,7 @@ void C_VS_UI_MAILBOX::LoadFromFile(class ifstream &file)
 
 void C_VS_UI_MAILBOX::SaveToFile(std::string filename)
 {
-	ofstream file(filename.c_str(), ios::binary);
+	std::ofstream file(filename.c_str(), std::ios::binary);
 	
 	if(file)
 	{
@@ -5946,7 +5947,7 @@ void C_VS_UI_MAILBOX::SaveToFile(std::string filename)
 
 void C_VS_UI_MAILBOX::LoadFromFile(std::string filename)
 {
-	ifstream file(filename.c_str(), ios::binary | ios::nocreate);
+	std::ifstream file(filename.c_str(), std::ios::binary | ios::nocreate);
 	
 	if(file)
 	{
