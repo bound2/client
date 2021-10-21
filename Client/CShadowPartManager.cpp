@@ -7,12 +7,12 @@
 #include "CShadowPartManager.h"
 #include "MGameTime.h"
 #include "MWeather.h"
-
+#include <fstream>
 #include "DebugInfo.h"
 //#define	new			DEBUG_NEW
 //#define	delete		DEBUG_DELETE
 
-extern bool FileOpenBinary(const char* filename, class ifstream& fil);
+extern bool FileOpenBinary(const char* filename, std::ifstream& fil);
 
 extern bool		g_bZonePlayerInLarge;
 
@@ -71,7 +71,7 @@ CShadowPartManager::Init(const char* SSPKFilename, WORD partSize)
 	Release();
 	///*
 	// Index File을 Load한다.
-	class ifstream indexFile;//(indexFilename, ios::binary);
+	std::ifstream indexFile;//(indexFilename, ios::binary);
 //	if (!FileOpenBinary(indexFilename, indexFile))
 //		return;
 //
@@ -110,7 +110,7 @@ CShadowPartManager::Init(const char* SSPKFilename, WORD partSize)
 	m_pWidth = new int [allSize];
 	m_pHeight = new int [allSize];
 
-	for (i=0; i<allSize; i++)
+	for (int i=0; i<allSize; i++)
 	{
 		m_pWidth[i] = 0;
 		m_pHeight[i] = 0;
@@ -278,7 +278,7 @@ CShadowPartManager::Clear()
 	CPartManager<WORD, WORD, CSpriteSurface*>::Init( m_nIndex, m_nPart );
 
 	// NULL로 초기화
-	for (i=0; i<m_nPart; i++)
+	for (int i=0; i<m_nPart; i++)
 	{
 		m_pData[i] = NULL;
 	}
