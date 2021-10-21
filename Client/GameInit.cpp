@@ -256,11 +256,11 @@ StartTitleLoading()
 		}
 
 		CFileIndexTable	FIT;
-		class ifstream indexFile(g_pFileDef->getProperty("FILE_SPRITEINDEX_UI").c_str(), ios::binary);
+		std::ifstream indexFile(g_pFileDef->getProperty("FILE_SPRITEINDEX_UI").c_str(), ios::binary);
 		FIT.LoadFromFile( indexFile );
 		indexFile.close();
 
-		class ifstream spkFile(g_pFileDef->getProperty("FILE_SPRITE_UI").c_str(), ios::binary);
+		std::ifstream spkFile(g_pFileDef->getProperty("FILE_SPRITE_UI").c_str(), ios::binary);
 		if(g_MyFull)
 			spkFile.seekg( FIT[5] );
 		else
@@ -463,7 +463,7 @@ PrepareLoadingAddonSPK()
 	//------------------------------------------------------------
 	if (g_AddonSPKNum==0)
 	{
-		class ifstream	AddonFileIndex2;//(FILE_ISPRITE_ADDON, ios::binary);
+		std::ifstream	AddonFileIndex2;//(FILE_ISPRITE_ADDON, ios::binary);
 		if (!FileOpenBinary(g_pFileDef->getProperty("FILE_ISPRITEINDEX_ADDON").c_str(), AddonFileIndex2))
 			return false;
 
@@ -1606,7 +1606,7 @@ InitGame()
 	//---------------------------------------------------------------------
 	// nick name string table Loading
 	//---------------------------------------------------------------------
-	class ifstream gameStringTableTable;//(FILE_INFO_gameStringTable, ios::binary);
+	std::ifstream gameStringTableTable;//(FILE_INFO_gameStringTable, ios::binary);
 	if (!FileOpenBinary(g_pFileDef->getProperty("FILE_INFO_NICKNAME_STRING").c_str(), gameStringTableTable))
 		return FALSE;
 	(*g_pNickNameStringTable).LoadFromFile_NickNameString(gameStringTableTable);
@@ -1617,7 +1617,7 @@ InitGame()
 	//---------------------------------------------------------------------
 	// GameStringTable Loading
 	//---------------------------------------------------------------------
-	class ifstream gameStringTableTable2;//(FILE_INFO_gameStringTable, ios::binary);
+	std::ifstream gameStringTableTable2;//(FILE_INFO_gameStringTable, ios::binary);
 	if (!FileOpenBinary(g_pFileDef->getProperty("FILE_INFO_STRING").c_str(), gameStringTableTable2))
 		return FALSE;
 	(*g_pGameStringTable).LoadFromFile(gameStringTableTable2);
@@ -2836,7 +2836,7 @@ InitGameObject()
 	int nStartV = 73*25;
 #ifdef __GAME_CLIENT__
 	int version;
-	class ifstream versionFile;//(g_pFileDef->getProperty("FILE_INFO_ACTION").c_str(), ios::binary);
+	std::ifstream versionFile;//(g_pFileDef->getProperty("FILE_INFO_ACTION").c_str(), ios::binary);
 	if (!FileOpenBinary(g_pFileDef->getProperty("FILE_INFO_VERSION").c_str(), versionFile))
 	{
 		return FALSE;

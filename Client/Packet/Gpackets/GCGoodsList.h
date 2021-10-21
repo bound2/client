@@ -43,7 +43,7 @@ typedef struct _GoodsInfo
 	{
 		StringStream msg;
 		msg << "Good( "
-			<< "ObjectID : " << objectID
+			<< "ObjectID : " << std::to_string(objectID)
 			<< ", ItemClass : " << std::to_string((int)itemClass)
 			<< ", ItemType : " << itemType
 			<< ", Grade : " << grade

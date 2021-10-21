@@ -90,7 +90,7 @@ extern CNPGameLib npgl;
 extern MScreenEffectManager*	g_pInventoryEffectManager;
 extern DWORD	g_PreviousCreatureType;
 
-extern bool FileOpenBinary(const char* filename, class ifstream& file);
+extern bool FileOpenBinary(const char* filename, std::ifstream& file);
 
 extern BOOL g_bSetHotKey;
 
@@ -527,7 +527,7 @@ SetGoreLevel(bool bGoreLevel)
 			//-----------------------------------
 			// Load From File
 			//-----------------------------------
-			class ifstream actionInfoFile2;//(FILE_INFO_ACTION, ios::binary);
+			std::ifstream actionInfoFile2;//(FILE_INFO_ACTION, ios::binary);
 			if (!FileOpenBinary(g_pFileDef->getProperty("FILE_INFO_ACTION").c_str(), actionInfoFile2))
 				return;
 
@@ -2260,7 +2260,7 @@ void SetBloodBibleSlot(BloodBibleSignInfo* pBloodBibleInfo)
 
 			g_pSlayerGear->SetBloodBibleOpenSlot(pBloodBibleInfo->getOpenNum());
 
-			for(i = 0; i<TempSignList.size() ; i++)
+			for(int i = 0; i<TempSignList.size() ; i++)
 			{
 				MItem* pItem = MItem::NewItem( ITEM_CLASS_BLOOD_BIBLE_SIGN );
 				pItem->SetItemType(	TempSignList[i] );
@@ -2280,7 +2280,7 @@ void SetBloodBibleSlot(BloodBibleSignInfo* pBloodBibleInfo)
 			}
 			g_pVampireGear->SetBloodBibleOpenSlot(pBloodBibleInfo->getOpenNum());
 
-			for(i = 0; i<TempSignList.size() ; i++)
+			for(int i = 0; i<TempSignList.size() ; i++)
 			{
 				MItem* pItem = MItem::NewItem( ITEM_CLASS_BLOOD_BIBLE_SIGN );
 				pItem->SetItemType(	TempSignList[i] );
@@ -2300,7 +2300,7 @@ void SetBloodBibleSlot(BloodBibleSignInfo* pBloodBibleInfo)
 			}
 			g_pOustersGear->SetBloodBibleOpenSlot(pBloodBibleInfo->getOpenNum());
 
-			for(i = 0; i<TempSignList.size() ; i++)
+			for(int i = 0; i<TempSignList.size() ; i++)
 			{ 
 				MItem* pItem = MItem::NewItem( ITEM_CLASS_BLOOD_BIBLE_SIGN );
 				pItem->SetItemType(	TempSignList[i] );

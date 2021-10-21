@@ -5,6 +5,7 @@
 // 지금 UI에서 타이밍 문제가 있어서 못 고치고 있음.
 //-----------------------------------------------------------------------------
 #include "Client_PCH.h"
+#include <fstream>
 #include <io.h>
 #include <process.h>
 #include <stdio.h>
@@ -2223,7 +2224,7 @@ UIMessageManager::Execute_UI_CONNECT(int left, int right, void* void_ptr)
 
 	#ifdef OUTPUT_DEBUG
 		DEBUG_ADD("MasterCheck");
-		class ifstream file("master.txt", ios::nocreate);
+		std::ifstream file("master.txt");
 
 		char str[256];
 		while (!file.eof())

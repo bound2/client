@@ -27,7 +27,7 @@
 #endif
 
 #ifdef __GAME_CLIENT__
-	bool	FileOpenBinary(const char* filename, class ifstream& file);
+	bool	FileOpenBinary(const char* filename, std::ifstream& file);
 
 	// MItem.cppø° ¿÷¥Ÿ.
 	bool	IsBombMaterial(const MItem* pItem);
@@ -1532,7 +1532,7 @@ MSkillSet::SetAvailableSkills()
 		}
 	}
 
-	for(i = 0; i < SWEEPER_BONUS_MAX; i++)
+	for(int i = 0; i < SWEEPER_BONUS_MAX; i++)
 	{
 		if( g_abSweeperBonusSkills[i] == true )
 		{

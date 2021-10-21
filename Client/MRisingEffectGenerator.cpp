@@ -62,6 +62,7 @@ MRisingEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 		tz[2] = egInfo.z0 + int(cosValue);
 		step[2] = step_count;
 				
+		int i;
 		for(i=0;i<3;i++)
 		{
 			MLinearEffect* pEffect = new MLinearEffect(bltType);
@@ -80,7 +81,7 @@ MRisingEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 					pEffect->SetLink( egInfo.nActionInfo, NULL );
 				} else
 				{
-					if( i == 1 )
+					if(i == 1 )
 					{
 						pEffect->SetLink( egInfo.nActionInfo, pTarget );
 						pTarget->Set( tx[i], egInfo.y0, tz[i], egInfo.creatureID );
@@ -134,7 +135,7 @@ MRisingEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 		tz[2] = egInfo.z0 + int(cosValue);
 		step[1] = step[2] = step_count;
 				
-		for(i=0;i<4;i++)
+		for(int i=0;i<4;i++)
 		{
 			MLinearEffect* pEffect = new MLinearEffect(bltType);
 			pEffect->SetFrameID( frameID, maxFrame );

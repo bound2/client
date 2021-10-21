@@ -58,7 +58,7 @@ std::string GCAddInstalledMineToZone::toString () const
 
 	StringStream msg;
 	msg << "GCAddInstalledMineToZone("
-		<< "ObjectID:" << m_ObjectID
+		<< "ObjectID:" << to_string(m_ObjectID)
 		<< ",X:" << (int)m_X 
 		<< ",Y:" << (int)m_Y 
 		<< ",ItemClass:" << (int)m_ItemClass

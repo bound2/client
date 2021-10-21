@@ -98,7 +98,7 @@ void GCAddBat::execute ( Player * pPlayer )
 
 		StringStream msg;
 		msg << "GCAddBat("
-			<< "ObjectID:"   << m_ObjectID 
+			<< "ObjectID:"   << to_string(m_ObjectID)
 			<< ",Name:"      << m_Name 
 			<< ",ItemType:"  << (int)m_ItemType
 			<< ",X:"         << (int)m_X 

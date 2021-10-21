@@ -97,7 +97,7 @@ void GCAddBurrowingCreature::execute ( Player * pPlayer )
 		StringStream msg;
 
 		msg << "GCAddBurrowingCreature("
-			<< "ObjectID:" << m_ObjectID 
+			<< "ObjectID:" << to_string(m_ObjectID)
 			<< ",Name:" << m_Name 
 			<< ",X:" << (int)m_X 
 			<< ",Y:" << (int)m_Y 

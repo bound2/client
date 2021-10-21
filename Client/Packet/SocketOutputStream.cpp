@@ -343,7 +343,7 @@ WORD SocketOutputStream::EncryptData(WORD EncryptKey, char* buf, int len)
 
 	if(m_HashTable == NULL)	return EncryptKey;
 	
-	for(i = 0; i<len; i++)
+	for(int i = 0; i<len; i++)
 	{
 		*(buf + i) ^= m_HashTable[EncryptKey];
 		if(++EncryptKey == 512)	EncryptKey = 0;
