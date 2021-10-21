@@ -27,7 +27,7 @@ RankBonusInfo::RankBonusInfo()
 }
 
 void				
-RankBonusInfo::LoadFromFile(class ifstream& file)
+RankBonusInfo::LoadFromFile(std::ifstream& file)
 {
 	file.read((char*)&m_type, 2);
 	m_Name.LoadFromFile(file);
