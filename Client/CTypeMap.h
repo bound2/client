@@ -39,8 +39,8 @@ class CTypeMap : public std::map<unsigned int, DataType*> {
 		//-----------------------------------------------------
 		// File I/O
 		//-----------------------------------------------------
-		virtual void		SaveToFile(class ofstream& file);
-		virtual void		LoadFromFile(class ifstream& file);
+		virtual void		SaveToFile(std::ofstream& file);
+		virtual void		LoadFromFile(std::ifstream& file);
 
 	protected :
 };
@@ -154,8 +154,8 @@ CTypeMap<DataType>::RemoveData( unsigned int id )
 // Save To File
 //----------------------------------------------------------------------
 template <class DataType>
-void		
-CTypeMap<DataType>::SaveToFile(class ofstream& file)
+void
+CTypeMap<DataType>::SaveToFile(std::ofstream& file)
 {
 	TYPE_MAP::iterator iData = begin();
 
@@ -185,7 +185,7 @@ CTypeMap<DataType>::SaveToFile(class ofstream& file)
 //----------------------------------------------------------------------
 template <class DataType>
 void		
-CTypeMap<DataType>::LoadFromFile(class ifstream& file)
+CTypeMap<DataType>::LoadFromFile(std::ifstream& file)
 {
 	//-----------------------------------------------------
 	// 기존에 있던것 제거
