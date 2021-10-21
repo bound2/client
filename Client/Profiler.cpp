@@ -72,7 +72,7 @@ ProfilerInfo::End()
 // Write To File
 //----------------------------------------------------------------------
 void		
-ProfilerInfo::WriteToFile(ofstream& file) const
+ProfilerInfo::WriteToFile(std::ofstream& file) const
 {	
 	char str[256];
 	sprintf(str, "%10d  %10d  %7.3f", m_Times, m_TotalTime, GetAverageTime());

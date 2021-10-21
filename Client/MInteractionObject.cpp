@@ -56,7 +56,7 @@ MInteractionObject::~MInteractionObject()
 // Save To File
 //----------------------------------------------------------------------
 void	
-MInteractionObject::SaveToFile(ofstream& file)
+MInteractionObject::SaveToFile(std::ofstream& file)
 {	
 	MAnimationObject::SaveToFile(file);	
 
@@ -67,7 +67,7 @@ MInteractionObject::SaveToFile(ofstream& file)
 // Load From File
 //----------------------------------------------------------------------
 void	
-MInteractionObject::LoadFromFile(ifstream& file)
+MInteractionObject::LoadFromFile(std::ifstream& file)
 {
 	MAnimationObject::LoadFromFile(file);
 

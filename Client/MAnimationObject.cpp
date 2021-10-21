@@ -80,7 +80,7 @@ MAnimationObject::Set(TYPE_OBJECTID id, TYPE_OBJECTID ImageObjectID, TYPE_SPRITE
 // Save To File
 //----------------------------------------------------------------------
 void	
-MAnimationObject::SaveToFile(ofstream& file)
+MAnimationObject::SaveToFile(std::ofstream& file)
 {
 	MImageObject::SaveToFile(file);	
 	CAnimationFrame::SaveToFile(file);	
@@ -97,7 +97,7 @@ MAnimationObject::SaveToFile(ofstream& file)
 // Load From File
 //----------------------------------------------------------------------
 void	
-MAnimationObject::LoadFromFile(ifstream& file)
+MAnimationObject::LoadFromFile(std::ifstream& file)
 {
 	MImageObject::LoadFromFile(file);
 	CAnimationFrame::LoadFromFile(file);

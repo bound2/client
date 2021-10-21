@@ -9,6 +9,7 @@
 
 #include "MObject.h"
 #include <vector>
+#include <fstream>
 
 #define	FLAG_MIP_SAFE_SLAYER		0x01
 #define	FLAG_MIP_SAFE_VAMPIRE		0x02
@@ -92,8 +93,8 @@ class MPortal{
 		//-------------------------------------------------------
 		// File I/O
 		//-------------------------------------------------------
-		void		SaveToFile(class ofstream& file);
-		void		LoadFromFile(class ifstream& file);
+		void		SaveToFile(std::ofstream& file);
+		void		LoadFromFile(std::ifstream& file);
 
 	protected :		
 		

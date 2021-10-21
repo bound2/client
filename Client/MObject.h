@@ -98,8 +98,8 @@ class MObject {
 		//--------------------------------------------------------
 		// file I/O
 		//--------------------------------------------------------
-		virtual void	SaveToFile(class ofstream& file);
-		virtual void	LoadFromFile(class ifstream& file);
+		virtual void	SaveToFile(std::ofstream& file);
+		virtual void	LoadFromFile(std::ifstream& file);
 
 	public :
 		//--------------------------------------------------------

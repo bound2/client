@@ -12,7 +12,7 @@
 #include "MSector.h"
 #include "MTopView.h"
 #include "EffectSpriteTypeDef.h"
-#include <fstream.h>
+#include <fstream>
 
 //----------------------------------------------------------------------
 //
@@ -87,7 +87,7 @@ MSector::RemoveAllObject()
 // SpriteID와 BlockFlag, Light만 저장한다.
 //----------------------------------------------------------------------
 void	
-MSector::SaveToFile(ofstream& file)
+MSector::SaveToFile(std::ofstream& file)
 {
 	BYTE flag = 0;
 
@@ -131,7 +131,7 @@ MSector::SaveToFile(ofstream& file)
 // SpriteID와 Block Flag, Light만 Load된다.
 //----------------------------------------------------------------------
 void	
-MSector::LoadFromFile(ifstream& file)
+MSector::LoadFromFile(std::ifstream& file)
 {
 	//----------------------------------------
 	// Object list를 초기화해야 되는데....
@@ -310,7 +310,8 @@ MSector::AddUndergroundCreature(const MCreature* pUndergroundCreature)
 		OBJECT_MAP::const_iterator iCreature = GetUndergroundCreatureIterator();
 		BYTE currentPos;
 		
-		for (int i=0; i<beforeSize; i++)
+		int i;
+		for (i=0; i<beforeSize; i++)
 		{
 			currentPos = iCreature->first;
 
@@ -402,7 +403,8 @@ MSector::AddGroundCreature(const MCreature* pCreature)
 		OBJECT_MAP::const_iterator iCreature = GetGroundCreatureIterator();
 		BYTE currentPos;
 		
-		for (int i=0; i<beforeSize; i++)
+		int i;
+		for (i=0; i<beforeSize; i++)
 		{
 			currentPos = iCreature->first;
 
@@ -473,7 +475,8 @@ MSector::AddFlyingCreature(const MCreature* pFlyingCreature)
 		OBJECT_MAP::const_iterator iCreature = GetFlyingCreatureIterator();
 		BYTE currentPos;
 		
-		for (int i=0; i<beforeSize; i++)
+		int i;
+		for (i=0; i<beforeSize; i++)
 		{
 			currentPos = iCreature->first;
 

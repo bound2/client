@@ -120,9 +120,7 @@
 #include "DrawTypeDef.h"
 #include "ExpInfo.h"
 #include "RaceType.h"
-
-class ifstream;
-class ofstream;
+#include "fstream"
 
 
 //----------------------------------------------------------------------
@@ -261,14 +259,14 @@ class SKILLINFO_NODE {
 		//------------------------------------------------------
 		// File I/O
 		//------------------------------------------------------
-		void		SaveToFile(class ofstream& file);
-		void		LoadFromFile(class ifstream& file);
+		void		SaveToFile(std::ofstream& file);
+		void		LoadFromFile(std::ifstream& file);
 
 		//------------------------------------------------------
 		// Load / Save SERVER_SKILLINFO
 		//------------------------------------------------------
-		void		LoadFromFileServerSkillInfo(class ifstream& file);
-		void        SaveFromFileServerSkillInfo(ofstream& file);
+		void		LoadFromFileServerSkillInfo(std::ifstream& file);
+		void        SaveFromFileServerSkillInfo(std::ofstream& file);
 
 	protected :
 		
@@ -528,13 +526,13 @@ class MSkillDomain {
 		//------------------------------------------------------
 		// File I/O
 		//------------------------------------------------------
-		void		SaveToFile(class ofstream& file);
-		void		LoadFromFile(class ifstream& file);
+		void		SaveToFile(std::ofstream& file);
+		void		LoadFromFile(std::ifstream& file);
 
 		//------------------------------------------------------
 		// Load SERVER_SKILLINFO
 		//------------------------------------------------------
-		void		LoadFromFileServerDomainInfo(class ifstream& file);
+		void		LoadFromFileServerDomainInfo(std::ifstream& file);
 
 		//------------------------------------------------------
 		// Exp

@@ -26,7 +26,7 @@ CFrame::Set(TYPE_SPRITEID spriteID, short cx, short cy)
 // Save to File
 //----------------------------------------------------------------------
 void
-CFrame::SaveToFile(ofstream& file)
+CFrame::SaveToFile(std::ofstream& file)
 {
 	file.write((const char*)&m_SpriteID, SIZE_SPRITEID);
 	file.write((const char*)&m_cX, 2);
@@ -38,7 +38,7 @@ CFrame::SaveToFile(ofstream& file)
 // Load from File
 //----------------------------------------------------------------------
 void
-CFrame::LoadFromFile(ifstream& file)
+CFrame::LoadFromFile(std::ifstream& file)
 {
 	file.read((char*)&m_SpriteID, SIZE_SPRITEID);
 	file.read((char*)&m_cX, 2);
@@ -63,7 +63,7 @@ CFrame::operator = (const CFrame& frame)
 // Save to File
 //----------------------------------------------------------------------
 void
-CEffectFrame::SaveToFile(ofstream& file)
+CEffectFrame::SaveToFile(std::ofstream& file)
 {
 	CFrame::SaveToFile(file);	
 	
@@ -88,7 +88,7 @@ CEffectFrame::SaveToFile(ofstream& file)
 // Load from File
 //----------------------------------------------------------------------
 void
-CEffectFrame::LoadFromFile(ifstream& file)
+CEffectFrame::LoadFromFile(std::ifstream& file)
 {
 	CFrame::LoadFromFile(file);
 	file.read((char*)&m_Light, 1);

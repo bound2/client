@@ -102,7 +102,7 @@ USINGCOLORSET_NODE::Disable(int start, int end)
 // Save To File
 //----------------------------------------------------------------------
 void			
-USINGCOLORSET_NODE::SaveToFile(ofstream& file)
+USINGCOLORSET_NODE::SaveToFile(std::ofstream& file)
 {
 	// 개수 저장
 	int size = MAX_COLORSET;
@@ -119,7 +119,7 @@ USINGCOLORSET_NODE::SaveToFile(ofstream& file)
 // Load From File
 //----------------------------------------------------------------------
 bool
-USINGCOLORSET_NODE::LoadFromFile(ifstream& file)
+USINGCOLORSET_NODE::LoadFromFile(std::ifstream& file)
 {
 	// 개수 읽기
 	int size;
