@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "AppendPatchInfo.h"
+#include "fstream"
 
 #ifdef __GAME_CLIENT__
 	extern void		UpdateProgressBar();
@@ -20,7 +21,7 @@ APPEND_PATCH_NODE::Append(const char* orgFilename) const
 	//-------------------------------------------------------------
 	// append화일 체크..
 	//-------------------------------------------------------------
-	class ifstream appendFile(appendFilename.GetString(), ios::binary | ios::nocreate);		
+	std::ifstream appendFile(appendFilename.GetString(), std::ios::binary);		
 
 	int n;
 	char buffer[4096];
@@ -39,7 +40,7 @@ APPEND_PATCH_NODE::Append(const char* orgFilename) const
 			SetProgressBarText("패치 화일을 적용시키고 있습니다.");
 		#endif
 
-		class fstream orgFile(orgFilename, ios::binary | ios::ate | ios::in | ios::out);
+		std::fstream orgFile(orgFilename, std::ios::binary | std::ios::ate | std::ios::in | std::ios::out);
 		
 		if (orgFile.is_open())
 		{
@@ -90,7 +91,7 @@ APPEND_PATCH_NODE::Append(const char* orgFilename) const
 // Save To File
 //-----------------------------------------------------------------------------
 void		
-APPEND_PATCH_NODE::SaveToFile(class ofstream& file)
+APPEND_PATCH_NODE::SaveToFile(std::ofstream& file)
 {
 	appendFilename.SaveToFile( file );
 	file.write((const char*)&appendFilesize, 4);
@@ -104,7 +105,7 @@ APPEND_PATCH_NODE::SaveToFile(class ofstream& file)
 // Load From File
 //-----------------------------------------------------------------------------
 void		
-APPEND_PATCH_NODE::LoadFromFile(class ifstream& file)
+APPEND_PATCH_NODE::LoadFromFile(std::ifstream& file)
 {
 	appendFilename.LoadFromFile( file );
 	file.read((char*)&appendFilesize, 4);
@@ -188,7 +189,7 @@ AppendPatch::SetFinalInfo(long finalFilesize, WORD finalSpkSize)
 bool		
 AppendPatch::SetFinalInfo(const char* currentFilename)
 {
-	class ifstream file(currentFilename, ios::binary | ios::nocreate);
+	std::ifstream file(currentFilename, ios::binary);
 
 	if (!file.is_open())
 	{
@@ -263,7 +264,7 @@ AppendPatch::AddAppendInfo(const char* currentFilename)
 	long appendFilesize;
 	WORD appSpkSize;
 
-	class ifstream file(currentFilename, ios::binary | ios::nocreate);
+	std::ifstream file(currentFilename, ios::binary);
 
 	if (!file.is_open())
 	{
@@ -367,7 +368,7 @@ AppendPatch::ExecutePatch() const
 bool
 AppendPatch::CheckFinalInfo() const
 {
-	class ifstream orgFile(m_orgFilename.GetString(), ios::binary | ios::nocreate);
+	std::ifstream orgFile(m_orgFilename.GetString(), ios::binary);
 		
 	if (orgFile.is_open())
 	{
@@ -429,7 +430,7 @@ AppendPatch::CalculateFinalInfo() const
 // Save To File
 //-----------------------------------------------------------------------------
 void		
-AppendPatch::SaveToFile(class ofstream& file)
+AppendPatch::SaveToFile(std::ofstream& file)
 {	
 	m_orgFilename.SaveToFile( file );
 	file.write((const char*)&m_orgFilesize, 4);
@@ -456,7 +457,7 @@ AppendPatch::SaveToFile(class ofstream& file)
 // Load From File
 //-----------------------------------------------------------------------------
 void		
-AppendPatch::LoadFromFile(class ifstream& file)
+AppendPatch::LoadFromFile(std::ifstream& file)
 {
 	Release();
 

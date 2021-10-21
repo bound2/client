@@ -1456,7 +1456,7 @@ bool	C_VS_UI_COMPUTER::LoadTree(const char* szFilename)
 
 		CSpritePack *temp;
 		temp = new CSpritePack;
-		std::ifstream file(spkname.c_str(), std::ios::binary | std::ios::nocreate);
+		std::ifstream file(spkname.c_str(), std::ios::binary);
 		if (!file)
 			_Error(FILE_OPEN);
 		temp->LoadFromFile( file );

@@ -1,5 +1,8 @@
   // VS_UI_GameCommon.cpp
 
+#include "fstream"
+#include <string>
+#include <vector>
 #include "client_PCH.h"
 #include "VS_UI_GameCommon.h"
 #include "VS_UI_GameCommon2.h"
@@ -86,8 +89,8 @@ class EventGiftInfo
 public :
 	EventGiftInfo() { m_bActive = 1; m_Step = 1; m_Name = "";}
 	~EventGiftInfo(){}
-	void LoadFromFile(ifstream &file)	{		file.read((char*)&m_ID, sizeof(DWORD) );file.read((char*)&m_bActive, sizeof(char) );		file.read((char*)&m_Step, sizeof( DWORD) );		m_Name.LoadFromFile( file );	}
-	void SaveToFile(ofstream &file)	{		file.write((const char*)&m_ID, sizeof(DWORD) );file.write((const char*)&m_bActive, sizeof(char) );		file.write((const char*)&m_Step, sizeof( int ) );		m_Name.SaveToFile( file );	}
+	void LoadFromFile(std::ifstream &file)	{		file.read((char*)&m_ID, sizeof(DWORD) );file.read((char*)&m_bActive, sizeof(char) );		file.read((char*)&m_Step, sizeof( DWORD) );		m_Name.LoadFromFile( file );	}
+	void SaveToFile(std::ofstream &file)	{		file.write((const char*)&m_ID, sizeof(DWORD) );file.write((const char*)&m_bActive, sizeof(char) );		file.write((const char*)&m_Step, sizeof( int ) );		m_Name.SaveToFile( file );	}
 	char	m_bActive;	DWORD		m_Step;	MString	m_Name; DWORD m_ID;
 };
 
@@ -5874,7 +5877,7 @@ void C_VS_UI_MAILBOX::C_VS_UI_MAIL::SaveToFile(std::string filename)
 
 void C_VS_UI_MAILBOX::C_VS_UI_MAIL::LoadFromFile(std::string filename)
 {
-	std::ifstream file(filename.c_str(), std::ios::binary | std::ios::nocreate);
+	std::ifstream file(filename.c_str(), std::ios::binary);
 	
 	if(file)
 	{
@@ -5947,7 +5950,7 @@ void C_VS_UI_MAILBOX::SaveToFile(std::string filename)
 
 void C_VS_UI_MAILBOX::LoadFromFile(std::string filename)
 {
-	std::ifstream file(filename.c_str(), std::ios::binary | ios::nocreate);
+	std::ifstream file(filename.c_str(), std::ios::binary);
 	
 	if(file)
 	{
@@ -8515,7 +8518,7 @@ void C_VS_UI_CRAZY_MINE::InitMineBoard(int size, int mine)
 		}
 	}
 
-	for ( i=0; i<m_MineCount; ++i )
+	for ( int i=0; i<m_MineCount; ++i )
 	{
 		int x,y;
 
@@ -9363,7 +9366,7 @@ void	C_VS_UI_STATUS_CTF::Show()
 			y+rectRemainTime.top+(rectRemainTime.bottom - rectRemainTime.top)/2 - g_GetStringHeight( szBuffer, gpC_base->m_chatting_pi.hfont)/2, 
 			szBuffer, gpC_base->m_chatting_pi, RGB_WHITE);
 
-		for( i =0 ; i< 3; i++ )
+		for(int i =0 ; i< 3; i++ )
 		{
 			wsprintf( szBuffer, "%d",m_num_flag[i]);
 			if( m_num_flag[i] == topscore )
@@ -9494,7 +9497,7 @@ void	C_VS_UI_REGEN_TOWER_MINIMAP::Show()
 			{ 204, 4, 304, 104 }
 		};
 
-		const map_width = 128, map_height=256;
+		const int map_width = 128, map_height=256;
 		
 		for(int i = 0; i < g_pRegenTowerInfoManager->GetSize(); i++ )
 		{
@@ -9586,7 +9589,7 @@ bool	C_VS_UI_REGEN_TOWER_MINIMAP::MouseControl(UINT message, int _x, int _y)
 		{ 204, 4, 304, 104 }
 	};
 
-	const map_width = 128, map_height=256;
+	const int map_width = 128, int map_height=256;
 
 	_x-=x; _y-=y;
 	switch(message)
@@ -10992,7 +10995,7 @@ bool C_VS_UI_HELPDESC::MouseControl(UINT message, int _x, int _y)
 
 void C_VS_UI_HELPDESC::LoadCustomstr(char * customstrfilename)
 {
-	ifstream file(customstrfilename, ios::binary| ios::nocreate);
+	std::ifstream file(customstrfilename, std::ios::binary);
 	if(!file) return;
 	char sztemp[1024];
 	
@@ -17974,7 +17977,7 @@ void	C_VS_UI_POWER_JJANG::SetItemList()
 	
 	// 에융..클래스 만들기 구찬타..
 	BYTE MaxItem = 0;
-	ifstream file("data\\info\\PowerjjangItem.inf",ios::binary);
+	std::ifstream file("data\\info\\PowerjjangItem.inf", std::ios::binary);
 	file.read(&MaxItem, 1);
 	file.read((char*)&m_AvailablePoint, 2);
 	for(int i = 0; i < MaxItem; i++)
@@ -18781,6 +18784,7 @@ void C_VS_UI_INVENTORY_SUB::Show()
 			
 			for(int depth = 0, number = p_item->GetNumber(); number > 0; number/=10, depth++);
 			
+			int depth;
 			if(depth == 0) depth = 1;
 			rt.left = rt.right - 7*depth;
 			

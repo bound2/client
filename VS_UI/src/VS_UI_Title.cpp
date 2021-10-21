@@ -1190,11 +1190,11 @@ C_VS_UI_NEWCHAR::C_VS_UI_NEWCHAR()
 	m_AdvancementSlayerManIspk.LoadFromFileRunning( ISPK_ADVANCEMENT_SLAYER_MAN );
 	m_AdvancementSlayerWomanIspk.LoadFromFileRunning( ISPK_ADVANCEMENT_SLAYER_WOMAN );
 
-	std::ifstream file_man(CFPK_SLAYER, std::ios::binary | std::ios::nocreate);
+	std::ifstream file_man(CFPK_SLAYER, std::ios::binary);
 	if (!file_man)
 		_Error(FILE_OPEN);
 	m_slayer_cfpk.LoadFromFile(file_man);
-	std::ifstream file_vampire(CFPK_VAMPIRE, std::ios::binary | std::ios::nocreate);
+	std::ifstream file_vampire(CFPK_VAMPIRE, std::ios::binary);
 	file_man.close();
 
 	if (!file_vampire)
@@ -1202,38 +1202,38 @@ C_VS_UI_NEWCHAR::C_VS_UI_NEWCHAR()
 	m_vampire_cfpk.LoadFromFile(file_vampire);
 	file_vampire.close();
 
-	std::ifstream file_ousters(CFPK_OUSTERS, std::ios::binary | std::ios::nocreate);
+	std::ifstream file_ousters(CFPK_OUSTERS, std::ios::binary);
 	if (!file_ousters)
 		_Error(FILE_OPEN);
 	m_ousters_cfpk.LoadFromFile(file_ousters);
 	file_ousters.close();
 	
-	std::ifstream file_ac_ousters( CFPK_ADVANCEMENT_OUSTERS, std::ios::binary | std::ios::nocreate );
+	std::ifstream file_ac_ousters( CFPK_ADVANCEMENT_OUSTERS, std::ios::binary);
 	if( !file_ac_ousters )
 		_Error( FILE_OPEN );
 	m_AdvancementOustersCfpk.LoadFromFile( file_ac_ousters );
 	file_ac_ousters.close();
 
-	std::ifstream file_ac_vampire( CFPK_ADVANCEMENT_VAMPIRE_MAN, std::ios::binary | std::ios::nocreate );
+	std::ifstream file_ac_vampire( CFPK_ADVANCEMENT_VAMPIRE_MAN, std::ios::binary);
 	if( !file_ac_vampire )
 		_Error( FILE_OPEN );
 	m_AdvancementVampireManCfpk.LoadFromFile( file_ac_vampire );
 	file_ac_vampire.close();
 
-	std::ifstream file_ac_vampire2( CFPK_ADVANCEMENT_VAMPIRE_WOMAN, std::ios::binary | std::ios::nocreate );
+	std::ifstream file_ac_vampire2( CFPK_ADVANCEMENT_VAMPIRE_WOMAN, std::ios::binary);
 	if( !file_ac_vampire2 )
 		_Error( FILE_OPEN );
 	m_AdvancementVampireWomanCfpk.LoadFromFile( file_ac_vampire2 );
 	file_ac_vampire2.close();
 
 
-	std::ifstream file_ac_slayerman( CFPK_ADVANCEMENT_SLAYER_MAN, std::ios::binary | std::ios::nocreate );
+	std::ifstream file_ac_slayerman( CFPK_ADVANCEMENT_SLAYER_MAN, std::ios::binary);
 	if( !file_ac_slayerman )
 		_Error( FILE_OPEN );
 	m_AdvancementSlayerManCfpk.LoadFromFile( file_ac_slayerman );
 	file_ac_slayerman.close();
 
-	std::ifstream file_ac_slayerwoman( CFPK_ADVANCEMENT_SLAYER_WOMAN, std::ios::binary | std::ios::nocreate );
+	std::ifstream file_ac_slayerwoman( CFPK_ADVANCEMENT_SLAYER_WOMAN, std::ios::binary);
 	if( !file_ac_slayerwoman )
 		_Error( FILE_OPEN );
 	m_AdvancementSlayerWomanCfpk.LoadFromFile( file_ac_slayerwoman );

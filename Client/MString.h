@@ -57,8 +57,8 @@ class MString {
 		//----------------------------------------------------
 		// File I/O
 		//----------------------------------------------------
-		virtual void	SaveToFile(class ofstream& file);
-		virtual void	LoadFromFile(class ifstream& file);
+		virtual void	SaveToFile(std::ofstream& file);
+		virtual void	LoadFromFile(std::ifstream& file);
 
 	protected :
 		size_t	m_Length;
