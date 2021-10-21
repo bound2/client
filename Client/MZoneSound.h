@@ -25,6 +25,7 @@
 #define __MZONESOUND_H__
 
 #include <Windows.h>
+#include <fstream>
 #include "MTypeDef.h"
 #include "ShowTimeChecker.h"
 
@@ -39,8 +40,8 @@ class ZONESOUND_INFO : public ShowTimeChecker {
 		//---------------------------------------------------------------
 		// File I/O
 		//---------------------------------------------------------------
-		void					SaveToFile(class ofstream& file);
-		void					LoadFromFile(class ifstream& file);
+		void					SaveToFile(std::ofstream& file);
+		void					LoadFromFile(std::ifstream& file);
 
 	public :
 		//---------------------------------------------------------------
