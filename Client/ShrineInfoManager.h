@@ -4,6 +4,7 @@
 
 #include "CTypeTable.h"
 #include <vector>
+#include <fstream>
 
 class RegenTowerInfo
 {
@@ -12,8 +13,8 @@ public :
 	~RegenTowerInfo() {}
 	void	LoadFromLine(char *szLine);
 
-	void	LoadFromFile(class ifstream& file) { }
-	void	SaveToFile(class ofstream& file) { }
+	void	LoadFromFile(std::ifstream& file) { }
+	void	SaveToFile(std::ofstream& file) { }
 	
 	int		num;
 	int		zoneID;	
