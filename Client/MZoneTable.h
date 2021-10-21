@@ -20,6 +20,7 @@
 #include "MString.h"
 #include <map>
 #include <list>
+#include <fstream>
 
 #define	FLAG_ZONESIZE_SMALL		0x01
 
@@ -69,8 +70,8 @@ class ZONETABLE_INFO {
 		//-------------------------------------------------------
 		// File I/O
 		//-------------------------------------------------------
-		void			SaveToFile(class ofstream& file);		
-		void			LoadFromFile(class ifstream& file);		
+		void			SaveToFile(std::ofstream& file);
+		void			LoadFromFile(std::ifstream& file);
 };
 
 //----------------------------------------------------------------------
@@ -102,8 +103,8 @@ class CZoneTable {
 		//-------------------------------------------------------
 		// File I/O
 		//-------------------------------------------------------
-		void				SaveToFile(class ofstream& file);
-		void				LoadFromFile(class ifstream& file);
+		void				SaveToFile(std::ofstream& file);
+		void				LoadFromFile(std::ifstream& file);
 	
 	protected :
 		ZONEINFO_MAP		m_mapZoneInfo;		// zone¡§∫∏ map
