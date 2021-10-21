@@ -9589,7 +9589,7 @@ bool	C_VS_UI_REGEN_TOWER_MINIMAP::MouseControl(UINT message, int _x, int _y)
 		{ 204, 4, 304, 104 }
 	};
 
-	const int map_width = 128, int map_height=256;
+	const int map_width = 128, map_height=256;
 
 	_x-=x; _y-=y;
 	switch(message)
@@ -10497,8 +10497,8 @@ void C_VS_UI_HELPDESC::Show()
 			
 	DWORD color;
 	
-	char *isfont = NULL;
-	char *istag  = NULL;
+	const char *isfont = NULL;
+	const char *istag  = NULL;
 
 	g_FL2_GetDC();
 
@@ -11030,8 +11030,8 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 	std::string tempindex;												// spk 인텍스
 	std::string tempappend;												// 이어쓰기
 	char *pCur = NULL;													// 한라인을 읽어드려서 저장하는 변수
-	char *istag = NULL;													//태크가 있는지 검사하는 변수
-	char *isfont = NULL;												//태크가 있는지 검사하는 변수
+	const char *istag = NULL;													//태크가 있는지 검사하는 변수
+	const char *isfont = NULL;												//태크가 있는지 검사하는 변수
 	
 	int NullSizex = 0,NullSizey = 0;
 	
@@ -11311,16 +11311,16 @@ char* C_VS_UI_HELPDESC::findkey(const char* tagstr ,char* keyword)
 {
 	if(tagstr == NULL) return NULL;
 	
-	char *s = strstr(tagstr, keyword );
+	const char *s = strstr(tagstr, keyword );
 	if(s == NULL )
 		return NULL;
 	
 	static char Buffer[512];  // 변수를 static  으로 해야한다 메모리 침범을 막기위해서 (중요하다)
 	memset( Buffer, 0, 512 );
 	
-	char *start = strstr( s, "'" );
+	const char *start = strstr( s, "'" );
 	start++;
-	char *end = strstr( start,"'" );
+	const char *end = strstr( start,"'" );
 	
 	memcpy( Buffer, start, end-start);
 	return Buffer;
