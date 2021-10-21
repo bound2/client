@@ -2659,8 +2659,8 @@ public:
 	void SetMainTab(int index) { m_i_main_tab = index; }
 	int	 GetMainTab() { return m_i_main_tab; }
 
-	void SaveToFile(class ofstream &file);
-	void LoadFromFile(class ifstream &file);
+	void SaveToFile(std::ofstream &file);
+	void LoadFromFile(std::ifstream &file);
 
 	void SetDefault();
 	void SetHotKey(int **hotkey = NULL);

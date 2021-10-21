@@ -2434,7 +2434,7 @@ void C_VS_UI_FILE_DIALOG::Start(char *type)
 			
 			memcpy(name,p_type,p_type_end-p_type);
 			name[p_type_end-p_type+1]='\0';
-			m_filter.insert(&m_filter[i],name);
+			m_filter.insert(m_filter.begin() + i, name);
 			p_type=p_type_end+1;
 		}
 		//m_filter = type;
@@ -2632,7 +2632,7 @@ bool C_VS_UI_FILE_DIALOG::MouseControl(UINT message, int _x, int _y)
 						{
 							m_select_file_num.clear();
 						}						
-						m_select_file_num.insert(&m_select_file_num[m_select_file_num.size()], m_select);
+						m_select_file_num.insert(m_select_file_num.begin() + m_select_file_num.size(), m_select);
 					} 
 					else		// 그냥 클릭했을경우
 					{
@@ -3228,15 +3228,15 @@ void C_VS_UI_FILE_DIALOG::RefreshFileList(char *sz_dirname)
 			{
 				if(m_vs_file_list[i] > sz_filename || m_vs_file_list[i][0] != '\\')
 				{
-					m_vs_file_list.insert(&m_vs_file_list[i], sz_filename);
-					m_vs_file_list_attr.insert(&m_vs_file_list_attr[i], fd.dwFileAttributes);
+					m_vs_file_list.insert(m_vs_file_list.begin() + i, sz_filename);
+					m_vs_file_list_attr.insert(m_vs_file_list_attr.begin() + i, fd.dwFileAttributes);
 					break;
 				}
 			}
 			if(i == m_vs_file_list.size())
 			{
-				m_vs_file_list.insert(&m_vs_file_list[i], sz_filename);
-				m_vs_file_list_attr.insert(&m_vs_file_list_attr[i], fd.dwFileAttributes);
+				m_vs_file_list.insert(m_vs_file_list.begin() + i, sz_filename);
+				m_vs_file_list_attr.insert(m_vs_file_list_attr.begin() + i, fd.dwFileAttributes);
 			}
 		}
 		else
@@ -3269,15 +3269,15 @@ void C_VS_UI_FILE_DIALOG::RefreshFileList(char *sz_dirname)
 			{
 				if(m_vs_file_list[i] > sz_filename && m_vs_file_list[i][0] != '\\')
 				{
-					m_vs_file_list.insert(&m_vs_file_list[i], sz_filename);
-					m_vs_file_list_attr.insert(&m_vs_file_list_attr[i], fd.dwFileAttributes);
+					m_vs_file_list.insert(m_vs_file_list.begin() + i, sz_filename);
+					m_vs_file_list_attr.insert(m_vs_file_list_attr.begin() + i, fd.dwFileAttributes);
 					break;
 				}
 			}
 			if(i == m_vs_file_list.size())
 			{
-				m_vs_file_list.insert(&m_vs_file_list[i], sz_filename);
-				m_vs_file_list_attr.insert(&m_vs_file_list_attr[i], fd.dwFileAttributes);
+				m_vs_file_list.insert(m_vs_file_list.begin() + i, sz_filename);
+				m_vs_file_list_attr.insert(m_vs_file_list_attr.begin() + i, fd.dwFileAttributes);
 			}
 		}
 

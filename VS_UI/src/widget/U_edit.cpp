@@ -228,7 +228,7 @@ bool LineEditor::InsertGap()
 
 	if(m_editor_height > 0 && GetLineCount() > m_editor_height)
 	{
-		m_string.erase(&m_string[m_cursor]);
+		m_string.erase(m_string.begin() + m_cursor);
 //		DEBUG_ADD("[LineEditor] InsertGap FALSE");
 		return false;
 	}
@@ -1129,7 +1129,7 @@ void LineEditorVisual::Show() const
 				{
 					std::vector<int>::iterator itr = v_cut.begin();
 					
-					while(px > m_xy.x + (m_reach_limit-1)*text_width || itr != NULL && *itr > 1 && px - (m_reach_limit-1 - *itr)*text_width > m_xy.x)
+					while(px > m_xy.x + (m_reach_limit-1)*text_width || *itr != NULL && *itr > 1 && px - (m_reach_limit-1 - *itr)*text_width > m_xy.x)
 					{
 						px -= (m_reach_limit+1)*text_width;
 						py += m_gap;
@@ -1173,7 +1173,7 @@ void LineEditorVisual::Show() const
 				if(m_gap != 0)
 				{
 					std::vector<int>::iterator itr = v_cut.begin();
-					while(itr != v_cut.end() && (px > m_xy.x + (m_reach_limit+1)*text_width || itr != NULL && *itr > 1 && px - (m_reach_limit+1 - *itr)*text_width > m_xy.x))
+					while(itr != v_cut.end() && (px > m_xy.x + (m_reach_limit+1)*text_width || *itr != NULL && *itr > 1 && px - (m_reach_limit+1 - *itr)*text_width > m_xy.x))
 					{
 						px -= (m_reach_limit+1)*text_width;
 						py += m_gap;
