@@ -38,6 +38,8 @@
 #include "CTypeTable.h"
 #include "MHelpDef.h"
 #include "Client_PCH.h"
+#include <fstream>
+
 #ifdef __GAME_CLIENT__
 	#include "UserOption.h"
 #endif
@@ -68,8 +70,8 @@ class MHelpNode {
 		//------------------------------------------------------
 		// File I/O
 		//------------------------------------------------------
-		virtual void		SaveToFile(class ofstream& file) = 0;
-		virtual void		LoadFromFile(class ifstream& file) = 0;
+		virtual void		SaveToFile(std::ofstream& file) = 0;
+		virtual void		LoadFromFile(std::ifstream& file) = 0;
 
 	public :
 		// NewItem()ø° ¥Î«— functions pointer
@@ -127,8 +129,8 @@ class MCompareHelpNode : public MHelpNode {
 		//------------------------------------------------------
 		// File I/O
 		//------------------------------------------------------
-		virtual void		SaveToFile(class ofstream& file);
-		virtual void		LoadFromFile(class ifstream& file);	
+		virtual void		SaveToFile(std::ofstream& file);
+		virtual void		LoadFromFile(std::ifstream& file);	
 
 	public :
 		static MHelpNode*	NewNode()					{ return new MCompareHelpNode; }
@@ -167,8 +169,8 @@ class MOutputHelpNode : public MHelpNode, public std::list<HELP_OUTPUT> {
 		//------------------------------------------------------
 		// File I/O
 		//------------------------------------------------------
-		virtual void		SaveToFile(class ofstream& file);
-		virtual void		LoadFromFile(class ifstream& file);	
+		virtual void		SaveToFile(std::ofstream& file);
+		virtual void		LoadFromFile(std::ifstream& file);	
 
 	public :
 		static MHelpNode*	NewNode()					{ return new MOutputHelpNode; }
@@ -205,8 +207,8 @@ class MHelpManager : public CTypeTable<MHelpNode*> {
 		//------------------------------------------------------
 		// File I/O
 		//------------------------------------------------------
-		void		SaveToFile(class ofstream& file);
-		void		LoadFromFile(class ifstream& file);	
+		void		SaveToFile(std::ofstream& file);
+		void		LoadFromFile(std::ifstream& file);	
 
 	protected :
 		CTypeTable<bool>		m_EventOccured;

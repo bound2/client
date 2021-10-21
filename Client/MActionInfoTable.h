@@ -115,8 +115,7 @@
 #include "CTypeTable.h"
 //#include "SkillDef.h"
 #include "MString.h"
-class ofstream;
-class ifstream;
+#include "fstream"
 
 //----------------------------------------------------------------------
 // 기술의 속성에 대한 flag
@@ -273,8 +272,8 @@ class ACTION_INFO_NODE {
 		//-------------------------------------------------------
 		// File I/O
 		//-------------------------------------------------------
-		void			SaveToFile(class ofstream& file);
-		void			LoadFromFile(class ifstream& file);
+		void			SaveToFile(std::ofstream& file);
+		void			LoadFromFile(std::ifstream& file);
 };
 
 
@@ -515,8 +514,8 @@ class MActionInfo : public CTypeTable<ACTION_INFO_NODE> {
 		//-------------------------------------------------------
 		// File I/O
 		//-------------------------------------------------------
-		void		SaveToFile(class ofstream& file);
-		void		LoadFromFile(class ifstream& file);
+		void		SaveToFile(std::ofstream& file);
+		void		LoadFromFile(std::ifstream& file);
 
 		//-------------------------------------------------------
 		// Grade 
@@ -651,8 +650,8 @@ class MActionInfoTable : public CTypeTable<MActionInfo> {
 		//-------------------------------------------------------
 		// File I/O
 		//-------------------------------------------------------
-		void		SaveToFile(class ofstream& file);
-		void		LoadFromFile(class ifstream& file);
+		void		SaveToFile(std::ofstream& file);
+		void		LoadFromFile(std::ifstream& file);
 
 	protected :
 		// ActionInfo / ResultActionInfo / ClientOnlyActionInfo의 경계값
