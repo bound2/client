@@ -17,7 +17,7 @@
 
 #include <Windows.h>
 #include <list>
-//#include <fstream.h>
+#include <fstream>
 
 
 
@@ -107,8 +107,8 @@ class CPositionList {
 		//--------------------------------------------------------------
 		// File I/O
 		//--------------------------------------------------------------
-		void		SaveToFile(class ofstream& file);
-		void		LoadFromFile(class ifstream& file);
+		void		SaveToFile(std::ofstream& file);
+		void		LoadFromFile(std::ifstream& file);
 
 	
 
@@ -251,7 +251,7 @@ CPositionList<Type>::Remove(Type x, Type y)
 //----------------------------------------------------------------------
 template <class Type>
 void		
-CPositionList<Type>::SaveToFile(class ofstream& file)
+CPositionList<Type>::SaveToFile(std::ofstream& file)
 {
 	//----------------------------------------
 	// Size저장
@@ -289,7 +289,7 @@ CPositionList<Type>::SaveToFile(class ofstream& file)
 //----------------------------------------------------------------------
 template <class Type>
 void		
-CPositionList<Type>::LoadFromFile(class ifstream& file)
+CPositionList<Type>::LoadFromFile(std::ifstream& file)
 {
 	// 이전에 있던 list를 제거
 	Release();

@@ -72,7 +72,7 @@ std::string CGGuildChat::toString () const
 	__BEGIN_TRY
 		
 	StringStream msg;
-	msg << "CGGuildChat(Color:" << m_Color
+	msg << "CGGuildChat(Color:" << std::to_string(m_Color)
 		<< ", Tupe:" << m_bType
 		<< ", Message : " << m_Message
 		<< ")" ;

@@ -1,8 +1,9 @@
 #include "Client_PCH.h"
 #include "MCrashReportManager.h"
+#include <fstream>
 
 void	
-MCrashReport::LoadFromFile(class ifstream &file)
+MCrashReport::LoadFromFile(std::ifstream &file)
 {
 	m_ExecutableTime.LoadFromFile(file);
 	file.read((char *)&m_Version, sizeof(WORD));
@@ -13,7 +14,7 @@ MCrashReport::LoadFromFile(class ifstream &file)
 }
 
 void	
-MCrashReport::SaveToFile(class ofstream &file)
+MCrashReport::SaveToFile(std::ofstream &file)
 {
 	m_ExecutableTime.SaveToFile(file);
 	file.write((const char *)&m_Version, sizeof(WORD));

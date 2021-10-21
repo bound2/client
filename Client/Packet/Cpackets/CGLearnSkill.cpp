@@ -75,9 +75,9 @@ void CGLearnSkill::execute ( Player * pPlayer )
 		}
 
 		msg << "CGLearnSkill("
-			<< "SkillType:"  << (int)m_SkillType << ","
+			<< "SkillType:"  << std::to_string((int)m_SkillType) << ","
 			<< "DomainType:" << domain 
-			<< "PacketSize:" << getPacketSize() << ","
+			<< "PacketSize:" << std::to_string(getPacketSize()) << ","
 			<< ")";
 		
 		return msg.toString();

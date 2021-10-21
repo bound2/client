@@ -46,7 +46,7 @@ std::string CGSelectQuest::toString () const
 		
 	StringStream msg;
     msg << "CGSelectQuest("
-		<< "QuestID:" << m_QuestID
+		<< "QuestID:" << std::to_string(m_QuestID)
 		<< ")" ;
 	return msg.toString();
 

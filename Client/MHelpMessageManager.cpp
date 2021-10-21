@@ -1,5 +1,6 @@
 #include "Client_PCH.h"
 #include "MHelpMessageManager.h"
+#include <fstream>
 
 #define dSTRING_LEN 2048
 
@@ -40,7 +41,7 @@ MHelpMessageManager:: ~MHelpMessageManager()
 
 void MHelpMessageManager::LoadFromFile(const char * filename)
 {	
-	ifstream file(filename, ios::binary| ios::nocreate);
+	std::ifstream file(filename, ios::binary);
 	if(!file)
 	{
 		return;
@@ -55,7 +56,7 @@ void MHelpMessageManager::LoadFromFile(const char * filename)
 
 void MHelpMessageManager::SaveToFile(const char * filename)
 {
-	ofstream file(filename, ios::binary);
+	std::ofstream file(filename, ios::binary);
 	if(file)
 	{
 		SaveToFile(file);
@@ -237,7 +238,7 @@ bool MHelpMessageManager::LoadHelpMessageRpk(const char *helprpkfilename)
 }
 
 
-void MHelpMessageManager::LoadFromFile(class ifstream &file)
+void MHelpMessageManager::LoadFromFile(std::ifstream &file)
 {
 	MHelpMessage message;
 	MString		 m_sender;
@@ -415,7 +416,7 @@ void MHelpMessageManager::LoadFromFile(class ifstream &file)
 	file.close();
 }
 
-void MHelpMessageManager::SaveToFile(class ofstream &file)
+void MHelpMessageManager::SaveToFile(std::ofstream &file)
 {
 	int i;
 	size_t strlen = 0;

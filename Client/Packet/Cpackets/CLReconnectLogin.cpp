@@ -72,7 +72,7 @@ void CLReconnectLogin::execute ( Player * pPlayer )
 		StringStream msg;
 		
 		msg << "CLReconnectLogin("
-			<< "KEY:" << m_Key 
+			<< "KEY:" << std::to_string(m_Key)
 			<< ")" ;
 		
 		return msg.toString();

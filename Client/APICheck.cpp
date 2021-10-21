@@ -98,6 +98,7 @@ BOOL APICheck::CheckApi()
 // 			else
 // 				::ExitProcess(0);
 		}
+		int i;
 		if (i==checklen)
 		{
 			MessageBox(0,"","",MB_OK);

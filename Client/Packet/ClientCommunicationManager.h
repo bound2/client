@@ -17,8 +17,8 @@ class DatagramPacket;
 
 class ClientCommunicationManager {
 	public :
-		ClientCommunicationManager();
-		~ClientCommunicationManager();
+		ClientCommunicationManager() throw (Error);
+		~ClientCommunicationManager() throw (Error);
 
 		//------------------------------------------------------------------
 		// Update

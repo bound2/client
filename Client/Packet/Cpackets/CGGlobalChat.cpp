@@ -61,7 +61,7 @@ std::string CGGlobalChat::toString () const
 	__BEGIN_TRY
 		
 	StringStream msg;
-	msg << "CGGlobalChat(Color:" << m_Color << ",Message:" << m_Message << ")" ;
+	msg << "CGGlobalChat(Color:" << std::to_string(m_Color) << ",Message:" << m_Message << ")" ;
 	return msg.toString();
 
 	__END_CATCH

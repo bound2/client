@@ -4,6 +4,7 @@
 #include "Client_PCH.h"
 #include "ClientConfig.h"
 #include "MusicDef.h"
+#include <fstream>
 
 //----------------------------------------------------------------------
 // Global
@@ -281,7 +282,7 @@ ClientConfig::~ClientConfig()
 void	
 ClientConfig::SaveToFile(const char* filename)
 {
-	class ofstream file(filename, ios::binary);	
+	std::ofstream file(filename, ios::binary);	
 
 	file.write((const char*)&FPS, 4);
 
@@ -454,7 +455,7 @@ ClientConfig::SaveToFile(const char* filename)
 bool	
 ClientConfig::LoadFromFile(const char* filename)
 {
-	class ifstream file(filename, ios::binary | ios::nocreate);	
+	std::ifstream file(filename, ios::binary);	
 
 	if (!file || !file.is_open())
 	{

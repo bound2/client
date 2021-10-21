@@ -4,6 +4,7 @@
 #include "Client_PCH.h"
 #include "MSkillManager.h"
 #include "MTypeDef.h"
+#include <fstream>
 
 #ifdef __GAME_CLIENT__
 	#include "MPlayer.h"
@@ -109,7 +110,7 @@ SKILLINFO_NODE::SKILLINFO_NODE()
 // Save From File ServerSkillInfo
 //----------------------------------------------------------------------
 void 
-SKILLINFO_NODE::SaveFromFileServerSkillInfo(ofstream &file)
+SKILLINFO_NODE::SaveFromFileServerSkillInfo(std::ofstream &file)
 {
 	
 	file.write((char*)&m_LearnLevel, 4);
@@ -166,7 +167,7 @@ SKILLINFO_NODE::SaveFromFileServerSkillInfo(ofstream &file)
 // Load From File ServerSkillInfo
 //----------------------------------------------------------------------
 void		
-SKILLINFO_NODE::LoadFromFileServerSkillInfo(class ifstream& file)
+SKILLINFO_NODE::LoadFromFileServerSkillInfo(std::ifstream& file)
 {
 	int ll;
 	MString name;
@@ -265,7 +266,7 @@ SKILLINFO_NODE::AddNextSkill(ACTIONINFO id)
 // Save To File
 //----------------------------------------------------------------------
 void		
-SKILLINFO_NODE::SaveToFile(class ofstream& file)
+SKILLINFO_NODE::SaveToFile(std::ofstream& file)
 {
 
 	m_Name.SaveToFile( file );							// 기술 이름
@@ -300,7 +301,7 @@ SKILLINFO_NODE::SaveToFile(class ofstream& file)
 // Load From File
 //----------------------------------------------------------------------
 void		
-SKILLINFO_NODE::LoadFromFile(class ifstream& file)
+SKILLINFO_NODE::LoadFromFile(std::ifstream& file)
 {
 	m_Name.LoadFromFile( file );					// 기술 이름
 	m_HName.LoadFromFile( file );
@@ -2645,7 +2646,7 @@ MSkillDomain::AddSkillStep(SKILL_STEP ss, ACTIONINFO ai)
 // Skill ID를 File에 저장한다.
 //----------------------------------------------------------------------
 void		
-MSkillDomain::SaveToFile(class ofstream& file)
+MSkillDomain::SaveToFile(std::ofstream& file)
 {
 	SKILLID_MAP::iterator	iSkill = m_mapSkillID.begin();
 
@@ -2672,7 +2673,7 @@ MSkillDomain::SaveToFile(class ofstream& file)
 // Skill ID를 File에서 읽어온다.
 //----------------------------------------------------------------------
 void		
-MSkillDomain::LoadFromFile(class ifstream& file)
+MSkillDomain::LoadFromFile(std::ifstream& file)
 {
 	Clear();
 	//m_mapSkillID.clear();
@@ -2699,7 +2700,7 @@ MSkillDomain::LoadFromFile(class ifstream& file)
 // LoadFromFileServerDomainInfo
 //----------------------------------------------------------------------
 void		
-MSkillDomain::LoadFromFileServerDomainInfo(class ifstream& file)
+MSkillDomain::LoadFromFileServerDomainInfo(std::ifstream& file)
 {	
 	int level;
 
@@ -2791,7 +2792,7 @@ MSkillManager::Init()
 		//------------------------------------------------
 		// Server 정보를 loading한다.
 		//------------------------------------------------
-		class ifstream serverDomainInfoFile;//(FILE_INFO_skill, ios::binary);
+		std::ifstream serverDomainInfoFile;//(FILE_INFO_skill, ios::binary);
 		if (!FileOpenBinary(g_pFileDef->getProperty("FILE_INFO_SKILL_DOMAIN_EXP").c_str(), serverDomainInfoFile))
 			return;
 
@@ -2822,7 +2823,7 @@ MSkillManager::InitSkillList()
 // LoadFromFileServerSkillInfo
 //----------------------------------------------------------------------
 void		
-MSkillManager::LoadFromFileServerDomainInfo(class ifstream& file)
+MSkillManager::LoadFromFileServerDomainInfo(std::ifstream& file)
 {
 	int num, domain;
 

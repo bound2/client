@@ -74,7 +74,7 @@ void CGStashList::execute ( Player * pPlayer )
 
 		StringStream msg;
 		msg << "CGStashList(" 
-			<< "ObjectID : " << m_ObjectID
+			<< "ObjectID : " << std::to_string(m_ObjectID)
 			<< ")";
 		return msg.toString();
 

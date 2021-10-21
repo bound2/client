@@ -73,7 +73,7 @@ std::string CGSay::toString () const
 	__BEGIN_TRY
 		
 	StringStream msg;
-	msg << "CGSay(Color:" << m_Color << ", Message:" << m_Message << ")" ;
+	msg << "CGSay(Color:" << std::to_string(m_Color) << ", Message:" << m_Message << ")" ;
 	return msg.toString();
 
 	__END_CATCH

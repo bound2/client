@@ -115,7 +115,7 @@ void CGConnect::execute ( Player * pPlayer )
 		StringStream msg;
 		
 		msg << "CGConnect("
-			<< "KEY:" << m_Key 
+			<< "KEY:" << std::to_string(m_Key)
 			<< ",PCType:" << PCType2String[m_PCType] 
 			<< ",PCName:" << m_PCName 
 			<< ")" ;

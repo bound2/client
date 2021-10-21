@@ -2,6 +2,7 @@
 #define __FAME_INFO_H__
 
 #include "CTypeTable.h"
+#include <fstream>
 
 class ifstream;
 class ofstream;
@@ -14,8 +15,8 @@ public :
 	FameInfo();
 	~FameInfo();
 	
-	void	LoadFromFile(class ifstream& file);
-	void	SaveToFile(class ofstream& file);
+	void	LoadFromFile(std::ifstream& file);
+	void	SaveToFile(std::ofstream& file);
 	DWORD	GetFame( SKILLDOMAIN type );
 
 private :	

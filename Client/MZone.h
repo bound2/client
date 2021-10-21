@@ -45,8 +45,7 @@
 #include <map>
 #include <vector>
 #include "MTypeDef.h"
-class ofstream;
-class ifstream;
+#include <fstream>
 #include "MSector.h"
 class MObstacle;
 class MItem;
@@ -130,10 +129,10 @@ class MZone {
 		//--------------------------------------------------------------
 		// file I/O
 		//--------------------------------------------------------------		
-		bool		LoadFromFile(class ifstream& file);
+		bool		LoadFromFile(std::ifstream& file);
 
-		bool		SaveToFileSectorSound(class ofstream& file);
-		bool		LoadFromFileSectorSound(class ifstream& file);
+		bool		SaveToFileSectorSound(std::ofstream& file);
+		bool		LoadFromFileSectorSound(std::ifstream& file);
 
 		//--------------------------------------------------------------		
 		// Zone File Header ºÎºÐ

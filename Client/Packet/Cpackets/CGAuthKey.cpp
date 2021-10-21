@@ -43,9 +43,7 @@ string CGAuthKey::toString () const
 	__BEGIN_TRY
 		
 	StringStream msg;
-	msg << "CGAuthKey("
-		<< "Key:" << m_Key 
-		<< ")" ;
+	msg << "CGAuthKey(" << "Key:" << std::to_string(m_Key) << ")";
 	return msg.toString();
 		
 	__END_CATCH

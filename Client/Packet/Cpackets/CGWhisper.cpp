@@ -97,7 +97,7 @@ std::string CGWhisper::toString () const
 		
 	StringStream msg;
 	msg << "CGWhisper(Name :" << m_Name 
-		<< ", Color : " << m_Color
+		<< ", Color : " << std::to_string(m_Color)
 		<< ", Message : " << m_Message
 		<< ")" ;
 	return msg.toString();

@@ -3,6 +3,7 @@
 
 #include "MPalette.h"
 #include <windows.h>
+#include <fstream>
 
 class CSpritePalBase
 {

@@ -1,6 +1,7 @@
 #include "client_PCH.h"
 #include "CSpritePalBase.h"
 #include "CSpriteSurface.h"
+#include <fstream>
 
 
 BYTE CSpritePalBase::s_Colorkey = 0xFF;

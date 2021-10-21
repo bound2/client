@@ -28,7 +28,7 @@ extern BOOL g_bMsgOutPutFlag;
 extern BOOL g_bMsgDetailFlag;
 extern BOOL g_bMsgContentFlag;
 
-extern void PrintMessageDetail(ofstream file, char *strMsg, int length);
+extern void PrintMessageDetail(std::ofstream file, char *strMsg, int length);
 
 void	SendBugReport(const char *bug, ...);
 //--------------------------------------------------------------------------------
@@ -149,10 +149,10 @@ void ClientPlayer::processCommand ()
 				byte seq = header[szPacketID+szPacketSize];
 
 #ifdef __DEBUG_OUTPUT__
-				ofstream file("packetID.log", ios::out | ios::app);
-				file << "*** RECEIVED PacketID=" << packetID << ", PacketSize=" << packetSize << ", Seq=" << (int)seq << endl;
+				std::ofstream file("packetID.log", ios::out | ios::app);
+				file << "*** RECEIVED PacketID=" << std::to_string(packetID) << ", PacketSize=" << std::to_string(packetSize) << ", Seq=" << std::to_string((int)seq) << endl;
 				if (packetID == 0) {
-					file << " StreamLength " << m_pInputStream->length() << endl;
+					file << " StreamLength " << std::to_string(m_pInputStream->length()) << endl;
 				}
 				file.close();
 #endif
@@ -458,7 +458,7 @@ std::string ClientPlayer::toString () const
 	StringStream msg;
 	
 	msg << "ClientPlayer("
-		<< "SocketID:" << m_pSocket->getSOCKET() 
+		<< "SocketID:" << std::to_string(m_pSocket->getSOCKET())
 		<< ",Host:" << m_pSocket->getHost() 
 		<< ")" ;
 

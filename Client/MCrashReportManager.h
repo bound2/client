@@ -3,6 +3,7 @@
 
 #include "CTypeTable.h"
 #include "MString.h"
+#include <fstream>
 
 class MCrashReport
 {
@@ -29,8 +30,8 @@ public:
 	const char *	GetCallStack() const						{ return m_CallStack.GetString(); }
 	const char *	GetMessage() const							{ return m_Message.GetString(); }
 
-	void	LoadFromFile(class ifstream &file);
-	void	SaveToFile(class ofstream &file);
+	void	LoadFromFile(std::ifstream &file);
+	void	SaveToFile(std::ofstream &file);
 	
 };
 

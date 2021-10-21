@@ -293,7 +293,7 @@ AppendPatch::AddAppendInfo(const char* currentFilename)
 		*(pBS+1) = '\0';		// 'Data\\Image\\' ±îÁö
 	}
 
-	pBS = strrchr(currentFilename, '\\');	// '\\NewXX.spk'
+	const char* pBS = strrchr(currentFilename, '\\');	// '\\NewXX.spk'
 	if (pBS==NULL)
 	{
 		strcat(appendFilename, currentFilename);

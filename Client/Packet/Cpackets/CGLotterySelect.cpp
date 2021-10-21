@@ -48,7 +48,7 @@ std::string CGLotterySelect::toString () const
 		
 	StringStream msg;
     msg << "CGLotterySelect("
-		<< "QuestLevel:" << m_QuestLevel
+		<< "QuestLevel:" << std::to_string(m_QuestLevel)
 		<< ")" ;
 	return msg.toString();
 

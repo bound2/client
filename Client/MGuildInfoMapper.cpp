@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "MGuildInfoMapper.h"
+#include "fstream"
 
 //----------------------------------------------------------------------
 // global
@@ -35,7 +36,7 @@ GUILD_INFO::~GUILD_INFO()
 // Save To File
 //----------------------------------------------------------------------
 void	
-GUILD_INFO::SaveToFile(class ofstream& file)
+GUILD_INFO::SaveToFile(std::ofstream& file)
 {
 	file.write((const char*)&m_SpriteID, SIZE_SPRITEID);
 //	m_GuildName.SaveToFile( file );
@@ -46,7 +47,7 @@ GUILD_INFO::SaveToFile(class ofstream& file)
 // Load From File
 //----------------------------------------------------------------------
 void	
-GUILD_INFO::LoadFromFile(class ifstream& file)
+GUILD_INFO::LoadFromFile(std::ifstream& file)
 {
 	file.read((char*)&m_SpriteID, SIZE_SPRITEID);
 //	MString tempString;
@@ -178,7 +179,7 @@ MGuildInfoMapper::Set(WORD guildID, GUILD_INFO* pInfo)
 // Save To File
 //----------------------------------------------------------------------
 void	
-MGuildInfoMapper::SaveToFile(class ofstream& file)
+MGuildInfoMapper::SaveToFile(std::ofstream& file)
 {
 	int num = size();
 
@@ -202,7 +203,7 @@ MGuildInfoMapper::SaveToFile(class ofstream& file)
 // Load From File
 //----------------------------------------------------------------------
 void	
-MGuildInfoMapper::LoadFromFile(class ifstream& file)
+MGuildInfoMapper::LoadFromFile(std::ifstream& file)
 {
 	int num;
 
