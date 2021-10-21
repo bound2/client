@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "MChatManager.h"
+#include <fstream>
 
 
 #ifdef __GAME_CLIENT__
@@ -51,7 +52,7 @@ MChatManager::~MChatManager()
 void				
 MChatManager::SaveToFile(const char* filename)
 {
-	class ofstream file(filename, ios::binary);
+	std::ofstream file(filename, ios::binary);
 
 	m_mapCurseEng.SaveToFile( file );
 	m_mapCurseKor1.SaveToFile( file );
@@ -69,7 +70,7 @@ MChatManager::SaveToFile(const char* filename)
 void				
 MChatManager::LoadFromFile(const char* filename)
 {
-	class ifstream file(filename, ios::binary);
+	std::ifstream file(filename, ios::binary);
 
 	m_mapCurseEng.LoadFromFile( file );
 	m_mapCurseKor1.LoadFromFile( file );
@@ -89,7 +90,7 @@ MChatManager::LoadFromFile(const char* filename)
 void				
 MChatManager::LoadFromFileCurse(const char* filename)
 {
-	class ifstream file(filename, ios::nocreate);
+	std::ifstream file(filename);
 
 	if (!file.is_open())
 	{
