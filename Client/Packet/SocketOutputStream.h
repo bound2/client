@@ -85,8 +85,7 @@ public :
     std::string toString () const throw ()
     {
         StringStream msg;
-        msg << "SocketOutputStream(m_BufferLen:"<<m_BufferLen<<",m_Head:"<<m_Head<<",m_Tail:"<<m_Tail
-<<")";
+        msg << "SocketOutputStream(m_BufferLen:" << std::to_string(m_BufferLen) << ",m_Head:"<< std::to_string(m_Head) << ",m_Tail:" << std::to_string(m_Tail) << ")";
         return msg.toString();
     }
 	// 初始化封包序列
