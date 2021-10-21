@@ -599,8 +599,8 @@ class MSkillInfoTable : public CTypeTable<SKILLINFO_NODE> {
 		// 바뀌는 정보만 초기화
 		void			Init();
 
-		void			LoadFromFileServerSkillInfo(class ifstream& file);
-		void			SaveFromFileServerSkillInfo(class ofstream& file);
+		void			LoadFromFileServerSkillInfo(std::ifstream& file);
+		void			SaveFromFileServerSkillInfo(std::ofstream& file);
 };
 
 extern MSkillInfoTable*		g_pSkillInfoTable;
@@ -623,7 +623,7 @@ class MSkillManager : public CTypeTable<MSkillDomain>
 		//------------------------------------------------------
 		// Load SERVER_SKILLINFO
 		//------------------------------------------------------
-		void		LoadFromFileServerDomainInfo(class ifstream& file);
+		void		LoadFromFileServerDomainInfo(std::ifstream& file);
 };
 
 //----------------------------------------------------------------------

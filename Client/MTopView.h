@@ -61,6 +61,7 @@
 #include "MViewDef.h"
 #include <map>
 #include <queue>
+#include <fstream>
 
 //----------------------------------------------------------------------
 //
@@ -147,10 +148,10 @@ class MTopView : public MRequestMode {
 		//
 		//------------------------------------------------------		
 		void		LoadMinimap(const char* filename);//, MZoneInfo* pZoneInfo=NULL);
-		bool		LoadFromFileTileSPKLargeZone(class ifstream & file);	// zone包访 spk load
-		bool		LoadFromFileImageObjectSPKLargeZone(class ifstream & file);	// zone包访 spk load
-		bool		LoadFromFileTileSPKSmallZone(class ifstream & file);	// zone包访 spk load
-		bool		LoadFromFileImageObjectSPKSmallZone(class ifstream & file);	// zone包访 spk load
+		bool		LoadFromFileTileSPKLargeZone(std::ifstream & file);	// zone包访 spk load
+		bool		LoadFromFileImageObjectSPKLargeZone(std::ifstream & file);	// zone包访 spk load
+		bool		LoadFromFileTileSPKSmallZone(std::ifstream & file);	// zone包访 spk load
+		bool		LoadFromFileImageObjectSPKSmallZone(std::ifstream & file);	// zone包访 spk load
 		void		LoadFromFileCreatureSPK(int n);			// creature load		
 // 		void		LoadFromFileAddonSPK(int frame, int action);		// addon load		
 //		void		LoadFromFileCreatureActionSPK(int frame, int action);		// addon load		
@@ -614,14 +615,14 @@ class MTopView : public MRequestMode {
 		//                  Sprite File
 		//
 		//------------------------------------------------------
-//		class ifstream			m_TileSPKFile;
-//		class ifstream			m_ImageObjectSPKFile;
-//		class ifstream			m_EffectAlphaSPKFile;
-//		class ifstream			m_EffectScreenSPKFile;
-//		class ifstream			m_AddonSPKFile;
-//		class ifstream			m_AddonSSPKFile;
-//		class ifstream			m_CreatureSPKFile;
-//		class ifstream			m_CreatureSSPKFile;
+//		std::ifstream			m_TileSPKFile;
+//		std::ifstream			m_ImageObjectSPKFile;
+//		std::ifstream			m_EffectAlphaSPKFile;
+//		std::ifstream			m_EffectScreenSPKFile;
+//		std::ifstream			m_AddonSPKFile;
+//		std::ifstream			m_AddonSSPKFile;
+//		std::ifstream			m_CreatureSPKFile;
+//		std::ifstream			m_CreatureSSPKFile;
 
 		//------------------------------------------------------
 		//

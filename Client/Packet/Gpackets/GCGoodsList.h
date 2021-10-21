@@ -44,7 +44,7 @@ typedef struct _GoodsInfo
 		StringStream msg;
 		msg << "Good( "
 			<< "ObjectID : " << objectID
-			<< ", ItemClass : " << (int)itemClass
+			<< ", ItemClass : " << std::to_string((int)itemClass)
 			<< ", ItemType : " << itemType
 			<< ", Grade : " << grade
 			<< ", Options : (";
@@ -58,7 +58,7 @@ typedef struct _GoodsInfo
 		}
 
 		msg << "), Num : " << num
-			<< ", TimeLimit : " << timeLimit;
+			<< ", TimeLimit : " << std::to_string(timeLimit);
 
 		return msg.toString();
 	}

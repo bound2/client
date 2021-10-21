@@ -1,5 +1,6 @@
 #include "Client_PCH.h"
 #include "Clientdef.h"
+#include <fstream>
 
 #include "MMonsterKillQuestInfo.h"
 
@@ -31,7 +32,7 @@ QUEST_INFO::~QUEST_INFO()
 //		m_Name = name;
 //}
 
-void	QUEST_INFO::LoadFromFile(class ifstream& file)
+void	QUEST_INFO::LoadFromFile(std::ifstream& file)
 {
 	MQuestInfo::LoadFromFile( file );
 	file.read((char*)&m_CreatureType, sizeof( DWORD ) );
@@ -43,7 +44,7 @@ void	QUEST_INFO::LoadFromFile(class ifstream& file)
 	m_Name.LoadFromFile( file );	
 }
 
-void	QUEST_INFO::SaveToFile(class ofstream& file)
+void	QUEST_INFO::SaveToFile(std::ofstream& file)
 {
 	MQuestInfo::SaveToFile( file );	
 	file.write((const char*)&m_CreatureType, sizeof( DWORD ) );
@@ -103,7 +104,7 @@ MQuestInfoManager::MQuestInfoManager(){}
 MQuestInfoManager::~MQuestInfoManager(){}
 
 void			
-MQuestInfoManager::LoadFromFile(class ifstream& file)
+MQuestInfoManager::LoadFromFile(std::ifstream& file)
 {
 	//-----------------------------------------------------
 	int infoSize;
