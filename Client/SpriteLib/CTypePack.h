@@ -739,14 +739,14 @@ bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFileData(int dataID, int fileID
 		return false;
 	}
 
-	std::ifstream dataFile(packFilename, std::ios::binary | std::ios::nocreate);
+	std::ifstream dataFile(packFilename, std::ios::binary);
 	
 	if (!dataFile.is_open())
 	{
 		return false;
 	}
 	
-	std::ifstream indexFile(indexFilename, std::ios::binary | std::ios::nocreate);
+	std::ifstream indexFile(indexFilename, std::ios::binary);
 	
 	if (!indexFile.is_open())
 	{

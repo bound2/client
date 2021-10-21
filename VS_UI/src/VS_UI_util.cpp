@@ -2,7 +2,7 @@
 
 #include "client_PCH.h"
 #include <assert.h>
-#include <fstream.h>
+#include <fstream>
 #include <stdlib.h>
 #include "VS_UI_base.h"
 #include "VS_UI_util.h"
@@ -621,7 +621,7 @@ bool C_FRR::Open(const char *sz_filename)
 	if (m_C_frame_array.GetSize() > 0)
 		m_C_frame_array.Release();
 
-	ifstream file(sz_filename, ios::binary | ios::nocreate);
+	std::ifstream file(sz_filename, std::ios::binary);
 	if (!file)
 		_Error(FILE_OPEN);
 
@@ -1301,7 +1301,7 @@ C_SPRITE_FRAME::~C_SPRITE_FRAME()
 //-----------------------------------------------------------------------------
 bool C_SPRITE_FRAME::Open(const char * pathfile)
 {
-	ifstream file(pathfile, ios::binary | ios::nocreate);
+	std::ifstream file(pathfile, std::ios::binary);
 	if (!file)
 		return false;
 
@@ -1320,7 +1320,7 @@ bool C_SPRITE_FRAME::Open(const char * pathfile)
 //-----------------------------------------------------------------------------
 bool C_SPRITE_FRAME::Save(const char * pathfile)
 {
-	ofstream file(pathfile, ios::binary);
+	std::ofstream file(pathfile, std::ios::binary);
 	if (!file)
 		return false;
 
