@@ -1,4 +1,4 @@
-// VS_UI_GameCommon.cpp
+﻿// VS_UI_GameCommon.cpp
 
 #include "client_PCH.h"
 #include "VS_UI_GameCommon.h"
@@ -2327,7 +2327,7 @@ bool C_VS_UI_TRIBE::MouseControl(UINT message, int _x, int _y)
 						int level = (*g_pSkillManager)[domainIndex].GetDomainLevel();
 						int exp_remain = (*g_pSkillManager)[domainIndex].GetDomainExpRemain();
 						
-						if(level >= 0 && exp >= 0)
+						if(level >= 0 && exp_remain >= 0)
 						{
 //							int next_exp = (*g_pSkillManager)[domainIndex].GetExpInfo(level).AccumExp;
 							const __int64 goal_exp = (*g_pSkillManager)[domainIndex].GetExpInfo(level).GoalExp;
@@ -2351,7 +2351,7 @@ bool C_VS_UI_TRIBE::MouseControl(UINT message, int _x, int _y)
 						int level = (*g_pSkillManager)[domainIndex].GetDomainLevel();
 						int exp_remain = (*g_pSkillManager)[domainIndex].GetDomainExpRemain();
 						
-						if(level >= 0 && exp >= 0)
+						if(level >= 0 && exp_remain >= 0)
 						{
 //							int next_exp = (*g_pSkillManager)[domainIndex].GetExpInfo(level).AccumExp;
 							const __int64 goal_exp = (*g_pSkillManager)[domainIndex].GetExpInfo(level).GoalExp;
@@ -2375,7 +2375,7 @@ bool C_VS_UI_TRIBE::MouseControl(UINT message, int _x, int _y)
 						int level = (*g_pSkillManager)[domainIndex].GetDomainLevel();
 						int exp_remain = (*g_pSkillManager)[domainIndex].GetDomainExpRemain();
 						
-						if(level >= 0 && exp >= 0)
+						if(level >= 0 && exp_remain >= 0)
 						{
 //							int next_exp = (*g_pSkillManager)[domainIndex].GetExpInfo(level).AccumExp;
 							const __int64 goal_exp = (*g_pSkillManager)[domainIndex].GetExpInfo(level).GoalExp;
@@ -4450,7 +4450,7 @@ void C_VS_UI_CHATTING::KeyboardControl(UINT message, UINT key, long extra)
 				{
 					if(m_history.size() == 20)
 					{
-						m_history.erase(&m_history[0]);
+						m_history.erase(m_history.begin());
 					}
 					
 					PAPERING_HISTORY temp_history;
@@ -4475,13 +4475,13 @@ void C_VS_UI_CHATTING::KeyboardControl(UINT message, UINT key, long extra)
 						}
 						else
 						{
-							temp_history.m_timer.erase(&temp_history.m_timer[0]);
+							temp_history.m_timer.erase(temp_history.m_timer.begin());
 						}
 					}
 
 
 					
-					m_history.erase(&m_history[m_history_line]);
+					m_history.erase(m_history.begin() + m_history_line);
 					temp_history.m_string = sz_chat_str;
 					temp_history.m_timer.push_back(GetTickCount());
 					m_history.push_back(temp_history);
@@ -4521,7 +4521,7 @@ void C_VS_UI_CHATTING::KeyboardControl(UINT message, UINT key, long extra)
 				
 				if(m_dw_rep_tickcount.size() == 5)
 				{
-					m_dw_rep_tickcount.erase(&m_dw_rep_tickcount[0]);
+					m_dw_rep_tickcount.erase(m_dw_rep_tickcount.begin());
 				}
 				m_dw_rep_tickcount.push_back(GetTickCount());
 				
@@ -6653,7 +6653,7 @@ bool C_VS_UI_CHATTING::AddWhisperID(const char *sz_ID)
 	{
 		if(m_sz_whisper_id[i] == temp)
 		{
-			m_sz_whisper_id.erase(&m_sz_whisper_id[i]);
+			m_sz_whisper_id.erase(m_sz_whisper_id.begin() + i);
 			break;
 		}
 	}
@@ -14702,7 +14702,7 @@ bool	C_VS_UI_INFO::SkillInfoMouseControl(UINT message, int _x, int _y)
 						int level = (*g_pSkillManager)[m_skill_domain].GetDomainLevel();
 						int exp_remain = (*g_pSkillManager)[m_skill_domain].GetDomainExpRemain();
 						
-						if(level >= 0 && exp >= 0)
+						if(level >= 0 && exp_remain >= 0)
 						{
 							char sz_temp[100];
 							std::string sstr;
@@ -24885,7 +24885,7 @@ void	C_VS_UI_TEAM_MEMBER_LIST::AddMemberList(const TEAM_MEMBER_LIST &member_list
 		{
 			if(convert_table[member_list.member_grade] < convert_table[m_v_member_list[i].member_grade])
 			{
-				m_v_member_list.insert(&m_v_member_list[i], member_list);
+				m_v_member_list.insert(m_v_member_list.begin() + i, member_list);
 				break;
 			}
 		}
