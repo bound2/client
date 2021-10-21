@@ -17976,7 +17976,7 @@ void	C_VS_UI_POWER_JJANG::SetItemList()
 	ReleaseItemList();
 	
 	// 에융..클래스 만들기 구찬타..
-	BYTE MaxItem = 0;
+	char MaxItem = 0;
 	std::ifstream file("data\\info\\PowerjjangItem.inf", std::ios::binary);
 	file.read(&MaxItem, 1);
 	file.read((char*)&m_AvailablePoint, 2);
