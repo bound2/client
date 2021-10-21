@@ -24,7 +24,7 @@ void __assert__ ( const char * file , uint line , const char * func , const char
 {
 	StringStream msg;
 	
-	msg << eos << "Assertion Failed : " << file << " : " << line;
+	msg << eos << "Assertion Failed : " << file << " : " << std::to_string(line);
 
 	if ( func )
 		msg << " : " << func;

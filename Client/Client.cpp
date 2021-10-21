@@ -1,4 +1,5 @@
 #include "Client_PCH.h"
+
 #define __NPROTECT__
 //#include "EXECryptor.h"
 /* add by sonic 2006.9.14 start Ôö¼Ó¶ÔWPEÆÁ±Î*/
@@ -44,6 +45,7 @@ APICheck _APICheck;
 // Include files
 //-----------------------------------------------------------------------------
 #include <Windows.h>
+#include <fstream>
 #include <stdio.h>
 #include <stdarg.h>
 #include <io.h>
@@ -286,10 +288,10 @@ void get_rand_str(char s[],int number)
 bool
 GetFutecAddress(const char* pStr)
 {
-	char * pFutecStr = strstr(pStr, "Futec");
-	char * pLeftParen = strchr(pStr, '(');
-	char * pSeperator = strchr(pStr, ':');
-	char * pRightParen = strchr(pStr, ')');
+	const char * pFutecStr = strstr(pStr, "Futec");
+	const char * pLeftParen = strchr(pStr, '(');
+	const char * pSeperator = strchr(pStr, ':');
+	const char * pRightParen = strchr(pStr, ')');
 
 	if (pFutecStr==NULL
 		|| pLeftParen==NULL
@@ -605,7 +607,7 @@ ReadPatchLogFromFile()
 {
 	char strBuffer[256];
 
-	class ifstream file("PatchLog.txt", ios::nocreate);	// text fileÀÌ´Ù.
+	std::ifstream file("PatchLog.txt");	// text fileÀÌ´Ù.
 
 	if (!file.is_open())
 	{
@@ -1921,7 +1923,7 @@ CheckTerriblePatch()
 	//-----------------------------------------------------------------------------
 	// Load
 	//-----------------------------------------------------------------------------
-	class ifstream	fileAppendInfo;
+	std::ifstream	fileAppendInfo;
 	if (!FileOpenBinary(g_pFileDef->getProperty("FILE_INFO_APPENDPATCH").c_str(), fileAppendInfo))
 		return false;
 	apt.LoadFromFile( fileAppendInfo );
@@ -2874,7 +2876,7 @@ ApplyPatch()
 			{
 				sprintf(filename, "Log\\%s", FileData.name);
 				
-				class ifstream file( filename, ios::binary );
+				std::ifstream file( filename, ios::binary );
 				file.seekg( 0, ios::end );
 				
 				long fp = file.tellg();
