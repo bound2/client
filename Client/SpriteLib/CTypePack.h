@@ -56,7 +56,7 @@ protected:
 
 	// runtime loading
 	WORD			m_nLoadData;	// Loading 된 CSprite의 개수
-	class ifstream	*m_file;
+	std::ifstream	*m_file;
 	int*			m_file_index;
 };
 
@@ -207,7 +207,7 @@ bool CTypePack<Type>::LoadFromFileRunning(LPCTSTR lpszFilename)
 
 	if(m_file == NULL)
 	{
-		m_file = new class ifstream;
+		m_file = new std::ifstream;
 	}
 	
 	m_file_index = new int[m_Size];
@@ -273,7 +273,7 @@ bool CTypePack<Type>::SaveToFile(std::ofstream &dataFile, std::ofstream &indexFi
 	//--------------------------------------------------
 	// index 저장
 	//--------------------------------------------------
-	for (i=0; i<vIndex.size(); i++)
+	for (int i=0; i<vIndex.size(); i++)
 	{
 		indexFile.write((const char*)&vIndex[i], 4);
 	}
@@ -350,14 +350,14 @@ bool CTypePack<Type>::LoadFromFileData(int dataID, int fileID, LPCTSTR packFilen
 		return false;
 	}
 
-	class ifstream dataFile(packFilename, std::ios::binary | std::ios::nocreate);
+	std::ifstream dataFile(packFilename, std::ios::binary);
 	
 	if (!dataFile.is_open())
 	{
 		return false;
 	}
 	
-	class ifstream indexFile(indexFilename, std::ios::binary | std::ios::nocreate);
+	std::ifstream indexFile(indexFilename, std::ios::binary);
 	
 	if (!indexFile.is_open())
 	{

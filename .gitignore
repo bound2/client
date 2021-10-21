@@ -48,4 +48,4 @@ ipch/
 *.cachefile
 *.VC.db
 .vs
-Client/.vs/
+Client/.vs
