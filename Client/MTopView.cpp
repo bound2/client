@@ -5033,7 +5033,7 @@ MTopView::InitAnimationFrames()
 
 	///*
 	// Load from File
-	class ifstream fileItemBroken2;//(FILE_IFRAME_ITEMTILE, ios::binary);
+	std::ifstream fileItemBroken2;//(FILE_IFRAME_ITEMTILE, ios::binary);
 	if (!FileOpenBinary(g_pFileDef->getProperty("FILE_AFRAME_ITEMBROKEN").c_str(), fileItemBroken2))
 		return false;
 	m_ItemBrokenFPK.LoadFromFile(fileItemBroken2);
@@ -5153,7 +5153,7 @@ MTopView::InitEffectFrames()
 
 	///*
 	// Load from NormalFile
-	class ifstream NormalFile2;//(FILE_EFRAME_NORMALEFFECT, ios::binary);
+	std::ifstream NormalFile2;//(FILE_EFRAME_NORMALEFFECT, ios::binary);
 	if (!FileOpenBinary(g_pFileDef->getProperty("FILE_EFRAME_NORMALEFFECT").c_str(), NormalFile2))
 		return false;
 	m_EffectNormalFPK.LoadFromFile(NormalFile2);
@@ -5301,7 +5301,7 @@ MTopView::InitEffectFrames()
 
 	///*
 	// Load from AlphaFile
-	class ifstream AlphaFile2;//(FILE_EFRAME_ALPHAEFFECT, ios::binary);
+	std::ifstream AlphaFile2;//(FILE_EFRAME_ALPHAEFFECT, ios::binary);
 	if (!FileOpenBinary(g_pFileDef->getProperty("FILE_EFRAME_ALPHAEFFECT").c_str(), AlphaFile2))
 		return false;
 	//class ifstream AlphaFile2("effect.efpk", ios::binary);
@@ -5463,14 +5463,14 @@ MTopView::InitEffectFrames()
 
 	///*
 	// Load from shadowEffectFile
-	class ifstream shadowEffectFile2;
+	std::ifstream shadowEffectFile2;
 	if (!FileOpenBinary(g_pFileDef->getProperty("FILE_EFRAME_SHADOWEFFECT").c_str(), shadowEffectFile2))
 		return false;
 	m_EffectShadowFPK.LoadFromFile(shadowEffectFile2);
 	shadowEffectFile2.close();
 
 	// Load from ScreenFile
-	class ifstream ScreenFile2;//(FILE_EFRAME_ScreenEFFECT, ios::binary);
+	std::ifstream ScreenFile2;//(FILE_EFRAME_ScreenEFFECT, ios::binary);
 	if (!FileOpenBinary(g_pFileDef->getProperty("FILE_EFRAME_SCREENEFFECT").c_str(), ScreenFile2))
 		return false;
 	//class ifstream ScreenFile2("effect.efpk", ios::binary);
@@ -22050,7 +22050,7 @@ MTopView::ExcuteAdvancementQuestEnding(void *pVoid)
 		int SpkIndex = AdvancementQuestEndingEvent->parameter4;
 		if(m_AdvacementQuestEnding.GetSize() == 0)
 		{
-			class ifstream	FinFile;
+			std::ifstream	FinFile;
 			if (!FileOpenBinary(g_pFileDef->getProperty("FILE_SPRITE_ADVANCEMENT_QUEST").c_str(), FinFile))
 				return false;
 			m_AdvacementQuestEnding.LoadFromFile(FinFile);
@@ -22237,7 +22237,7 @@ MTopView::ExcuteOustersFinEvent()
 
 		if(m_OustersFinSPK.GetSize() == 0)
 		{
-			class ifstream	FinFile;
+			std::ifstream	FinFile;
 			if (!FileOpenBinary(g_pFileDef->getProperty("FILE_SPRITE_OUSTERS_FIN").c_str(), FinFile))
 				return bDrawBackGround;
 			m_OustersFinSPK.LoadFromFile(FinFile);

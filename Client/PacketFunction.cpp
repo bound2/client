@@ -527,7 +527,7 @@ SetGoreLevel(bool bGoreLevel)
 			//-----------------------------------
 			// Load From File
 			//-----------------------------------
-			class ifstream actionInfoFile2;//(FILE_INFO_ACTION, ios::binary);
+			std::ifstream actionInfoFile2;//(FILE_INFO_ACTION, ios::binary);
 			if (!FileOpenBinary(g_pFileDef->getProperty("FILE_INFO_ACTION").c_str(), actionInfoFile2))
 				return;
 

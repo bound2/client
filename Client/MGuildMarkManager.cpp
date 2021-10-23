@@ -653,8 +653,8 @@ MGuildMarkManager::MergeGuildMark(const char* pSPKFilenameOrg,
 		MGuildInfoMapper mapperOrg;
 		MGuildInfoMapper mapperApp;
 
-		class ifstream mapperFileOrg(pIDMapperFilenameOrg, ios::binary | ios::nocreate);
-		class ifstream mapperFileApp(pIDMapperFilenameApp, ios::binary | ios::nocreate);
+		std::ifstream mapperFileOrg(pIDMapperFilenameOrg, std::ios::binary);
+		std::ifstream mapperFileApp(pIDMapperFilenameApp, std::ios::binary);
 
 		if (mapperFileOrg.is_open())
 		{
@@ -702,7 +702,7 @@ MGuildMarkManager::MergeGuildMark(const char* pSPKFilenameOrg,
 		}
 
 		// MapperOrg를 다시 저장한다.
-		class ofstream mapperOutputFileOrg(pIDMapperFilenameOrg, ios::binary);
+		std::ofstream mapperOutputFileOrg(pIDMapperFilenameOrg, ios::binary);
 		mapperOrg.SaveToFile( mapperOutputFileOrg );
 		mapperOutputFileOrg.close();
 

@@ -1921,7 +1921,7 @@ CheckTerriblePatch()
 	//-----------------------------------------------------------------------------
 	// Load
 	//-----------------------------------------------------------------------------
-	class ifstream	fileAppendInfo;
+	std::ifstream	fileAppendInfo;
 	if (!FileOpenBinary(g_pFileDef->getProperty("FILE_INFO_APPENDPATCH").c_str(), fileAppendInfo))
 		return false;
 	apt.LoadFromFile( fileAppendInfo );
