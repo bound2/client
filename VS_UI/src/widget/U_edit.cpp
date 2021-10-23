@@ -1173,7 +1173,7 @@ void LineEditorVisual::Show() const
 				if(m_gap != 0)
 				{
 					std::vector<int>::iterator itr = v_cut.begin();
-					while(itr != v_cut.end() && (px > m_xy.x + (m_reach_limit+1)*text_width || itr != NULL && *itr > 1 && px - (m_reach_limit+1 - *itr)*text_width > m_xy.x))
+					while(itr != v_cut.end() && (px > m_xy.x + (m_reach_limit+1)*text_width || *itr != NULL && *itr > 1 && px - (m_reach_limit+1 - *itr)*text_width > m_xy.x))
 					{
 						px -= (m_reach_limit+1)*text_width;
 						py += m_gap;
