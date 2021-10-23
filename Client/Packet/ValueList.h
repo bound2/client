@@ -22,6 +22,10 @@ template <class T>
 class ValueList 
 {
 public:
+
+	typedef typename std::list<T> VALUE_LIST;
+	typedef typename std::list<T>::const_iterator VALUE_LIST_ITERATOR;
+
     void read (SocketInputStream & iStream) throw (ProtocolException, Error);
     void write (SocketOutputStream & oStream) const throw (ProtocolException, Error);
 
@@ -30,9 +34,9 @@ public:
 
 #ifdef __GAME_CLIENT__
 	std::string toString () const throw ();
-	std::list<T>&					GetList() { return m_Values; }
-	std::list<T>::const_iterator		Begin() { return m_Values.begin(); }
-	std::list<T>::const_iterator		End() { return m_Values.end(); }
+	VALUE_LIST&					GetList() { return m_Values; }
+	VALUE_LIST_ITERATOR		    Begin() { return m_Values.begin(); }
+	VALUE_LIST_ITERATOR 		End() { return m_Values.end(); }
 	bool						IsEmpty() { return m_Values.empty(); }
 #endif
 
