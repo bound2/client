@@ -8497,7 +8497,7 @@ void C_VS_UI_CRAZY_MINE::InitMineBoard(int size, int mine)
 	m_MineBoardSize = size;
 	if ( mine == -1 )
 	{
-		m_MineCount = pow( 2, m_MineBoardSize-1 );
+		m_MineCount = pow( 2.0, m_MineBoardSize-1 );
 		if ( m_MineCount > m_MineBoardSize * m_MineBoardSize ) m_MineCount = m_MineBoardSize * (m_MineBoardSize-2);
 	}
 	else
