@@ -76,7 +76,7 @@ bool CTypePackVector<Type>::SaveToFile(LPCTSTR lpszFilename)
 
 
 template <class Type>
-bool CTypePackVector<Type>::LoadFromFile(class ifstream &file)
+bool CTypePackVector<Type>::LoadFromFile(std::ifstream &file)
 {
 	Release();
 
