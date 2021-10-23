@@ -16,6 +16,7 @@
 #ifndef __WAVE_PACK_FILE_MANAGER__
 #define __WAVE_PACK_FILE_MANAGER__
 
+#include <fstream>
 #include "PackFileManager.h"
 #include "MTypeDef.h"
 #include <DSound.h>
@@ -28,8 +29,8 @@ class WavePackFileInfo : public PackFileInfo {
 		WavePackFileInfo() {}
 		virtual ~WavePackFileInfo() {}
 
-		virtual bool			SaveToFileData(class ofstream& file);
-		LPDIRECTSOUNDBUFFER		LoadFromFileData(class ifstream& file);
+		virtual bool			SaveToFileData(std::ofstream& file);
+		LPDIRECTSOUNDBUFFER		LoadFromFileData(std::ifstream& file);
 };
 
 //--------------------------------------------------------------------------

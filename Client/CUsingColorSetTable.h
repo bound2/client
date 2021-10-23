@@ -10,11 +10,9 @@
 #ifndef	__CUSINGCOLORSETTABLE_H__
 #define	__CUSINGCOLORSETTABLE_H__
 
+#include <fstream>
 #include "CIndexSprite.h"
 #include "CTypeTable.h"
-class ofstream;
-class ifstream;
-
 
 class USINGCOLORSET_NODE {
 	public :
@@ -36,8 +34,8 @@ class USINGCOLORSET_NODE {
 		//-------------------------------------------------
 		// File I/O
 		//-------------------------------------------------
-		void			SaveToFile(class ofstream& file);
-		bool			LoadFromFile(class ifstream& file);
+		void			SaveToFile(std::ofstream& file);
+		bool			LoadFromFile(std::ifstream& file);
 
 	protected :
 		bool			m_bEnable[MAX_COLORSET];

@@ -7,6 +7,7 @@
 #ifndef __MSHOPTEMPLATE_H__
 #define __MSHOPTEMPLATE_H__
 
+#include <fstream>
 #include "CTypeMap.h"
 
 //-----------------------------------------------------------------------------
@@ -17,8 +18,8 @@ class MShopTemplate {
 		MShopTemplate();
 		~MShopTemplate();
 
-		void		SaveToFile(class ofstream& file);
-		void		LoadFromFile(class ifstream& file);
+		void		SaveToFile(std::ofstream& file);
+		void		LoadFromFile(std::ifstream& file);
 
 	public :
 		//UINT				m_ID;

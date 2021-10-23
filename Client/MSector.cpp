@@ -87,7 +87,7 @@ MSector::RemoveAllObject()
 // SpriteID와 BlockFlag, Light만 저장한다.
 //----------------------------------------------------------------------
 void	
-MSector::SaveToFile(ofstream& file)
+MSector::SaveToFile(std::ofstream& file)
 {
 	BYTE flag = 0;
 
@@ -131,7 +131,7 @@ MSector::SaveToFile(ofstream& file)
 // SpriteID와 Block Flag, Light만 Load된다.
 //----------------------------------------------------------------------
 void	
-MSector::LoadFromFile(ifstream& file)
+MSector::LoadFromFile(std::ifstream& file)
 {
 	//----------------------------------------
 	// Object list를 초기화해야 되는데....

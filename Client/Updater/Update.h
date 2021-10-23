@@ -9,6 +9,7 @@
 #define __UPDATE_H__
 
 // include files
+#include <fstream>
 #include "UpdateDef.h"
 
 
@@ -63,10 +64,10 @@ public :
 	int			getFileSize(uint i);
 
 	// load from file
-	void load ( class ifstream & ifile );
+	void load ( std::ifstream & ifile );
 
 	// save to file
-	void save ( class ofstream & ofile ) const;
+	void save ( std::ofstream & ofile ) const;
 
 	// get size
 	uint getSize () const;

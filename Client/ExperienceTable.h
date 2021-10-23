@@ -9,9 +9,9 @@
 #define __EXPERIENCETABLE_H__
 
 #include <Windows.h>
+#include <fstream>
 #include "ExpInfo.h"
 #include "RaceType.h"
-class ifstream;
 
 //---------------------------------------------------------------------------------
 // ExperienceTable
@@ -45,16 +45,16 @@ class ExperienceTable {
 		//----------------------------------------------------------------
 		// Load From File
 		//----------------------------------------------------------------
-		void				LoadFromFileSTR(class ifstream& file);
-		void				LoadFromFileDEX(class ifstream& file);
-		void				LoadFromFileINT(class ifstream& file);
-		void				LoadFromFileVampire(class ifstream& file);
-		void				LoadFromFileOusters(class ifstream& file);
-		void				LoadFromFileSlayerRank(class ifstream& file);
-		void				LoadFromFileVampireRank(class ifstream& file);
-		void				LoadFromFileOustersRank(class ifstream& file);
-		void				LoadFromFilePetExp(class ifstream& file);
-		void				LoadFromFileAdvanceMent(class ifstream& file);
+		void				LoadFromFileSTR(std::ifstream& file);
+		void				LoadFromFileDEX(std::ifstream& file);
+		void				LoadFromFileINT(std::ifstream& file);
+		void				LoadFromFileVampire(std::ifstream& file);
+		void				LoadFromFileOusters(std::ifstream& file);
+		void				LoadFromFileSlayerRank(std::ifstream& file);
+		void				LoadFromFileVampireRank(std::ifstream& file);
+		void				LoadFromFileOustersRank(std::ifstream& file);
+		void				LoadFromFilePetExp(std::ifstream& file);
+		void				LoadFromFileAdvanceMent(std::ifstream& file);
 
 	public :
 		ExpTable			m_STRExp;

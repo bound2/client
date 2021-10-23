@@ -13,6 +13,7 @@
 #ifndef	__MEFFECTSTATUSTABLE_H__
 #define	__MEFFECTSTATUSTABLE_H__
 
+#include <fstream>
 #include "CTypeTable.h"
 #include "MTypeDef.h"
 //#include "EffectSpriteTypeDef.h"
@@ -44,8 +45,8 @@ class EFFECTSTATUS_NODE {
 		//-------------------------------------------------------
 		// File I/O
 		//-------------------------------------------------------
-		void			SaveToFile(class ofstream& file);		
-		void			LoadFromFile(class ifstream& file);		
+		void			SaveToFile(std::ofstream& file);		
+		void			LoadFromFile(std::ifstream& file);		
 };
 
 

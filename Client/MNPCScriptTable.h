@@ -28,6 +28,7 @@
 #ifndef __MNPCSCRIPTTABLE_H__
 #define	__MNPCSCRIPTTABLE_H__
 
+#include <fstream>
 #include "CTypeTable.h"
 #include "CTypeMap2.h"
 #include "MString.h"
@@ -53,8 +54,8 @@ class NPC_SCRIPT {
 		int					GetSubjectSize() const	{ return SubjectTable.GetSize(); }
 		int					GetContentSize() const	{ return ContentTable.GetSize(); }
 
-		void				SaveToFile(class ofstream& file);
-		void				LoadFromFile(class ifstream& file);
+		void				SaveToFile(std::ofstream& file);
+		void				LoadFromFile(std::ifstream& file);
 };
 
 //---------------------------------------------------------------------------
@@ -63,8 +64,8 @@ class NPC_SCRIPT {
 class MNPCScriptTable : public CTypeMap2<NPC_SCRIPT> {
 	public :	
 		
-		void		SaveToFile(class ofstream& file);
-		void		LoadFromFile(class ifstream& file);
+		void		SaveToFile(std::ofstream& file);
+		void		LoadFromFile(std::ifstream& file);
 
 		int			GetSubjectSize(int scriptID) const;
 		int			GetContentSize(int scriptID) const;

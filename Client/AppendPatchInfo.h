@@ -14,9 +14,8 @@
 
 #include "MString.h"
 #include "CTypeTable.h"
-class ifstream;
-class ofstream;
-#include <vector> 
+#include <vector>
+#include <fstream>
 using namespace std;
 
 //-----------------------------------------------------------------------------
@@ -27,8 +26,8 @@ class APPEND_PATCH_NODE
 	public :
 		bool		Append(const char* orgFilename) const;
 
-		void		SaveToFile(class ofstream& file);
-		void		LoadFromFile(class ifstream& file);
+		void		SaveToFile(std::ofstream& file);
+		void		LoadFromFile(std::ifstream& file);
 
 	public :
 		MString		appendFilename;
@@ -76,8 +75,8 @@ class AppendPatch {
 		//------------------------------------------------------------------
 		// File I / O
 		//------------------------------------------------------------------
-		void		SaveToFile(class ofstream& file);
-		void		LoadFromFile(class ifstream& file);
+		void		SaveToFile(std::ofstream& file);
+		void		LoadFromFile(std::ifstream& file);
 		const APPEND_PATCH_VECTOR	GetAppendPatchNode() { return m_AppendPatch; }
 
 

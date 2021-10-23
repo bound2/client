@@ -18,8 +18,6 @@
 #include "SpriteLib\DrawTypeDef.h"
 #include "CTypeTable.h"
 #include "MString.h"
-class ifstream;
-class ofstream;
 
 //----------------------------------------------------------------------
 // Flag CreatureType
@@ -87,8 +85,8 @@ class CREATURESPRITETABLE_INFO {
 		//-------------------------------------------------------
 		// File I/O
 		//-------------------------------------------------------
-		void				SaveToFile(class ofstream& file);
-		void				LoadFromFile(class ifstream& file);	
+		void				SaveToFile(std::ofstream& file);
+		void				LoadFromFile(std::ifstream& file);	
 };
 
 

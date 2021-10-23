@@ -9,8 +9,7 @@
 
 #include "CSprite.h"
 #include "MString.h"
-class ifstream;
-class ofstream;
+#include <fstream>
 
 //----------------------------------------------------------------------
 // GUILD_INFO
@@ -40,8 +39,8 @@ class GUILD_INFO {
 		//----------------------------------------------------------
 		// File I/O
 		//----------------------------------------------------------
-		void	SaveToFile(class ofstream& file);
-		void	LoadFromFile(class ifstream& file);
+		void	SaveToFile(std::ofstream& file);
+		void	LoadFromFile(std::ifstream& file);
 
 	protected :
 		TYPE_SPRITEID	m_SpriteID;
@@ -77,8 +76,8 @@ class MGuildInfoMapper : public std::map<WORD, GUILD_INFO*> {
 		//----------------------------------------------------------
 		// File I/O
 		//----------------------------------------------------------
-		void	SaveToFile(class ofstream& file);
-		void	LoadFromFile(class ifstream& file);
+		void	SaveToFile(std::ofstream& file);
+		void	LoadFromFile(std::ifstream& file);
 //		void	SaveInfoToFile(const char* pFilename);
 		//void	ChangeValueToFile(const char* pFilename, WORD guildID) const;
 

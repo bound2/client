@@ -8,10 +8,8 @@
 #pragma warning(disable:4786)
 
 #include "MTypeDef.h"
+#include <fstream>
 #include <list>
-class ofstream;
-class ifstream;
-
 
 //----------------------------------------------------------------------
 // SectorSoundInfo
@@ -53,8 +51,8 @@ class SECTORSOUND_INFO
 					||	Y!=info.Y;
 		}
 
-		void	SaveToFile(class ofstream& file) const;
-		void	LoadFromFile(class ifstream& file);
+		void	SaveToFile(std::ofstream& file) const;
+		void	LoadFromFile(std::ifstream& file);
 };
 
 

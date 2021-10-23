@@ -65,7 +65,7 @@ ITEM_WEARINFO::operator = (const ITEM_WEARINFO& info)
 // Save To File
 //----------------------------------------------------------------------
 void		
-ITEM_WEARINFO::SaveToFile(class ofstream& file)
+ITEM_WEARINFO::SaveToFile(std::ofstream& file)
 {
 	file.write((const char*)&skinColor, 2);
 	file.write((const char*)&hairColor, 2);
@@ -89,7 +89,7 @@ ITEM_WEARINFO::SaveToFile(class ofstream& file)
 // Load From File
 //----------------------------------------------------------------------
 void		
-ITEM_WEARINFO::LoadFromFile(class ifstream& file)
+ITEM_WEARINFO::LoadFromFile(std::ifstream& file)
 {
 	file.read((char*)&skinColor, 2);
 	file.read((char*)&hairColor, 2);

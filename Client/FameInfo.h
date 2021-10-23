@@ -1,12 +1,10 @@
 #ifndef __FAME_INFO_H__
 #define __FAME_INFO_H__
 
+#include <fstream>
 #include "CTypeTable.h"
 
-class ifstream;
-class ofstream;
-
-typedef unsigned char	BYTE;
+typedef typename unsigned char	BYTE;
 
 class FameInfo
 {
@@ -14,8 +12,8 @@ public :
 	FameInfo();
 	~FameInfo();
 	
-	void	LoadFromFile(class ifstream& file);
-	void	SaveToFile(class ofstream& file);
+	void	LoadFromFile(std::ifstream& file);
+	void	SaveToFile(std::ofstream& file);
 	DWORD	GetFame( SKILLDOMAIN type );
 
 private :	
