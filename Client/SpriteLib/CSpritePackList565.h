@@ -10,6 +10,7 @@
 #pragma warning(disable:4786)
 
 #include <list>
+#include <fstream>
 #include "DrawTypeDef.h"
 #include "CSprite.h"
 #include "CSpritePackList.h"
@@ -25,7 +26,7 @@ class CSpritePackList565 : public CSpritePackList {
 		//---------------------------------------------------
 		// file I/O		
 		//---------------------------------------------------
-		void		LoadFromFile(class ifstream& file);
+		void		LoadFromFile(std::ifstream& file);
 };
 
 #endif

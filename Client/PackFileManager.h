@@ -88,8 +88,8 @@ class PackFileManager {
 		// Load Data
 		//---------------------------------------------------------------
 		void				SetDataFilename(const char* pFilename)	{ m_DataFilename = pFilename; }
-		bool				GetInputFileStream(const char* pFilename, class ifstream& file) const;
-		bool				GetInputFileStream(DWORD id, class ifstream& file) const;
+		bool				GetInputFileStream(const char* pFilename, std::ifstream& file) const;
+		bool				GetInputFileStream(DWORD id, std::ifstream& file) const;
 
 		//---------------------------------------------------------------
 		// Merge

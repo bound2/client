@@ -2874,7 +2874,7 @@ ApplyPatch()
 			{
 				sprintf(filename, "Log\\%s", FileData.name);
 				
-				class ifstream file( filename, ios::binary );
+				std::ifstream file( filename, ios::binary );
 				file.seekg( 0, ios::end );
 				
 				long fp = file.tellg();

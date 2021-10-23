@@ -13,7 +13,7 @@
 #include "CSpriteSurface.h"
 #include <list>
 #include <map>
-//class ifstream;
+#include <fstream>
 //class CFileIndexTable;
 //class CAlphaSpritePack;
 #include "CAlphaSpritePal.h"

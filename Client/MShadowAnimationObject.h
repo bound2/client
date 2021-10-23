@@ -8,8 +8,7 @@
 #ifndef	__MSHADOWANIMATIONOBJECT_H__
 #define	__MSHADOWANIMATIONOBJECT_H__
 
-class ofstream;
-class ifstream;
+#include <fstream>
 #include "MTypeDef.h"
 #include "DrawTypeDef.h"
 #include "MAnimationObject.h"

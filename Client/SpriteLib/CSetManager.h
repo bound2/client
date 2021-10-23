@@ -44,8 +44,8 @@ class CSetManager {
 		//--------------------------------------------------------
 		// file I/O		
 		//--------------------------------------------------------		
-		bool		SaveToFile(class ofstream& file);
-		bool		LoadFromFile(class ifstream& file);
+		bool		SaveToFile(std::ofstream& file);
+		bool		LoadFromFile(std::ifstream& file);
 
 		//--------------------------------------------------------
 		// Get functions
@@ -194,7 +194,7 @@ CSetManager<DataType, SizeType>::Remove(const DataType data)
 //----------------------------------------------------------------------
 template <class DataType, class SizeType>
 bool
-CSetManager<DataType, SizeType>::SaveToFile(class ofstream& file)
+CSetManager<DataType, SizeType>::SaveToFile(std::ofstream& file)
 {
 	// size
 	SizeType size = m_List.size();
@@ -233,7 +233,7 @@ CSetManager<DataType, SizeType>::SaveToFile(class ofstream& file)
 //----------------------------------------------------------------------
 template <class DataType, class SizeType>
 bool
-CSetManager<DataType, SizeType>::LoadFromFile(class ifstream& file)
+CSetManager<DataType, SizeType>::LoadFromFile(std::ifstream& file)
 {
 	// 이전에 있던 list를 지운다.
 	Release();

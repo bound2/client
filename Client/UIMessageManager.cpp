@@ -2223,7 +2223,7 @@ UIMessageManager::Execute_UI_CONNECT(int left, int right, void* void_ptr)
 
 	#ifdef OUTPUT_DEBUG
 		DEBUG_ADD("MasterCheck");
-		class ifstream file("master.txt", ios::nocreate);
+		std::ifstream file("master.txt");
 
 		char str[256];
 		while (!file.eof())

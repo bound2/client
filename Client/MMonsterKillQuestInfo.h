@@ -24,8 +24,6 @@
 #include <list>
 #include <fstream>
 #include "CTypeMap.h"
-class ifstream;
-class ofstream;
 
 enum MINI_GAME_TYPE 
 {	

@@ -137,7 +137,7 @@ extern CMessageArray*	g_pNoticeMessage;
 
 extern MScreenEffectManager*	g_pInventoryEffectManager;
 
-extern bool FileOpenBinary(const char* filename, class ifstream& file);
+extern bool FileOpenBinary(const char* filename, std::ifstream& file);
 //GameNew Mode  add by sonc 2006.9.27
 extern	LONG g_SECTOR_WIDTH;
 extern	LONG g_SECTOR_HEIGHT;

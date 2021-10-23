@@ -49,7 +49,7 @@ InitSound()
 	//------------------------------------------------
 	// Load SoundTable
 	//------------------------------------------------
-	class ifstream soundTable("Data\\Info\\Sound.inf", ios::binary);
+	std::ifstream soundTable("Data\\Info\\Sound.inf", ios::binary);
 	g_pSoundTable->LoadFromFile(soundTable);
 	soundTable.close();
 

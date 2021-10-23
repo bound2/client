@@ -37,8 +37,8 @@ public:
 	//--------------------------------------------------------
 	// file I/O
 	//--------------------------------------------------------
-	bool LoadFromFile(class ifstream &file);
-	bool SaveToFile(class ofstream &dataFile, class ofstream &indexFile);
+	bool LoadFromFile(std::ifstream &file);
+	bool SaveToFile(std::ofstream &dataFile, std::ofstream &indexFile);
 	
 	bool LoadFromFile(LPCTSTR lpszFilename);
 	bool SaveToFile(LPCTSTR lpszFilename);
@@ -50,7 +50,7 @@ protected:
 template <class Type>
 bool CTypePackVector<Type>::LoadFromFile(LPCTSTR lpszFilename)
 {
-	class ifstream file(lpszFilename, ios::binary);
+	std::ifstream file(lpszFilename, ios::binary);
 	bool re = LoadFromFile(file);
 	file.close();
 
@@ -63,8 +63,8 @@ bool CTypePackVector<Type>::SaveToFile(LPCTSTR lpszFilename)
 	char szIndexFilename[512];
 	sprintf(szIndexFilename, "%si", lpszFilename);
 
-	ofstream dataFile(lpszFilename, ios::binary);
-	ofstream indexFile(szIndexFilename, ios::binary);
+	std::ofstream dataFile(lpszFilename, std::ios::binary);
+	std::ofstream indexFile(szIndexFilename, std::ios::binary);
 
 	bool re = SaveToFile(dataFile, indexFile);
 
@@ -96,7 +96,7 @@ bool CTypePackVector<Type>::LoadFromFile(class ifstream &file)
 }
 
 template <class Type>
-bool CTypePackVector<Type>::SaveToFile(class ofstream &dataFile, class ofstream &indexFile)
+bool CTypePackVector<Type>::SaveToFile(std::ofstream &dataFile, std::ofstream &indexFile)
 {
 	//--------------------------------------------------
 	// index file을 생성하기 위한 정보
@@ -141,7 +141,7 @@ bool CTypePackVector<Type>::SaveToFile(class ofstream &dataFile, class ofstream 
 	//--------------------------------------------------
 	// index 저장
 	//--------------------------------------------------
-	for (i=0; i<vIndex.size(); i++)
+	for (int i=0; i<vIndex.size(); i++)
 	{
 		indexFile.write((const char*)&vIndex[i], 4);
 	}
