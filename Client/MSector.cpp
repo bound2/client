@@ -1783,7 +1783,7 @@ MSector::GetImageObjectIterator() const
 		return m_mapObject.find(POSITION_IMAGEOBJECT);
 	}
 
-	return NULL;
+	return m_mapObject.end();
 }
 
 
