@@ -13,6 +13,7 @@
 #ifndef	__MSOUNDTABLE_H__
 #define	__MSOUNDTABLE_H__
 
+#include <fstream>
 #include "MTypeDef.h"
 #include "CTypeTable.h"
 #include "MString.h"
@@ -47,8 +48,8 @@ class SOUNDTABLE_INFO {
 		//-------------------------------------------------------
 		// File I/O
 		//-------------------------------------------------------
-		void			SaveToFile(class ofstream& file);		
-		void			LoadFromFile(class ifstream& file);		
+		void			SaveToFile(std::ofstream& file);		
+		void			LoadFromFile(std::ifstream& file);		
 };
 
 typedef CTypeTable<SOUNDTABLE_INFO>		SOUND_TABLE;
