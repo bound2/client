@@ -138,12 +138,12 @@ void Properties::save ()
 	if ( m_Filename.empty() )
 		throw Error("filename not specified");
 
-	std::ofstream ofile( m_Filename.c_str() , ios::out | ios::trunc );
+	std::ofstream ofile( m_Filename.c_str() , std::ios::out | std::ios::trunc );
 	
 	for ( std::map< std::string , std::string , StringCompare >::iterator itr = m_Properties.begin() ;
 		  itr != m_Properties.end() ;
 		  itr ++ )
-		ofile << itr->first.c_str() << ' ' << Separator << ' ' << itr->second.c_str() << endl;
+		ofile << itr->first.c_str() << ' ' << Separator << ' ' << itr->second.c_str() << std::endl;
 	
 	ofile.close();
 
