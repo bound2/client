@@ -94,13 +94,13 @@ public:
 	// SENDER
 	const MString&	getSender(int senderIndex) const	{ return m_SenderVector[senderIndex]; }
 	void			addSender(MString& sender)			{ m_SenderVector.push_back(sender); }
-	void			removeSender(int senderIndex)		{ m_SenderVector.erase(&m_SenderVector[senderIndex]); }
+	void			removeSender(int senderIndex)		{ m_SenderVector.erase(m_SenderVector.begin() + senderIndex); }
 	size_t			getSenderSize() const				{ return m_SenderVector.size(); }
 
 	// ID
 	const MHelpMessage&	getMessage(int messageIndex) const	{ return m_MessageVector[messageIndex]; }
 	void				addMessage(MHelpMessage& message)	{ m_MessageVector.push_back(message); }
-	void				removeMessage(int messageIndex)		{ m_MessageVector.erase(&m_MessageVector[messageIndex]); }
+	void				removeMessage(int messageIndex)		{ m_MessageVector.erase(m_MessageVector.begin() + messageIndex); }
 	void				updateMessage(int messageIndex, MHelpMessage& message) { m_MessageVector[messageIndex] = message; }
 	size_t				getMessageSize() const				{ return m_MessageVector.size(); }
 

@@ -228,7 +228,7 @@ bool LineEditor::InsertGap()
 
 	if(m_editor_height > 0 && GetLineCount() > m_editor_height)
 	{
-		m_string.erase(&m_string[m_cursor]);
+		m_string.erase(m_string.begin() + m_cursor);
 //		DEBUG_ADD("[LineEditor] InsertGap FALSE");
 		return false;
 	}
