@@ -32,7 +32,7 @@
 #include "MHelicopterManager.h"
 #include "MParty.h"
 #include "MTestDef.h"
-#include <fstream.h>
+#include <fstream>
 #include "SkillDef.h"
 #include "mintr.h"
 #include "MNPC.h"

@@ -12,7 +12,7 @@
 #include "MSector.h"
 #include "MTopView.h"
 #include "EffectSpriteTypeDef.h"
-#include <fstream.h>
+#include <fstream>
 
 //----------------------------------------------------------------------
 //

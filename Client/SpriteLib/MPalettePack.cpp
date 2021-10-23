@@ -1,6 +1,6 @@
 #include "client_PCH.h"
 //#include "MPalettePack.h"
-//#include <fstream.h>
+//#include <fstream>
 //
 //void MPalettePack::Init(WORD size, bool b565)
 //{

@@ -1,0 +1,225 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Template|Win32">
+      <Configuration>Template</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <SccProjectName>"$/VS_UI/lib", OFKAAAAA</SccProjectName>
+    <SccLocalPath>.</SccLocalPath>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Template|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Template|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.Cpp.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.Cpp.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>.\Release\</OutDir>
+    <IntDir>.\Release\</IntDir>
+    <IncludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;C:\dx90bsdk\Include</IncludePath>
+    <LibraryPath>$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib;C:\dx90bsdk\Lib</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>.\Debug\</OutDir>
+    <IntDir>.\Debug\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <StringPooling>true</StringPooling>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <Optimization>MinSpace</Optimization>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>.;..\client;..\client\dxlib;..\client\spriteLib;..\client\frameLib;src\widget;src\hangul;src\header;src\imm;lib\ui;..\client\sxml;..\basic;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;__TEST_SUB_INVENTORY__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AssemblerListingLocation>.\Release\</AssemblerListingLocation>
+      <PrecompiledHeaderOutputFile>.\Release\lib.pch</PrecompiledHeaderOutputFile>
+      <ObjectFileName>.\Release\</ObjectFileName>
+      <ProgramDataBaseFileName>.\Release\</ProgramDataBaseFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <Culture>0x0412</Culture>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Release\lib.bsc</OutputFile>
+    </Bscmake>
+    <Lib>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>Release\VS_UI.lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <Optimization>Disabled</Optimization>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <WarningLevel>Level3</WarningLevel>
+      <MinimalRebuild>true</MinimalRebuild>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <AdditionalIncludeDirectories>.;..\client;..\client\dxlib;..\client\spriteLib;..\client\frameLib;src\widget;src\hangul;src\header;src\imm;lib\ui;..\client\sxml;..\basic;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;__TEST_SUB_INVENTORY__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AssemblerListingLocation>.\Debug\</AssemblerListingLocation>
+      <BrowseInformation>true</BrowseInformation>
+      <PrecompiledHeaderOutputFile>.\Debug\lib.pch</PrecompiledHeaderOutputFile>
+      <ObjectFileName>.\Debug\</ObjectFileName>
+      <ProgramDataBaseFileName>.\Debug\</ProgramDataBaseFileName>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+    </ClCompile>
+    <ResourceCompile>
+      <Culture>0x0412</Culture>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Debug\lib.bsc</OutputFile>
+    </Bscmake>
+    <Lib>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>Debug\VS_UI.lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="src\AcceleratorDef.cpp" />
+    <ClCompile Include="src\AcceleratorManager.cpp" />
+    <ClCompile Include="src\hangul\Ci.cpp" />
+    <ClCompile Include="src\Imm\CImm.cpp" />
+    <ClCompile Include="src\hangul\FL2.cpp" />
+    <ClCompile Include="src\KeyAccelerator.cpp" />
+    <ClCompile Include="src\widget\mother.cpp" />
+    <ClCompile Include="src\widget\pi_core.cpp" />
+    <ClCompile Include="src\SkinManager.cpp" />
+    <ClCompile Include="SXml.cpp" />
+    <ClCompile Include="src\widget\u_button.cpp" />
+    <ClCompile Include="src\widget\U_edit.cpp" />
+    <ClCompile Include="src\widget\u_scrollbar.cpp" />
+    <ClCompile Include="src\widget\u_window.cpp" />
+    <ClCompile Include="src\Vs_ui.cpp" />
+    <ClCompile Include="src\VS_UI_Base.cpp" />
+    <ClCompile Include="src\VS_UI_BBS.cpp" />
+    <ClCompile Include="src\VS_UI_DESC.cpp" />
+    <ClCompile Include="src\VS_UI_Description.cpp" />
+    <ClCompile Include="src\VS_UI_Descriptor.cpp" />
+    <ClCompile Include="src\VS_UI_Dialog.cpp" />
+    <ClCompile Include="src\VS_UI_ELEVATOR.cpp" />
+    <ClCompile Include="src\VS_UI_Exception.cpp" />
+    <ClCompile Include="src\VS_UI_Exchange.cpp" />
+    <ClCompile Include="src\VS_UI_ExtraDialog.cpp" />
+    <ClCompile Include="src\VS_UI_Game.cpp" />
+    <ClCompile Include="src\VS_UI_GameCommon.cpp" />
+    <ClCompile Include="src\vs_ui_gamecommon2.cpp" />
+    <ClCompile Include="src\VS_UI_GameOusters.cpp" />
+    <ClCompile Include="src\VS_UI_GameSlayer.cpp" />
+    <ClCompile Include="src\VS_UI_GameVampire.cpp" />
+    <ClCompile Include="src\VS_UI_GlobalResource.cpp" />
+    <ClCompile Include="src\VS_UI_Helper.cpp" />
+    <ClCompile Include="src\VS_UI_Item.cpp" />
+    <ClCompile Include="src\VS_UI_Message.cpp" />
+    <ClCompile Include="src\VS_UI_mouse_pointer.cpp" />
+    <ClCompile Include="src\VS_UI_PetStorage.cpp" />
+    <ClCompile Include="src\VS_UI_progress.cpp" />
+    <ClCompile Include="src\VS_UI_Shop.cpp" />
+    <ClCompile Include="src\VS_UI_skill_tree.cpp" />
+    <ClCompile Include="src\VS_UI_Storage.cpp" />
+    <ClCompile Include="src\VS_UI_Title.cpp" />
+    <ClCompile Include="src\VS_UI_TITLE_SHOWCHAR.CPP" />
+    <ClCompile Include="src\VS_UI_Tutorial.cpp" />
+    <ClCompile Include="src\VS_UI_ui_result_receiver.cpp" />
+    <ClCompile Include="src\VS_UI_util.cpp" />
+    <ClCompile Include="src\VS_UI_WebBrowser.cpp" />
+    <ClCompile Include="src\VS_UI_widget.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\header\AcceleratorDef.h" />
+    <ClInclude Include="src\header\AcceleratorManager.h" />
+    <ClInclude Include="src\hangul\Ci.h" />
+    <ClInclude Include="src\hangul\Fl2.h" />
+    <ClInclude Include="src\header\KeyAccelerator.h" />
+    <ClInclude Include="src\widget\mother.h" />
+    <ClInclude Include="src\widget\PI.H" />
+    <ClInclude Include="src\widget\pi_core.h" />
+    <ClInclude Include="src\widget\SimpleDataList.h" />
+    <ClInclude Include="src\header\SkinManager.h" />
+    <ClInclude Include="src\widget\u_button.h" />
+    <ClInclude Include="src\widget\U_edit.h" />
+    <ClInclude Include="src\widget\u_scrollbar.h" />
+    <ClInclude Include="src\widget\u_window.h" />
+    <ClInclude Include="src\widget\unicorn.h" />
+    <ClInclude Include="src\header\VS_UI.h" />
+    <ClInclude Include="src\header\VS_UI_Base.h" />
+    <ClInclude Include="src\header\VS_UI_bbs.h" />
+    <ClInclude Include="src\header\VS_UI_DESC.h" />
+    <ClInclude Include="src\header\VS_UI_Description.h" />
+    <ClInclude Include="src\header\VS_UI_descriptor.h" />
+    <ClInclude Include="src\header\VS_UI_Dialog.h" />
+    <ClInclude Include="src\header\VS_UI_ELEVATOR.h" />
+    <ClInclude Include="src\header\VS_UI_Exchange.h" />
+    <ClInclude Include="src\header\VS_UI_ExtraDialog.h" />
+    <ClInclude Include="src\header\VS_UI_filepath.h" />
+    <ClInclude Include="src\header\VS_UI_Game.h" />
+    <ClInclude Include="src\header\VS_UI_GameCommon.h" />
+    <ClInclude Include="src\header\VS_UI_GameCommon2.h" />
+    <ClInclude Include="src\header\VS_UI_GameOusters.h" />
+    <ClInclude Include="src\header\VS_UI_GameSlayer.h" />
+    <ClInclude Include="src\header\VS_UI_GameVampire.h" />
+    <ClInclude Include="src\header\VS_UI_GlobalResource.h" />
+    <ClInclude Include="src\header\VS_UI_Helper.h" />
+    <ClInclude Include="src\header\VS_UI_item.h" />
+    <ClInclude Include="src\header\VS_UI_Message.h" />
+    <ClInclude Include="src\header\VS_UI_mouse_pointer.h" />
+    <ClInclude Include="src\header\VS_UI_PetStorage.h" />
+    <ClInclude Include="src\header\VS_UI_progress.h" />
+    <ClInclude Include="src\header\VS_UI_Shop.h" />
+    <ClInclude Include="src\header\VS_UI_skill_tree.h" />
+    <ClInclude Include="src\header\VS_UI_Storage.h" />
+    <ClInclude Include="src\header\VS_UI_title.h" />
+    <ClInclude Include="src\header\VS_UI_Tutorial.h" />
+    <ClInclude Include="src\header\VS_UI_ui_result_receiver.h" />
+    <ClInclude Include="src\header\VS_UI_UIMessage.h" />
+    <ClInclude Include="src\header\VS_UI_util.h" />
+    <ClInclude Include="src\header\VS_UI_WebBrowser.h" />
+    <ClInclude Include="src\header\VS_UI_widget.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

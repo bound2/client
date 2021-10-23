@@ -19,7 +19,7 @@
 
 
 #include <Windows.h>
-#include <fstream.h>
+#include <fstream>
 //class ofstream;
 //class ifstream;
 

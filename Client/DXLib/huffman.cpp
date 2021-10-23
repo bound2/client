@@ -1,5 +1,5 @@
 
-#include <fstream.h>
+#include <fstream>
 #include <strstrea.h>
 #ifdef  __WIN32__
 #define STRICT

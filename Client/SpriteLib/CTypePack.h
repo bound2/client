@@ -2,7 +2,7 @@
 #define __CTYPEPACK_H__
 
 #include <windows.h>
-#include <fstream.h>
+#include <fstream>
 #include "CSpriteSetManager.h"
 #include "COrderedList.h"
 #include "CDirectDraw.h"

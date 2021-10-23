@@ -18,7 +18,7 @@
 #endif#endif
  
 #include <iostream>
-#include <fstream.h>
+#include <fstream>
 #include <string>
 
 //using namespace std;

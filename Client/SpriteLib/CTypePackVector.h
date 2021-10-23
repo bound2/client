@@ -2,7 +2,7 @@
 #define __CTYPEPACKVECTOR_H__
 
 #include <windows.h>
-#include <fstream.h>
+#include <fstream>
 #include <vector>
 
 template <class Type>
