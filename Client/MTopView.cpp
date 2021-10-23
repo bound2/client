@@ -20929,7 +20929,7 @@ MTopView::DrawCreatureName(MCreature* pCreature)
 			//---------------------------------------------------------------
 			if (IsRequestTrade())
 			{
-				const maxRequestFrames = SPRITEID_ITEM_TRADE_LAST - SPRITEID_ITEM_TRADE + 1;
+				const int maxRequestFrames = SPRITEID_ITEM_TRADE_LAST - SPRITEID_ITEM_TRADE + 1;
 				RequestSpriteID = SPRITEID_ITEM_TRADE + ((g_CurrentFrame>>1) % (maxRequestFrames<<1));
 
 				if (RequestSpriteID > SPRITEID_ITEM_TRADE_LAST)
