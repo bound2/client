@@ -1531,7 +1531,7 @@ MSkillSet::SetAvailableSkills()
 		}
 	}
 
-	for(i = 0; i < SWEEPER_BONUS_MAX; i++)
+	for(int i = 0; i < SWEEPER_BONUS_MAX; i++)
 	{
 		if( g_abSweeperBonusSkills[i] == true )
 		{

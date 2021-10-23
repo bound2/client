@@ -420,7 +420,7 @@ MActionInfo::LoadFromFile(std::ifstream& file)
 	
 	if( m_bUseActionStep )
 	{
-		for( i = 0;i<MAX_ACTION_STEP; i++)
+		for(int i = 0;i<MAX_ACTION_STEP; i++)
 		{
 			file.read((char*)&m_ActionStep[i],sizeof( TYPE_ACTIONINFO ) );
 		}

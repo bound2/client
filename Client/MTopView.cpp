@@ -6593,7 +6593,7 @@ MTopView::ReleaseUselessCreatureSPKExcept(const INT_ORDERED_LIST& listUse)
 	
 	INT_ORDERED_LIST::DATA_LIST::const_iterator iUse = listUse.GetIterator();
 
-	for (i=0; i<listUse.GetSize(); i++)
+	for (int i=0; i<listUse.GetSize(); i++)
 	{
 		int useSpriteType = *iUse;
 
@@ -10822,7 +10822,7 @@ MTopView::DrawInformation()
 	int iColorType = 0;
 	char* pColorType=NULL;
 	char message[300];
-	for (c=0; c<g_pPlayerMessage->GetSize(); c++)
+	for (int c=0; c<g_pPlayerMessage->GetSize(); c++)
 	{
 		if ((*g_pPlayerMessage)[c][0] != NULL)
 		{
@@ -10859,7 +10859,7 @@ MTopView::DrawInformation()
 	PrintInfo* pNoticeInfo = g_ClientPrintInfo[FONTID_LARGE_CHAT];	
 	
 	
-	for( c = 0; c< g_pNoticeMessage->GetSize(); c++ )
+	for( int c = 0; c< g_pNoticeMessage->GetSize(); c++ )
 	{
 		if( (*g_pNoticeMessage)[c][0] != NULL )
 		{
@@ -10946,7 +10946,7 @@ MTopView::DrawInformation()
 		break;
 	}
 
-	for (c=g_pGameMessage->GetSize()-1; c>=0; c--)
+	for (int c=g_pGameMessage->GetSize()-1; c>=0; c--)
 	{
 		if ((*g_pGameMessage)[c][0] != NULL)
 		{
@@ -17040,7 +17040,7 @@ int
 	//  °¢ string Ãâ·Â...
 	//---------------------------------------------------------
 	int start = g_pClientConfig->MAX_CHATSTRING-numString; 
-	for (i=start; i<g_pClientConfig->MAX_CHATSTRING; i++)
+	for (int i=start; i<g_pClientConfig->MAX_CHATSTRING; i++)
 	{
 		const char *str = pCreature->GetChatString(i);
 		

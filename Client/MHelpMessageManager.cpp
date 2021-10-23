@@ -77,8 +77,8 @@ bool MHelpMessageManager::LoadHelpMessageRpk(const char *helprpkfilename)
 	char *token;
 	int  levtemp[7],i,Sendercnt;
 	bool detail_flag = false;
-	char * iskeyword = NULL,* isMessagetype = NULL,* isEvent = NULL ,* isTitle = NULL;
-	char * isLevel = NULL,	* isDetail= NULL,   * isDetailEnd= NULL,* isSender = NULL;
+	const char * iskeyword = NULL,* isMessagetype = NULL,* isEvent = NULL ,* isTitle = NULL;
+	const char * isLevel = NULL,	* isDetail= NULL,   * isDetailEnd= NULL,* isSender = NULL;
 	m_pack_file.GetString(sztemp, dSTRING_LEN);
 	Sendercnt = atoi(sztemp);
 	m_pack_file.GetString(sztemp, dSTRING_LEN);
@@ -248,8 +248,8 @@ void MHelpMessageManager::LoadFromFile(std::ifstream &file)
 	int  levtemp[7];
 	int i;
 	bool detail_flag = false;
-	char * iskeyword = NULL,* isMessagetype = NULL,* isEvent = NULL ,* isTitle = NULL;
-	char * isLevel = NULL,	* isDetail= NULL,   * isDetailEnd= NULL,* isSender = NULL;
+	const char * iskeyword = NULL,* isMessagetype = NULL,* isEvent = NULL ,* isTitle = NULL;
+	const char * isLevel = NULL,	* isDetail= NULL,   * isDetailEnd= NULL,* isSender = NULL;
 
 	file.getline(sztemp, dSTRING_LEN);			
 	m_SenderCnt = atoi(sztemp);

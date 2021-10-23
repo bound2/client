@@ -235,7 +235,7 @@ CPartManager<IndexType, PartIndexType, DataType>::Init(IndexType maxIndex, PartI
 	m_listLRU.clear();
 	m_pPartIterator		= new PARTINDEX_LIST_ITERATOR [m_nPart];	// iterator
 
-	for (i=0; i<m_nPart; i++)
+	for (int i=0; i<m_nPart; i++)
 	{
 		m_pData[i] = NULL;
 		m_pParentIndex[i] = m_IndexNULL;

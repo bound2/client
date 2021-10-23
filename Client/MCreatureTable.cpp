@@ -367,7 +367,7 @@ CREATURETABLE_INFO::LoadFromFile(std::ifstream& file)
 	}
 
 	// 각각의 SoundID를 load한다.
-	for (i=0; i<max; i++)
+	for (int i=0; i<max; i++)
 	{
 		file.read((char*)&m_pActionCount[i], 4);
 	}
@@ -436,7 +436,7 @@ CREATURETABLE_INFO::operator = (const CREATURETABLE_INFO& creatureInfo)
 	}
 
 	// 각각의 SoundID를 load한다.
-	for (i=0; i<max; i++)
+	for (int i=0; i<max; i++)
 	{
 		m_pActionCount[i] = creatureInfo.m_pActionCount[i];
 	}

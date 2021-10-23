@@ -474,7 +474,8 @@ MSector::AddFlyingCreature(const MCreature* pFlyingCreature)
 		OBJECT_MAP::const_iterator iCreature = GetFlyingCreatureIterator();
 		BYTE currentPos;
 		
-		for (int i=0; i<beforeSize; i++)
+		int i;
+		for (i=0; i<beforeSize; i++)
 		{
 			currentPos = iCreature->first;
 
