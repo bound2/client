@@ -23,8 +23,8 @@
 #include <deque>
 #include <bitset>
 #include <algorithm>
-#include <iostream.h>
-#include <fstream.h>
+#include <iostream>
+#include <fstream>
 #include <windows.h>
 #include <MMSystem.h>
 #include <Digitalv.h>

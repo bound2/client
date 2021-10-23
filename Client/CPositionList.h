@@ -16,8 +16,8 @@
 #define	__CPOSITIONLIST_H__
 
 #include <Windows.h>
+#include <fstream>
 #include <list>
-//#include <fstream>
 
 
 
@@ -74,8 +74,9 @@ class CPositionList {
 		//----------------------------------------------------------------------
 		// IMAGEOBJECT_INFO_LIST를 정의한다.
 		//----------------------------------------------------------------------
-		typedef	POSITION_NODE<Type>				POSITION_NODE_TYPE;
-		typedef	std::list<POSITION_NODE_TYPE>	POSITION_LIST;
+		typedef typename POSITION_NODE<Type>				           POSITION_NODE_TYPE;
+        typedef	typename std::list<POSITION_NODE_TYPE>                 POSITION_LIST;
+		typedef typename std::list<POSITION_NODE_TYPE>::const_iterator POSITION_LIST_ITERATOR;
 
 	public :
 		CPositionList();
@@ -100,14 +101,14 @@ class CPositionList {
 		// Get 
 		//--------------------------------------------------------------
 		int								GetSize() const		{ return m_listPosition.size(); }
-		POSITION_LIST::const_iterator	GetIterator() const	{ return m_listPosition.begin(); }
+		POSITION_LIST_ITERATOR          GetIterator() const	{ return m_listPosition.begin(); }
 
 
 		//--------------------------------------------------------------
 		// File I/O
 		//--------------------------------------------------------------
-		void		SaveToFile(class ofstream& file);
-		void		LoadFromFile(class ifstream& file);
+		void		SaveToFile(std::ofstream& file);
+		void		LoadFromFile(std::ifstream& file);
 
 	
 
@@ -172,7 +173,7 @@ CPositionList<Type>::Add(Type x, Type y)
 	node.X = x;
 	node.Y = y;
 
-	POSITION_LIST::iterator iPosition = m_listPosition.begin();
+	POSITION_LIST_ITERATOR iPosition = m_listPosition.begin();
 
 	// 이미 list에 들어있는 모든 position과 비교해보고
 	// 같은게 없을 때 추가한다.
@@ -217,7 +218,7 @@ CPositionList<Type>::Remove(Type x, Type y)
 	node.X = x;
 	node.Y = y;
 
-	POSITION_LIST::iterator iPosition = m_listPosition.begin();
+	POSITION_LIST_ITERATOR iPosition = m_listPosition.begin();
 
 	// list의 POSITION_NODE에서 같은게 있으면 지운다.
 	while (iPosition != m_listPosition.end())
@@ -250,7 +251,7 @@ CPositionList<Type>::Remove(Type x, Type y)
 //----------------------------------------------------------------------
 template <class Type>
 void		
-CPositionList<Type>::SaveToFile(class ofstream& file)
+CPositionList<Type>::SaveToFile(std::ofstream& file)
 {
 	//----------------------------------------
 	// Size저장
@@ -264,7 +265,7 @@ CPositionList<Type>::SaveToFile(class ofstream& file)
 		return;
 
 
-	POSITION_LIST::iterator iPosition = m_listPosition.begin();
+	POSITION_LIST_ITERATOR iPosition = m_listPosition.begin();
 
 	POSITION_NODE<Type>	node;
 
@@ -288,7 +289,7 @@ CPositionList<Type>::SaveToFile(class ofstream& file)
 //----------------------------------------------------------------------
 template <class Type>
 void		
-CPositionList<Type>::LoadFromFile(class ifstream& file)
+CPositionList<Type>::LoadFromFile(std::ifstream& file)
 {
 	// 이전에 있던 list를 제거
 	Release();
@@ -329,7 +330,7 @@ void
 CPositionList<Type>::Print()
 {
 
-	POSITION_LIST::iterator iPosition = m_listPosition.begin();
+	POSITION_LIST_ITERATOR iPosition = m_listPosition.begin();
 
 	POSITION_NODE<Type> node;
 

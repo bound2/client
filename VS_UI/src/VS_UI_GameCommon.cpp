@@ -2460,7 +2460,7 @@ bool C_VS_UI_TRIBE::MouseControl(UINT message, int _x, int _y)
 					wsprintf(szTemp,"%d",(goal_exp-g_char_slot_ingame.EXP_REMAIN)*100/max(1, (goal_exp)));
 					
 					temp[1] = szTemp;
-					for(i = 3; i <= 13; i += 4)
+					for(int i = 3; i <= 13; i += 4)
 					{
 						if(temp[1].size() > i)temp[1].insert(temp[1].size()-i, ",");
 					}
@@ -8227,7 +8227,7 @@ void C_VS_UI_INVENTORY::Show()
 			
 			std::string sstr = money_buf;
 			
-			for(i = 3; i <= 13; i += 4)
+			for(int i = 3; i <= 13; i += 4)
 				if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
 			
 			WriteLogLine(__LINE__);
@@ -9436,7 +9436,7 @@ void	C_VS_UI_SKILL::UnselectSkill()
 //-----------------------------------------------------------------------------
 void	C_VS_UI_SKILL::SetHotkey(HOTKEY hotkey, ACTIONINFO id)
 {
-	int i, j;
+	int i, j, k;
 	
 	for (i=0; i < HOTKEY_MAX; i++)
 	{
@@ -9445,7 +9445,7 @@ void	C_VS_UI_SKILL::SetHotkey(HOTKEY hotkey, ACTIONINFO id)
 			if (m_skill_hotkey_buf[i][j] == id)
 			{
 				//				m_skill_hotkey_buf[i][j] = NOT_SELECTED;
-				for(int k = j; k < GRADE_MAX-1; k++)
+				for(k = j; k < GRADE_MAX-1; k++)
 					m_skill_hotkey_buf[i][k] = m_skill_hotkey_buf[i][k+1];
 				m_skill_hotkey_buf[i][k] = NOT_SELECTED;
 				return;
@@ -11279,8 +11279,8 @@ void	C_VS_UI_PARTY_MANAGER::Show()
 				}
 			}
 			
-			
-			for(int find = 0; find < m_v_face_name.size(); find++)
+			int find;
+			for(find = 0; find < m_v_face_name.size(); find++)
 			{
 				if(strcmp(m_v_face_name[find].c_str(), name.c_str()) == 0)break;
 			}
@@ -12173,7 +12173,7 @@ C_VS_UI_INFO::C_VS_UI_INFO()
 						Button_ID+i, this, i));
 				}
 
-				for(i=0 ;i<3;i++)
+				for(int i=0 ;i<3;i++)
 				{
 					int eeg = button_x+10+C_VS_UI_SKILL::m_C_spk[0].GetWidth()+(C_VS_UI_SKILL::m_C_spk[0].GetWidth()*(i/4))+gap_x*(i/4);
 					m_pC_grade3_button_group->Add(new C_VS_UI_EVENT_BUTTON(
@@ -12271,7 +12271,7 @@ C_VS_UI_INFO::C_VS_UI_INFO()
 						Button_ID+i, this, i));			
 				}
 				
-				for(i=0 ;i<3;i++)
+				for(int i=0 ;i<3;i++)
 				{
 					m_pC_grade3_button_group->Add(new C_VS_UI_EVENT_BUTTON(
 						button_x+10+C_VS_UI_SKILL::m_C_spk[0].GetWidth()+(C_VS_UI_SKILL::m_C_spk[0].GetWidth()*(i/4))+gap_x*(i/4),
@@ -12313,7 +12313,7 @@ C_VS_UI_INFO::C_VS_UI_INFO()
 						Button_ID+i, this, i));
 				}
 
-				for(i=0 ;i<3;i++)
+				for(int i=0 ;i<3;i++)
 				{
 					m_pC_grade3_button_group->Add(new C_VS_UI_EVENT_BUTTON(
 						button_x+10+C_VS_UI_SKILL::m_C_spk[0].GetWidth()+(C_VS_UI_SKILL::m_C_spk[0].GetWidth()*(i/4))+gap_x*(i/4),
@@ -13989,7 +13989,7 @@ bool	C_VS_UI_INFO::CharacterInfoMouseControl(UINT message, int _x, int _y)
 				// 숫자사이에 ,넣기
 				wsprintf(temp, "%d", num2);
 				std::string sstr2 = temp;
-				for(i = 3; i <= 13; i += 4)
+				for(int i = 3; i <= 13; i += 4)
 				{
 					if(sstr2.size() > i)sstr2.insert(sstr2.size()-i, ",");
 				}
@@ -14276,7 +14276,7 @@ grade :			str[2]=NULL;
 				const __int64 goal_exp = g_pExperienceTable->GetVampireInfo(g_char_slot_ingame.level).GoalExp;
 				wsprintf(szTemp,"%d", (goal_exp - g_char_slot_ingame.EXP_REMAIN)*100/max(1, (goal_exp)));
 				temp[1] = szTemp;
-				for(i = 3; i <= 13; i += 4)
+				for(int i = 3; i <= 13; i += 4)
 					if(temp[1].size() > i)temp[1].insert(temp[1].size()-i, ",");
 				wsprintf(temp_str[0], (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW].GetString(), temp[0].c_str(), temp[1].c_str());
 				int fame = g_pFameInfoTable->GetFameForLevel( SKILLDOMAIN_VAMPIRE, g_char_slot_ingame.level );
@@ -14479,7 +14479,7 @@ grade :			str[2]=NULL;
 					const __int64 goal_exp = g_pExperienceTable->GetOustersInfo(g_char_slot_ingame.level).GoalExp;
 					wsprintf(szTemp,"%d", (goal_exp - g_char_slot_ingame.EXP_REMAIN)*100/max(1, (goal_exp)));
 					temp[1] = szTemp;
-					for(i = 3; i <= 13; i += 4)
+					for(int i = 3; i <= 13; i += 4)
 						if(temp[1].size() > i)temp[1].insert(temp[1].size()-i, ",");
 					wsprintf(temp_str[0], (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW].GetString(), temp[0].c_str(), temp[1].c_str());
 					int fame = g_pFameInfoTable->GetFameForLevel( SKILLDOMAIN_OUSTERS, g_char_slot_ingame.level );
@@ -14696,7 +14696,7 @@ bool	C_VS_UI_INFO::SkillInfoMouseControl(UINT message, int _x, int _y)
 						int level = (*g_pSkillManager)[m_skill_domain].GetDomainLevel();
 						int exp_remain = (*g_pSkillManager)[m_skill_domain].GetDomainExpRemain();
 						
-						if(level >= 0 && exp >= 0)
+						if(level >= 0 && exp_remain >= 0)
 						{
 							char sz_temp[100];
 							std::string sstr;
@@ -16298,7 +16298,7 @@ void	C_VS_UI_INFO::_Show1()
 						}
 						
 						//스킬이 꽉찬상태가 아닐때의 여분처리
-						for(; i < 8; i++)
+						for(int i = 0; i < 8; i++)
 						{
 							POINT p = {x+24, y+83+i*19+skip_y};
 							gpC_global_resource->m_pC_info_spk->BltLocked(p.x, p.y, C_GLOBAL_RESOURCE::SKILL_ICON_BACK);
@@ -17194,7 +17194,7 @@ void	C_VS_UI_INFO::_Show2()
 				gpC_global_resource->m_pC_info_spk->BltLocked(AddPosition.x + pSkin->GetPoint( slayerpos+ 4 + 3 ).x,   
 					AddPosition.y+field2_gap*4+ pSkin->GetPoint( slayerpos+ 4 + 3 ).y, C_GLOBAL_RESOURCE::TITLE_MP);
 
-				for(i = 5; i <= 8; i++ )
+				for(int i = 5; i <= 8; i++ )
 				{
 					gpC_global_resource->m_pC_info_spk->BltLocked(AddPosition.x + pSkin->GetPoint( slayerpos + i + 3 ).x,
 						AddPosition.y + pSkin->GetPoint( slayerpos + i + 3 ).y + field2_gap * i, C_GLOBAL_RESOURCE::TITLE_TOHIT + i - 5 );
@@ -17202,10 +17202,10 @@ void	C_VS_UI_INFO::_Show2()
 
 				AddPosition.x = x + field2_x2;
 
-				for( i = 0; i <= 2 ; i++ )
+				for(int i = 0; i <= 2 ; i++ )
 					gpC_global_resource->m_pC_info_spk->BltLocked(AddPosition.x, AddPosition.y+field2_gap*i, C_GLOBAL_RESOURCE::SMALL_BAR);
 				
-				for( i = 3; i <= 8 ; i++ )
+				for(int i = 3; i <= 8 ; i++ )
 					gpC_global_resource->m_pC_info_spk->BltLocked( AddPosition.x, AddPosition.y+field2_gap*i, C_GLOBAL_RESOURCE::SMALL_BAR2 );				
 				
 				
@@ -23492,7 +23492,7 @@ void C_VS_UI_WINDOW_MANAGER::SetHotKey(int **hotkey)
 	}
 }
 
-void C_VS_UI_WINDOW_MANAGER::SaveToFile(ofstream &file)
+void C_VS_UI_WINDOW_MANAGER::SaveToFile(std::ofstream &file)
 {
 	int i = 0, j = 0;
 	
@@ -23543,7 +23543,7 @@ void C_VS_UI_WINDOW_MANAGER::SaveToFile(ofstream &file)
 	// 2004, 6, 4, sobeit add end
 }
 
-void C_VS_UI_WINDOW_MANAGER::LoadFromFile(ifstream &file)
+void C_VS_UI_WINDOW_MANAGER::LoadFromFile(std::ifstream &file)
 {
 	// 각각 개수가 늘거나 줄었을때에 대한 처리는.... 귀찮으니까 나중에 하쟈-.-;
 	int i = 0, j = 0;

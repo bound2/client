@@ -67,7 +67,8 @@ C_VS_UI_EDIT_DIALOG::C_VS_UI_EDIT_DIALOG(int _x, int _y, int center_x, int cente
 
 	m_max_val = max_val;	
 	m_lev_value.SetDigitOnlyMode(true);
-	for(int digit_count = 0, number = max_val; number > 0; number/=10, digit_count++);
+	int digit_count, number;
+	for(digit_count = 0, number = max_val; number > 0; number/=10, digit_count++);
 	m_lev_value.SetByteLimit(digit_count);
 	Attach(&m_lev_value);
 	m_default_val = cur_val;
@@ -257,7 +258,7 @@ void C_VS_UI_EDIT_DIALOG::Show()
 //-----------------------------------------------------------------------------
 void	C_VS_UI_EDIT_DIALOG::ScrollButton(bool up)
 {
-	const _MAX_NUM = m_max_val;
+	const int _MAX_NUM = m_max_val;
 
 	int cur_val;
 	char * p_temp = NULL;
@@ -306,7 +307,8 @@ void	C_VS_UI_EDIT_DIALOG::KeyboardControl(UINT message, UINT key, long extra)
 //			num[0] = (char)key;
 //			m_lev_value.AddString(num);
 //		}
-	for(int digit_count = 0, number = m_max_val; number > 0; number/=10, digit_count++);
+	int digit_count, number;
+	for(digit_count = 0, number = m_max_val; number > 0; number/=10, digit_count++);
 	if (message == WM_CHAR)
 		if ((char)key >= '0' && (char)key <= '9')
 		{
@@ -3220,7 +3222,8 @@ void C_VS_UI_FILE_DIALOG::RefreshFileList(char *sz_dirname)
 			sz_filename = "\\";
 			sz_filename += fd.cFileName;
 
-			for(int i = 0; i < m_vs_file_list.size(); i++)
+			int i;
+			for(i = 0; i < m_vs_file_list.size(); i++)
 			{
 				if(m_vs_file_list[i] > sz_filename || m_vs_file_list[i][0] != '\\')
 				{

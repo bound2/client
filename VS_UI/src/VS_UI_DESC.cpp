@@ -254,7 +254,9 @@ bool	C_VS_UI_DESC::LoadDesc(const char *szFilename, int row, int col, bool bl_ti
 
 		temp_string = szLine;
 
-		for(int i = 0; i < m_ori_string.size(); i++)//문자열 대체
+		register int i;
+
+		for(i = 0; i < m_ori_string.size(); i++)//문자열 대체
 		{
 			int re = temp_string.find(m_ori_string[i]);
 			if(re != -1)
@@ -344,7 +346,7 @@ bool	C_VS_UI_DESC::LoadDesc(const char *szFilename, int row, int col, bool bl_ti
 				int pos = m_desc.size();	//그림위치 조정
 				if(bl_title)
 				{
-					for(i = 1; !strcmp(m_desc[i].c_str(),""); i++);
+					for(int i = 1; !strcmp(m_desc[i].c_str(),""); i++);
 					pos -= i;
 				}
 

@@ -35,6 +35,7 @@ extern bool gbl_mine_progress;
 #include "ClientFunction.h"
 #include "MZone.h"
 
+#include <fstream>
 #include <vector>	//by larosel
 
 #define SLAYER_FONT_COLOR				RGB(186, 189, 191)//RGB(20, 70, 0)	// by larosel
@@ -2659,8 +2660,8 @@ public:
 	void SetMainTab(int index) { m_i_main_tab = index; }
 	int	 GetMainTab() { return m_i_main_tab; }
 
-	void SaveToFile(class ofstream &file);
-	void LoadFromFile(class ifstream &file);
+	void SaveToFile(std::ofstream &file);
+	void LoadFromFile(std::ifstream &file);
 
 	void SetDefault();
 	void SetHotKey(int **hotkey = NULL);

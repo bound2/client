@@ -215,6 +215,7 @@ int	g_GetByteLenth(const char_t * p_dbcs, int dbcs_len)
 	if (p_dbcs == NULL || dbcs_len <= 0)
 		return 0;
 	// convert
+	register int c;
 	for (int i=0, c=0; i < dbcs_len; i++)
 	{
 		// check high byte
