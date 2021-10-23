@@ -35,7 +35,7 @@ CCreatureFrameSetManager::~CCreatureFrameSetManager()
 //----------------------------------------------------------------------
 bool		
 CCreatureFrameSetManager::SaveSpriteSetIndex(CCreatureFramePack* pCreatureFramePack, 
-											 ofstream& setIndex, ifstream& packIndex)
+											 std::ofstream& setIndex, std::ifstream& packIndex)
 {
 	CSpriteSetManager ssm;
 

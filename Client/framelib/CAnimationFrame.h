@@ -23,10 +23,8 @@
 #define	__CANIMATIONFRAME_H__
 
 #include <Windows.h>
+#include <fstream>
 #include "DrawTypeDef.h"
-class ofstream;
-class ifstream;
-
 
 class CAnimationFrame {
 	public :
@@ -47,8 +45,8 @@ class CAnimationFrame {
 		//--------------------------------------------------------
 		// file I/O
 		//--------------------------------------------------------
-		void	SaveToFile(class ofstream& file);
-		void	LoadFromFile(class ifstream& file);
+		void	SaveToFile(std::ofstream& file);
+		void	LoadFromFile(std::ifstream& file);
 
 		//-------------------------------------------------------
 		// 출력 방식

@@ -33,6 +33,7 @@
 #define	__CFRAMESETMANAGER_H__
 
 
+#include <fstream>
 #include "DrawTypeDef.h"
 #include "CSetManager.h"
 
@@ -45,7 +46,7 @@ class CFrameSetManager : public CSetManager<TYPE_FRAMEID, TYPE_FRAMEID> {
 		//--------------------------------------------------------
 		// FramePack IndexFile로부터 FrameSet IndexFile을 생성한다.
 		//--------------------------------------------------------
-		bool		SaveFrameSetIndex(class ofstream& setIndex, class ifstream& packIndex);
+		bool SaveFrameSetIndex(std::ofstream& setIndex, std::ifstream& packIndex);
 
 		//--------------------------------------------------------
 		// FrameSet과 관련된 SpriteID를 선택해서

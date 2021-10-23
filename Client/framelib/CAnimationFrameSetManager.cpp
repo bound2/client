@@ -35,7 +35,7 @@ CAnimationFrameSetManager::~CAnimationFrameSetManager()
 //----------------------------------------------------------------------
 bool		
 CAnimationFrameSetManager::SaveSpriteSetIndex(CAnimationFramePack* pAnimationFramePack, 
-										  ofstream& setIndex, ifstream& packIndex)
+										  std::ofstream& setIndex, std::ifstream& packIndex)
 {
 	CSpriteSetManager ssm;
 
