@@ -100,7 +100,7 @@ void PCSlayerInfo2::read ( SocketInputStream & iStream )
 		iStream.read( m_Sight );
 
 		// read sight
-		for(  i = 0 ; i < 4 ; i++ ) 
+		for( int i = 0 ; i < 4 ; i++ ) 
 		{
 			iStream.read( m_HotKey[i] );
 		}
@@ -128,7 +128,7 @@ void PCSlayerInfo2::read ( SocketInputStream & iStream )
 	} 
 	catch ( Throwable & t ) 
 	{
-		cout << t.toString().c_str() << endl;
+		std::cout << t.toString().c_str() << std::endl;
 	}
 
 	__END_CATCH
@@ -215,7 +215,7 @@ void PCSlayerInfo2::write ( SocketOutputStream & oStream ) const
 		oStream.write( m_Sight );
 
 		// write HotKey
-		for( i = 0; i < 4; i++ ) 
+		for( int i = 0; i < 4; i++ ) 
 		{
 			oStream.write( m_HotKey[i] );
 		}
@@ -242,7 +242,7 @@ void PCSlayerInfo2::write ( SocketOutputStream & oStream ) const
 	} 
 	catch ( Throwable & t ) 
 	{
-		cout << t.toString().c_str() << endl;
+		std::cout << t.toString().c_str() << std::endl;
 	}
 
 	__END_CATCH

@@ -283,7 +283,7 @@ SendFileInfo::Send(char* pBuffer)
 void
 SendFileInfo::SendBack(DWORD nBack)
 {
-	m_FileStream.seekg( -nBack, ios::cur );
+	m_FileStream.seekg( -nBack, std::ios::cur );
 	m_FileSizeLeft += nBack;
 }
 

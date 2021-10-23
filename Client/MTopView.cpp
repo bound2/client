@@ -3529,7 +3529,7 @@ MTopView::InitFilters()
 			m_p2DLightPixelWidth[i] = pPixelWidth[i];
 		}
 
-		for (i=0; i<SCREENLIGHT_HEIGHT; i++)
+		for (int i=0; i<SCREENLIGHT_HEIGHT; i++)
 		{
 			m_p2DLightPixelHeight[i] = pPixelHeight[i];
 		}

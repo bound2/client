@@ -102,7 +102,7 @@ void GLIncomingConnectionError::execute ( Player * pPlayer )
 {
 	__BEGIN_TRY
 		
-	cout << "GLIncomingConnectionError::execute() called." << endl;
+	std::cout << "GLIncomingConnectionError::execute() called." << std::endl;
 
 	GLIncomingConnectionErrorHandler::execute( this );
 		

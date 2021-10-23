@@ -352,7 +352,7 @@ MPlayerGear::CheckItemStatusAll()
 	//---------------------------------------------------
 	// 모두 체크
 	//---------------------------------------------------
-	for (i=0; i<m_Size; i++)
+	for (BYTE i=0; i<m_Size; i++)
 	{
 		if (m_ItemSlot[i]!=NULL)
 		{

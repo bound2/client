@@ -62,7 +62,7 @@ MRisingEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 		tz[2] = egInfo.z0 + int(cosValue);
 		step[2] = step_count;
 				
-		for(i=0;i<3;i++)
+		for(int i=0;i<3;i++)
 		{
 			MLinearEffect* pEffect = new MLinearEffect(bltType);
 			
@@ -134,7 +134,7 @@ MRisingEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 		tz[2] = egInfo.z0 + int(cosValue);
 		step[1] = step[2] = step_count;
 				
-		for(i=0;i<4;i++)
+		for(int i=0;i<4;i++)
 		{
 			MLinearEffect* pEffect = new MLinearEffect(bltType);
 			pEffect->SetFrameID( frameID, maxFrame );

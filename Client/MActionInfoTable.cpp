@@ -160,7 +160,7 @@ MActionInfo::MActionInfo()
 	m_bUseGrade = false;
 	m_bUseActionStep = false;
 	
-	for( i = 0 ; i< MAX_ACTION_STEP ;i ++ )
+	for( int i = 0 ; i< MAX_ACTION_STEP ;i ++ )
 	{
 		m_ActionStep[i] = 0;
 	}

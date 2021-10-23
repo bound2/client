@@ -64,7 +64,7 @@ void Properties::load ()
 	if ( m_Filename.empty() )
 		throw Error("filename not specified");
 		
-	std::ifstream ifile( m_Filename.c_str() , ios::in );
+	std::ifstream ifile( m_Filename.c_str() , std::ios::in );
 	
 	if ( ! ifile )
 		throw FileNotExistException( m_Filename.c_str() );

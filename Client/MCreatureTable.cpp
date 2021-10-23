@@ -247,7 +247,7 @@ CREATURETABLE_INFO::GetActionMax() const
 // Save To File
 //----------------------------------------------------------------------
 void			
-CREATURETABLE_INFO::SaveToFile(class ofstream& file)
+CREATURETABLE_INFO::SaveToFile(std::ofstream& file)
 {
 	Name.SaveToFile( file );
 
@@ -285,7 +285,7 @@ CREATURETABLE_INFO::SaveToFile(class ofstream& file)
 	}
 
 	// 각각의 CountID를 저장한다.
-	for (i=0; i<max; i++)
+	for (int i=0; i<max; i++)
 	{
 		file.write((const char*)&m_pActionCount[i], 4);
 	}
@@ -307,7 +307,7 @@ CREATURETABLE_INFO::SaveToFile(class ofstream& file)
 // Load From File
 //----------------------------------------------------------------------
 void			
-CREATURETABLE_INFO::LoadFromFile(class ifstream& file)
+CREATURETABLE_INFO::LoadFromFile(std::ifstream& file)
 {
 	Name.LoadFromFile( file );
 
@@ -555,7 +555,7 @@ CreatureSpriteTypeMapper::GetRandomCreatureType(TYPE_SPRITEID spriteID) const
 // Save To File
 //----------------------------------------------------------------------
 void				
-CreatureSpriteTypeMapper::SaveToFile(class ofstream& file)
+CreatureSpriteTypeMapper::SaveToFile(std::ofstream& file)
 {
 	int numSpriteTypes = m_CreatureSpriteTypes.capacity();
 
@@ -589,7 +589,7 @@ CreatureSpriteTypeMapper::SaveToFile(class ofstream& file)
 // Load From File
 //----------------------------------------------------------------------
 void				
-CreatureSpriteTypeMapper::LoadFromFile(class ifstream& file)
+CreatureSpriteTypeMapper::LoadFromFile(std::ifstream& file)
 {
 	int numSpriteTypes;
 	

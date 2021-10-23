@@ -61,7 +61,7 @@ void PCSlayerInfo3::read ( SocketInputStream & iStream )
 	}
 	catch ( Throwable & t ) 
 	{
-		cout << t.toString().c_str() << endl;
+		std::cout << t.toString().c_str() << std::endl;
 	}
 	
 	__END_CATCH
@@ -124,7 +124,7 @@ void PCSlayerInfo3::write ( SocketOutputStream & oStream ) const
 	} 
 	catch ( Throwable & t ) 
 	{
-		cout << t.toString().c_str() << endl;
+		std::cout << t.toString().c_str() << std::endl;
 	}
 
 	__END_CATCH

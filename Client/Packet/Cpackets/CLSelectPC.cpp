@@ -34,7 +34,7 @@ void CLSelectPC::read ( SocketInputStream & iStream )
 
 	iStream.read( m_PCName , szPCName );
 
-	cout << "Select PC Name : " << m_PCName.c_str() << endl;
+	std::cout << "Select PC Name : " << m_PCName.c_str() << std::endl;
 
 	//--------------------------------------------------
 	// read pc type
@@ -43,7 +43,7 @@ void CLSelectPC::read ( SocketInputStream & iStream )
 	iStream.read( pcType );
 	m_PCType = PCType(pcType);
 
-	cout << "Select PC Type : " << (int)m_PCType << endl;
+	std::cout << "Select PC Type : " << (int)m_PCType << std::endl;
 
 	if ( m_PCType != PC_SLAYER && m_PCType != PC_VAMPIRE && m_PCType != PC_OUSTERS )
 		throw InvalidProtocolException("invalid pc type");
@@ -60,8 +60,8 @@ void CLSelectPC::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 
-	cout << "Select PC Name : " << m_PCName.c_str() << endl;
-	cout << "Select PC Type : " << (int)m_PCType << endl;
+	std::cout << "Select PC Name : " << m_PCName.c_str() << std::endl;
+	std::cout << "Select PC Type : " << (int)m_PCType << std::endl;
 
 	//--------------------------------------------------
 	// write creature's name

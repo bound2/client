@@ -33,7 +33,7 @@ void SubServerInfo::read ( SocketInputStream & iStream )
 	iStream.read( m_ServerStat );
 
 	} catch( Throwable & t ) {
-		cout << t.toString().c_str() << endl;
+		std::cout << t.toString().c_str() << std::endl;
 	}
 
 	__END_CATCH
@@ -64,7 +64,7 @@ void SubServerInfo::write ( SocketOutputStream & oStream ) const
 	oStream.write( m_ServerStat );
 
 	} catch (Throwable & t ) {
-		cout << t.toString().c_str() << endl;
+		std::cout << t.toString().c_str() << std::endl;
 	}
 
 	__END_CATCH

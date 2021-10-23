@@ -89,7 +89,9 @@ BOOL APICheck::CheckApi()
 	BYTE	bReadCode[37];
 	if (m_hsend!=NULL)	{
 		memcpy(&bReadCode[0],m_hsend,37);
-		for (int i=0;i<checklen;i++)
+
+		int i;
+		for (i=0;i<checklen;i++)
 		{
 			if (bReadCode[i]!=bCheck[i])
 			{

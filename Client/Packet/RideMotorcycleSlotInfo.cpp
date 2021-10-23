@@ -24,7 +24,7 @@ void RideMotorcycleSlotInfo::read ( SocketInputStream & iStream )
 	} 
 	catch( Throwable & t ) 
 	{
-		cout << t.toString().c_str() << endl;
+		std::cout << t.toString().c_str() << std::endl;
 	}
 
 	__END_CATCH
@@ -47,7 +47,7 @@ void RideMotorcycleSlotInfo::write ( SocketOutputStream & oStream ) const
 	} 
 	catch (Throwable & t ) 
 	{
-		cout << t.toString().c_str() << endl;
+		std::cout << t.toString().c_str() << std::endl;
 	}
 
 	__END_CATCH

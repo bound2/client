@@ -122,17 +122,17 @@ void PCSlayerInfo::read ( SocketInputStream & iStream )
 	//--------------------------------------------------------------------------------
 	DWORD outlook;
 	iStream.read( outlook);
-	m_Outlook = std::bitset<SLAYER_BIT_MAX>(outlook);
+	m_Outlook = std::bitset<SLAYER_BIT_MAX>((long) outlook);
 	
 	//--------------------------------------------------------------------------------
 	// read colors
 	//--------------------------------------------------------------------------------
-	for ( i = 0 ; i < SLAYER_COLOR_MAX ; i ++ )
+	for ( int i = 0 ; i < SLAYER_COLOR_MAX ; i ++ )
 		iStream.read( m_Colors[i] );
 
 
 	} catch( Throwable & t ) {
-		cout << t.toString().c_str() << endl;
+		std::cout << t.toString().c_str() << std::endl;
 	}
 
 	iStream.read(m_AdvancementLevel);
@@ -224,11 +224,11 @@ void PCSlayerInfo::write ( SocketOutputStream & oStream ) const
 	//--------------------------------------------------------------------------------
 	// write colors
 	//--------------------------------------------------------------------------------
-	for ( i = 0 ; i < SLAYER_COLOR_MAX ; i ++ )
+	for (int i = 0 ; i < SLAYER_COLOR_MAX ; i ++ )
 		oStream.write( m_Colors[i] );
 
 	} catch (Throwable & t ) {
-		cout << t.toString().c_str() << endl;
+		std::cout << t.toString().c_str() << std::endl;
 	}
 
 	oStream.write( m_AdvancementLevel );

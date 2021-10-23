@@ -25,10 +25,10 @@ void GCFriendChatting::read ( SocketInputStream & iStream )
 	 throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
-	cout<<"read1"<<endl;
+	std::cout<<"read1"<<std::endl;
 	iStream.read( m_Command );
 
-	cout<<"read2"<<endl;
+	std::cout<<"read2"<<std::endl;
 	BYTE szPlayerName;
 	iStream.read( szPlayerName );
 	if ( szPlayerName>32 )
@@ -36,7 +36,7 @@ void GCFriendChatting::read ( SocketInputStream & iStream )
 	if(szPlayerName>0)
 		iStream.read(m_PlayerName, szPlayerName);
 
-	cout<<"read3"<<endl;
+	std::cout<<"read3"<<std::endl;
 	WORD szMessage;
 	iStream.read( szMessage);
 	if ( szMessage > 512 )
@@ -44,7 +44,7 @@ void GCFriendChatting::read ( SocketInputStream & iStream )
 	if(szMessage>0)
 		iStream.read( m_Message , szMessage );
 
-	cout<<"read4"<<endl;
+	std::cout<<"read4"<<std::endl;
 	iStream.read(m_IsBlack);
 	iStream.read(m_IsOnLine);
 
