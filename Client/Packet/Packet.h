@@ -9,6 +9,7 @@
 #define __PACKET_H__
 
 // include files
+#include <iostream>
 #include "Types.h"
 #include "Exception.h"
 #include "SocketInputStream.h"
@@ -583,7 +584,7 @@ public :
 		if ( getPacketSize() != 0 ) {
 			write( oStream );
 			if (oStream.length() != getPacketSize() + szPacketID + szPacketSize + 1) {
-			  cout << "writeHeaderNBody: " << getPacketID() << " size:" << getPacketSize() << endl;
+			  std::cout << "writeHeaderNBody: " << getPacketID() << " size:" << getPacketSize() << std::endl;
 			}
 		}
 	}
