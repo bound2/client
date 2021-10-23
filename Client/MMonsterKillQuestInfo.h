@@ -22,6 +22,7 @@
 #include "MString.h"
 
 #include <list>
+#include <fstream>
 #include "CTypeMap.h"
 class ifstream;
 class ofstream;
@@ -53,8 +54,8 @@ public :
 	
 	bool			IsChief()		{ return m_Chief == 1;}
 	
-	void			LoadFromFile(class ifstream& file);
-	void			SaveToFile(class ofstream& file);
+	void			LoadFromFile(std::ifstream& file);
+	void			SaveToFile(std::ofstream& file);
 
 	BYTE			GetQuestLevel() { return m_QuestLevel; }
 	BYTE			GetEventQuest()	{ return m_EventQuest; }
@@ -84,7 +85,7 @@ public :
 	void					Init();
 	QUEST_INFO*				GetInfo(DWORD id) ;
 	void					SetInfo(DWORD id, DWORD goal, DWORD time, std::string str);
-	void LoadFromFile(class ifstream& file);
+	void LoadFromFile(std::ifstream& file);
 
 };
 
