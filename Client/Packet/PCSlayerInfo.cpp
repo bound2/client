@@ -122,7 +122,7 @@ void PCSlayerInfo::read ( SocketInputStream & iStream )
 	//--------------------------------------------------------------------------------
 	DWORD outlook;
 	iStream.read( outlook);
-	m_Outlook = std::bitset<SLAYER_BIT_MAX>((long) outlook);
+	m_Outlook = std::bitset<SLAYER_BIT_MAX>(outlook);
 	
 	//--------------------------------------------------------------------------------
 	// read colors
