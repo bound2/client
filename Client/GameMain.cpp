@@ -493,9 +493,9 @@ CheckTime()
 			
 			if ((g_dSHGetTime > 0) && (g_dSHGetTime1 > 0))
 			{
-				if (abs((dCount1 - g_dSHGetTime1) - (dTimer - g_dSHTimerTime)) > 70)
+				if (labs((dCount1 - g_dSHGetTime1) - (dTimer - g_dSHTimerTime)) > 70)
 					g_iSHFakeCount ++;
-				else if (abs((dCount - g_dSHGetTime) - (dTimer - g_dSHTimerTime)) > 70)
+				else if (labs((dCount - g_dSHGetTime) - (dTimer - g_dSHTimerTime)) > 70)
 					g_iSHFakeCount ++;
 				else
 					g_iSHFakeCount = 0;

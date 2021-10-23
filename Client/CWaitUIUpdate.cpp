@@ -127,7 +127,7 @@ CWaitUIUpdate::DXMouseEvent(CDirectInput::E_MOUSE_EVENT event, int x, int y, int
 	{
 		case CDirectInput::LEFTDOWN:
 			//  double-click interval?
-			if ((DWORD)abs(GetTickCount() - last_click_time) <= g_double_click_time)
+			if ((DWORD)labs(GetTickCount() - last_click_time) <= g_double_click_time)
 			{
 				if (g_x>= double_click_x-1 && g_x <= double_click_x+1 &&
 					 g_y>= double_click_y-1 && g_y <= double_click_y+1)
