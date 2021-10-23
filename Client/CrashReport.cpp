@@ -100,13 +100,13 @@ static const TCHAR *GetExceptionDescription(DWORD ExceptionCode)
 	return "an Unknown exception type";
 }
 
-typedef struct _tagADDRESS64 {
+/*typedef struct _tagADDRESS64 {
     DWORD64       Offset;
     WORD          Segment;
     ADDRESS_MODE  Mode;
-} ADDRESS64, *LPADDRESS64;
+} ADDRESS64, *LPADDRESS64;*/
 
-typedef struct _KDHELP64 {
+/*typedef struct _KDHELP64 {
 
     //
     // address of kernel thread object, as provided in the
@@ -153,9 +153,9 @@ typedef struct _KDHELP64 {
 
     DWORD64  Reserved[8];
 
-} KDHELP64, *PKDHELP64;
+} KDHELP64, *PKDHELP64;*/
 
-typedef struct _tagSTACKFRAME64 {
+/*typedef struct _tagSTACKFRAME64 {
     ADDRESS64   AddrPC;               // program counter
     ADDRESS64   AddrReturn;           // return address
     ADDRESS64   AddrFrame;            // frame pointer
@@ -167,7 +167,7 @@ typedef struct _tagSTACKFRAME64 {
     BOOL        Virtual;              // is this a virtual frame?
     DWORD64     Reserved[3];
     KDHELP64    KdHelp;
-} STACKFRAME64, *LPSTACKFRAME64;
+} STACKFRAME64, *LPSTACKFRAME64;*/
 
 typedef
 BOOL
