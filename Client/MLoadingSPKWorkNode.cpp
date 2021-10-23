@@ -4,7 +4,7 @@
 #include "Client_PCH.h"
 #include "MLoadingSPKWorkNode.h"
 
-extern bool		FileOpenBinary(const char* filename, class ifstream& file);
+extern bool		FileOpenBinary(const char* filename, std::ifstream& file);
 
 //----------------------------------------------------------------------
 // MLoadingSPKWorkNode1 :: Execute
@@ -26,7 +26,7 @@ MLoadingSPKWorkNode1::Execute(MWorkNode*& pRemainNode)
 	// Load SpriteFilePositionArray 
 	//
 	//---------------------------------------------------
-	class ifstream file;
+	std::ifstream file;
 	if (!FileOpenBinary(m_SFPAFilename, file))
 	{
 		// -_-;;
@@ -43,7 +43,7 @@ MLoadingSPKWorkNode1::Execute(MWorkNode*& pRemainNode)
 	// SPK Load
 	//
 	//---------------------------------------------------
-	class ifstream spkFile;
+	std::ifstream spkFile;
 	if (!FileOpenBinary(m_SPKFilename, spkFile))
 	{
 		// -_-;;
@@ -61,7 +61,7 @@ MLoadingSPKWorkNode1::Execute(MWorkNode*& pRemainNode)
 		if (m_bExecute)
 		{
 			// Load할려는 위치까지 FilePosition을 이동한다.
-			spkFile.seekg( SFPA[i].FilePosition, ios::beg );
+			spkFile.seekg( SFPA[i].FilePosition, std::ios::beg );
 
 			CSprite& sprite = (*m_pSPK)[SFPA[i].SpriteID];
 
@@ -137,7 +137,7 @@ MLoadingSPKWorkNode2::Execute(MWorkNode*& pRemainNode)
 	// SPK Load
 	//
 	//---------------------------------------------------
-	class ifstream spkFile;
+	std::ifstream spkFile;
 	if (!FileOpenBinary(m_SPKFilename, spkFile))
 	{
 		// -_-;;
@@ -157,7 +157,7 @@ MLoadingSPKWorkNode2::Execute(MWorkNode*& pRemainNode)
 		if (m_bExecute)
 		{
 			// Load할려는 위치까지 FilePosition을 이동한다.
-			spkFile.seekg( node.FilePosition, ios::beg );
+			spkFile.seekg( node.FilePosition, std::ios::beg );
 
 			CSprite& sprite = (*m_pSPK)[node.SpriteID];
 
@@ -228,7 +228,7 @@ MLoadingSPKWorkNode3::Execute(MWorkNode*& pRemainNode)
 	//-------------------------------------------------------------
 	if (sprite.IsNotInit())
 	{	
-		class ifstream spkFile;
+		std::ifstream spkFile;
 		if (!FileOpenBinary(m_SPKFilename, spkFile))
 		{
 			// -_-;;
@@ -238,7 +238,7 @@ MLoadingSPKWorkNode3::Execute(MWorkNode*& pRemainNode)
 		}
 
 		// loading할려는 sprite에 접근한다.
-		spkFile.seekg(m_FilePosition, ios::beg);
+		spkFile.seekg(m_FilePosition, std::ios::beg);
 		
 		//--------------------------------------------------
 		// Sprite 하나 Loading
@@ -276,7 +276,7 @@ MLoadingSPKWorkNode4::Execute(MWorkNode*& pRemainNode)
 {
 	//m_bExecute = TRUE;
 
-	class ifstream spkFile;
+	std::ifstream spkFile;
 	if (!FileOpenBinary(m_SPKFilename, spkFile))
 	{
 		// -_-;;
@@ -288,7 +288,7 @@ MLoadingSPKWorkNode4::Execute(MWorkNode*& pRemainNode)
 	//-------------------------------------------------------
 	// FirstSprite에 접근..
 	//-------------------------------------------------------
-	spkFile.seekg(m_FilePosition, ios::beg);
+	spkFile.seekg(m_FilePosition, std::ios::beg);
 
 	//-------------------------------------------------------
 	// FirstSpriteID ~ LastSpriteID를 Loading한다.

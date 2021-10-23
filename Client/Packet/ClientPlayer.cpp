@@ -149,10 +149,10 @@ void ClientPlayer::processCommand ()
 				byte seq = header[szPacketID+szPacketSize];
 
 #ifdef __DEBUG_OUTPUT__
-				ofstream file("packetID.log", ios::out | ios::app);
-				file << "*** RECEIVED PacketID=" << packetID << ", PacketSize=" << packetSize << ", Seq=" << (int)seq << endl;
+				std::ofstream file("packetID.log", std::ios::out | std::ios::app);
+				file << "*** RECEIVED PacketID=" << packetID << ", PacketSize=" << packetSize << ", Seq=" << (int)seq << std::endl;
 				if (packetID == 0) {
-					file << " StreamLength " << m_pInputStream->length() << endl;
+					file << " StreamLength " << m_pInputStream->length() << std::endl;
 				}
 				file.close();
 #endif

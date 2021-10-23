@@ -40,7 +40,7 @@ MHelpMessageManager:: ~MHelpMessageManager()
 
 void MHelpMessageManager::LoadFromFile(const char * filename)
 {	
-	ifstream file(filename, ios::binary| ios::nocreate);
+	std::ifstream file(filename, std::ios::binary);
 	if(!file)
 	{
 		return;
@@ -55,7 +55,7 @@ void MHelpMessageManager::LoadFromFile(const char * filename)
 
 void MHelpMessageManager::SaveToFile(const char * filename)
 {
-	ofstream file(filename, ios::binary);
+	std::ofstream file(filename, std::ios::binary);
 	if(file)
 	{
 		SaveToFile(file);

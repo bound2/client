@@ -218,8 +218,8 @@ UUFCopyFile(const char* FilenameSource, const char* FilenameTarget)
 {				
 	if (UUFHasPermission( FilenameTarget ) && UUFHasPermission( FilenameSource))				
 	{
-		class ifstream fileSource(FilenameSource, ios::binary);
-		class ofstream fileTarget(FilenameTarget, ios::binary);
+		std::ifstream fileSource(FilenameSource, std::ios::binary);
+		std::ofstream fileTarget(FilenameTarget, std::ios::binary);
 		
 		// 추가
 		char buffer[SIZE_BUFFER];
@@ -266,9 +266,9 @@ UUFMoveFile(const char* FilenameSource, const char* FilenameTarget)
 {				
 	if (UUFHasPermission( FilenameTarget ) && UUFHasPermission( FilenameSource))				
 	{
-		ifstream file;
+		std::ifstream file;
 
-		file.open(FilenameTarget, ios::binary | ios::nocreate);
+		file.open(FilenameTarget, std::ios::binary);
 		
 		if (file.is_open())
 		{
@@ -396,8 +396,8 @@ UUFAppendPack(const char* FilenameAdd, const char* FilenameOriginal,
 		//
 		//---------------------------------------------------------------
 		// 추가할 수 있게 한다.
-		class ifstream addFile(FilenameAdd, ios::binary);
-		class fstream originalFile(FilenameOriginal, ios::in | ios::out | ios::binary);
+		std::ifstream addFile(FilenameAdd, std::ios::binary);
+		std::fstream originalFile(FilenameOriginal, std::ios::in | std::ios::out | std::ios::binary);
 
 		TYPE_PACKSIZE	sourceCount, targetCount;
 		
@@ -409,7 +409,7 @@ UUFAppendPack(const char* FilenameAdd, const char* FilenameOriginal,
 		//---------------------------------------------------------------
 		// target File Pointer를 끝으로..
 		//---------------------------------------------------------------
-		originalFile.seekp(0, ios::end);
+		originalFile.seekp(0, std::ios::end);
 
 		//---------------------------------------------------------------
 		// Original File의 크기를 기억해둔다.
@@ -441,12 +441,12 @@ UUFAppendPack(const char* FilenameAdd, const char* FilenameOriginal,
 		//---------------------------------------------------------------
 		// 개수를 변경시켜준다. (originalFile + addFile)
 		//---------------------------------------------------------------
-		originalFile.seekg(0, ios::beg);
+		originalFile.seekg(0, std::ios::beg);
 		originalFile.read((char*)&targetCount, SIZE_PACKSIZE);
 
 		targetCount += sourceCount;
 
-		originalFile.seekp(0, ios::beg);				
+		originalFile.seekp(0, std::ios::beg);				
 		originalFile.write((const char*)&targetCount, SIZE_PACKSIZE);
 
 		// 끝
@@ -484,8 +484,8 @@ UUFAppendPack(const char* FilenameAdd, const char* FilenameOriginal,
 
 
 			// 추가할 수 있게 한다.
-			class ifstream addIndexFile(FilenameIndexAdd, ios::binary);
-			class fstream originalIndexFile(FilenameIndexOriginal, ios::in | ios::out | ios::binary);	
+			std::ifstream addIndexFile(FilenameIndexAdd, std::ios::binary);
+			std::fstream originalIndexFile(FilenameIndexOriginal, std::ios::in | std::ios::out | std::ios::binary);	
 
 			TYPE_PACKSIZE	targetCount;
 
@@ -498,7 +498,7 @@ UUFAppendPack(const char* FilenameAdd, const char* FilenameOriginal,
 			//---------------------------------------------------------------
 			// target File Pointer를 끝으로..
 			//---------------------------------------------------------------
-			originalIndexFile.seekp(0, ios::end);
+			originalIndexFile.seekp(0, std::ios::end);
 			
 			//---------------------------------------------------------------
 			// OriginalFile의 크기에서부터 file pointer가 시작되므로
@@ -519,12 +519,12 @@ UUFAppendPack(const char* FilenameAdd, const char* FilenameOriginal,
 			//---------------------------------------------------------------
 			// 개수를 변경시켜준다. (originalIndexFile + addIndexFile)
 			//---------------------------------------------------------------
-			originalIndexFile.seekg(0, ios::beg);
+			originalIndexFile.seekg(0, std::ios::beg);
 			originalIndexFile.read((char*)&targetCount, SIZE_PACKSIZE);
 
 			targetCount += sourceIndexFile.GetSize();
 
-			originalIndexFile.seekp(0, ios::beg);				
+			originalIndexFile.seekp(0, std::ios::beg);				
 			originalIndexFile.write((const char*)&targetCount, SIZE_PACKSIZE);
 
 			// 끝
@@ -574,8 +574,8 @@ UUFAppendInfo(const char* FilenameAdd, const char* FilenameOriginal)
 		//}
 
 		// 추가할 수 있게 한다.
-		class ifstream sourceFile(FilenameAdd, ios::binary);
-		class fstream targetFile(FilenameOriginal, ios::in | ios::out | ios::binary);
+		std::ifstream sourceFile(FilenameAdd, std::ios::binary);
+		std::fstream targetFile(FilenameOriginal, std::ios::in | std::ios::out | std::ios::binary);
 		
 
 		int sourceCount, targetCount;
@@ -583,7 +583,7 @@ UUFAppendInfo(const char* FilenameAdd, const char* FilenameOriginal)
 		sourceFile.read((char*)&sourceCount, 4);
 
 		// target File Pointer를 끝으로..
-		targetFile.seekp(0, ios::end);
+		targetFile.seekp(0, std::ios::end);
 
 		// 추가
 		char buffer[SIZE_BUFFER];
@@ -606,12 +606,12 @@ UUFAppendInfo(const char* FilenameAdd, const char* FilenameOriginal)
 		}
 
 		// 개수를 변경시켜준다. (targetFile + sourceFile)
-		targetFile.seekg(0, ios::beg);
+		targetFile.seekg(0, std::ios::beg);
 		targetFile.read((char*)&targetCount, 4);
 
 		targetCount += sourceCount;
 
-		targetFile.seekp(0, ios::beg);				
+		targetFile.seekp(0, std::ios::beg);				
 		targetFile.write((const char*)&targetCount, 4);
 
 		// 끝

@@ -309,8 +309,8 @@ void SocketOutputStream::resize ( int size )
 	m_Tail = len;	
 
 	#ifdef __DEBUG_OUTPUT__
-		ofstream ofile("buffer_resized.log",ios::app);
-		ofile << "SocketOutputStream resized " << size << " bytes!" << endl;
+		std::ofstream ofile("buffer_resized.log", std::ios::app);
+		ofile << "SocketOutputStream resized " << size << " bytes!" << std::endl;
 		ofile.close();
 	#endif
 

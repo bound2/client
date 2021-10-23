@@ -34,8 +34,8 @@ void __assert__ ( const char * file , uint line , const char * func , const char
 	
 	msg << expr << " at " << ctime(&currentTime);
 	
-	ofstream ofile("assertion_failed.log",ios::app);
-	ofile << msg.toString().c_str() << endl;
+	std::ofstream ofile("assertion_failed.log", std::ios::app);
+	ofile << msg.toString().c_str() << std::endl;
 	ofile.close();
 
 	throw AssertionError( msg.toString() );

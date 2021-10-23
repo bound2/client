@@ -41,7 +41,7 @@ UpdateManager::~UpdateManager ()
 //--------------------------------------------------------------------------------
 void UpdateManager::load ( const std::string & filename ) 
 {
-	ifstream ifile( filename.c_str() , ios::binary );
+	std::ifstream ifile( filename.c_str() , std::ios::binary );
 	if ( !ifile ) {
 		//StringStream msg;
 		//msg << "cannot open " << filename << " with read mode";
@@ -74,7 +74,7 @@ void UpdateManager::load ( const std::string & filename )
 //--------------------------------------------------------------------------------
 void UpdateManager::save ( const std::string & filename ) const 
 {
-	ofstream ofile( filename.c_str() , ios::binary );
+	std::ofstream ofile( filename.c_str() , std::ios::binary );
 	if ( !ofile ) {
 //		StringStream msg;
 //		msg << "cannot open " << filename << " with write mode";

@@ -51,7 +51,7 @@ MChatManager::~MChatManager()
 void				
 MChatManager::SaveToFile(const char* filename)
 {
-	class ofstream file(filename, ios::binary);
+	std::ofstream file(filename, std::ios::binary);
 
 	m_mapCurseEng.SaveToFile( file );
 	m_mapCurseKor1.SaveToFile( file );
@@ -69,7 +69,7 @@ MChatManager::SaveToFile(const char* filename)
 void				
 MChatManager::LoadFromFile(const char* filename)
 {
-	class ifstream file(filename, ios::binary);
+	std::ifstream file(filename, std::ios::binary);
 
 	m_mapCurseEng.LoadFromFile( file );
 	m_mapCurseKor1.LoadFromFile( file );

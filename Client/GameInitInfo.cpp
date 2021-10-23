@@ -239,7 +239,7 @@ InitInfomation()
 		g_pGuildInfoMapper = new MGuildInfoMapper;
 		
 		// 이 화일은 없을 수도 있다.
-		class ifstream guildInfoFile(g_pFileDef->getProperty("FILE_INFO_GUILD_INFO_MAPPER").c_str(), ios::binary | ios::nocreate);
+		std::ifstream guildInfoFile(g_pFileDef->getProperty("FILE_INFO_GUILD_INFO_MAPPER").c_str(), std::ios::binary);
 		
 		if (guildInfoFile.is_open())
 		{
@@ -626,7 +626,7 @@ InitInfomation()
 	// Load
 	//------------------------------------------------
 	DEBUG_ADD_FORMAT("[ InitGame ]  Information - ItemTable(%s)", g_pFileDef->getProperty("FILE_INFO_ITEM").c_str());	
-	class ifstream itemTable2;//(g_pFileDef->getProperty("FILE_INFO_ITEM").c_str(), ios::binary);
+	std::ifstream itemTable2;//(g_pFileDef->getProperty("FILE_INFO_ITEM").c_str(), ios::binary);
 	if (!FileOpenBinary(g_pFileDef->getProperty("FILE_INFO_ITEM").c_str(), itemTable2))
 		return FALSE;
 	(*g_pItemTable).LoadFromFile(itemTable2);
@@ -634,7 +634,7 @@ InitInfomation()
 
 	DEBUG_ADD("[ InitGame ]  Information - ItemOptionTable");
 
-	class ifstream itemOptionTable2(g_pFileDef->getProperty("FILE_INFO_ITEMOPTION").c_str(), ios::binary);
+	std::ifstream itemOptionTable2(g_pFileDef->getProperty("FILE_INFO_ITEMOPTION").c_str(), std::ios::binary);
 	(*g_pItemOptionTable).LoadFromFile( itemOptionTable2 );
 	itemOptionTable2.close();
 
