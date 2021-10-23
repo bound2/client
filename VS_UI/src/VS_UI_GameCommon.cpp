@@ -2326,7 +2326,7 @@ bool C_VS_UI_TRIBE::MouseControl(UINT message, int _x, int _y)
 						int level = (*g_pSkillManager)[domainIndex].GetDomainLevel();
 						int exp_remain = (*g_pSkillManager)[domainIndex].GetDomainExpRemain();
 						
-						if(level >= 0 && exp >= 0)
+						if(level >= 0 && exp_remain >= 0)
 						{
 //							int next_exp = (*g_pSkillManager)[domainIndex].GetExpInfo(level).AccumExp;
 							const __int64 goal_exp = (*g_pSkillManager)[domainIndex].GetExpInfo(level).GoalExp;
@@ -2350,7 +2350,7 @@ bool C_VS_UI_TRIBE::MouseControl(UINT message, int _x, int _y)
 						int level = (*g_pSkillManager)[domainIndex].GetDomainLevel();
 						int exp_remain = (*g_pSkillManager)[domainIndex].GetDomainExpRemain();
 						
-						if(level >= 0 && exp >= 0)
+						if(level >= 0 && exp_remain >= 0)
 						{
 //							int next_exp = (*g_pSkillManager)[domainIndex].GetExpInfo(level).AccumExp;
 							const __int64 goal_exp = (*g_pSkillManager)[domainIndex].GetExpInfo(level).GoalExp;
@@ -2374,7 +2374,7 @@ bool C_VS_UI_TRIBE::MouseControl(UINT message, int _x, int _y)
 						int level = (*g_pSkillManager)[domainIndex].GetDomainLevel();
 						int exp_remain = (*g_pSkillManager)[domainIndex].GetDomainExpRemain();
 						
-						if(level >= 0 && exp >= 0)
+						if(level >= 0 && exp_remain >= 0)
 						{
 //							int next_exp = (*g_pSkillManager)[domainIndex].GetExpInfo(level).AccumExp;
 							const __int64 goal_exp = (*g_pSkillManager)[domainIndex].GetExpInfo(level).GoalExp;
@@ -8173,7 +8173,8 @@ void C_VS_UI_INVENTORY::Show()
 			
 			rt.right = x+GetFocusedItemGridX(p_item) + p_item->GetGridWidth()*GRID_UNIT_PIXEL_X-1;
 			
-			for(int depth = 0, number = p_item->GetNumber(); number > 0; number/=10, depth++);
+			int depth, number;
+			for(depth = 0, number = p_item->GetNumber(); number > 0; number/=10, depth++);
 			
 			if(depth == 0) depth = 1;
 			rt.left = rt.right - 7*depth;
@@ -17608,7 +17609,7 @@ void	C_VS_UI_INFO::_Show2()
 
 				AddPosition.x = x + field2_x2;
 				AddPosition.y = y + field2_y;
-				for( i = 0; i < 8 ; i++ )
+				for( int i = 0; i < 8 ; i++ )
 				{
 					gpC_global_resource->m_pC_info_spk->BltLocked( AddPosition.x, AddPosition.y + field2_gap * i, C_GLOBAL_RESOURCE::SMALL_BAR2 );
 				}
@@ -17975,10 +17976,11 @@ void	C_VS_UI_INFO::_Show2()
 				}
 				
 				// str, dex, int, hp, mp, tohit, damage, defence, protection출력
-				int line_count = 0; 
+				int line_count = 0, i = 0; 
 				AddPosition.x = x+ field2_x;
 				AddPosition.y = y+field2_y;
-				for( int i =0;i<4;i++ )
+
+				for( i =0;i<4;i++ )
 				{
 					gpC_global_resource->m_pC_info_spk->BltLocked( AddPosition.x + pSkin->GetPoint( ousterspos + 10 + i).x,
 						AddPosition.y + pSkin->GetPoint( ousterspos+10+i).y + field2_gap*i, C_GLOBAL_RESOURCE::TITLE_STR + i );
@@ -22579,7 +22581,7 @@ void C_VS_UI_MINIMAP::MouseControlExtra(UINT message, int _x, int _y)
 				}
 			}
 			
-			for(i = 0; i < m_npc.size(); i++)
+			for(int i = 0; i < m_npc.size(); i++)
 			{
 				int x = m_map_start_point.x + m_npc[i].x*map_w/m_map_w;
 				int y = m_map_start_point.y + m_npc[i].y*map_h/m_map_h;
@@ -22610,7 +22612,7 @@ void C_VS_UI_MINIMAP::MouseControlExtra(UINT message, int _x, int _y)
 				}
 			}
 			
-			for(i = 0; i < m_shrine.size(); i++)
+			for(int i = 0; i < m_shrine.size(); i++)
 			{
 				int x = m_map_start_point.x + m_shrine[i].x*map_w/m_map_w;
 				int y = m_map_start_point.y + m_shrine[i].y*map_h/m_map_h;
@@ -22622,7 +22624,7 @@ void C_VS_UI_MINIMAP::MouseControlExtra(UINT message, int _x, int _y)
 				}
 			}
 
-			for(i = 0; i < g_pParty->GetSize(); i++)
+			for(int i = 0; i < g_pParty->GetSize(); i++)
 			{
 				PARTY_INFO *info = g_pParty->GetMemberInfo(i);
 				if(info != NULL && info->zoneID == GetZoneID())
@@ -22650,7 +22652,7 @@ void C_VS_UI_MINIMAP::MouseControlExtra(UINT message, int _x, int _y)
 				}
 			}
 			
-			for(i = 0; i < m_Flag.size(); i++)
+			for(int i = 0; i < m_Flag.size(); i++)
 			{
 				int x = m_map_start_point.x + m_Flag[i].x*map_w/m_map_w;
 				int y = m_map_start_point.y + m_Flag[i].y*map_h/m_map_h;
@@ -23308,7 +23310,8 @@ void C_VS_UI_MINIMAP::SetNPC(MINIMAP_NPC npc)
 	}
 	else if(npc.id >= 526 && npc.id <= 537)	// 수호성단
 	{
-		for(int i = 0; i < m_shrine.size(); i++)
+		int i;
+		for(i = 0; i < m_shrine.size(); i++)
 		{
 			if(npc.id == m_shrine[i].id)break;
 		}
@@ -23326,7 +23329,8 @@ void C_VS_UI_MINIMAP::SetNPC(MINIMAP_NPC npc)
 	}
 	else if(npc.id >= 538 && npc.id <= 549)	// 성지 성단
 	{
-		for(int i = 0; i < m_shrine.size(); i++)
+		int i;
+		for(i = 0; i < m_shrine.size(); i++)
 		{
 			if(npc.id == m_shrine[i].id)break;
 		}
@@ -23352,7 +23356,8 @@ void C_VS_UI_MINIMAP::SetNPC(MINIMAP_NPC npc)
 	}
 	else
 	{
-		for(int i = 0; i < m_npc.size(); i++)
+		int i;
+		for(i = 0; i < m_npc.size(); i++)
 		{
 			if(npc.id == m_npc[i].id && npc.id != 659 && npc.id != 672 && npc.id != 673 )break; // 돼지 정령은 생까쟈
 		}
@@ -23376,7 +23381,8 @@ void C_VS_UI_MINIMAP::SetPortal(RECT rect, int id)
 		/*|| */!g_pSystemAvailableManager->ZoneFiltering( id ) )
 		return;
 	
-	for(int i = 0; i < m_portal.size(); i++)
+	int i;
+	for(i = 0; i < m_portal.size(); i++)
 	{
 		if(m_portal_zone_id[i] == id &&
 			m_portal[i].top <= rect.bottom +5 &&
@@ -24867,7 +24873,8 @@ void	C_VS_UI_TEAM_MEMBER_LIST::AddMemberList(const TEAM_MEMBER_LIST &member_list
 		m_v_member_list.push_back(member_list);
 	else
 	{
-		for(int i = 0; i < m_v_member_list.size(); i++)
+		int i;
+		for(i = 0; i < m_v_member_list.size(); i++)
 		{
 			if(convert_table[member_list.member_grade] < convert_table[m_v_member_list[i].member_grade])
 			{
@@ -25266,7 +25273,7 @@ void	C_VS_UI_TEAM_LIST::Run(id_t id)
 		break;
 		
 	case SEARCH_TYPE_ID:
-		if(m_search_type >= SEARCH_ALL)
+		if(m_search_type >= SEARCH_ALLL)
 			m_search_type = SEARCH_NAME;
 		else
 			m_search_type += 3;
@@ -25304,7 +25311,7 @@ void	C_VS_UI_TEAM_LIST::Run(id_t id)
 							m_v_ready_team_search_list.push_back(*itr);
 						break;
 						
-					case SEARCH_ALL:
+					case SEARCH_ALLL:
 						// 대기중인 팀 리스트는 Members, Ranking 이 없다.
 						if(strstr(itr->TEAM_NAME.c_str(), p_temp) || strstr(itr->LEADER_NAME.c_str(), p_temp))
 							m_v_ready_team_search_list.push_back(*itr);
@@ -25335,7 +25342,7 @@ void	C_VS_UI_TEAM_LIST::Run(id_t id)
 							m_v_regist_team_search_list.push_back(*itr);
 						break;
 						
-					case SEARCH_ALL:					
+					case SEARCH_ALLL:					
 						if(strstr(itr->TEAM_NAME.c_str(), p_temp) || strstr(itr->LEADER_NAME.c_str(), p_temp))
 							m_v_regist_team_search_list.push_back(*itr);
 						else 
@@ -25487,7 +25494,7 @@ void	C_VS_UI_FRIEND_INFO::Start(bool bl_set_load)
 //look by viva : friend show
 void	C_VS_UI_FRIEND_INFO::Show()
 {
-	const barHeight = scroll_down_y - (scroll_up_y+m_friend_spk.GetHeight(SCROLL_UP_BUTTON)) - m_friend_spk.GetHeight(SCROLL_TAG);
+	const int barHeight = scroll_down_y - (scroll_up_y+m_friend_spk.GetHeight(SCROLL_UP_BUTTON)) - m_friend_spk.GetHeight(SCROLL_TAG);
 
 	if(m_ButtonID_Down == KIND_ID)
 	{
@@ -26129,7 +26136,7 @@ void C_VS_UI_FRIEND_CHATTING_INFO::Show()
 //	//		m_v_pHistory_List.push_back(pHistory);
 //		}
 //	}
-	const barHeight = scroll_down_y - (scroll_up_y+m_chatting_spk.GetHeight(SCROLL_UP_BUTTON)) - m_chatting_spk.GetHeight(SCROLL_TAG);
+	const int barHeight = scroll_down_y - (scroll_up_y+m_chatting_spk.GetHeight(SCROLL_UP_BUTTON)) - m_chatting_spk.GetHeight(SCROLL_TAG);
 	if(m_pList->blIsShow == 1)
 	{
 		while(m_scroll+9 < m_pList->m_v_pHistory_List.size())
@@ -30815,7 +30822,7 @@ void	C_VS_UI_BRING_FEE::Show()
 		wsprintf(money_buf, "%d", m_BringFee);
 		sstr = money_buf;
 		
-		for(i = 3; i <= 13; i += 4)
+		for(int i = 3; i <= 13; i += 4)
 			if(sstr.size() > i)
 				sstr.insert(sstr.size()-i, ",");
 			
@@ -33980,8 +33987,8 @@ class EventGiftInfo
 public :
 	EventGiftInfo() { m_bActive = 1; m_Step = 1; m_Name = "";}
 	~EventGiftInfo(){}
-	void LoadFromFile(ifstream &file)	{		file.read((char*)&m_ID, sizeof(DWORD) );file.read((char*)&m_bActive, sizeof(char) );		file.read((char*)&m_Step, sizeof( DWORD ) );		m_Name.LoadFromFile( file );	}
-	void SaveToFile(ofstream &file)	{		file.write((const char*)&m_ID, sizeof(DWORD) );file.write((const char*)&m_bActive, sizeof(char) );		file.write((const char*)&m_Step, sizeof( int ) );		m_Name.SaveToFile( file );	}
+	void LoadFromFile(std::ifstream &file)	{		file.read((char*)&m_ID, sizeof(DWORD) );file.read((char*)&m_bActive, sizeof(char) );		file.read((char*)&m_Step, sizeof( DWORD ) );		m_Name.LoadFromFile( file );	}
+	void SaveToFile(std::ofstream &file)	{		file.write((const char*)&m_ID, sizeof(DWORD) );file.write((const char*)&m_bActive, sizeof(char) );		file.write((const char*)&m_Step, sizeof( int ) );		m_Name.SaveToFile( file );	}
 	char	m_bActive;	DWORD		m_Step;	MString	m_Name; DWORD m_ID;
 };
 typedef CTypeTable<EventGiftInfo> CEventGiftInfo;
@@ -34079,7 +34086,7 @@ void C_VS_UI_LOTTERY_CARD::LoadInfo(int &step)
 	GiftImage[52] = DARKEDEN_TICKET_2;
 
 	CEventGiftInfo *Event = new CEventGiftInfo;
-	ifstream info("data\\info\\EventQuest.inf", ios::binary );
+	std::ifstream info("data\\info\\EventQuest.inf", std::ios::binary );
 	Event->LoadFromFile ( info );
 	info.close();		
 	
@@ -34971,7 +34978,7 @@ void C_VS_UI_WORLDMAP::MouseControlExtra(UINT message, int _x, int _y)
 				}
 			}
 			
-			for(i = 0; i < m_npc.size(); i++)
+			for(int i = 0; i < m_npc.size(); i++)
 			{
 				int x = m_map_start_point.x + m_npc[i].x*map_w/m_map_w;
 				int y = m_map_start_point.y + m_npc[i].y*map_h/m_map_h;
@@ -35002,7 +35009,7 @@ void C_VS_UI_WORLDMAP::MouseControlExtra(UINT message, int _x, int _y)
 				}
 			}
 			
-			for(i = 0; i < m_shrine.size(); i++)
+			for(int i = 0; i < m_shrine.size(); i++)
 			{
 				int x = m_map_start_point.x + m_shrine[i].x*map_w/m_map_w;
 				int y = m_map_start_point.y + m_shrine[i].y*map_h/m_map_h;
@@ -35014,7 +35021,7 @@ void C_VS_UI_WORLDMAP::MouseControlExtra(UINT message, int _x, int _y)
 				}
 			}
 
-			for(i = 0; i < g_pParty->GetSize(); i++)
+			for(int i = 0; i < g_pParty->GetSize(); i++)
 			{
 				PARTY_INFO *info = g_pParty->GetMemberInfo(i);
 				if(info != NULL && info->zoneID == GetZoneID())
@@ -35042,7 +35049,7 @@ void C_VS_UI_WORLDMAP::MouseControlExtra(UINT message, int _x, int _y)
 				}
 			}
 			
-			for(i = 0; i < m_Flag.size(); i++)
+			for(int i = 0; i < m_Flag.size(); i++)
 			{
 				int x = m_map_start_point.x + m_Flag[i].x*map_w/m_map_w;
 				int y = m_map_start_point.y + m_Flag[i].y*map_h/m_map_h;
@@ -35681,7 +35688,8 @@ void C_VS_UI_WORLDMAP::SetNPC(MINIMAP_NPC npc)
 {
 	if(npc.id >= 560 && npc.id <= 563)	// 성 상징물 받침대
 	{
-		for(int i = 0; i < m_shrine.size(); i++)
+		int i;
+		for(i = 0; i < m_shrine.size(); i++)
 		{
 			if(npc.id == m_shrine[i].id)break;
 		}
@@ -35717,7 +35725,8 @@ void C_VS_UI_WORLDMAP::SetNPC(MINIMAP_NPC npc)
 	}
 	else if(npc.id >= 538 && npc.id <= 549)	// 성지 성단
 	{
-		for(int i = 0; i < m_shrine.size(); i++)
+		int i;
+		for(i = 0; i < m_shrine.size(); i++)
 		{
 			if(npc.id == m_shrine[i].id)break;
 		}
@@ -35743,7 +35752,8 @@ void C_VS_UI_WORLDMAP::SetNPC(MINIMAP_NPC npc)
 	}
 	else
 	{
-		for(int i = 0; i < m_npc.size(); i++)
+		int i;
+		for(i = 0; i < m_npc.size(); i++)
 		{
 			if(npc.id == m_npc[i].id && npc.id != 659 && npc.id != 672 && npc.id != 673 )break; // 돼지 정령은 생까쟈
 		}

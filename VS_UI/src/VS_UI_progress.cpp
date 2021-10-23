@@ -96,14 +96,14 @@ C_VS_UI_PROGRESS::C_VS_UI_PROGRESS()
 		if(g_MyFull)
 		{
 			pSpk_progressPathc =SPK_PROGRESS_1024;
-			//ifstream progress_file(SPK_PROGRESS_1024, ios::binary);
+			//ifstream progress_file(SPK_PROGRESS_1024, std::ios::binary);
 		}
 		else
 		{
 			pSpk_progressPathc =SPK_PROGRESS;
-			//ifstream progress_file(SPK_PROGRESS, ios::binary);
+			//ifstream progress_file(SPK_PROGRESS, std::ios::binary);
 		}
-		ifstream progress_file(pSpk_progressPathc, ios::binary);
+		std::ifstream progress_file(pSpk_progressPathc, std::ios::binary);
 		m_pC_progress->LoadFromFile(progress_file);
 		progress_file.close();
 		

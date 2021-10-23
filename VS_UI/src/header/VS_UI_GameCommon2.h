@@ -25,6 +25,7 @@
 #include "MZone.h"
 #include "MHelpMessageManager.h"
 #include <map>
+#include <fstream>
 
 #include "SXml.h"
 #include "MInventory.h"
@@ -672,8 +673,8 @@ private:
 		C_VS_UI_MAIL();
 		~C_VS_UI_MAIL();
 
-		void SaveToFile(class ofstream &file);
-		bool LoadFromFile(class ifstream &file);
+		void SaveToFile(std::ofstream &file);
+		bool LoadFromFile(std::ifstream &file);
 		void SaveToFile(std::string filename);
 		void LoadFromFile(std::string filename);
 	};
@@ -799,8 +800,8 @@ public:
 		m_pC_button_group->CancelPushState();
 	}
 
-	void SaveToFile(class ofstream &file);
-	void LoadFromFile(class ifstream &file);
+	void SaveToFile(std::ofstream &file);
+	void LoadFromFile(std::ifstream &file);
 	void SaveToFile(std::string filename);
 	void LoadFromFile(std::string filename);
 	void CloseMailBoxDialogBox();

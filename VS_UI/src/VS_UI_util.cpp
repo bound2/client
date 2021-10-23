@@ -53,7 +53,7 @@ extern	BOOL g_MyFull;
 //			_Error(FAILED_JOB);
 //		}
 //
-//		ofstream spr_file(TEMP_FILE, ios::binary);
+//		ofstream spr_file(TEMP_FILE, std::ios::binary);
 //		if (!spr_file)
 //		{
 //			DeleteNewArray(buf);
@@ -114,7 +114,7 @@ extern	BOOL g_MyFull;
 //			_Error(FAILED_JOB);
 //		}
 //
-//		ofstream spr_file(TEMP_FILE, ios::binary);
+//		ofstream spr_file(TEMP_FILE, std::ios::binary);
 //		if (!spr_file)
 //		{
 //			DeleteNewArray(buf);
@@ -123,7 +123,7 @@ extern	BOOL g_MyFull;
 //		spr_file.write(buf, size);
 //		spr_file.close();
 //
-//		ifstream spr_file2(TEMP_FILE, ios::binary);
+//		ifstream spr_file2(TEMP_FILE, std::ios::binary);
 //		if (!spr_file2)
 //		{
 //			DeleteNewArray(buf);
@@ -621,7 +621,7 @@ bool C_FRR::Open(const char *sz_filename)
 	if (m_C_frame_array.GetSize() > 0)
 		m_C_frame_array.Release();
 
-	ifstream file(sz_filename, ios::binary | ios::nocreate);
+	std::ifstream file(sz_filename, std::ios::binary);
 	if (!file)
 		_Error(FILE_OPEN);
 
@@ -650,7 +650,7 @@ void C_SPRITE_PACK::Open(const char *sz_filename)
 	//if (m_pC_spk_list->GetSize() > 0)
 	//	m_pC_spk_list->Release();
 
-//	ifstream file(sz_filename, ios::binary | ios::nocreate);
+//	ifstream file(sz_filename, std::ios::binary);
 //	if (!file)
 //	{
 //		_ErrorStr((char *)sz_filename);
@@ -1301,7 +1301,7 @@ C_SPRITE_FRAME::~C_SPRITE_FRAME()
 //-----------------------------------------------------------------------------
 bool C_SPRITE_FRAME::Open(const char * pathfile)
 {
-	ifstream file(pathfile, ios::binary | ios::nocreate);
+	std::ifstream file(pathfile, std::ios::binary);
 	if (!file)
 		return false;
 
@@ -1320,7 +1320,7 @@ bool C_SPRITE_FRAME::Open(const char * pathfile)
 //-----------------------------------------------------------------------------
 bool C_SPRITE_FRAME::Save(const char * pathfile)
 {
-	ofstream file(pathfile, ios::binary);
+	std::ofstream file(pathfile, std::ios::binary);
 	if (!file)
 		return false;
 

@@ -1395,7 +1395,8 @@ void C_VS_UI_OUSTERS_QUICKITEM::Show()
 				if(p_item->IsPileItem())
 				{
 					
-					for(int depth = 0, number = p_item->GetNumber(); number > 0; number/=10, depth++);
+					int depth, number;
+					for(depth = 0, number = p_item->GetNumber(); number > 0; number/=10, depth++);
 					if(depth == 0) depth = 1;
 
 					rect[len].right = temp_x + QUICKSLOT_W+2;

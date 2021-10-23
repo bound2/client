@@ -86,8 +86,8 @@ class EventGiftInfo
 public :
 	EventGiftInfo() { m_bActive = 1; m_Step = 1; m_Name = "";}
 	~EventGiftInfo(){}
-	void LoadFromFile(ifstream &file)	{		file.read((char*)&m_ID, sizeof(DWORD) );file.read((char*)&m_bActive, sizeof(char) );		file.read((char*)&m_Step, sizeof( DWORD) );		m_Name.LoadFromFile( file );	}
-	void SaveToFile(ofstream &file)	{		file.write((const char*)&m_ID, sizeof(DWORD) );file.write((const char*)&m_bActive, sizeof(char) );		file.write((const char*)&m_Step, sizeof( int ) );		m_Name.SaveToFile( file );	}
+	void LoadFromFile(std::ifstream &file)	{		file.read((char*)&m_ID, sizeof(DWORD) );file.read((char*)&m_bActive, sizeof(char) );		file.read((char*)&m_Step, sizeof( DWORD) );		m_Name.LoadFromFile( file );	}
+	void SaveToFile(std::ofstream &file)	{		file.write((const char*)&m_ID, sizeof(DWORD) );file.write((const char*)&m_bActive, sizeof(char) );		file.write((const char*)&m_Step, sizeof( int ) );		m_Name.SaveToFile( file );	}
 	char	m_bActive;	DWORD		m_Step;	MString	m_Name; DWORD m_ID;
 };
 
@@ -415,7 +415,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 
 	g_FL2_GetDC();	
 	g_PrintColorStr(x+35, y+200, (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_SHOP].GetString(), gpC_base->m_chatting_pi, RGB_WHITE);
-	for(i=0;i<line_num;i++)
+	for(int i=0;i<line_num;i++)
 	{
 		COLORREF TitleColor,ShadowColor;
 		const COLORREF required_rgb = RGB(255, 128, 64);
@@ -1162,7 +1162,7 @@ void	C_VS_UI_IMAGE_NOTICE::AddNotice(const char* name, DWORD id)
 std::string C_VS_UI_IMAGE_NOTICE::LoadInfo(DWORD ID)
 {
 	CEventGiftInfo *Event = new CEventGiftInfo;
-	ifstream info("data\\info\\eventquest.inf", ios::binary );
+	std::ifstream info("data\\info\\eventquest.inf", std::ios::binary );
 	Event->LoadFromFile ( info );
 	info.close();
 	
@@ -1864,7 +1864,7 @@ void	C_VS_UI_REQUEST_RESURRECT::Show()
 	
 	if(gpC_base->m_p_DDSurface_back->Lock() )
 	{
-		for( i=0;i<RESURRECT_MODE_MAX; i++ )
+		for( int i=0;i<RESURRECT_MODE_MAX; i++ )
 		{
 			if( m_ResurrectButton[i].m_Enable == true && m_ResurrectButton[i].m_Image != -1 )
 			{
@@ -2513,7 +2513,9 @@ void	C_VS_UI_MIXING_FORGE::Show()
 			{
 				RECT rt;
 				rt.right = print_x;
-				for(int depth = 0, number = p_item->GetNumber(); number > 0; number/=10, depth++);
+
+				int depth, number;
+				for(depth = 0, number = p_item->GetNumber(); number > 0; number/=10, depth++);
 				if(depth == 0) depth = 1;
 				rt.left = print_x - 7*depth;
 				rt.top = print_y;
@@ -4574,7 +4576,7 @@ C_VS_UI_HORN::C_VS_UI_HORN(int currentZoneID)
 //	UI_PORTAL_FLAG portal;
 //	UI_PORTAL_LIST portalList;
 //
-//	ifstream hornInfoFile(FILE_INFO_HORN, ios::binary);
+//	ifstream hornInfoFile(FILE_INFO_HORN, std::ios::binary);
 //	hornInfoFile.read((char *)&zoneNum, sizeof(int));
 //	for(int zone = 0; zone < zoneNum; zone++)
 //	{
@@ -5834,7 +5836,7 @@ C_VS_UI_MAILBOX::C_VS_UI_MAIL::~C_VS_UI_MAIL()
 }
 
 
-void C_VS_UI_MAILBOX::C_VS_UI_MAIL::SaveToFile(class ofstream &file)
+void C_VS_UI_MAILBOX::C_VS_UI_MAIL::SaveToFile(std::ofstream &file)
 {
 	file.write((const char *)&id, sizeof(DWORD));
 	file.write((const char *)&mark, sizeof(bool));
@@ -5845,7 +5847,7 @@ void C_VS_UI_MAILBOX::C_VS_UI_MAIL::SaveToFile(class ofstream &file)
 	file.write((const char *)&windowSize, sizeof(SIZE));
 }
 
-bool C_VS_UI_MAILBOX::C_VS_UI_MAIL::LoadFromFile(class ifstream &file)
+bool C_VS_UI_MAILBOX::C_VS_UI_MAIL::LoadFromFile(std::ifstream &file)
 {
 	file.read((char *)&id, sizeof(DWORD));
 	file.read((char *)&mark, sizeof(bool));
@@ -5861,7 +5863,7 @@ bool C_VS_UI_MAILBOX::C_VS_UI_MAIL::LoadFromFile(class ifstream &file)
 
 void C_VS_UI_MAILBOX::C_VS_UI_MAIL::SaveToFile(std::string filename)
 {
-	ofstream file(filename.c_str(), ios::binary);
+	std::ofstream file(filename.c_str(), std::ios::binary);
 	
 	if(file)
 	{
@@ -5873,7 +5875,7 @@ void C_VS_UI_MAILBOX::C_VS_UI_MAIL::SaveToFile(std::string filename)
 
 void C_VS_UI_MAILBOX::C_VS_UI_MAIL::LoadFromFile(std::string filename)
 {
-	ifstream file(filename.c_str(), ios::binary | ios::nocreate);
+	std::ifstream file(filename.c_str(), std::ios::binary);
 	
 	if(file)
 	{
@@ -5882,7 +5884,7 @@ void C_VS_UI_MAILBOX::C_VS_UI_MAIL::LoadFromFile(std::string filename)
 	}
 }
 
-void C_VS_UI_MAILBOX::SaveToFile(class ofstream &file)
+void C_VS_UI_MAILBOX::SaveToFile(std::ofstream &file)
 {
 	DWORD flag = 0;
 	file.write((const char *)&flag, sizeof(DWORD));
@@ -5906,7 +5908,7 @@ void C_VS_UI_MAILBOX::SaveToFile(class ofstream &file)
 	}
 }
 
-void C_VS_UI_MAILBOX::LoadFromFile(class ifstream &file)
+void C_VS_UI_MAILBOX::LoadFromFile(std::ifstream &file)
 {
 	DWORD flag = 0;
 	file.read((char *)&flag, sizeof(DWORD));
@@ -5934,7 +5936,7 @@ void C_VS_UI_MAILBOX::LoadFromFile(class ifstream &file)
 
 void C_VS_UI_MAILBOX::SaveToFile(std::string filename)
 {
-	ofstream file(filename.c_str(), ios::binary);
+	std::ofstream file(filename.c_str(), std::ios::binary);
 	
 	if(file)
 	{
@@ -5946,7 +5948,7 @@ void C_VS_UI_MAILBOX::SaveToFile(std::string filename)
 
 void C_VS_UI_MAILBOX::LoadFromFile(std::string filename)
 {
-	ifstream file(filename.c_str(), ios::binary | ios::nocreate);
+	std::ifstream file(filename.c_str(), std::ios::binary);
 	
 	if(file)
 	{
@@ -8514,7 +8516,7 @@ void C_VS_UI_CRAZY_MINE::InitMineBoard(int size, int mine)
 		}
 	}
 
-	for ( i=0; i<m_MineCount; ++i )
+	for ( int i=0; i<m_MineCount; ++i )
 	{
 		int x,y;
 
@@ -9362,7 +9364,7 @@ void	C_VS_UI_STATUS_CTF::Show()
 			y+rectRemainTime.top+(rectRemainTime.bottom - rectRemainTime.top)/2 - g_GetStringHeight( szBuffer, gpC_base->m_chatting_pi.hfont)/2, 
 			szBuffer, gpC_base->m_chatting_pi, RGB_WHITE);
 
-		for( i =0 ; i< 3; i++ )
+		for( int i =0 ; i< 3; i++ )
 		{
 			wsprintf( szBuffer, "%d",m_num_flag[i]);
 			if( m_num_flag[i] == topscore )
@@ -10991,7 +10993,7 @@ bool C_VS_UI_HELPDESC::MouseControl(UINT message, int _x, int _y)
 
 void C_VS_UI_HELPDESC::LoadCustomstr(char * customstrfilename)
 {
-	ifstream file(customstrfilename, ios::binary| ios::nocreate);
+	ifstream file(customstrfilename, std::ios::binary| std::ios::nocreate);
 	if(!file) return;
 	char sztemp[1024];
 	
@@ -17973,7 +17975,7 @@ void	C_VS_UI_POWER_JJANG::SetItemList()
 	
 	// 에융..클래스 만들기 구찬타..
 	BYTE MaxItem = 0;
-	ifstream file("data\\info\\PowerjjangItem.inf",ios::binary);
+	ifstream file("data\\info\\PowerjjangItem.inf",std::ios::binary);
 	file.read(&MaxItem, 1);
 	file.read((char*)&m_AvailablePoint, 2);
 	for(int i = 0; i < MaxItem; i++)
