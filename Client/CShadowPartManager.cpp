@@ -71,7 +71,7 @@ CShadowPartManager::Init(const char* SSPKFilename, WORD partSize)
 	Release();
 	///*
 	// Index File¿ª Load«—¥Ÿ.
-	class ifstream indexFile;//(indexFilename, ios::binary);
+	std::ifstream indexFile;//(indexFilename, ios::binary);
 //	if (!FileOpenBinary(indexFilename, indexFile))
 //		return;
 //

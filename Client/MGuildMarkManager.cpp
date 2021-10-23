@@ -401,8 +401,8 @@ MGuildMarkManager::SaveGuildMark(WORD guildID, CSprite* pSprite, CSprite* pSprit
 		}
 
 		
-		class ofstream spkFile(m_GuildMarkSPKFilename.GetString(), ios::binary | ios::ate);
-		class ofstream spkiFile(spkiFilename, ios::binary | ios::ate);
+		std::ofstream spkFile(m_GuildMarkSPKFilename.GetString(), std::ios::binary | std::ios::ate);
+		std::ofstream spkiFile(spkiFilename, std::ios::binary | std::ios::ate);
 		
 		if (spkFile.is_open()
 			&& spkiFile.is_open())
@@ -483,7 +483,7 @@ MGuildMarkManager::SaveGuildMark(WORD guildID, CSprite* pSprite, CSprite* pSprit
 			//class fstream mapperFile(m_GuildMarkSpriteMapperFilename.GetString(), ios::binary | ios::ate | ios::in | ios::out);
 			//g_pGuildInfoMapper->ChangeValueToFile(m_GuildMarkSpriteMapperFilename.GetString(), guildID);
 
-			class ofstream file(m_GuildMarkSpriteMapperFilename.GetString(), ios::binary);
+			std::ofstream file(m_GuildMarkSpriteMapperFilename.GetString(), std::ios::binary);
 
 			if (file.is_open())
 			{

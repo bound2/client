@@ -5,6 +5,7 @@
 #ifndef __MHELPSTRINGTABLE_H__
 #define __MHELPSTRINGTABLE_H__
 
+#include <fstream>
 #include "MStringArray.h"
 #include "MHelpDef.h"
 
@@ -34,7 +35,7 @@ class MHelpStringTable : public MStringArray {
 		// File I/O
 		//-------------------------------------------------------
 		//void			SaveToFile(class ofstream& file);
-		void			LoadFromFile(class ifstream& file);
+		void			LoadFromFile(std::ifstream& file);
 
 	protected :
 		CTypeTable<bool>		m_Displayed;

@@ -6,6 +6,7 @@
 #define	__MONSTER_NAME_TABLE_H__
 
 #include <Windows.h>
+#include <fstream>
 #include "MString.h"
 #include "CTypeTable.h"
 
@@ -32,7 +33,7 @@ class MonsterNameTable {
 		// File I/O
 		//------------------------------------------------------------
 		//void		SaveToFile(class ofstream& file);	// 서버에서 읽어온걸 쓴다는 가정하에.. 
-		void		LoadFromFile(class ifstream& file);
+		void		LoadFromFile(std::ifstream& file);
 
 	public :
 		STRING_TABLE	m_FirstNames;
