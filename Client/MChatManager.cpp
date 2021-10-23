@@ -89,7 +89,7 @@ MChatManager::LoadFromFile(const char* filename)
 void				
 MChatManager::LoadFromFileCurse(const char* filename)
 {
-	class ifstream file(filename, ios::nocreate);
+	std::ifstream file(filename);
 
 	if (!file.is_open())
 	{
