@@ -336,7 +336,7 @@ bool			MWarManager::IsExist(ZoneID_t id)
 
 	WarInfoMapItr	itr = m_WarInfo.find(id);
 
-	if(itr == NULL || itr == m_WarInfo.end())
+	if(itr == m_WarInfo.end())
 	{
 //		if(!m_WarInfo.empty())
 //			return IsHolyLand( id );

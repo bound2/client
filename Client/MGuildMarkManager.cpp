@@ -702,7 +702,7 @@ MGuildMarkManager::MergeGuildMark(const char* pSPKFilenameOrg,
 		}
 
 		// MapperOrg를 다시 저장한다.
-		std::ofstream mapperOutputFileOrg(pIDMapperFilenameOrg, ios::binary);
+		std::ofstream mapperOutputFileOrg(pIDMapperFilenameOrg, std::ios::binary);
 		mapperOrg.SaveToFile( mapperOutputFileOrg );
 		mapperOutputFileOrg.close();
 

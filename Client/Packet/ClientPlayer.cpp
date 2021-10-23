@@ -28,7 +28,7 @@ extern BOOL g_bMsgOutPutFlag;
 extern BOOL g_bMsgDetailFlag;
 extern BOOL g_bMsgContentFlag;
 
-extern void PrintMessageDetail(ofstream file, char *strMsg, int length);
+extern void PrintMessageDetail(std::ofstream file, char *strMsg, int length);
 
 void	SendBugReport(const char *bug, ...);
 //--------------------------------------------------------------------------------

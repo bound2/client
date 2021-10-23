@@ -6653,7 +6653,7 @@ MTopView::LoadFromFileTileAndImageObjectSet(const CSpriteSetManager &TileSSM, co
 // File에서 LargeZone에서만 사용할 TileSprite을 Load한다.
 //----------------------------------------------------------------------
 bool
-MTopView::LoadFromFileTileSPKLargeZone(class ifstream & file)
+MTopView::LoadFromFileTileSPKLargeZone(std::ifstream & file)
 {
 	//------------------------------------------------------------
 	// File에서 TileSprite에 대한 정보를 Load한다.
@@ -6760,7 +6760,7 @@ MTopView::LoadFromFileTileSPKLargeZone(class ifstream & file)
 // File에서 LargeZone에서만 사용할 ImageObjectSprite들을 Load한다.
 //----------------------------------------------------------------------
 bool
-MTopView::LoadFromFileImageObjectSPKLargeZone(class ifstream & file)
+MTopView::LoadFromFileImageObjectSPKLargeZone(std::ifstream & file)
 {
 	//------------------------------------------------------------
 	// File에서 ImageObjectSprite에 대한 정보를 Load한다.
@@ -6871,7 +6871,7 @@ MTopView::LoadFromFileImageObjectSPKLargeZone(class ifstream & file)
 // File에서 SmallZone에서만 사용할 TileSprite을 Load한다.
 //----------------------------------------------------------------------
 bool
-MTopView::LoadFromFileTileSPKSmallZone(class ifstream & file)
+MTopView::LoadFromFileTileSPKSmallZone(std::ifstream & file)
 {
 	//------------------------------------------------------------
 	// File에서 TileSprite에 대한 정보를 Load한다.
@@ -6973,7 +6973,7 @@ MTopView::LoadFromFileTileSPKSmallZone(class ifstream & file)
 // File에서 SmallZone에서만 사용할 ImageObjectSprite들을 Load한다.
 //----------------------------------------------------------------------
 bool
-MTopView::LoadFromFileImageObjectSPKSmallZone(class ifstream & file)
+MTopView::LoadFromFileImageObjectSPKSmallZone(std::ifstream & file)
 {
 	//------------------------------------------------------------
 	// File에서 ImageObjectSprite에 대한 정보를 Load한다.

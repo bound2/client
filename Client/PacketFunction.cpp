@@ -90,7 +90,7 @@ extern CNPGameLib npgl;
 extern MScreenEffectManager*	g_pInventoryEffectManager;
 extern DWORD	g_PreviousCreatureType;
 
-extern bool FileOpenBinary(const char* filename, class ifstream& file);
+extern bool FileOpenBinary(const char* filename, std::ifstream& file);
 
 extern BOOL g_bSetHotKey;
 
