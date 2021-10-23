@@ -9495,7 +9495,7 @@ void	C_VS_UI_REGEN_TOWER_MINIMAP::Show()
 			{ 204, 4, 304, 104 }
 		};
 
-		const map_width = 128, map_height=256;
+		const int map_width = 128, map_height=256;
 		
 		for(int i = 0; i < g_pRegenTowerInfoManager->GetSize(); i++ )
 		{
@@ -9587,7 +9587,7 @@ bool	C_VS_UI_REGEN_TOWER_MINIMAP::MouseControl(UINT message, int _x, int _y)
 		{ 204, 4, 304, 104 }
 	};
 
-	const map_width = 128, map_height=256;
+	const int map_width = 128, map_height=256;
 
 	_x-=x; _y-=y;
 	switch(message)
@@ -10495,8 +10495,8 @@ void C_VS_UI_HELPDESC::Show()
 			
 	DWORD color;
 	
-	char *isfont = NULL;
-	char *istag  = NULL;
+	const char *isfont = NULL;
+	const char *istag  = NULL;
 
 	g_FL2_GetDC();
 
@@ -10993,7 +10993,7 @@ bool C_VS_UI_HELPDESC::MouseControl(UINT message, int _x, int _y)
 
 void C_VS_UI_HELPDESC::LoadCustomstr(char * customstrfilename)
 {
-	ifstream file(customstrfilename, std::ios::binary| std::ios::nocreate);
+	std::ifstream file(customstrfilename, std::ios::binary);
 	if(!file) return;
 	char sztemp[1024];
 	
@@ -17974,8 +17974,8 @@ void	C_VS_UI_POWER_JJANG::SetItemList()
 	ReleaseItemList();
 	
 	// 에융..클래스 만들기 구찬타..
-	BYTE MaxItem = 0;
-	ifstream file("data\\info\\PowerjjangItem.inf",std::ios::binary);
+	char MaxItem = 0;
+	std::ifstream file("data\\info\\PowerjjangItem.inf",std::ios::binary);
 	file.read(&MaxItem, 1);
 	file.read((char*)&m_AvailablePoint, 2);
 	for(int i = 0; i < MaxItem; i++)
@@ -18780,7 +18780,8 @@ void C_VS_UI_INVENTORY_SUB::Show()
 			
 			rt.right = x+GetFocusedItemGridX(p_item) + p_item->GetGridWidth()*GRID_UNIT_PIXEL_X-1;
 			
-			for(int depth = 0, number = p_item->GetNumber(); number > 0; number/=10, depth++);
+			int depth, number;
+			for(depth = 0, number = p_item->GetNumber(); number > 0; number/=10, depth++);
 			
 			if(depth == 0) depth = 1;
 			rt.left = rt.right - 7*depth;

@@ -23292,7 +23292,8 @@ void C_VS_UI_MINIMAP::SetNPC(MINIMAP_NPC npc)
 {
 	if(npc.id >= 560 && npc.id <= 563)	// 성 상징물 받침대
 	{
-		for(int i = 0; i < m_shrine.size(); i++)
+		int i;
+		for(i = 0; i < m_shrine.size(); i++)
 		{
 			if(npc.id == m_shrine[i].id)break;
 		}
@@ -35707,7 +35708,8 @@ void C_VS_UI_WORLDMAP::SetNPC(MINIMAP_NPC npc)
 	}
 	else if(npc.id >= 526 && npc.id <= 537)	// 수호성단
 	{
-		for(int i = 0; i < m_shrine.size(); i++)
+		int i;
+		for(i = 0; i < m_shrine.size(); i++)
 		{
 			if(npc.id == m_shrine[i].id)break;
 		}
@@ -35777,7 +35779,8 @@ void C_VS_UI_WORLDMAP::SetPortal(RECT rect, int id)
 		/*|| */!g_pSystemAvailableManager->ZoneFiltering( id ) )
 		return;
 	
-	for(int i = 0; i < m_portal.size(); i++)
+	int i;
+	for(i = 0; i < m_portal.size(); i++)
 	{
 		if(m_portal_zone_id[i] == id &&
 			m_portal[i].top <= rect.bottom +5 &&
