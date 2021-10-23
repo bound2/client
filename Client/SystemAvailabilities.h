@@ -57,7 +57,7 @@ public :
 	SystemAvailabilitiesManager();
 	~SystemAvailabilitiesManager();
 	
-	void SetFlag( DWORD Flag ) { m_Flag = std::bitset< SYSTEM_MAX > ((ulonglong) Flag); }
+	void SetFlag( DWORD Flag ) { m_Flag = std::bitset<SYSTEM_MAX>((unsigned long long) Flag); }
 	void SetOpenDegree( BYTE grade ) { m_OpenDegree = grade; }
 	void SetLimitSkillLevel( BYTE level ) { m_LimitSkillLevel = level; }
 	
