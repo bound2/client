@@ -1921,7 +1921,7 @@ MSkillDomain::ClearSkillList()
 		iSkill++;
 	}
 
-	m_iterator = NULL; 
+	//m_iterator = NULL; 
 	m_mapSkillID.clear();
 
 	if(m_pLearnedSkillID != NULL)
