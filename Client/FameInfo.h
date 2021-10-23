@@ -4,7 +4,7 @@
 #include <fstream>
 #include "CTypeTable.h"
 
-typedef typename unsigned char	BYTE;
+typedef unsigned char	BYTE;
 
 class FameInfo
 {
