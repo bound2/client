@@ -330,7 +330,7 @@ MActionInfo::SaveToFile(std::ofstream& file)
 	file.write((const char*)&flag, sizeof(char) );
 	if( m_bUseActionStep )
 	{
-		for( i = 0;i<MAX_ACTION_STEP; i++)
+		for(int i = 0;i<MAX_ACTION_STEP; i++)
 		{
 			file.write((const char*)&m_ActionStep[i],sizeof( TYPE_ACTIONINFO ) );
 		}

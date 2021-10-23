@@ -403,7 +403,8 @@ MSector::AddGroundCreature(const MCreature* pCreature)
 		OBJECT_MAP::const_iterator iCreature = GetGroundCreatureIterator();
 		BYTE currentPos;
 		
-		for (int i=0; i<beforeSize; i++)
+		int i;
+		for (i=0; i<beforeSize; i++)
 		{
 			currentPos = iCreature->first;
 
