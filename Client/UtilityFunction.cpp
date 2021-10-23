@@ -230,7 +230,7 @@ IsValidID(const char* strID, const char* strPermit)
 			
 			char strKor[3] = { ch, *str };
 			
-			char* findPtr = strstr(badKor, strKor);
+			const char* findPtr = strstr(badKor, strKor);
 
 			if (findPtr!=NULL)
 			{

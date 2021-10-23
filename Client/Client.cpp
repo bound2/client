@@ -286,10 +286,10 @@ void get_rand_str(char s[],int number)
 bool
 GetFutecAddress(const char* pStr)
 {
-	char * pFutecStr = strstr(pStr, "Futec");
-	char * pLeftParen = strchr(pStr, '(');
-	char * pSeperator = strchr(pStr, ':');
-	char * pRightParen = strchr(pStr, ')');
+	const char * pFutecStr = strstr(pStr, "Futec");
+	const char * pLeftParen = strchr(pStr, '(');
+	const char * pSeperator = strchr(pStr, ':');
+	const char * pRightParen = strchr(pStr, ')');
 
 	if (pFutecStr==NULL
 		|| pLeftParen==NULL
