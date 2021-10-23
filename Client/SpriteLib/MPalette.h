@@ -2,6 +2,7 @@
 #define __MPALETTE_H__
 
 #include <windows.h>
+#include <fstream>
 
 class MPalette
 {
@@ -30,8 +31,8 @@ public:
 	//--------------------------------------------------------
 	// file I/O
 	//--------------------------------------------------------
-	virtual bool	SaveToFile(class ofstream& file) { return false; };
-	virtual bool	LoadFromFile(class ifstream& file) { return false; };		
+	virtual bool	SaveToFile(std::ofstream& file) { return false; };
+	virtual bool	LoadFromFile(std::ifstream& file) { return false; };		
 
 	bool IsInit() const { return (m_Size == 0)?false:true; }
 	
@@ -46,8 +47,8 @@ public:
 	//--------------------------------------------------------
 	// file I/O
 	//--------------------------------------------------------
-	bool LoadFromFile(class ifstream &file);
-	bool SaveToFile(class ofstream &file);
+	bool LoadFromFile(std::ifstream &file);
+	bool SaveToFile(std::ofstream &file);
 };
 
 class MPalette565 : public MPalette
@@ -56,8 +57,8 @@ public:
 	//--------------------------------------------------------
 	// file I/O
 	//--------------------------------------------------------
-	bool LoadFromFile(class ifstream &file);
-	bool SaveToFile(class ofstream &file);
+	bool LoadFromFile(std::ifstream &file);
+	bool SaveToFile(std::ofstream &file);
 };
 
 #endif

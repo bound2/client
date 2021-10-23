@@ -109,7 +109,7 @@ CShadowSprite::operator = (const CShadowSprite& Sprite)
 // fstream에 save 한다.    ( file에는 5:6:5로 저장한다. )
 //----------------------------------------------------------------------
 bool	
-CShadowSprite::SaveToFile(ofstream& file)
+CShadowSprite::SaveToFile(std::ofstream& file)
 {
 	// width와 height를 저장한다.
 	file.write((const char*)&m_Width , 2);
@@ -143,7 +143,7 @@ CShadowSprite::SaveToFile(ofstream& file)
 // fstream에서 load한다.
 //----------------------------------------------------------------------
 bool	
-CShadowSprite::LoadFromFile(ifstream& file)
+CShadowSprite::LoadFromFile(std::ifstream& file)
 {
 	// 이미 잡혀있는 memory를 release한다.
 	Release();

@@ -6,8 +6,7 @@
 #define	__CALPHASPRITE_H__
 
 #include <Windows.h>
-class ofstream;
-class ifstream;
+#include <fstream>
 
 
 //----------------------------------------------------------------------

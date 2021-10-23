@@ -3,6 +3,7 @@
 
 #include "MPalette.h"
 #include <windows.h>
+#include <fstream>
 
 class CSpritePalBase
 {
@@ -28,8 +29,8 @@ public:
 	//--------------------------------------------------------
 	// file I/O
 	//--------------------------------------------------------
-	bool LoadFromFile(class ifstream &file);
-	bool SaveToFile(class ofstream &file);
+	bool LoadFromFile(std::ifstream &file);
+	bool SaveToFile(std::ofstream &file);
 	
 	//--------------------------------------------------------
 	// Get Functions

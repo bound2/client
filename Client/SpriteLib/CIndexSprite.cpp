@@ -260,7 +260,7 @@ CIndexSprite::SetColorSet()
 // Save IndexTable To File
 //----------------------------------------------------------------------
 BOOL
-CIndexSprite::SaveIndexTableToFile(class ofstream& file)
+CIndexSprite::SaveIndexTableToFile(std::ofstream& file)
 {
 	int i,j,k;
 
@@ -315,7 +315,7 @@ CIndexSprite::SaveIndexTableToFile(class ofstream& file)
 // Load IndexTable From File
 //----------------------------------------------------------------------
 BOOL
-CIndexSprite::LoadIndexTableFromFile(class ifstream& file)
+CIndexSprite::LoadIndexTableFromFile(std::ifstream& file)
 {
 	int i,j,k;
 
@@ -573,7 +573,8 @@ CIndexSprite::GetColorToGradation(BYTE spriteGradation)
 	// spriteGradation값과 가장 가까운 
 	// GradationValue를 찾아야 한다.
 	//-------------------------------------------------------
-	for (int g=0; g<MAX_COLORGRADATION; g++)
+	register int g;
+	for (g=0; g<MAX_COLORGRADATION; g++)
 	{			
 		if (spriteGradation > GradationValue[g])
 		{
@@ -644,8 +645,9 @@ CIndexSprite::SetPixel(WORD* pSource, WORD sourcePitch,
 	//--------------------------------------------------
 	WORD	*pSourceTemp2;
 	pSourceTemp = pSource;
+	register int i;
 
-	for (register i=0; i<height; i++)
+	for (i=0; i<height; i++)
 	{
 		pSourceTemp2 = pSourceTemp;
 

@@ -23,7 +23,8 @@
 template <class DataType, class SizeType>
 class CSetManager {
 	public :		
-		typedef std::list<DataType>	DATA_LIST;
+		typedef typename std::list<DataType> DATA_LIST;
+		typedef typename std::list<DataType>::const_iterator DATA_LIST_ITERATOR;
 
 	public :
 		CSetManager();
@@ -52,7 +53,7 @@ class CSetManager {
 		SizeType	GetSize() const	{ return m_List.size(); }
 		
 		// 첫번째 위치의 List Iterater를 넘겨준다.
-		DATA_LIST::const_iterator	GetIterator() const	{ return m_List.begin(); }
+		DATA_LIST_ITERATOR	GetIterator() const	{ return m_List.begin(); }
 
 	protected :			
 		DATA_LIST			m_List;		// Data pointer들을 저장해둔다.
@@ -117,7 +118,7 @@ template <class DataType, class SizeType>
 bool	
 CSetManager<DataType, SizeType>::Add(const DataType data)
 {
-	DATA_LIST::iterator iData = m_List.begin();
+	DATA_LIST_ITERATOR iData = m_List.begin();
 
 	while (iData != m_List.end())
 	{		
@@ -157,7 +158,7 @@ template <class DataType, class SizeType>
 bool
 CSetManager<DataType, SizeType>::Remove(const DataType data)
 {
-	DATA_LIST::iterator iData = m_List.begin();
+	DATA_LIST_ITERATOR iData = m_List.begin();
 
 	while (iData != m_List.end())
 	{		
@@ -210,7 +211,7 @@ CSetManager<DataType, SizeType>::SaveToFile(class ofstream& file)
 	DataType data;
 
 	// 모든 Data들을 save한다.
-	DATA_LIST::iterator iData = m_List.begin();
+	DATA_LIST_ITERATOR iData = m_List.begin();
 
 	int dataSize = sizeof(DataType);
 

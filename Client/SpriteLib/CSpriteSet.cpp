@@ -81,7 +81,7 @@ CSpriteSet::Release()
 // 특정 위치의 Sprite들을 Load한다.
 //----------------------------------------------------------------------
 bool		
-CSpriteSet::LoadFromFile(ifstream& indexFile, ifstream& packFile)
+CSpriteSet::LoadFromFile(std::ifstream& indexFile, std::ifstream& packFile)
 {
 	TYPE_SPRITEID	count;
 	
@@ -115,9 +115,10 @@ CSpriteSet::LoadFromFile(ifstream& indexFile, ifstream& packFile)
 	// Index(File Position)를 이용해서 SpritePack에서
 	// 특정 Sprite들을 Load한다.
 	//------------------------------------------------------
+	register int i;
 	for (i=0; i<count; i++)
 	{
-		packFile.seekg(pIndex[i], ios::beg);
+		packFile.seekg(pIndex[i], std::ios::beg);
 		m_pSprites[i].LoadFromFile( packFile );
 	}
 

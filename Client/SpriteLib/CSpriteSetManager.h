@@ -23,7 +23,7 @@
 #ifndef	__CSPRITESETMANAGER_H__
 #define	__CSPRITESETMANAGER_H__
 
-
+#include <fstream>
 #include "DrawTypeDef.h"
 #include "CSetManager.h"
 
@@ -36,7 +36,7 @@ class CSpriteSetManager : public CSetManager<TYPE_SPRITEID, TYPE_SPRITEID> {
 		//--------------------------------------------------------
 		// SpritePack IndexFile로부터 SpriteSet IndexFile을 생성한다.
 		//--------------------------------------------------------
-		bool		SaveSpriteSetIndex(class ofstream& setIndex, class ifstream& spkIndex);
+		bool		SaveSpriteSetIndex(std::ofstream& setIndex, std::ifstream& spkIndex);
 		
 
 	protected :
