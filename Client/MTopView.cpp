@@ -20947,7 +20947,7 @@ MTopView::DrawCreatureName(MCreature* pCreature)
 			//---------------------------------------------------------------
 			else if(IsRequestParty())
 			{
-				const maxRequestFrames = SPRITEID_PARTY_REQUEST_LAST - SPRITEID_PARTY_REQUEST + 1;
+				const int maxRequestFrames = SPRITEID_PARTY_REQUEST_LAST - SPRITEID_PARTY_REQUEST + 1;
 				RequestSpriteID = SPRITEID_PARTY_REQUEST + ((g_CurrentFrame>>1) % (maxRequestFrames+4));
 
 				if (RequestSpriteID > SPRITEID_PARTY_REQUEST_LAST)
@@ -20960,7 +20960,7 @@ MTopView::DrawCreatureName(MCreature* pCreature)
 			//---------------------------------------------------------------
 			else if(IsRequestInfo())
 			{
-				const maxRequestFrames = SPRITEID_INFO_REQUEST_LAST - SPRITEID_INFO_REQUEST + 1;
+				const int maxRequestFrames = SPRITEID_INFO_REQUEST_LAST - SPRITEID_INFO_REQUEST + 1;
 				RequestSpriteID = SPRITEID_INFO_REQUEST + ((g_CurrentFrame>>1) % (maxRequestFrames+4));
 
 				if (RequestSpriteID > SPRITEID_INFO_REQUEST_LAST)
