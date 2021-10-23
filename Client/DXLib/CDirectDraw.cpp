@@ -800,8 +800,9 @@ void CDirectDraw::SetGammaRamp(WORD step)
 
 		int maxValue[3];
 		int stepValue[3];
+		register int i;
 
-		for(int i = 0; i < 3; i++)
+		for(i = 0; i < 3; i++)
 		{
 			WORD addGammaStep = max(-100, min(100, m_AddGammaStep[i]));
 			if(m_AddGammaStep[i] > 0)

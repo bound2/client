@@ -138,6 +138,8 @@
 #ifndef __CDIRECTINPUT_H__
 #define __CDIRECTINPUT_H__
 
+#define DIRECTINPUT_VERSION 0x0600
+
 #include <dinput.h>
 
 #define BUFFER_SIZE           32

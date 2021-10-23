@@ -72,7 +72,7 @@ ProfilerInfo::End()
 // Write To File
 //----------------------------------------------------------------------
 void		
-ProfilerInfo::WriteToFile(ofstream& file) const
+ProfilerInfo::WriteToFile(std::ofstream& file) const
 {	
 	char str[256];
 	sprintf(str, "%10d  %10d  %7.3f", m_Times, m_TotalTime, GetAverageTime());
@@ -221,9 +221,9 @@ Profiler::GetAverageTime(const char* pName) const
 void		
 Profiler::WriteToFile(const char* pFilename, bool bAppend) const
 {
-	DWORD flag = (bAppend? ios::app : 0);
+	DWORD flag = (bAppend? std::ios::app : 0);
 
-	ofstream file(pFilename, flag);
+	std::ofstream file(pFilename, flag);
 
 	PROFILE_MAP::const_iterator iInfo = m_mapProfile.begin();
 

@@ -1,6 +1,6 @@
 
 #include <fstream>
-#include <strstrea.h>
+#include <strstream>
 #ifdef  __WIN32__
 #define STRICT
 #include <windows.h>
