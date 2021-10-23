@@ -775,12 +775,7 @@ void C_VS_UI_CHAR_DELETE::Run(id_t id)
 			// 넷마블용
 			{
 				// 제대로 입력하였는가?
-				if (
-					 ( ( gC_ci->IsKorean()&& (	m_lev_ssn_part1.Size() == SSN_PART1_CHAR_COUNT &&
-					 m_lev_ssn_part2.Size() == SSN_PART2_CHAR_COUNT ) ) ||
-					 ( !gC_ci->IsKorean() && ( wcscmp( m_lev_ssn_part1.GetString(), _L("DeletePc")) == 0 ) )
-					 )
-					 || g_pUserInformation->IsNetmarble)
+				if (g_pUserInformation->IsNetmarble)
 				{
 					SendCharacterDeleteToClient();
 				}
