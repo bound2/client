@@ -17,7 +17,7 @@ void
 PCSlayerInfo::setShapeInfo(DWORD flag, Color_t color[SLAYER_COLOR_MAX]) 
 	throw()
 {
-	m_Outlook = std::bitset<SLAYER_BIT_MAX>(flag);
+	m_Outlook = std::bitset<SLAYER_BIT_MAX>((ulonglong) flag);
 
 	//cout << "-----------SET------------" << endl;
 	//cout << m_Outlook << endl;
@@ -122,7 +122,7 @@ void PCSlayerInfo::read ( SocketInputStream & iStream )
 	//--------------------------------------------------------------------------------
 	DWORD outlook;
 	iStream.read( outlook);
-	m_Outlook = std::bitset<SLAYER_BIT_MAX>(outlook);
+	m_Outlook = std::bitset<SLAYER_BIT_MAX>((ulonglong) outlook);
 	
 	//--------------------------------------------------------------------------------
 	// read colors

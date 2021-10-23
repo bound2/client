@@ -38,8 +38,8 @@ void PCSlayerInfo3::read ( SocketInputStream & iStream )
 
 		// read outlook bitset
 		DWORD outlook;
-		iStream.read( outlook);
-		m_Outlook = std::bitset<SLAYER_BIT_MAX>(outlook);
+		iStream.read(outlook);
+		m_Outlook = std::bitset<SLAYER_BIT_MAX>((ulonglong) outlook);
 		
 		// read colors
 		for ( uint i = 0 ; i < SLAYER_COLOR_MAX ; i ++ )
