@@ -605,7 +605,7 @@ ReadPatchLogFromFile()
 {
 	char strBuffer[256];
 
-	class ifstream file("PatchLog.txt", ios::nocreate);	// text file이다.
+	std::ifstream file("PatchLog.txt");	// text file이다.
 
 	if (!file.is_open())
 	{

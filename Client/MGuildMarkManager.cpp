@@ -290,8 +290,8 @@ MGuildMarkManager::LoadGuildMark(WORD guildID)
 		strcpy(spkiFilename, m_GuildMarkSPKFilename.GetString());
 		strcat(spkiFilename, "i");
 
-		class ifstream spkFile(m_GuildMarkSPKFilename.GetString(), ios::binary | ios::nocreate);
-		class ifstream spkiFile(spkiFilename, ios::binary | ios::nocreate);
+		std::ifstream spkFile(m_GuildMarkSPKFilename.GetString(), std::ios::binary);
+		std::ifstream spkiFile(spkiFilename, std::ios::binary);
 
 		TYPE_SPRITEID maxSpkSize = 0;
 
@@ -386,7 +386,7 @@ MGuildMarkManager::SaveGuildMark(WORD guildID, CSprite* pSprite, CSprite* pSprit
 		// file에 sprite를 추가한다.
 		// index도 추가해야 한다.
 		//---------------------------------------------------------
-		class ifstream spkInputFile(m_GuildMarkSPKFilename.GetString(), ios::binary | ios::nocreate);
+		std::ifstream spkInputFile(m_GuildMarkSPKFilename.GetString(), std::ios::binary);
 
 		TYPE_SPRITEID maxSpkSize = 0;
 
@@ -535,9 +535,9 @@ MGuildMarkManager::MergeGuildMark(const char* pSPKFilenameOrg,
 		// (SPKApp의 0 --> orgSize가 된다)
 		// (SPKAppIndex의 0 --> fpOrg-2(size부분)가 된다.)
 		//---------------------------------------------------------
-		class ifstream spkInputFile(pSPKFilenameOrg, ios::binary | ios::nocreate);
-		class ifstream spkInputFileApp(pSPKFilenameApp, ios::binary | ios::nocreate);
-		class ifstream spkiInputFileApp(pSPKIFilenameApp, ios::binary | ios::nocreate);
+		std::ifstream spkInputFile(pSPKFilenameOrg, std::ios::binary);
+		std::ifstream spkInputFileApp(pSPKFilenameApp, std::ios::binary);
+		std::ifstream spkiInputFileApp(pSPKIFilenameApp, std::ios::binary);
 
 		TYPE_SPRITEID orgSize = 0;			// 원래 개수
 		TYPE_SPRITEID appSize = 0;			// 추가할 개수
@@ -618,8 +618,8 @@ MGuildMarkManager::MergeGuildMark(const char* pSPKFilenameOrg,
 		//-----------------------------------------------------------------------------
 		// GuildMark.spki 를 수정해서 추가한다.
 		//-----------------------------------------------------------------------------
-		class ofstream spkiFileOrg(pSPKIFilenameOrg, ios::binary | ios::ate);
-		class ifstream spkiFileApp(pSPKIFilenameApp, ios::binary | ios::nocreate);
+		std::ofstream spkiFileOrg(pSPKIFilenameOrg, std::ios::binary | std::ios::ate);
+		std::ifstream spkiFileApp(pSPKIFilenameApp, std::ios::binary);
 
 		TYPE_SPRITEID newSize = orgSize + appSize;
 

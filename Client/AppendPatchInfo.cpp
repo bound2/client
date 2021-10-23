@@ -188,7 +188,7 @@ AppendPatch::SetFinalInfo(long finalFilesize, WORD finalSpkSize)
 bool		
 AppendPatch::SetFinalInfo(const char* currentFilename)
 {
-	class ifstream file(currentFilename, ios::binary | ios::nocreate);
+	std::ifstream file(currentFilename, std::ios::binary);
 
 	if (!file.is_open())
 	{
