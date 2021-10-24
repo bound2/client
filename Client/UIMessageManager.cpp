@@ -2237,7 +2237,7 @@ UIMessageManager::Execute_UI_CONNECT(int left, int right, void* void_ptr)
 			
 			str[n] = '\0';
 
-			g_pUserInformation->IsMaster |= (strstr(g_pUserInformation->CharacterID, str)!=NULL);
+			g_pUserInformation->IsMaster |= (strstr((const char*) g_pUserInformation->CharacterID, str)!=NULL);
 		}
 		
 		file.close();

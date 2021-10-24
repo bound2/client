@@ -108,7 +108,7 @@ CFramePack<Type>::SaveToFile(std::ofstream& packFile, std::ofstream& indexFile)
 	//--------------------------------------------------
 	// index ¿˙¿Â
 	//--------------------------------------------------
-	for (i=0; i<m_Size; i++)
+	for (int i=0; i<m_Size; i++)
 	{
 		indexFile.write((const char*)&pIndex[i], 4);
 	}
