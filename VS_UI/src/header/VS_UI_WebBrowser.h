@@ -13,7 +13,7 @@
 
 //#include <ddraw.h>
 #include "EXDISP.H"
-#include "ATLBASE.H"
+#include <atlbase.h>
 
 
 //-----------------------------------------------------------------------------
