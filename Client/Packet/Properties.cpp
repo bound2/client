@@ -11,7 +11,7 @@
 #include <wtypes.h>
 #include "Properties.h"
 #include <stdlib.h>			// atoi()
-#include "fstream"
+#include <fstream>
 //--------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------
 const char Properties::Comment = '#';
