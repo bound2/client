@@ -1,5 +1,6 @@
-
-C:.
+2TB_Nvme2 볼륨에 대한 폴더 경로의 목록입니다.
+볼륨 일련 번호가 000000B6 6657:F8FC입니다.
+H:.
 │  .gitignore
 │  AGENTS.md
 │  build_and_run_effect_viewer.sh
@@ -2322,158 +2323,175 @@ C:.
 │              main.c
 │              main.cpp
 │              
-└─VS_UI
-    │  Client_PCH.cpp
-    │  Client_PCH.h
-    │  DebugInfo.cpp
-    │  DIK_Defines.h
-    │  MitemTableInit.cpp
-    │  RarFile.cpp
-    │  RarFile.h
-    │  SXml.cpp
-    │  SXml.h
-    │  WinMain.cpp
-    │  
-    └─src
-        │  AcceleratorDef.cpp
-        │  AcceleratorManager.cpp
-        │  CWebPage.h
-        │  cwebpage_.h
-        │  InputFocusManager.cpp
-        │  InputFocusManager.h
-        │  KeyAccelerator.cpp
-        │  SkinManager.cpp
-        │  Vs_ui.cpp
-        │  VS_UI_Base.cpp
-        │  VS_UI_BBS.cpp
-        │  VS_UI_DESC.cpp
-        │  VS_UI_Description.cpp
-        │  VS_UI_Descriptor.cpp
-        │  VS_UI_Dialog.cpp
-        │  VS_UI_ELEVATOR.cpp
-        │  VS_UI_Exception.cpp
-        │  VS_UI_Exchange.cpp
-        │  VS_UI_ExtraDialog.cpp
-        │  VS_UI_Game.cpp
-        │  VS_UI_GameCommon.cpp
-        │  vs_ui_gamecommon2.cpp
-        │  VS_UI_GameOusters.cpp
-        │  VS_UI_GameSlayer.cpp
-        │  VS_UI_GameVampire.cpp
-        │  VS_UI_GlobalResource.cpp
-        │  VS_UI_Helper.cpp
-        │  VS_UI_Item.cpp
-        │  VS_UI_Message.cpp
-        │  VS_UI_mouse_pointer.cpp
-        │  VS_UI_PetStorage.cpp
-        │  VS_UI_PointExchange.cpp
-        │  VS_UI_progress.cpp
-        │  VS_UI_Shop.cpp
-        │  VS_UI_skill_tree.cpp
-        │  VS_UI_SKILL_VIEW.cpp
-        │  VS_UI_Storage.cpp
-        │  VS_UI_Title.cpp
-        │  VS_UI_TITLE_SHOWCHAR.CPP
-        │  VS_UI_Tutorial.cpp
-        │  VS_UI_ui_result_receiver.cpp
-        │  VS_UI_util.cpp
-        │  VS_UI_WebBrowser.cpp
-        │  VS_UI_widget.cpp
-        │  
-        ├─hangul
-        │      Ci.cpp
-        │      Ci.h
-        │      Ci_macOS.cpp
-        │      FL2.cpp
-        │      Fl2.h
-        │      
-        ├─header
-        │      AcceleratorDef.h
-        │      AcceleratorManager.h
-        │      KeyAccelerator.h
-        │      SkinManager.h
-        │      VS_UI.h
-        │      VS_UI_Base.h
-        │      VS_UI_bbs.h
-        │      VS_UI_DESC.h
-        │      VS_UI_Description.h
-        │      VS_UI_descriptor.h
-        │      VS_UI_Dialog.h
-        │      VS_UI_ELEVATOR.h
-        │      VS_UI_Exception.h
-        │      VS_UI_Exchange.h
-        │      VS_UI_ExtraDialog.h
-        │      VS_UI_filepath.h
-        │      VS_UI_Game.h
-        │      VS_UI_GameCommon.h
-        │      VS_UI_GameCommon2.h
-        │      VS_UI_GameOusters.h
-        │      VS_UI_GameSlayer.h
-        │      VS_UI_GameVampire.h
-        │      VS_UI_GlobalResource.h
-        │      VS_UI_Helper.h
-        │      VS_UI_item.h
-        │      VS_UI_Message.h
-        │      VS_UI_mouse_pointer.h
-        │      VS_UI_PetStorage.h
-        │      VS_UI_PointExchange.h
-        │      VS_UI_progress.h
-        │      VS_UI_Shop.h
-        │      VS_UI_skill_tree.h
-        │      VS_UI_SKILL_VIEW.h
-        │      VS_UI_Storage.h
-        │      VS_UI_title.h
-        │      VS_UI_Tutorial.h
-        │      VS_UI_UIMessage.h
-        │      VS_UI_ui_result_receiver.h
-        │      VS_UI_util.h
-        │      VS_UI_WebBrowser.h
-        │      VS_UI_widget.h
-        │      
-        ├─Imm
-        │      CImm.cpp
-        │      CImm.h
-        │      FeelitAPI.h
-        │      IFC.h
-        │      IFCErrors.h
-        │      ImmBaseTypes.h
-        │      ImmBox.h
-        │      ImmCompoundEffect.h
-        │      ImmCondition.h
-        │      ImmConstant.h
-        │      ImmDamper.h
-        │      ImmDevice.h
-        │      ImmDevices.h
-        │      ImmDXDevice.h
-        │      ImmEffect.h
-        │      ImmEffectSuite.h
-        │      ImmEllipse.h
-        │      ImmEnclosure.h
-        │      ImmFriction.h
-        │      ImmGrid.h
-        │      ImmIFR.h
-        │      ImmInertia.h
-        │      ImmMouse.h
-        │      ImmPeriodic.h
-        │      ImmProjects.h
-        │      ImmRamp.h
-        │      ImmSpring.h
-        │      ImmTexture.h
-        │      
-        └─widget
-                mother.cpp
-                mother.h
-                PI.H
-                pi_core.cpp
-                pi_core.h
-                SimpleDataList.h
-                unicorn.h
-                u_button.cpp
-                u_button.h
-                U_edit.cpp
-                U_edit.h
-                u_scrollbar.cpp
-                u_scrollbar.h
-                u_window.cpp
-                u_window.h
-                
+├─VS_UI
+│  │  Client_PCH.cpp
+│  │  Client_PCH.h
+│  │  DebugInfo.cpp
+│  │  DIK_Defines.h
+│  │  MitemTableInit.cpp
+│  │  RarFile.cpp
+│  │  RarFile.h
+│  │  SXml.cpp
+│  │  SXml.h
+│  │  WinMain.cpp
+│  │  
+│  └─src
+│      │  AcceleratorDef.cpp
+│      │  AcceleratorManager.cpp
+│      │  CWebPage.h
+│      │  cwebpage_.h
+│      │  InputFocusManager.cpp
+│      │  InputFocusManager.h
+│      │  KeyAccelerator.cpp
+│      │  SkinManager.cpp
+│      │  Vs_ui.cpp
+│      │  VS_UI_Base.cpp
+│      │  VS_UI_BBS.cpp
+│      │  VS_UI_DESC.cpp
+│      │  VS_UI_Description.cpp
+│      │  VS_UI_Descriptor.cpp
+│      │  VS_UI_Dialog.cpp
+│      │  VS_UI_ELEVATOR.cpp
+│      │  VS_UI_Exception.cpp
+│      │  VS_UI_Exchange.cpp
+│      │  VS_UI_ExtraDialog.cpp
+│      │  VS_UI_Game.cpp
+│      │  VS_UI_GameCommon.cpp
+│      │  vs_ui_gamecommon2.cpp
+│      │  VS_UI_GameOusters.cpp
+│      │  VS_UI_GameSlayer.cpp
+│      │  VS_UI_GameVampire.cpp
+│      │  VS_UI_GlobalResource.cpp
+│      │  VS_UI_Helper.cpp
+│      │  VS_UI_Item.cpp
+│      │  VS_UI_Message.cpp
+│      │  VS_UI_mouse_pointer.cpp
+│      │  VS_UI_PetStorage.cpp
+│      │  VS_UI_PointExchange.cpp
+│      │  VS_UI_progress.cpp
+│      │  VS_UI_Shop.cpp
+│      │  VS_UI_skill_tree.cpp
+│      │  VS_UI_SKILL_VIEW.cpp
+│      │  VS_UI_Storage.cpp
+│      │  VS_UI_Title.cpp
+│      │  VS_UI_TITLE_SHOWCHAR.CPP
+│      │  VS_UI_Tutorial.cpp
+│      │  VS_UI_ui_result_receiver.cpp
+│      │  VS_UI_util.cpp
+│      │  VS_UI_WebBrowser.cpp
+│      │  VS_UI_widget.cpp
+│      │  
+│      ├─hangul
+│      │      Ci.cpp
+│      │      Ci.h
+│      │      Ci_macOS.cpp
+│      │      FL2.cpp
+│      │      Fl2.h
+│      │      
+│      ├─header
+│      │      AcceleratorDef.h
+│      │      AcceleratorManager.h
+│      │      KeyAccelerator.h
+│      │      SkinManager.h
+│      │      VS_UI.h
+│      │      VS_UI_Base.h
+│      │      VS_UI_bbs.h
+│      │      VS_UI_DESC.h
+│      │      VS_UI_Description.h
+│      │      VS_UI_descriptor.h
+│      │      VS_UI_Dialog.h
+│      │      VS_UI_ELEVATOR.h
+│      │      VS_UI_Exception.h
+│      │      VS_UI_Exchange.h
+│      │      VS_UI_ExtraDialog.h
+│      │      VS_UI_filepath.h
+│      │      VS_UI_Game.h
+│      │      VS_UI_GameCommon.h
+│      │      VS_UI_GameCommon2.h
+│      │      VS_UI_GameOusters.h
+│      │      VS_UI_GameSlayer.h
+│      │      VS_UI_GameVampire.h
+│      │      VS_UI_GlobalResource.h
+│      │      VS_UI_Helper.h
+│      │      VS_UI_item.h
+│      │      VS_UI_Message.h
+│      │      VS_UI_mouse_pointer.h
+│      │      VS_UI_PetStorage.h
+│      │      VS_UI_PointExchange.h
+│      │      VS_UI_progress.h
+│      │      VS_UI_Shop.h
+│      │      VS_UI_skill_tree.h
+│      │      VS_UI_SKILL_VIEW.h
+│      │      VS_UI_Storage.h
+│      │      VS_UI_title.h
+│      │      VS_UI_Tutorial.h
+│      │      VS_UI_UIMessage.h
+│      │      VS_UI_ui_result_receiver.h
+│      │      VS_UI_util.h
+│      │      VS_UI_WebBrowser.h
+│      │      VS_UI_widget.h
+│      │      
+│      ├─Imm
+│      │      CImm.cpp
+│      │      CImm.h
+│      │      FeelitAPI.h
+│      │      IFC.h
+│      │      IFCErrors.h
+│      │      ImmBaseTypes.h
+│      │      ImmBox.h
+│      │      ImmCompoundEffect.h
+│      │      ImmCondition.h
+│      │      ImmConstant.h
+│      │      ImmDamper.h
+│      │      ImmDevice.h
+│      │      ImmDevices.h
+│      │      ImmDXDevice.h
+│      │      ImmEffect.h
+│      │      ImmEffectSuite.h
+│      │      ImmEllipse.h
+│      │      ImmEnclosure.h
+│      │      ImmFriction.h
+│      │      ImmGrid.h
+│      │      ImmIFR.h
+│      │      ImmInertia.h
+│      │      ImmMouse.h
+│      │      ImmPeriodic.h
+│      │      ImmProjects.h
+│      │      ImmRamp.h
+│      │      ImmSpring.h
+│      │      ImmTexture.h
+│      │      
+│      └─widget
+│              mother.cpp
+│              mother.h
+│              PI.H
+│              pi_core.cpp
+│              pi_core.h
+│              SimpleDataList.h
+│              unicorn.h
+│              u_button.cpp
+│              u_button.h
+│              U_edit.cpp
+│              U_edit.h
+│              u_scrollbar.cpp
+│              u_scrollbar.h
+│              u_window.cpp
+│              u_window.h
+│              
+└─분석관련
+        01. 프로젝트 기본 정보.md
+        02. 디렉토리 구조.md
+        03-1. 렌더링 시스템 상세.md
+        03-2. 입력사운드 시스템 상세.md
+        03. 핵심 서브시스템 목록.md
+        04. 플랫폼 마이그레이션 현황.md
+        05. 빌드 의존성.md
+        06. 관련 링크.md
+        07. VS2019 마이그레이션 가이드.md
+        08. 빌드 종속성 트리.md
+        09. basic 빌드 오류 분석.md
+        vs2019 빌드오류.sql
+        분석 제외.md
+        분석.md
+        프로젝트 개요.md
+        
