@@ -108,7 +108,9 @@ extern RECT g_GameRect;
 //¼ì²âÏµÍ³µÇÂ½µÄÓÃ»§
 #ifdef PLATFORM_WINDOWS
 	#include <tlhelp32.h>
-	#pragma comment(lib, "th32")
+	// ToolHelp32 functions (CreateToolhelp32Snapshot, etc.) live in kernel32.lib
+	// on modern Windows SDKs; "th32.lib" doesn't exist and this pragma would
+	// fail the link (LNK1104) on VS2019+.
 	extern int GetCurrentUserNumber();
 	extern int g_CheckTimeNum=0;
 #else

@@ -283,10 +283,16 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		framelib
 		TextSystem
 		SDL2::SDL2
-		SDL2::SDL2main
 		SDL2_image::SDL2_image
 		SDL2_ttf::SDL2_ttf
 	)
+
+	# See DarkEden target below: SDL2main collides with VS_UI/WinMain.cpp's
+	# own WinAPI WinMain on Windows, so only link it (PUBLIC, so it still
+	# reaches consumers) on platforms where it isn't a real Windows entry point.
+	if(NOT WIN32)
+		target_link_libraries(VS_UI PUBLIC SDL2::SDL2main)
+	endif()
 
 	# Platform-specific definitions
 	if(NOT WIN32)
@@ -559,7 +565,13 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	endif()
 
 	# Add DarkEden executable
-	add_executable(DarkEden ${CLIENT_MAIN_SOURCES})
+	# WIN32 keyword required on Windows: VS_UI/WinMain.cpp defines a real WinAPI
+	# WinMain, so the exe must link as a GUI subsystem app (not console/main).
+	if(WIN32)
+		add_executable(DarkEden WIN32 ${CLIENT_MAIN_SOURCES})
+	else()
+		add_executable(DarkEden ${CLIENT_MAIN_SOURCES})
+	endif()
 
 	# Set output directory
 	set_target_properties(DarkEden PROPERTIES
@@ -575,8 +587,15 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		VS_UI
 		TextSystem
 		SDL2::SDL2
-		SDL2::SDL2main
 	)
+
+	# SDL2main provides its own WinMain that forwards to SDL_main() on Windows.
+	# VS_UI/WinMain.cpp defines WinMain directly (not via the SDL_main macro
+	# convention), so linking SDL2main on Windows would collide with it
+	# (LNK2005). It's a no-op on other platforms, so only link it there.
+	if(NOT WIN32)
+		target_link_libraries(DarkEden PRIVATE SDL2::SDL2main)
+	endif()
 
 	# Link iconv library (not needed for Emscripten - has stub implementations)
 	if(NOT EMSCRIPTEN)
