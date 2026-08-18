@@ -1,6 +1,8 @@
 //////////////////////////////////////////////////////////////////////
 //
-// FileAPI.cpp
+// PacketFileAPI.cpp
+//
+// Renamed from FileAPI.cpp - see PacketFileAPI.h for why.
 //
 // by Reiot
 //
@@ -10,7 +12,7 @@
 // include files
 //////////////////////////////////////////////////
 #include "Client_PCH.h"
-#include "FileAPI.h"
+#include "PacketFileAPI.h"
 #include "Assert.h"
 
 

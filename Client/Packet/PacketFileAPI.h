@@ -1,6 +1,11 @@
 //////////////////////////////////////////////////////////////////////
 //
-// FileAPI.h
+// PacketFileAPI.h
+//
+// Renamed from FileAPI.h: the old name collided with the real Windows
+// SDK header <fileapi.h>, which <windows.h> depends on internally.
+// Whenever this project's include directory was searched before the
+// SDK's, <windows.h> would pick up this file instead and break.
 //
 // by Reiot
 //

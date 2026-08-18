@@ -11,7 +11,7 @@
 //////////////////////////////////////////////////
 #include "Client_PCH.h"
 #include "SocketImpl.h"
-#include "FileAPI.h"
+#include "PacketFileAPI.h"
 #include "SocketAPI.h"
 
 #if __LINUX__
