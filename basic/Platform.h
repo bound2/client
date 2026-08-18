@@ -70,6 +70,16 @@ extern "C" {
 	#endif
 #endif
 
+/* Include windows.h as early as possible on Windows builds so the rest of
+   this header can defer to the real Win32 types/structs/functions instead
+   of redefining them (which fails to compile or silently diverges). */
+#ifdef PLATFORM_WINDOWS
+	#ifndef _WINDOWS_
+		#define WIN32_LEAN_AND_MEAN
+		#include <windows.h>
+	#endif
+#endif
+
 /* ============================================================================
  * Calling Conventions
  * ============================================================================ */
@@ -106,7 +116,11 @@ extern "C" {
 
 #define NOT_SELECTED						-1
 
-/* Type definitions (same as original Typedef.h) */
+/* Type definitions (same as original Typedef.h)
+   On Windows these come from <windows.h> instead, since it is included
+   above and its types (DWORD, LONG, etc.) are not interchangeable with
+   these fixed-width equivalents. */
+#ifndef PLATFORM_WINDOWS
 typedef uint8_t			BYTE;
 typedef uint16_t		WORD;
 typedef uint32_t		UINT;
@@ -126,8 +140,8 @@ typedef int				BOOL;
 
 	/* Define id_t for cross-platform compatibility (unsigned int on all platforms) */
 	typedef unsigned int   id_t;
-	/* Define id_t for cross-platform compatibility (unsigned int on all platforms) */
-	typedef unsigned int   id_t;
+#endif /* !PLATFORM_WINDOWS */
+
 #ifndef TRUE
 #define TRUE 1
 #endif
@@ -187,7 +201,7 @@ typedef struct IDirectSoundNotify* LPDIRECTSOUNDNOTIFY;
 #endif
 
 /* CRITICAL_SECTION for thread synchronization */
-#ifndef _CRITICAL_SECTION_DEFINED
+#if !defined(_CRITICAL_SECTION_DEFINED) && !defined(PLATFORM_WINDOWS)
 #define _CRITICAL_SECTION_DEFINED
 #include <pthread.h>
 
@@ -1150,6 +1164,11 @@ void platform_shutdown(void);
 #endif
 #endif
 
+/* The remaining Windows API shims below (types, structs, and stub functions)
+   are only needed when compiling without <windows.h>; on real Windows builds
+   <windows.h> (included above) already provides all of them. */
+#ifndef PLATFORM_WINDOWS
+
 // Windows constants that may be needed
 #ifndef MAXLONG
 #define MAXLONG 2147483647L  // 0x7FFFFFFF
@@ -1776,6 +1795,8 @@ static inline void SetRect(LPRECT lprc, int xLeft, int yTop, int xRight, int yBo
         lprc->bottom = yBottom;
     }
 }
+
+#endif /* !PLATFORM_WINDOWS (Windows API shims started above) */
 
 /* max and min macros for compatibility with Windows code */
 #ifndef PLATFORM_WINDOWS
