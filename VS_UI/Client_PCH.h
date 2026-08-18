@@ -7,6 +7,17 @@
 
 #pragma once
 
+/* Establish PLATFORM_WINDOWS before the #ifdef checks below run: whenever
+   this PCH is the first header included in a translation unit, the macro
+   is still undefined here (only basic/Platform.h defines it), so the
+   POSIX branches (<unistd.h>, <SDL2/SDL.h>, ...) would get taken even on
+   a native Windows build. */
+#if defined(_WIN32) || defined(_WIN64)
+	#ifndef PLATFORM_WINDOWS
+		#define PLATFORM_WINDOWS
+	#endif
+#endif
+
 #ifdef PLATFORM_WINDOWS
 	#pragma warning(disable:4290)
 	#pragma warning(disable:4018)
