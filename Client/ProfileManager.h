@@ -114,10 +114,12 @@ class ProfileManager {
 };
 
 // Compile-time check to ensure CRITICAL_SECTION is fully defined
-// Windows: sizeof(CRITICAL_SECTION) >= 68 bytes
+// Windows: the real <windows.h> struct is 24 bytes on x86, 40 bytes on x64
+// (never 68 - an incomplete/forward-declared type would fail to compile
+// sizeof() at all, not silently return a small value)
 // POSIX/Emscripten: sizeof(CRITICAL_SECTION) = sizeof(pthread_mutex_t) + sizeof(int)
 #ifdef PLATFORM_WINDOWS
-	static_assert(sizeof(CRITICAL_SECTION) >= 68, "CRITICAL_SECTION is incomplete - Platform.h must be included before ProfileManager.h");
+	static_assert(sizeof(CRITICAL_SECTION) >= 24, "CRITICAL_SECTION is incomplete - Platform.h must be included before ProfileManager.h");
 #else
 	// For POSIX systems (including Emscripten), the size may vary
 	// Just ensure it contains the mutex (basic sanity check)
