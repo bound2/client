@@ -2,7 +2,7 @@
 // UtilityFunction.cpp
 //-----------------------------------------------------------------------------
 #include "Client_PCH.h"
-#include "DXLib.h"
+#include "DXLib/DXLib.h"
 
 #include "UtilityFunction.h"
 

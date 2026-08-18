@@ -13,7 +13,11 @@
 #include "DLL.h"
 #include "GL_import.h"
 #include "Timer2.h"
-#include "DXLib.h"
+/* Explicit path: plain "DXLib.h" is ambiguous with the stale, unmigrated
+   Client/DXLib.h (which pulls in Client/CDirectSoundStream.h etc. - the
+   pre-SDL versions that still expect real <MMSystem.h> types) since
+   Client/ is also on the include path. */
+#include "DXLib/DXLib.h"
 #ifdef PLATFORM_WINDOWS
 #include "Unicorn.h"
 #endif

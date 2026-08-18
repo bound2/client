@@ -2,9 +2,10 @@
 #define __2D__
 
 #include "Typedef.h"
-#ifdef PLATFORM_WINDOWS
-#include <DDraw.h>
-#endif
+/* Do not include the real <DDraw.h>: this project no longer uses real
+   DirectDraw, and no type declared in this file needs it. Pulling it in
+   redefines DDPIXELFORMAT/DDSCAPS2/... (SDL stand-ins used elsewhere)
+   with incompatible types. */
 #include "DLL.h"
 
 /*-----------------------------------------------------------------------------

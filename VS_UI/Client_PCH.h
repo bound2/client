@@ -32,10 +32,12 @@
 #include <sys/stat.h>
 
 #ifdef PLATFORM_WINDOWS
+	/* Do not include the real <MMSystem.h>/<Digitalv.h>/<DDraw.h> here:
+	   this project no longer uses real DirectX/DirectSound - basic/AudioTypes.h
+	   and Client/DXLib/CDirectDraw.h define SDL-backed stand-ins for the
+	   same type names (HMMIO, DDPIXELFORMAT, LPDIRECTDRAW7, ...), and
+	   including the real headers redefines them with incompatible types. */
 	#include <windows.h>
-	#include <MMSystem.h>
-	#include <Digitalv.h>
-	#include <DDraw.h>
 	#include <io.h>
 	#include <fcntl.h>
 	#pragma warning(pop)

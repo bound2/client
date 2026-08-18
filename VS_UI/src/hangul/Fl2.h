@@ -14,7 +14,11 @@
 #include "CI.h"
 #include <string>
 #ifdef PLATFORM_WINDOWS
-#include <ddraw.h>
+/* Do not include the real <ddraw.h>: this project no longer uses real
+   DirectDraw. Client/DXLib/CDirectDraw.h defines the SDL-backed stand-in
+   for LPDIRECTDRAWSURFACE7 used below, and including the real header
+   redefines DDPIXELFORMAT/DDSCAPS2/... with incompatible types. */
+#include "CDirectDraw.h"
 #endif
 
 // NOTE: Do not include SP.h here as it defines a stub PrintInfo that conflicts

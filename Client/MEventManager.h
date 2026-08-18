@@ -8,7 +8,10 @@
 #pragma warning(disable:4786)
 
 #include "ctypetable.h"
-#include "CDirectDrawSurface.h"
+/* Explicit path: plain "CDirectDrawSurface.h" resolves to this same
+   directory's stale, unmigrated copy (missing m_ddsd) instead of the
+   maintained Client/DXLib/CDirectDrawSurface.h. */
+#include "DXLib/CDirectDrawSurface.h"
 #include <map>
 
 #define	EVENTFLAG_SHOW_STRING				0x00000001		// 화면에 string를 표시한다

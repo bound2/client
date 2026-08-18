@@ -19,7 +19,13 @@
 #endif
 
 #ifdef PLATFORM_WINDOWS
-	#include <Windows.h>
+	/* WIN32_LEAN_AND_MEAN keeps <Windows.h> from pulling in mmsystem.h,
+	   ddraw-adjacent headers, etc., which redefine types this project's
+	   own SDL stand-ins (AudioTypes.h, DXLib/CDirectDraw.h, ...) provide. */
+	#ifndef _WINDOWS_
+		#define WIN32_LEAN_AND_MEAN
+		#include <Windows.h>
+	#endif
 #elif defined(__LINUX__) || defined(PLATFORM_MACOS)
 	#include <sys/types.h>
 #endif

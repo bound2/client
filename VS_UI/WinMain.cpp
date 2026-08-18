@@ -14,7 +14,7 @@
 
 // ... rest of includes ...
 #include <windows.h>
-#include "DXLib.h"
+#include "DXLib/DXLib.h"
 
 #include "VS_UI.h" // include VS UI master header file.
 #include <math.h>

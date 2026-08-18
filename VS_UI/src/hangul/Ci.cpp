@@ -1,7 +1,7 @@
 // CI.cpp
 
 #include "client_PCH.h"
-#include "DXLib.h"
+#include "DXLib/DXLib.h"
 #include "CI.h"
 #include "Timer2.h"
 
