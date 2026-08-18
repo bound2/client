@@ -47,8 +47,13 @@
 	   this project no longer uses real DirectX/DirectSound - basic/AudioTypes.h
 	   and Client/DXLib/CDirectDraw.h define SDL-backed stand-ins for the
 	   same type names (HMMIO, DDPIXELFORMAT, LPDIRECTDRAW7, ...), and
-	   including the real headers redefines them with incompatible types. */
-	#include <windows.h>
+	   including the real headers redefines them with incompatible types.
+	   WIN32_LEAN_AND_MEAN keeps <windows.h> itself from pulling those same
+	   headers in automatically (via lzexpand.h -> mmsystem.h -> ...). */
+	#ifndef _WINDOWS_
+		#define WIN32_LEAN_AND_MEAN
+		#include <windows.h>
+	#endif
 	#include <io.h>
 	#include <fcntl.h>
 	#pragma warning(pop)
