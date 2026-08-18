@@ -74,7 +74,10 @@ typedef struct {
 	WORD blue[256];
 } DDGAMMARAMP;
 
-/* Common Windows types - define if not already defined */
+/* Common Windows types - define if not already defined.
+   On Windows these already come from <windows.h> (via Platform.h), and
+   redefining them (structs especially) fails to compile. */
+#ifndef PLATFORM_WINDOWS
 #ifndef RECT_DEFINED
 #define RECT_DEFINED
 typedef struct tagRECT {
@@ -105,10 +108,12 @@ typedef struct tagSIZE {
 	LONG cy;
 } SIZE, *PSIZE, *LPSIZE;
 #endif
+#endif /* !PLATFORM_WINDOWS */
 
 /* QWORD type */
 typedef uint64_t QWORD;
 
+#ifndef PLATFORM_WINDOWS
 /* HWND type stub */
 typedef void* HWND;
 
@@ -117,6 +122,7 @@ typedef void* HWND;
 #define HBITMAP_DEFINED
 typedef void* HBITMAP;
 #endif
+#endif /* !PLATFORM_WINDOWS */
 
 /* Memory utilities */
 #ifndef ZeroMemory
