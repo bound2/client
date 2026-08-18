@@ -1,4 +1,4 @@
-// VS_UI_GameCommon.cpp
+﻿// VS_UI_GameCommon.cpp
 
 #include "client_PCH.h"
 #include "VS_UI_GameCommon.h"
