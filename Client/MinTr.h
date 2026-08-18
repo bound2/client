@@ -145,15 +145,16 @@ inline void _MinTrace(LPCTSTR pFormat, ...)
 #ifdef PLATFORM_WINDOWS
 inline void _MinTraceErrA(LPCSTR p)
 {
-    COPYDATASTRUCT cd; 
-    HWND hWnd = ::FindWindow (g_pszMinTraceClassName, g_pszMinTraceTitle); 
+    COPYDATASTRUCT cd;
+    HWND hWnd = ::FindWindow (g_pszMinTraceClassName, g_pszMinTraceTitle);
     if (hWnd)
-    {  
+    {
         cd.dwData = MIN_NOTUNI | MIN_ERR;
         cd.cbData = (strlen(p)+1)*sizeof(char);
-        cd.lpData = (void *)p; 
-        ::SendMessage (hWnd, WM_COPYDATA, 0, (LPARAM)&cd);  
-    } 
+        cd.lpData = (void *)p;
+        ::SendMessage (hWnd, WM_COPYDATA, 0, (LPARAM)&cd);
+    }
+}
 #else
 inline void _MinTraceErrA(LPCSTR p)
 {
@@ -167,15 +168,16 @@ inline void _MinTraceErrA(LPCSTR p)
 #ifdef PLATFORM_WINDOWS
 inline void _MinTraceErrW(LPCWSTR p)
 {
-    COPYDATASTRUCT cd; 
-    HWND hWnd = ::FindWindow (g_pszMinTraceClassName, g_pszMinTraceTitle); 
+    COPYDATASTRUCT cd;
+    HWND hWnd = ::FindWindow (g_pszMinTraceClassName, g_pszMinTraceTitle);
     if (hWnd)
-    {  
+    {
         cd.dwData = MIN_UNICOD | MIN_ERR;
         cd.cbData = (wcslen(p)+1)*sizeof(wchar_t);
-        cd.lpData = (void *)p; 
-        ::SendMessage (hWnd, WM_COPYDATA, 0, (LPARAM)&cd);  
-    } 
+        cd.lpData = (void *)p;
+        ::SendMessage (hWnd, WM_COPYDATA, 0, (LPARAM)&cd);
+    }
+}
 #else
 inline void _MinTraceErrW(LPCWSTR p)
 {
@@ -212,15 +214,16 @@ inline void _MinTraceErr(LPCTSTR pFormat, ...)
 #ifdef PLATFORM_WINDOWS
 inline void _MinTraceWarA(LPCSTR p)
 {
-    COPYDATASTRUCT cd; 
-    HWND hWnd = ::FindWindow (g_pszMinTraceClassName, g_pszMinTraceTitle); 
+    COPYDATASTRUCT cd;
+    HWND hWnd = ::FindWindow (g_pszMinTraceClassName, g_pszMinTraceTitle);
     if (hWnd)
-    {  
+    {
         cd.dwData = MIN_NOTUNI | MIN_WAR;
         cd.cbData = (strlen(p)+1)*sizeof(char);
-        cd.lpData = (void *)p; 
-        ::SendMessage (hWnd, WM_COPYDATA, 0, (LPARAM)&cd);  
-    } 
+        cd.lpData = (void *)p;
+        ::SendMessage (hWnd, WM_COPYDATA, 0, (LPARAM)&cd);
+    }
+}
 #else
 inline void _MinTraceWarA(LPCSTR p)
 {
@@ -234,15 +237,16 @@ inline void _MinTraceWarA(LPCSTR p)
 #ifdef PLATFORM_WINDOWS
 inline void _MinTraceWarW(LPCWSTR p)
 {
-    COPYDATASTRUCT cd; 
-    HWND hWnd = ::FindWindow (g_pszMinTraceClassName, g_pszMinTraceTitle); 
+    COPYDATASTRUCT cd;
+    HWND hWnd = ::FindWindow (g_pszMinTraceClassName, g_pszMinTraceTitle);
     if (hWnd)
-    {  
+    {
         cd.dwData = MIN_UNICOD | MIN_WAR;
         cd.cbData = (wcslen(p)+1)*sizeof(wchar_t);
-        cd.lpData = (void *)p; 
-        ::SendMessage (hWnd, WM_COPYDATA, 0, (LPARAM)&cd);  
-    } 
+        cd.lpData = (void *)p;
+        ::SendMessage (hWnd, WM_COPYDATA, 0, (LPARAM)&cd);
+    }
+}
 #else
 inline void _MinTraceWarW(LPCWSTR p)
 {
