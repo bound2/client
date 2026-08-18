@@ -34,8 +34,11 @@ set(SPRITELIB_SOURCES
 	SpriteLibBackendSDL.cpp
 
 	# SDL-specific CSpriteSurface implementation
+	# NOTE: CSpriteSurface_Adapter.cpp is #include-d directly by
+	# CSpriteSurface_SDL.cpp and must not be listed here, or its
+	# CSpriteSurface::Blt* methods get compiled into two translation
+	# units and the linker discards one copy (LNK4006).
 	CSpriteSurface_SDL.cpp
-	CSpriteSurface_Adapter.cpp
 	CSpriteSurface_Effects.cpp
 
 	# SDL-specific CSprite implementation
