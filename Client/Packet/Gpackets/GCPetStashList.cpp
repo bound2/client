@@ -6,7 +6,7 @@
 
 #include "Client_PCH.h"
 #include "GCPetStashList.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 
 #ifdef __GAME_SERVER__
 	#include "Item.h"

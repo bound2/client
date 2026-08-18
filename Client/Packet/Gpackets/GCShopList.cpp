@@ -9,7 +9,7 @@
 
 #include "Client_PCH.h"
 #include "GCShopList.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 //#include "Item.h"
 
 //////////////////////////////////////////////////////////////////////////////

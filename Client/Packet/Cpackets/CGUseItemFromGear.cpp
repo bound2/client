@@ -7,7 +7,7 @@
 #include "CGUseItemFromGear.h"
 #include "SocketEncryptInputStream.h"
 #include "SocketEncryptOutputStream.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 
 
 void CGUseItemFromGear::read (SocketInputStream & iStream) 

@@ -19,7 +19,7 @@
 #include "GearInfo.h"
 #include "ExtraInfo.h"
 #include "EffectInfo.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 #include "RideMotorcycleInfo.h"
 #include "NPCInfo.h"
 #include "NicknameInfo.h"

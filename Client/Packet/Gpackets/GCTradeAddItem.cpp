@@ -7,7 +7,7 @@
 // include files
 #include "Client_PCH.h"
 #include "GCTradeAddItem.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // constructor

@@ -8,7 +8,7 @@
 // include files
 #include "Client_PCH.h"
 #include "GCRankBonusInfo.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 
 //--------------------------------------------------------------------------------
 // constructor

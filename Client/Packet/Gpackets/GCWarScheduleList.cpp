@@ -6,7 +6,7 @@
 
 #include "Client_PCH.h"
 #include "GCWarScheduleList.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // constructor

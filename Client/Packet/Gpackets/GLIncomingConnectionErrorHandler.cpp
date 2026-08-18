@@ -13,7 +13,7 @@
 #ifdef __LOGIN_SERVER__
 	#include "LoginPlayer.h"
 	#include "LoginPlayerManager.h"
-	#include "Assert.h"
+	#include "PacketAssert.h"
 #endif
 
 //--------------------------------------------------------------------------------

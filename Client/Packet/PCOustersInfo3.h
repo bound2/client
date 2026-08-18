@@ -8,7 +8,7 @@
 #define __PC_OUSTERS_INFO_3_H__
 
 #include "PCInfo.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class PCOustersInfo3;

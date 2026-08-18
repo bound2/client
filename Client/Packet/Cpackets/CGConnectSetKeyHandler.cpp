@@ -7,7 +7,7 @@
 // include files
 #include "Client_PCH.h"
 #include "CGConnectSetKey.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 #include "Player.h"
 #ifdef __LOGIN_SERVER__
 #endif

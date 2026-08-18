@@ -8,7 +8,7 @@
 // include files
 #include "Client_PCH.h"
 #include "RequestClientPlayer.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 #include "Packet.h"
 #include "PacketFactoryManager.h"
 #include "PacketValidator.h"

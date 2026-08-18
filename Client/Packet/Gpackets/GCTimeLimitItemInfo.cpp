@@ -1,7 +1,7 @@
 
 #include "Client_PCH.h"
 #include "GCTimeLimitItemInfo.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 
 GCTimeLimitItemInfo::GCTimeLimitItemInfo()
 	throw()

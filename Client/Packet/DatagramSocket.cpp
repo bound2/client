@@ -9,7 +9,7 @@
 // include files
 #include "Client_PCH.h"
 #include "DatagramSocket.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 #include "PacketFileAPI.h"
 #include "DebugInfo.h"
 #include "MTestDef.h"

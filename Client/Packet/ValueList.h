@@ -12,7 +12,7 @@
 #include "Packet.h"
 
 #ifdef __GAME_CLIENT__
-#include "Assert.h"
+#include "PacketAssert.h"
 #endif
 
 //////////////////////////////////////////////////////////////////////////////

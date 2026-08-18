@@ -10,7 +10,7 @@
 #include "GCNPCInfo.h"
 #include "PCSlayerInfo2.h"
 #include "PCVampireInfo2.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 
 // for client.. by sigi
 #ifndef SAFE_DELETE

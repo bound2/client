@@ -8,7 +8,7 @@
 
 #include "Client_PCH.h"
 #include "GCShopBuyFail.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 
 void GCShopBuyFail::read (SocketInputStream & iStream) 
 	 throw (ProtocolException , Error)

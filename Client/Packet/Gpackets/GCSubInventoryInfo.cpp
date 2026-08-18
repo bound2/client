@@ -8,7 +8,7 @@
 #include "RaceWarInfo.h"
 #include "LevelWarInfo.h"
 #include "GuildWarInfo.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 #include "Client.h"
 #ifdef __GAME_SERVER__
 #include "PetItem.h"

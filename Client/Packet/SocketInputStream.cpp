@@ -14,7 +14,7 @@
 #include "Client_PCH.h"
 #include "SocketInputStream.h"
 #include <errno.h>
-#include "Assert.h"
+#include "PacketAssert.h"
 #include "Packet.h"
 #include "MinTr.h"
 #include <cstdio>

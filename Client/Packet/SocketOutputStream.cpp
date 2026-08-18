@@ -11,7 +11,7 @@
 //////////////////////////////////////////////////
 #include "Client_PCH.h"
 #include "SocketOutputStream.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 #include "Packet.h"
 #include "DebugInfo.h"
 

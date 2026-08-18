@@ -12,7 +12,7 @@
 #include "Socket.h"
 #include "SocketInputStream.h"
 #include "SocketOutputStream.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 #include "Packet.h"
 #include "PacketFactoryManager.h"
 #include "DebugInfo.h"

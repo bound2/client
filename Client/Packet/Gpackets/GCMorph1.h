@@ -18,7 +18,7 @@
 #include "InventoryInfo.h"
 #include "GearInfo.h"
 #include "ExtraInfo.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 
 //--------------------------------------------------------------------------------
 //

@@ -11,7 +11,7 @@
 #include "SlayerSkillInfo.h"
 #include "VampireSkillInfo.h"
 #include "OustersSkillInfo.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 
 //--------------------------------------------------------------------------------
 // constructor

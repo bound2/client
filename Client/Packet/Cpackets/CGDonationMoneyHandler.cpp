@@ -7,7 +7,7 @@
 #include "CGDonationMoney.h"
 
 #ifdef __GAME_SERVER__
-	#include "Assert.h"
+	#include "PacketAssert.h"
 #endif
 
 //////////////////////////////////////////////////////////////////////////////

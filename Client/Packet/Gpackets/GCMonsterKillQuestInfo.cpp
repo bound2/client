@@ -6,7 +6,7 @@
 
 #include "Client_PCH.h"
 #include "GCMonsterKillQuestInfo.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 
 const int GCMonsterKillQuestInfo::szQuestInfo = szQuestID + szSpriteType + szWORD + szDWORD;
 

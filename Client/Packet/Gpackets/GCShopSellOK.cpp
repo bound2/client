@@ -13,7 +13,7 @@
 // include files
 #include "Client_PCH.h"
 #include "GCShopSellOK.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 
 
 //--------------------------------------------------------------------

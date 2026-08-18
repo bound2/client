@@ -6,7 +6,7 @@
 
 #include "Client_PCH.h"
 #include "GCPartyJoined.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class GCPartyJoined member methods

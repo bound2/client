@@ -9,7 +9,7 @@
 #include "SocketInputStream.h"
 #include "SocketOutputStream.h"
 #include "StringStream.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // constructor

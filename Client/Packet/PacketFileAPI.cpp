@@ -13,7 +13,7 @@
 //////////////////////////////////////////////////
 #include "Client_PCH.h"
 #include "PacketFileAPI.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 
 
 #if __WINDOWS__

@@ -9,7 +9,7 @@
 #include "CGMixItem.h"
 #include "SocketEncryptInputStream.h"
 #include "SocketEncryptOutputStream.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 
 
 void CGMixItem::read (SocketInputStream & iStream) 

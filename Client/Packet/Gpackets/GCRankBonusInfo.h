@@ -12,7 +12,7 @@
 // include files
 #include "Packet.h"
 #include "PacketFactory.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 
 const DWORD EndOfRankBonus = 9999;
 

@@ -8,7 +8,7 @@
 
 #ifdef __GAME_SERVER__
 	#include "SystemAvailabilitiesManager.h"
-	#include "Assert.h"
+	#include "PacketAssert.h"
 	#include "GamePlayer.h"
 	#include "PlayerCreature.h"
 #endif	// __GAME_SERVER__

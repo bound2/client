@@ -10,7 +10,7 @@
 // include files
 #include "Client_PCH.h"
 #include "GCShopSellFail.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 
 
 //--------------------------------------------------------------------

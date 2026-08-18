@@ -1,6 +1,13 @@
 //--------------------------------------------------------------------------------
 //
-// Filename   : Assert.h
+// Filename   : PacketAssert.h
+//
+// Renamed from Assert.h: the old name collided with the standard C++
+// <cassert>/<assert.h> header. With Client/Packet on the include path,
+// <cassert>'s internal #include <assert.h> resolved to this file instead
+// of the real CRT header, so the standard assert() macro was never
+// defined - breaking any translation unit that used plain assert().
+//
 // Written By : Reiot
 //
 //--------------------------------------------------------------------------------

@@ -9,7 +9,7 @@
 #ifdef __GAME_SERVER__
 	#include "SystemAvailabilitiesManager.h"
 	#include "GamePlayer.h"
-	#include "Assert.h"
+	#include "PacketAssert.h"
 #endif	// __GAME_SERVER__
 
 //////////////////////////////////////////////////////////////////////////////

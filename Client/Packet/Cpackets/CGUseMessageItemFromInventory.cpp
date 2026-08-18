@@ -7,7 +7,7 @@
 //////////////////////////////////////////////////////////////////////////////
 #include "Client_PCH.h"
 #include "CGUseMessageItemFromInventory.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 
 #ifdef __DEBUG_OUTPUT__
 void CGUseMessageItemFromInventory::read (SocketInputStream & iStream) 

@@ -8,7 +8,7 @@
 #define __PC_SLAYER_INFO3_H__
 
 #include "PCInfo.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 #include <bitset>
 
 //////////////////////////////////////////////////////////////////////////////

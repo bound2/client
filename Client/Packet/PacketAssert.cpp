@@ -1,6 +1,9 @@
 //--------------------------------------------------------------------------------
-// 
-// Filename   : Assert.cpp 
+//
+// Filename   : PacketAssert.cpp
+//
+// Renamed from Assert.cpp - see PacketAssert.h for why.
+//
 // Written By : Reiot
 //
 //--------------------------------------------------------------------------------
@@ -8,7 +11,7 @@
 // include files
 #include "Client_PCH.h"
 #include "Types.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 #include "Exception.h"
 #include <time.h>
 

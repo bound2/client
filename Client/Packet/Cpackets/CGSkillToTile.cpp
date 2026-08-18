@@ -7,7 +7,7 @@
 #include "CGSkillToTile.h"
 #include "SocketEncryptInputStream.h"
 #include "SocketEncryptOutputStream.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 
 
 CGSkillToTile::CGSkillToTile () 

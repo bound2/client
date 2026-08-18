@@ -5,7 +5,7 @@
 //////////////////////////////////////////////////////////////////////////////
 #include "Client_PCH.h"
 #include "CGCrashReport.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 
 CGCrashReport::CGCrashReport () 
      throw ()

@@ -12,7 +12,7 @@
 // include files
 #include "Client_PCH.h"
 #include "GCShopSold.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 
 //--------------------------------------------------------------------
 // constructor

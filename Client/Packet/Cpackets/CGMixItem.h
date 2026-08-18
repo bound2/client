@@ -11,7 +11,7 @@
 
 #include "Packet.h"
 #include "PacketFactory.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class CGMixItem;

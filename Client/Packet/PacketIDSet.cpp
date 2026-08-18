@@ -9,7 +9,7 @@
 #include "Client_PCH.h"
 // include files
 #include "PacketIDSet.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 
 //----------------------------------------------------------------------
 // constructor

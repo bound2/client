@@ -9,7 +9,7 @@
 
 #include "Client_PCH.h"
 #include "GCShopListMysterious.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 
 #ifndef __GAME_CLIENT__
 	#include "Item.h"

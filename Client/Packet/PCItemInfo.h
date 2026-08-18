@@ -15,7 +15,7 @@
 #include "SocketInputStream.h"
 #include "SocketOutputStream.h"
 #include "SubItemInfo.h"
-#include "Assert.h"
+#include "PacketAssert.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class PCItemInfo

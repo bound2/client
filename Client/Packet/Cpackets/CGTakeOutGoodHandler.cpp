@@ -8,7 +8,7 @@
 
 #ifdef __GAME_SERVER__
 	#include "GamePlayer.h"
-	#include "Assert.h"
+	#include "PacketAssert.h"
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
