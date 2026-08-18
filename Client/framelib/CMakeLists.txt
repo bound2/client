@@ -12,10 +12,12 @@ list(FILTER FRAMELIB_SOURCES EXCLUDE REGEX ".*_PCH\\.cpp")
 add_library(framelib STATIC ${FRAMELIB_SOURCES})
 
 # Include directories
+# NOTE: Do not add ../Packet here. Client/Packet/fileapi.h shadows the real
+# Windows SDK <fileapi.h> that <windows.h> depends on internally, and
+# framelib does not include anything from Packet.
 target_include_directories(framelib PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/../..
-	${CMAKE_CURRENT_SOURCE_DIR}/../Packet
 	${CMAKE_CURRENT_SOURCE_DIR}/../SpriteLib
 )
 
