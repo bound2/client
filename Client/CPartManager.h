@@ -81,8 +81,8 @@
 template <class IndexType, class PartIndexType, class DataType>
 class CPartManager {
 	public :
-		typedef	std::list<PartIndexType>	PARTINDEX_LIST;				// PartIndex의 ID
-		typedef	PARTINDEX_LIST::iterator	PARTINDEX_LIST_ITERATOR;
+		typedef	std::list<PartIndexType>			PARTINDEX_LIST;				// PartIndex의 ID
+		typedef	typename PARTINDEX_LIST::iterator	PARTINDEX_LIST_ITERATOR;
 		
 	public :
 		CPartManager();
