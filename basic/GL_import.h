@@ -25,8 +25,10 @@ DllImport void (*CkBltz)(const S_SURFACEINFO *,
 						const int); // copy_2D_Space_colorkey fp
 
 #ifdef PLATFORM_WINDOWS
+/* DDSURFACEDESC (the original, non-"2" DirectDraw surface descriptor) was
+   never ported to this project's SDL stand-ins and has no caller left -
+   only the DDSURFACEDESC2 overload below is actually used. */
 DllImport void	SetSurfaceInfo(S_SURFACEINFO *surface_info, const DDSURFACEDESC2 *p_ddsd);
-DllImport void	SetSurfaceInfo(S_SURFACEINFO *surface_info, const DDSURFACEDESC *p_ddsd);
 #endif
 DllImport void	SetSurfaceInfo(S_SURFACEINFO &surface_info, void *p_surface, int w, int h, int pitch=0);
 DllImport void	SetRect(S_RECT &rect, int x, int y, int w, int h);

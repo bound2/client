@@ -11,13 +11,16 @@
 
 #include "BasicS.h"
 #include "DLL.h"
-#include "GL_import.h"
-#include "Timer2.h"
 /* Explicit path: plain "DXLib.h" is ambiguous with the stale, unmigrated
    Client/DXLib.h (which pulls in Client/CDirectSoundStream.h etc. - the
    pre-SDL versions that still expect real <MMSystem.h> types) since
-   Client/ is also on the include path. */
+   Client/ is also on the include path.
+   Must come before GL_import.h: GL_import.h declares a SetSurfaceInfo()
+   overload that takes a DDSURFACEDESC2*, a type DXLib/CDirectDraw.h
+   defines. */
 #include "DXLib/DXLib.h"
+#include "GL_import.h"
+#include "Timer2.h"
 #ifdef PLATFORM_WINDOWS
 #include "Unicorn.h"
 #endif
