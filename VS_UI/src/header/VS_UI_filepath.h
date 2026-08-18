@@ -361,7 +361,7 @@
 
 // FILE DIALOG
 #define SPK_FILE_DIALOG					SPK_ROOT"FileDialog.spk"
-#define DIR_PROFILE							_PROFILE_ROOT"
+#define DIR_PROFILE							_PROFILE_ROOT
 
 #define SPK_QUESTION					SPK_ROOT"Question.spk"
 
