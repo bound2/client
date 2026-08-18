@@ -58,7 +58,7 @@ bool C_VS_UI_WEBBROWSER::Start(HWND hwndApp,  char* pURL, void* pWebOjbect)
 			return false;
 		}
 
-	m_pWebBrowser->get_HWND((LONG*)&m_hWnd_Explorer);
+	m_pWebBrowser->get_HWND((SHANDLE_PTR*)&m_hWnd_Explorer);
 
 	if(NULL == m_hWnd_Explorer)
 		return false;

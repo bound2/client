@@ -260,6 +260,24 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# Create VS_UI static library
 	add_library(VS_UI STATIC ${VS_UI_ALL_SOURCES})
 
+	# VS_UI_WebBrowser.h/.cpp use ATL (atlbase.h, CComBSTR, CComVariant) for the
+	# legacy in-game IE browser control. ATL ships alongside the MSVC toolset
+	# under atlmfc/include but is not on the default include path. Locate it
+	# by searching installed VS instances directly rather than trusting
+	# CMAKE_CXX_COMPILER, which can point at a toolset instance (e.g. a
+	# CMakeCache generated against a since-removed VS Build Tools install)
+	# that no longer matches whichever MSBuild is actually used to build.
+	if(MSVC)
+		file(GLOB _atlmfc_candidates
+			"C:/Program Files/Microsoft Visual Studio/*/*/VC/Tools/MSVC/*/atlmfc/include"
+			"C:/Program Files (x86)/Microsoft Visual Studio/*/*/VC/Tools/MSVC/*/atlmfc/include"
+		)
+		if(_atlmfc_candidates)
+			list(SORT _atlmfc_candidates)
+			list(GET _atlmfc_candidates -1 _atlmfc_include_dir)
+		endif()
+	endif()
+
 	# Include directories
 	target_include_directories(VS_UI PUBLIC
 		${CMAKE_CURRENT_SOURCE_DIR}/VS_UI
@@ -274,6 +292,7 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/framelib
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet
 		${CMAKE_CURRENT_SOURCE_DIR}
+		${_atlmfc_include_dir}
 	)
 
 	# Link libraries

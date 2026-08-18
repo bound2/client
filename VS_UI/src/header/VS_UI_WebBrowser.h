@@ -13,8 +13,11 @@
 
 #ifdef PLATFORM_WINDOWS
 //#include <ddraw.h>
-#include "EXDISP.H"
+/* ATLBASE.H must come first: it pulls in the COM/OLE prerequisites
+   (IUnknown, IDispatch, the interface macro, ...) that EXDISP.H's
+   COM automation interface declarations need. */
 #include "ATLBASE.H"
+#include "EXDISP.H"
 
 //-----------------------------------------------------------------------------
 // MWEBBROWSER
