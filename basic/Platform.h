@@ -863,6 +863,17 @@ typedef WORD			char_t;
 	#define timeGetTime()		platform_get_ticks()
 #endif
 
+#ifdef PLATFORM_WINDOWS
+	/* timeGetTime() lives in <mmsystem.h> (winmm), which this project no
+	   longer includes since it also drags in HMMIO/MMCKINFO/... that
+	   conflict with basic/AudioTypes.h's SDL stand-ins. Route it through
+	   the same platform_get_ticks() used on every other platform instead
+	   of pulling mmsystem.h back in just for this one function. */
+	#ifndef timeGetTime
+	#define timeGetTime()		platform_get_ticks()
+	#endif
+#endif
+
 /* ============================================================================
  * Platform-Specific Types
  * ============================================================================ */
