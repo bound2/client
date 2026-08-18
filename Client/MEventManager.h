@@ -13,6 +13,7 @@
    maintained Client/DXLib/CDirectDrawSurface.h. */
 #include "DXLib/CDirectDrawSurface.h"
 #include <map>
+#include <vector>
 
 #define	EVENTFLAG_SHOW_STRING				0x00000001		// 화면에 string를 표시한다
 #define EVENTFLAG_SHOW_DELAY				0x00000002		// Delay타임을 화면에 표시한다
