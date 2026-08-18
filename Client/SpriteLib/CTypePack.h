@@ -1,9 +1,10 @@
-#ifndef __CTYPEPACK_H__
+﻿#ifndef __CTYPEPACK_H__
 #define __CTYPEPACK_H__
 
 #ifdef PLATFORM_WINDOWS
 	#include <windows.h>
-	#include <fstream.h>
+	#include <fstream>
+	using namespace std;
 #else
 	#include "../basic/Platform.h"
 	#include <fstream>

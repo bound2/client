@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------------
 // DebugLog.cpp
 //
 // Lightweight, cross-platform logging system for Dark Eden client
@@ -9,9 +9,9 @@
 #include <stdarg.h>
 #include <string.h>
 #include <time.h>
+#include "../../basic/Platform.h"
 
 #ifdef PLATFORM_WINDOWS
-	#include <windows.h>
 	#include <sys/timeb.h>
 #else
 	#include <sys/time.h>
@@ -20,8 +20,6 @@
 // Platform-specific includes
 #ifdef PLATFORM_WINDOWS
 	#define PLATFORM_LOCK_INITIALIZED 1
-#else
-	#include "../../basic/Platform.h"
 #endif
 
 //-----------------------------------------------------------------------------

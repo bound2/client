@@ -1,4 +1,4 @@
-#include <fstream>
+﻿#include <fstream>
 //----------------------------------------------------------------------
 // CFilter.h
 //----------------------------------------------------------------------
@@ -80,10 +80,6 @@ class CFilter {
 		WORD		m_Height;
 		BYTE**		m_ppFilter;
 };
-
-#ifdef PLATFORM_WINDOWS
-typedef CTypePack<CFilter>			CFilterPack;
-#endif
 
 #endif
 

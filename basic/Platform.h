@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------
+﻿/*-----------------------------------------------------------------------------
 
 	Platform.h
 
@@ -126,7 +126,6 @@ typedef uint16_t		WORD;
 typedef uint32_t		UINT;
 typedef uint32_t		DWORD;
 typedef uint32_t		ULONG;
-typedef uint64_t		QWORD;
 typedef uint64_t		DWORD64;
 typedef uint64_t		ULONGLONG;
 typedef int64_t			LONGLONG;
@@ -141,6 +140,13 @@ typedef int				BOOL;
 	/* Define id_t for cross-platform compatibility (unsigned int on all platforms) */
 	typedef unsigned int   id_t;
 #endif /* !PLATFORM_WINDOWS */
+
+/* QWORD is a project-specific type, not part of the real Win32 API, so
+   <windows.h> never defines it - keep it available on every platform. */
+#ifndef QWORD_DEFINED
+#define QWORD_DEFINED
+typedef uint64_t		QWORD;
+#endif
 
 #ifndef TRUE
 #define TRUE 1
