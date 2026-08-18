@@ -27,7 +27,7 @@ using namespace std;
 
 //#include "CInputManager.h"
 
-#include "DXLib.h"
+#include "DXLib/DXLib.h"
 #include "SpriteLib/SP.h"
 #include "FR.h"
 #ifdef PLATFORM_WINDOWS
