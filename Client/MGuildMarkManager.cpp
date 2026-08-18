@@ -8,6 +8,7 @@
 #include "CSprite565.h"
 #include "UtilityFunction.h"
 #include "basic/ColorDraw.h"
+#include "DXLib/CDirectDrawSurface.h"
 
 #if defined(__GAME_CLIENT__) || defined(__GUILD_MANAGER_TOOL__)
 	#include "UtilityFunction.h"

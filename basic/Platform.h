@@ -359,6 +359,13 @@ static inline void* CreateFontIndirect(LOGFONT* lplf) {
 }
 #endif
 
+/* DirectDraw surface capabilities - project-specific constants, not part of
+   real Win32 API, so <windows.h> never defines them - keep available on
+   every platform (same reasoning as QWORD above). */
+#ifndef DDSCAPS_SYSTEMMEMORY
+#define DDSCAPS_SYSTEMMEMORY 0x00000800L
+#endif
+
 /* Windows path constants */
 #ifndef _MAX_PATH
 	#define _MAX_PATH	260
