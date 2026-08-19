@@ -92,9 +92,9 @@ int		g_LeftPremiumDays =10;
 extern EventButton *g_EventButton;
 
 bool						gbl_active; // Is application active?
-CDirectDraw				gC_DD;
+CSDLGraphics				gC_DD;
 CSpriteSurface			gC_DDSurface;
-extern CDirectInput*			g_pSDLInput;// = new CDirectInput;
+extern CSDLInput*			g_pSDLInput;// = new CSDLInput;
 
 static DWORD			g_double_click_time;
 int						g_mouse_x, g_mouse_y;
