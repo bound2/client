@@ -1311,7 +1311,7 @@ void Water( int xx, int yy, char Density, char Radius )
     static WORD Color2;
     static int cx,cy, cnt;
     static int addr1,addr2;
-    static HiCurr, HiNext;
+    static int HiCurr, HiNext;
     static int xhdif, yhdif, Chdif;
     static int XPos, YPos, OPos;
     static int WcntX1,WcntY1, WcntX2,WcntY2;
