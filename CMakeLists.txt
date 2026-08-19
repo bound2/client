@@ -291,6 +291,7 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/DXLib
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/framelib
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet
+		${CMAKE_CURRENT_SOURCE_DIR}/Client/WinLib
 		${CMAKE_CURRENT_SOURCE_DIR}
 		${_atlmfc_include_dir}
 	)
