@@ -2,6 +2,11 @@
 
 # 목표
 
+모든 소스 파일 순회해보면서 
+warning C4091 warning에 대해 수정하자. 아래가 좀 힌트인거같아.
+
+std::ofstream;
+std::ifstream;
 
 
 # 수정 대상
