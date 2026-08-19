@@ -123,13 +123,13 @@ IWebBrowser2*			g_pWebBrowser = NULL;
 -----------------------------------------------------------------------------*/
 void KeyboardEventReceiver(CSDLInput::E_KEYBOARD_EVENT event, DWORD scan_code)
 {
-	static hp;
+	static int hp;
 	static WORD progress;
 	static bool bl_ctrl;
 	static int time = 0;
 	static int x = 0, y = 0;
-	static step = 2;
-	static count = 2;
+	static int step = 2;
+	static int count = 2;
 
 	switch (event)
 	{
@@ -3288,7 +3288,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszArgs, int nWi
 	g_pQuestInfoManager = new MQuestInfoManager;
 	DWORD ver;
 
-	class ifstream questinfo("data\\info\\questinfo.inf",ios::binary);
+	ifstream questinfo("data\\info\\questinfo.inf",ios::binary);
 	questinfo.read((char*)&ver, sizeof( DWORD ) );
 	g_pQuestInfoManager->LoadFromFile( questinfo );
 	questinfo.close();
@@ -3297,7 +3297,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszArgs, int nWi
 	// nick name string table Loading
 	//---------------------------------------------------------------------
 	g_pNickNameStringTable = new MStringArray;
-	class ifstream gameStringTableTable("data\\info\\Nickname.inf", ios::binary);
+	ifstream gameStringTableTable("data\\info\\Nickname.inf", ios::binary);
 	if(false == (*g_pNickNameStringTable).LoadFromFile_NickNameString(gameStringTableTable))
 		MessageBox(NULL, "File read Error - NickName.inf", "Error", MB_OK|MB_ICONERROR);
 	gameStringTableTable.close();
@@ -3314,7 +3314,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszArgs, int nWi
 	//------------------------------------------------
 
 	//------------------------------------------------
-	class ifstream serverSkillInfoFile(FILE_INFO_SKILL_INFO, ios::binary);
+	ifstream serverSkillInfoFile(FILE_INFO_SKILL_INFO, ios::binary);
 	g_pSkillInfoTable->LoadFromFileServerSkillInfo( serverSkillInfoFile );
 	serverSkillInfoFile.close();
 
@@ -3330,7 +3330,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszArgs, int nWi
 	//------------------------------------------------
 
 	//------------------------------------------------
-	class ifstream serverDomainInfoFile(FILE_INFO_SKILL_DOMAIN_EXP, ios::binary);
+	ifstream serverDomainInfoFile(FILE_INFO_SKILL_DOMAIN_EXP, ios::binary);
 	g_pSkillManager->LoadFromFileServerDomainInfo( serverDomainInfoFile );
 	serverDomainInfoFile.close();
 
@@ -3339,7 +3339,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszArgs, int nWi
 
 	//---------------------------------------------------
 	g_pFameInfoTable = new FameInfoTable;
-	class ifstream FameLimit( "Data\\Info\\FameLimit.inf", ios::binary );
+	ifstream FameLimit( "Data\\Info\\FameLimit.inf", ios::binary );
 	g_pFameInfoTable->LoadFromFile( FameLimit );
 	FameLimit.close();
 	
@@ -3354,16 +3354,16 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszArgs, int nWi
 	//------------------------------------------------
 	// Load
 	//------------------------------------------------
-	class ifstream strExpFile(FILE_INFO_STR_EXP, ios::binary);
-	class ifstream dexExpFile(FILE_INFO_DEX_EXP, ios::binary);
-	class ifstream intExpFile(FILE_INFO_INT_EXP, ios::binary);
-	class ifstream vampireExpFile(FILE_INFO_VAMPIRE_EXP, ios::binary);
-	class ifstream oustersExpFile(FILE_INFO_OUSTERS_EXP, ios::binary);
-	class ifstream slayerRankExp(FILE_INFO_SLAYER_RANK_EXP, ios::binary);
-	class ifstream vampireRankExp(FILE_INFO_VAMPIRE_RANK_EXP, ios::binary);
-	class ifstream oustersRankExp(FILE_INFO_OUSTERS_RANK_EXP, ios::binary);
-	class ifstream advancementExp(FILE_INFO_ADVANCEMENT_EXP, ios::binary);
-	class ifstream petExpInfo("DATA\\INFO\\PETEXP.INF", ios::binary);
+	ifstream strExpFile(FILE_INFO_STR_EXP, ios::binary);
+	ifstream dexExpFile(FILE_INFO_DEX_EXP, ios::binary);
+	ifstream intExpFile(FILE_INFO_INT_EXP, ios::binary);
+	ifstream vampireExpFile(FILE_INFO_VAMPIRE_EXP, ios::binary);
+	ifstream oustersExpFile(FILE_INFO_OUSTERS_EXP, ios::binary);
+	ifstream slayerRankExp(FILE_INFO_SLAYER_RANK_EXP, ios::binary);
+	ifstream vampireRankExp(FILE_INFO_VAMPIRE_RANK_EXP, ios::binary);
+	ifstream oustersRankExp(FILE_INFO_OUSTERS_RANK_EXP, ios::binary);
+	ifstream advancementExp(FILE_INFO_ADVANCEMENT_EXP, ios::binary);
+	ifstream petExpInfo("DATA\\INFO\\PETEXP.INF", ios::binary);
 
 	g_pExperienceTable->LoadFromFileSTR(strExpFile);
 	g_pExperienceTable->LoadFromFileDEX(dexExpFile);
