@@ -3281,7 +3281,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszArgs, int nWi
 	g_pPriceManager = new MPriceManager;
 
 
-	g_pSDLInput = new CDirectInput;
+	g_pSDLInput = new CSDLInput;
 
 	g_pParty = new MParty;
 
