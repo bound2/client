@@ -7,15 +7,12 @@
 
 #include "CPartManager.h"
 
-#ifdef PLATFORM_WINDOWS
-#include <DSound.h>
-#else
+/* This project no longer uses real DirectSound - basic/Platform.h already
+   forward-declares LPDIRECTSOUNDBUFFER as an SDL-backed stand-in. Including
+   the real <DSound.h> here redefines _DSBPOSITIONNOTIFY (from basic/AudioTypes.h)
+   with an incompatible duplicate, matching the same category of conflict
+   already fixed for CDirectDraw/MMSystem elsewhere. */
 #include "../../basic/Platform.h"
-
-// Forward declaration for DirectSound buffer
-typedef struct IDirectSoundBuffer* LPDIRECTSOUNDBUFFER;
-
-#endif
 
 class CSoundPartManager : public CPartManager<WORD, BYTE, LPDIRECTSOUNDBUFFER> {
 	public :
