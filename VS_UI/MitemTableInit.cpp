@@ -12840,6 +12840,7 @@ InitClass( ITEM_CLASS_MITTEN,1 );
  m_pTypeInfo[ITEM_CLASS_MITTEN][0].Elemental = 0;
 
 
+#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9
 InitClass( ITEM_CLASS_SUB_INVENTORY,1 );
 
  m_pTypeInfo[ITEM_CLASS_SUB_INVENTORY][0].HName = "2x4±³°ü";
@@ -12871,5 +12872,6 @@ InitClass( ITEM_CLASS_SUB_INVENTORY,1 );
  m_pTypeInfo[ITEM_CLASS_SUB_INVENTORY][0].ItemStyle = 0;
  m_pTypeInfo[ITEM_CLASS_SUB_INVENTORY][0].ElementalType = ITEMTABLE_INFO::ELEMENTAL_TYPE_ANY;
  m_pTypeInfo[ITEM_CLASS_SUB_INVENTORY][0].Elemental = 0;
+#endif
 
 }
