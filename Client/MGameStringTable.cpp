@@ -14,8 +14,6 @@ MStringArray*		g_pNickNameStringTable = NULL;
 //2004, 6, 18, sobeit add end - about nick name string table
 
 
-#ifndef __GAME_CLIENT__
-
 void
 InitGameStringTable()
 {
@@ -1630,5 +1628,3 @@ InitGameStringTable()
 	//end
 	return;
 }
-
-#endif

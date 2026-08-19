@@ -25,9 +25,7 @@ extern MStringArray*		g_pGameStringTable;
 //2004, 6, 18, sobeit add start - about nick name string table
 extern MStringArray*		g_pNickNameStringTable;
 //2004, 6, 18, sobeit add end - about nick name string table
-#ifndef __GAME_CLIENT__
-	extern void				InitGameStringTable();
-#endif
+extern void				InitGameStringTable();
 
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
@@ -2001,7 +1999,7 @@ enum GAME_STRINGID
 	UI_STRING_MESSAGE_PLAYER_SAY,
 	UI_STRING_NO_ITEM_MESSAGE,				//Ã»ÓÐÎïÆ·
 	//add by viva : friend button description
-//	UI_STRING_MESSAGE_FRIEND,
+	UI_STRING_MESSAGE_FRIEND,
 //	UI_STRING_MESSAGE_FRIEND_LIST,
 //	UI_STRING_MESSAGE_FRIEND_BLACKLIST,
 //	UI_STRING_MESSAGE_FRIEND_TAG,

@@ -71,7 +71,6 @@
 //----------------------------------------------------------------------
 // server info file // test
 //----------------------------------------------------------------------
-#ifndef _LIB
 #define	FILE_INFO_STR_EXP						_DATA_ROOT"STRExp.inf"
 #define	FILE_INFO_DEX_EXP						_DATA_ROOT"DEXExp.inf"
 #define	FILE_INFO_INT_EXP						_DATA_ROOT"INTExp.inf"
@@ -99,7 +98,6 @@
 #define	SPK_GRADE_VAMPIRE						_IMAGE_ROOT"GradeMarkVampire.spk"
 #define	SPK_GRADE_OUSTERS						_IMAGE_ROOT"GradeMarkOusters.spk"
 #define	SPK_LEVEL_MARK							_IMAGE_ROOT"LevelMarkPet.spk"
-#endif
 
 #define FILE_INFO_HORN							_DATA_ROOT"Horn.inf"
 #define FILE_INFO_TESTSERVER					_DATA_ROOT"TestServer.inf"
