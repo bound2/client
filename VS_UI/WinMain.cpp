@@ -1067,7 +1067,10 @@ void MouseEventReceiver(CSDLInput::E_MOUSE_EVENT event, int x, int y, int z)
 
 		case CSDLInput::LEFTDOWN:
 			//  double-click interval?
-			if ((DWORD)abs(GetTickCount() - last_click_time) <= g_double_click_time)
+			
+			// abs()를 지우고 단순 빼기로 수정
+			// if ((DWORD)abs(GetTickCount() - last_click_time) <= g_double_click_time)
+			if ((GetTickCount() - last_click_time) <= g_double_click_time)
 			{
 				if (x>= double_click_x-1 && x <= double_click_x+1 &&
 					 y>= double_click_y-1 && y <= double_click_y+1)
