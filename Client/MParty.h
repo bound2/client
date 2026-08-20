@@ -17,6 +17,8 @@
 
 #pragma warning(disable:4786)
 
+#include <vector>
+
 #include "MString.h"
 #include "MTypeDef.h"
 

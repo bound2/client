@@ -3953,8 +3953,7 @@ MZone::AddEffect(MEffect* pNewEffect, DWORD dwWaitCount)
 	}
 
 	// Try to safely validate the object
-	// We use __builtin_expect to hint that validation usually succeeds
-	if (__builtin_expect(pNewEffect != NULL, 1)) {
+	if (pNewEffect != NULL) {
 		// Log the pointer for debugging
 		DEBUG_ADD_FORMAT("AddEffect: pNewEffect=%p, dwWaitCount=%u", pNewEffect, dwWaitCount);
 

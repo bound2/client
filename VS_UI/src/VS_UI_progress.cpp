@@ -425,7 +425,7 @@ void C_VS_UI_PROGRESS::Show()
 			Rect rect;
 			RECT rt;
 			S_SURFACEINFO surface_info;
-			SetSurfaceInfo(&surface_info, gpC_base->m_p_DDSurface_back->GetDDSD());
+			gpC_base->m_p_DDSurface_back->GetSurfaceInfo(&surface_info);
 			
 			rect.Set(0, 0, (*m_pC_character)[0].GetWidth(), (*m_pC_character)[0].GetHeight()*(100-m_percent)/100);
 			rt.left = max(-p.x, rect.x);

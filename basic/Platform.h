@@ -1822,6 +1822,25 @@ static inline void SetRect(LPRECT lprc, int xLeft, int yTop, int xRight, int yBo
 
 #endif /* !PLATFORM_WINDOWS (Windows API shims started above) */
 
+/* SDL text input relay messages (not real Win32 message IDs; used to carry
+   SDL_TEXTINPUT/SDL_TEXTEDITING events through this codebase's message
+   dispatch). Defined above for non-Windows; USE_SDL_BACKEND is mandatory on
+   all platforms now (including Windows), so also define them here when
+   <windows.h> didn't (real Win32 has no WM_TEXTINPUT/WM_TEXTEDITING). */
+#ifndef WM_TEXTINPUT
+#define WM_TEXTINPUT 0x0111
+#define WM_TEXTEDITING 0x0110
+#endif
+
+/* MCI notification constants (normally <mmsystem.h>/<digitalv.h>, which this
+   project no longer includes - see CWinUpdate.h). Used by Client.cpp's
+   WindowProc to detect AVI intro playback completion. Values are stable,
+   decades-old Win32 SDK constants. */
+#ifndef MM_MCINOTIFY
+#define MM_MCINOTIFY 0x03B9
+#define MCI_NOTIFY_SUCCESSFUL 0x0001
+#endif
+
 /* max and min macros for compatibility with Windows code */
 #ifndef PLATFORM_WINDOWS
 #ifndef max

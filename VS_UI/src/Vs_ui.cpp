@@ -3786,7 +3786,7 @@ void C_VS_UI::Init(CSpriteSurface *surface, void (*fp)(DWORD, int, int, void *))
 		gpC_Imm = NULL;
 	}
 	gpC_Imm = new CImm;
-	if(gpC_Imm && g_pUserOption->UseForceFeel)gpC_Imm->Enable(true);
+	if(gpC_Imm && g_pUserOption->UseForceFeel)gpC_Imm->Enable();
 	else if(gpC_Imm)gpC_Imm->Disable();
 
 #ifndef _LIB

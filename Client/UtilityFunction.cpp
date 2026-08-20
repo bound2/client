@@ -965,8 +965,8 @@ GetDiskFreeSpace(const char* pDrive)
 	return freeBytes;
 #endif
 }
-// SDL backend implementation of LoadImageToSurface
-#ifndef PLATFORM_WINDOWS
+// SDL backend implementation of LoadImageToSurface (USE_SDL_BACKEND is
+// mandatory on all platforms, including PLATFORM_WINDOWS)
 #include "SpriteLib/CSpriteSurface.h"
 
 bool LoadImageToSurface(const char* pFilename, CSpriteSurface& surface)
@@ -1040,4 +1040,3 @@ bool LoadImageToSurface(const char* pFilename, CSpriteSurface& surface)
 
 	return true;
 }
-#endif

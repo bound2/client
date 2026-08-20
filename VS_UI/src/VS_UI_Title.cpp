@@ -2464,7 +2464,7 @@ void C_VS_UI_NEWCHAR::Show()
 	{
 		int i, j;
 		S_SURFACEINFO	surfaceinfo;
-		SetSurfaceInfo(&surfaceinfo, gpC_base->m_p_DDSurface_back->GetDDSD());
+		gpC_base->m_p_DDSurface_back->GetSurfaceInfo(&surfaceinfo);
 
 		Rect color_unit_rect;
 
@@ -2572,7 +2572,7 @@ void C_VS_UI_NEWCHAR::Show()
 	if (gpC_base->m_p_DDSurface_back->Lock())
 	{
 		S_SURFACEINFO	surfaceinfo;
-		SetSurfaceInfo(&surfaceinfo, gpC_base->m_p_DDSurface_back->GetDDSD());
+		gpC_base->m_p_DDSurface_back->GetSurfaceInfo(&surfaceinfo);
 
 		gpC_base->SelectFont(FONT_SLAYER);
 
@@ -2602,7 +2602,7 @@ void C_VS_UI_NEWCHAR::Show()
 	if (gpC_base->m_p_DDSurface_back->Lock())
 	{
 		S_SURFACEINFO	surfaceinfo;
-		SetSurfaceInfo(&surfaceinfo, gpC_base->m_p_DDSurface_back->GetDDSD());
+		gpC_base->m_p_DDSurface_back->GetSurfaceInfo(&surfaceinfo);
 
 		int board_wh = m_pC_board_spk->GetWidth(NAME_BOARD)/2;
 
@@ -4765,7 +4765,7 @@ void C_VS_UI_LOGIN::Show()
 	if (gpC_base->m_p_DDSurface_back->Lock())
 	{
 		S_SURFACEINFO	surfaceinfo;
-		SetSurfaceInfo(&surfaceinfo, gpC_base->m_p_DDSurface_back->GetDDSD());
+		gpC_base->m_p_DDSurface_back->GetSurfaceInfo(&surfaceinfo);
 
 		gpC_base->SelectFont(FONT_SLAYER);
 
@@ -5240,7 +5240,7 @@ void C_VS_UI_TITLE::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 	if (gpC_base->m_p_DDSurface_back->Lock())
 	{
 		S_SURFACEINFO	surfaceinfo;
-		SetSurfaceInfo(&surfaceinfo, gpC_base->m_p_DDSurface_back->GetDDSD());
+		gpC_base->m_p_DDSurface_back->GetSurfaceInfo(&surfaceinfo);
 
 		//if (p_button->GetFocusState())
 		//{
@@ -5509,7 +5509,7 @@ void C_VS_UI_TITLE::Run(id_t id)
 
 			sprintf(str, "%s\\Explorer.exe", str);
 
-			CSDLGraphics::GetDD()->RestoreDisplayMode();
+			// CSDLGraphics::GetDD()->RestoreDisplayMode() removed (SDL2) - GetDD() is a stub that always returns nullptr
 
 			_spawnl(_P_NOWAIT, str, "Explorer.exe", "http://www.ttdk2.com", NULL);
 
@@ -6224,7 +6224,7 @@ void C_VS_UI_OPTION::Run(id_t id)
 		{
 			m_check[CHECK_IFEEL] = (m_check[CHECK_IFEEL] == CHECK_CHECK)?CHECK_NOT:CHECK_CHECK;
 			g_pUserOption->UseForceFeel = m_check[CHECK_IFEEL] == CHECK_CHECK;
-			if(gpC_Imm && g_pUserOption->UseForceFeel)gpC_Imm->Enable(true);
+			if(gpC_Imm && g_pUserOption->UseForceFeel)gpC_Imm->Enable();
 			else if(gpC_Imm)gpC_Imm->Disable();
 		}
 		break;

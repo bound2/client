@@ -170,15 +170,21 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX ".*Imm.*")
 		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX ".*WinMain.*")
 		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX ".*WebBrowser.*")
-		# Exclude Windows-specific Korean input method files (except macOS stub)
-		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/src/hangul/Ci\\.cpp")
-		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/src/hangul/FL2\\.cpp")
 		# U_edit is now cross-platform (SDL-based), so don't exclude it
 		# Exclude problematic files in VS_UI root directory
 		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/DebugInfo\\.cpp")
 		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/MitemTableInit\\.cpp")
 		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/SXml\\.cpp")
 		# Note: u_window.cpp is now cross-platform compatible
+	endif()
+
+	# Exclude native Win32 GDI/IME implementations superseded by their SDL-backend
+	# replacements (Ci_macOS.cpp, Client/RenderingFunctions.cpp). USE_SDL_BACKEND is
+	# forced ON above for all platforms including WIN32 ("Windows native support
+	# removed"), so these must be excluded regardless of platform, not just NOT WIN32.
+	if(USE_SDL_BACKEND)
+		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/src/hangul/Ci\\.cpp")
+		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/src/hangul/FL2\\.cpp")
 	endif()
 
 	# Client files that VS_UI depends on (按需编译)

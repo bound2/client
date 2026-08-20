@@ -136,11 +136,7 @@ private:
 	int  mi_open_drive_count;
 	int  mi_open_drive_index;
 	int m_mode;
-#ifdef PLATFORM_WINDOWS
-	CDirectDrawSurface m_temp_face;
-#else
 	CSpriteSurface m_temp_face;
-#endif
 
 
 public:

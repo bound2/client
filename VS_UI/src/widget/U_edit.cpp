@@ -20,11 +20,10 @@ extern int g_GetStringHeight(const char* sz_str, void* hfont);
 // External reference to global CI (for cursor blink state)
 extern CI* gC_ci;
 
-// External reference to SDL renderer
-extern SDL_Renderer* g_pSDLRenderer;
-
 // External reference to back buffer surface (for spritectl blt)
 #ifdef PLATFORM_MACOS
+// External reference to SDL renderer
+extern SDL_Renderer* g_pSDLRenderer;
 extern CSpriteSurface* g_pBack;
 extern CSpriteSurface* g_pLast;  // UI renders to g_pLast, not g_pBack!
 #endif

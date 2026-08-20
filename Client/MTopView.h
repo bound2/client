@@ -734,9 +734,10 @@ class MTopView : public MRequestMode {
 		//CTexturePack				m_CreatureTPK;
 		//CTexturePack				m_ShadowTPK;	// for test
 
-#ifdef PLATFORM_WINDOWS
-		CD3DTextureEffect			m_TextureEffect;
-#endif
+		// CD3DTextureEffect removed (SDL2); 유일한 사용처(DrawCreatureShadow.cpp,
+		// MTopView.cpp, MTopViewDraw.inl)는 모두 이미 주석 처리되었거나
+		// 정의되지 않는 __3D_IMAGE_OBJECT__로 감싸인 죽은 코드임
+		//CD3DTextureEffect			m_TextureEffect;
 		
 		//------------------------------------------------------
 		// 출력할 String을 기억..

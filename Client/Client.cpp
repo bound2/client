@@ -1667,7 +1667,7 @@ InitApp(int nCmdShow)
 	//get_rand_str(rnd_PROGRAM_TITLE,5);
     // Set up and register window class
     wc.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
-    wc.lpfnWndProc = (void*)WindowProc;
+    wc.lpfnWndProc = (WNDPROC)WindowProc;
     wc.cbClsExtra = 0;
     wc.cbWndExtra = 0;
     wc.hInstance = g_hInstance;

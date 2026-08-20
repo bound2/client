@@ -6,10 +6,7 @@
 #define __UTILITYFUNCTION_H__
 
 class CDirectDrawSurface;
-
-#ifndef PLATFORM_WINDOWS
 class CSpriteSurface;
-#endif
 
 //-----------------------------------------------------------------------------
 // 문자열 앞 뒤의 공백 제거하기
@@ -48,9 +45,8 @@ bool	SaveSurfaceToImage(const char* pFilename, CDirectDrawSurface& surface);
 //-----------------------------------------------------------------------------
 unsigned long	GetDiskFreeSpace(const char* pDrive=NULL);
 
-// SDL backend overloads
-#ifndef PLATFORM_WINDOWS
+// SDL backend overload (USE_SDL_BACKEND is mandatory on all platforms,
+// including PLATFORM_WINDOWS, so this is not restricted to non-Windows)
 bool	LoadImageToSurface(const char* pFilename, CSpriteSurface& surface);
-#endif
 
 #endif

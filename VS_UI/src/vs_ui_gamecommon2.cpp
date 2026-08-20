@@ -1896,7 +1896,7 @@ void	C_VS_UI_REQUEST_RESURRECT::Show()
 
 							S_SURFACEINFO surface_info;
 							CSprite* pSprite = &m_image_spk.GetSprite(m_ResurrectButton[i].m_Image);
-							SetSurfaceInfo(&surface_info, gpC_base->m_p_DDSurface_back->GetDDSD());
+							gpC_base->m_p_DDSurface_back->GetSurfaceInfo(&surface_info);
 					
 							SetRect((RECT *)&rect, 0, 0, pSprite->GetWidth(), pSprite->GetHeight()*(percent)/100);
 							
@@ -10719,12 +10719,8 @@ void  C_VS_UI_HELPDESC::DrawImg(int m_width, int m_height ,const char * filename
 		RECT re = {x ,  y+30 , x+ 500, y +400};
 		gpC_base->m_p_DDSurface_back->SetClip(&re);
 
-#ifdef PLATFORM_WINDOWS
-		gpC_base->m_p_DDSurface_back->BltNoColorkey( &p, pSurface, &r );
-#else
 		// SDL backend: cast CDirectDrawSurface* to CSpriteSurface*
 		gpC_base->m_p_DDSurface_back->BltNoColorkey( &p, reinterpret_cast<CSpriteSurface*>(pSurface), &r );
-#endif
 		// add by Sonic 2006.9.26
 		RECT clientrect = {0,0,800,600};
 		if(g_MyFull)

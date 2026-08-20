@@ -7,12 +7,12 @@
 #ifndef	__CWINUPDATE_H__
 #define	__CWINUPDATE_H__
 
-#ifdef PLATFORM_WINDOWS
-#include <Windows.h>
-#include <MMSystem.h>
-#else
+// <MMSystem.h> (real timeGetTime/HMMIO/MMCKINFO) conflicts with this
+// project's SDL stand-ins (basic/AudioTypes.h) and with the
+// timeGetTime()->platform_get_ticks() macro below basic/Platform.h defines
+// for PLATFORM_WINDOWS; USE_SDL_BACKEND is mandatory on all platforms now,
+// so always route through Platform.h instead of pulling MMSystem.h back in.
 #include "../../basic/Platform.h"
-#endif
 
 class CWinUpdate {
 	public :

@@ -108,12 +108,7 @@ void C_VS_UI_DESC::ShowDesc(int x, int y)
 				if (gpC_base->m_p_DDSurface_back->Lock())
 				{
 					S_SURFACEINFO surface_info;
-#ifdef PLATFORM_WINDOWS
-					SetSurfaceInfo(&surface_info, gpC_base->m_p_DDSurface_back->GetDDSD());
-#else
-					// SDL backend: Get surface info differently
 					gpC_base->m_p_DDSurface_back->GetSurfaceInfo(&surface_info);
-#endif
 
 					RECT rt;
 					rt.left = max(-(m_desc_x+x), rect.x);

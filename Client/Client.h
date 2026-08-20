@@ -10,7 +10,10 @@
 // include
 //-----------------------------------------------------------------------------
 #ifdef PLATFORM_WINDOWS
+#ifndef _WINDOWS_
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#endif
 #else
 #include "../basic/Platform.h"
 #include <fstream>

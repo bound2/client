@@ -810,7 +810,7 @@ void C_SPRITE_PACK::BltClip(int x, int y, Rect &rect, SPRITE_ID sprite_id)
 	if (gpC_base->m_p_DDSurface_back->Lock())
 	{
 		S_SURFACEINFO surface_info;
-		SetSurfaceInfo(&surface_info, gpC_base->m_p_DDSurface_back->GetDDSD());
+		gpC_base->m_p_DDSurface_back->GetSurfaceInfo(&surface_info);
 		
 		RECT rt;
 		rt.left = max(-x, rect.x);
@@ -1141,7 +1141,7 @@ void C_SPRITE_PACK::BltLockedClip(int x, int y, Rect &rect, SPRITE_ID sprite_id)
 	assert(gpC_base->m_p_DDSurface_back->IsLock());
 
 	S_SURFACEINFO surface_info;
-	SetSurfaceInfo(&surface_info, gpC_base->m_p_DDSurface_back->GetDDSD());
+	gpC_base->m_p_DDSurface_back->GetSurfaceInfo(&surface_info);
 	
 	RECT rt;
 	rt.left = max(-x, rect.x);

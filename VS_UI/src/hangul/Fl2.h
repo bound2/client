@@ -13,25 +13,16 @@
 
 #include "CI.h"
 #include <string>
-#ifdef PLATFORM_WINDOWS
-/* Do not include the real <ddraw.h>: this project no longer uses real
-   DirectDraw. Client/DXLib/CDirectDraw.h defines the SDL-backed stand-in
-   for LPDIRECTDRAWSURFACE7 used below, and including the real header
-   redefines DDPIXELFORMAT/DDSCAPS2/... with incompatible types. */
-#include "CDirectDraw.h"
-#endif
 
 // NOTE: Do not include SP.h here as it defines a stub PrintInfo that conflicts
 // with the full definition below. Files that need SP.h should include it separately.
 
-#ifdef PLATFORM_WINDOWS
-void	g_SetFL2Surface(LPDIRECTDRAWSURFACE7 surface);
-
-extern LPDIRECTDRAWSURFACE7	gpC_fl2_surface;
-#else
+// g_SetFL2Surface/gpC_fl2_surface only ever had an SDL-backed (void*)
+// implementation (Client/RenderingFunctions.cpp); the LPDIRECTDRAWSURFACE7
+// variant lived in VS_UI/src/hangul/FL2.cpp, which is excluded from the
+// build now that USE_SDL_BACKEND is mandatory on all platforms.
 void	g_SetFL2Surface(void* surface);
 extern void*	gpC_fl2_surface;
-#endif
 
 extern HDC gh_FL2_DC;
 
@@ -40,7 +31,7 @@ extern HDC gh_FL2_DC;
 #define PrintInfo_DEFINED
 struct PrintInfo
 {
-	HFONT		hfont;
+	void*		hfont;
 	COLORREF	text_color;
 	COLORREF	back_color;
 	int		bk_mode;
@@ -56,8 +47,8 @@ int	g_GetByteLenth(const char_t * p_dbcs, int dbcs_len);
 int	g_Convert_DBCS_Ascii2SingleByte(const char_t * p_dbcs, int dbcs_len, char * &p_new_buf);
 int	g_ConvertAscii2DBCS(const char * p_ascii, int ascii_len, char_t * &p_new_buf);
 void	g_Print(int x, int y, const char * sz_str, PrintInfo * p_print_info=NULL);
-int		g_GetStringWidth(const char * sz_str, HFONT hfont=NULL);
-int		g_GetStringHeight(const char * sz_str, HFONT hfont=NULL);
+int		g_GetStringWidth(const char * sz_str, void* hfont=NULL);
+int		g_GetStringHeight(const char * sz_str, void* hfont=NULL);
 bool	g_PossibleStringCut(const char * sz_str, int position);
 bool	g_FL2_GetDC();
 bool	g_FL2_ReleaseDC();

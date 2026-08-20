@@ -4,6 +4,7 @@
 #include "../Client_PCH.h"
 #include "../basic/BasicException.h"
 #include "../basic/BasicData.h"
+#include "../basic/2d.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

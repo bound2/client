@@ -2346,9 +2346,9 @@ void UI_ResultReceiver(DWORD message, int dw_left, int dw_right, void *void_ptr)
 					);
 				
 				sprintf(str, "%s\\Explorer.exe", str);
-				
-				CSDLGraphics::GetDD()->RestoreDisplayMode();
-				
+
+				// CSDLGraphics::GetDD()->RestoreDisplayMode() removed (SDL2) - GetDD() is a stub that always returns nullptr
+
 				_spawnl(_P_NOWAIT, str, "Explorer.exe", "http://", NULL);
 			}
 			break;
@@ -3421,7 +3421,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszArgs, int nWi
 	//
 	wcl.hInstance = hInst;
 	wcl.lpszClassName = CLASSNAME;
-	wcl.lpfnWndProc = WindowProc;
+	wcl.lpfnWndProc = (WNDPROC)WindowProc;
 	//
 	// `wcl.style =	CS_HREDRAW | CS_VREDRAW;
 

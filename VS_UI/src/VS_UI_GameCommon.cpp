@@ -9966,8 +9966,8 @@ void C_VS_UI_SKILL::Show2()
 						Rect rect;
 						RECT rt;
 						S_SURFACEINFO surface_info;
-						SetSurfaceInfo(&surface_info, gpC_base->m_p_DDSurface_back->GetDDSD());
-						
+						gpC_base->m_p_DDSurface_back->GetSurfaceInfo(&surface_info);
+
 						SetRect((RECT *)&rect, 0, 0, p_sprite->GetWidth(), p_sprite->GetHeight()*(percent)/100);
 						rt.left = rect.x;
 						rt.top = rect.y;
@@ -10068,7 +10068,7 @@ void C_VS_UI_SKILL::Show2()
 							Rect rect;
 							RECT rt;
 							S_SURFACEINFO surface_info;
-							SetSurfaceInfo(&surface_info, gpC_base->m_p_DDSurface_back->GetDDSD());
+							gpC_base->m_p_DDSurface_back->GetSurfaceInfo(&surface_info);
 							
 							SetRect((RECT *)&rect, 0, 0, p_sprite->GetWidth(), p_sprite->GetHeight()*(percent)/100);
 							rt.left = rect.x;
