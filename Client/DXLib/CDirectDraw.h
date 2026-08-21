@@ -227,6 +227,12 @@ public:
 	// InitMask - implemented in .cpp to initialize static arrays
 	static void		InitMask(bool b565);
 
+protected:
+	// DirectDraw Surface Description - kept accessible to CDirectDrawSurface
+	// (its GetSurfacePointer()/GetSurfacePitch()/GetDDSD() read this directly,
+	// as in the original VC6 CDirectDraw base class).
+	static DDSURFACEDESC2					m_ddsd;
+
 private:
 	// DirectDraw objects (stub pointers)
 	static LPDIRECTDRAW7					m_pDD;

@@ -23,6 +23,8 @@ LPDIRECTDRAWSURFACE7			CSDLGraphics::m_pDDSPrimary			= NULL;
 LPDIRECTDRAWSURFACE7			CSDLGraphics::m_pDDSBack				= NULL;
 LPDIRECTDRAWGAMMACONTROL	CSDLGraphics::m_pDDGammaControl		= NULL;
 
+DDSURFACEDESC2					CSDLGraphics::m_ddsd;
+
 SDL_Window*						CSDLGraphics::m_pSDLWindow			= NULL;
 SDL_Renderer*					CSDLGraphics::m_pSDLRenderer			= NULL;
 
