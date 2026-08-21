@@ -3239,7 +3239,29 @@ WinMain(HINSTANCE hInstance,
 				InvalidDll != "dbghelp.dll" &&
 				InvalidDll != "darkedenweb.dll" &&
 				InvalidDll != "npchk.dll" &&
-				InvalidDll != "xerces-c_2_4_0.dll")
+				InvalidDll != "xerces-c_2_4_0.dll" &&
+				// SDL2/vcpkg runtime DLLs (SDL migration replaced the DirectX/
+				// Immersion/GL_import libraries this whitelist used to name -
+				// ifc22.dll/gl.dll above are their now-dead entries). Debug and
+				// Release configs use differently-suffixed DLL names, so both
+				// are listed.
+				InvalidDll != "sdl2d.dll" &&
+				InvalidDll != "sdl2.dll" &&
+				InvalidDll != "sdl2_ttfd.dll" &&
+				InvalidDll != "sdl2_ttf.dll" &&
+				InvalidDll != "sdl2_imaged.dll" &&
+				InvalidDll != "sdl2_image.dll" &&
+				InvalidDll != "freetyped.dll" &&
+				InvalidDll != "freetype.dll" &&
+				InvalidDll != "libpng16d.dll" &&
+				InvalidDll != "libpng16.dll" &&
+				InvalidDll != "zlibd1.dll" &&
+				InvalidDll != "zlib1.dll" &&
+				InvalidDll != "jpeg62.dll" &&
+				InvalidDll != "brotlicommon.dll" &&
+				InvalidDll != "brotlidec.dll" &&
+				InvalidDll != "bz2d.dll" &&
+				InvalidDll != "bz2.dll")
 				//MessageBox(0,(LPCTSTR)InvalidDll.c_str(),"ERROR",MB_OK);
 				//MessageBox(0,
 				return -1;
