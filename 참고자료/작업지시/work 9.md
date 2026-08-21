@@ -154,44 +154,68 @@ target_compile_definitions(DarkEden PRIVATE __WIN32__ __WINDOWS__)`로
 
 **결과: 링크 오류 152건 → 71건(고유 기호 약 50개).**
 
+## 5. 남은 링크 오류 전부 해소 - 빌드 성공
+
+이후 대화(2026-08-21 밤 ~ 2026-08-22)에서 나머지 71건(고유 약 50개)도
+전부 정리:
+
+- **`CImm` (Immersion 포스피드백)** - `VS_UI/src/Imm/Imm*.h`는 Immersion
+  Corporation IFC SDK 원본 헤더(저작권 표기 포함) 그대로였고, VC6 원본
+  (`client-master_vs6/lib/IFC22.lib`)까지 확인해봤지만 **x86 전용
+  prebuilt 바이너리**뿐 소스는 어디에도 없었음(x64로 링크 자체가
+  불가능). `CImm.cpp`가 실제 Immersion 타입을 생성/호출하는 코드를 전부
+  제거(생성자는 `m_pDevice=NULL`만, `Enable`/`Disable`/`Force*`는
+  no-op)하고, `gpC_Imm` 전역이 Windows 분기에서 정의 자체가 없던 버그도
+  같이 수정(50건).
+- **`RequestServerPlayerManager` 클러스터** - CImm과 달리 **진짜 소스가
+  있었음**. `RequestServerPlayerManager.cpp`의 `#ifdef PLATFORM_WINDOWS`
+  (스레딩 include 몇 줄만 감쌀 의도)를 닫는 `#endif`가 없어서, 그 뒤
+  파일 끝까지 - 생성자/`Init`/`Update`/`Disconnect`/전역까지 - 전부
+  non-Windows 전용 `#elif` 분기 안에 들어가 있었음. `#endif` 추가로
+  해소(8건).
+- **`CAVI` (오프닝 동영상)** - 이것도 소스는 있었음(`Client/CAvi.cpp`).
+  이전 세션이 "어디서도 생성 안 되는 죽은 코드"라 판단해 CMake에서
+  제외해뒀는데 틀린 판단이었음(`COpeningUpdate::PlayMPG()`가 실제로
+  씀). 재확인해보니 Windows 분기는 MCI Digital Video API(`MCI_DGV_*`)를
+  썼는데, 이 드라이버(`MCIAVI.DRV`)가 애초에 64비트 Windows용으로 나온
+  적이 없어서(SDK에서 빠진 게 아니라 OS 자체에서 없어진 기능) 실구현
+  불가능 - CImm과 같은 결론으로 전 플랫폼 스텁화(5건).
+  **주의**: `COpeningUpdate::PlayMPG()`가 `OpenMPG()` 실패 시 모달
+  `MessageBox("Not Found <파일>")`를 띄우는 기존 로직이 있어서, 오프닝
+  화면 진입 시(`GameMain.cpp`의 OPENING 모드, "test.mpg") 매번 이 팝업이
+  뜰 가능성 있음 - 이번엔 안 건드림, 실행 확인 시 체크 필요.
+- **`InitializeGL`** - `client-master_vs6/lib/GL.lib` 확인 결과 이것도
+  x86 전용 prebuilt, 소스 없음. `GL_import.h`의 나머지 함수들
+  (`rectangle`/`GL_RGB`/`Convert24RGBto16`/`Get_ColorkeyColor`)도 현재
+  빌드에서 아무도 안 씀을 확인(SDL 시대 자체 구현으로 대체됐거나 유일한
+  호출부가 이미 제외됨) - 스텁 함수 대신 `GameInit.cpp`의 호출 자체를
+  제거(1건).
+- **`Client/header.cpp`** - `reader.cpp`/`synfilt.cpp`/`subdecoder.cpp`와
+  같은 부류(VC6에서 DXLib.lib 전용)를 이번에 같이 제외 처리하면서
+  놓쳤던 것 - 마저 제외(1건).
+- **JPEG** - `vcpkg install libjpeg-turbo:x64-windows`로 설치.
+  `find_package(JPEG)`가 바로 찾아서 CMake 쪽 수정 없이 해소(13건).
+  **주의**: 이 프로젝트는 `vcpkg.json` 매니페스트가 없어서(클래식 모드)
+  이 설치는 vcpkg 공용 설치 디렉터리에만 반영되고 git에는 안 잡힘 -
+  다른 머신에서 새로 빌드하려면 이 설치를 다시 해줘야 함.
+
+**최종 결과: 링크 오류 0건. `DarkEden.exe` 빌드 성공**
+(`build/vs2019/bin/Debug/DarkEden.exe`, LNK4217/LNK4286 경고만 있고
+오류는 없음).
+
 # 수정 대상
 
-남은 링크 오류는 전부 "선언/호출은 있는데 구현이 아예 없는" 것들이라
-성격이 다름 - 다음 세션에서 하나씩 어떻게 할지(실구현/스텁/제거) 상의
-필요:
+(현재 없음 - 컴파일/링크 오류는 전부 해소됨) 다음으로 볼 만한 것:
 
-- **`CImm` (Immersion 진동/포스피드백 라이브러리)** - `CImmDevice`/
-  `CImmPeriodic`/`CImmProject`/`CImmEffect`가 전부 `__declspec(dllimport)`
-  로 선언되어 있는데 실제 Immersion I-Force SDK(2005년대 조이스틱/스티어링
-  휠 포스피드백 하드웨어 SDK, 폐쇄소스)가 이 환경에 없음. `gpC_Imm`
-  전역도 미정의. VS_UI 위젯 다수(`VS_UI_PointExchange`, `VS_UI_Tutorial`,
-  `u_window` 등)에서 참조. 현실적으로 되살릴 방법이 없어 보임(SDK
-  자체가 없음) - `CImm` 관련 호출부를 전부 no-op으로 스텁화하는 방향이
-  유력해 보이지만, 얼마나 넓게 퍼져있는지 먼저 조사 필요.
-- **`CAVI` (AVI/MPG 오프닝 동영상 재생)** - `COpeningUpdate::PlayMPG()`가
-  `CAVI` 클래스(생성자/`OpenMPG`/`Play`/`Close`)를 쓰는데 구현이 어디에도
-  없음. 오프닝 동영상 재생 기능 자체가 미구현 상태로 보임 - 스텁 처리할지
-  SDL 기반으로 새로 구현할지 결정 필요.
-- **`InitSocket`/`UpdateSocketInput`/`RequestDisconnect`/`GetLocalIP`/
-  `WindowProc`/`RequestServerPlayerManager`(생성자/소멸자/`Init`/`Update`/
-  `Disconnect`)/`g_pRequestServerPlayerManager`** - `GameInit.cpp`/
-  `GameMain.cpp`/`RequestFunction.cpp`가 참조하는 별도 네트워킹
-  서브시스템인데 구현이 전혀 없음. 실제 사용 중인 `SocketAPI`/
-  `RequestClientPlayerManager` 계열과 별개의, 아마도 이식이 안 끝난
-  레거시/중복 경로로 보임 - 실제로 필요한 기능인지, 아니면 죽은 코드라
-  호출부를 제거해도 되는지 조사 필요.
-- **`InitializeGL`/`InitSurface`** - `GameInit.cpp`가 참조하는 또 다른
-  `__declspec(dllimport)` GL_import류 함수. `basic/GL_import.h`에 선언만
-  있고(`SetSurfaceInfo(DDSURFACEDESC2*)`와 같은 부류) 구현하는 .cpp가
-  없음 - 이것도 죽은 legacy DLL 의존성으로 보임.
-- **JPEG 라이브러리** - `UtilityFunction.cpp`의 `LoadJPG`/`SaveJPG`가
-  `jpeg_*`(libjpeg) 함수를 쓰는데 vcpkg에 `libjpeg`/`libjpeg-turbo`가
-  설치되어 있지 않음(`find_package(JPEG QUIET)`가 계속 못 찾고 있었음,
-  세션 시작 때부터 나던 CMake 경고). `vcpkg install libjpeg-turbo` 같은
-  설치가 필요하거나, JPG 저장/로드를 스텁 처리할지 결정 필요.
-- **`ReadHeader`/`MP3_ReadHeader`** - `header.obj`(DXLib mp3 디코더
-  일부)가 참조하는 함수 하나, 구현 없음. 범위 작아 보임(1건) - 다음
-  세션에서 바로 조사 가능.
+- 실제로 클라이언트를 띄워서 골든 패스 테스트(`CLAUDE.md`의 "UI/frontend
+  변경 시 브라우저에서 테스트" 원칙과 같은 취지) - 서버 접속 없이 어디까지
+  뜨는지, 오프닝 화면 진입 시 `CAVI` 스텁 관련 `MessageBox` 팝업이 실제로
+  뜨는지 확인
+- `참고자료/작업필요stub.md`에 쌓인 스텁 목록(CImm/CAVI/InitializeGL/
+  WavePackFileManager/ProfileManager/SaveSurfaceToImage 등) 중 실제
+  플레이에 필요한 게 있으면 우선순위 정해서 실구현 착수
+- Release 빌드도 같은 방식으로 한번 돌려서 Debug에서만 통과하는 건
+  아닌지 확인
 
 # 요구사항
 3. 코드 스타일: 
