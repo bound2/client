@@ -104,106 +104,12 @@ static const TCHAR *GetExceptionDescription(DWORD ExceptionCode)
 	return "an Unknown exception type";
 }
 
-typedef struct _tagADDRESS64 {
-    DWORD64       Offset;
-    WORD          Segment;
-    ADDRESS_MODE  Mode;
-} ADDRESS64, *LPADDRESS64;
-
-typedef struct _KDHELP64 {
-
-    //
-    // address of kernel thread object, as provided in the
-    // WAIT_STATE_CHANGE packet.
-    //
-    DWORD64   Thread;
-
-    //
-    // offset in thread object to pointer to the current callback frame
-    // in kernel stack.
-    //
-    DWORD   ThCallbackStack;
-
-    //
-    // offset in thread object to pointer to the current callback backing
-    // store frame in kernel stack.
-    //
-    DWORD   ThCallbackBStore;
-
-    //
-    // offsets to values in frame:
-    //
-    // address of next callback frame
-    DWORD   NextCallback;
-
-    // address of saved frame pointer (if applicable)
-    DWORD   FramePointer;
-
-
-    //
-    // Address of the kernel function that calls out to user mode
-    //
-    DWORD64   KiCallUserMode;
-
-    //
-    // Address of the user mode dispatcher function
-    //
-    DWORD64   KeUserCallbackDispatcher;
-
-    //
-    // Lowest kernel mode address
-    //
-    DWORD64   SystemRangeStart;
-
-    DWORD64  Reserved[8];
-
-} KDHELP64, *PKDHELP64;
-
-typedef struct _tagSTACKFRAME64 {
-    ADDRESS64   AddrPC;               // program counter
-    ADDRESS64   AddrReturn;           // return address
-    ADDRESS64   AddrFrame;            // frame pointer
-    ADDRESS64   AddrStack;            // stack pointer
-    ADDRESS64   AddrBStore;           // backing store pointer
-    PVOID       FuncTableEntry;       // pointer to pdata/fpo or NULL
-    DWORD64     Params[4];            // possible arguments to the function
-    BOOL        Far;                  // WOW far call
-    BOOL        Virtual;              // is this a virtual frame?
-    DWORD64     Reserved[3];
-    KDHELP64    KdHelp;
-} STACKFRAME64, *LPSTACKFRAME64;
-
-typedef
-BOOL
-(__stdcall *PREAD_PROCESS_MEMORY_ROUTINE64)(
-    HANDLE      hProcess,
-    DWORD64     qwBaseAddress,
-    PVOID       lpBuffer,
-    DWORD       nSize,
-    LPDWORD     lpNumberOfBytesRead
-    );
-
-typedef
-PVOID
-(__stdcall *PFUNCTION_TABLE_ACCESS_ROUTINE64)(
-    HANDLE  hProcess,
-    DWORD64 AddrBase
-    );
-
-typedef
-DWORD64
-(__stdcall *PGET_MODULE_BASE_ROUTINE64)(
-    HANDLE  hProcess,
-    DWORD64 Address
-    );
-
-typedef
-DWORD64
-(__stdcall *PTRANSLATE_ADDRESS_ROUTINE64)(
-    HANDLE    hProcess,
-    HANDLE    hThread,
-    LPADDRESS64 lpaddr
-    );
+// ADDRESS64/KDHELP64/STACKFRAME64 and the PREAD_PROCESS_MEMORY_ROUTINE64/
+// PFUNCTION_TABLE_ACCESS_ROUTINE64/PGET_MODULE_BASE_ROUTINE64/
+// PTRANSLATE_ADDRESS_ROUTINE64 typedefs used to be hand-rolled here because
+// the VC6-era Platform SDK didn't ship them. The Windows 10 SDK's
+// <imagehlp.h> (pulled in via <Windows.h> above) already declares all of
+// these identically, so redefining them is just a duplicate (error C2011).
 
 // StackWalk64()
 typedef BOOL (__stdcall *tSW)( 
@@ -268,7 +174,7 @@ LONG __stdcall RecordExceptionInfo( _EXCEPTION_POINTERS* pExp )
 	}
 
 	int version = 0;
-	std::ifstream versionFile(g_pFileDef->getProperty("FILE_INFO_VERSION").c_str(), ios::binary | );
+	std::ifstream versionFile(g_pFileDef->getProperty("FILE_INFO_VERSION").c_str(), ios::binary);
 
 	if (versionFile.is_open())
 	{
@@ -282,7 +188,10 @@ LONG __stdcall RecordExceptionInfo( _EXCEPTION_POINTERS* pExp )
 	GetWinVersion(szTemp);
 	cr.SetOS(szTemp);
 
-	wsprintf(szTemp, "0x%08x", Context->Eip);
+	// Eip/Ebp are the x86 CONTEXT register names; on x64 the equivalent
+	// fields are Rip/Rbp (64-bit). wsprintf doesn't reliably support
+	// 64-bit arguments, so use sprintf here instead.
+	sprintf(szTemp, "0x%016llx", Context->Rip);
 	cr.SetAddress(szTemp);
 
 	wsprintf(szTemp, "%s(0x%08x)", GetExceptionDescription(Exception->ExceptionCode), Exception->ExceptionCode);
@@ -291,7 +200,9 @@ LONG __stdcall RecordExceptionInfo( _EXCEPTION_POINTERS* pExp )
 	std::string callStack;
 
 	int frameNum;
-	DWORD imageType = IMAGE_FILE_MACHINE_I386;
+	// StackWalk64's frame-walking logic depends on the machine type
+	// matching the actual CONTEXT layout (Rip/Rbp here, not Eip/Ebp).
+	DWORD imageType = IMAGE_FILE_MACHINE_AMD64;
 
 	HANDLE hThread;
 	HANDLE hSWProcess = GetCurrentProcess();
@@ -310,9 +221,9 @@ LONG __stdcall RecordExceptionInfo( _EXCEPTION_POINTERS* pExp )
 
 			if(pSFTA != NULL && pSGMB != NULL && pSW != NULL)
 			{
-				s.AddrPC.Offset = Context->Eip;
+				s.AddrPC.Offset = Context->Rip;
 				s.AddrPC.Mode = AddrModeFlat;
-				s.AddrFrame.Offset = Context->Ebp;
+				s.AddrFrame.Offset = Context->Rbp;
 				s.AddrFrame.Mode = AddrModeFlat;
 
 				for ( frameNum = 0; ; ++ frameNum )
@@ -320,7 +231,9 @@ LONG __stdcall RecordExceptionInfo( _EXCEPTION_POINTERS* pExp )
 					if ( ! pSW( imageType, hSWProcess, hThread, &s, NULL, NULL, pSFTA, pSGMB, NULL ) )
 						break;
 
-					wsprintf(szTemp, "0x%08x", s.AddrPC.Offset);
+					// AddrPC.Offset is DWORD64 - wsprintf doesn't reliably
+					// support 64-bit arguments, so use sprintf here instead.
+					sprintf(szTemp, "0x%016llx", s.AddrPC.Offset);
 					callStack += ' ';
 					callStack += szTemp;
 				}
