@@ -596,13 +596,17 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# The client-side packet handling is done through different mechanisms
 	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*Cpackets/.*Handler\\.cpp")
 
-	# Exclude CAvi.cpp: legacy MCI/AVFile-based intro-movie player (uses
-	# MCI_DGV_* digital-video structures that current Windows SDKs no longer
-	# declare in <mmsystem.h>/<vfw.h>). Confirmed dead: the only class it
-	# defines (CAvi) is never instantiated - its two other includers,
-	# GlobalVariables.cpp and MissingGlobals.cpp, are both already excluded
-	# above via REMOVE_ITEM for duplicating globals with Client.cpp/GameMain.cpp.
-	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*CAvi\\.cpp")
+	# CAvi.cpp is NOT excluded (re-checked 2026-08-22): the "never
+	# instantiated" claim this exclusion used to be based on doesn't hold -
+	# COpeningUpdate::PlayMPG() does instantiate CAVI and call OpenMPG()/
+	# Play()/Close(); this was only an unresolved-external link error while
+	# compile errors elsewhere stopped masking it. The MCI_DGV_* concern
+	# (current Windows SDKs no longer declare those digital-video structures)
+	# is real, but moot either way - that MCI driver (MCIAVI.DRV) was never
+	# shipped for 64-bit Windows at all, so even defining the missing
+	# structures ourselves would only compile, not actually work on x64.
+	# CAVI's methods are stubbed out directly in CAvi.cpp instead (all
+	# platforms, not just non-Windows) rather than excluding the file.
 
 	# Exclude root-level Client/soundbuf.cpp and Client/mp3.cpp: duplicates of
 	# Client/DXLib/soundbuf.cpp and Client/DXLib/mp3.cpp (already compiled into

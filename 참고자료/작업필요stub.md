@@ -251,6 +251,37 @@ static inline LPDIRECTDRAW7 GetDD() { return nullptr; } // 하드코딩 (1-1 항
 - 결과: 이제 이 파일은 원래 의도대로 Windows 빌드에서 완전히 빠짐(위 "2."
   항목이 애초에 서술하려던 상태가 이제야 실제로 맞음).
 
+### 3-5. `CAVI` (오프닝 동영상 재생) - 스텁화
+
+- 대상: `Client/CAvi.cpp`
+- 무엇을 했나: `OpenMPG()`/`OpenAVI()`/`Close()`/`Play()`/`Stop()`을 전부
+  플랫폼 상관없이 항상 실패/no-op으로 통일(기존에 있던 non-Windows 전용
+  스텁과 같은 내용을 Windows에도 적용).
+- 왜 그렇게 했나: 원래 Windows 분기는 MCI Digital Video API
+  (`MCI_DGV_OPEN_PARMS` 등, `MCIAVI.DRV` 드라이버 기반의 옛 AVI/MPEG
+  재생 방식)를 썼는데, 이 구조체들이 최신 Windows 10 SDK
+  `<mmsystem.h>`에 더 이상 선언되어 있지 않아 컴파일이 안 됨. 게다가
+  이 MCI 드라이버 자체가 애초에 64비트 Windows용으로 나온 적이 없어서,
+  설령 구조체를 직접 정의해서 컴파일만 통과시키더라도 x64에서는
+  `mciSendCommand()`가 그냥 실패했을 것 - 헤더에서 빠진 게 아니라 OS
+  자체에서 없어진 기능이라 실구현이 불가능함(CImm/Immersion과 같은
+  성격).
+  이전 세션에 "CAvi 클래스는 어디서도 생성 안 됨(죽은 코드)"이라는
+  이유로 아예 컴파일에서 제외돼 있었는데, 오늘 재확인해보니 그 판단이
+  틀렸음 - `COpeningUpdate::PlayMPG()`(`COpeningUpdate.cpp`)가 실제로
+  `CAVI`를 생성하고 `OpenMPG()`/`Play()`를 호출하고 있었음(이전엔 다른
+  컴파일 오류들에 가려서 이 링크 오류가 안 보였을 뿐). CMake 제외
+  대신 클래스 자체를 스텁화하는 쪽으로 처리.
+- **남은 일(주의)**: `COpeningUpdate::PlayMPG()`가 `OpenMPG()` 실패 시
+  `MessageBox(g_hWnd, "Not Found <파일명>", "Error!", MB_OK)`로 **모달
+  팝업**을 띄우는 기존 로직이 있음. `OpenMPG()`가 이제 항상 실패를
+  반환하므로, `GameMain.cpp`에서 오프닝 화면으로 진입할 때마다
+  ("test.mpg" 재생 시도, `SetMode`의 OPENING 분기) 이 팝업이 매번 뜰 것
+  으로 보임. `CAVI` 자체의 스텁화 범위 밖이라 이번엔 안 건드렸지만,
+  실제로 오프닝 화면에 도달하는 경로라면 `PlayMPG()`/그 호출부도 같이
+  손봐야 함(예: 팝업 없이 조용히 건너뛰게).
+
+
 ### 3-4. `ProfileManager.cpp`의 프로필 이미지 로딩 - Windows 분기도 SDL 스텁으로 통일
 
 - 대상: `Client/ProfileManager.cpp`, `MakeProfiles()`(BMP -> SPK 변환 부분)
