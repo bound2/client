@@ -180,6 +180,10 @@ class CSpriteSurface {
 		static void		Gamma4Pixel555(void *pDest, int len, int p);
 		static WORD		memcpyAlpha1Pixel(WORD pDest, WORD pSource) { return 0; }
 
+		// GammaBox - applies Gamma4Pixel565/555 to each row of pRect on this surface
+		void	GammaBox565(RECT* pRect, int p);
+		void	GammaBox555(RECT* pRect, int p);
+
 		static int		s_Value1;
 		static int		s_Value2;
 		static int		s_Value3;

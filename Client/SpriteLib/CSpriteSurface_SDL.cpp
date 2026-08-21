@@ -659,6 +659,60 @@ void CSpriteSurface::Gamma4Pixel555(void *pDest, int len, int p)
 }
 
 /* ============================================================================
+ * GammaBox565/555 - apply Gamma4Pixel565/555 to every row of pRect
+ * (ported from the original CDirectDrawSurface::GammaBox565/555)
+ * ============================================================================ */
+void CSpriteSurface::GammaBox565(RECT* pRect, int p)
+{
+	if (!pRect)
+	{
+		return;
+	}
+
+	S_SURFACEINFO info;
+	GetSurfaceInfo(&info);
+	if (info.p_surface == NULL)
+	{
+		return;
+	}
+
+	// SDL backend has no DirectDraw-style clip region tracking, so clip
+	// against the surface's own bounds instead (matches GetClipRight()/
+	// GetClipBottom() stubs above, which return m_width/m_height).
+	if (pRect->bottom < 0 || pRect->top > info.height
+		|| pRect->right < 0 || pRect->left > info.width)
+	{
+		return;
+	}
+
+	if (pRect->left < 0) pRect->left = 0;
+	if (pRect->right > info.width) pRect->right = info.width;
+	if (pRect->top < 0) pRect->top = 0;
+	if (pRect->bottom > info.height) pRect->bottom = info.height;
+
+	if (pRect->left >= pRect->right || pRect->top >= pRect->bottom)
+	{
+		return;
+	}
+
+	WORD* pDest = (WORD*)((BYTE*)info.p_surface + pRect->top * info.pitch + (pRect->left << 1));
+	int dLen = pRect->right - pRect->left;
+	int rows = pRect->bottom - pRect->top;
+
+	for (int i = 0; i < rows; i++)
+	{
+		Gamma4Pixel565(pDest, dLen, p);
+		pDest = (WORD*)((BYTE*)pDest + info.pitch);
+	}
+}
+
+void CSpriteSurface::GammaBox555(RECT* pRect, int p)
+{
+	// SDL backend always uses RGB565 surfaces (see Gamma4Pixel555 above)
+	GammaBox565(pRect, p);
+}
+
+/* ============================================================================
  * Missing Methods for Linker Compatibility
  * ============================================================================ */
 

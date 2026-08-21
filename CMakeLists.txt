@@ -187,6 +187,20 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/src/hangul/FL2\\.cpp")
 	endif()
 
+	# Exclude VS_UI/WinMain.cpp on WIN32 too (already excluded above for NOT WIN32).
+	# It defines its own WinMain/InitApp/WindowProc/g_hWnd/g_GameRect/UI_ResultReceiver
+	# etc., which duplicate symbols already defined by Client/Client.cpp and
+	# Client/GameUI.cpp - the actual, functionally complete entry point (it alone
+	# calls InitGame()/g_pTopView->Init()/g_pUpdate, which Client/SDLMain.cpp's own
+	# header comment confirms it was ported from: "Based on WinMain from Client.cpp").
+	# VS_UI/WinMain.cpp never calls InitGame() at all - it only drives the VS_UI
+	# widget system (gC_vs_ui.Process()/Show()), so even where it happened to link
+	# it would never start the actual game. See
+	# 참고자료/커밋로그/2026-08-21_VS_UI_WinMain_cpp_죽은_진입점_제외.md.
+	if(WIN32)
+		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/WinMain\\.cpp")
+	endif()
+
 	# Client files that VS_UI depends on (按需编译)
 	set(VS_UI_CLIENT_SOURCES
 		# Core
@@ -314,9 +328,11 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		SDL2_ttf::SDL2_ttf
 	)
 
-	# See DarkEden target below: SDL2main collides with VS_UI/WinMain.cpp's
-	# own WinAPI WinMain on Windows, so only link it (PUBLIC, so it still
-	# reaches consumers) on platforms where it isn't a real Windows entry point.
+	# See DarkEden target below: SDL2main collides with Client/Client.cpp's own
+	# WinAPI WinMain on Windows (VS_UI/WinMain.cpp, which used to duplicate this
+	# reasoning, is now excluded from the build - see the WIN32 filter above), so
+	# only link it (PUBLIC, so it still reaches consumers) on platforms where it
+	# isn't a real Windows entry point.
 	if(NOT WIN32)
 		target_link_libraries(VS_UI PUBLIC SDL2::SDL2main)
 	endif()
@@ -592,8 +608,9 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	endif()
 
 	# Add DarkEden executable
-	# WIN32 keyword required on Windows: VS_UI/WinMain.cpp defines a real WinAPI
-	# WinMain, so the exe must link as a GUI subsystem app (not console/main).
+	# WIN32 keyword required on Windows: Client/Client.cpp (compiled into the VS_UI
+	# lib below) defines a real WinAPI WinMain, so the exe must link as a GUI
+	# subsystem app (not console/main).
 	if(WIN32)
 		add_executable(DarkEden WIN32 ${CLIENT_MAIN_SOURCES})
 	else()
@@ -617,7 +634,7 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	)
 
 	# SDL2main provides its own WinMain that forwards to SDL_main() on Windows.
-	# VS_UI/WinMain.cpp defines WinMain directly (not via the SDL_main macro
+	# Client/Client.cpp defines WinMain directly (not via the SDL_main macro
 	# convention), so linking SDL2main on Windows would collide with it
 	# (LNK2005). It's a no-op on other platforms, so only link it there.
 	if(NOT WIN32)
