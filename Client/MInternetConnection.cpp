@@ -5,6 +5,7 @@
 #include "MInternetConnection.h"
 #ifdef PLATFORM_WINDOWS
 #include "Shlwapi.h"
+#include <WinInet.h>
 #endif
 
 //-----------------------------------------------------------------------------
