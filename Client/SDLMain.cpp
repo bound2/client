@@ -16,6 +16,21 @@
 
 -----------------------------------------------------------------------------*/
 
+// PLATFORM_WINDOWS is normally defined by basic/Platform.h (pulled in via
+// Client_PCH.h), but nothing is included before the #ifndef check below -
+// unlike every other file in this project, which includes Client_PCH.h
+// (directly or transitively) first. Without this, PLATFORM_WINDOWS is
+// always undefined at this point regardless of platform, so the guard
+// below always took the non-Windows branch, compiling this whole
+// macOS/Linux-only file into the Windows build too. Detect the real
+// platform locally first, matching the same self-contained pattern used
+// in Client/Packet/SocketAPI.h.
+#if defined(_WIN32) || defined(_WIN64)
+#ifndef PLATFORM_WINDOWS
+#define PLATFORM_WINDOWS
+#endif
+#endif
+
 #ifndef PLATFORM_WINDOWS
 
 #include "Client_PCH.h"
