@@ -42,6 +42,10 @@ public :
 	StringStream & operator << ( uint T ) throw ();
 	StringStream & operator << ( long T ) throw ();
 	StringStream & operator << ( ulong T ) throw ();
+	// SOCKET is `UINT_PTR` (64-bit) on Windows x64 - without this overload,
+	// streaming a SOCKET is ambiguous between the uint/ulong overloads
+	// above (both an equally-ranked narrowing conversion), error C2593.
+	StringStream & operator << ( ulonglong T ) throw ();
 	StringStream & operator << ( float T ) throw ();
 	StringStream & operator << ( double T ) throw ();
 	StringStream & operator << ( const char * str ) throw ();

@@ -173,6 +173,22 @@ StringStream & StringStream::operator << ( ulong T )
 	return *this;
 }
 
+StringStream & StringStream::operator << ( ulonglong T )
+	throw ()
+{
+	char buf[24];
+	sprintf( buf , "%llu" , T );
+
+	std::string str(buf);
+
+	m_Strings.push_back( str );
+
+	m_Size += str.size();
+	m_bInserted = true;
+
+	return *this;
+}
+
 StringStream & StringStream::operator << ( float T )
 	throw ()
 {
