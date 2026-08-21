@@ -595,6 +595,17 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "/Client/soundbuf\\.cpp$")
 	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "/Client/mp3\\.cpp$")
 
+	# Same duplication as soundbuf.cpp/mp3.cpp above: reader.cpp/synfilt.cpp/
+	# subdecoder.cpp were also DXLib.lib-only in the original VC6 project
+	# (client-master_vs6/Client/DXLib/DXLib.dsp) and never part of Client.dsp
+	# (the EXE). The root-level copies here still #include the root mp3.h,
+	# which pulls in the real <dsound.h> and redefines _DSBPOSITIONNOTIFY
+	# against basic/AudioTypes.h's compat typedef (already processed earlier
+	# in the TU via Client_PCH.h) - error C2011.
+	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "/Client/reader\\.cpp$")
+	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "/Client/synfilt\\.cpp$")
+	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "/Client/subdecoder\\.cpp$")
+
 
 	# Exclude Windows-specific files
 	if(NOT WIN32)
