@@ -303,6 +303,20 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		if(_atlmfc_candidates)
 			list(SORT _atlmfc_candidates)
 			list(GET _atlmfc_candidates -1 _atlmfc_include_dir)
+			# ATL's headers (atlbase.h et al.) embed a
+			# #pragma comment(lib, "atls.lib") - the linker needs this
+			# directory too (DarkEden.exe, the final link target that
+			# actually pulls in VS_UI, is set up further below), or it
+			# can't find atls.lib even though the include dir above lets
+			# it compile fine (LNK1104). Derive it from the same toolset
+			# instance as the include dir above, not just any installed
+			# atlmfc/lib, so headers and binary stay from the same version.
+			string(REPLACE "/include" "/lib" _atlmfc_lib_dir "${_atlmfc_include_dir}")
+			if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+				set(_atlmfc_lib_dir "${_atlmfc_lib_dir}/x64")
+			else()
+				set(_atlmfc_lib_dir "${_atlmfc_lib_dir}/x86")
+			endif()
 		endif()
 	endif()
 
@@ -614,6 +628,20 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "/Client/synfilt\\.cpp$")
 	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "/Client/subdecoder\\.cpp$")
 
+	# Same duplication again: CSpritePal.cpp was SpriteLib.lib-only in the
+	# original VC6 project (client-master_vs6/Client/SpriteLib/SpriteLib.dsp)
+	# and never part of Client.dsp (the EXE). The root-level copy here was
+	# compiling straight into DarkEden.exe too, fighting the SpriteLib.lib
+	# copy for every CSpritePal symbol at link time (LNK2005).
+	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "/Client/CSpritePal\\.cpp$")
+
+	# Backup files (e.g. MItemTable_bak-2007-5-7.cpp) are stale duplicates of
+	# their non-"_bak" counterpart and were never meant to compile on any
+	# platform - this used to be scoped inside the `if(NOT WIN32)` block
+	# below, so on Windows these still got globbed in and fought their
+	# current counterparts for the same symbols at link time (LNK2005).
+	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*\\.bak.*")
+	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*_bak-.*")
 
 	# Exclude Windows-specific files
 	if(NOT WIN32)
@@ -623,8 +651,6 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		# list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*GameMain.*")  # Re-enabled for cross-platform support
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*EXECryptor.*")
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*GetWinVer.*")
-		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*\\.bak.*")
-		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*_bak-.*")
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*MInternetConnection.*")
 		# Exclude Handler files in Client root only (not in Packet subdirectories)
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "^Client/[^/]+Handler\\.cpp")
@@ -662,6 +688,12 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 	)
 
+	# atls.lib for VS_UI_WebBrowser.h's ATL usage - see the
+	# _atlmfc_include_dir/_atlmfc_lib_dir search above (VS_UI target).
+	if(_atlmfc_lib_dir)
+		target_link_directories(DarkEden PRIVATE ${_atlmfc_lib_dir})
+	endif()
+
 	# Link libraries (now includes VS_UI and TextSystem)
 	target_link_libraries(DarkEden PRIVATE
 		SpriteLib
@@ -672,6 +704,23 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		TextSystem
 		SDL2::SDL2
 	)
+
+	# Standard Windows import libraries for APIs this project calls
+	# directly (Winsock: SocketAPI.cpp/DatagramSocket.cpp/...; Winmm:
+	# WavePackFileManager.cpp's mmio* calls; WinInet:
+	# MInternetConnection.cpp; Comctl32: InitCommonControls). None of
+	# these were previously in the link line, so every symbol from them
+	# was an unresolved external (LNK2001/LNK2019) once the code that
+	# calls them started compiling.
+	if(WIN32)
+		target_link_libraries(DarkEden PRIVATE
+			ws2_32
+			winmm
+			wininet
+			comctl32
+			netapi32
+		)
+	endif()
 
 	# SDL2main provides its own WinMain that forwards to SDL_main() on Windows.
 	# Client/Client.cpp defines WinMain directly (not via the SDL_main macro
