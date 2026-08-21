@@ -22,7 +22,7 @@
 #include "ServerInfo.h"
 #include "PacketDef.h"
 #include "VS_UI.h"
-#include "ServerInformation.h"
+#include "CServerInformation.h"
 #include "packet/cpackets/CLGetServerList.h"
 #include "packet/cpackets/CLChangeServer.h"
 #include "CWaitUIUpdate.h"
@@ -716,7 +716,7 @@ CWaitUIUpdate::UpdateDraw()
 //				//g_pBack->GDI_Text(401,11, str, RGB(0,0,0));
 //				//g_pBack->GDI_Text(400,10, str, RGB(240,240,240));
 //
-//				ServerInformation::const_iterator iGroup = g_pServerInformation->begin();
+//				CServerInformation::const_iterator iGroup = g_pServerInformation->begin();
 //
 //				int y = 30;
 //				
@@ -816,7 +816,7 @@ CWaitUIUpdate::UpdateDraw()
 				//g_pLast->GDI_Text(401,11, str, RGB(0,0,0));
 				//g_pLast->GDI_Text(400,10, str, RGB(240,240,240));
 
-				ServerInformation::const_iterator iGroup = g_pServerInformation->begin();
+				CServerInformation::const_iterator iGroup = g_pServerInformation->begin();
 
 				int y = 30;
 				

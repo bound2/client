@@ -574,6 +574,27 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# The client-side packet handling is done through different mechanisms
 	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*Cpackets/.*Handler\\.cpp")
 
+	# Exclude CAvi.cpp: legacy MCI/AVFile-based intro-movie player (uses
+	# MCI_DGV_* digital-video structures that current Windows SDKs no longer
+	# declare in <mmsystem.h>/<vfw.h>). Confirmed dead: the only class it
+	# defines (CAvi) is never instantiated - its two other includers,
+	# GlobalVariables.cpp and MissingGlobals.cpp, are both already excluded
+	# above via REMOVE_ITEM for duplicating globals with Client.cpp/GameMain.cpp.
+	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*CAvi\\.cpp")
+
+	# Exclude root-level Client/soundbuf.cpp and Client/mp3.cpp: duplicates of
+	# Client/DXLib/soundbuf.cpp and Client/DXLib/mp3.cpp (already compiled into
+	# the dxlib library that DarkEden links). The original VC6 project
+	# (client-master_vs6/Client/DXLib/DXLib.dsp) only ever compiled these two
+	# files as part of DXLib.lib - Client.dsp (the EXE) never listed them
+	# directly. The root-level copies here still include the real
+	# <dsound.h>/<wtypes.h> (unlike the DXLib/ versions, already migrated to
+	# basic/AudioTypes.h), so the file(GLOB Client/*.cpp) above picking them up
+	# both reintroduces the real-DirectSound redefinition conflict and risks
+	# LNK2005 duplicate symbols against the dxlib copies once compiled cleanly.
+	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "/Client/soundbuf\\.cpp$")
+	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "/Client/mp3\\.cpp$")
+
 
 	# Exclude Windows-specific files
 	if(NOT WIN32)

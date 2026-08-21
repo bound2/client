@@ -47,7 +47,7 @@
 #include "MLevelNameTable.h"
 #include "MonsterNameTable.h"
 #include "ExperienceTable.h"
-#include "ServerInformation.h"
+#include "CServerInformation.h"
 #include "GameObject.h"
 #include "MZoneSoundManager.h"
 #include "MNPCScriptTable.h"
@@ -996,8 +996,8 @@ InitSound()
 					LPDIRECTSOUNDBUFFER pOld;
 					if (g_pSoundManager.SetData( soundID, pBuffer, pOld ))
 					{
-						pOld->Release();
-					}				
+						g_SDLAudio.Release(pOld);
+					}
 				}
 			}
 			//-----------------------------------------------------------
@@ -2812,7 +2812,7 @@ InitGameObject()
 	}
 	if (g_pServerInformation==NULL)
 	{
-		g_pServerInformation = new ServerInformation;
+		g_pServerInformation = new CServerInformation;
 		g_pServerInformation->SetServerGroupName( "ServerGroup" );
 		g_pServerInformation->SetServerName( "Server" );
 	}

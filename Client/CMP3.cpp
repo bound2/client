@@ -271,7 +271,18 @@
 ////	g_SDLAudio.SetVolumeLimit(volume);
 //}
 
-#ifdef PLATFORM_WINDOWS
+/* __USE_MP3__ (SoundSetting.h) is permanently disabled, so every caller of
+   CMP3 (GameInit.cpp/GameMain.cpp/GameUI.cpp/UIMessageManager.cpp) already
+   skips the code paths that would actually construct/Open/Play a real CMP3
+   instance - only null-guarded Stop()/SetVolume() calls on a permanently-NULL
+   g_pMP3 remain reachable. So this class's real Win32 MCI implementation
+   below is unreachable code, and building it needs the real <MMSystem.h>
+   this project's basic/Platform.h deliberately never includes (it
+   macro-redirects timeGetTime()/GetTickCount() to platform_get_ticks()
+   instead - including the real header here conflicts with that, see
+   Platform.h). Build against the already-working stub in the #else branch
+   on all platforms, including Windows, until __USE_MP3__ is ever enabled. */
+#if defined(PLATFORM_WINDOWS) && defined(__USE_MP3__)
 
 CMP3::CMP3(LPCSTR lpcszFileName)
 {

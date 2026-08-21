@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------
-// ServerInformation.h
+// CServerInformation.h
 //----------------------------------------------------------------------
 // Server의 정보
 //----------------------------------------------------------------------
@@ -81,17 +81,17 @@ class ServerGroup : public CTypeMap2<SERVER_INFO> {
 };
 
 //----------------------------------------------------------------------
-// ServerInformation
+// CServerInformation
 //----------------------------------------------------------------------
 // <ServerGroupID, ServerGroup>의 map에다가.. 선택된 server에 대한 정보.
 //----------------------------------------------------------------------
-class ServerInformation : public CTypeMap2<ServerGroup> {
+class CServerInformation : public CTypeMap2<ServerGroup> {
 	public :
 		typedef CTypeMap2<ServerGroup>		SERVER_GROUP_MAP;
 
 	public :
-		ServerInformation();
-		~ServerInformation();
+		CServerInformation();
+		~CServerInformation();
 
 		void			Release();
 
@@ -131,7 +131,7 @@ class ServerInformation : public CTypeMap2<ServerGroup> {
 		
 };
 
-extern	ServerInformation*	g_pServerInformation;
+extern	CServerInformation*	g_pServerInformation;
 
 #endif
 

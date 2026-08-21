@@ -1,13 +1,13 @@
 //----------------------------------------------------------------------
-// ServerInformation.cpp
+// CServerInformation.cpp
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
-#include "ServerInformation.h"
+#include "CServerInformation.h"
 
 //----------------------------------------------------------------------
 // Global
 //----------------------------------------------------------------------
-ServerInformation*	g_pServerInformation = NULL;
+CServerInformation*	g_pServerInformation = NULL;
 
 //----------------------------------------------------------------------
 //
@@ -21,14 +21,14 @@ ServerGroup::ServerGroup()
 
 //----------------------------------------------------------------------
 //
-// ServerInformation
+// CServerInformation
 //
 //----------------------------------------------------------------------
-ServerInformation::ServerInformation()
+CServerInformation::CServerInformation()
 {
 }
 
-ServerInformation::~ServerInformation()
+CServerInformation::~CServerInformation()
 {
 	Release();
 }
@@ -37,7 +37,7 @@ ServerInformation::~ServerInformation()
 // Release
 //----------------------------------------------------------------------
 void			
-ServerInformation::Release()
+CServerInformation::Release()
 {
 	SERVER_GROUP_MAP::Release();
 
@@ -54,7 +54,7 @@ ServerInformation::Release()
 // Set Server GroupID
 //----------------------------------------------------------------------
 bool			
-ServerInformation::SetServerGroupID(unsigned int id)	
+CServerInformation::SetServerGroupID(unsigned int id)	
 { 
 	//-----------------------------------------------------------
 	// Group의 이름을 기억해둔다.
@@ -79,7 +79,7 @@ ServerInformation::SetServerGroupID(unsigned int id)
 // Set ServerID
 //----------------------------------------------------------------------
 bool			
-ServerInformation::SetServerID(unsigned int id)		
+CServerInformation::SetServerID(unsigned int id)		
 { 
 	//-----------------------------------------------------------
 	// Group찾기

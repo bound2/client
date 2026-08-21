@@ -4,7 +4,16 @@
 #include "Client_PCH.h"
 #include "MMusic.h"
 
-#ifdef PLATFORM_WINDOWS
+/* __USE_REAL_MIDI__ (like __USE_MP3__ in SoundSetting.h) is never defined -
+   the real branch below calls real Win32 MCI/MIDI (mciSendString, HMIDIOUT,
+   midiOutOpen, MIDI_MAPPER, CALLBACK_NULL), which needs the real
+   <MMSystem.h> this project's basic/Platform.h deliberately never includes
+   (it macro-redirects timeGetTime()/GetTickCount() to platform_get_ticks()
+   instead - including the real header here would conflict with that, see
+   Platform.h). Until MIDI playback is reimplemented on top of SDL2/SDL_mixer,
+   build against the already-working stub in the #else branch on all
+   platforms, including Windows. */
+#if defined(PLATFORM_WINDOWS) && defined(__USE_REAL_MIDI__)
 
 // Windows implementation (original code)
 

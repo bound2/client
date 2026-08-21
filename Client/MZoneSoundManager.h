@@ -15,9 +15,20 @@
 
 #include "MZoneSound.h"
 #include "CTypeMap.h"
-#ifdef PLATFORM_WINDOWS
-#include <DSound.h>
+
+/* This project no longer uses real DirectSound - including the real
+   <DSound.h> here redefines _DSBPOSITIONNOTIFY (from basic/AudioTypes.h)
+   with an incompatible duplicate, the same conflict already fixed for
+   CSoundPartManager.h/CDirectDraw/MMSystem elsewhere. basic/Platform.h only
+   forward-declares LPDIRECTSOUNDBUFFER on non-Windows (it expects the real
+   header to supply it on Windows), so declare the opaque pointer type here
+   directly for all platforms instead. */
+#include "../basic/Platform.h"
+
+#ifndef LPDIRECTSOUNDBUFFER
+typedef struct IDirectSoundBuffer* LPDIRECTSOUNDBUFFER;
 #endif
+
 #include <map>
 
 #include <fstream>

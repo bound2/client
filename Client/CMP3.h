@@ -1,7 +1,10 @@
-#ifdef PLATFORM_WINDOWS
+/* See CMP3.cpp: __USE_MP3__ is never defined, so the real Win32 MCI
+   implementation (and its <mmsystem.h> dependency) is never built, on
+   Windows or otherwise. */
+#if defined(PLATFORM_WINDOWS) && defined(__USE_MP3__)
 #include <mmsystem.h>
 #else
-#include "../../basic/Platform.h"
+#include "../basic/Platform.h"
 #endif
 
 struct MP3;

@@ -33,7 +33,7 @@
 #include "MStatusManager.h"
 #include "MChatManager.h"
 #include "UIMessageManager.h"
-#include "ServerInformation.h"
+#include "CServerInformation.h"
 #include "UserInformation.h"
 #include "TempInformation.h"
 #include "ClientConfig.h"
@@ -457,7 +457,7 @@ UI_SetWorldList()
 		int* groupID = new int [numGroup];
 		int* groupStatus = new int [numGroup];
 
-		ServerInformation::const_iterator iGroup = g_pServerInformation->begin();
+		CServerInformation::const_iterator iGroup = g_pServerInformation->begin();
 
 		//-----------------------------------------------------
 		// UI에 넘겨줄 server정보 생성

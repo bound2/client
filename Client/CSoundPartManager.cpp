@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "CSoundPartManager.h"
+#include "CDirectSound.h"
 
 //-----------------------------------------------------------------------------
 // Release
@@ -19,10 +20,8 @@ CSoundPartManager::Release()
 		{
 			if (m_pData[i]!=NULL)
 			{
-#ifdef PLATFORM_WINDOWS
-				m_pData[i]->Stop();
-				m_pData[i]->Release();
-#endif
+				g_SDLAudio.Stop(m_pData[i]);
+				g_SDLAudio.Release(m_pData[i]);
 				m_pData[i] = NULL;
 			}
 		}
@@ -49,9 +48,7 @@ CSoundPartManager::Stop()
 		{
 			if (m_pData[i]!=NULL)
 			{
-#ifdef PLATFORM_WINDOWS
-				m_pData[i]->Stop();
-#endif
+				g_SDLAudio.Stop(m_pData[i]);
 			}
 		}
 	}

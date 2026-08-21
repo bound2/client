@@ -22,7 +22,11 @@
 #ifndef __MMUSIC_H__
 #define __MMUSIC_H__
 
-//#include <MMSystem.h>
+/* See MMusic.cpp: __USE_REAL_MIDI__ is never defined, so the real Win32 MCI/
+   MIDI implementation (and its <MMSystem.h> dependency) is never built. */
+#if defined(PLATFORM_WINDOWS) && defined(__USE_REAL_MIDI__)
+#include <MMSystem.h>
+#endif
 
 
 // 클래스

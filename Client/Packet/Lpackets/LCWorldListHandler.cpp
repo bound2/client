@@ -10,7 +10,7 @@
 #include "Client_PCH.h"
 #include "LCWorldList.h"
 #include "ClientDef.h"
-#include "ServerInformation.h"
+#include "CServerInformation.h"
 #include "DebugInfo.h"
 #include "UIFunction.h"
 
@@ -32,7 +32,7 @@ throw ( ProtocolException , Error )
 	//-----------------------------------------------------------
 	if (g_pServerInformation==NULL)
 	{
-		g_pServerInformation = new ServerInformation;
+		g_pServerInformation = new CServerInformation;
 	}
 	else
 	{

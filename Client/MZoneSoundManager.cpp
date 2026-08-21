@@ -52,10 +52,8 @@ ZONESOUND_NODE::~ZONESOUND_NODE()
 {
 	if (m_pBuffer!=NULL)
 	{
-#ifdef PLATFORM_WINDOWS
-		m_pBuffer->Stop();
-		m_pBuffer->Release();
-#endif
+		g_SDLAudio.Stop(m_pBuffer);
+		g_SDLAudio.Release(m_pBuffer);
 		m_pBuffer = NULL;
 	}
 }
@@ -176,9 +174,7 @@ ZONESOUND_NODE::Play(int x, int y, bool bLoop)
 					LPDIRECTSOUNDBUFFER pOld;
 					if ((*g_pSoundManager).SetData( m_SoundID, pBuffer, pOld )!=0xFFFF)
 					{
-#ifdef PLATFORM_WINDOWS
-						pOld->Release();
-#endif
+						g_SDLAudio.Release(pOld);
 					}
 					
 					//-----------------------------------------------------------
@@ -285,9 +281,7 @@ ZONESOUND_NODE::StopLoop()
 	{
 		if (g_SDLAudio.IsPlay( m_pBuffer ))
 		{
-#ifdef PLATFORM_WINDOWS
-			m_pBuffer->Play(0, 0, 0);	// loop를 멈춘다.
-#endif
+			g_SDLAudio.Play(m_pBuffer, false);	// loop를 멈춘다.
 		}
 	}
 

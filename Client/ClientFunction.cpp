@@ -118,16 +118,11 @@ UnInitSound()
 			else		
 			{
 				// Replace됐으면 원래것을 메모리에서 지운다.
-#ifdef PLATFORM_WINDOWS
 				LPDIRECTSOUNDBUFFER pOld;
 				if (g_pSoundManager->SetData( soundID, pBuffer, pOld )!=0xFFFF)
 				{
-					pOld->Release();
+					g_SDLAudio.Release(pOld);
 				}
-#else
-				// SDL backend: SetData manages buffer lifecycle internally
-				g_pSoundManager->SetData( soundID, pBuffer);
-#endif
 
 				// Play
 				g_SDLAudio.Play( pBuffer, false );				

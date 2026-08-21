@@ -75,6 +75,12 @@
 	Replaces DirectX multimedia types.
 -----------------------------------------------------------------------------*/
 
+/* HMMIO/MMCKINFO: skip our compat definitions if the real <mmsystem.h>/
+   <mmiscapi.h> was already included earlier in this translation unit (e.g.
+   CMP3.cpp/MMusic.cpp still call real MCI/mmio APIs) - defining both is an
+   incompatible redefinition (error C2371/C2011). _INC_MMSYSTEM and
+   _MMISCAPI_H_ are those headers' own include guards. */
+#if !defined(_INC_MMSYSTEM) && !defined(_MMISCAPI_H_)
 /* Forward declarations */
 typedef DWORD FOURCC;
 typedef void* HMMIO;
@@ -86,13 +92,18 @@ typedef struct _MMCKINFO {
     DWORD   dwDataOffset;
     DWORD   dwSize;
 } MMCKINFO;
+#endif /* !_INC_MMSYSTEM && !_MMISCAPI_H_ */
 
-/* DirectSound buffer position notify structure */
+/* DSBPOSITIONNOTIFY: same idea, deferring to the real <dsound.h> if it was
+   already included earlier in this translation unit. __DSOUND_INCLUDED__ is
+   dsound.h's own include guard. */
+#ifndef __DSOUND_INCLUDED__
 typedef struct _DSBPOSITIONNOTIFY {
     DWORD   dwFlags;
     DWORD   dwOffset;
     DWORD   dwCallback;
 } DSBPOSITIONNOTIFY;
+#endif /* !__DSOUND_INCLUDED__ */
 
 /* Multimedia constants */
 #ifndef MMIO_READ

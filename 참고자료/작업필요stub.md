@@ -95,6 +95,49 @@ BOM 추가, `__builtin_expect` 제거)은 전부 **실제 동작 경로를 그�
 넘길지는 별도로 상의해서 결정하기로 함(2026-08-21 대화에서 사용자에게
 선택지 제시 중).
 
+**후속 처리(같은 날 이후 세션)**: `VS_UI/WinMain.cpp`를 죽은 진입점으로 확정해
+빌드에서 제외하면서, 위 5건 중 `ShowFPS`/`CSDLGraphics::Init`/
+`InitBacksurface` 3건은 호출부 자체가 사라져 해소됨(자세한 내용은
+`참고자료/커밋로그/2026-08-21_VS_UI_WinMain_cpp_죽은_진입점_제외.md`).
+나머지 `GammaBox565`/`GammaBox555`는 VC6 원본을 참고해 실제로 구현함(같은
+커밋).
+
+---
+
+## 2-1. `work 5` (DarkEden.exe 최초 링크) 오류 조사 중 남긴 스텁 - MIDI/MCI 배경음악
+
+`Client/MMusic.cpp`(MIDI 기반 배경음악, `g_Music`)와 `Client/CMP3.cpp`(MCI
+기반 MP3 재생, `g_pMP3`)는 둘 다 원래 실제 Win32 `<MMSystem.h>` API(MCI/
+`midiOutOpen`/`mciSendString` 등)를 직접 호출하는 Windows 전용 구현을 갖고
+있었음. 그런데 `basic/Platform.h`가 이미 "이 프로젝트는 real `<MMSystem.h>`를
+어디서도 include하지 않는다"는 원칙 하에 `timeGetTime()`/`GetTickCount()`를
+`platform_get_ticks()`로 매크로 치환해두고 있어서, 이 두 파일에서 real
+`<MMSystem.h>`를 include하면 그 매크로와 충돌해 새 컴파일 오류가 남(예:
+`timeGetTime(void)` 선언부가 인자 0개짜리 매크로와 충돌).
+
+- **`CMP3`(MP3/MCI)**: 조사 결과, 이 클래스를 실제로 생성/재생하는 코드 경로는
+  전부 `#ifdef __USE_MP3__`(`Client/SoundSetting.h:4`에서 영구적으로
+  `//#define`으로 비활성화됨)로 감싸여 있어 **이미 도달 불가능한 상태**였음
+  (실제 배경음악 재생은 `COGGSTREAM`/`g_pOGG` 기반 OGG 스트리밍 경로가 담당).
+  다만 `g_pMP3->Stop()`/`SetVolume()` 등 일부 null-guard된 호출은 여전히
+  살아있어 클래스 자체는 링크에 필요함. `CMP3.cpp`에는 이미 완전한 비-Windows
+  스텁 구현(`#else` 분기)이 있었으므로, Windows에서도 이 스텁을 쓰도록
+  `#ifdef PLATFORM_WINDOWS`를 `#if defined(PLATFORM_WINDOWS) &&
+  defined(__USE_MP3__)`로 바꿈(같은 파일의 기존 플래그를 그대로 재사용 -
+  `__USE_MP3__`가 켜지지 않는 한 real MCI 코드는 컴파일조차 안 됨).
+- **`MMusic`(MIDI)**: `g_Music.Play()`는 `GameMain.cpp`/`UIMessageManager.cpp`
+  에서 "사용자가 PlayWaveMusic(WAV/OGG 음악)을 끈 경우"의 폴백 경로로 여전히
+  **런타임에 도달 가능**함 - `CMP3`와 달리 진짜 죽은 코드는 아님. 다만 real
+  MIDI 재생을 SDL 기반으로 재구현하는 건 이번 컴파일 오류 수정 범위를 크게
+  벗어나는 별도 기능 작업이라 판단해, `CMP3`와 동일한 패턴으로 새 플래그
+  `__USE_REAL_MIDI__`(영구 미정의)를 도입하고 이미 있던 비-Windows 스텁
+  구현으로 Windows도 라우팅함.
+- **결과**: 이 폴백 경로를 타는 사용자는 Windows에서도 MIDI 배경음악이 아무
+  소리도 내지 않음(상태 추적은 정상 동작 - `IsPlay()`/`IsPause()` 등은 그대로
+  참/거짓을 반환하지만 실제 재생은 no-op). **남은 일**: `__USE_REAL_MIDI__`를
+  실제로 구현하려면 SDL2/SDL_mixer 기반 MIDI 재생(예: 폰트 기반 MIDI 신디사이저
+  연동)이 필요함.
+
 ---
 
 ## 3. 조사 중 발견한, 내가 만들지 않은 기존 스텁 (Windows 렌더링 파이프라인 관련)

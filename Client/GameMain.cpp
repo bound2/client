@@ -3649,14 +3649,11 @@ PlaySound(TYPE_SOUNDID soundID, bool repeat, int x, int y)
 			// Load¿¡ ¼º°ø ÇßÀ¸¸é...
 			//-----------------------------------------------------------
 			{
-#ifdef PLATFORM_WINDOWS
-				// DirectSound-specific buffer management (Windows only)
 				LPDIRECTSOUNDBUFFER pOld;
 				if ((*g_pSoundManager).SetData( soundID, pBuffer, pOld )!=0xFFFF)
 				{
-					pOld->Release();
+					g_SDLAudio.Release(pOld);
 				}
-#endif // PLATFORM_WINDOWS
 
 				int gapX = x - g_pPlayer->GetX();
 				int gapY = y - g_pPlayer->GetY();
@@ -3839,18 +3836,12 @@ PlaySound(TYPE_SOUNDID soundID)
 		//-----------------------------------------------------------
 		else
 		{
-#ifdef PLATFORM_WINDOWS
 			// ReplaceµÆÀ¸¸é ¿ø·¡°ÍÀ» ¸Þ¸ð¸®¿¡¼­ Áö¿î´Ù.
 			LPDIRECTSOUNDBUFFER pOld;
 			if ((*g_pSoundManager).SetData( soundID, pBuffer, pOld )!=0xFFFF)
 			{
-				pOld->Release();
+				g_SDLAudio.Release(pOld);
 			}
-#else
-			// DirectSound is Windows-specific
-			LPDIRECTSOUNDBUFFER pOld;
-			(*g_pSoundManager).SetData(soundID, pBuffer, pOld);
-#endif // PLATFORM_WINDOWS
 
 			g_SDLAudio.CenterPan( pBuffer );						
 		
@@ -3971,18 +3962,12 @@ void PlaySoundForce(TYPE_SOUNDID soundID)
 		//-----------------------------------------------------------
 		else
 		{
-#ifdef PLATFORM_WINDOWS
 			// ReplaceµÆÀ¸¸é ¿ø·¡°ÍÀ» ¸Þ¸ð¸®¿¡¼­ Áö¿î´Ù.
 			LPDIRECTSOUNDBUFFER pOld;
 			if ((*g_pSoundManager).SetData( soundID, pBuffer, pOld )!=0xFFFF)
 			{
-				pOld->Release();
+				g_SDLAudio.Release(pOld);
 			}
-#else
-			// DirectSound is Windows-specific
-			LPDIRECTSOUNDBUFFER pOld;
-			(*g_pSoundManager).SetData(soundID, pBuffer, pOld);
-#endif // PLATFORM_WINDOWS
 
 			g_SDLAudio.CenterPan( pBuffer );						
 		
