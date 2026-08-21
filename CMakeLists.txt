@@ -697,6 +697,15 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# Set output directory
 	set_target_properties(DarkEden PROPERTIES
 		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+		# Without this, Visual Studio's "Local Windows Debugger" (F5) runs
+		# DarkEden.exe with the .vcxproj's own directory (build/vs2019) as
+		# the working directory, not the exe's own folder (bin/<Config>) -
+		# a mismatch trap, since GameInit.cpp loads "Data/Info/FileDef.inf"
+		# and other game data via paths relative to the working directory.
+		# Match double-click-from-Explorer behavior (CWD = exe's folder)
+		# so "Data/" only needs to exist in one place regardless of how
+		# the exe is launched.
+		VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:DarkEden>"
 	)
 
 	# atls.lib for VS_UI_WebBrowser.h's ATL usage - see the
