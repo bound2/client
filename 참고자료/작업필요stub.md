@@ -188,3 +188,65 @@ static inline LPDIRECTDRAW7 GetDD() { return nullptr; } // 하드코딩 (1-1 항
 진입점인데, 여기서 필요로 하는 `CSDLGraphics::Init()`이 아직 없어(위 2번
 항목) 사실상 Windows 빌드는 창은 뜨더라도 SDL 렌더러가 붙지 않은 상태로
 추정됨(직접 실행해서 확인 필요).
+
+## 3. work 8 오류 수정 (2026-08-21)에서 내가 남긴 부분
+
+### 3-1. `WavePackFileInfo::LoadFromFileData()` — 항상 `NULL` 반환하도록 스텁화
+
+- 대상: `Client/WavePackFileManager.cpp`
+- 무엇을 했나: `DSBUFFERDESC`를 만들어 `g_SDLAudio.GetDS()->CreateSoundBuffer(...)`를
+  호출하고 `buffer->Lock()/Unlock()`으로 WAV 데이터를 채워넣던 원래 구현을
+  제거하고, 파일을 읽지 않고 바로 `NULL`을 반환하도록 바꿈.
+- 왜 그렇게 했나: `CSDLAudio::GetDS()`(`Client/DXLib/CDirectSound.cpp:273`)가
+  **애초에 내가 만들기 전부터** 항상 `NULL`로 초기화되고 재할당되지 않는
+  `m_pDS`를 그대로 반환하는 스텁이라(실제 재생은 SDL_mixer로 처리),
+  이 함수가 실행됐다면 `nullptr->CreateSoundBuffer(...)`로 항상 크래시했을
+  것임. 즉 1-1 항목(`CSDLGraphics::GetDD()`)과 같은 성격의, 내가 손대기
+  전부터 이미 죽어있던 코드.
+  또한 이 함수가 실제 `<DSound.h>`를 필요로 하는 유일한 지점이었는데, 같은
+  번역 단위에서 `basic/AudioTypes.h`가 먼저 처리된 뒤(Client_PCH.h 경유)
+  `<DSound.h>`가 include되면 `_DSBPOSITIONNOTIFY`가 중복 정의되는 문제
+  (`error C2011`, work5 사운드 서브시스템 정리 때 다룬 것과 같은 부류)가
+  있어서, 이 함수를 스텁화하면서 `WavePackFileManager.h`의
+  `#include <DSound.h>`도 제거하고 `LPDIRECTSOUNDBUFFER`를 opaque
+  pointer typedef로 직접 선언하도록 바꿈(`CSoundPartManager.h`/
+  `MZoneSoundManager.h`에 이미 있던 것과 같은 패턴).
+- **남은 일**: WAV 파일을 실제 재생 가능한 사운드 버퍼로 로드하는 기능이
+  필요하다면, SDL_mixer 기준(`Mix_LoadWAV`류)으로 새로 구현해야 함. 지금은
+  이 경로를 타면 그냥 사운드 없이 `NULL`을 돌려받음.
+
+### 3-2. `GameMain.cpp`의 스크린샷 JPG 저장 호출 제거 (기능 미구현 상태로 방치)
+
+- 대상: `Client/GameMain.cpp`(약 3540줄), `TakeScreenShot()` 계열 함수
+- 무엇을 했나: `SaveSurfaceToImage(str, *g_pBack)` 호출을, 이미 non-Windows
+  경로에 있던 것과 같은 "not yet implemented" `printf`로 교체(Windows/
+  non-Windows 공통 경로가 됨).
+- 왜 그렇게 했나: `SaveSurfaceToImage()`(`UtilityFunction.cpp:495`)는
+  `CDirectDrawSurface&`를 받는데, `SPRITELIB_BACKEND_SDL`(현재 이 프로젝트가
+  Windows 포함 항상 쓰는 유일한 백엔드)에서는 `CSpriteSurface`가
+  `CDirectDrawSurface`를 상속하지 않는 독립 클래스로 바뀜
+  (`CSpriteSurface.h`의 `SPRITESURFACE_STANDALONE` 분기). `g_pBack`은
+  `CSpriteSurface*`라서 이 호출은 SDL 백엔드에서 애초에 타입이 맞은 적이
+  없었음(non-Windows 경로는 이미 같은 이유로 "not yet implemented"로
+  처리되어 있었음 - Windows 경로만 안 맞춰져 있었던 것).
+- **남은 일**: 스크린샷 저장이 필요하다면 `CSpriteSurface` 기준으로 새로
+  구현해야 함(BMP는 `SaveToBMP`가 있지만 `Get_BPP()`/`Lock()`이 없고
+  `LockSDL()`로 이름이 바뀌어 있어 JPG 경로는 그대로 못 씀 - stb_image_write
+  같은 걸로 새로 짜는 게 나을 수 있음).
+
+### 3-3. (정정) `Client/SDLMain.cpp` — 실제로는 Windows 빌드에도 컴파일되고 있었음
+
+- 위 "2." 항목의 "Windows에서 통째로 빠짐"이라는 서술이 **틀렸음**을 이번에
+  발견함. 파일 맨 앞(19번째 줄)의 `#ifndef PLATFORM_WINDOWS`가 그 앞에
+  `Client_PCH.h`(또는 `basic/Platform.h`)를 전혀 include하지 않은 채로
+  검사를 하고 있었음 - `PLATFORM_WINDOWS`는 CMake `/D` 플래그가 아니라
+  `basic/Platform.h`에서 `_WIN32`/`_WIN64`로 정의되는 매크로라서, 이 파일
+  자신은 플랫폼과 무관하게 항상 "정의 안 됨" 상태로 그 줄을 만났음. 그 결과
+  `#ifndef` 분기가 **항상** 참이 되어, macOS/Linux 전용으로 의도된 이
+  파일이 Windows 빌드에도 그대로 컴파일되고 있었음(`getcwd()` 등
+  POSIX-only 심볼 미선언으로 실제 오류가 남).
+- 고친 내용: `#ifndef PLATFORM_WINDOWS` 검사 앞에 `Client/Packet/SocketAPI.h`와
+  같은 방식의 자체적인 `#if defined(_WIN32) || defined(_WIN64)` 플랫폼 감지를
+  추가해서, 이 파일 혼자서도 올바르게 플랫폼을 판단하도록 함.
+- 결과: 이제 이 파일은 원래 의도대로 Windows 빌드에서 완전히 빠짐(위 "2."
+  항목이 애초에 서술하려던 상태가 이제야 실제로 맞음).

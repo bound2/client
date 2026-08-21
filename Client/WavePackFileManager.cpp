@@ -93,50 +93,21 @@ WavePackFileInfo::SaveToFileData(std::ofstream& file)
 //--------------------------------------------------------------------------
 // Load From File Data
 //--------------------------------------------------------------------------
-LPDIRECTSOUNDBUFFER		
+/* CSDLAudio::GetDS() (Client/DXLib/CDirectSound.cpp) always returns the
+   stub's m_pDS, which is initialized to NULL and never reassigned - actual
+   playback goes through SDL_mixer instead. So the original body here
+   (g_SDLAudio.GetDS()->CreateSoundBuffer(...)) always dereferenced a null
+   pointer if it was ever reached, i.e. it was already dead/crashing code
+   before this stub, same category as CSDLGraphics::GetDD() elsewhere (see
+   참고자료/작업필요stub.md). Stubbed to return NULL directly instead of
+   building a DSBUFFERDESC/calling the real DirectSound API, which also
+   avoids pulling in the real <DSound.h> in this translation unit (see the
+   comment on the LPDIRECTSOUNDBUFFER typedef in WavePackFileManager.h). */
+LPDIRECTSOUNDBUFFER
 WavePackFileInfo::LoadFromFileData(std::ifstream& file)
 {
-	DWORD cksize;
-	WAVEFORMATEX wavefmt;
-	const int wavefmtSize = sizeof(WAVEFORMATEX);
-
-	file.read((char*)&cksize, 4);
-	file.read((char*)&wavefmt, wavefmtSize);
-	
-	// create a directsound buffer to hold wave data
-	LPDIRECTSOUNDBUFFER buffer;
-	DSBUFFERDESC bufdesc;
-	memset(&bufdesc, 0, sizeof(DSBUFFERDESC));
-	bufdesc.dwSize			= sizeof(DSBUFFERDESC);
-	bufdesc.dwFlags			= DSBCAPS_CTRLPAN 
-							| DSBCAPS_CTRLVOLUME ;
-							//| DSBCAPS_LOCDEFER;	// 이건 왜 넣어둔거였을까. - -;
-	bufdesc.dwBufferBytes	= cksize;
-	bufdesc.lpwfxFormat		= &wavefmt;
-
-	if( FAILED(g_SDLAudio.GetDS()->CreateSoundBuffer(&bufdesc, &buffer, NULL)) )
-	{
-		return NULL;
-	}
-	
-	// write wave data to directsound buffer you just created
-	void *write1 = 0; 
-	void *write2 = 0;
-	unsigned long length1;
-	unsigned long length2;
-
-	buffer->Lock(0, cksize, &write1, &length1, &write2, &length2, 0);
-	if(write1 > 0)
-	{
-		file.read((char*)write1, length1);
-	}
-	if(write2 > 0)
-	{
-		file.read((char*)write2, length2);
-	}
-	buffer->Unlock(write1, length1, write2, length2);
-	
-	return buffer;
+	(void)file;
+	return NULL;
 }
 
 //--------------------------------------------------------------------------
