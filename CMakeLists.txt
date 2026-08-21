@@ -93,6 +93,14 @@ if(BUILD_ENGINE OR USE_SDL_BACKEND OR NOT WIN32)
 	endif()
 endif()
 
+# Find iconv library (needed for MString.cpp/TextService.cpp). On Windows
+# this isn't a system library - it comes from vcpkg - so it needs an actual
+# find_package() to resolve a full path; a bare target_link_libraries(iconv)
+# just passes the literal string "iconv" to the linker, which then can't
+# find iconv.lib in its default search paths (LNK1104) even though it's
+# right there in the vcpkg install.
+find_package(Iconv QUIET)
+
 # Find JPEG library (needed for UtilityFunction.cpp)
 find_package(JPEG QUIET)
 if(NOT JPEG_FOUND)
@@ -675,7 +683,11 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 
 	# Link iconv library (not needed for Emscripten - has stub implementations)
 	if(NOT EMSCRIPTEN)
-		target_link_libraries(DarkEden PRIVATE iconv)
+		if(Iconv_FOUND)
+			target_link_libraries(DarkEden PRIVATE Iconv::Iconv)
+		else()
+			target_link_libraries(DarkEden PRIVATE iconv)
+		endif()
 	endif()
 
 	# Link JPEG library if available
@@ -727,7 +739,14 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		# neither the NDEBUG nor the __WIN32__ branch matches on a Windows
 		# Debug build, leaving those macros undefined across every Packet/*
 		# translation unit that uses them.
-		target_compile_definitions(DarkEden PRIVATE __WIN32__)
+		# __WINDOWS__ was likewise always passed via /D in Client.dsp.
+		# Several Packet/*.cpp files (SocketAPI.cpp, PacketFileAPI.cpp, ...)
+		# branch on bare `#if __WINDOWS__`/`#elif __WINDOWS__` (not
+		# `defined(__WINDOWS__)`) to pick the Windows vs. POSIX code path;
+		# an undefined macro reads as 0 in a #if, so without this those
+		# branches silently compiled neither path, leaving locals like
+		# fd/result/client/nSent declared in the branch that never ran.
+		target_compile_definitions(DarkEden PRIVATE __WIN32__ __WINDOWS__)
 	endif()
 
 	message(STATUS "DarkEden executable will be built from remaining Client files (VS_UI compiled separately)")
