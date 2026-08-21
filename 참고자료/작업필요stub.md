@@ -250,3 +250,22 @@ static inline LPDIRECTDRAW7 GetDD() { return nullptr; } // 하드코딩 (1-1 항
   추가해서, 이 파일 혼자서도 올바르게 플랫폼을 판단하도록 함.
 - 결과: 이제 이 파일은 원래 의도대로 Windows 빌드에서 완전히 빠짐(위 "2."
   항목이 애초에 서술하려던 상태가 이제야 실제로 맞음).
+
+### 3-4. `ProfileManager.cpp`의 프로필 이미지 로딩 - Windows 분기도 SDL 스텁으로 통일
+
+- 대상: `Client/ProfileManager.cpp`, `MakeProfiles()`(BMP -> SPK 변환 부분)
+- 무엇을 했나: `#ifdef PLATFORM_WINDOWS`(실제 BMP 로드 -> `CDirectDrawSurface`
+  로 Blt/Lock해서 SPK에 픽셀 채워넣기)/`#else`(이미 있던 "not yet
+  implemented" 스텁 - 빈 프로필만 생성) 두 분기를 `#else` 쪽 스텁 하나로
+  통일.
+- 왜 그렇게 했나: `CSpriteSurface surface`/`CDirectDrawSurface bmpSurface`를
+  쓰던 Windows 분기가, `SPRITELIB_BACKEND_SDL`(Windows 포함 현재 유일한
+  백엔드)에서 `CSpriteSurface`가 더 이상 `CDirectDrawSurface`를 상속하지
+  않는 독립 클래스로 바뀌면서 애초에 타입이 맞은 적이 없었음
+  (`LoadImageToSurface(bmpFilename, bmpSurface)`도 `CDirectDrawSurface&`
+  오버로드만 있어서 안 맞았음). non-Windows 분기는 이미 이 문제를 알고
+  "TODO: SDL_image 기반으로 새로 구현 필요"로 스텁 처리되어 있었으므로,
+  같은 처리를 Windows에도 그대로 적용.
+- **남은 일**: 프로필 캐릭터 초상화 BMP 로딩이 필요하다면 `CSpriteSurface`
+  기준으로 새로 구현해야 함(SDL_image 등으로 로드 후 `SPK[].SetPixelNoColorkey()`
+  에 픽셀을 채워넣는 경로). 지금은 항상 빈(검은) 프로필 이미지가 생성됨.

@@ -1291,7 +1291,11 @@ UIMessageManager::Execute_UI_RUN_NEWUSER_REGISTRATION(int left, int right, void*
 
 			sprintf(str, "%s\\Explorer.exe", str);
 
-			CSDLGraphics::GetDD()->RestoreDisplayMode();
+			// CSDLGraphics::GetDD() always returns nullptr (stub - see
+			// 참고자료/작업필요stub.md 1-1), and IDirectDraw is only
+			// forward-declared, so ->RestoreDisplayMode() never compiled.
+			// Same category as the WinMain.cpp/VS_UI_Title.cpp call sites
+			// already disabled there; just missed here.
 #ifdef __YHDK2__
 			_spawnl(_P_NOWAIT, str, "Explorer.exe", "http://www.yhdk2.cn", NULL);
 #else
@@ -9822,7 +9826,11 @@ UIMessageManager::Execute_GO_BILING_PAGE(int left, int right, void* void_ptr)
 
 		sprintf(str, "%s\\Explorer.exe", str);
 
-		CSDLGraphics::GetDD()->RestoreDisplayMode();
+		// CSDLGraphics::GetDD() always returns nullptr (stub - see
+		// 참고자료/작업필요stub.md 1-1), and IDirectDraw is only
+		// forward-declared, so ->RestoreDisplayMode() never compiled.
+		// Same category as the WinMain.cpp/VS_UI_Title.cpp call sites
+		// already disabled there; just missed here.
 
 	//	_spawnl(_P_NOWAIT, str, "Explorer.exe", g_pClientConfig->URL_HOMEPAGE_BILING.GetString(), NULL);
 #endif
