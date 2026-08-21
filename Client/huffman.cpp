@@ -1,6 +1,6 @@
 #include "DirectXlib_PCH.h"
 #ifdef PLATFORM_WINDOWS
-#include <strstrea.h>
+#include <strstream>
 #else
 #include <sstream>
 #endif
