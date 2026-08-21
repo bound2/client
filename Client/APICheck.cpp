@@ -93,20 +93,23 @@ BOOL APICheck::CheckApi()
 					   0xE8,0x12,0x52,0x00,0x00
 						};
 	BYTE	bReadCode[37];
-	if (m_hsend!=NULL)	{
-		memcpy(&bReadCode[0],m_hsend,37);
-		for (int i=0;i<checklen;i++)
+	if (m_hsend != NULL)
+	{
+		memcpy(&bReadCode[0], m_hsend, 37);
+
+		int i = 0; // 변수 선언을 for 문 밖으로 이동
+		for (i = 0; i < checklen; i++)
 		{
-			if (bReadCode[i]!=bCheck[i])
+			if (bReadCode[i] != bCheck[i])
 			{
 				break;
 			}
-// 			else
-// 				::ExitProcess(0);
 		}
-		if (i==checklen)
+
+		// 이제 루프 밖에서도 i 값을 정상적으로 검사 가능
+		if (i == checklen)
 		{
-			MessageBox(0,"","",MB_OK);
+			MessageBox(0, "", "", MB_OK);
 			::ExitProcess(0);
 		}
 	}
