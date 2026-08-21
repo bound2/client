@@ -15,230 +15,84 @@ extern CSoundPartManager*		g_pSoundManager;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
+// The real Immersion Force Feedback classes this file used to drive
+// (CImmDevice/CImmPeriodic/CImmProject/CImmEffect - see VS_UI/src/Imm/
+// Imm*.h) are declared DLLIFC (__declspec(dllimport)) against Immersion
+// Corporation's proprietary IFC runtime DLL. That DLL/.lib was never part
+// of this project and doesn't exist anywhere in this environment, so any
+// code that actually constructs one of those types (which requires their
+// vtable/constructor to be linkable) fails at link time - LNK2019 for
+// CImmDevice::CreateDevice()/CImmPeriodic/CImmProject's own constructors,
+// and LNK2001 for the rest of CImmPeriodic/CImmEffect's virtual functions
+// (needed just to emit those types' vtables). See 참고자료/작업필요stub.md.
+//
+// This class now never instantiates any of them: m_pDevice is always
+// NULL, so IsDevice() is always false, and every other method below is a
+// no-op via its own IsDevice() guard - matching the already-established
+// pattern for other Windows features that lost their backing
+// implementation (CSDLGraphics::GetDD(), WavePackFileInfo::LoadFromFileData()).
 
 CImm::CImm()
 {
-
 	m_bPlay = false;
-	m_pDevice = CImmDevice::CreateDevice(NULL, g_hWnd);
+	m_pDevice = NULL;
 
-//	if (m_pDevice)
-//	{
-//		m_strAction[FORCE_ACTION_DAMAGED] = "Damaged";
-//		m_strAction[FORCE_ACTION_SWORD] = "Sword";
-//		m_strAction[FORCE_ACTION_BLADE] = "Blade";
-//		m_strAction[FORCE_ACTION_CROSS] = "Cross";
-//		m_strAction[FORCE_ACTION_MACE] = "Mace";
-//		m_strAction[FORCE_ACTION_SR] = "Sr";
-//		m_strAction[FORCE_ACTION_SMG] = "Smg";
-//		m_strAction[FORCE_ACTION_SG] = "Sg";
-//		m_strAction[FORCE_ACTION_AR] = "Ar";
-//		m_strAction[FORCE_ACTION_BIKE_UP] = "BikeUp";
-//		m_strAction[FORCE_ACTION_BIKE_DOWN] = "BikeDown";
-//		m_strAction[FORCE_ACTION_BIKE_ING] = "BikeIng";
-//	}
 	m_ProjectAction = NULL;
 	m_ProjectSkill = NULL;
 	m_ProjectInventory = NULL;
 	m_ProjectUseItem = NULL;
-
 }
 
 CImm::~CImm()
 {
-
-
-	Disable();
-	delete m_pDevice; // Release device
-
+	// m_pDevice is always NULL (see constructor above) - nothing to release.
 }
 
 
 void CImm::Enable()
 {
 	if(!IsDevice())return;
-	Disable();
-	m_bPlay = true; 
-	
-	BOOL bRes;
-
-
-	CImmProject ImmProject;
-	if (ImmProject.OpenFile(IFR_UI, m_pDevice))
-	{
-		// Square Wave Vibration from Immersion Studio resource file 
-		
-		CImmPeriodic *m_pTemp;
-		
-		m_pTemp = new CImmPeriodic;
-		bRes = m_pTemp->InitializeFromProject(ImmProject, "Drag");
-		if (!bRes)
-		{
-			delete m_pTemp;
-			m_pTemp = NULL;
-		}
-		m_vUI.push_back(m_pTemp);
-		
-		m_pTemp = new CImmPeriodic;
-		bRes = m_pTemp->InitializeFromProject(ImmProject, "Window");
-		if (!bRes)
-		{
-			delete m_pTemp;
-			m_pTemp = NULL;
-		}
-		m_vUI.push_back(m_pTemp);
-		
-		m_pTemp = new CImmPeriodic;
-		bRes = m_pTemp->InitializeFromProject(ImmProject, "Button");
-		if (!bRes)
-		{
-			delete m_pTemp;
-			m_pTemp = NULL;
-		}
-		m_vUI.push_back(m_pTemp);
-		
-		m_pTemp = new CImmPeriodic;
-		bRes = m_pTemp->InitializeFromProject(ImmProject, "Grid");
-		if (!bRes)
-		{
-			delete m_pTemp;
-			m_pTemp = NULL;
-		}
-		m_vUI.push_back(m_pTemp);
-		
-		ImmProject.Close();
-	}
-
-	m_ProjectAction = new CImmProject;
-	if(!m_ProjectAction->OpenFile(IFR_ACTION, m_pDevice))
-	{
-		delete m_ProjectAction;
-		m_ProjectAction = NULL;
-	}
-	
-	m_ProjectSkill = new CImmProject;
-	if(!m_ProjectSkill->OpenFile(IFR_SKILL, m_pDevice))
-	{
-		delete m_ProjectSkill;
-		m_ProjectSkill = NULL;
-	}
-	
-	m_ProjectInventory = new CImmProject;
-	if(!m_ProjectInventory->OpenFile(IFR_INVENTORY, m_pDevice))
-	{
-		delete m_ProjectInventory;
-		m_ProjectInventory = NULL;
-	}
-	
-	m_ProjectUseItem = new CImmProject;
-	if(!m_ProjectUseItem->OpenFile(IFR_USE_ITEM, m_pDevice))
-	{
-		delete m_ProjectUseItem;
-		m_ProjectUseItem = NULL;
-	}
-	
 }
 
 void CImm::Disable()
 {
 	if(!IsDevice())return;
-	m_bPlay = false; 
-
-
-	for(unsigned int i = 0; i < m_vUI.size(); i++)
-	{
-		if(m_vUI[i] != NULL)
-			delete m_vUI[i];
-	}
-	m_vUI.clear();
-
-	if(m_ProjectAction != NULL)
-	{
-		m_ProjectAction->Close();
-		delete m_ProjectAction;
-		m_ProjectAction = NULL;
-	}
-
-	if(m_ProjectSkill != NULL)
-	{
-		m_ProjectSkill->Close();
-		delete m_ProjectSkill;
-		m_ProjectSkill = NULL;
-	}
-
-	if(m_ProjectInventory != NULL)
-	{
-		m_ProjectInventory->Close();
-		delete m_ProjectInventory;
-		m_ProjectInventory = NULL;
-	}
-
-	if(m_ProjectUseItem != NULL)
-	{
-		m_ProjectUseItem->Close();
-		delete m_ProjectUseItem;
-		m_ProjectUseItem = NULL;
-	}
-
 }
+
+// The bodies below used to call into CImmProject::Start()/CImmPeriodic::
+// Start() (via m_vUI[]) - direct (non-virtual) calls into the same
+// unavailable Immersion DLL, so referencing them at all is enough to fail
+// the link even behind an always-false guard (m_pDevice/m_ProjectXxx are
+// always NULL - see the constructor above). Kept as no-ops instead of
+// deleting the parameters outright, in case a future real implementation
+// wants the sound_id/ID inputs back.
 
 //UI
 void CImm::ForceUI(const unsigned int ID) const
 {
-	if(m_bPlay && m_pDevice)
-		if(ID < m_vUI.size() && m_vUI[ID] != NULL)
-			m_vUI[ID]->Start();
+	(void)ID;
 }
 
 
 void CImm::ForceAction(const int sound_id) const
 {
-	if(m_bPlay && m_pDevice && m_ProjectAction && g_pSoundTable && sound_id < g_pSoundTable->GetSize())
-	{
-		const char *pFilename = strrchr((*g_pSoundTable)[sound_id].Filename.GetString(), '\\');
-		if(pFilename != NULL)
-		{
-			m_ProjectAction->Start(pFilename+1);
-		}
-	}
+	(void)sound_id;
 }
 
 
 void CImm::ForceSkill(const int sound_id) const
 {
-	if(m_bPlay && m_pDevice && m_ProjectSkill && g_pSoundTable && sound_id < g_pSoundTable->GetSize())
-	{
-		const char *pFilename = strrchr((*g_pSoundTable)[sound_id].Filename.GetString(), '\\');
-		if(pFilename != NULL)
-		{
-			m_ProjectSkill->Start(pFilename+1);
-		}
-	}
+	(void)sound_id;
 }
 
 
 void CImm::ForceUseItem(const int sound_id) const
 {
-	if(m_bPlay && m_pDevice && m_ProjectUseItem && g_pSoundTable && sound_id < g_pSoundTable->GetSize())
-	{
-		const char *pFilename = strrchr((*g_pSoundTable)[sound_id].Filename.GetString(), '\\');
-		if(pFilename != NULL)
-		{
-			m_ProjectUseItem->Start(pFilename+1);
-		}
-	}
+	(void)sound_id;
 }
 
 
 void CImm::ForceInventory(const int sound_id) const
 {
-	if(m_bPlay && m_pDevice && m_ProjectInventory && g_pSoundTable && sound_id < g_pSoundTable->GetSize())
-	{
-		const char *pFilename = strrchr((*g_pSoundTable)[sound_id].Filename.GetString(), '\\');
-		if(pFilename != NULL)
-		{
-			m_ProjectInventory->Start(pFilename+1);
-		}
-	}
+	(void)sound_id;
 }
-
