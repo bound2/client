@@ -11,15 +11,31 @@
 
 #include "Platform.h"
 
-#ifndef PLATFORM_WINDOWS
-/* Only compile on non-Windows platforms */
+/* Most of this file (time/thread/mutex/event/dynamic-library/keyboard/
+   error-reporting/init-shutdown) is plain SDL2 calls that work identically
+   on Windows, and Platform.h declares these functions unconditionally
+   (e.g. platform_get_ticks(), which timeGetTime()/GetTickCount() route
+   through even on PLATFORM_WINDOWS - see Platform.h). This file used to be
+   entirely `#ifndef PLATFORM_WINDOWS`-only with no Windows-native
+   implementation anywhere else in the project, so on Windows every one of
+   these was an unresolved external at link time (LNK2001/LNK2019) the
+   moment code that called them actually got compiled - which every one of
+   them now does after the __WIN32__/__WINDOWS__ CMake fixes unblocked the
+   rest of the codebase.
+   The File/Path Functions section below (platform_get_executable_dir(),
+   platform_create_directory()) is genuinely POSIX-only (dirname(),
+   readlink(), 2-arg mkdir()) and stays guarded out on Windows; nothing in
+   the current Windows build calls either. */
 
 #include <SDL.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <errno.h>
+
+#ifndef PLATFORM_WINDOWS
+#include <unistd.h>
+#endif
 
 #ifdef PLATFORM_LINUX
 	#include <limits.h>
@@ -77,8 +93,49 @@ void platform_sleep(DWORD ms) {
 }
 
 /* ============================================================================
- * Thread Functions
+ * Thread/Mutex/Event/Dynamic-Library Functions
  * ============================================================================ */
+/* platform_thread_t/platform_mutex_t/platform_event_t/platform_lib_t are
+   real Win32 HANDLE/HMODULE on PLATFORM_WINDOWS (see Platform.h) - callers
+   like MWorkThread.cpp rely on that (e.g. casting platform_thread_create()'s
+   result straight to HANDLE, and creating its event members with the real
+   CreateEvent() while closing them via platform_event_close()). The SDL
+   versions below return SDL_Thread pointers, SDL_mutex pointers, and
+   platform_event_s pointers, which are not interchangeable with those -
+   so on Windows this needs a genuine
+   native implementation instead of sharing the SDL one. */
+#ifdef PLATFORM_WINDOWS
+
+platform_thread_t platform_thread_create(platform_thread_func_t func, void* param) {
+	return CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)func, param, 0, NULL);
+}
+
+int platform_thread_wait(platform_thread_t thread) {
+	if (thread == NULL) return 1;
+	return (WaitForSingleObject(thread, INFINITE) == WAIT_OBJECT_0) ? 0 : 1;
+}
+
+void platform_thread_close(platform_thread_t thread) {
+	if (thread != NULL) {
+		CloseHandle(thread);
+	}
+}
+
+void platform_event_close(platform_event_t event) {
+	if (event != NULL) {
+		CloseHandle(event);
+	}
+}
+
+/* platform_mutex_*()/platform_event_create()/platform_event_wait()/
+   platform_event_signal()/platform_event_reset()/platform_lib_*() are not
+   implemented on Windows - nothing in the current Windows build calls
+   them (code needing real synchronization primitives/event
+   creation/dynamic loading on Windows uses the native
+   CreateMutex/CreateEvent/SetEvent/LoadLibrary APIs directly instead of
+   this abstraction layer, as MWorkThread.cpp does). */
+
+#else /* !PLATFORM_WINDOWS */
 
 struct ThreadWrapperData {
 	platform_thread_func_t func;
@@ -112,10 +169,6 @@ void platform_thread_close(platform_thread_t thread) {
 	/* No explicit close needed */
 }
 
-/* ============================================================================
- * Mutex Functions
- * ============================================================================ */
-
 platform_mutex_t platform_mutex_create(int initial_locked) {
 	SDL_mutex* mutex = SDL_CreateMutex();
 	if (mutex != NULL && initial_locked) {
@@ -137,10 +190,6 @@ void platform_mutex_close(platform_mutex_t mutex) {
 		SDL_DestroyMutex(mutex);
 	}
 }
-
-/* ============================================================================
- * Event Functions
- * ============================================================================ */
 
 platform_event_t platform_event_create(int manual_reset, int initial_state) {
 	platform_event_t event = new struct platform_event_s;
@@ -223,10 +272,6 @@ void platform_event_close(platform_event_t event) {
 	}
 }
 
-/* ============================================================================
- * Dynamic Library Functions
- * ============================================================================ */
-
 platform_lib_t platform_lib_load(const char* filename) {
 	return SDL_LoadObject(filename);
 }
@@ -242,6 +287,8 @@ void platform_lib_free(platform_lib_t lib) {
 	}
 }
 
+#endif /* PLATFORM_WINDOWS */
+
 /* ============================================================================
  * File/Path Functions
  * ============================================================================ */
@@ -255,6 +302,10 @@ int platform_file_exists(const char* filename) {
 	return (stat(filename, &st) == 0);
 }
 
+/* Not needed on Windows yet (nothing in the current Windows build calls
+   either), and genuinely POSIX-only (PATH_MAX, dirname(), readlink(), the
+   2-arg POSIX mkdir() signature - Windows' _mkdir() takes just the path). */
+#ifndef PLATFORM_WINDOWS
 int platform_get_executable_dir(char* buffer, size_t size) {
 	if (buffer == NULL || size == 0) return 1;
 
@@ -292,6 +343,7 @@ int platform_create_directory(const char* path) {
 		return mkdir(path, 0755) == 0 ? 0 : 1;
 	#endif
 }
+#endif /* !PLATFORM_WINDOWS */
 
 /* ============================================================================
  * Keyboard Functions
@@ -311,6 +363,11 @@ BYTE platform_get_scan_code(DWORD lParam) {
 /* ============================================================================
  * Registry/Configuration Functions
  * ============================================================================ */
+
+/* Not needed on Windows yet (nothing in the current Windows build calls
+   any of these), and depends on platform_get_executable_dir()/PATH_MAX
+   above, which are themselves POSIX-only and guarded out on Windows. */
+#ifndef PLATFORM_WINDOWS
 
 /* Config file path (fallback for registry) */
 static char g_config_file_path[PATH_MAX] = {0};
@@ -403,6 +460,7 @@ int platform_config_set_string(const char* key, const char* value,
 
 	return 0;
 }
+#endif /* !PLATFORM_WINDOWS */
 
 /* ============================================================================
  * Error Reporting
@@ -431,5 +489,3 @@ int platform_init(void) {
 void platform_shutdown(void) {
 	SDL_Quit();
 }
-
-#endif /* !PLATFORM_WINDOWS */

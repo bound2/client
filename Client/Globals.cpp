@@ -31,11 +31,16 @@ extern "C" {
 // Platform-Specific Functions (Windows-specific)
 //-----------------------------------------------------------------------------
 
-// CheckMacScreenMode - Check Mac screen mode (Windows-specific stub)
+// CheckMacScreenMode - PacketFunction.cpp already provides a real
+// implementation under #ifdef PLATFORM_WINDOWS; this stub is only needed
+// as a fallback on the platforms where that one is excluded. Defining both
+// on Windows was a duplicate symbol (LNK2005).
+#ifndef PLATFORM_WINDOWS
 void CheckMacScreenMode()
 {
 	// Stub implementation - Windows-specific function
 }
+#endif
 
 // GetNMClipData - Get Netmarble clipboard data (Windows-specific)
 bool GetNMClipData(char* pBuffer, unsigned int bufferSize, const char* pURL, bool bUseHTML)

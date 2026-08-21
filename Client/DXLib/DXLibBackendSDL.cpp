@@ -193,8 +193,16 @@ static dxlib_textediting_callback g_textediting_callback = NULL;
 /* Legacy global mouse coordinates (used by CWaitUIUpdate) */
 extern int g_x, g_y;
 
-/* Global game state (from SDLMain.cpp) */
+/* Global game state. On non-Windows this is defined in SDLMain.cpp (the
+   main loop that reads it); SDLMain.cpp is compiled out on Windows (it's
+   the macOS/Linux entry point), so define it here instead - this file
+   (dxlib) is built on every platform, and nothing else provides it for
+   PLATFORM_WINDOWS. */
+#ifdef PLATFORM_WINDOWS
+bool g_bRunning = true;
+#else
 extern bool g_bRunning;
+#endif
 extern BOOL g_bActiveApp;
 
 /* DIK to SDL scancode mapping table */
