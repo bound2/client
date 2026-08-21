@@ -19749,7 +19749,7 @@ MTopView::ExcuteAdvancementQuestEnding(void *pVoid)
 
 				if( g_pOGG == NULL )
 #ifdef _MT
-					g_pOGG = new COGGSTREAM(g_hWnd, g_pSoundBufferForOGG, 44100, 11025, 8800);
+					g_pOGG = new COGGSTREAM(g_hWnd, g_pSoundBufferForOGG, 44100, 11025, 8800, 1);
 #else
 					g_pOGG = new COGGSTREAM(g_hWnd, g_pSoundBufferForOGG, 44100, 11025, 8800,1);
 #endif
@@ -19931,7 +19931,7 @@ MTopView::ExcuteOustersFinEvent()
 
 				if( g_pOGG == NULL )
 #ifdef _MT
-					g_pOGG = new COGGSTREAM(g_hWnd, g_pSoundBufferForOGG, 44100, 11025, 8800);
+					g_pOGG = new COGGSTREAM(g_hWnd, g_pSoundBufferForOGG, 44100, 11025, 8800, 1);
 #else
 					g_pOGG = new COGGSTREAM(g_hWnd, g_pSoundBufferForOGG, 44100, 11025, 8800,1);
 #endif

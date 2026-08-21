@@ -318,7 +318,7 @@ extern RECT g_GameRect;
 #define DRAW_ALPHA_BOX_2D( rect, boxColor )						\
 		if (boxColor==0)										\
 		{														\
-			if (CDirectDraw::Is565())							\
+			if (CSDLGraphics::Is565())							\
 			{													\
 				m_pSurface->GammaBox565(&rect, 15);				\
 			}													\
