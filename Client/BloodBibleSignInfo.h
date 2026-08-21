@@ -12,6 +12,7 @@
 #include "Types.h"
 #include "Exception.h"
 #include "Packet.h"
+#include <vector>
 
 #define BLOOD_BIBLE_SIGN_SLOT_NUM 6
 
