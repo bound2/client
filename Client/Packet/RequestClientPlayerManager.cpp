@@ -261,8 +261,7 @@ RequestClientPlayerManager::Connect(const char* pIP, const char* pRequestName, R
 	m_mapConnectionInfo[pInfo->name] = pInfo;
 	
 #ifdef PLATFORM_WINDOWS
-	DWORD dwChildThreadID;
-	HANDLE hConnectionThread = CreateThread(NULL, 
+	HANDLE hConnectionThread = CreateThread(NULL,
 									0,	// default stack size
 									(LPTHREAD_START_ROUTINE)RequestConnectionThreadProc,
 									pInfo,
