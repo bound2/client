@@ -1096,7 +1096,7 @@ InitMusic()
 		if( g_pOGG == NULL )
 		{
 #ifdef _MT
-			g_pOGG = new COGGSTREAM(NULL, g_pSoundBufferForOGG, 44100, 11025, 8800);
+			g_pOGG = new COGGSTREAM(NULL, g_pSoundBufferForOGG, 44100, 11025, 8800, 1);
 #else
 			g_pOGG = new COGGSTREAM(NULL, g_pSoundBufferForOGG, 44100, 11025, 8800,1);
 #endif
@@ -1168,47 +1168,14 @@ InitDraw()
 		//--------------------------------------------------------
 		// Video Memory 얼마인가?
 		//--------------------------------------------------------
-		DDSCAPS2 ddsCaps2;
-		DWORD dwTotal;
-		DWORD dwFree;
-		ZeroMemory(&ddsCaps2, sizeof(ddsCaps2));
-		ddsCaps2.dwCaps = DDSCAPS_VIDEOMEMORY;//DDSCAPS_TEXTURE;
-		HRESULT hr = CSDLGraphics::GetDD()->GetAvailableVidMem(&ddsCaps2, &dwTotal, &dwFree);
+		// CSDLGraphics::GetDD()는 항상 nullptr을 반환하는 스텁이고
+		// IDirectDraw는 정의가 없는 불완전 타입이라 실제 DirectDraw VidMem
+		// 조회는 더 이상 불가능함(SDL2 마이그레이션으로 죽은 코드).
+		// 최신 GPU 기준 아래 8M 문턱값은 항상 넘기므로 충분하다고 간주한다.
+		DWORD dwTotal = 256 * 1024 * 1024;
+		DWORD dwFree = 256 * 1024 * 1024;
 
-		DEBUG_ADD_FORMAT("[VidemoMemory from GetAvailableVidMem()] Before Init Draw = %d/%d", dwFree, dwTotal);
-
-
-		//--------------------------------------------------------
-		// 이게 진짜다.. - -;
-		//--------------------------------------------------------
-		// 근데 .. 과연 이거라고 될려나..
-		// i740에서 memory 60M쯤 나오는건 뭘까.. - -;;
-		DDCAPS	driverCaps;
-		ZeroMemory( &driverCaps, sizeof(driverCaps) );
-		driverCaps.dwSize = sizeof(driverCaps);
-
-		hr = CSDLGraphics::GetDD()->GetCaps( &driverCaps, NULL );
-		if (hr!=DD_OK)
-		{
-			InitFail("[Error] GetCaps to Get VidMem");
-			return FALSE;
-		}
-
-		#ifdef	OUTPUT_DEBUG
-			if (driverCaps.dwCaps2 & DDCAPS2_NONLOCALVIDMEMCAPS)
-			{
-				DEBUG_ADD_FORMAT("DDCAPS2_NONLOCALVIDMEMCAPS Enable");
-			}
-			else
-			{
-				DEBUG_ADD_FORMAT("DDCAPS2_NONLOCALVIDMEMCAPS Disable");
-			}
-		#endif
-
-		dwTotal = driverCaps.dwVidMemTotal;
-		dwFree = driverCaps.dwVidMemFree;
-
-		DEBUG_ADD_FORMAT("[VidemoMemory from GetDDCaps()] Before Init Draw = %d/%d", dwFree, dwTotal);
+		DEBUG_ADD_FORMAT("[VidemoMemory] SDL2 - assuming sufficient video memory = %d/%d", dwFree, dwTotal);
 
 		DEBUG_ADD("[ InitGame ]  Init Draw OK");
 

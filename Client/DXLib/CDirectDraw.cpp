@@ -7,6 +7,12 @@
 //----------------------------------------------------------------------
 
 #include "CDirectDraw.h"
+// spritectl_init() only; CSDLGraphics::Flip() (which needs the full
+// CSpriteSurface definition) is implemented in Client/CSDLGraphicsFlip.cpp
+// instead, since this file is compiled into the standalone dxlib library
+// (no /IClient, no SPRITELIB_BACKEND_SDL) and can't safely pull in
+// SpriteLib/CSpriteSurface.h the way DarkEden.exe's own sources can.
+#include "../SpriteLib/SpriteLibBackend.h"
 
 //-----------------------------------------------------------------------------
 // Static member initialization for DirectDraw objects
@@ -16,6 +22,9 @@ LPDIRECTDRAW7					CSDLGraphics::m_pDD					= NULL;
 LPDIRECTDRAWSURFACE7			CSDLGraphics::m_pDDSPrimary			= NULL;
 LPDIRECTDRAWSURFACE7			CSDLGraphics::m_pDDSBack				= NULL;
 LPDIRECTDRAWGAMMACONTROL	CSDLGraphics::m_pDDGammaControl		= NULL;
+
+SDL_Window*						CSDLGraphics::m_pSDLWindow			= NULL;
+SDL_Renderer*					CSDLGraphics::m_pSDLRenderer			= NULL;
 
 HWND								CSDLGraphics::m_hWnd					= NULL;
 
@@ -45,6 +54,68 @@ CSDLGraphics::CSDLGraphics()
 
 CSDLGraphics::~CSDLGraphics()
 {
+}
+
+//-----------------------------------------------------------------------------
+// Init
+//
+// hWnd is a real native window already created by CreateWindowEx() before
+// this is called; SDL_CreateWindowFrom() wraps it instead of creating a new
+// window, so SDL renders into the same window Win32 message handling uses.
+//-----------------------------------------------------------------------------
+void CSDLGraphics::Init(HWND hWnd, WORD width, WORD height, SCREENMODE mode, bool bUseHAL, bool bUseIME)
+{
+	(void)bUseHAL;
+	(void)bUseIME;
+
+	ReleaseAll();
+
+	spritectl_init();
+
+	m_pSDLWindow = SDL_CreateWindowFrom((void*)hWnd);
+	if (m_pSDLWindow == NULL)
+	{
+		return;
+	}
+
+	m_pSDLRenderer = SDL_CreateRenderer(m_pSDLWindow, -1, SDL_RENDERER_ACCELERATED);
+	if (m_pSDLRenderer == NULL)
+	{
+		m_pSDLRenderer = SDL_CreateRenderer(m_pSDLWindow, -1, 0);
+	}
+
+	if (m_pSDLRenderer != NULL)
+	{
+		SDL_SetRenderDrawColor(m_pSDLRenderer, 0, 0, 0, 255);
+	}
+
+	m_hWnd = hWnd;
+	m_ScreenWidth = width;
+	m_ScreenHeight = height;
+	m_bFullscreen = (mode == FULLSCREEN);
+}
+
+// CSDLGraphics::Flip() is defined in Client/CSDLGraphicsFlip.cpp (see comment
+// on the SpriteLibBackend.h include above for why it isn't here).
+
+//-----------------------------------------------------------------------------
+// ReleaseAll
+//-----------------------------------------------------------------------------
+void CSDLGraphics::ReleaseAll()
+{
+	if (m_pSDLRenderer != NULL)
+	{
+		SDL_DestroyRenderer(m_pSDLRenderer);
+		m_pSDLRenderer = NULL;
+	}
+
+	if (m_pSDLWindow != NULL)
+	{
+		// SDL_CreateWindowFrom() wraps an externally-owned native window, so
+		// destroying it here only releases SDL's wrapper, not hWnd itself.
+		SDL_DestroyWindow(m_pSDLWindow);
+		m_pSDLWindow = NULL;
+	}
 }
 
 //-----------------------------------------------------------------------------

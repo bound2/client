@@ -16,6 +16,7 @@
 
 /* Cross-platform includes */
 #include "../basic/Platform.h"
+#include <SDL.h>
 #include <cstring>
 #include <cstdint>
 
@@ -196,23 +197,27 @@ public:
 	static DWORD		Get_B_Bitmask();
 	static DWORD		Get_BPP();
 
-	// Property methods (stub implementations)
-	static inline bool		IsFullscreen()			{ return true; }
-	static inline WORD		GetScreenWidth()		{ return 800; }
-	static inline WORD		GetScreenHeight()		{ return 600; }
+	// Property methods
+	static inline bool		IsFullscreen()			{ return m_bFullscreen; }
+	static inline WORD		GetScreenWidth()		{ return m_ScreenWidth; }
+	static inline WORD		GetScreenHeight()		{ return m_ScreenHeight; }
 	static inline bool		IsMMX()	 				{ return false; }
 	static inline bool		IsSupportGammaControl()	{ return false; }
 	static inline bool		Is565()	 				{ return true; }
-	static inline HWND		GetHwnd()				{ return nullptr; }
+	static inline HWND		GetHwnd()				{ return m_hWnd; }
 	static inline LPDIRECTDRAW7 GetDD()			{ return nullptr; }
 
-	// Display methods (stub implementations - use SDL2 instead)
-	static inline void		Flip() { }
+	// Init - creates the real SDL window/renderer for hWnd (implemented in .cpp)
+	static void		Init(HWND hWnd, WORD width, WORD height, SCREENMODE mode, bool bUseHAL = true, bool bUseIME = true);
+
+	// Display methods - Flip()/ReleaseAll() implemented in .cpp (real SDL2
+	// presentation), the rest remain stubs (no corresponding SDL2 concept needed)
+	static void		Flip();
 	static inline void		FlipToGDISurface() { }
 	static inline void		OnMove() { }
 	static inline bool		RestoreAllSurfaces() { return true; }
 	static inline void		ReleaseSurface() { }
-	static inline void		ReleaseAll() { }
+	static void		ReleaseAll();
 	static inline void		SetGammaRamp(WORD step = (WORD)-1) { }
 	static inline void		RestoreGammaRamp() { }
 	static inline void		SetAddGammaRamp(WORD rStep = 0, WORD gStep = 0, WORD bStep = 0) { }
@@ -228,6 +233,10 @@ private:
 	static LPDIRECTDRAWSURFACE7				m_pDDSPrimary;
 	static LPDIRECTDRAWSURFACE7				m_pDDSBack;
 	static LPDIRECTDRAWGAMMACONTROL			m_pDDGammaControl;
+
+	// Real SDL2 window/renderer backing this class (created by Init())
+	static SDL_Window*						m_pSDLWindow;
+	static SDL_Renderer*					m_pSDLRenderer;
 
 	// Screen properties
 	static HWND								m_hWnd;
