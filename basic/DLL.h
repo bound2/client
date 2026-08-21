@@ -14,16 +14,21 @@
 #define _CPP
 
 #ifdef PLATFORM_WINDOWS
+// `export`/`import` used to be defined here as plain macros and then
+// aliased into DllExport/DllImport below. `export` is a reserved C++
+// keyword (historically for exported templates), and the C++ standard
+// library explicitly guards against it being macroized - <xkeycheck.h>
+// #errors out (C1189) the moment any standard header is included in a
+// translation unit where `export` is a macro. Defining DllExport/DllImport
+// directly, without a bare `export`/`import` macro ever existing, avoids
+// that collision entirely; nothing outside this file used the bare names.
 #ifndef _CPP
-#define export extern "C" __declspec (dllexport)
-#define import extern "C" __declspec (dllimport)
+#define DllExport extern "C" __declspec (dllexport)
+#define DllImport extern "C" __declspec (dllimport)
 #else
-#define export __declspec (dllexport)
-#define import __declspec (dllimport)
+#define DllExport __declspec (dllexport)
+#define DllImport __declspec (dllimport)
 #endif
-
-#define DllExport		export
-#define DllImport		import
 
 #ifdef _DLL_EXPORT
 #define DllClass		DllExport
@@ -32,8 +37,6 @@
 #endif
 #else
 // Non-Windows platforms: empty macros
-#define export
-#define import extern
 #define DllExport
 #define DllImport extern
 #define DllClass
