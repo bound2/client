@@ -17,9 +17,9 @@
 #endif
 
 #include "Client_PCH.h"
-#ifdef PLATFORM_WINDOWS
-#include <MMSystem.h>
-#endif
+// <MMSystem.h> not included: no real MM_ symbols are used in this file, and
+// including it conflicts with basic/Platform.h's timeGetTime()/GetTickCount()
+// macros (see basic/Platform.h).
 #include "DebugLog.h"
 #include <algorithm>
 //#include "MFileDef.h"

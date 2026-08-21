@@ -11,7 +11,9 @@
 //-----------------------------------------------------------------------------
 #ifdef PLATFORM_WINDOWS
 #include <Windows.h>
-#include <MMSystem.h>
+// <MMSystem.h> not included: this file only uses timeGetTime()/GetTickCount(),
+// which basic/Platform.h already routes through platform_get_ticks(); including
+// the real header here conflicts with that macro (see basic/Platform.h).
 #else
 #include "../../basic/Platform.h"
 #endif

@@ -8,7 +8,9 @@
 #include "Client_PCH.h"
 
 #ifdef PLATFORM_WINDOWS
-#include <MMSystem.h>
+// <MMSystem.h> not included: this file only uses timeGetTime()/GetTickCount(),
+// which basic/Platform.h already routes through platform_get_ticks(); including
+// the real header here conflicts with that macro (see basic/Platform.h).
 #include <process.h>
 #include <io.h>
 #include <direct.h>

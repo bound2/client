@@ -9,7 +9,9 @@
 //-----------------------------------------------------------------------------
 #include "Client_PCH.h"
 #ifdef PLATFORM_WINDOWS
-#include <MMSystem.h>
+// <MMSystem.h> not included: no real MM_ symbols are used in this file, and
+// including it conflicts with basic/Platform.h's timeGetTime()/GetTickCount()
+// macros (see basic/Platform.h).
 #else
 // macOS: BSD sockets headers for network functions
 #include <sys/types.h>

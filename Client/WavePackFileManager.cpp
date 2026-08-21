@@ -3,6 +3,15 @@
 //--------------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "WavePackFileManager.h"
+// This file needs the real MMIO API (mmioOpen/mmioRead/...) to parse WAV
+// files, unlike every other file that pulls in <MMSystem.h> just for
+// timeGetTime()/GetTickCount(). basic/Platform.h has already #defined those
+// two as platform_get_ticks() by this point (via Client_PCH.h), which
+// corrupts <MMSystem.h>'s own timeGetTime() declaration (C2375) - undef it
+// first so the real header parses cleanly. Safe because this file never
+// calls timeGetTime()/GetTickCount() itself.
+#undef timeGetTime
+#undef GetTickCount
 #include <MMSystem.h>
 #include "CDirectSound.h"
 #include "Profiler.h"
