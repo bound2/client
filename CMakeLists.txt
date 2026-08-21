@@ -709,6 +709,14 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# Platform-specific definitions
 	if(NOT WIN32)
 		target_compile_definitions(DarkEden PRIVATE PLATFORM_MACOS)
+	else()
+		# __WIN32__ was always passed via /D in the original VC6 build
+		# (Client.dsp) and Client/Packet/Exception.h's __BEGIN_DEBUG/__END_DEBUG
+		# (and Assert1.h's Assert()) macros are conditioned on it. Without it,
+		# neither the NDEBUG nor the __WIN32__ branch matches on a Windows
+		# Debug build, leaving those macros undefined across every Packet/*
+		# translation unit that uses them.
+		target_compile_definitions(DarkEden PRIVATE __WIN32__)
 	endif()
 
 	message(STATUS "DarkEden executable will be built from remaining Client files (VS_UI compiled separately)")
