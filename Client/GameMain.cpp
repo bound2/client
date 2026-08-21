@@ -35,7 +35,7 @@
 #include "UIDialog.h"
 #include "MusicDef.h"
 #include "MPortal.h"
-#include "ServerInformation.h"
+#include "CServerInformation.h"
 #include "UserInformation.h"
 #include "TempInformation.h"
 

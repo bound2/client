@@ -26,7 +26,7 @@
 #include "MStorage.h"
 //#include "MFileDef.h"
 #include "Properties.h"
-#include "ServerInformation.h"
+#include "CServerInformation.h"
 #include "UserInformation.h"
 #include "MEventManager.h"
 #include "UIMessageManager.h"

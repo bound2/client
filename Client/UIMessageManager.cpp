@@ -35,7 +35,7 @@
 #include "MMusic.h"
 #include "MMusicTable.h"
 #include "SoundDef.h"
-#include "ServerInformation.h"
+#include "CServerInformation.h"
 #include "MParty.h"
 #include "MItemFinder.h"
 #include "ServerInfo.h"

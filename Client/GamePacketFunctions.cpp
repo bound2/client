@@ -25,7 +25,7 @@
 #include "VS_UI_Mouse_pointer.h"
 #include "VS_UI.h"
 #include "UIDialog.h"
-#include "ServerInformation.h"
+#include "CServerInformation.h"
 #include "PacketFunction.h"
 #include "UserInformation.h"
 #include "MFakeCreature.h"
