@@ -10,6 +10,14 @@ struct tag_position_set {
 	// Add other fields as needed
 };
 
+// Legacy sound-library-style constants kept for call-site compatibility.
+// streamLoad()/streamPlay() now return bool directly (true = success), and
+// the SDL-backend stub implementation (COGGSTREAM.cpp) ignores ulFlags
+// entirely, so SOUND_PLAY_ONCE's value doesn't matter beyond being a valid
+// unsigned long.
+const bool SOUND_ERR_OK = true;
+const unsigned long SOUND_PLAY_ONCE = 0;
+
 class COGGSTREAM
 {
 public:

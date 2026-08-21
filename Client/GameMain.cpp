@@ -14,6 +14,7 @@
 #include <process.h>
 #include <io.h>
 #include <direct.h>
+#include <fcntl.h>	// _O_RDONLY (used with _open() below)
 #else
 #include <unistd.h>
 #include <fcntl.h>
@@ -3535,13 +3536,16 @@ MakeScreenShot()
 			#endif
 
 //			g_pBack->SaveToBMP(str);
-#ifdef PLATFORM_WINDOWS
-			SaveSurfaceToImage(str, *g_pBack);
-#else
-			// Screenshot saving is Windows-specific (uses GDI+ for JPEG)
-			// TODO: Implement cross-platform screenshot using SDL or stb_image_write
+			// SaveSurfaceToImage() (UtilityFunction.cpp) takes a
+			// CDirectDrawSurface&, but with SPRITELIB_BACKEND_SDL (the only
+			// backend this project builds now, Windows included)
+			// CSpriteSurface is a standalone class that no longer inherits
+			// from CDirectDrawSurface - see CSpriteSurface.h's
+			// SPRITESURFACE_STANDALONE branch. g_pBack is a CSpriteSurface*,
+			// so this call never type-checked under that backend.
+			// TODO: Implement screenshot saving against CSpriteSurface (SDL
+			// surface -> BMP/JPEG) or via stb_image_write; see 참고자료/작업필요stub.md.
 			printf("Screenshot functionality not yet implemented on this platform\n");
-#endif // PLATFORM_WINDOWS
 
 #ifdef PLATFORM_WINDOWS
 			_close(fd);

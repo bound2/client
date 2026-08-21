@@ -3,6 +3,8 @@
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "PCConfigTable.h"
+#include <vector>
+#include <algorithm>
 
 const int PLAYER_CONFIG_VERSION	= 2;
 
