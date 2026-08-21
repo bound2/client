@@ -1,7 +1,7 @@
 #include "Client_PCH.h"
 #include <fstream>
 #include "NicknameInfo.h"
-#include "Packet/Assert.h"
+#include "Packet/PacketAssert.h"
 NicknameInfo::NicknameInfo()
 {
 	m_NicknameID = 0;
