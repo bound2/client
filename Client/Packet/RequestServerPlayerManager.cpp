@@ -59,6 +59,7 @@
 		}
 		return (HANDLE)0;
 }
+#endif // PLATFORM_WINDOWS / __APPLE__ || __linux__ || __EMSCRIPTEN__
 
 // Note: CreateThread stub removed - use platform_thread_create from Platform.h
 // #ifdef PLATFORM_WINDOWS... (removed)
@@ -510,5 +511,3 @@ WaitRequestThreadProc(LPVOID lpParameter)
 
 	return 0L;
 }
-
-#endif /* PLATFORM_WINDOWS */

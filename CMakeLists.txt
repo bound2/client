@@ -627,6 +627,13 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "/Client/reader\\.cpp$")
 	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "/Client/synfilt\\.cpp$")
 	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "/Client/subdecoder\\.cpp$")
+	# header.cpp is the same story - DXLib.lib-only in VC6 (DXLib.dsp) and
+	# never part of Client.dsp. Its only real caller (mp3.cpp) is already
+	# excluded above, and the root copy's ReadHeader() call resolves to the
+	# now-excluded root reader.cpp, so with it compiling directly into
+	# DarkEden.exe MP3_ReadHeader()/ReadHeader() were dead weight that
+	# only produced an unresolved external (LNK2019).
+	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "/Client/header\\.cpp$")
 
 	# Same duplication again: CSpritePal.cpp was SpriteLib.lib-only in the
 	# original VC6 project (client-master_vs6/Client/SpriteLib/SpriteLib.dsp)
