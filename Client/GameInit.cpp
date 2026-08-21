@@ -745,11 +745,16 @@ InitSurface()
 	//--------------------------------------------------------	
 	DEBUG_ADD("[ InitGame ]  Surface - InitializeGL");
 
-
-	InitializeGL(CSDLGraphics::Get_BPP(), 
-					 CSDLGraphics::Get_Count_Rbit(), 
-					 CSDLGraphics::Get_Count_Gbit(), 
-					 CSDLGraphics::Get_Count_Bbit());
+	// InitializeGL() (basic/GL_import.h) - see 참고자료/작업필요stub.md.
+	// __declspec(dllimport) against gl.lib, a VC6-era prebuilt x86-only
+	// library with no source anywhere in this project (same as CImm's
+	// IFC22.lib and CAVI's MCI driver) - can't link on x64. The rest of
+	// GL_import's interface (rectangle()/GL_RGB()/Convert24RGBto16()/
+	// Get_ColorkeyColor()) already has no live callers in the current
+	// build (rectangle() has local SDL-era replacements in
+	// GameHelpers.cpp/RenderingFunctions.cpp; Convert24RGBto16()'s only
+	// caller, VS_UI/WinMain.cpp, is excluded on Windows), so this call is
+	// safe to drop rather than needing a stub function to keep around.
 
 	DEBUG_ADD("[ InitGame ]  Surface - Initialize Font");
 	DEBUG_ADD("[ InitGame ]  Surface - UI");

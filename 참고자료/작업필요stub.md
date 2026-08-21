@@ -281,6 +281,31 @@ static inline LPDIRECTDRAW7 GetDD() { return nullptr; } // 하드코딩 (1-1 항
   실제로 오프닝 화면에 도달하는 경로라면 `PlayMPG()`/그 호출부도 같이
   손봐야 함(예: 팝업 없이 조용히 건너뛰게).
 
+### 3-6. `InitializeGL()` 호출 제거 (GL_import, gl.lib)
+
+- 대상: `Client/GameInit.cpp`(`InitDraw()` 근처)
+- 무엇을 했나: `InitializeGL(bpp, r_bit, g_bit, b_bit)` 호출을 제거(주석
+  으로 이유만 남김). 별도 스텁 함수를 만들지 않음.
+- 왜 그렇게 했나: `InitializeGL()`은 `basic/GL_import.h`에
+  `__declspec(dllimport)`로 선언된 `gl.lib`(VC6 시절 prebuilt) 함수인데,
+  `client-master_vs6/lib/GL.lib`를 확인해보니 CImm의 `IFC22.lib`와 같은
+  **x86 전용 prebuilt 바이너리**였고 소스는 어디에도 없음(x64로는 애초에
+  링크 불가능). `GL_import.h`가 선언하는 나머지 함수들
+  (`rectangle()`/`GL_RGB()`/`Convert24RGBto16()`/`Get_ColorkeyColor()`)도
+  현재 빌드에서 실제로 부르는 곳이 없음을 확인함 - `rectangle()`은
+  `GameHelpers.cpp`/`RenderingFunctions.cpp`에 SDL 시대 자체 구현으로
+  대체되어 있고, `Convert24RGBto16()`의 유일한 호출부인
+  `VS_UI/WinMain.cpp`는 Windows 빌드에서 이미 제외되어 있음. 즉
+  `InitializeGL()`이 초기화하려던 `gl.lib`의 나머지 기능 자체가 이미
+  아무도 안 쓰는 상태라, 스텁 함수를 남겨둘 필요 없이 호출 자체를
+  제거함(1-1 항목 `GetDD()->RestoreDisplayMode()`와 같은 "이미 죽어있던
+  호출부 제거" 패턴).
+- **남은 일**: 없음(대체할 기능이 필요 없다고 판단). 만약 나중에
+  `rectangle()`/`GL_RGB()`/`Convert24RGBto16()`/`Get_ColorkeyColor()`를
+  실제로 부르는 코드가 새로 생긴다면, `basic/GL_import.h`의 선언 대신
+  `Client/GameHelpers.cpp`/`Client/RenderingFunctions.cpp`류의 자체 구현
+  경로를 따라가야 함.
+
 
 ### 3-4. `ProfileManager.cpp`의 프로필 이미지 로딩 - Windows 분기도 SDL 스텁으로 통일
 
