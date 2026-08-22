@@ -138,7 +138,7 @@ exit /b %1
 if %errorlevel% neq 0 goto :VCEnd</Command>
     </PostBuildEvent>
     <Link>
-      <AdditionalDependencies>lib\Debug\sprite.lib;lib\Debug\SpriteLib.lib;lib\Debug\dxlib.lib;lib\Debug\basic.lib;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\debug\lib\SDL2d.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalDependencies>lib\Debug\sprite.lib;lib\Debug\SpriteLib.lib;lib\Debug\dxlib.lib;lib\Debug\basic.lib;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\debug\lib\SDL2d.lib;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\debug\lib\manual-link\SDL2maind.lib;shell32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <DataExecutionPrevention></DataExecutionPrevention>
@@ -209,7 +209,7 @@ exit /b %1
 if %errorlevel% neq 0 goto :VCEnd</Command>
     </PostBuildEvent>
     <Link>
-      <AdditionalDependencies>lib\Release\sprite.lib;lib\Release\SpriteLib.lib;lib\Release\dxlib.lib;lib\Release\basic.lib;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\lib\SDL2.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalDependencies>lib\Release\sprite.lib;lib\Release\SpriteLib.lib;lib\Release\dxlib.lib;lib\Release\basic.lib;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\lib\SDL2.lib;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\lib\manual-link\SDL2main.lib;shell32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <DataExecutionPrevention></DataExecutionPrevention>
@@ -280,7 +280,7 @@ exit /b %1
 if %errorlevel% neq 0 goto :VCEnd</Command>
     </PostBuildEvent>
     <Link>
-      <AdditionalDependencies>lib\MinSizeRel\sprite.lib;lib\MinSizeRel\SpriteLib.lib;lib\MinSizeRel\dxlib.lib;lib\MinSizeRel\basic.lib;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\lib\SDL2.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalDependencies>lib\MinSizeRel\sprite.lib;lib\MinSizeRel\SpriteLib.lib;lib\MinSizeRel\dxlib.lib;lib\MinSizeRel\basic.lib;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\lib\SDL2.lib;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\lib\manual-link\SDL2main.lib;shell32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <DataExecutionPrevention></DataExecutionPrevention>
@@ -350,7 +350,7 @@ exit /b %1
 if %errorlevel% neq 0 goto :VCEnd</Command>
     </PostBuildEvent>
     <Link>
-      <AdditionalDependencies>lib\RelWithDebInfo\sprite.lib;lib\RelWithDebInfo\SpriteLib.lib;lib\RelWithDebInfo\dxlib.lib;lib\RelWithDebInfo\basic.lib;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\lib\SDL2.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalDependencies>lib\RelWithDebInfo\sprite.lib;lib\RelWithDebInfo\SpriteLib.lib;lib\RelWithDebInfo\dxlib.lib;lib\RelWithDebInfo\basic.lib;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\lib\SDL2.lib;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\lib\manual-link\SDL2main.lib;shell32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <DataExecutionPrevention></DataExecutionPrevention>

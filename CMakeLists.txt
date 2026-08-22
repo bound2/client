@@ -412,6 +412,15 @@ target_link_libraries(sprite_viewer PRIVATE
 	SDL2::SDL2
 )
 
+# main() gets renamed to SDL_main by <SDL2/SDL.h> on Windows; SDL2main.lib
+# supplies the real WinMain/main that forwards to it. Unlike DarkEden (which
+# defines its own WinMain and must skip this), this tool has no WinMain of
+# its own, so it needs SDL2main - without it, link fails with LNK2019 on
+# `main` (see invoke_main in exe_main.obj).
+if(WIN32)
+	target_link_libraries(sprite_viewer PRIVATE SDL2::SDL2main)
+endif()
+
 set_target_properties(sprite_viewer PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
@@ -446,6 +455,11 @@ target_link_libraries(item_viewer PRIVATE
 	SDL2::SDL2
 )
 
+# See sprite_viewer above for why this is needed on Windows.
+if(WIN32)
+	target_link_libraries(item_viewer PRIVATE SDL2::SDL2main)
+endif()
+
 set_target_properties(item_viewer PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
@@ -469,6 +483,11 @@ target_link_libraries(creature_viewer PRIVATE
 	basic
 	SDL2::SDL2
 )
+
+# See sprite_viewer above for why this is needed on Windows.
+if(WIN32)
+	target_link_libraries(creature_viewer PRIVATE SDL2::SDL2main)
+endif()
 
 set_target_properties(creature_viewer PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
@@ -496,6 +515,11 @@ target_link_libraries(map_viewer PRIVATE
 	basic
 	SDL2::SDL2
 )
+
+# See sprite_viewer above for why this is needed on Windows.
+if(WIN32)
+	target_link_libraries(map_viewer PRIVATE SDL2::SDL2main)
+endif()
 
 set_target_properties(map_viewer PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
@@ -528,6 +552,11 @@ target_link_libraries(effect_viewer PRIVATE
 	basic
 	SDL2::SDL2
 )
+
+# See sprite_viewer above for why this is needed on Windows.
+if(WIN32)
+	target_link_libraries(effect_viewer PRIVATE SDL2::SDL2main)
+endif()
 
 # Set output directory for effect_viewer
 # Use CMAKE_BINARY_DIR to avoid nesting (build/debug-asan/bin/)
