@@ -1736,7 +1736,7 @@ void C_VS_UI_NEWCHAR::KeyboardControl(UINT message, UINT key, long extra)
 	//
 	if (message == WM_CHAR)
 	{
-		if (isdigit(key) && m_lev_name.Size() == 0)
+		if ((key >= '0' && key <= '9') && m_lev_name.Size() == 0)
 			return;
 
 		char ignore_char[] = {'~', '`', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_',

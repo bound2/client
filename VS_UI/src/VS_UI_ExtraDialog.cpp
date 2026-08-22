@@ -2524,12 +2524,12 @@ void C_VS_UI_FILE_DIALOG::Start(char *type)
 		
 		for (i = 0; i < mi_open_drive_count; i++)
 		{
-			if (mp_open_current_directory[i][0] == tolower(temp[0]))
+			if (mp_open_current_directory[i][0] == tolower((unsigned char)temp[0]))
 			{
 				mi_open_drive_index = i;
 				mp_open_current_directory[i][0] = '\0';
 				strcat(mp_open_current_directory[i], temp);
-				mp_open_current_directory[i][0] = tolower(mp_open_current_directory[i][0]);
+				mp_open_current_directory[i][0] = (char)tolower((unsigned char)mp_open_current_directory[i][0]);
 			}
 		}
 	}

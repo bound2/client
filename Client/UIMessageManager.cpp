@@ -3027,7 +3027,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 								strTempCommand = "*warp 8000 75 77";
 								pMessage = const_cast<char*>(strTempCommand.c_str());
 							}
-							else if(strncmp(str, "*mc", 3) == 0 && isdigit(str[4]))
+							else if(strncmp(str, "*mc", 3) == 0 && isdigit((unsigned char)str[4]))
 							{
 //								if(vMasterCommand.empty())
 								{

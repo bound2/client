@@ -3212,8 +3212,8 @@ WinMain(HINSTANCE hInstance,
 			int iLen = strlen(FileData.cFileName);
 			for (int j=0;j<iLen;j++)
 			{
-				if(isupper(FileData.cFileName[j]) != 0)
-					FileData.cFileName[j] = tolower(FileData.cFileName[j]);
+				if(isupper((unsigned char)FileData.cFileName[j]) != 0)
+					FileData.cFileName[j] = (char)tolower((unsigned char)FileData.cFileName[j]);
 			}
 			InvalidDll = FileData.cFileName;
 

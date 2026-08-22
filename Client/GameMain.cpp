@@ -538,8 +538,8 @@ CheckTime()
 						int iLen = strlen(szText);
 						for (int j=0;j<iLen;j++)
 						{
-							if(isupper(szText[j]) != 0)
-								szText[j] = tolower(szText[j]);
+							if(isupper((unsigned char)szText[j]) != 0)
+								szText[j] = (char)tolower((unsigned char)szText[j]);
 						}
 
 						std::string strTemp = szText;
@@ -603,8 +603,8 @@ bool CheckInvalidProcess()
 				int iLen = strlen(szText);
 				for (int j=0;j<iLen;j++)
 				{
-					if(isupper(szText[j]) != 0)
-						szText[j] = tolower(szText[j]);
+					if(isupper((unsigned char)szText[j]) != 0)
+						szText[j] = (char)tolower((unsigned char)szText[j]);
 				}
 
 				std::string strTemp = szText;
