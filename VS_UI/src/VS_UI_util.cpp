@@ -315,8 +315,8 @@ void C_ANIMATION::Timer()
 				{
 					m_play_order = STOP;
 
-					// m_play_order�� next order�� �ٲ� ��, �ð������� �ֱ� ������(�ܺο��� �� ��
-					// �̰��� �߿��� ������) ��ٷ� next order�� �����Ѵ�.
+					// m_play_order가 next order로 바뀔 때, 시간간격이 있기 때문에(외부에서 알 때
+					// 이것은 중요한 문제다) 곧바로 next order를 수행한다.
 					RunNextPlayOrder();
 				}
 				break;
@@ -355,7 +355,7 @@ void C_ANIMATION::Timer()
 
 /*-----------------------------------------------------------------------------
 - Doing
-- Animation ���̶�� true�� ��ȯ�Ѵ�.
+- Animation 중이라면 true를 반환한다.
 -----------------------------------------------------------------------------*/
 C_ANIMATION::PLAY_ORDER C_ANIMATION::GetAnimationState() const
 {
@@ -392,8 +392,8 @@ C_ANIMATION::~C_ANIMATION()
 //-----------------------------------------------------------------------------
 // RunNextPlayOrder
 //
-// next order�� ������ m_play_order���� ��ü�ϰ�, next order�� �ٽ� ������(STOP)��
-// �ٲ۴�.
+// next order가 있으면 m_play_order으로 대체하고, next order를 다시 대기상태(STOP)로
+// 바꾼다.
 //-----------------------------------------------------------------------------
 void C_ANIMATION::RunNextPlayOrder()
 {
@@ -421,7 +421,7 @@ void C_ANIMATION::RunNextPlayOrder()
 
 /*-----------------------------------------------------------------------------
 - SetSpeed
-- timer �ӵ��� �����Ѵ�.
+- timer 속도를 설정한다.
 -----------------------------------------------------------------------------*/
 void C_ANIMATION::SetSpeed(DWORD millisec)
 {
@@ -430,7 +430,7 @@ void C_ANIMATION::SetSpeed(DWORD millisec)
 
 /*-----------------------------------------------------------------------------
 - SetPlayPosition
-- animation�� �ϴ� ������ġ�� �����Ѵ�.
+- animation을 하는 절대위치를 설정한다.
 -----------------------------------------------------------------------------*/
 void C_ANIMATION::SetPlayPosition(int x, int y)
 {
@@ -454,7 +454,7 @@ void C_ANIMATION::PlayLoop()
 //-----------------------------------------------------------------------------
 // PlayLoopBack
 //
-// play -> back -> play (�ݺ�)
+// play -> back -> play (반복)
 //-----------------------------------------------------------------------------
 void C_ANIMATION::PlayLoopBack()
 {
@@ -468,7 +468,7 @@ void C_ANIMATION::PlayLoopBack()
 
 /*-----------------------------------------------------------------------------
 - Play
-- �տ��� �ڷ� �� �� animation�Ѵ�.
+- 앞에서 뒤로 한 번 animation한다.
 -----------------------------------------------------------------------------*/
 void C_ANIMATION::Play()
 {
@@ -482,7 +482,7 @@ void C_ANIMATION::Play()
 //-----------------------------------------------------------------------------
 // Stop
 //
-// ���� ��ġ���� �����.
+// 현재 위치에서 멈춘다.
 //-----------------------------------------------------------------------------
 void C_ANIMATION::Stop()
 {
@@ -526,7 +526,7 @@ void C_ANIMATION::Refresh()
 
 /*-----------------------------------------------------------------------------
 - PlayBack
-- �ڿ��� ������ �� �� animation�Ѵ�.
+- 뒤에서 앞으로 한 번 animation한다.
 -----------------------------------------------------------------------------*/
 void C_ANIMATION::PlayBack()
 {
@@ -539,7 +539,7 @@ void C_ANIMATION::PlayBack()
 
 /*-----------------------------------------------------------------------------
 - Show
-- animation�� ������ ������ frame�� ���δ�.
+- animation이 끝나면 마지막 frame을 보인다.
 -----------------------------------------------------------------------------*/
 void C_ANIMATION::Show(bool enable)
 {
@@ -551,13 +551,13 @@ void C_ANIMATION::Show(bool enable)
 //		gpC_base->m_p_DDSurface_back->BltIndexSpriteDarkness(&point, &m_pC_slayer_woman_ispk[m_pC_slayer_woman_cfpk[p_slot->woman_info.right][0][0][index].GetSpriteID()], DARK_BIT);
 		m_pC_ani_object->BltDarkness(point, m_current_frame, 2);
 
-	// �ӵ��� ���� Show()�� ����...
+	// 속도를 위해 Show()에 포함...
 	Timer();
 }
 
 /*-----------------------------------------------------------------------------
 - Size
-- frame�� �� ���� ��ȯ�Ѵ�.
+- frame의 충 수를 반환한다.
 -----------------------------------------------------------------------------*/
 int C_FRR::Size() const
 {
@@ -611,14 +611,14 @@ C_FRR::~C_FRR()
 /*-----------------------------------------------------------------------------
 - Open
 -
-  `�̹� load�Ǿ� �ִٸ�, release�ϰ� sz_filename�� open�Ѵ�.
+  `이미 load되어 있다면, release하고 sz_filename을 open한다.
 -----------------------------------------------------------------------------*/
 bool C_FRR::Open(const char *sz_filename)
 {
 	if (!sz_filename)
 		return false;
 
-	// ������ load�ߴٸ� release�Ѵ�.
+	// 이전에 load했다면 release한다.
 	if (m_C_frame_array.GetSize() > 0)
 		m_C_frame_array.Release();
 
@@ -634,10 +634,10 @@ bool C_FRR::Open(const char *sz_filename)
 
 /*-----------------------------------------------------------------------------
 - Open
-- Sprite Pack file�� open�Ѵ�.
+- Sprite Pack file을 open한다.
 
-  `Sprite pack file�� �ƴҰ���� ����ó���� ����.
-  `�̹� load�Ǿ� �ִٸ�, release�ϰ� sz_filename�� open�Ѵ�.
+  `Sprite pack file이 아닐경우의 예외처리는 없다.
+  `이미 load되어 있다면, release하고 sz_filename을 open한다.
 -----------------------------------------------------------------------------*/
 void C_SPRITE_PACK::Open(const char *sz_filename)
 {
@@ -647,7 +647,7 @@ void C_SPRITE_PACK::Open(const char *sz_filename)
 //		_ErrorStr((char *)sz_filename);//(FAILED_JOB);
 
 	// by sigi
-	// ������ load�ߴٸ� release�Ѵ�.
+	// 이전에 load했다면 release한다.
 	//if (m_pC_spk_list->GetSize() > 0)
 	//	m_pC_spk_list->Release();
 
@@ -673,8 +673,8 @@ void C_SPRITE_PACK::Open(const char *sz_filename)
 -----------------------------------------------------------------------------*/
 C_SPRITE_PACK::C_SPRITE_PACK(const char *sz_filename)
 {
-	// Sprite�� ������ �� 565���� 555���� �˾ƾߵǴϱ�...
-	// �׷��� �� �˻縦 �ܺο��� �ϰ� �ߴٴ±�...
+	// Sprite를 저장할 때 565인지 555인지 알아야되니까...
+	// 그런데 이 검사를 외부에서 하게 했다는군...
 	
 	// by sigi
 	//if (CSDLGraphics::Is565())
@@ -682,7 +682,7 @@ C_SPRITE_PACK::C_SPRITE_PACK(const char *sz_filename)
 	//else
 	//	m_pC_spk_list = new CSpritePackList555;
 
-	if (sz_filename) // file���� �����Ͽ��ٸ�...
+	if (sz_filename) // file명을 지정하였다면...
 		Open(sz_filename);
 }
 
@@ -699,7 +699,7 @@ C_SPRITE_PACK::~C_SPRITE_PACK()
 //-----------------------------------------------------------------------------
 // BltColor
 //
-// rgb �� �ϳ������� blt�Ѵ�.
+// rgb 중 하나만으로 blt한다.
 //-----------------------------------------------------------------------------
 void C_SPRITE_PACK::BltColor(int x, int y, SPRITE_ID sprite_id, int rgb)
 {
@@ -725,7 +725,7 @@ void C_SPRITE_PACK::BltColor(int x, int y, SPRITE_ID sprite_id, int rgb)
 //-----------------------------------------------------------------------------
 // BltColor
 //
-// rgb �� �ϳ������� blt�Ѵ�.
+// rgb 중 하나만으로 blt한다.
 //-----------------------------------------------------------------------------
 void C_SPRITE_PACK::BltColor(POINT &point, SPRITE_ID sprite_id, int rgb)
 {
@@ -795,8 +795,8 @@ void C_SPRITE_PACK::BltDarkness(POINT &point, SPRITE_ID sprite_id, int dark)
 //-----------------------------------------------------------------------------
 // BltClip
 //
-// sprite�� clipping�Ѵ�.
-// sprite�� ���ϴ� �κи� ����� �� �����ϴ�.
+// sprite를 clipping한다.
+// sprite의 원하는 부분만 출력할 때 용이하다.
 //-----------------------------------------------------------------------------
 void C_SPRITE_PACK::BltClip(int x, int y, Rect &rect, SPRITE_ID sprite_id)
 {
@@ -909,7 +909,7 @@ int C_SPRITE_PACK::GetHeight(SPRITE_ID sprite_id)
 //-----------------------------------------------------------------------------
 // IsPixel
 //
-// (x, y)�� �������̸� false�� ��ȯ�Ѵ�.
+// (x, y)가 투명색이면 false를 반환한다.
 //-----------------------------------------------------------------------------
 bool C_SPRITE_PACK::IsPixel(int x, int y, SPRITE_ID sprite_id)
 {
@@ -934,7 +934,7 @@ void C_SPRITE_PACK::Blt(int x, int y, SPRITE_ID sprite_id)
 
 /*-----------------------------------------------------------------------------
 - Blt
-- Sprite Surface�� BackSurface�� blt�Ѵ�.
+- Sprite Surface인 BackSurface에 blt한다.
 -----------------------------------------------------------------------------*/
 void C_SPRITE_PACK::Blt(POINT &point, SPRITE_ID sprite_id)
 {
@@ -955,7 +955,7 @@ void C_SPRITE_PACK::Blt(POINT &point, SPRITE_ID sprite_id)
 
 /*-----------------------------------------------------------------------------
 - BltOffscreen
-- Sprite Surface�� BackSurface�� blt�Ѵ�.
+- Sprite Surface인 BackSurface에 blt한다.
 -----------------------------------------------------------------------------*/
 void C_SPRITE_PACK::BltOffscreen(POINT &point, SPRITE_ID sprite_id)
 {
@@ -983,7 +983,7 @@ void C_SPRITE_PACK::BltOffscreen(int x, int y, SPRITE_ID sprite_id)
 //-----------------------------------------------------------------------------
 // BltOutline
 //
-// Sprite�� �ܰ����� �׷��� �Բ� ����Ѵ�.
+// Sprite에 외곽선을 그려서 함께 출력한다.
 //-----------------------------------------------------------------------------
 void C_SPRITE_PACK::BltOutline(int x, int y, int color, SPRITE_ID sprite_id)
 {
@@ -991,10 +991,10 @@ void C_SPRITE_PACK::BltOutline(int x, int y, int color, SPRITE_ID sprite_id)
 
 	//assert(p_sprite);
 
-	// focus�� ���� �ܰ����� �׸���.
-	CSpriteOutlineManager	outline_o; // �ܰ������ ��ü.
+	// focus된 것은 외곽선을 그린다.
+	CSpriteOutlineManager	outline_o; // 외곽선출력 객체.
 
-	// �ܰ������ ��ü �߰�.
+	// 외곽선출력 객체 추가.
 	outline_o.Add(x, y, &m_SPK[sprite_id]);
 	outline_o.Generate();
 
@@ -1022,7 +1022,7 @@ void C_SPRITE_PACK::BltLocked(int x, int y, SPRITE_ID sprite_id)
 
 /*-----------------------------------------------------------------------------
 - BltLocked
-- Sprite Surface�� BackSurface�� blt�Ѵ�.
+- Sprite Surface인 BackSurface에 blt한다.
 -----------------------------------------------------------------------------*/
 void C_SPRITE_PACK::BltLocked(POINT &point, SPRITE_ID sprite_id)
 {
@@ -1038,7 +1038,7 @@ void C_SPRITE_PACK::BltLocked(POINT &point, SPRITE_ID sprite_id)
 
 /*-----------------------------------------------------------------------------
 - BltLockedOffscreen
-- Sprite Surface�� BackSurface�� blt�Ѵ�.
+- Sprite Surface인 BackSurface에 blt한다.
 -----------------------------------------------------------------------------*/
 void C_SPRITE_PACK::BltLockedOffscreen(POINT &point, SPRITE_ID sprite_id)
 {
@@ -1061,7 +1061,7 @@ void C_SPRITE_PACK::BltLockedOffscreen(int x, int y, SPRITE_ID sprite_id)
 //-----------------------------------------------------------------------------
 // BltOutline
 //
-// Sprite�� �ܰ����� �׷��� �Բ� ����Ѵ�.
+// Sprite에 외곽선을 그려서 함께 출력한다.
 //-----------------------------------------------------------------------------
 void C_SPRITE_PACK::BltLockedOutline(int x, int y, int color, SPRITE_ID sprite_id)
 {
@@ -1069,10 +1069,10 @@ void C_SPRITE_PACK::BltLockedOutline(int x, int y, int color, SPRITE_ID sprite_i
 
 	//assert(p_sprite);
 
-	// focus�� ���� �ܰ����� �׸���.
-	CSpriteOutlineManager	outline_o; // �ܰ������ ��ü.
+	// focus된 것은 외곽선을 그린다.
+	CSpriteOutlineManager	outline_o; // 외곽선출력 객체.
 
-	// �ܰ������ ��ü �߰�.
+	// 외곽선출력 객체 추가.
 	outline_o.Add(x, y, &m_SPK[sprite_id]);
 	outline_o.Generate();
 
@@ -1085,7 +1085,7 @@ void C_SPRITE_PACK::BltLockedOutline(int x, int y, int color, SPRITE_ID sprite_i
 //-----------------------------------------------------------------------------
 // BltLockedColor
 //
-// rgb �� �ϳ������� blt�Ѵ�.
+// rgb 중 하나만으로 blt한다.
 //-----------------------------------------------------------------------------
 void C_SPRITE_PACK::BltLockedColor(int x, int y, SPRITE_ID sprite_id, int rgb)
 {
@@ -1127,8 +1127,8 @@ void C_SPRITE_PACK::BltLockedDarkness(int x, int y, SPRITE_ID sprite_id, int dar
 //-----------------------------------------------------------------------------
 // BltLockedClip
 //
-// sprite�� clipping�Ѵ�.
-// sprite�� ���ϴ� �κи� ����� �� �����ϴ�.
+// sprite를 clipping한다.
+// sprite의 원하는 부분만 출력할 때 용이하다.
 //-----------------------------------------------------------------------------
 void C_SPRITE_PACK::BltLockedClip(int x, int y, Rect &rect, SPRITE_ID sprite_id)
 {

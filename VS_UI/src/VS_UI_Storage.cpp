@@ -57,7 +57,7 @@ void C_VS_UI_STORAGE::UnacquireMouseFocus()
 //-----------------------------------------------------------------------------
 C_VS_UI_STORAGE::C_VS_UI_STORAGE()
 {
-	m_pStorage = NULL; // Ȯ�ο�... by sigi
+	m_pStorage = NULL; // 확인용... by sigi
 
 	g_RegisterWindow(this);
 
@@ -148,7 +148,7 @@ C_VS_UI_STORAGE::C_VS_UI_STORAGE()
 	MItem*		pItem;
 
 	//----------------------------------------------------
-	// 3���� shelf�� ���� ����
+	// 3개의 shelf를 가진 상점
 	//----------------------------------------------------
 	m_pStorage = new MStorage;
 	pStorage = m_pStorage;
@@ -157,7 +157,7 @@ C_VS_UI_STORAGE::C_VS_UI_STORAGE()
 	pStorage->SetCurrent( 0 );
 	
 	//----------------------------------------------------
-	// Item ���� --> �߰�
+	// Item 생성 --> 추가
 	//----------------------------------------------------
 	pItem = MItem::NewItem( ITEM_CLASS_POTION );
 	pItem->SetID( 0 );
@@ -171,7 +171,7 @@ C_VS_UI_STORAGE::C_VS_UI_STORAGE()
 	}
 
 	//----------------------------------------------------
-	// Item ���� --> �߰�
+	// Item 생성 --> 추가
 	//----------------------------------------------------
 	pItem = MItem::NewItem( ITEM_CLASS_RING );
 	pItem->SetID( 1 );
@@ -184,7 +184,7 @@ C_VS_UI_STORAGE::C_VS_UI_STORAGE()
 	}
 	
 	//----------------------------------------------------
-	// Item ���� --> �߰�
+	// Item 생성 --> 추가
 	//----------------------------------------------------
 	pItem = MItem::NewItem( ITEM_CLASS_RING );
 	pItem->SetID( 2 );
@@ -197,7 +197,7 @@ C_VS_UI_STORAGE::C_VS_UI_STORAGE()
 	}
 
 	//----------------------------------------------------
-	// Item ���� --> �߰�
+	// Item 생성 --> 추가
 	//----------------------------------------------------
 	pItem = MItem::NewItem( ITEM_CLASS_RING );
 	pItem->SetID( 3 );
@@ -210,7 +210,7 @@ C_VS_UI_STORAGE::C_VS_UI_STORAGE()
 		}
 
 	//----------------------------------------------------
-	// Item ���� --> �߰�
+	// Item 생성 --> 추가
 	//----------------------------------------------------
 	pItem = MItem::NewItem( ITEM_CLASS_RING );
 	pItem->SetID( 4 );
@@ -233,7 +233,7 @@ C_VS_UI_STORAGE::C_VS_UI_STORAGE()
 		pStorage->SetCurrent( 1 );
 
 		//----------------------------------------------------
-		// Item ���� --> �߰�
+		// Item 생성 --> 추가
 		//----------------------------------------------------
 		pItem = MItem::NewItem( ITEM_CLASS_SWORD );
 		pItem->SetID( 100 );
@@ -246,7 +246,7 @@ C_VS_UI_STORAGE::C_VS_UI_STORAGE()
 			}
 
 		//----------------------------------------------------
-		// Item ���� --> �߰�
+		// Item 생성 --> 추가
 		//----------------------------------------------------
 		pItem = MItem::NewItem( ITEM_CLASS_SWORD );
 		pItem->SetID( 101 );
@@ -268,7 +268,7 @@ C_VS_UI_STORAGE::C_VS_UI_STORAGE()
 		pStorage->SetCurrent( 2 );
 		
 		//----------------------------------------------------
-		// Item ���� --> �߰�
+		// Item 생성 --> 추가
 		//----------------------------------------------------
 		pItem = MItem::NewItem( ITEM_CLASS_BLADE );
 		pItem->SetID( 202 );
@@ -282,7 +282,7 @@ C_VS_UI_STORAGE::C_VS_UI_STORAGE()
 			}
 
 		//----------------------------------------------------
-		// Item ���� --> �߰�
+		// Item 생성 --> 추가
 		//----------------------------------------------------
 		pItem = MItem::NewItem( ITEM_CLASS_BLADE );
 		pItem->SetID( 205 );
@@ -297,7 +297,7 @@ C_VS_UI_STORAGE::C_VS_UI_STORAGE()
 	}
 
 	//----------------------------------------------------
-	// �� ����
+	// 돈 설정
 	//----------------------------------------------------
 	MMoneyManager* pMoneyManager = pStorage->GetMoneyManager();
 
@@ -305,7 +305,7 @@ C_VS_UI_STORAGE::C_VS_UI_STORAGE()
 
 
 	//----------------------------------------------------
-	// global ����
+	// global 설정
 	//----------------------------------------------------
 	g_pStorage = m_pStorage;
 
@@ -328,7 +328,7 @@ C_VS_UI_STORAGE::~C_VS_UI_STORAGE()
 	g_pStorage = NULL;	// by sigi
 #endif
 
-	m_pStorage = NULL; // ���� check�� ���ؼ�..
+	m_pStorage = NULL; // 다음 check를 위해서..
 
 	DeleteNew(m_pC_dialog_withdraw_money);// by sigi
 
@@ -349,11 +349,11 @@ void	C_VS_UI_STORAGE::CancelPushState()
 //-----------------------------------------------------------------------------
 // GetSlotItem
 //
-// slot�� item�� �ִ°�?
+// slot에 item이 있는가?
 //-----------------------------------------------------------------------------
 MItem * C_VS_UI_STORAGE::GetSlotItem(int slot) const
 {
-	if (m_pStorage!=NULL)	// Ȯ�ο�... by sigi
+	if (m_pStorage!=NULL)	// 확인용... by sigi
 	{
 		return (MItem *)m_pStorage->GetItem( slot );
 	}
@@ -394,7 +394,7 @@ int C_VS_UI_STORAGE::GetSlotY(int slot) const
 //-----------------------------------------------------------------------------
 // GetDialogShowX
 //
-// Dialog box�� ��µ� ���� x��ǥ�� ��ȯ�Ѵ�.
+// Dialog box가 출력될 곳의 x좌표를 반환한다.
 //-----------------------------------------------------------------------------
 int C_VS_UI_STORAGE::GetDialogShowX() const
 {
@@ -407,7 +407,7 @@ int C_VS_UI_STORAGE::GetDialogShowX() const
 //-----------------------------------------------------------------------------
 // GetDialogShowY
 //
-// Dialog box�� ��µ� ���� Y��ǥ�� ��ȯ�Ѵ�.
+// Dialog box가 출력될 곳의 Y좌표를 반환한다.
 //-----------------------------------------------------------------------------
 int C_VS_UI_STORAGE::GetDialogShowY() const
 {
@@ -438,7 +438,7 @@ void C_VS_UI_STORAGE::SetStorage(MStorage * pStorage)
 
 	m_pStorage = pStorage;
 
-	// normal�� default�� ����.. by sigi
+	// normal을 default로 설정.. by sigi
 //	m_what_tab = STORAGE_TAB1;
 	
 	m_pStorage->SetCurrent(0);	
@@ -478,13 +478,13 @@ void C_VS_UI_STORAGE::Show()
 				
 				int item_x = x+GetSlotX(i);
 				
-				// �ٴۿ� ���̰� �Ѵ�.
+				// 바닦에 놓이게 한다.
 				int item_y = y+GetSlotY(i)+SLOT_HEIGHT-gpC_item->GetHeight(frame_id)-4;
 				
-				// item�� center�� �����.
+				// item을 center에 맞춘다.
 				item_x += SLOT_WIDTH/2-gpC_item->GetWidth(frame_id)/2;
 				
-				// identify�� �������� ���.. by sigi
+				// identify된 아이템인 경우.. by sigi
 				if (p_item->IsIdentified())
 				{
 					if(p_item->IsQuestItem())
@@ -497,7 +497,7 @@ void C_VS_UI_STORAGE::Show()
 				}
 				else
 				{
-					// identify �� �� ���� ������ ���
+					// identify 안 된 경우는 무조건 흰색
 					CIndexSprite::SetUsingColorSet(378, 378);
 				}
 				
@@ -552,7 +552,7 @@ void C_VS_UI_STORAGE::Show()
 					}
 				}
 
-				// ������ ����ǥ��
+				// 아이템 개수표시
 				if(p_item->IsPileItem() || p_item->IsChargeItem())
 				{
 					RECT rt;
@@ -587,10 +587,10 @@ void C_VS_UI_STORAGE::Show()
 
 						int item_x = x+GetSlotX(i);
 
-						// �ٴۿ� ���̰� �Ѵ�.
+						// 바닦에 놓이게 한다.
 						int item_y = y+GetSlotY(i)+SLOT_HEIGHT-gpC_item->GetHeight(frame_id)-4;
 
-						// item�� center�� �����.
+						// item을 center에 맞춘다.
 						item_x += SLOT_WIDTH/2-gpC_item->GetWidth(frame_id)/2;
 						
 						gpC_item->BltLockedOutlineOnly(item_x, item_y, WHITE, frame_id);					
@@ -612,7 +612,7 @@ void C_VS_UI_STORAGE::Show()
 		g_PrintColorStr(rect[i].left, rect[i].top, sz_temp, gpC_base->m_item_desc_pi, markColor);	
 	}
 
-	// ������ �׼��� ����Ѵ�.
+	// 보관된 액수를 출력한다.
 	// 2004, 12, 14, sobeit modify start
 	if(NULL != m_pStorage && NULL != m_pStorage->GetMoneyManager())
 	{
@@ -701,7 +701,7 @@ void C_VS_UI_STORAGE::Run(id_t id)
 		case STORAGE_TAB1_ID:
 // 			m_what_tab = STORAGE_TAB1_ID;
 
-			if (m_pStorage!=NULL)	// Ȯ�ο� by sigi
+			if (m_pStorage!=NULL)	// 확인용 by sigi
 			{
 				m_pStorage->SetCurrent(0);
 			}
@@ -710,7 +710,7 @@ void C_VS_UI_STORAGE::Run(id_t id)
 		case STORAGE_TAB2_ID:
 // 			m_what_tab = STORAGE_TAB2_ID;
 
-			if (m_pStorage!=NULL && m_pStorage->GetSize()>=2)	// Ȯ�ο� by sigi
+			if (m_pStorage!=NULL && m_pStorage->GetSize()>=2)	// 확인용 by sigi
 			{
 				m_pStorage->SetCurrent(1);
 			}
@@ -719,7 +719,7 @@ void C_VS_UI_STORAGE::Run(id_t id)
 		case STORAGE_TAB3_ID:
 // 			m_what_tab = STORAGE_TAB3_ID; 
 
-			if (m_pStorage!=NULL && m_pStorage->GetSize()>=3)	// Ȯ�ο� by sigi
+			if (m_pStorage!=NULL && m_pStorage->GetSize()>=3)	// 확인용 by sigi
 			{
 				m_pStorage->SetCurrent(2);
 			}
@@ -849,7 +849,7 @@ bool C_VS_UI_STORAGE::MouseControl(UINT message, int _x, int _y)
 		case M_LEFTBUTTON_DOWN:
 		case M_LB_DOUBLECLICK:
 			//
-			// Item�� �����Ѵ�.
+			// Item을 선택한다.
 			//
 			if (m_focused_slot != NOT_SELECTED && m_pStorage != NULL)
 			{
@@ -868,7 +868,7 @@ bool C_VS_UI_STORAGE::MouseControl(UINT message, int _x, int _y)
 				else
 				{
 					gpC_base->SendMessage(UI_SELECT_STORAGE_SLOT, m_pStorage->GetCurrent(), m_focused_slot);
-					// SHIFT������ Ŭ�������� ������ �ڵ� �̵� ó�� -> �κ��丮
+					// SHIFT누르고 클릭했을때 아이템 자동 이동 처리 -> 인벤토리
 					if(g_pSDLInput->KeyDown(DIK_LSHIFT))
 					{
 						MItem* p_item = (MItem *)m_pStorage->GetItem( m_focused_slot );
@@ -877,26 +877,26 @@ bool C_VS_UI_STORAGE::MouseControl(UINT message, int _x, int _y)
 						{
 							const MItem* p_cur_item = g_pInventory->GetItem(point.x, point.y);
 							
-							// �ѿ� źâ�� ����� �Ͱ� ���� ���� insert item�̴�.
-							// ��ġ�� ������ ��ġ�Ұ�쿡�� �߰��Ѵ�.
+							// 총에 탄창을 끼우는 것과 같은 것이 insert item이다.
+							// 위치가 완전히 일치할경우에만 추가한다.
 							if (p_item->IsInsertToItem( p_cur_item ) && p_cur_item->GetGridX() == point.x && p_cur_item->GetGridY() == point.y)
 							{
-								// ������ �ִ� item�� �߰��� �� �ִ� ���
+								// 이전에 있던 item에 추가될 수 있는 경우
 								
-								// ��� Item�� ��� �ִ�(�߰��� Item)�� Client���� �˾ƾ� �Ѵ�.
-								// ��� �ִ� Item�� Client���� access�� �� �����Ƿ� ��� Item�� ������.
+								// 대상 Item과 들고 있는(추가할 Item)을 Client에서 알아야 한다.
+								// 들고 있는 Item은 Client에서 access할 수 있으므로 대상 Item을 보낸다.
 								gpC_base->SendMessage(UI_ITEM_INSERT_FROM_INVENTORY,
 									point.x, point.y,
-									(void *)p_cur_item); // ��� Item
+									(void *)p_cur_item); // 대상 Item
 							}
 							else
 							{	
-								// �߰��� �� ���� ���
+								// 추가될 수 없는 경우
 								MItem* p_old_item  = NULL;
 								
-								if (g_pInventory->CanReplaceItem(p_item,		// �߰��� item
-									point.x, point.y,	// �߰��� ��ġ 
-									p_old_item))								// �����ִ� item
+								if (g_pInventory->CanReplaceItem(p_item,		// 추가할 item
+									point.x, point.y,	// 추가할 위치 
+									p_old_item))								// 원래있던 item
 								{
 										
 									gpC_base->SendMessage(UI_ITEM_DROP_TO_INVENTORY, 
@@ -935,7 +935,7 @@ void C_VS_UI_STORAGE::Start()
 	AttrPin(true);
 	gpC_window_manager->AppearWindow(this);
 
-	// ������ g_pStorage���� �д°Ŵ�.
+	// 원래는 g_pStorage에서 읽는거다.
 //	m_what_tab = STORAGE_TAB1_ID;
 
 	m_focused_slot = NOT_SELECTED;

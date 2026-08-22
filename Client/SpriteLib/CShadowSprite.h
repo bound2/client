@@ -22,29 +22,29 @@
 
 
 //----------------------------------------------------------------------
-// width * height��ŭ�� pixel�� �����صд�.
+// width * height만큼의 pixel을 저장해둔다.
 //----------------------------------------------------------------------
-// �� pixel�� �����ϴ� ����� ������ ����.
+// 한 pixel을 저장하는 방법은 다음과 같다.
 //
 //    [1] 5:5:5 --> 2 bytes
 //    [2] 5:6:5 --> 2 bytes
 //    [3] R,G,B --> 3 bytes
 //
-// [3]�� �뷮�� Ŀ�� �������Ƿ� [2]�� ����� ����ؼ�
-// 5:5:5�� ���� ������� ����ǵ��� �Ѵ�.
+// [3]은 용량이 커서 안좋으므로 [2]번 방법을 사용해서
+// 5:5:5로 같은 방식으로 저장되도록 한다.
 //
-// Memory�� 5:5:5�� 5:6:5�� ���������
-// disk���� 5:6:5�� ����ȴ�.
+// Memory는 5:5:5나 5:6:5로 사용하지만
+// disk에는 5:6:5로 저장된다.
 //
-// ��, 5:5:5�� ����ϴ� system������ 
-//    File(5:6:5) ---(5:5:5�� ��ȯ)--> Memory(5:5:5)
-//    File(5:6:5) <--(5:6:5�� ��ȯ)--- Memory(5:5:5)  �̷��� �ؾߵȴ�.
+// 즉, 5:5:5를 사용하는 system에서는 
+//    File(5:6:5) ---(5:5:5로 변환)--> Memory(5:5:5)
+//    File(5:6:5) <--(5:6:5로 변환)--- Memory(5:5:5)  이렇게 해야된다.
 //
 //----------------------------------------------------------------------
 //
-// = �� ���� ����
+// = 한 줄의 정보
 //
-// (�ݺ�ȸ��) (������, shadow��) (������, shadow��) (������, shadow��) ......
+// (반복회수) (투명수, shadow수) (투명수, shadow수) (투명수, shadow수) ......
 //
 //
 //----------------------------------------------------------------------
@@ -61,24 +61,24 @@ class CShadowSprite
 		void		operator = (const CShadowSprite& Sprite);
 
 		//---------------------------------------------------------
-		// m_Pixels�� memory�� Release�Ѵ�.		
+		// m_Pixels의 memory를 Release한다.		
 		//---------------------------------------------------------
 		void		Release();
 
 		//---------------------------------------------------------
-		// ���� Color 
+		// 투명 Color 
 		//---------------------------------------------------------
 		static void	SetColorkey(WORD color)			{ s_Colorkey = color; }
 		static WORD	GetColorkey() 					{ return s_Colorkey; }
 
 		//---------------------------------------------------------
-		// fstream���� save/load�� �Ѵ�.
+		// fstream에서 save/load를 한다.
 		//---------------------------------------------------------
 		bool		SaveToFile(std::ofstream& file);
 		bool		LoadFromFile(std::ifstream& file);
 	
 		//---------------------------------------------------------
-		// CDirectDrawSurface�� ������ �о m_Pixels�� �����Ѵ�.
+		// CDirectDrawSurface의 영역을 읽어서 m_Pixels에 저장한다.
 		//---------------------------------------------------------
 		void		SetPixel(WORD* pSource, WORD sourcePitch, 							 
 							 WORD width, WORD height);
@@ -90,7 +90,7 @@ class CShadowSprite
 		void		SetPixel(CSprite& spr);
 
 		//---------------------------------------------------------
-		// (x,y)�� sprite�� ���� �κ��ΰ�?
+		// (x,y)는 sprite의 색깔 부분인가?
 		//---------------------------------------------------------
 		bool		IsColorPixel(short x, short y);
 
@@ -117,7 +117,7 @@ class CShadowSprite
 		//---------------------------------------------------------
 
 		//---------------------------------------------------------
-		// �������� Blt
+		// 정상적인 Blt
 		//---------------------------------------------------------
 		void		Blt(WORD *pDest, WORD pitch);				
 		void		BltClipLeft(WORD *pDest, WORD pitch, RECT* pRect);
@@ -126,7 +126,7 @@ class CShadowSprite
 		void		BltClipHeight(WORD *pDest, WORD pitch, RECT* pRect);
 
 		//---------------------------------------------------------
-		// ���� ũ�⺸�� �۰� ����ϱ�
+		// 실제 크기보다 작게 출력하기
 		// Test Code~~
 		//---------------------------------------------------------
 		void		BltSmall(WORD *pDest, WORD pitch, BYTE shift);
@@ -136,7 +136,7 @@ class CShadowSprite
 		void		BltSmallClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE shift);
 
 		//---------------------------------------------------------
-		// �������� Blt
+		// 정상적인 Blt
 		//---------------------------------------------------------
 		//void		BltRotate(WORD *pDest, WORD pitch, short deg);
 		//void		BltRotateClipLeft(WORD *pDest, WORD pitch, RECT* pRect);
@@ -146,12 +146,12 @@ class CShadowSprite
 		
 
 		//---------------------------------------------------------
-		// �¿� �ٲ�
+		// 좌우 바뀜
 		//---------------------------------------------------------
 	
 
 		//---------------------------------------------------------
-		// ������
+		// 반투명
 		//---------------------------------------------------------
 		//void		BltHalf(WORD *pDest, WORD pitch);		
 		//void		BltHalfClipLeft(WORD *pDest, WORD pitch, RECT* pRect);
@@ -167,7 +167,7 @@ class CShadowSprite
 		//void		BltAlphaClipHeight(WORD *pDest, WORD pitch, RECT* pRect);
 
 		//---------------------------------------------------------
-		// RGB�� �ٲ�
+		// RGB값 바뀜
 		//---------------------------------------------------------
 		//void		BltColor(WORD *pDest, WORD pitch, BYTE rgb);		
 		//void		BltColorClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb);
@@ -175,7 +175,7 @@ class CShadowSprite
 		//void		BltColorClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb);
 
 		//---------------------------------------------------------
-		// ��Ӱ� �ϱ�
+		// 어둡게 하기
 		//---------------------------------------------------------
 		void		BltDarkness(WORD *pDest, WORD pitch, BYTE DarkBits);		
 		void		BltDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE DarkBits);
@@ -184,7 +184,7 @@ class CShadowSprite
 		void		BltDarknessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE DarkBits);
 
 		//---------------------------------------------------------
-		// Texture������ 4444 Blt
+		// Texture용으로 4444 Blt
 		//---------------------------------------------------------
 		void		Blt4444(WORD *pDest, WORD pitch, WORD pixel);				
 		void		Blt4444ClipLeft(WORD *pDest, WORD pitch, RECT* pRect, WORD pixel);
@@ -193,7 +193,7 @@ class CShadowSprite
 		void		Blt4444ClipHeight(WORD *pDest, WORD pitch, RECT* pRect, WORD pixel);
 
 		//---------------------------------------------------------
-		// Texture������ �۰� ����ϴ� 4444 Blt
+		// Texture용으로 작게 출력하는 4444 Blt
 		//---------------------------------------------------------
 		void		BltSmall4444(WORD *pDest, WORD pitch, WORD pixel, BYTE shift);				
 		void		BltSmall4444ClipLeft(WORD *pDest, WORD pitch, RECT* pRect, WORD pixel, BYTE shift);
@@ -211,7 +211,7 @@ class CShadowSprite
 		//void		BltEffectClipHeight(WORD *pDest, WORD pitch, RECT* pRect);
 
 		//---------------------------------------------------------
-		// ShadowChannel Filter�� �̿��� ���
+		// ShadowChannel Filter를 이용한 출력
 		//---------------------------------------------------------
 		//void		BltShadowFilter(WORD *pDest, WORD pitch, CFilter* pFilter);		
 
@@ -229,10 +229,10 @@ class CShadowSprite
 		//void		memcpyDarknessFilter(WORD* pDest, WORD* pSource, WORD* pFilter, WORD pixels);
 
 	protected :
-		WORD			m_Width;		// ���� pixel��
-		WORD			m_Height;		// ���� pixel��
+		WORD			m_Width;		// 가로 pixel수
+		WORD			m_Height;		// 세로 pixel수		
 		WORD**			m_Pixels;		// pixels
-		bool			m_bInit;		// data�� �ִ°�?
+		bool			m_bInit;		// data가 있는가?
 
 #ifdef SPRITELIB_BACKEND_SDL
 		spritectl_sprite_t	m_backend_sprite;	// Backend sprite handle

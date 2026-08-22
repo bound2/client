@@ -1,53 +1,53 @@
 ﻿//-----------------------------------------------------------------------------
 // CIndexSprite.h
 //-----------------------------------------------------------------------------
-// width * height��ŭ�� pixel�� �����صд�.
+// width * height만큼의 pixel을 저장해둔다.
 //-----------------------------------------------------------------------------
-// �� pixel�� �����ϴ� ����� ������ ����.
+// 한 pixel을 저장하는 방법은 다음과 같다.
 //
 //    [1] 5:5:5 --> 2 bytes
 //    [2] 5:6:5 --> 2 bytes
 //    [3] R,G,B --> 3 bytes
 //
-// [3]�� �뷮�� Ŀ�� �������Ƿ� [2]�� ����� ����ؼ�
-// 5:5:5�� ���� ������� ����ǵ��� �Ѵ�.
+// [3]은 용량이 커서 안좋으므로 [2]번 방법을 사용해서
+// 5:5:5로 같은 방식으로 저장되도록 한다.
 //
-// Memory�� 5:5:5�� 5:6:5�� ���������
-// disk���� 5:6:5�� ����ȴ�.
+// Memory는 5:5:5나 5:6:5로 사용하지만
+// disk에는 5:6:5로 저장된다.
 //
-// ��, 5:5:5�� ����ϴ� system������ 
-//    File(5:6:5) ---(5:5:5�� ��ȯ)--> Memory(5:5:5)
-//    File(5:6:5) <--(5:6:5�� ��ȯ)--- Memory(5:5:5)  �̷��� �ؾߵȴ�.
+// 즉, 5:5:5를 사용하는 system에서는 
+//    File(5:6:5) ---(5:5:5로 변환)--> Memory(5:5:5)
+//    File(5:6:5) <--(5:6:5로 변환)--- Memory(5:5:5)  이렇게 해야된다.
 //
 //-----------------------------------------------------------------------------
-// - ���������� ������ ������ ����Ѵ�.
-// - IndexSet�� Gradation���򺰷� ����(?)�Ѵ�. (ȿ���� ���� ���� �� �ϴ�)
+// - 내부적으로 투명색 압축을 사용한다.
+// - IndexSet의 Gradation색깔별로 압축(?)한다. (효율은 높지 않을 듯 하다)
 //
 //
-// [ �� ���� ���� ]
+// [ 한 줄의 정보 ]
 //
-// (����Pair�ݺ���) 
-//    ( (��������, IndexPair�ݺ���, 
-//                 (index����, indexSet��ȣ, gradation��ȣ), 
-//                 (index����, indexSet��ȣ, gradation��ȣ), 
+// (투명Pair반복수) 
+//    ( (투명색수, IndexPair반복수, 
+//                 (index색수, indexSet번호, gradation번호), 
+//                 (index색수, indexSet번호, gradation번호), 
 //                              .     
 //                              .     
 //                              .     
-//        �����Ȼ����, �����Ȼ����)
-//       (��������, IndexPair�ݺ���, 
-//                 (index����, indexSet��ȣ, gradation��ȣ), 
-//                 (index����, indexSet��ȣ, gradation��ȣ), 
+//        고정된색깔수, 고정된색깔들)
+//       (투명색수, IndexPair반복수, 
+//                 (index색수, indexSet번호, gradation번호), 
+//                 (index색수, indexSet번호, gradation번호), 
 //                              .     
 //                              .     
 //                              .     
-//        �����Ȼ����, �����Ȼ����)
+//        고정된색깔수, 고정된색깔들)
 //    )
 //
 //
-// �������� Gradation Index���� ������ ���� �����Ѵ�.
+// 투명색과 Gradation Index값과 색깔값을 같이 저장한다.
 //-----------------------------------------------------------------------------
 //
-// SetColorSet555�� SetColorSet565�� ��!! �ܺο��� ���������� �Ѵ�.
+// SetColorSet555나 SetColorSet565를 꼭!! 외부에서 실행시켜줘야 한다.
 //
 //-----------------------------------------------------------------------------
 
@@ -70,19 +70,19 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // Defines
 //-----------------------------------------------------------------------------
-// Maximum value����
-#define	MAX_COLORSET_SEED			33	// �⺻ ������ ����
-#define	MAX_COLORSET_SEED_MODIFY	15	// �⺻ ���󸶴��� ���� ���� ��
+// Maximum value설정
+#define	MAX_COLORSET_SEED			33	// 기본 색상의 개수
+#define	MAX_COLORSET_SEED_MODIFY	15	// 기본 색상마다의 변형 색깔 수
 #define	MAX_COLORSET				495 // MAX_COLORSET_SEED * MAX_COLORSET_SEED_MODIFY
 #define	MAX_COLORGRADATION			30
 #define	MAX_COLOR_TO_GRADATION		93	// R+G+B
 #define	MAX_COLORGRADATION_HALF		15	// == MAX_COLORSET_SEED_MODIFY
 #define	MAX_DARKBIT					5
 
-// �� Sprite���� ����ϴ� �ִ��� ColorSet��
+// 한 Sprite에서 사용하는 최대의 ColorSet수
 #define	MAX_COLORSET_USE			256
 
-// index�� ����
+// index값 설정
 #define	INDEX_NULL					0xFF
 #define	INDEX_SELECT				0xFE
 #define	INDEX_TRANS					0xFD
@@ -99,7 +99,7 @@ class CIndexSprite {
 		void		operator = (const CIndexSprite& Sprite);
 
 		//---------------------------------------------------------
-		// Static ColorSet Table�� �ʱ�ȭ ���ش�.
+		// Static ColorSet Table을 초기화 해준다.
 		//---------------------------------------------------------
 		static	BOOL	SaveIndexTableToFile(std::ofstream& file);
 		static	BOOL	LoadIndexTableFromFile(std::ifstream& file);
@@ -112,15 +112,15 @@ class CIndexSprite {
 
 
 		//---------------------------------------------------------
-		// CDirectDrawSurface�� ������ �о m_Pixels�� �����Ѵ�.
+		// CDirectDrawSurface의 영역을 읽어서 m_Pixels에 저장한다.
 		//---------------------------------------------------------
 		void		SetPixel(WORD* pSource, WORD sourcePitch, 
-							 WORD* pIndex1, WORD indexPitch1,	// ù��° index
-							 WORD* pIndex2, WORD indexPitch2,	// �ι�° index
+							 WORD* pIndex1, WORD indexPitch1,	// 첫번째 index
+							 WORD* pIndex2, WORD indexPitch2,	// 두번째 index
 							 WORD width, WORD height);
 
 		//---------------------------------------------------------
-		// color�� �����ϴ� index����ȣ�� ã�´�.
+		// color에 대응하는 index색번호를 찾는다.
 		//---------------------------------------------------------
 		static	BYTE	GetIndexColor(WORD color);
 		static	BYTE	GetColorToGradation(BYTE color);
@@ -132,18 +132,18 @@ class CIndexSprite {
 		void			GetIndexInfo(WORD**& ppIndex);
 
 		//---------------------------------------------------------
-		// m_Pixels�� memory�� Release�Ѵ�.		
+		// m_Pixels의 memory를 Release한다.		
 		//---------------------------------------------------------
 		void		Release();
 
 		//---------------------------------------------------------
-		// ���� Color 
+		// 투명 Color 
 		//---------------------------------------------------------
 		static void	SetColorkey(WORD color)			{ s_Colorkey = color; }
 		static WORD	GetColorkey() 					{ return s_Colorkey; }
 
 		//---------------------------------------------------------
-		// fstream���� save/load�� �Ѵ�.
+		// fstream에서 save/load를 한다.
 		//---------------------------------------------------------
 		virtual bool		SaveToFile(std::ofstream& file) = 0;
 		virtual bool		LoadFromFile(std::ifstream& file) = 0;		
@@ -165,7 +165,7 @@ class CIndexSprite {
 #endif
 
 		//---------------------------------------------------------
-		// (x,y)�� ������ �ִ� �κ��ΰ�?
+		// (x,y)는 색깔이 있는 부분인가?
 		//---------------------------------------------------------
 		bool		IsColorPixel(short x, short y);
 
@@ -179,7 +179,7 @@ class CIndexSprite {
 		void		BltClipHeight(WORD *pDest, WORD pitch, RECT* pRect);
 
 		//---------------------------------------------------------
-		// ��Ӱ� �ϱ�
+		// 어둡게 하기
 		//---------------------------------------------------------
 		void		BltDarkness(WORD *pDest, WORD pitch, BYTE DarkBits);		
 		void		BltDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE DarkBits);
@@ -188,7 +188,7 @@ class CIndexSprite {
 		void		BltDarknessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE DarkBits);
 
 		//---------------------------------------------------------
-		// ��� �ϱ�
+		// 밝게 하기
 		//---------------------------------------------------------
 		void		BltBrightness(WORD *pDest, WORD pitch, BYTE DarkBits);		
 		void		BltBrightnessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE DarkBits);
@@ -206,7 +206,7 @@ class CIndexSprite {
 		void		BltAlphaClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha);
 
 		//---------------------------------------------------------
-		// Ư������� ���
+		// 특정색깔로 찍기
 		//---------------------------------------------------------
 		void		BltColor(WORD *pDest, WORD pitch, BYTE rgb);		
 
@@ -217,7 +217,7 @@ class CIndexSprite {
 		void		BltColorClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb);
 
 		//---------------------------------------------------------
-		// Ư��ColorSet���� ���
+		// 특정ColorSet으로 찍기
 		//---------------------------------------------------------
 		void		BltColorSet(WORD *pDest, WORD pitch, WORD colorSet);		
 		void		BltColorSetClipLeft(WORD *pDest, WORD pitch, RECT* pRect, WORD colorSet);
@@ -245,16 +245,16 @@ class CIndexSprite {
 		// ColorSet Table
 		//--------------------------------------------------------
 		// 25 Set ,  13 Gradation
-		static WORD		ColorSet[MAX_COLORSET][MAX_COLORGRADATION];			// ���� ��
-		static WORD		GradationValue[MAX_COLORGRADATION];					// �� gradation�� �� - IndexEditor���� ����� ���� ��
-		static WORD		ColorSetDarkness[MAX_DARKBIT][MAX_COLORSET][MAX_COLORGRADATION];	// ��Ӱ� ���� ���� ���� ��
-		static BYTE		ColorToGradation[MAX_COLOR_TO_GRADATION];			// R+G+B�� ������ Gradation���� ����.
+		static WORD		ColorSet[MAX_COLORSET][MAX_COLORGRADATION];			// 실제 색
+		static WORD		GradationValue[MAX_COLORGRADATION];					// 각 gradation의 값 - IndexEditor에서 계산을 위한 값
+		static WORD		ColorSetDarkness[MAX_DARKBIT][MAX_COLORSET][MAX_COLORGRADATION];	// 어둡게 했을 때의 색깔 값
+		static BYTE		ColorToGradation[MAX_COLOR_TO_GRADATION];			// R+G+B의 값으로 Gradation값을 얻어낸다.
 
 	protected :
-		WORD			m_Width;		// ���� pixel��
-		WORD			m_Height;		// ���� pixel��
+		WORD			m_Width;		// 가로 pixel수
+		WORD			m_Height;		// 세로 pixel수		
 		WORD**			m_Pixels;		// pixels
-		bool			m_bInit;		// data�� �ִ°�?
+		bool			m_bInit;		// data가 있는가?
 
 #ifdef SPRITELIB_BACKEND_SDL
 		spritectl_sprite_t	m_backend_sprite;	// Backend sprite handle
@@ -263,14 +263,14 @@ class CIndexSprite {
 
 		static WORD		s_Colorkey;
 	
-		// Blt Value (parameter ���)
+		// Blt Value (parameter 대용)
 		static int		s_IndexValue[MAX_COLORSET_USE];
 
 	
 	public :		
 		typedef void (*FUNCTION_MEMCPYEFFECT)(WORD*, WORD*, WORD);
 
-		// memcpyEffect�� ����
+		// memcpyEffect의 종류
 		enum FUNCTION_EFFECT
 		{
 			EFFECT_DARKER = 0,

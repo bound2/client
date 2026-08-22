@@ -51,7 +51,7 @@ CAlphaSprite::~CAlphaSprite()
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// m_Pixels�� memory�� �����Ѵ�.
+// m_Pixels의 memory를 해제한다.
 //----------------------------------------------------------------------
 void	
 CAlphaSprite::Release()
@@ -87,99 +87,99 @@ CAlphaSprite::Release()
 void
 CAlphaSprite::operator = (const CAlphaSprite& Sprite)
 {
-		// �޸� ����
+		// 메모리 해제
 	Release();
 
 
-	// NULL�̸� �������� �ʴ´�.
+	// NULL이면 저장하지 않는다.
 	if (Sprite.m_Pixels==NULL || Sprite.m_Width==0 || Sprite.m_Height==0)
 		return;
 
-	// ũ�� ����
+	// 크기 설정
 	m_Width = Sprite.m_Width;
 	m_Height = Sprite.m_Height;
 	
-	// ���� �� �� ����
+	// 압축 된 것 저장
 	int index;	
 	register int i;
 	register int j;
 
-	// �޸� ���
+	// 메모리 잡기
 	m_Pixels = new WORD* [m_Height];
 
 	for (int i=0; i<m_Height; i++)
 	{
-		// �ݺ� ȸ���� 2 byte
+		// 반복 회수의 2 byte
 		int	count = Sprite.m_Pixels[i][0], 
 				colorCount;
 		index	= 1;
 
-		// �� line���� byte���� ��� �����ؾ��Ѵ�.
+		// 각 line마다 byte수를 세어서 저장해야한다.
 		for (j=0; j<count; j++)
 		{
 			//transCount = m_Pixels[i][index];
 			colorCount = Sprite.m_Pixels[i][index+1];
 
-			index+=2;	// �� count ��ŭ
+			index+=2;	// 두 count 만큼
 
-			index += (colorCount<<1);	// ������ �ƴѰ͸�ŭ +				
+			index += (colorCount<<1);	// 투명색 아닌것만큼 +				
 		}
 
-		// �޸� ���
+		// 메모리 잡기
 		m_Pixels[i] = new WORD [index];
 		memcpy(m_Pixels[i], Sprite.m_Pixels[i], index<<1);
 	}
 
-	// ���� �Ϸ�
+	// 복사 완료
 	m_bInit = true;
 }
 
 //----------------------------------------------------------------------
-// CDirectDrawSurface�� (x,y)+(width, height)������ �о m_Pixels�� �����Ѵ�.
+// CDirectDrawSurface의 (x,y)+(width, height)영역을 읽어서 m_Pixels에 저장한다.
 //----------------------------------------------------------------------
-// m_Pixels�� 0�� ���� Format���� �ٲ۴�.
+// m_Pixels를 0번 압축 Format으로 바꾼다.
 //
-// �� line���� ������ ���� ������ ������.
+// 각 line마다 다음과 같은 구조를 가진다.
 //
-// [�ݺ���] (������,�����,(alpha,����)(alpha,����)....)(������,�����,(alpha,����)(alpha,����)....)........
+// [반복수] (투명수,색깔수,(alpha,색깔)(alpha,색깔)....)(투명수,색깔수,(alpha,색깔)(alpha,색깔)....)........
 //
-// �ݺ����� 2 bytes�̰�
-// �������� ������� ���� 2 byte�̰�
-// ������� ���� 2 bytes���̴�.
+// 반복수는 2 bytes이고
+// 투명수와 색깔수는 각각 2 byte이고
+// 색깔들은 각각 2 bytes씩이다.
 //
-// alpha���� 2byte�ε�
-// ���� 1byte�� ���� alpha��
-// ���� 1byte�� 32-alpha��
-// (�̷��� �ϴ� ������... 2byte�� ���ߴµ� 1byte�� ���ٺ���.. *_*)
+// alpha값은 2byte인데
+// 상위 1byte는 원래 alpha값
+// 하위 1byte는 32-alpha값
+// (이렇게 하는 이유는... 2byte씩 맞추는데 1byte가 남다보니.. *_*)
 //----------------------------------------------------------------------
-// Source���� ������ ������ �ϰ�
-// Filter�� Alpha������ �ؼ� �Բ� �����Ѵ�. 
+// Source에서 투명색 압축을 하고
+// Filter를 Alpha값으로 해서 함께 저장한다. 
 //----------------------------------------------------------------------
 void
 CAlphaSprite::SetPixel(WORD *pSource, WORD sourcePitch, 
 						WORD *pFilter, WORD filterPitch, 
 						WORD width, WORD height)
 {
-	// memory����
+	// memory해제
 	Release();
 
 	m_Width = width;
 	m_Height = height;
 
-	// �ϴ� memory�� ������ ��Ƶд�.	
+	// 일단 memory를 적당히 잡아둔다.	
 	WORD*	data = new WORD[m_Width*4+10];
 
-	int	index,				// data�� index�� ���
-			lastColorIndex;		// ������ �ƴѻ� ������ �ֱ� index
-	int	count;				// �ݺ���
-	int	trans,				// ������ ����
-			color;				// ������ �ƴѻ� ����
+	int	index,				// data의 index로 사용
+			lastColorIndex;		// 투명이 아닌색 개수의 최근 index
+	int	count;				// 반복수
+	int	trans,				// 투명색 개수
+			color;				// 투명이 아닌색 개수
 
-	BOOL	bCheckTrans;		// �ֱٿ� �˻��Ѱ� �������ΰ�?
+	BOOL	bCheckTrans;		// 최근에 검사한게 투명색인가?
 
 	WORD	*pSourceTemp, *pFilterTemp;
 
-	// height�� ��ŭ memory���
+	// height줄 만큼 memory잡기
 	m_Pixels = new WORD* [height];
 
 	for (register int i=0; i<height; i++)
@@ -193,22 +193,22 @@ CAlphaSprite::SetPixel(WORD *pSource, WORD sourcePitch,
 		pSourceTemp = pSource;
 		pFilterTemp = pFilter;
 
-		// �� line�� ���ؼ� ����~
+		// 각 line에 대해서 압축~
 		for (register int j=0; j<width; j++)
 		{
-			// 0�� color�� ���ؼ� ����			
+			// 0번 color에 대해서 압축			
 			if (*pSourceTemp==s_Colorkey)
-				// alpha���� 0�� ���� ���������� ���� �ɰ� ���Ҵµ�.. �Ҿ��ؼ�.. -_-;
-				//|| (*pFilterTemp & 0x001F)==0)	// 2002.3.26 �߰�
+				// alpha값이 0인 것은 투명색으로 봐도 될거 같았는데.. 불안해서.. -_-;
+				//|| (*pFilterTemp & 0x001F)==0)	// 2002.3.26 추가
 			{
-				// �ֱٿ� �˻��Ѱ� �������� �ƴϾ��ٸ�
+				// 최근에 검사한게 투명색이 아니었다면
 				if (!bCheckTrans)
 				{
-					// ' (����,�����,�����) '�� �� set�� �������� �ǹ��ϹǷ�
-					// ������� (alpha,�����)�� ������ �ǹ��Ѵ�.
+					// ' (투명,색깔수,색깔들) '의 한 set가 끝났음을 의미하므로
+					// 색깔들은 (alpha,색깔들)의 집합을 의미한다.
 					count++;
 					
-					// color���� ����
+					// color개수 저장
 					data[lastColorIndex] = color;
 					color = 0;
 
@@ -219,26 +219,26 @@ CAlphaSprite::SetPixel(WORD *pSource, WORD sourcePitch,
 			}
 			else
 			{
-				// �ֱٿ� �˻��Ѱ� �������̾��ٸ�..
+				// 최근에 검사한게 투명색이었다면..
 				if (bCheckTrans)
 				{						
-					data[index++] = trans;		// ���� byte�� �������� �ִ´�.
+					data[index++] = trans;		// 상위 byte에 투명수를 넣는다.
 					trans = 0;
 
-					lastColorIndex=index++;			// ������� ���� ��ġ�� ���					
+					lastColorIndex=index++;			// 색깔수를 넣을 위치를 기억					
 
 					bCheckTrans = FALSE;
 				}
 
-				// alpha�� �����
+				// alpha값 만들기
 				BYTE alpha;
 				WORD alpha2;				
-				alpha = (BYTE)(*pFilterTemp & 0x001F);	// Alpha��(Blue���� ���Ѵ�.)
+				alpha = (BYTE)(*pFilterTemp & 0x001F);	// Alpha값(Blue값을 택한다.)
 				alpha2 = (alpha << 8) | (32-alpha);	// (Alpha:32-Alpha)
 
-				// ����
-				data[index++] = alpha2;					// Alpha ���� �����Ѵ�.				
-				data[index++] = *pSourceTemp;			// ���� ������ �����Ѵ�.
+				// 저장
+				data[index++] = alpha2;					// Alpha 값을 저장한다.				
+				data[index++] = *pSourceTemp;			// 실제 색깔을 저장한다.
 
 				color++;								
 			}
@@ -247,23 +247,23 @@ CAlphaSprite::SetPixel(WORD *pSource, WORD sourcePitch,
 			pFilterTemp++;
 		}
 		
-		// �� ���� ������ ���� �������ΰ�?
+		// 한 줄의 마지막 점이 투명색인가?
 		if (bCheckTrans)
 		{
-			// �������̸� ���ٸ� ó���� �����൵ �ɰ� ����.
+			// 투명색이면 별다른 처리를 안해줘도 될거 같다.
 		}	
-		// �������� �ƴ� ���, ���� ������ ���������� �Ѵ�.
+		// 투명색이 아닌 경우, 점의 개수를 저장시켜줘야 한다.
 		else
 		{			
 			count++;
 			data[lastColorIndex] = color;
 		}
 		
-		// memory�� �ٽ� ��´�.
+		// memory를 다시 잡는다.
 		m_Pixels[i] = new WORD [index+1];
 
-		// m_Pixels[i]�� ���������Ƿ� data�� ��ü�Ѵ�.
-		// m_Pixels[i][0]���� count�� �־�� �Ѵ�.
+		// m_Pixels[i]를 압축했으므로 data로 대체한다.
+		// m_Pixels[i][0]에는 count를 넣어야 한다.
 		m_Pixels[i][0] = count;
 		memcpy(m_Pixels[i]+1, data, index<<1);
 
@@ -287,29 +287,29 @@ CAlphaSprite::Uncompress()
 //----------------------------------------------------------------------
 // Is ColorPixel ?
 //----------------------------------------------------------------------
-// Sprite�ȿ��� (x,y)�� ������ �ִ°�?(�������� �ƴ� ���)
+// Sprite안에서 (x,y)는 색깔이 있는가?(투명색이 아닌 경우)
 //----------------------------------------------------------------------
 bool		
 CAlphaSprite::IsColorPixel(short x, short y)
 {
-	// �ʱ�ȭ �� ���
+	// 초기화 된 경우
 	if (m_bInit)
 	{
-		// Sprite�� ������ ����� false
+		// Sprite의 영역을 벗어나면 false
 		if (x<0 || y<0 || x>=m_Width || y>=m_Height)
 			return false;
 
-		// y��° ��
+		// y번째 줄
 		WORD	*pPixels = m_Pixels[y];
 
-		// y��° ���� �ݺ� ��
+		// y번째 줄의 반복 수
 		int	count = *pPixels++;
 
 		int	transCount, 
 				colorCount,
 				index = 0;
 
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{			
 			register int i = count;
@@ -320,18 +320,18 @@ CAlphaSprite::IsColorPixel(short x, short y)
 
 				index += transCount;
 
-				// �̹� loop�ȿ� �����ϴ� ��
+				// 이번 loop안에 존재하는 점
 				if (x < index+colorCount)
 				{
-					// �������������� ���� ���
+					// 투명색까지보다 적은 경우
 					if (x < index)
 					{
 						int n = index - x;
 
-						// [pixel + alpha] * n ��ŭ ���� ���� �д´�.
+						// [pixel + alpha] * n 만큼 뒤의 점을 읽는다.
 						pPixels += n<<1;
 
-						// alpha���� �д´�.
+						// alpha값을 읽는다.
 						if ((*pPixels >> 8)!= 0)
 						{
 							return true;
@@ -340,7 +340,7 @@ CAlphaSprite::IsColorPixel(short x, short y)
 						return false;
 					}
 
-					// ���� ���Ѵ�.
+					// 색깔에 속한다.
 					return true;
 				}
 				
@@ -356,29 +356,29 @@ CAlphaSprite::IsColorPixel(short x, short y)
 //----------------------------------------------------------------------
 // Get Pixel ?
 //----------------------------------------------------------------------
-// Sprite�ȿ��� (x,y)�� ������ ��´�.(�������� �ƴ� ���)
+// Sprite안에서 (x,y)는 색깔을 얻는다.(투명색이 아닌 경우)
 //----------------------------------------------------------------------
 WORD		
 CAlphaSprite::GetPixel(int x, int y, int bColor) const
 {
-	// �ʱ�ȭ �� ���
+	// 초기화 된 경우
 	if (m_bInit)
 	{
-		// Sprite�� ������ ����� false
+		// Sprite의 영역을 벗어나면 false
 		if (x<0 || y<0 || x>=m_Width || y>=m_Height)
 			return 0;
 
-		// y��° ��
+		// y번째 줄
 		WORD	*pPixels = m_Pixels[y];
 
-		// y��° ���� �ݺ� ��
+		// y번째 줄의 반복 수
 		int	count = *pPixels++;
 
 		int	transCount, 
 				colorCount,
 				index = 0;
 
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{			
 			register int i = count;
@@ -389,17 +389,17 @@ CAlphaSprite::GetPixel(int x, int y, int bColor) const
 
 				index += transCount;
 
-				// �̹� loop�ȿ� �����ϴ� ��
+				// 이번 loop안에 존재하는 점
 				if (x < index+colorCount)
 				{
-					// �������������� ���� ���
+					// 투명색까지보다 적은 경우
 					if (x < index)
 					{
 						return 0;
 					}
 
-					// ���� ���Ѵ�.
-					// AlphaChannel���� �ֱ� ������...
+					// 색깔에 속한다.
+					// AlphaChannel값이 있기 때문에...
 					return pPixels[((x-index)<<1)+bColor];
 				}
 				
@@ -415,10 +415,10 @@ CAlphaSprite::GetPixel(int x, int y, int bColor) const
 //----------------------------------------------------------------------
 // AlphaChannel Copy
 //----------------------------------------------------------------------
-// Alpha�� : 1~32
+// Alpha값 : 1~32
 //----------------------------------------------------------------------
-// pSource�� ���� pDest�� ����� �ؾ��Ѵ�.
-// pSource�� ������ (alpha,���� �ϳ�)�� pixels��ŭ �ݺ��̴�.
+// pSource의 것을 pDest에 출력을 해야한다.
+// pSource의 구성은 (alpha,색깔 하나)의 pixels만큼 반복이다.
 //----------------------------------------------------------------------
 void	
 CAlphaSprite::memcpyAlpha(WORD* pDest, WORD* pSource, WORD pixels)
@@ -432,14 +432,14 @@ CAlphaSprite::memcpyAlpha(WORD* pDest, WORD* pSource, WORD pixels)
 	BYTE alpha;
 
 	// Alpha Channel Blending
-	// ������ ���
+	// 한점씩 찍기
 	while (i--)
 	{	
-		// Source���� Alpha���� ���ԵǾ� �ִ�.
+		// Source에는 Alpha값이 포함되어 있다.
 		alpha = *pSource >> 8;
 		pSource++;
 
-		// ���� ���
+		// 한점 찍기
 		sTemp = *pSource;
 		dTemp = *pDest;
 
@@ -456,7 +456,7 @@ CAlphaSprite::memcpyAlpha(WORD* pDest, WORD* pSource, WORD pixels)
 					(((sr - dr)*alpha >> 5) + dr) << ColorDraw::s_bSHIFT_R);
 	
 		/*
-		// ��... �̰� �� ������.. �� �׷���.. - -;;;
+		// 잉... 이게 더 느리다.. 왜 그렇지.. - -;;;
 		temp = sb-db;
 		temp *= alpha;
 		temp >>= 5;
@@ -491,12 +491,12 @@ CAlphaSprite::memcpyAlpha(WORD* pDest, WORD* pSource, WORD pixels)
 //----------------------------------------------------------------------
 // AlphaChannel Copy  4444
 //----------------------------------------------------------------------
-// Alpha�� : 1~32
+// Alpha값 : 1~32
 //----------------------------------------------------------------------
-// pSource�� ���� pDest�� ����� �ؾ��Ѵ�.
-// pSource�� ������ (alpha,���� �ϳ�)�� pixels��ŭ �ݺ��̴�.
+// pSource의 것을 pDest에 출력을 해야한다.
+// pSource의 구성은 (alpha,색깔 하나)의 pixels만큼 반복이다.
 //
-// A:R:G:B = 4:4:4:4 Texture�� ���� ���̴�.
+// A:R:G:B = 4:4:4:4 Texture를 위한 것이다.
 //----------------------------------------------------------------------
 void	
 CAlphaSprite::memcpyAlpha4444(WORD* pDest, WORD* pSource, WORD pixels)
@@ -510,14 +510,14 @@ CAlphaSprite::memcpyAlpha4444(WORD* pDest, WORD* pSource, WORD pixels)
 	BYTE alpha;
 
 	// Alpha Channel Blending
-	// ������ ���
+	// 한점씩 찍기
 	while (i--)
 	{	
-		// Source���� Alpha���� ���ԵǾ� �ִ�.
+		// Source에는 Alpha값이 포함되어 있다.
 		alpha = *pSource >> 9;	//	alpha = (*pSource >> 8) >> 1;
 		pSource++;
 
-		// ���� ���
+		// 한점 찍기
 		sTemp = *pSource;
 	
 		sr = (sTemp >> ColorDraw::s_bSHIFT4_R);// & 0x0F;
@@ -537,7 +537,7 @@ CAlphaSprite::memcpyAlpha4444(WORD* pDest, WORD* pSource, WORD pixels)
 //----------------------------------------------------------------------
 // BltClip
 //----------------------------------------------------------------------
-// pRect�� ������ ����Ѵ�.
+// pRect의 영역만 출력한다.
 //----------------------------------------------------------------------
 void
 CAlphaSprite::BltClip(WORD* pDest, WORD pitch, RECT* pRect)
@@ -546,13 +546,13 @@ CAlphaSprite::BltClip(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------	
-	// ù �� (x,y)
+	// 첫 점 (x,y)
 	//--------------------------------------------
 	pDest = (WORD*)((BYTE*)pDest + pitch*pRect->top + pRect->left);
 	//WORD width = ((pRect->right - pRect->left)<<1);
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -571,56 +571,56 @@ CAlphaSprite::BltClip(WORD* pDest, WORD pitch, RECT* pRect)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���
+		// 한 줄 출력
 		bPut = (pRect->left==0)? TRUE:FALSE;
 		index = 0;
 			
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxxOOOOOOOOOOOOOO �̰ų�  (x:��¾���, O:�����)
-		// OOOOOOOOOOOOOOxxxxx �̰�.. �� ���� ����.			
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxxOOOOOOOOOOOOOO 이거나  (x:출력안함, O:출력함)
+		// OOOOOOOOOOOOOOxxxxx 이거.. 두 가지 경우다.			
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{				
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ �ǳ� �ڴ�.
+				// 투명색만큼 건너 뛴다.
 				//lpSurfaceTemp += transCount;
 				index += transCount;
 
-				// ����ص� �Ǵ� ��쿡�� ����Ѵ�.
+				// 출력해도 되는 경우에는 출력한다.
 				if (bPut)
 				{
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 					if (index > pRect->right)
 						break;
 
 					pDestTemp += transCount;
 
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					// 투명색 아닌 것을 조금 출력해야 할 경우
 					if (index+colorCount > pRect->right)
 					{							
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						memcpyAlpha(pDestTemp, pPixels, pRect->right - index);
 						break;
 					}						
 
-					// ��� ���
+					// 모두 출력
 					memcpyAlpha(pDestTemp, pPixels, colorCount);
 					pDestTemp += colorCount;
 				}				
-				// ����ϸ� �� �� ���(���� ���ʺκ�)���� ����ص� �Ǵ��� Ȯ���غ���.
+				// 출력하면 안 될 경우(줄의 왼쪽부분)에는 출력해도 되는지 확인해본다.
 				else
 				{
-					// ������������ ������ �Ѿ���Ƿ� ��� ���
+					// 투명색만으로 범위를 넘어갔으므로 모두 출력
 					if (index > pRect->left)
 					{	
 						pDestTemp += index - pRect->left;
@@ -633,16 +633,16 @@ CAlphaSprite::BltClip(WORD* pDest, WORD pitch, RECT* pRect)
 					{
 						dist = pRect->left - index;
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						memcpyAlpha(pDestTemp, pPixels+dist, colorCount-dist);
 						pDestTemp += colorCount-dist;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						bPut = TRUE;
 					}
 				}				
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += (colorCount<<1);		
 
 				index += colorCount;
@@ -656,7 +656,7 @@ CAlphaSprite::BltClip(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // Blt
 //----------------------------------------------------------------------
-// Clipping���� �ʴ´�.
+// Clipping하지 않는다.
 //----------------------------------------------------------------------
 void
 CAlphaSprite::Blt(WORD *pDest, WORD pitch)
@@ -681,24 +681,24 @@ CAlphaSprite::Blt(WORD *pDest, WORD pitch)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,�����,�����)�� �ݺ� ��		
+			// (투명수,색깔수,색깔들)의 반복 수		
 			count	= *pPixels++;		
 
-			// �� �� ���
+			// 한 줄 출력
 			if (count > 0)
 			{			
 				j = count;
 				do
 				{
-					pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+					pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+					colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					memcpyAlpha(pDestTemp, pPixels, colorCount);
 					
 					pDestTemp	+= colorCount;
 
-					// ���� �� ������ alpha�� ������ 2���̴�.
+					// 실제 점 개수는 alpha값 때문에 2배이다.
 					pPixels		+= (colorCount<<1);
 				} while (--j);
 			}
@@ -711,8 +711,8 @@ CAlphaSprite::Blt(WORD *pDest, WORD pitch)
 //----------------------------------------------------------------------
 // Blt ClipLeft
 //----------------------------------------------------------------------
-// ���� clipping.  
-// rectLeft���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
+// 왼쪽 clipping.  
+// rectLeft개의 점을 건너띈 다음부터 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CAlphaSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
@@ -721,7 +721,7 @@ CAlphaSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -736,99 +736,99 @@ CAlphaSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 	int rectLeft = pRect->left;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	for (int i=pRect->top; i<rectBottom; i++)
 	{
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						memcpyAlpha(pDestTemp, pPixels, colorCount);
 						pDestTemp += colorCount;
 						pPixels += (colorCount<<1);
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = rectLeft - index;
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						memcpyAlpha(pDestTemp, pPixels+(dist<<1), colorCount-dist);
 						pDestTemp += colorCount-dist;
 						pPixels += (colorCount<<1);
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += (colorCount<<1);
 				index += colorCount;
 			} while (--j);
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			// 이제부터는 계속 출력한다.		
 			//---------------------------------------------		
 			if (--j > 0)
 			{
 				do
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ �ǳ� �ڴ�.
+					// 투명색만큼 건너 뛴다.
 					pDestTemp += transCount;			
 					
-					// �������� �ƴѸ�ŭ ������ش�.
+					// 투명색이 아닌만큼 출력해준다.
 					memcpyAlpha(pDestTemp, pPixels, colorCount);
 
-					// memory addr ����
+					// memory addr 증가
 					pDestTemp += colorCount;
 					pPixels += (colorCount<<1);
 				} while (--j);
@@ -843,8 +843,8 @@ CAlphaSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // Blt ClipRight
 //----------------------------------------------------------------------
-// ������ clipping.  
-// rectRight�� ������ ���� pDest�� ����Ѵ�.
+// 오른쪽 clipping.  
+// rectRight개 까지의 점만 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CAlphaSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
@@ -853,7 +853,7 @@ CAlphaSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -871,60 +871,60 @@ CAlphaSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		// 각 줄마다 Clipping을 해줘야 하는데...		
+		// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 		//---------------------------------------------
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����
+				// 투명색만큼 index증가
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+				// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 				//---------------------------------------------
-				// ������ ������ �������� ���
+				// 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+colorCount > rectRight)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					// 투명색만으로 더 출력할 필요가 없을 때
 					if (index > rectRight)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					// 투명색 아닌 것을 조금 출력해야 할 경우
 					else
 					{
 						pDestTemp += transCount;
 					
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						memcpyAlpha(pDestTemp, pPixels, rectRight - index);
 						break;
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				// 투명색만큼 건너띄고
 				pDestTemp += transCount;
 
-				// ���
+				// 출력
 				memcpyAlpha(pDestTemp, pPixels, colorCount);
 				pDestTemp += colorCount;
 				pPixels += (colorCount<<1);
@@ -939,9 +939,9 @@ CAlphaSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // Blt ClipWidth
 //----------------------------------------------------------------------
-// ���� clipping.  
-// rectLeft���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
-// rectRight����..
+// 왼쪽 clipping.  
+// rectLeft개의 점을 건너띈 다음부터 pDest에 출력한다.
+// rectRight까지..
 //----------------------------------------------------------------------
 void
 CAlphaSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
@@ -950,7 +950,7 @@ CAlphaSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -966,56 +966,56 @@ CAlphaSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 	int rectRight = pRect->right;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	for (int i=pRect->top; i<rectBottom; i++)
 	{
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// �̹� �ܰ�� ��� ���
-						// ������ ���� �Ѿ�� ���..
+						// 이번 단계는 모두 출력
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > rectRight)
 						{							
-							// ������������ ������ �� �Ѿ�� ���
+							// 투명색만으로 오른쪽 끝 넘어가는 경우
 							if (index > rectRight)
 							{
 							}
@@ -1034,19 +1034,19 @@ CAlphaSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 						pPixels += (colorCount<<1);
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = rectLeft - index;
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
-						// ������ ���� �Ѿ�� ���..
+						// 투명이 아닌 색들을 Surface에 출력한다.
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > rectRight)
 						{
 							memcpyAlpha(pDestTemp, pPixels+(dist<<1), (rectRight - rectLeft));
@@ -1059,62 +1059,62 @@ CAlphaSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 						pPixels += (colorCount<<1);
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += (colorCount<<1);
 				index += colorCount;
 			} while (--j);
 
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			// 각 줄마다 Clipping을 해줘야 하는데...		
+			// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����
+					// 투명색만큼 index증가
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 					//---------------------------------------------
-					// ������ ������ �������� ���
+					// 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						// 투명색만으로 더 출력할 필요가 없을 때
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						// 투명색 아닌 것을 조금 출력해야 할 경우
 						else
 						{
 							pDestTemp += transCount;
 						
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							memcpyAlpha(pDestTemp, pPixels, rectRight - index);
 							break;
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					// 투명색만큼 건너띄고
 					pDestTemp += transCount;
 
-					// ���
+					// 출력
 					memcpyAlpha(pDestTemp, pPixels, colorCount);
 					pDestTemp += colorCount;
 					pPixels += (colorCount<<1);
@@ -1130,7 +1130,7 @@ CAlphaSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // Blt Clip Height
 //----------------------------------------------------------------------
-// pRect->top, rectBottom��ŭ�� ����Ѵ�.
+// pRect->top, rectBottom만큼만 출력한다.
 //----------------------------------------------------------------------
 void
 CAlphaSprite::BltClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
@@ -1152,20 +1152,20 @@ CAlphaSprite::BltClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		// (투명수,색깔수,색깔들)의 반복 수		
 		count	= *pPixels++;		
 
-		// �� �� ���
-		// �� �� ���
+		// 한 줄 출력
+		// 한 줄 출력
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{
-				pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+				pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+				colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-				// ������ �ƴ� ������ Surface�� ����Ѵ�.
+				// 투명이 아닌 색들을 Surface에 출력한다.
 				memcpyAlpha(pDestTemp, pPixels, colorCount);
 				
 				pDestTemp	+= colorCount;
@@ -1180,7 +1180,7 @@ CAlphaSprite::BltClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // Blt4444
 //----------------------------------------------------------------------
-// Clipping���� �ʴ´�.
+// Clipping하지 않는다.
 //----------------------------------------------------------------------
 void
 CAlphaSprite::Blt4444(WORD *pDest, WORD pitch)
@@ -1206,25 +1206,25 @@ CAlphaSprite::Blt4444(WORD *pDest, WORD pitch)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,�����,�����)�� �ݺ� ��		
+			// (투명수,색깔수,색깔들)의 반복 수		
 			count	= *pPixels++;		
 
-			// �� �� ���
-			// �� �� ���
+			// 한 줄 출력
+			// 한 줄 출력
 			if (count > 0)
 			{			
 				j = count;
 				do
 				{				
-					pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+					pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+					colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					memcpyAlpha4444(pDestTemp, pPixels, colorCount);
 					
 					pDestTemp	+= colorCount;
 
-					// ���� �� ������ alpha�� ������ 2���̴�.
+					// 실제 점 개수는 alpha값 때문에 2배이다.
 					pPixels		+= (colorCount<<1);
 				} while (--j);
 			}
@@ -1237,8 +1237,8 @@ CAlphaSprite::Blt4444(WORD *pDest, WORD pitch)
 //----------------------------------------------------------------------
 // Blt4444 ClipLeft
 //----------------------------------------------------------------------
-// ���� clipping.  
-// rectLeft���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
+// 왼쪽 clipping.  
+// rectLeft개의 점을 건너띈 다음부터 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CAlphaSprite::Blt4444ClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
@@ -1247,7 +1247,7 @@ CAlphaSprite::Blt4444ClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -1262,99 +1262,99 @@ CAlphaSprite::Blt4444ClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 	int rectLeft = pRect->left;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	for (int i=pRect->top; i<rectBottom; i++)
 	{
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						memcpyAlpha4444(pDestTemp, pPixels, colorCount);
 						pDestTemp += colorCount;
 						pPixels += (colorCount<<1);
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = rectLeft - index;
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						memcpyAlpha4444(pDestTemp, pPixels+(dist<<1), colorCount-dist);
 						pDestTemp += colorCount-dist;
 						pPixels += (colorCount<<1);
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += (colorCount<<1);
 				index += colorCount;
 			} while (--j);
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			// 이제부터는 계속 출력한다.		
 			//---------------------------------------------		
 			if (--j > 0)
 			{
 				do
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ �ǳ� �ڴ�.
+					// 투명색만큼 건너 뛴다.
 					pDestTemp += transCount;			
 					
-					// �������� �ƴѸ�ŭ ������ش�.
+					// 투명색이 아닌만큼 출력해준다.
 					memcpyAlpha4444(pDestTemp, pPixels, colorCount);
 
-					// memory addr ����
+					// memory addr 증가
 					pDestTemp += colorCount;
 					pPixels += (colorCount<<1);
 				} while (--j);
@@ -1369,8 +1369,8 @@ CAlphaSprite::Blt4444ClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // Blt4444 ClipRight
 //----------------------------------------------------------------------
-// ������ clipping.  
-// rectRight�� ������ ���� pDest�� ����Ѵ�.
+// 오른쪽 clipping.  
+// rectRight개 까지의 점만 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CAlphaSprite::Blt4444ClipRight(WORD* pDest, WORD pitch, RECT* pRect)
@@ -1379,7 +1379,7 @@ CAlphaSprite::Blt4444ClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -1397,60 +1397,60 @@ CAlphaSprite::Blt4444ClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		// 각 줄마다 Clipping을 해줘야 하는데...		
+		// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 		//---------------------------------------------
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����
+				// 투명색만큼 index증가
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+				// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 				//---------------------------------------------
-				// ������ ������ �������� ���
+				// 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+colorCount > rectRight)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					// 투명색만으로 더 출력할 필요가 없을 때
 					if (index > rectRight)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					// 투명색 아닌 것을 조금 출력해야 할 경우
 					else
 					{
 						pDestTemp += transCount;
 					
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						memcpyAlpha4444(pDestTemp, pPixels, rectRight - index);
 						break;
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				// 투명색만큼 건너띄고
 				pDestTemp += transCount;
 
-				// ���
+				// 출력
 				memcpyAlpha4444(pDestTemp, pPixels, colorCount);
 				pDestTemp += colorCount;
 				pPixels += (colorCount<<1);
@@ -1465,9 +1465,9 @@ CAlphaSprite::Blt4444ClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // Blt4444 ClipWidth
 //----------------------------------------------------------------------
-// ���� clipping.  
-// rectLeft���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
-// rectRight����..
+// 왼쪽 clipping.  
+// rectLeft개의 점을 건너띈 다음부터 pDest에 출력한다.
+// rectRight까지..
 //----------------------------------------------------------------------
 void
 CAlphaSprite::Blt4444ClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
@@ -1476,7 +1476,7 @@ CAlphaSprite::Blt4444ClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -1492,130 +1492,130 @@ CAlphaSprite::Blt4444ClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 	int rectRight = pRect->right;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	for (int i=pRect->top; i<rectBottom; i++)
 	{
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						memcpyAlpha4444(pDestTemp, pPixels, colorCount);
 						pDestTemp += colorCount;
 						pPixels += (colorCount<<1);
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = rectLeft - index;
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						memcpyAlpha4444(pDestTemp, pPixels+(dist<<1), colorCount-dist);
 						pDestTemp += colorCount-dist;
 						pPixels += (colorCount<<1);
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += (colorCount<<1);
 				index += colorCount;
 			} while (--j);
 
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			// 각 줄마다 Clipping을 해줘야 하는데...		
+			// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����
+					// 투명색만큼 index증가
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 					//---------------------------------------------
-					// ������ ������ �������� ���
+					// 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						// 투명색만으로 더 출력할 필요가 없을 때
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						// 투명색 아닌 것을 조금 출력해야 할 경우
 						else
 						{
 							pDestTemp += transCount;
 						
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							memcpyAlpha4444(pDestTemp, pPixels, rectRight - index);
 							break;
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					// 투명색만큼 건너띄고
 					pDestTemp += transCount;
 
-					// ���
+					// 출력
 					memcpyAlpha4444(pDestTemp, pPixels, colorCount);
 					pDestTemp += colorCount;
 					pPixels += (colorCount<<1);
@@ -1631,7 +1631,7 @@ CAlphaSprite::Blt4444ClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // Blt4444 Clip Height
 //----------------------------------------------------------------------
-// pRect->top, rectBottom��ŭ�� ����Ѵ�.
+// pRect->top, rectBottom만큼만 출력한다.
 //----------------------------------------------------------------------
 void
 CAlphaSprite::Blt4444ClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
@@ -1653,20 +1653,20 @@ CAlphaSprite::Blt4444ClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		// (투명수,색깔수,색깔들)의 반복 수		
 		count	= *pPixels++;		
 
-		// �� �� ���
-		// �� �� ���
+		// 한 줄 출력
+		// 한 줄 출력
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{	
-				pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+				pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+				colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-				// ������ �ƴ� ������ Surface�� ����Ѵ�.
+				// 투명이 아닌 색들을 Surface에 출력한다.
 				memcpyAlpha4444(pDestTemp, pPixels, colorCount);
 				
 				pDestTemp	+= colorCount;
@@ -1682,7 +1682,7 @@ CAlphaSprite::Blt4444ClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // Blt4444NotTrans
 //----------------------------------------------------------------------
-// Clipping���� �ʴ´�.
+// Clipping하지 않는다.
 //----------------------------------------------------------------------
 void
 CAlphaSprite::Blt4444NotTrans(WORD *pDest, WORD pitch)
@@ -1709,28 +1709,28 @@ CAlphaSprite::Blt4444NotTrans(WORD *pDest, WORD pitch)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,�����,�����)�� �ݺ� ��		
+			// (투명수,색깔수,색깔들)의 반복 수		
 			count	= *pPixels++;		
 
-			// �� �� ���
+			// 한 줄 출력
 			if (count > 0)
 			{			
 				j = count;
 				do
 				{		
 					transCount = *pPixels++;					
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+					colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-					// 0�� ����Ѵ�.
+					// 0을 출력한다.
 					memset(pDestTemp, 0, transCount<<1);
-					pDestTemp += transCount;		// ��������ŭ �ǳ� �ڴ�.
+					pDestTemp += transCount;		// 투명색만큼 건너 뛴다.
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					memcpyAlpha4444(pDestTemp, pPixels, colorCount);
 					
 					pDestTemp	+= colorCount;
 
-					// ���� �� ������ alpha�� ������ 2���̴�.
+					// 실제 점 개수는 alpha값 때문에 2배이다.
 					pPixels		+= (colorCount<<1);
 				} while (--j);
 			}
@@ -1743,8 +1743,8 @@ CAlphaSprite::Blt4444NotTrans(WORD *pDest, WORD pitch)
 //----------------------------------------------------------------------
 // Blt4444NotTrans ClipLeft
 //----------------------------------------------------------------------
-// ���� clipping.  
-// rectLeft���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
+// 왼쪽 clipping.  
+// rectLeft개의 점을 건너띈 다음부터 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CAlphaSprite::Blt4444NotTransClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
@@ -1753,7 +1753,7 @@ CAlphaSprite::Blt4444NotTransClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -1768,103 +1768,103 @@ CAlphaSprite::Blt4444NotTransClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 	int rectLeft = pRect->left;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	for (int i=pRect->top; i<rectBottom; i++)
 	{
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��							
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수							
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
-						// 0�� ����Ѵ�.
+						// 투명색부분 건너띔
+						// 0을 출력한다.
 						transCount = index - rectLeft;
 						memset(pDestTemp, 0, transCount<<1);
-						pDestTemp += transCount;		// ��������ŭ �ǳ� �ڴ�.
+						pDestTemp += transCount;		// 투명색만큼 건너 뛴다.
 						
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						memcpyAlpha4444(pDestTemp, pPixels, colorCount);
 						pDestTemp += colorCount;
 						pPixels += (colorCount<<1);
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = rectLeft - index;
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						memcpyAlpha4444(pDestTemp, pPixels+(dist<<1), colorCount-dist);
 						pDestTemp += colorCount-dist;
 						pPixels += (colorCount<<1);
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += (colorCount<<1);
 				index += colorCount;
 			} while (--j);
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			// 이제부터는 계속 출력한다.		
 			//---------------------------------------------		
 			if (--j > 0)
 			{
 				do
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// 0�� ����Ѵ�.
+					// 0을 출력한다.
 					memset(pDestTemp, 0, transCount<<1);
-					pDestTemp += transCount;		// ��������ŭ �ǳ� �ڴ�.
+					pDestTemp += transCount;		// 투명색만큼 건너 뛴다.
 					
-					// �������� �ƴѸ�ŭ ������ش�.
+					// 투명색이 아닌만큼 출력해준다.
 					memcpyAlpha4444(pDestTemp, pPixels, colorCount);
 
-					// memory addr ����
+					// memory addr 증가
 					pDestTemp += colorCount;
 					pPixels += (colorCount<<1);
 				} while (--j);
@@ -1879,8 +1879,8 @@ CAlphaSprite::Blt4444NotTransClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // Blt4444NotTrans ClipRight
 //----------------------------------------------------------------------
-// ������ clipping.  
-// rectRight�� ������ ���� pDest�� ����Ѵ�.
+// 오른쪽 clipping.  
+// rectRight개 까지의 점만 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CAlphaSprite::Blt4444NotTransClipRight(WORD* pDest, WORD pitch, RECT* pRect)
@@ -1889,7 +1889,7 @@ CAlphaSprite::Blt4444NotTransClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -1907,63 +1907,63 @@ CAlphaSprite::Blt4444NotTransClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		// 각 줄마다 Clipping을 해줘야 하는데...		
+		// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 		//---------------------------------------------
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����
+				// 투명색만큼 index증가
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+				// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 				//---------------------------------------------
-				// ������ ������ �������� ���
+				// 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+colorCount > rectRight)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					// 투명색만으로 더 출력할 필요가 없을 때
 					if (index > rectRight)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					// 투명색 아닌 것을 조금 출력해야 할 경우
 					else
 					{
-						// 0�� ����Ѵ�.
+						// 0을 출력한다.
 						memset(pDestTemp, 0, transCount<<1);
-						pDestTemp += transCount;		// ��������ŭ �ǳ� �ڴ�.
+						pDestTemp += transCount;		// 투명색만큼 건너 뛴다.
 					
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						memcpyAlpha4444(pDestTemp, pPixels, rectRight - index);
 						break;
 					}
 				}
 
-				// 0�� ����Ѵ�.
+				// 0을 출력한다.
 				memset(pDestTemp, 0, transCount<<1);
-				pDestTemp += transCount;		// ��������ŭ �ǳ� �ڴ�.
+				pDestTemp += transCount;		// 투명색만큼 건너 뛴다.
 
-				// ���
+				// 출력
 				memcpyAlpha4444(pDestTemp, pPixels, colorCount);
 				pDestTemp += colorCount;
 				pPixels += (colorCount<<1);
@@ -1978,9 +1978,9 @@ CAlphaSprite::Blt4444NotTransClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // Blt4444NotTrans ClipWidth
 //----------------------------------------------------------------------
-// ���� clipping.  
-// rectLeft���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
-// rectRight����..
+// 왼쪽 clipping.  
+// rectLeft개의 점을 건너띈 다음부터 pDest에 출력한다.
+// rectRight까지..
 //----------------------------------------------------------------------
 void
 CAlphaSprite::Blt4444NotTransClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
@@ -1989,7 +1989,7 @@ CAlphaSprite::Blt4444NotTransClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -2005,135 +2005,135 @@ CAlphaSprite::Blt4444NotTransClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 	int rectRight = pRect->right;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	for (int i=pRect->top; i<rectBottom; i++)
 	{
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
 						transCount = index - rectLeft;
-						// 0�� ����Ѵ�.
+						// 0을 출력한다.
 						memset(pDestTemp, 0, transCount<<1);
-						pDestTemp += transCount;		// ��������ŭ �ǳ� �ڴ�.
+						pDestTemp += transCount;		// 투명색만큼 건너 뛴다.
 
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						memcpyAlpha4444(pDestTemp, pPixels, colorCount);
 						pDestTemp += colorCount;
 						pPixels += (colorCount<<1);
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = rectLeft - index;
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						memcpyAlpha4444(pDestTemp, pPixels+(dist<<1), colorCount-dist);
 						pDestTemp += colorCount-dist;
 						pPixels += (colorCount<<1);
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += (colorCount<<1);
 				index += colorCount;
 			} while (--j);
 
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			// 각 줄마다 Clipping을 해줘야 하는데...		
+			// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����
+					// 투명색만큼 index증가
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 					//---------------------------------------------
-					// ������ ������ �������� ���
+					// 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						// 투명색만으로 더 출력할 필요가 없을 때
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						// 투명색 아닌 것을 조금 출력해야 할 경우
 						else
 						{
-							// 0�� ����Ѵ�.
+							// 0을 출력한다.
 							memset(pDestTemp, 0, transCount<<1);
-							pDestTemp += transCount;		// ��������ŭ �ǳ� �ڴ�.
+							pDestTemp += transCount;		// 투명색만큼 건너 뛴다.
 						
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							memcpyAlpha4444(pDestTemp, pPixels, rectRight - index);
 							break;
 						}
 					}
 
-					// 0�� ����Ѵ�.
+					// 0을 출력한다.
 					memset(pDestTemp, 0, transCount<<1);
-					pDestTemp += transCount;		// ��������ŭ �ǳ� �ڴ�.
+					pDestTemp += transCount;		// 투명색만큼 건너 뛴다.
 
-					// ���
+					// 출력
 					memcpyAlpha4444(pDestTemp, pPixels, colorCount);
 					pDestTemp += colorCount;
 					pPixels += (colorCount<<1);
@@ -2149,7 +2149,7 @@ CAlphaSprite::Blt4444NotTransClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // Blt4444NotTrans Clip Height
 //----------------------------------------------------------------------
-// pRect->top, rectBottom��ŭ�� ����Ѵ�.
+// pRect->top, rectBottom만큼만 출력한다.
 //----------------------------------------------------------------------
 void
 CAlphaSprite::Blt4444NotTransClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
@@ -2172,24 +2172,24 @@ CAlphaSprite::Blt4444NotTransClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		// (투명수,색깔수,색깔들)의 반복 수		
 		count	= *pPixels++;		
 
-		// �� �� ���
-		// �� �� ���
+		// 한 줄 출력
+		// 한 줄 출력
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{	
-				transCount = *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+				transCount = *pPixels++;		// 투명색만큼 건너 뛴다.
+				colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-				// 0�� ����Ѵ�.
+				// 0을 출력한다.
 				memset(pDestTemp, 0, transCount<<1);
-				pDestTemp += transCount;		// ��������ŭ �ǳ� �ڴ�.
+				pDestTemp += transCount;		// 투명색만큼 건너 뛴다.
 
-				// ������ �ƴ� ������ Surface�� ����Ѵ�.
+				// 투명이 아닌 색들을 Surface에 출력한다.
 				memcpyAlpha4444(pDestTemp, pPixels, colorCount);
 				
 				pDestTemp	+= colorCount;
@@ -2205,7 +2205,7 @@ CAlphaSprite::Blt4444NotTransClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // BltAlpha
 //----------------------------------------------------------------------
-// Clipping���� �ʴ´�.
+// Clipping하지 않는다.
 //----------------------------------------------------------------------
 void
 CAlphaSprite::BltAlpha(WORD *pDest, WORD pitch, BYTE alpha)
@@ -2232,24 +2232,24 @@ CAlphaSprite::BltAlpha(WORD *pDest, WORD pitch, BYTE alpha)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,�����,�����)�� �ݺ� ��		
+			// (투명수,색깔수,색깔들)의 반복 수		
 			count	= *pPixels++;		
 
-			// �� �� ���
+			// 한 줄 출력
 			if (count > 0)
 			{			
 				j = count;
 				do
 				{
-					pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+					pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+					colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					memcpyAlphaValue(pDestTemp, pPixels, colorCount);
 					
 					pDestTemp	+= colorCount;
 
-					// ���� �� ������ alpha�� ������ 2���̴�.
+					// 실제 점 개수는 alpha값 때문에 2배이다.
 					pPixels		+= (colorCount<<1);
 				} while (--j);
 			}
@@ -2262,8 +2262,8 @@ CAlphaSprite::BltAlpha(WORD *pDest, WORD pitch, BYTE alpha)
 //----------------------------------------------------------------------
 // BltAlpha ClipLeft
 //----------------------------------------------------------------------
-// ���� clipping.  
-// rectLeft���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
+// 왼쪽 clipping.  
+// rectLeft개의 점을 건너띈 다음부터 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CAlphaSprite::BltAlphaClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha)
@@ -2274,7 +2274,7 @@ CAlphaSprite::BltAlphaClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -2289,99 +2289,99 @@ CAlphaSprite::BltAlphaClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha)
 	int rectLeft = pRect->left;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	for (int i=pRect->top; i<rectBottom; i++)
 	{
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						memcpyAlphaValue(pDestTemp, pPixels, colorCount);
 						pDestTemp += colorCount;
 						pPixels += (colorCount<<1);
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = rectLeft - index;
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						memcpyAlphaValue(pDestTemp, pPixels+(dist<<1), colorCount-dist);
 						pDestTemp += colorCount-dist;
 						pPixels += (colorCount<<1);
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += (colorCount<<1);
 				index += colorCount;
 			} while (--j);
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			// 이제부터는 계속 출력한다.		
 			//---------------------------------------------		
 			if (--j > 0)
 			{
 				do
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ �ǳ� �ڴ�.
+					// 투명색만큼 건너 뛴다.
 					pDestTemp += transCount;			
 					
-					// �������� �ƴѸ�ŭ ������ش�.
+					// 투명색이 아닌만큼 출력해준다.
 					memcpyAlphaValue(pDestTemp, pPixels, colorCount);
 
-					// memory addr ����
+					// memory addr 증가
 					pDestTemp += colorCount;
 					pPixels += (colorCount<<1);
 				} while (--j);
@@ -2396,8 +2396,8 @@ CAlphaSprite::BltAlphaClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha)
 //----------------------------------------------------------------------
 // BltAlpha ClipRight
 //----------------------------------------------------------------------
-// ������ clipping.  
-// rectRight�� ������ ���� pDest�� ����Ѵ�.
+// 오른쪽 clipping.  
+// rectRight개 까지의 점만 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CAlphaSprite::BltAlphaClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha)
@@ -2408,7 +2408,7 @@ CAlphaSprite::BltAlphaClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -2426,60 +2426,60 @@ CAlphaSprite::BltAlphaClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		// 각 줄마다 Clipping을 해줘야 하는데...		
+		// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 		//---------------------------------------------
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����
+				// 투명색만큼 index증가
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+				// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 				//---------------------------------------------
-				// ������ ������ �������� ���
+				// 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+colorCount > rectRight)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					// 투명색만으로 더 출력할 필요가 없을 때
 					if (index > rectRight)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					// 투명색 아닌 것을 조금 출력해야 할 경우
 					else
 					{
 						pDestTemp += transCount;
 					
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						memcpyAlphaValue(pDestTemp, pPixels, rectRight - index);
 						break;
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				// 투명색만큼 건너띄고
 				pDestTemp += transCount;
 
-				// ���
+				// 출력
 				memcpyAlphaValue(pDestTemp, pPixels, colorCount);
 				pDestTemp += colorCount;
 				pPixels += (colorCount<<1);
@@ -2494,9 +2494,9 @@ CAlphaSprite::BltAlphaClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha
 //----------------------------------------------------------------------
 // BltAlpha ClipWidth
 //----------------------------------------------------------------------
-// ���� clipping.  
-// rectLeft���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
-// rectRight����..
+// 왼쪽 clipping.  
+// rectLeft개의 점을 건너띈 다음부터 pDest에 출력한다.
+// rectRight까지..
 //----------------------------------------------------------------------
 void
 CAlphaSprite::BltAlphaClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha)
@@ -2507,7 +2507,7 @@ CAlphaSprite::BltAlphaClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -2523,56 +2523,56 @@ CAlphaSprite::BltAlphaClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha
 	int rectRight = pRect->right;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	for (int i=pRect->top; i<rectBottom; i++)
 	{
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// �̹� �ܰ�� ��� ���
-						// ������ ���� �Ѿ�� ���..
+						// 이번 단계는 모두 출력
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > rectRight)
 						{							
-							// ������������ ������ �� �Ѿ�� ���
+							// 투명색만으로 오른쪽 끝 넘어가는 경우
 							if (index > rectRight)
 							{
 							}
@@ -2592,19 +2592,19 @@ CAlphaSprite::BltAlphaClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha
 						pPixels += (colorCount<<1);
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = rectLeft - index;
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
-						// ������ ���� �Ѿ�� ���..
+						// 투명이 아닌 색들을 Surface에 출력한다.
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > rectRight)
 						{
 							memcpyAlphaValue(pDestTemp, pPixels+(dist<<1), (rectRight - rectLeft));
@@ -2618,62 +2618,62 @@ CAlphaSprite::BltAlphaClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha
 						pPixels += (colorCount<<1);
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += (colorCount<<1);
 				index += colorCount;
 			} while (--j);
 
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			// 각 줄마다 Clipping을 해줘야 하는데...		
+			// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����
+					// 투명색만큼 index증가
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 					//---------------------------------------------
-					// ������ ������ �������� ���
+					// 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						// 투명색만으로 더 출력할 필요가 없을 때
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						// 투명색 아닌 것을 조금 출력해야 할 경우
 						else
 						{
 							pDestTemp += transCount;
 						
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							memcpyAlphaValue(pDestTemp, pPixels, rectRight - index);
 							break;
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					// 투명색만큼 건너띄고
 					pDestTemp += transCount;
 
-					// ���
+					// 출력
 					memcpyAlphaValue(pDestTemp, pPixels, colorCount);
 					pDestTemp += colorCount;
 					pPixels += (colorCount<<1);
@@ -2689,7 +2689,7 @@ CAlphaSprite::BltAlphaClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha
 //----------------------------------------------------------------------
 // BltAlpha Clip Height
 //----------------------------------------------------------------------
-// pRect->top, rectBottom��ŭ�� ����Ѵ�.
+// pRect->top, rectBottom만큼만 출력한다.
 //----------------------------------------------------------------------
 void
 CAlphaSprite::BltAlphaClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha)
@@ -2713,20 +2713,20 @@ CAlphaSprite::BltAlphaClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE alph
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		// (투명수,색깔수,색깔들)의 반복 수		
 		count	= *pPixels++;		
 
-		// �� �� ���
-		// �� �� ���
+		// 한 줄 출력
+		// 한 줄 출력
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{
-				pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+				pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+				colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-				// ������ �ƴ� ������ Surface�� ����Ѵ�.
+				// 투명이 아닌 색들을 Surface에 출력한다.
 				memcpyAlphaValue(pDestTemp, pPixels, colorCount);
 				
 				pDestTemp	+= colorCount;
@@ -2742,10 +2742,10 @@ CAlphaSprite::BltAlphaClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE alph
 //----------------------------------------------------------------------
 // AlphaChannel Copy
 //----------------------------------------------------------------------
-// Alpha�� : 1~32
+// Alpha값 : 1~32
 //----------------------------------------------------------------------
-// pSource�� ���� pDest�� ����� �ؾ��Ѵ�.
-// pSource�� ������ (alpha,���� �ϳ�)�� pixels��ŭ �ݺ��̴�.
+// pSource의 것을 pDest에 출력을 해야한다.
+// pSource의 구성은 (alpha,색깔 하나)의 pixels만큼 반복이다.
 //----------------------------------------------------------------------
 void	
 CAlphaSprite::memcpyAlphaValue(WORD* pDest, WORD* pSource, WORD pixels)
@@ -2759,14 +2759,14 @@ CAlphaSprite::memcpyAlphaValue(WORD* pDest, WORD* pSource, WORD pixels)
 	//BYTE alpha;
 
 	// Alpha Channel Blending
-	// ������ ���
+	// 한점씩 찍기
 	while (i--)
 	{	
-		// Source���� Alpha���� ���ԵǾ� �ִ�.
+		// Source에는 Alpha값이 포함되어 있다.
 		//alpha = *pSource >> 8;
 		pSource++;
 
-		// ���� ���
+		// 한점 찍기
 		sTemp = *pSource;
 		dTemp = *pDest;
 
@@ -2783,7 +2783,7 @@ CAlphaSprite::memcpyAlphaValue(WORD* pDest, WORD* pSource, WORD pixels)
 					((s_Value1 * (sr - dr) >> 5) + dr) << ColorDraw::s_bSHIFT_R);
 	
 		/*
-		// ��... �̰� �� ������.. �� �׷���.. - -;;;
+		// 잉... 이게 더 느리다.. 왜 그렇지.. - -;;;
 		temp = sb-db;
 		temp *= alpha;
 		temp >>= 5;
@@ -2817,21 +2817,21 @@ CAlphaSprite::memcpyAlphaValue(WORD* pDest, WORD* pSource, WORD pixels)
 //----------------------------------------------------------------------
 // Blt4444SmallNotTrans
 //----------------------------------------------------------------------
-// ����ؼ� ���.. 
-// Clipping���� �ʴ´�.
+// 축소해서 출력.. 
+// Clipping하지 않는다.
 //----------------------------------------------------------------------
-// shift�� ���ؼ� ���� ������ ���̴ٺ���
-// ���� ���̰� ���� ���� �Ǵµ�,
-// �װ� ��������� �Ѵ�.
-// ����� �� ������.. T_T;;
-// �ٿ��� ���̸� �ٽ� �ø���(-_-;)
-// ������ ���� ������ �� �� �ִ�.					
+// shift로 인해서 빠진 점들이 쌓이다보면
+// 길이 차이가 많이 나게 되는데,
+// 그걸 보정해줘야 한다.
+// 계산이 좀 많은데.. T_T;;
+// 줄여진 길이를 다시 늘리면(-_-;)
+// 부족한 점의 개수를 알 수 있다.					
 //----------------------------------------------------------------------
 void
 CAlphaSprite::Blt4444SmallNotTrans(WORD *pDest, WORD pitch, BYTE shift)
 {
 	s_Value1 = shift;
-	// memcpy���� �ϳ��� alpha���� �����ϰ� +�ϴ� ��
+	// memcpy에서 하나의 alpha값을 제외하고 +하는 값
 	s_Value2 = (2 << shift) - 1; //((1 << s_Value1) << 1) - 1;	
 
 
@@ -2856,7 +2856,7 @@ CAlphaSprite::Blt4444SmallNotTrans(WORD *pDest, WORD pitch, BYTE shift)
 	if (rectBottom > 0)
 	{
 		i = rectBottom-1;
-		int stepY = 1 << shift;		// y�� �ǳʶ�� pixel��
+		int stepY = 1 << shift;		// y줄 건너띄는 pixel수
 		pDest = (WORD*)((BYTE*)pDest + (i>>shift)*pitch);
 
 		do
@@ -2864,10 +2864,10 @@ CAlphaSprite::Blt4444SmallNotTrans(WORD *pDest, WORD pitch, BYTE shift)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,�����,�����)�� �ݺ� ��		
+			// (투명수,색깔수,색깔들)의 반복 수		
 			count	= *pPixels++;		
 
-			// �� �� ���
+			// 한 줄 출력
 			totalCount = 0;
 			totalShiftCount = 0;
 			if (count > 0)
@@ -2876,62 +2876,62 @@ CAlphaSprite::Blt4444SmallNotTrans(WORD *pDest, WORD pitch, BYTE shift)
 				do
 				{		
 					transCount = *pPixels++;					
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��	
+					colorCount = *pPixels++;		// 투명 아닌 색 수	
 					
 					//--------------------------------------------------
-					// shift��ŭ �ٿ��� ���� ����Ѵ�.
+					// shift만큼 줄여진 값을 계산한다.
 					//--------------------------------------------------
 					transCountShift = transCount >> shift;
 					colorCountShift = colorCount >> shift;
 
 					//--------------------------------------------------
-					//				���� �κ� ���� ����
+					//				투명 부분 길이 보정
 					//--------------------------------------------------
-					// ���� size�� pixel��..
+					// 실제 size의 pixel수..
 					//--------------------------------------------------
 					totalCount += transCount;
 					totalShiftCount += transCountShift;
 
-					// ����pixel - shift�ؼ� �ø� pixel(-_-;)
+					// 실제pixel - shift해서 늘린 pixel(-_-;)
 					pixelGap = totalCount - (totalShiftCount << shift);
 
-					// gap�� �ٽ� shift�ؼ� �����ش�.
+					// gap을 다시 shift해서 더해준다.
 					pixelGapShift = pixelGap >> shift;
 					transCountShift += pixelGapShift;
 					totalShiftCount += pixelGapShift;
 
 					
 					//--------------------------------------------------
-					// 0�� ����Ѵ�. �������̴�..
+					// 0을 출력한다. 투명색이다..
 					//--------------------------------------------------
 					memset(pDestTemp, 0, transCountShift<<1);
-					pDestTemp += transCountShift;		// ��������ŭ �ǳ� �ڴ�.
+					pDestTemp += transCountShift;		// 투명색만큼 건너 뛴다.
 
 
 					//--------------------------------------------------
-					//				���� �κ� ���� ����
+					//				색깔 부분 길이 보정
 					//--------------------------------------------------
-					// (!!!) �ٵ� ���⼭ ������ �ִ�.
-					// �������̾� �׳� �������ε�..
-					// ������ �ִ� �κп����� 
-					// �� ��� �� ���ߵ� ���..
-					// � ���� ����ұ�?? ��..
-					// �̴�ζ��.. 
-					// ������ ����ŭ �׳� �ǳʶ� ��.. ��..- -;
+					// (!!!) 근데 여기서 문제가 있다.
+					// 투명색이야 그냥 투명색인데..
+					// 색깔이 있는 부분에서는 
+					// 점 몇개를 더 찍어야될 경우..
+					// 어떤 점을 출력할까?? 흠..
+					// 이대로라면.. 
+					// 부족한 색깔만큼 그냥 건너띌 뿐.. 흠..- -;
 					//
-					// �׷���, �ϴ� ����.. - -;
+					// 그래서, 일단 제외.. - -;
 					//--------------------------------------------------
 					totalCount += colorCount;
 					totalShiftCount += colorCountShift;
 
 					//--------------------------------------------------
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					//--------------------------------------------------					
 					memcpyAlpha4444Small(pDestTemp, pPixels, colorCount);
 					
 					pDestTemp	+= colorCountShift;
 
-					// ���� �� ������ alpha�� ������ 2���̴�.
+					// 실제 점 개수는 alpha값 때문에 2배이다.
 					pPixels		+= (colorCount<<1);
 				} while (--j);
 			}
@@ -2948,12 +2948,12 @@ CAlphaSprite::Blt4444SmallNotTrans(WORD *pDest, WORD pitch, BYTE shift)
 //----------------------------------------------------------------------
 // AlphaChannel Copy  4444 Small
 //----------------------------------------------------------------------
-// Alpha�� : 1~32
+// Alpha값 : 1~32
 //----------------------------------------------------------------------
-// pSource�� ���� pDest�� ����� �ؾ��Ѵ�.
-// pSource�� ������ (alpha,���� �ϳ�)�� pixels��ŭ �ݺ��̴�.
+// pSource의 것을 pDest에 출력을 해야한다.
+// pSource의 구성은 (alpha,색깔 하나)의 pixels만큼 반복이다.
 //
-// A:R:G:B = 4:4:4:4 Texture�� ���� ���̴�.
+// A:R:G:B = 4:4:4:4 Texture를 위한 것이다.
 //----------------------------------------------------------------------
 void	
 CAlphaSprite::memcpyAlpha4444Small(WORD* pDest, WORD* pSource, WORD pixels)
@@ -2967,14 +2967,14 @@ CAlphaSprite::memcpyAlpha4444Small(WORD* pDest, WORD* pSource, WORD pixels)
 	BYTE alpha;
 	
 	// Alpha Channel Blending
-	// ������ ���
+	// 한점씩 찍기
 	while (i--)
 	{	
-		// Source���� Alpha���� ���ԵǾ� �ִ�.
-		alpha = *pSource >> 9;	//	alpha = (*pSource >> 8) >> 1;	4 bit�̱� ������..
+		// Source에는 Alpha값이 포함되어 있다.
+		alpha = *pSource >> 9;	//	alpha = (*pSource >> 8) >> 1;	4 bit이기 때문에..
 		pSource++;
 
-		// ���� ���
+		// 한점 찍기
 		sTemp = *pSource;
 	
 		sr = (sTemp >> ColorDraw::s_bSHIFT4_R);// & 0x0F;

@@ -18,7 +18,7 @@
 //-----------------------------------------------------------------------------
 // class C_VS_UI_DESC_DIALOG
 //
-// Item �Ǵ� Skill����
+// Item 또는 Skill설명
 //
 //-----------------------------------------------------------------------------
 class C_VS_UI_DESC_DIALOG : public Window, public C_VS_UI_DESC, public Exec, public ButtonVisual
@@ -83,7 +83,7 @@ public:
 //-----------------------------------------------------------------------------
 // class C_VS_UI_FILE_DIALOG
 //
-// file ����
+// file 선택
 //
 //-----------------------------------------------------------------------------
 class C_VS_UI_FILE_DIALOG : public Window, public Exec, public ButtonVisual
@@ -146,9 +146,9 @@ public:
 		MODE_SENDFILE_SELECT,
 	};
 
-	// �ش� ��ȣ�� ���� ���� ����
+	// 해당 번호에 대한 파일 추출
 	static const std::string GetFileNameInString(char *str,int n);
-	// �����̸����� ������ �� ����
+	// 파일이름에서 파일의 총 갯수
 	static int GetSizeFileInString(char *str);
 
 	C_VS_UI_FILE_DIALOG(MODE Mode = MODE_PROFILE_SELECT);
@@ -182,9 +182,9 @@ public:
 //-----------------------------------------------------------------------------
 // class C_VS_UI_EDIT_DIALOG
 //
-// Dialog box���� ��(digit only)�� �Է��� �� �ִ� dialog box�̴�.
+// Dialog box에서 값(digit only)을 입력할 수 있는 dialog box이다.
 //
-// ! �������� ������ ���ǻ�� �������� ����.
+// ! 상점에서 복수개 물건사기 전용으로 쓴다.
 //-----------------------------------------------------------------------------
 class C_VS_UI_EDIT_DIALOG : public C_VS_UI_DIALOG
 {
@@ -251,7 +251,7 @@ public:
 //-----------------------------------------------------------------------------
 // class C_VS_UI_MONEY_DIALOG
 //
-// ���� ������ dialog box�̴�.
+// 돈을 버리는 dialog box이다.
 //-----------------------------------------------------------------------------
 class C_VS_UI_MONEY_DIALOG : public C_VS_UI_DIALOG
 {
@@ -283,8 +283,8 @@ private:
 
 	Point							m_money_dialog_pt;
 
-	//static char *				m_sz_question_msg[1];	// �ּ�ó�� by sigi
-	//static char *				m_sz_question_msg_for_storage[1];	// �ּ�ó�� by sigi
+	//static char *				m_sz_question_msg[1];	// 주석처리 by sigi
+	//static char *				m_sz_question_msg_for_storage[1];	// 주석처리 by sigi
 	char *					m_sz_question_msg[MAX_MONEY_DIALOG_TYPE][1];		// by sigi
 
 	TYPE_MONEY_DIALOG		m_type;	// dialog type	 by sigi
@@ -292,7 +292,7 @@ private:
 	void	ScrollButton(bool up);
 
 public:
-	C_VS_UI_MONEY_DIALOG(int _x, int _y, int center_x, int center_y, void (*exec_fp)(C_VS_UI_DIALOG *, id_t), WORD dd_button, int digit_count, TYPE_MONEY_DIALOG type); // type �߰�  by sigi
+	C_VS_UI_MONEY_DIALOG(int _x, int _y, int center_x, int center_y, void (*exec_fp)(C_VS_UI_DIALOG *, id_t), WORD dd_button, int digit_count, TYPE_MONEY_DIALOG type); // type 추가  by sigi
 	~C_VS_UI_MONEY_DIALOG();
 
 	void	Start();
@@ -306,7 +306,7 @@ public:
 //-----------------------------------------------------------------------------
 // class C_VS_UI_ASK_DIALOG
 //
-// message������ OK/NO�� �����ϴ� dialog
+// message나오고 OK/NO를 선택하는 dialog
 //
 //-----------------------------------------------------------------------------
 class C_VS_UI_ASK_DIALOG : public C_VS_UI_DIALOG
@@ -327,11 +327,11 @@ public :
 		ASK_BRINGFEE_LIMIT,
 		ASK_TRANS_ITEM,
 		ASK_USE_PET_FOOD,
-		ASK_KEEP_PETITEM,		// ���� ���� �Ͻðڽ��ϱ�?
-		ASK_GET_KEEP_PETITEM,	// "%s ���� ã���ðڽ��ϱ�?";
-		ASK_USE_SMSITEM,		// sms item �� ����Ͻðڽ��ϱ�?
-		ASK_USE_NAMINGITEM,		// ���̹� �������� ��� �ϰڽ��ϱ�?
-		ASK_GET_EVENT_ITEM,		// �̺�Ʈ �������� �����ðڽ��ϱ�?
+		ASK_KEEP_PETITEM,		// 펫을 보관 하시겠습니까?
+		ASK_GET_KEEP_PETITEM,	// "%s 펫을 찾으시겠습니까?";
+		ASK_USE_SMSITEM,		// sms item 을 사용하시겠습니까?
+		ASK_USE_NAMINGITEM,		// 네이밍 아이템을 사용 하겠습니까?
+		ASK_GET_EVENT_ITEM,		// 이벤트 아이템을 받으시겠습니까?
 		//add by viva : ask_friend_request
 		ASK_FRIEND_REQUEST,
 		ASK_FRIEND_REFUSE,
@@ -370,7 +370,7 @@ public:
 //-----------------------------------------------------------------------------
 // class C_VS_UI_NPC_DIALOG
 //
-// DIALOG�� ������ NPC�� ������ ������ �ִ�.
+// DIALOG와 같으나 NPC의 사진을 넣을수 있다.
 //
 //-----------------------------------------------------------------------------
 class C_VS_UI_NPC_DIALOG : public C_VS_UI_DIALOG

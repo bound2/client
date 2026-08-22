@@ -2,7 +2,7 @@
 
 	VS_UI_mouse_pointer.h
 
-	Mouse pointer ����.
+	Mouse pointer 관련.
 
 	2000.3.30. KJTINC
 
@@ -45,7 +45,7 @@ private:
 	bool						Timer();
 
 	//
-	// ���� ����(Mouse pointer�� ����) Item.
+	// 현재 집은(Mouse pointer에 붙은) Item.
 	//
 	MItem *						m_p_current_pickup_item;
 

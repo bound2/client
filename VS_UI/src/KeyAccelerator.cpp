@@ -57,8 +57,8 @@ KeyAccelerator::Init( int max )
 //----------------------------------------------------------------------
 // Set AcceleratorKey ( accel, key )
 //----------------------------------------------------------------------
-// key�� ������ accel�� ����ȴ�..�� �ǹ�.
-// accel�� key�� ����Ǿ��ִ�..�� �ǹ̵� �ǰ�..
+// key를 누르면 accel이 실행된다..는 의미.
+// accel은 key와 연결되어있다..는 의미도 되고..
 //----------------------------------------------------------------------
 void
 KeyAccelerator::SetAcceleratorKey(BYTE accel, WORD key)
@@ -85,7 +85,7 @@ KeyAccelerator::SetAcceleratorKey(BYTE accel, WORD key)
 //----------------------------------------------------------------------
 // Get Accelerator ( key )
 //----------------------------------------------------------------------
-// Ȯ���� �� key�� �Էµ� ���
+// 확실히 그 key만 입력된 경우
 //----------------------------------------------------------------------
 BYTE
 KeyAccelerator::GetAccelerator(WORD key) const
@@ -103,14 +103,14 @@ KeyAccelerator::GetAccelerator(WORD key) const
 //----------------------------------------------------------------------
 // Get AcceleratorSimilar ( key )
 //----------------------------------------------------------------------
-// ctrl+I�� ������ ����Ǵ°�
-// ctrl+shift+I�� ������ ������ �ȵȴ�.
-// �̷� ��쿡�� ����ǰ� �ҷ���.. ����Ű�� �����ؼ� üũ�ؾ� �Ѵ�.
+// ctrl+I만 눌러서 실행되는게
+// ctrl+shift+I를 누르면 실행이 안된다.
+// 이런 경우에도 실행되게 할려면.. 조합키를 고려해서 체크해야 한다.
 //----------------------------------------------------------------------
 BYTE				
 KeyAccelerator::GetAcceleratorSimilar(WORD key) const
 {
-	// �Էµ� key
+	// 입력된 key
 	KEY_MAP::const_iterator iKey = m_Keys.find( key );
 
 	if (iKey!=m_Keys.end())
@@ -125,7 +125,7 @@ KeyAccelerator::GetAcceleratorSimilar(WORD key) const
 	int bHasShift	= ACCEL_HAS_SHIFT(key);
 
 	//------------------------------------------------------------
-	// ���� key�� ���� ���
+	// 눌린 key가 없는 경우
 	//------------------------------------------------------------
 //	if (!bHasControl && !bHasAlt && !bHasShift)
 //	{
@@ -133,7 +133,7 @@ KeyAccelerator::GetAcceleratorSimilar(WORD key) const
 //	}
 
 	//------------------------------------------------------------
-	// ctrl����
+	// ctrl제거
 	//------------------------------------------------------------
 	if (bHasControl)
 	{
@@ -143,7 +143,7 @@ KeyAccelerator::GetAcceleratorSimilar(WORD key) const
 	}
 
 	//------------------------------------------------------------
-	// alt����
+	// alt제거
 	//------------------------------------------------------------
 	if (bHasAlt)
 	{
@@ -153,7 +153,7 @@ KeyAccelerator::GetAcceleratorSimilar(WORD key) const
 	}
 
 	//------------------------------------------------------------
-	// shift����
+	// shift제거
 	//------------------------------------------------------------
 	if (bHasShift)
 	{
@@ -165,26 +165,26 @@ KeyAccelerator::GetAcceleratorSimilar(WORD key) const
 	WORD keyOnly = ACCEL_GET_KEY( key );
 
 	//------------------------------------------------------------
-	// ctrl + alt + shift �� ���
+	// ctrl + alt + shift 인 경우
 	//------------------------------------------------------------
 	if (bHasControl && bHasAlt && bHasShift)
 	{
 		//------------------------------------------------------------
-		// ctrl�� �����.
+		// ctrl만 남긴다.
 		//------------------------------------------------------------
 		checkKey = ACCEL_ADD_CONTROL( keyOnly );
 		iKey = m_Keys.find( checkKey );
 		if (iKey!=m_Keys.end())	return iKey->second;	
 
 		//------------------------------------------------------------
-		// alt�� �����
+		// alt만 남긴다
 		//------------------------------------------------------------
 		checkKey = ACCEL_ADD_ALT( keyOnly );
 		iKey = m_Keys.find( checkKey );
 		if (iKey!=m_Keys.end())	return iKey->second;		
 
 		//------------------------------------------------------------
-		// shift�� �����
+		// shift만 남긴다
 		//------------------------------------------------------------
 		checkKey = ACCEL_ADD_SHIFT( keyOnly );
 		iKey = m_Keys.find( checkKey );
@@ -192,7 +192,7 @@ KeyAccelerator::GetAcceleratorSimilar(WORD key) const
 	}
 
 	//------------------------------------------------------------
-	// �� ������ ���
+	// 다 제거한 경우
 	//------------------------------------------------------------
 	iKey = m_Keys.find( keyOnly );
 	if (iKey!=m_Keys.end())	return iKey->second;

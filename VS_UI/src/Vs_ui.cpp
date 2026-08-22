@@ -77,7 +77,7 @@ bool gbl_global_empty_move = false;
 //
 // g_interface_blink_tid
 //
-// Title/Game���� ���������� ����ϴ� blink timer.
+// Title/Game에서 범용적으로 사용하는 blink timer.
 //
 timer_id_t	g_interface_blink_tid = INVALID_TID;
 bool gbl_ask_go_biling_page_running;
@@ -135,8 +135,8 @@ void	ExecF_GoBilingPage(C_VS_UI_DIALOG *p_this_dialog, id_t id)
 
 /////////////////////////////////////////////////////////////////////////////////
 //
-// DI�� ������� ���� ���, ctrl+space bar�� ���� message�� �߻����� �ʱ� ������,
-// (�� �׷��� ���� ��) �ܺο��� DI�� message�� �޴´�.
+// DI를 사용하지 않을 경우, ctrl+space bar에 대한 message가 발생하지 않기 때문에,
+// (왜 그런지 아직 모름) 외부에서 DI의 message를 받는다.
 //
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -151,7 +151,7 @@ void C_VS_UI::HotKey_Mark()
 //	if (m_pC_game)
 //		m_pC_game->HotKey_WindowToggle();
 //}
-#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 	void C_VS_UI::HotKey_Inventory(bool IsCheckSubInventory)	
 	{
 		if (m_pC_game)
@@ -383,7 +383,7 @@ void C_VS_UI::HotKey_SummonPet()
 // PickUpItem
 //
 // Client -> UI
-// Item�� ������.
+// Item을 집었다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::PickUpItem(MItem * p_item, int item_x, int item_y)
 {
@@ -393,7 +393,7 @@ void C_VS_UI::PickUpItem(MItem * p_item, int item_x, int item_y)
 //-----------------------------------------------------------------------------
 // DropItem
 //
-// Item�� ���������� ����߷ȴ�.
+// Item을 성공적으로 떨어뜨렸다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::DropItem()
 {
@@ -403,7 +403,7 @@ void C_VS_UI::DropItem()
 //-----------------------------------------------------------------------------
 // Lock/Unlock Item
 //
-// Lock�Ǹ� Item ����/����/�ٲٱⰡ �Ұ���������. Unlock�� �װ��� �����Ѵ�.
+// Lock되면 Item 집기/놓기/바꾸기가 불가능해진다. Unlock은 그것을 해제한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::LockItem()
 {
@@ -420,8 +420,8 @@ void C_VS_UI::UnlockItem()
 //-----------------------------------------------------------------------------
 // Lock/Unlock item trade
 //
-// Item sell/buy interface�� ����ǰ��־ lock�Ǹ� ���������� '����'�� �Ұ���
-// ������.
+// Item sell/buy interface는 실행되고있어도 lock되면 실제적으로 '행위'가 불가능
+// 해진다.
 //-----------------------------------------------------------------------------
 void	C_VS_UI::LockItemTrade()
 {
@@ -454,7 +454,7 @@ void C_VS_UI::UnlockGear()
 
 /*-----------------------------------------------------------------------------
 - AddChatToHistory
-- Chat history�� str�� �߰��Ѵ�.
+- Chat history에 str을 추가한다.
 -----------------------------------------------------------------------------*/
 void C_VS_UI::AddChatToHistory(char * str, char * sz_id, CHAT_LINE_CONDITION condition, DWORD color)
 {
@@ -465,9 +465,9 @@ void C_VS_UI::AddChatToHistory(char * str, char * sz_id, CHAT_LINE_CONDITION con
 
 /*-----------------------------------------------------------------------------
 - ChangeToSlayerInterface
-- Slayer interface�� �ٲ۴�.
+- Slayer interface로 바꾼다.
 
-  ���� Interface�� free�Ѵ�.
+  이전 Interface는 free한다.
 -----------------------------------------------------------------------------*/
 void C_VS_UI::ChangeToSlayerInterface()
 {
@@ -481,7 +481,7 @@ void C_VS_UI::ChangeToSlayerInterface()
 
 /*-----------------------------------------------------------------------------
 - ChangeToVampireInterface
-- Vampire interface�� �ٲ۴�.
+- Vampire interface로 바꾼다.
 -----------------------------------------------------------------------------*/
 void C_VS_UI::ChangeToVampireInterface()
 {
@@ -496,7 +496,7 @@ void C_VS_UI::ChangeToVampireInterface()
 //-----------------------------------------------------------------------------
 // DeleteCharacter
 //
-// slot�� �ִ� character�� �����Ѵ�.
+// slot에 있는 character를 삭제한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::DeleteCharacter(int slot)
 {
@@ -552,7 +552,7 @@ int C_VS_UI::GetZoneID()
 //-----------------------------------------------------------------------------
 // SetZoneName
 //
-// ZoneName�� �����Ѵ�.
+// ZoneName을 설정한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::SetZone(int zone_id)
 {
@@ -569,7 +569,7 @@ void C_VS_UI::SetBlock(int x, int y)
 //-----------------------------------------------------------------------------
 // SetTime
 //
-// Time�� �����Ѵ�.
+// Time을 설정한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::SetTime(const char * str)
 {
@@ -580,7 +580,7 @@ void C_VS_UI::SetTime(const char * str)
 //-----------------------------------------------------------------------------
 // SetDate
 //
-// Date�� �����Ѵ�.
+// Date을 설정한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::SetDate(const char * str)
 {
@@ -591,7 +591,7 @@ void C_VS_UI::SetDate(const char * str)
 //-----------------------------------------------------------------------------
 // SetXY
 //
-// ����ǥ�� �����Ѵ�.
+// 맵좌표를 설정한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::SetXY(int x, int y)
 {
@@ -602,7 +602,7 @@ void C_VS_UI::SetXY(int x, int y)
 //-----------------------------------------------------------------------------
 // SetSize
 //
-// map size�� �����Ѵ�.
+// map size를 설정한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::SetSize(SIZE size)
 {
@@ -613,7 +613,7 @@ void C_VS_UI::SetSize(SIZE size)
 //-----------------------------------------------------------------------------
 // SetSafetyZone
 //
-// �̴ϸ� �������븦 �����Ѵ�.
+// 미니맵 안전지대를 설정한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::SetSafetyZone(RECT rect, bool my_zone)
 {
@@ -625,7 +625,7 @@ void C_VS_UI::SetSafetyZone(RECT rect, bool my_zone)
 //-----------------------------------------------------------------------------
 // SetNPC
 //
-// �̴ϸ� NPC�� �����Ѵ�.
+// 미니맵 NPC를 설정한다.
 //-----------------------------------------------------------------------------
 //struct MINIMAP_NPC
 //{
@@ -648,7 +648,7 @@ void C_VS_UI::ClearNPC()
 //-----------------------------------------------------------------------------
 // SetNPC
 //
-// �̴ϸ� NPC�� �����Ѵ�.
+// 미니맵 NPC를 설정한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::SetNPC(int x, int y, int id, const char* name)
 {
@@ -665,7 +665,7 @@ void C_VS_UI::SetNPC(int x, int y, int id, const char* name)
 //-----------------------------------------------------------------------------
 // SetPortal
 //
-// �̴ϸ� ��Ż�� �����Ѵ�.
+// 미니맵 포탈을 설정한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::SetPortal(RECT rect, int id)
 {
@@ -677,7 +677,7 @@ void C_VS_UI::SetPortal(RECT rect, int id)
 //-----------------------------------------------------------------------------
 // SetPortal
 //
-// �̴ϸ� ��Ż�� �����Ѵ�.
+// 미니맵 포탈을 설정한다.
 //-----------------------------------------------------------------------------
 //void C_VS_UI::SetPortal(int x, int y)
 //{
@@ -735,7 +735,7 @@ bool C_VS_UI::MouseControl(UINT message, int x, int y)
 #endif
 
 	//
-	// pick up�� Item�� ������, Item�� �ٴڿ� ����߸���. - Game �߿���..
+	// pick up된 Item이 있으면, Item을 바닥에 떨어뜨린다. - Game 중에서..
 	//
 	if (ret == false && (message == M_LEFTBUTTON_DOWN || message == M_LB_DOUBLECLICK))
 	{
@@ -745,9 +745,9 @@ bool C_VS_UI::MouseControl(UINT message, int x, int y)
 		
 #ifdef _LIB
 			//
-			// Client���� Item�� ����߸��鼭 �̵��ϴ� ���� ���� ���� UI �Է����� return �Ѵ�.
+			// Client에서 Item을 떨어뜨리면서 이동하는 것을 막기 위해 UI 입력으로 return 한다.
 			//
-			return true; // Item�� ������ ���� ���� ����߸��� �� ���� Client �Է��� ����.
+			return true; // Item을 가지고 있을 때는 떨어뜨리는 것 외의 Client 입력은 없다.
 #endif
 		}
 	}
@@ -855,7 +855,7 @@ void C_VS_UI::DIKeyboardControl(CSDLInput::E_KEYBOARD_EVENT event, DWORD scan_co
 	{
 		pressed_key = ACCEL_ADD_CONTROL( pressed_key );
 
-		// Control+ESC�� ����Ű�� ����� �� ����
+		// Control+ESC는 단축키로 사용할 수 없다
 		if(scan_code == SCANCODE_ESC)
 		{
 #ifdef OUTPUT_DEBUG
@@ -869,7 +869,7 @@ void C_VS_UI::DIKeyboardControl(CSDLInput::E_KEYBOARD_EVENT event, DWORD scan_co
 	{
 //		pressed_key = ACCEL_ADD_ALT( pressed_key );
 		
-		// Alt+Tab�� ����Ű�� ����� �� ����
+		// Alt+Tab은 단축키로 사용할 수 없다
 		if(scan_code == SCANCODE_TAB)
 		{
 #ifdef OUTPUT_DEBUG
@@ -879,7 +879,7 @@ void C_VS_UI::DIKeyboardControl(CSDLInput::E_KEYBOARD_EVENT event, DWORD scan_co
 		}
 	}
 
-	// function key�� ����Ű�� �� �� ����
+	// function key는 단축키로 쓸 수 없다
 	if(m_bl_accel_mode && (scan_code >= DIK_F1 && scan_code <= DIK_F10 || scan_code >= DIK_F11 && scan_code <= DIK_F12))
 	{
 #ifdef OUTPUT_DEBUG
@@ -928,9 +928,9 @@ void C_VS_UI::DIKeyboardControl(CSDLInput::E_KEYBOARD_EVENT event, DWORD scan_co
 
 	if(m_bl_accel_mode)
 	{
-		// �̹� ��ϵ� ��Ű�� ��� ����
-		// GetAcceleratorSimilar�� ���� �ȵȴ�
-		// Tab, Control+Tab������ ���� �ƾȵǱ� �����̴�
+		// 이미 등록된 핫키는 사용 못함
+		// GetAcceleratorSimilar를 쓰면 안된다
+		// Tab, Control+Tab같은게 지정 아안되기 때문이다
 		BYTE accel = g_pKeyAccelerator->GetAccelerator( pressed_key );
 		
 		if(accel != ACCEL_NULL)
@@ -950,12 +950,12 @@ void C_VS_UI::DIKeyboardControl(CSDLInput::E_KEYBOARD_EVENT event, DWORD scan_co
 	{
 		BYTE accel = g_pKeyAccelerator->GetAcceleratorSimilar( pressed_key );
 
-		// accel�� ������!
-		// ä�ø�尡 �ƴҶ��� ä�� ����Ű �ȸ԰�! 
+		// accel이 있을때!
+		// 채팅모드가 아닐때는 채팅 단축키 안먹게! 
 		if(accel !=0 && 
 			(
-				(!g_pUserOption->UseEnterChat || g_pUserOption->UseEnterChat && gC_vs_ui.IsInputMode()) || // ä�� ����϶�
-				(accel != ACCEL_UNION_CHAT && accel != ACCEL_CHAT && accel != ACCEL_GUILD_CHAT && accel != ACCEL_ZONE_CHAT && accel != ACCEL_WHISPER && accel != ACCEL_PARTY_CHAT ) // ä�� ����Ű�� �ƴϰ�,
+				(!g_pUserOption->UseEnterChat || g_pUserOption->UseEnterChat && gC_vs_ui.IsInputMode()) || // 채팅 모드일때
+				(accel != ACCEL_UNION_CHAT && accel != ACCEL_CHAT && accel != ACCEL_GUILD_CHAT && accel != ACCEL_ZONE_CHAT && accel != ACCEL_WHISPER && accel != ACCEL_PARTY_CHAT ) // 채팅 단축키가 아니고,
 			)
 		)
 		{
@@ -1040,32 +1040,32 @@ void C_VS_UI::KeyboardControl(UINT message, UINT key, long extra)
 
 	//
 	//---------
-	// !������
+	// !문제점
 	//---------
-	// ctrl+space�� ������ VK_SPACE�� ���� �ʴ´�. - �˼� ����
-	// ������ scan code�� ������� ��ȿ�ϴ�. �׷��� scan code�� VK_SPACE���
-	// ����Ѵ�. �׷��� �̻��ϰ� ���� ctrl+space �޽����� �� �� �´�.
-	// �ٸ� �� ���θ� �׽�Ʈ�غ����� �ʾ����� ���ݱ����� �׷���.
+	// ctrl+space를 누르면 VK_SPACE가 오지 않는다. - 알수 없음
+	// 하지만 scan code는 어느때나 유효하다. 그래서 scan code로 VK_SPACE대신
+	// 사용한다. 그런데 이상하게 유독 ctrl+space 메시지만 두 번 온다.
+	// 다른 것 전부를 테스트해보지는 않았지만 지금까지는 그렇다.
 	//
-	// �� �� �� �ٸ� ���� ������ long key ���� ó������ 25 �������� 229���
-	// ���̴�. �� �� �ϳ��� ���� ����� OS���� ȣȯ�������� �߻���Ű���� ������
-	// �� �� ����. �׽�Ʈ�� �ٷδ� Windows ME������ Windows 2000����ó�� ����������.
-	// �̰����κ��� Windows98������ �������� ���̴�.
+	// 두 번 중 다른 것은 인자중 long key 값이 처음에는 25 다음에는 229라는
+	// 것이다. 이 중 하나만 막는 방법이 OS상의 호환성문제를 발생시키지는 않을지
+	// 알 수 없다. 테스트한 바로는 Windows ME에서는 Windows 2000에서처럼 문제없었다.
+	// 이것으로보아 Windows98에서도 문제없을 것이다.
 	//
 	//--------------
-	// hot-key ��å
+	// hot-key 정책
 	//--------------
 	//
-	// �ϳ��� key�� ���ÿ� �ٸ� �� ���� ������ �ϴ� ���� ���� ���ؼ�, hot-key�� ó���Ǹ�
-	// window�� ���� ���ϰ� �Ѵ�.
+	// 하나의 key가 동시에 다른 두 가지 동작을 하는 것을 막기 위해서, hot-key로 처리되면
+	// window로 가지 못하게 한다.
 	//
 
 	//
 	// CTRL_GARBAGE
 	//
-	// scan_code�� �̿��ϴ� ���, ctrl�� �Բ� ������ ���δ� �� ���� ���� ������ �� ����
-	// �ٸ����� ���´�. �̰��� �ѱ��� �Է��ϰ� �ִ� ����(ImeRunning() == true)�� �߰ߵǾ���.
-	// �� ���� �ݵ�� �����ؾ� �Ѵ�.
+	// scan_code를 이용하는 경우, ctrl과 함께 누르면 때로는 이 값이 먼저 들어오고 그 다음
+	// 바른값이 들어온다. 이것은 한글을 입력하고 있는 도중(ImeRunning() == true)에 발견되었다.
+	// 이 값을 반드시 무시해야 한다.
 	//
 	const int CTRL_GARBAGE = 229;
 	if(key != CTRL_GARBAGE)
@@ -1256,9 +1256,9 @@ void C_VS_UI::KeyboardControl(UINT message, UINT key, long extra)
 
 			//
 			// 2000.12.22.
-			// ctrl(��) + space�� WinME/Win98������ �������·� ���´�. Win2000������
-			// ���������� ���´�. ��... �� ������ ���� �ذ��� �� �����Ƿ� Dinput����
-			// ó���Ѵ�.				
+			// ctrl(좌) + space가 WinME/Win98에서는 눌림상태로 들어온다. Win2000에서는
+			// 정상적으로 들어온다. 음... 이 문제는 현재 해결할 수 없으므로 Dinput으로
+			// 처리한다.				
 			//---------------------------------------------------------------------------
 			//			case SCANCODE_SPACE:
 			//				if (key != CTRL_GARBAGE)
@@ -1301,7 +1301,7 @@ void C_VS_UI::KeyboardControl(UINT message, UINT key, long extra)
 	{
 		//switch (key)
 		//{
-			// VK_F1 ~ test�ϸ� ��� Ű�� �ȴ�����! Ȳ��...
+			// VK_F1 ~ test하면 몇몇 키기 안눌린다! 황당...
 			
 //			case VK_F1:
 //				break;
@@ -1338,11 +1338,11 @@ void C_VS_UI::KeyboardControl(UINT message, UINT key, long extra)
 //-----------------------------------------------------------------------------
 // StartTitle
 //
-//	�ʱ�ȭ���� �����߿��� ��� �Ǵ� ���̹Ƿ� �޸� �Ҵ��� ���⼭ �Ѵ�.
-// �ʱ�ȭ�� ��Ȳ�� ����Ǹ� �޸𸮸� �����Ͽ��� �Ѵ�.
+//	초기화면은 게임중에는 없어도 되는 것이므로 메모리 할당은 여기서 한다.
+// 초기화면 상황이 종료되면 메모리를 해제하여야 한다.
 //
-// �̹� Title�� �����߿� �־ "Server�� ���� ���" �ٽ� Login �κ����� 
-// �;��ϱ� ������ �� �� �̻� StartTitle() �� �� �ִ�.
+// 이미 Title이 시작중에 있어도 "Server가 죽을 경우" 다시 Login 부분으로 
+// 와야하기 때문에 두 번 이상 StartTitle() 할 수 있다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::StartTitle()
 {
@@ -1376,7 +1376,7 @@ void C_VS_UI::EndTitle()
 //-----------------------------------------------------------------------------
 // StartGame
 //
-// �� �� �̻� ������ �� ����.
+// 두 번 이상 실행할 수 없다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::StartGame()
 {
@@ -1405,7 +1405,7 @@ void C_VS_UI::StartGame()
 //-----------------------------------------------------------------------------
 // EndGame
 //
-// StartGame()���� �Ҵ��� memory�� �����Ͽ��� �Ѵ�.
+// StartGame()에서 할당한 memory를 해제하여야 한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::EndGame()
 {
@@ -1422,7 +1422,7 @@ void C_VS_UI::EndGame()
 //-----------------------------------------------------------------------------
 // Process
 //
-// UI ó���κ�.
+// UI 처리부분.
 //-----------------------------------------------------------------------------
 void C_VS_UI::Process()
 {
@@ -1479,7 +1479,7 @@ const int				g_item_show_y = 120;
 const int				g_item_show_w = 8;
 const int				g_item_show_h = 4;
 const int				g_item_gap	  = 90;
-int						g_item_page   = 0; // ��� �������� ����ϱ� ���ؼ�.
+int						g_item_page   = 0; // 모든 아이템을 출력하기 위해서.
 int						g_item_select = NOT_SELECTED;
 
 extern bool				gbl_show_item;
@@ -1505,10 +1505,10 @@ void ShowItem()
 			{
 				SPRITE_ID id = pItem->GetInventoryFrameID(); // frame id = data id
 
-				if (gpC_mouse_pointer->GetPickUpItem()) // Item�� �����ٸ�.
+				if (gpC_mouse_pointer->GetPickUpItem()) // Item을 집었다면.
 				{
 					if (gpC_mouse_pointer->GetPickUpItem() == pItem)
-						continue; // ������� �ʴ´�.
+						continue; // 출력하지 않는다.
 				}			
 
 				int item_x = g_item_show_x+g_item_gap*i;
@@ -1650,7 +1650,7 @@ void ShowItem_KeyboardControl(UINT message, UINT key, long extra)
 //-----------------------------------------------------------------------------
 // Show
 //
-// UI ��ºκ�.
+// UI 출력부분.
 //-----------------------------------------------------------------------------
 void C_VS_UI::Show()
 {
@@ -1669,7 +1669,7 @@ void C_VS_UI::Show()
 		ShowItem();
 #endif
 
-	if(IsRunningProgress())			//���α׷��� �鰥�� �ٿ�Ǵ°� �־ ������ ���� ���̳� �ؼ� ��� �ٲ� // �Դٰ� �ӵ��� UP!
+	if(IsRunningProgress())			//프로그레스 들갈때 다운되는게 있어서 윈도우 쪽이 꼬이나 해서 방식 바꿈 // 게다가 속도도 UP!
 		m_pC_progress->Show();
 	else
 		gpC_window_manager->Show();
@@ -1720,7 +1720,7 @@ if(gbl_info_show)
 //	g_Print(0, TEXT_LINE(10), win_buf);
 #endif
 
-	//��Ƽ�� ǥ�� ȭ��ǥ
+	//파티원 표시 화살표
 #define TILE_X 48
 #define TILE_Y 24
 #define WIDTH 1023
@@ -1860,8 +1860,8 @@ if(gbl_info_show)
 //-----------------------------------------------------------------------------
 // DrawMousePointer
 //
-// Client�� Mouse pointer�� �ٽ� �׸��� ���� �� ����ϴ� Method. UI Loop��
-// �Ҹ����״�(Client�� �䱸��).
+// Client가 Mouse pointer를 다시 그리고 싶을 때 사용하는 Method. UI Loop와
+// 불리시켰다(Client의 요구로).
 //-----------------------------------------------------------------------------
 void C_VS_UI::DrawMousePointer()
 {
@@ -1881,7 +1881,7 @@ void C_VS_UI::DrawTargetArrow(int TargetX, int TargetY)
 //-----------------------------------------------------------------------------
 // GetCurrentMousePointerInfo
 //
-// Client���� Mouse pointer buffer�� �����ϱ� ���� ������ ��� Method.
+// Client에서 Mouse pointer buffer를 생성하기 위한 정보를 얻는 Method.
 //-----------------------------------------------------------------------------
 void C_VS_UI::GetCurrentMousePointerInfo(MOUSEPOINTER_INFO &info)
 {
@@ -2067,7 +2067,7 @@ bool	C_VS_UI::IsRunningTutorialExit() const
 //-----------------------------------------------------------------------------
 // RunTutorialExitAsk
 //
-// �װŵ鱸 Ʃ�丮�� ������?�ϰ� ���´�.
+// 그거들구 튜토리얼 나갈래?하고 묻는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunTutorialExitAsk(const int select, const char* pName)
 {
@@ -2100,7 +2100,7 @@ void	C_VS_UI::RestoreWhenActivateGame()
 //-----------------------------------------------------------------------------
 // C_VS_UI::BackupPrevId
 //
-// login�� �� ������ �Է��� id�� �ڵ����� �̸� �Է½�Ű�� ���ؼ� file�� backup�Ѵ�.
+// login할 때 이전에 입력한 id를 자동으로 미리 입력시키기 위해서 file에 backup한다.
 //-----------------------------------------------------------------------------
 void	C_VS_UI::BackupPrevId(const char * sz_id)
 {
@@ -2123,7 +2123,7 @@ void	C_VS_UI::BackupPrevId(const char * sz_id)
 //-----------------------------------------------------------------------------
 // C_VS_UI::AlreadyPress
 //
-// ������ push�� ���¸� true�� ��ȯ�Ѵ�.
+// 이전에 push된 상태면 true를 반환한다.
 //-----------------------------------------------------------------------------
 bool	C_VS_UI::AlreadyPress(UINT message, long extra) const
 {
@@ -2137,7 +2137,7 @@ bool	C_VS_UI::AlreadyPress(UINT message, long extra) const
 //-----------------------------------------------------------------------------
 // C_VS_UI::Release
 //
-// global���Ÿ� Ȯ���� �������� �ϱ� ���ؼ� �߰�..  by sigi
+// global제거를 확실한 시점에서 하기 위해서 추가..  by sigi
 //-----------------------------------------------------------------------------
 void
 C_VS_UI::Release()
@@ -2154,7 +2154,7 @@ C_VS_UI::Release()
 	DeleteNew(m_pC_option);
 	m_pC_progress = NULL;
 
-	g_FreeMessage(); // Window Manager ������ ���ش�.
+	g_FreeMessage(); // Window Manager 이전에 해준다.
 
 	DeleteNew(gpC_vs_ui_window_manager);
 
@@ -2433,7 +2433,7 @@ void C_VS_UI::CloseGameMenu()
 //-----------------------------------------------------------------------------
 // C_VS_UI::GetInventoryPosition
 //
-// Client���� Inventory�� ��ġ�� ����.
+// Client에서 Inventory의 위치를 얻음.
 //-----------------------------------------------------------------------------
 Point C_VS_UI::GetInventoryPosition() const
 {
@@ -2447,7 +2447,7 @@ Point C_VS_UI::GetInventoryPosition() const
 //-----------------------------------------------------------------------------
 // C_VS_UI::GetInventoryGridPosition
 //
-// Client���� Inventory�� (x, y) grid�� ��ġ�� ����.
+// Client에서 Inventory의 (x, y) grid의 위치를 얻음.
 //-----------------------------------------------------------------------------
 Point	C_VS_UI::GetInventoryGridPosition(int grid_x, int grid_y) const
 {
@@ -2487,7 +2487,7 @@ MItem * C_VS_UI::RemoveItemInGear(int slot)
 //-----------------------------------------------------------------------------
 // C_VS_UI::CanReplaceItemInGear
 //
-// slayer/vampire gearâ���� item�� replace�� �� �ִ°�?
+// slayer/vampire gear창에서 item이 replace될 수 있는가?
 //-----------------------------------------------------------------------------
 bool C_VS_UI::CanReplaceItemInGear(MItem* pItem, int slot, MItem*& pOldItem)
 {
@@ -2500,7 +2500,7 @@ bool C_VS_UI::CanReplaceItemInGear(MItem* pItem, int slot, MItem*& pOldItem)
 //-----------------------------------------------------------------------------
 // C_VS_UI::GetGearItem
 //
-// slayer���� vampire���� �� �� ����Ѵ�.
+// slayer인지 vampire인지 모를 때 사용한다.
 //-----------------------------------------------------------------------------
 const MItem * C_VS_UI::GetGearItem(int slot) const
 {
@@ -2516,14 +2516,14 @@ const MItem * C_VS_UI::GetGearItem_PickUp(int &slot) const
 
 	return NULL;
 }
-const MItem * C_VS_UI::GetGearCoreZapItem(int slot) const // Ư�� ���Կ� �پ� �ִ� �ھ����� ����, slot : �ھ��� ���� ����
+const MItem * C_VS_UI::GetGearCoreZapItem(int slot) const // 특정 슬롯에 붙어 있는 코어잽을 리턴, slot : 코어잽 밑의 슬롯
 {
 	if (m_pC_game)
 		return m_pC_game->GetGearCoreZapItem(slot);
 
 	return NULL;
 }
-const MItem * C_VS_UI::GetGearCoreZapedItem(int slot) const // �ھ��� �ؿ� �� �������� ����, slot : �ھ��� ����
+const MItem * C_VS_UI::GetGearCoreZapedItem(int slot) const // 코어잽 밑에 깔린 아이템을 리턴, slot : 코어잽 슬롯
 {
 	if (m_pC_game)
 		return m_pC_game->GetGearCoreZapedItem(slot);
@@ -2549,7 +2549,7 @@ const bool C_VS_UI::IsCloseBloodBibleSlot(int slot) const
 //-----------------------------------------------------------------------------
 // C_VS_UI::GetGearSize
 //
-// slayer���� vampire���� �� �� ����Ѵ�.
+// slayer인지 vampire인지 모를 때 사용한다.
 //-----------------------------------------------------------------------------
 const int C_VS_UI::GetGearSize() const
 {
@@ -2562,8 +2562,8 @@ const int C_VS_UI::GetGearSize() const
 //-----------------------------------------------------------------------------
 // C_VS_UI::CloseAllDialog
 //
-// ��𿡵� ���ӵ����ʴ� dialog�� server disconnect message�� ���� ���� ���� ����
-// ���� �ݾ���� �Ѵ�.
+// 어디에도 종속되지않는 dialog는 server disconnect message가 떳을 경우와 같은 때에
+// 전부 닫아줘야 한다.
 //-----------------------------------------------------------------------------
 void	C_VS_UI::CloseAllDialog()
 {
@@ -2703,7 +2703,7 @@ void	C_VS_UI::RunVampireSkillTree()
 //-----------------------------------------------------------------------------
 // RunDescDialog
 //
-// ����â�� ����.
+// 설명창을 띄운다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunDescDialog(int type, void *ptr, void* ptr2)
 {
@@ -2725,7 +2725,7 @@ void C_VS_UI::CloseDescDialog()
 //-----------------------------------------------------------------------------
 // RunFileDialog
 //
-// ����â�� ����.
+// 설명창을 띄운다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunFileDialog(C_VS_UI_FILE_DIALOG::MODE Mode, char *type)
 {
@@ -2747,7 +2747,7 @@ void C_VS_UI::CloseFileDialog()
 //-----------------------------------------------------------------------------
 // RunElevator
 //
-// ���������� �������̽��� ����.
+// 엘리베이터 인터페이스를 띄운다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunElevator()
 {
@@ -2769,7 +2769,7 @@ void C_VS_UI::CloseElevator()
 //-----------------------------------------------------------------------------
 // RunBookcase
 //
-// å���� ����.
+// 책장을 띄운다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunBookcase()
 {
@@ -2792,7 +2792,7 @@ void C_VS_UI::CloseBookcase()
 //-----------------------------------------------------------------------------
 // RunBriefing
 //
-// �긮���� ����.
+// 브리핑을 띄운다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunBriefing()
 {
@@ -2814,7 +2814,7 @@ void C_VS_UI::CloseBriefing()
 //-----------------------------------------------------------------------------
 // RunComputer
 //
-// ��ǻ�͸� ����.
+// 컴퓨터를 띄운다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunComputer()
 {
@@ -2836,7 +2836,7 @@ void C_VS_UI::CloseComputer()
 //-----------------------------------------------------------------------------
 // RunTutorialExit
 //
-// Ʃ�丮�� ������â�� ����.
+// 튜토리얼 나가기창을 띄운다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunTutorialExit()
 {
@@ -2868,7 +2868,7 @@ void C_VS_UI::RunTutorialExitAccept()
 //-----------------------------------------------------------------------------
 // RunSlayerPortal
 //
-// �����̾���Ż �������̽��� ����.
+// 슬레이어포탈 인터페이스를 띄운다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunSlayerPortal()
 {
@@ -3326,7 +3326,7 @@ void C_VS_UI::CloseExchangeCancel()
 //-----------------------------------------------------------------------------
 // RunSkillView
 //
-// SkillView�� ����.
+// SkillView을 띄운다.
 //-----------------------------------------------------------------------------
 //void C_VS_UI::RunSkillView()
 //{
@@ -3337,7 +3337,7 @@ void C_VS_UI::CloseExchangeCancel()
 //-----------------------------------------------------------------------------
 // GetSkillViewWindow
 //
-// SkillViewâ�� �����͸� ��ȯ�Ѵ�
+// SkillView창의 포인터를 반환한다
 //-----------------------------------------------------------------------------
 //C_VS_UI_SKILL_VIEW * C_VS_UI::GetSkillViewWindow()
 //{
@@ -3350,7 +3350,7 @@ void C_VS_UI::CloseExchangeCancel()
 //-----------------------------------------------------------------------------
 // RunShop
 //
-// Shop�� ����.
+// Shop을 띄운다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunShop()
 {
@@ -3361,7 +3361,7 @@ void C_VS_UI::RunShop()
 //-----------------------------------------------------------------------------
 // RunStorage
 //
-// Storage�� ����.
+// Storage을 띄운다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunStorage()
 {
@@ -3371,7 +3371,7 @@ void C_VS_UI::RunStorage()
 //-----------------------------------------------------------------------------
 // RunPetStorage
 //
-// Storage�� ����.
+// Storage을 띄운다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunPetStorage()
 {
@@ -3382,7 +3382,7 @@ void C_VS_UI::RunPetStorage()
 //-----------------------------------------------------------------------------
 // RunStorageBuy
 //
-// Storage�� ����.
+// Storage을 띄운다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunStorageBuy(int price)
 {
@@ -3393,7 +3393,7 @@ void C_VS_UI::RunStorageBuy(int price)
 //-----------------------------------------------------------------------------
 // RunExchangeCancel
 //
-// ��ȯ����ҷ�?�ϰ� ���´�.
+// 교환취소할래?하고 묻는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunExchangeCancel(const char* pName)
 {
@@ -3404,7 +3404,7 @@ void C_VS_UI::RunExchangeCancel(const char* pName)
 //-----------------------------------------------------------------------------
 // RunExchangeAsk
 //
-// ��ȯ�ҷ�?�ϰ� ���´�.
+// 교환할래?하고 묻는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunExchangeAsk(const char* pName)
 {
@@ -3498,7 +3498,7 @@ void C_VS_UI::RunFriendDeleteAsk(const char* pName)
 //-----------------------------------------------------------------------------
 // RunExchange
 //
-// ��ȯâ�� ����.
+// 교환창을 띄운다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunExchange()
 {
@@ -3509,7 +3509,7 @@ void C_VS_UI::RunExchange()
 //-----------------------------------------------------------------------------
 // RunOption
 //
-// �ɼ�â�� ����.
+// 옵션창을 띄운다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunOption()
 {
@@ -3522,7 +3522,7 @@ void C_VS_UI::RunOption()
 //-----------------------------------------------------------------------------
 // CloseOption
 //
-// ��ȯâ�� ����.
+// 교환창을 띄운다.
 //-----------------------------------------------------------------------------
 void	C_VS_UI::CloseOption()
 {
@@ -3589,7 +3589,7 @@ void C_VS_UI::ServerDisconnectMessage()
 		gpC_base->FinishEvent();
 
 
-	// Ȯ���� ��� Window�� �ݱ����ؼ�..
+	// 확실히 모든 Window를 닫기위해서..
 //	if (m_pC_title)
 //	{
 //		DeleteNew(m_pC_title);
@@ -3681,7 +3681,7 @@ void C_VS_UI::SetProgress(WORD cur_val, WORD max_val)
 //-----------------------------------------------------------------------------
 // ToggleESC4UI
 //
-// Game �� GameMenu�� �θ��� ����...
+// Game 중 GameMenu를 부르기 위해...
 //-----------------------------------------------------------------------------
 void C_VS_UI::ToggleESC4UI()
 {
@@ -3692,7 +3692,7 @@ void C_VS_UI::ToggleESC4UI()
 //-----------------------------------------------------------------------------
 // ResetSlayerQuickItemSize
 //
-// Gear���� belt�� ��ü�� ��쿡 ����ȴ�.
+// Gear에서 belt를 교체할 경우에 실행된다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::ResetSlayerQuickItemSize()
 {
@@ -3710,7 +3710,7 @@ class C_VS_UI_FRIEND_INFO;
 //-----------------------------------------------------------------------------
 // Init
 //
-// �翬�� ���� ���� �����Ͽ��� �Ѵ�.
+// 당연히 가장 먼저 실행하여야 한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::Init(CSpriteSurface *surface, void (*fp)(DWORD, int, int, void *))
 {
@@ -3798,13 +3798,13 @@ void C_VS_UI::Init(CSpriteSurface *surface, void (*fp)(DWORD, int, int, void *))
 
 	//---------------------------------------------------------------------
 	//
-	// Skill Tree ��ü�� �ʱ�ȭ �ϴ� ���
+	// Skill Tree 전체를 초기화 하는 방법
 	//
 	//---------------------------------------------------------------------
 //	g_pSkillManager->Init();
 
 	//---------------------------------------------------------------------
-	// �⺻ ����κ��� skill tree�� �ʱ�ȭ�Ѵ�.
+	// 기본 기술로부터 skill tree를 초기화한다.
 	//---------------------------------------------------------------------
 //	(*g_pSkillManager)[SKILLDOMAIN_BLADE].SetRootSkill( SKILL_SINGLE_BLOW );
 //	(*g_pSkillManager)[SKILLDOMAIN_SWORD].SetRootSkill( SKILL_DOUBLE_IMPACT );
@@ -3904,7 +3904,7 @@ bool	C_VS_UI::IsRunningAskParty()	const
 //-----------------------------------------------------------------------------
 // RunPartyAsk
 //
-// ��Ƽ�������ҷ�?�ϰ� ���´�.
+// 파티에참가할래?하고 묻는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunPartyAsk(const char* pName, C_VS_UI_REQUEST_PARTY::REQUEST_PARTY type)
 {
@@ -3925,9 +3925,9 @@ void C_VS_UI::ClosePartyAsk()
 //-----------------------------------------------------------------------------
 // RunUsePetFood
 //
-// ��Ƽ�������ҷ�?�ϰ� ���´�.
+// 파티에참가할래?하고 묻는다.
 //-----------------------------------------------------------------------------
-#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 
 	void C_VS_UI::RunUsePetFood(DWORD UsingObjectID, MItem* SubInventory)
 	{
@@ -3958,7 +3958,7 @@ void C_VS_UI::CloseUsePetFood()
 //-----------------------------------------------------------------------------
 // RunKeepPetItemDialog
 //
-// �� �±淡??�ϰ� ���´�.
+// 펫 맞길래??하고 묻는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunKeepPetItemDialog()
 {
@@ -3978,7 +3978,7 @@ void C_VS_UI::CloseKeepPetItemDialog()
 //-----------------------------------------------------------------------------
 // RunGetKeepPetItemDialog
 //
-// �� ã����??�ϰ� ���´�.
+// 펫 찾을래??하고 묻는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunGetKeepPetItemDialog()
 {
@@ -3998,7 +3998,7 @@ void C_VS_UI::CloseGetKeepPetItemDialog()
 //-----------------------------------------------------------------------------
 // RunEnchant
 //
-// Enchant�ҷ�?�ϰ� ���´�.
+// Enchant할래?하고 묻는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunEnchant(int value)
 {
@@ -4019,7 +4019,7 @@ void C_VS_UI::CloseEnchant()
 //-----------------------------------------------------------------------------
 // RunNoSearchResult
 //
-// �˻���� ���� Ȯ��â
+// 검색결과 없음 확인창
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunNoSearchResult()
 {
@@ -4040,7 +4040,7 @@ void C_VS_UI::CloseNoSearchResult()
 //-----------------------------------------------------------------------------
 // RunDepositLimit
 //
-// �˻���� ���� Ȯ��â
+// 검색결과 없음 확인창
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunDepositLimit()
 {
@@ -4061,7 +4061,7 @@ void C_VS_UI::CloseDepositLimit()
 //-----------------------------------------------------------------------------
 // RunWithdrawLimit
 //
-// �˻���� ���� Ȯ��â
+// 검색결과 없음 확인창
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunWithdrawLimit()
 {
@@ -4088,7 +4088,7 @@ void	C_VS_UI::RunBringFeeLimit()
 //-----------------------------------------------------------------------------
 // RunPartyCancel
 //
-// ��Ƽ��������û��... �ϰ� ���´�
+// 파티에참가신청중... 하고 나온다
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunPartyCancel(const char* pName)
 {
@@ -4120,7 +4120,7 @@ void C_VS_UI::ClosePartyManager()
 //-----------------------------------------------------------------------------
 // RunPartyManager
 //
-// PartyManager�� ����.
+// PartyManager을 띄운다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunPartyManager()
 {
@@ -4161,7 +4161,7 @@ void C_VS_UI::CloseOption()
 //-----------------------------------------------------------------------------
 // RunOption
 //
-// �ɼ�â ����
+// 옵션창 띄우기
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunOption(bool IsTitle)
 {
@@ -4459,7 +4459,7 @@ bool	C_VS_UI::IsRunningPopupMessage()
 	return false;
 }
 
-// ����Ʈ ����â
+// 퀘스트 정보창
 void	C_VS_UI::RunQuestStatusWindow()
 {
 	if(m_pC_game != NULL)
@@ -4499,7 +4499,7 @@ DWORD	C_VS_UI::GetQuestStatusID()
 	return 0xffffffff;
 }
 
-// ����â
+// 복권창
 void	C_VS_UI::RunLotteryCard( int& step )
 {
 	if(m_pC_game != NULL)
@@ -4655,7 +4655,7 @@ bool	C_VS_UI::IsRunningRequestResurrect() const
 
 /*-----------------------------------------------------------------------------
 - ChangeToOustersInterface
-- Ousters interface�� �ٲ۴�.
+- Ousters interface로 바꾼다.
 -----------------------------------------------------------------------------*/
 void C_VS_UI::ChangeToOustersInterface()
 {
@@ -4670,7 +4670,7 @@ void C_VS_UI::ChangeToOustersInterface()
 //-----------------------------------------------------------------------------
 // RunMixingForge
 //
-// MixingForge�� ����.
+// MixingForge을 띄운다.
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunMixingForge(C_VS_UI_MIXING_FORGE::FORGE_CLASS forge_class, C_VS_UI_MIXING_FORGE::FORGE_TYPE forge_type)
 {
@@ -5379,7 +5379,7 @@ void	C_VS_UI::DeleteQuestItem(int nSlot)
 
 }
 
-// 2004, 10, 25, sobeit add start - ���� ����
+// 2004, 10, 25, sobeit add start - 세율 변경
 void	C_VS_UI::RunModifyTax()
 {
 	if (m_pC_game)
@@ -5508,7 +5508,7 @@ bool C_VS_UI::IsRunningSwapAdvancementItem()
 }
 // 2005, 1, 3, sobeit add end
 
-// 2005, 1, 11, sobeit add start - �ҿ��̿����� â
+// 2005, 1, 11, sobeit add start - 불우이웃돕기 창
 void	C_VS_UI::Run_Campaign_Help_Unfortunate_Neighbors(int value)
 {
 	if (m_pC_game)
@@ -5517,15 +5517,15 @@ void	C_VS_UI::Run_Campaign_Help_Unfortunate_Neighbors(int value)
 }
 // 2005, 1, 11, sobeit add end
 
-// 2005, 1, 17, sobeit add start - ����Ʈ ����
+// 2005, 1, 17, sobeit add start - 퀘스트 관련
 void	C_VS_UI::SetQuestNpcDialog(void* pVoid)
 {
 	if(m_pC_game)
 		m_pC_game->SetQuestNpcDialog(pVoid);
 }
-// 2005, 1, 17, sobeit add end - ����Ʈ ����
+// 2005, 1, 17, sobeit add end - 퀘스트 관련
 	
-// 2005, 1, 24, sobeit add start - ������ �ޱ� �̺�Ʈ
+// 2005, 1, 24, sobeit add start - 아이템 받기 이벤트
 void	C_VS_UI::Run_Confirm_GetItemEvent(int value)
 {
 	if (m_pC_game)
@@ -5567,7 +5567,7 @@ bool C_VS_UI::IsInRectPointWebBrowser(int X, int Y)
 	return false;
 }
 // 2005, 2, 1, sobeit add end
-#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 // 2005, 2, 24, sobeit add start
 	void	C_VS_UI::RunSubInventory(MItem* pItem)
 	{

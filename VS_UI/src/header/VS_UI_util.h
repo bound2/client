@@ -21,7 +21,7 @@
 
 typedef WORD SPRITE_ID;
 
-// sprite id�� �ƴϴ�.
+// sprite id가 아니다.
 #define NO_SPRITE_ID						ULONG_MAX
 
 // data id <-> spk index
@@ -47,10 +47,10 @@ typedef WORD SPRITE_ID;
 
 /*-----------------------------------------------------------------------------
   Class Sprite Pack
-  `DX�� �ʱ�ȭ�Ǿ 555, 565 ���θ� �Ǻ��ϹǷ� �ٵ�� DX�� �ʱ�ȭ��Ų �Ŀ� 
+  `DX가 초기화되어서 555, 565 여부를 판별하므로 바드시 DX를 초기화시킨 후에 
    ����(����)�ؾ� �Ѵ�.
 -----------------------------------------------------------------------------*/
-// RGB �� ��� �ϳ�.
+// RGB 중 어느 하나.
 #define rgb_RED							0
 #define rgb_GREEN							1
 #define rgb_BLUE							2
@@ -58,7 +58,7 @@ typedef WORD SPRITE_ID;
 class C_SPRITE_PACK
 {
 private:
-	//CSpritePackList *	m_pC_spk_list; // 565, 555�� �����ؾ��ϱ� ������ pointer��.
+	//CSpritePackList *	m_pC_spk_list; // 565, 555를 결정해야하기 때문에 pointer로.
 	CSpritePack			m_SPK;	// by sigi
 
 	// Disable copy constructor and copy assignment to prevent issues with m_file pointer
@@ -90,7 +90,7 @@ public:
 	void	BltOffscreen(POINT &point, SPRITE_ID sprite_id = 0);
 	void	BltOffscreen(int x=0, int y=0, SPRITE_ID sprite_id = 0);
 
-	// �̹� Surface�� Lock�� ���¿��� �θ��� �Լ�..
+	// 이미 Surface가 Lock된 상태에서 부르는 함수..
 	void	BltLockedClip(int x, int y, Rect &rect, SPRITE_ID sprite_id=0);
 	void	BltLockedOutline(int x, int y, int color, SPRITE_ID sprite_id = 0);
 	void	BltLocked(POINT &point, SPRITE_ID sprite_id=0);
@@ -112,7 +112,7 @@ public:
 
 /*-----------------------------------------------------------------------------
   Class FRR
-  `��ü�� Animation�����ֱ� ���� Frame array object.
+  `객체를 Animation시켜주기 위한 Frame array object.
 -----------------------------------------------------------------------------*/
 class C_FRR
 {
@@ -133,7 +133,7 @@ public:
   Class animation object
   `animation�� object. �̰��� �� ���� SPK, FRR �̴�. ���� SPK, FRR�� �����ġ��
    �ٸ��� �� ���, �׸��� ������ Timer�� ����� ��찡 �ֱ� ������ �������. 
-	�̰��� C_ANIMATION�� ������ animation�ȴ�.
+	이것을 C_ANIMATION에 넣으면 animation된다.
 -----------------------------------------------------------------------------*/
 class C_ANI_OBJECT
 {
@@ -141,11 +141,11 @@ private:
 	//
 	// m_pC_spk
 	//
-	// m_pC_frr�� �����ϴ� SPK�̴�. �ϳ��� Animation object�� �ϳ����� SPK, FRR��
+	// m_pC_frr과 대응하는 SPK이다. 하나의 Animation object는 하나씩의 SPK, FRR을
 	// ���´�. �ϳ��� SPK�� �ټ��� FRR�� ������ �� ����. �̷��� �ϴ� ������, �׷���
 	// ���ӻ��� Animation object�� �� ��� ��ɰų� ����, ���� ȥ��(?)�� �����ϸ�,
 	// �ܼ��� Interface�� �����ϱ� �����̴�. ���� �׷� �ʿ䰡 ���Ŀ� ����ٸ�,
-	// �Ǵٸ� Class�� ����� �׸��̴�.
+	// 또다른 Class를 만들면 그만이다.
 	//
 	C_SPRITE_PACK *		m_pC_spk;
 	C_FRR *					m_pC_frr;
@@ -166,11 +166,11 @@ public:
 
 /*-----------------------------------------------------------------------------
   Class animation object
-  `Object�� Animation��Ű�� object.
+  `Object를 Animation시키는 object.
 
   `SPK file�� Frr file�� animation�� �ϱ� ���� �ʿ������̴�. Animation Object��
    �� �ΰ��� ������ �����Ͽ�, ���� ��ġ�� play, �� animation�����ش�. ����
-	Timer�� �����ϰ� Timer�� ������ �� �ִ�. ���� ������ animation�� ���� �ִ�.
+	Timer를 내장하고 Timer를 설정할 수 있다. 또한 역으로 animation할 수도 있다.
 -----------------------------------------------------------------------------*/
 class C_ANIMATION
 {
@@ -178,18 +178,18 @@ private:
 	//
 	// m_pC_ani_object
 	//
-	// 1. Animation�� object pointer�̴�. �� object�� �ٸ� Animation object������
+	// 1. Animation할 object pointer이다. 이 object는 다른 Animation object에서도
 	//    ����� �� �ֱ� ������ pointer�� �ؾ� ȿ�����̴�.
 	//
 	// 2. �ϳ��� Animation object������ �ϳ��� ani object�� ���´�. �׷��� �� ����
-	//    �ݵ�� �׷����� �ʾƵ� �ȴ�.
+	//    반드시 그러하지 않아도 된다.
 	//
 	C_ANI_OBJECT *			m_pC_ani_object;
 
 	//
 	// Timer
 	// 
-	// �ϳ��� Animation object�� play�Ǳ� ���� �ϳ��� timer�� ���´�. ���ο� timer��
+	// 하나의 Animation object는 play되기 위해 하나의 timer를 갖는다. 내부에 timer가
 	// �����ȴ�. Timer library�� ���� �Լ��� ����������ϱ� ������ ����� �� ����.
 	//
 	DWORD						m_dw_prev_tickcount;
@@ -204,16 +204,16 @@ public:
 	enum PLAY_ORDER
 	{
 		STOP,					// stop
-		PLAY,					// 0�� frame���� ������ �� ����.
+		PLAY,					// 0번 frame부터 끝까지 한 번만.
 		PLAY_LOOP,			// play�� ��� �ݺ�.
 		PLAY_BACK,			// �� frame���� 0������ �� ����.
 		PLAY_BACKLOOP,		// play back ��� �ݺ�.
-		PLAY_LOOPBACK,		// play -> back -> play (�ݺ�)
+		PLAY_LOOPBACK,		// play -> back -> play (반복)
 	};
 
 private:
 	PLAY_ORDER				m_play_order;
-	PLAY_ORDER				m_play_order_next; // play order�� ������ ���ִ� ��.
+	PLAY_ORDER				m_play_order_next; // play order가 끝나고 해주는 것.
 
 public:
 	C_ANIMATION(C_ANI_OBJECT *p_object);

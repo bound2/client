@@ -152,18 +152,18 @@ void Base::InitFont()
 	LOGFONT lf;
 
 	// 
-	// ������ style
+	// 괜찮은 style
 	//
-	// - ����, 13
+	// - 바탕, 13
 	//
-	// !Times New Romans�� ���� ����. OS�� ��ġ �ȸ´� ���� �߻���.
+	// !Times New Romans로 하지 말것. OS간 위치 안맞는 문제 발생함.
 	//
 	const char szFontName[4][2][20] = {
 		// Hangul Font      Chinese Font
-		{ "����ü",			"����" },
+		{ "奔覆眉",			"宋体" },
 		{ "MS Sans Serif",	"MS Sans Serif" },
-		{ "����ü",			"������" },
-		{ "����",			"����" }
+		{ "蹈框眉",			"新宋体" },
+		{ "奔覆",			"宋体" }
 	};
 
 	char Language;
@@ -258,11 +258,11 @@ void Base::InitFont()
 	SetFont(m_char_value_pi, lf, RGB(255, 255, 255));
 
 	//
-	//font used by Client by larosel ���� ��Ʈ���� 2�� ũ�� �������.
+	//font used by Client by larosel 밖의 폰트보다 2씩 크게 해줘야함.
 	//
 	//SetDefaultLogfont(lf);
 	//lf.lfHeight = 12;
-	//strcpy(lf.lfFaceName, "����");
+	//strcpy(lf.lfFaceName, "굴림");
 	//SetFont(m_chat_dialog_pi, lf, RGB(255, 255, 255));
 
 	SetDefaultLogfont(lf);
@@ -332,8 +332,8 @@ void Base::InitSurface(CSpriteSurface *surface)
 		_Error(FAILED_JOB);
 
 	//
-	// offscreen�� colorkey�� �����Ѵ�. ��Ȳ�� ���� Image���� �� ���� ����
-	// �����ؾ� �Ѵ�.
+	// offscreen의 colorkey를 설정한다. 상황에 따라서 Image에서 안 쓰는 색을 
+	// 결정해야 한다.
 	//
 	m_colorkey_red = RED;
 

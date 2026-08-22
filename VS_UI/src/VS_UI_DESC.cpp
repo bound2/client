@@ -7,7 +7,7 @@
 #define assert(e) ((void)(e))
 // Disabled assert for macOS
 #include "vs_ui_extradialog.h"
-//#include "VS_UI_DESC.h" // ?? �̻�-_-a
+//#include "VS_UI_DESC.h" // ?? 이상-_-a
 #include "VS_UI_filepath.h"
 #include <algorithm>
 extern RECT g_GameRect;
@@ -35,7 +35,7 @@ C_VS_UI_DESC::~C_VS_UI_DESC()
 {
 	if(!m_pC_inpicture.empty())
 	{		
-		// by sigi - delete ���ϴٴ�.. �̿�.. - -;
+		// by sigi - delete 안하다니.. 미오.. - -;
 		std::vector<CSpritePack *>::iterator iPic = m_pC_inpicture.begin();
 		while (iPic != m_pC_inpicture.end())
 		{
@@ -75,13 +75,13 @@ void C_VS_UI_DESC::ShowDesc(int x, int y)
 				Rect rect(0, 0, (*m_pC_inpicture[m_Sprite[i].pack_num])[m_Sprite[i].sprite_num].GetWidth(), (*m_pC_inpicture[m_Sprite[i].pack_num])[m_Sprite[i].sprite_num].GetHeight());
 				int blt_y = (m_Sprite[i].pos - m_desc_scroll)*m_desc_y_distance;
 
-				// ũ�������� Ʈ���� �ϵ��ڵ�
+				// 크리스마스 트리용 하드코딩
 				if(m_Sprite[i].pos == -300)
 				{
 					blt_y = (0 - m_desc_scroll)*m_desc_y_distance;
 				}
 				
-				if(blt_y < 0)//��� cliping
+				if(blt_y < 0)//상단 cliping
 				{
 					if(blt_y + rect.h > 0)
 					{
@@ -94,7 +94,7 @@ void C_VS_UI_DESC::ShowDesc(int x, int y)
 					}
 				}
 				
-				if(blt_y + rect.h > m_desc_col*m_desc_y_distance)//�ϴ� cliping
+				if(blt_y + rect.h > m_desc_col*m_desc_y_distance)//하단 cliping
 				{
 					if(blt_y < m_desc_col*m_desc_y_distance)
 					{
@@ -120,7 +120,7 @@ void C_VS_UI_DESC::ShowDesc(int x, int y)
 					{
 						WORD * p_dest = (WORD *)surface_info.p_surface+m_desc_x+x+rt.left;
 						p_dest = (WORD *)((BYTE *)p_dest+((m_desc_y + blt_y+y)+rt.top)*surface_info.pitch);
-						// ũ�������� Ʈ���� �ϵ��ڵ�
+						// 크리스마스 트리용 하드코딩
 						if(m_Sprite[i].pos == -300)
 						{
 							p_dest += 200;
@@ -159,7 +159,7 @@ void C_VS_UI_DESC::ShowDesc(int x, int y)
 
 				if(m_desc_title.size()-scroll > 110)
 				{
-					// ���������� ��ũ�� ����
+					// 오른쪽으로 스크롤 상태
 					len=110;
 					if(!g_PossibleStringCut(m_desc_title.c_str(),scroll+len))
 						len-=1;
@@ -171,7 +171,7 @@ void C_VS_UI_DESC::ShowDesc(int x, int y)
 				;//	rightscroll=false;
 			} /*else
 			{
-				// �������� ��ũ�� ����
+				// 왼쪽으로 스크롤 상태
 				if(scroll<0)
 				{
 					scroll=0;
@@ -190,7 +190,7 @@ void C_VS_UI_DESC::ShowDesc(int x, int y)
 			g_PrintColorStr(m_desc_title_x+x, m_desc_title_y+y, m_desc_title.c_str(), m_title_pi, m_title_color);
 	}
 
-	// ����
+	// 내용
 	char *p_temp;
 	for(i=m_desc_scroll; i<m_desc_col+m_desc_scroll && i<m_desc.size();i++)
 	{
@@ -206,7 +206,7 @@ void C_VS_UI_DESC::ShowDesc(int x, int y)
 
 ////////////////////////////////////////////////////////////////////////
 // C_VS_UI_DESC::LoadDesc
-// txt�� �� description������ �ҷ��´�.
+// txt로 된 description파일을 불러온다.
 ////////////////////////////////////////////////////////////////////////
 bool	C_VS_UI_DESC::LoadDesc(const char *szFilename, int row, int col, bool bl_title, int CoreZapID)
 {
@@ -223,7 +223,7 @@ bool	C_VS_UI_DESC::LoadDesc(const char *szFilename, int row, int col, bool bl_ti
 		return false;
 
 	bool indent = false;
-	//��� ���ڿ� ����
+	//상단 문자열 삽입
 
 	int check, w=0, h=0, w2=0, pack = 0;
 
@@ -259,7 +259,7 @@ bool	C_VS_UI_DESC::LoadDesc(const char *szFilename, int row, int col, bool bl_ti
 
 		temp_string = szLine;
 
-		bool string_replaced = false;		for(int i = 0; i < m_ori_string.size(); i++)//���ڿ� ��ü
+		for(int i = 0; i < m_ori_string.size(); i++)//문자열 대체
 		{
 			int re = temp_string.find(m_ori_string[i]);
 			if(re != -1)
@@ -283,35 +283,35 @@ bool	C_VS_UI_DESC::LoadDesc(const char *szFilename, int row, int col, bool bl_ti
 		}
 		if(string_replaced) continue;
 
-		if(temp_string[0] == '&')//�ѹ�ȣ
+		if(temp_string[0] == '&')//팩번호
 		{
 			pack = atoi(temp_string.c_str()+1);
 			continue;
 		}
 
-		if(temp_string[0] == '(')//�ѹ�ȣ
+		if(temp_string[0] == '(')//팩번호
 		{
 			m_delimiter_pack = atoi(temp_string.c_str()+1);
 			continue;
 		}
 
-		if(temp_string[0] == ')')//�ѹ�ȣ
+		if(temp_string[0] == ')')//팩번호
 		{
 			m_delimiter_sprite = atoi(temp_string.c_str()+1);
 			continue;
 		}
 
-		if(temp_string[0] == '%')//�׸����� �׸� �±�
+		if(temp_string[0] == '%')//그림삽입 그림 태그
 		{
 			int spr_id = atoi(temp_string.c_str()+1);
 
-			if(m_ori_string.empty() && !m_rep_string.empty())//item�ΰ��
+			if(m_ori_string.empty() && !m_rep_string.empty())//item인경우
 			{
-				// 2004, 7, 6 sobeit modify start - �ھ��� �̹����� �����ֱ� ���Ͽ�~ -_- ���� �ڵ尡 ���� �̻���..
+				// 2004, 7, 6 sobeit modify start - 코어잽 이미지도 보여주기 위하여~ -_- 여기 코드가 무지 이상함..
 				int HasCoreZap = (CoreZapID==-1)?0:1;
 
 				CSpritePack *temp = new CSpritePack;
-				temp->Init( 1 + HasCoreZap );		// �ӽ÷� 1���� loading.. - -;;
+				temp->Init( 1 + HasCoreZap );		// 임시로 1개만 loading.. - -;;
 				
 				bool re = temp->LoadFromFileData( 0, spr_id, SPK_ITEM, SPKI_ITEM );
 				assert(re);
@@ -324,7 +324,7 @@ bool	C_VS_UI_DESC::LoadDesc(const char *szFilename, int row, int col, bool bl_ti
 			
 				m_pC_inpicture.push_back(temp);
 
-				// ũ�������� Ʈ���� �ϵ� �ڵ�
+				// 크리스마스 트리용 하드 코딩
 				if(spr_id == 371)
 					SetSprite(m_pC_inpicture.size()-1, 0, -300);
 				else
@@ -339,15 +339,15 @@ bool	C_VS_UI_DESC::LoadDesc(const char *szFilename, int row, int col, bool bl_ti
 				w2 = 0;
 				h = ((*m_pC_inpicture[m_pC_inpicture.size()-1])[0].GetHeight() -1)/ m_desc_y_distance +1 - m_rep_string.size();
 			}
-			else//item�� �ƴѰ��
+			else//item이 아닌경우
 			{
-				while(h > 0)	// �׸��� ��ġ�� �ʰ��Ѵ�
+				while(h > 0)	// 그림이 겹치지 않게한다
 				{
 					h--;
 					m_desc.push_back("");
 				};
 
-				int pos = m_desc.size();	//�׸���ġ ����
+				int pos = m_desc.size();	//그림위치 조정
 				if(bl_title)
 				{
 					int offset = 1;
@@ -375,7 +375,7 @@ bool	C_VS_UI_DESC::LoadDesc(const char *szFilename, int row, int col, bool bl_ti
 		}
 		else
 		{
-			if(h > 0 && w2 == 0)	// tab���ڿ��� �ƴѰ��� �׸��� ��ġ�� �ʰ� ����
+			if(h > 0 && w2 == 0)	// tab문자열이 아닌것이 그림에 겹치지 않게 조정
 			{
 				while(h>0)
 				{
@@ -383,7 +383,7 @@ bool	C_VS_UI_DESC::LoadDesc(const char *szFilename, int row, int col, bool bl_ti
 					m_desc.push_back("");
 				}
 			}
-			else if(indent)		// tab���ڿ��� �Ϲ� ���ڿ��� �� �� ���
+			else if(indent)		// tab문자열과 일반 문자열은 한 줄 띄움
 			{
 				m_desc.push_back("");
 				indent = false;
@@ -440,7 +440,7 @@ bool	C_VS_UI_DESC::LoadDesc(const char *szFilename, int row, int col, bool bl_ti
 
 	m_pack_file.Release();
 
-	if(bl_title)	// ����� ù���� Ÿ��Ʋ��
+	if(bl_title)	// 상단의 첫줄을 타이틀로
 	{
 		m_desc_title = m_desc[0];
 		m_desc.erase(m_desc.begin());
@@ -461,7 +461,7 @@ bool	C_VS_UI_DESC::LoadDesc(const char *szFilename, int row, int col, bool bl_ti
 
 ////////////////////////////////////////////////////////////////////////
 // C_VS_UI_DESC::SetSprite
-// DESC���� Sprite�� �����Ѵ�
+// DESC안의 Sprite를 세팅한다
 ////////////////////////////////////////////////////////////////////////
 void	C_VS_UI_DESC::SetSprite(int pack, int num, int line)				
 {
@@ -475,7 +475,7 @@ void	C_VS_UI_DESC::SetSprite(int pack, int num, int line)
 
 ////////////////////////////////////////////////////////////////////////
 // C_VS_UI_DESC::LoadDesc
-// memory���� ���� ���� - by sobeit
+// memory에서 직접 세팅 - by sobeit
 ////////////////////////////////////////////////////////////////////////
 bool	C_VS_UI_DESC::LoadDescFromString(const char *szString, int row, int col, bool bl_title, int CoreZapID)
 {
@@ -488,7 +488,7 @@ bool	C_VS_UI_DESC::LoadDescFromString(const char *szString, int row, int col, bo
 	m_Sprite.clear();
 
 	bool indent = false;
-	//��� ���ڿ� ����
+	//상단 문자열 삽입
 
 	int check, w=0, h=0, w2=0, pack = 0;
 
@@ -524,7 +524,7 @@ bool	C_VS_UI_DESC::LoadDescFromString(const char *szString, int row, int col, bo
 
 		temp_string = szString;
 
-		for(int i = 0; i < m_ori_string.size(); i++)//���ڿ� ��ü
+		for(int i = 0; i < m_ori_string.size(); i++)//문자열 대체
 		{
 			int re = temp_string.find(m_ori_string[i]);
 			if(re != -1)
@@ -547,35 +547,35 @@ bool	C_VS_UI_DESC::LoadDescFromString(const char *szString, int row, int col, bo
 		}
 //		if(i != m_ori_string.size())continue;
 //
-//		if(temp_string[0] == '&')//�ѹ�ȣ
+//		if(temp_string[0] == '&')//팩번호
 //		{
 //			pack = atoi(temp_string.c_str()+1);
 //			continue;
 //		}
 //
-//		if(temp_string[0] == '(')//�ѹ�ȣ
+//		if(temp_string[0] == '(')//팩번호
 //		{
 //			m_delimiter_pack = atoi(temp_string.c_str()+1);
 //			continue;
 //		}
 //
-//		if(temp_string[0] == ')')//�ѹ�ȣ
+//		if(temp_string[0] == ')')//팩번호
 //		{
 //			m_delimiter_sprite = atoi(temp_string.c_str()+1);
 //			continue;
 //		}
 //
-//		if(temp_string[0] == '%')//�׸����� �׸� �±�
+//		if(temp_string[0] == '%')//그림삽입 그림 태그
 //		{
 //			int spr_id = atoi(temp_string.c_str()+1);
 //
-//			if(m_ori_string.empty() && !m_rep_string.empty())//item�ΰ��
+//			if(m_ori_string.empty() && !m_rep_string.empty())//item인경우
 //			{
-//				// 2004, 7, 6 sobeit modify start - �ھ��� �̹����� �����ֱ� ���Ͽ�~ -_- ���� �ڵ尡 ���� �̻���..
+//				// 2004, 7, 6 sobeit modify start - 코어잽 이미지도 보여주기 위하여~ -_- 여기 코드가 무지 이상함..
 //				int HasCoreZap = (CoreZapID==-1)?0:1;
 //
 //				CSpritePack *temp = new CSpritePack;
-//				temp->Init( 1 + HasCoreZap );		// �ӽ÷� 1���� loading.. - -;;
+//				temp->Init( 1 + HasCoreZap );		// 임시로 1개만 loading.. - -;;
 //				
 //				bool re = temp->LoadFromFileData( 0, spr_id, SPK_ITEM, SPKI_ITEM );
 //				assert(re);
@@ -588,7 +588,7 @@ bool	C_VS_UI_DESC::LoadDescFromString(const char *szString, int row, int col, bo
 //			
 //				m_pC_inpicture.push_back(temp);
 //
-//				// ũ�������� Ʈ���� �ϵ� �ڵ�
+//				// 크리스마스 트리용 하드 코딩
 //				if(spr_id == 371)
 //					SetSprite(m_pC_inpicture.size()-1, 0, -300);
 //				else
@@ -603,15 +603,15 @@ bool	C_VS_UI_DESC::LoadDescFromString(const char *szString, int row, int col, bo
 //				w2 = 0;
 //				h = ((*m_pC_inpicture[m_pC_inpicture.size()-1])[0].GetHeight() -1)/ m_desc_y_distance +1 - m_rep_string.size();
 //			}
-//			else//item�� �ƴѰ��
+//			else//item이 아닌경우
 //			{
-//				while(h > 0)	// �׸��� ��ġ�� �ʰ��Ѵ�
+//				while(h > 0)	// 그림이 겹치지 않게한다
 //				{
 //					h--;
 //					m_desc.push_back("");
 //				};
 //
-//				int pos = m_desc.size();	//�׸���ġ ����
+//				int pos = m_desc.size();	//그림위치 조정
 //				if(bl_title)
 //				{
 //					for(i = 1; !strcmp(m_desc[i].c_str(),""); i++);
@@ -638,7 +638,7 @@ bool	C_VS_UI_DESC::LoadDescFromString(const char *szString, int row, int col, bo
 		}
 		else
 		{
-			if(h > 0 && w2 == 0)	// tab���ڿ��� �ƴѰ��� �׸��� ��ġ�� �ʰ� ����
+			if(h > 0 && w2 == 0)	// tab문자열이 아닌것이 그림에 겹치지 않게 조정
 			{
 				while(h>0)
 				{
@@ -646,7 +646,7 @@ bool	C_VS_UI_DESC::LoadDescFromString(const char *szString, int row, int col, bo
 					m_desc.push_back("");
 				}
 			}
-			else if(indent)		// tab���ڿ��� �Ϲ� ���ڿ��� �� �� ���
+			else if(indent)		// tab문자열과 일반 문자열은 한 줄 띄움
 			{
 				m_desc.push_back("");
 				indent = false;
@@ -703,7 +703,7 @@ bool	C_VS_UI_DESC::LoadDescFromString(const char *szString, int row, int col, bo
 
 	m_pack_file.Release();
 
-	if(bl_title)	// ����� ù���� Ÿ��Ʋ��
+	if(bl_title)	// 상단의 첫줄을 타이틀로
 	{
 		m_desc_title = m_desc[0];
 		m_desc.erase(m_desc.begin());

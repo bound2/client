@@ -21,33 +21,33 @@ std::ifstream;
 
 
 //----------------------------------------------------------------------
-// width * height��ŭ�� pixel�� �����صд�.
+// width * height만큼의 pixel을 저장해둔다.
 //----------------------------------------------------------------------
-// �� pixel�� �����ϴ� ����� ������ ����.
+// 한 pixel을 저장하는 방법은 다음과 같다.
 //
 //    [1] 5:5:5 --> 2 bytes
 //    [2] 5:6:5 --> 2 bytes
 //    [3] R,G,B --> 3 bytes
 //
-// [3]�� �뷮�� Ŀ�� �������Ƿ� [2]�� ����� ����ؼ�
-// 5:5:5�� ���� ������� ����ǵ��� �Ѵ�.
+// [3]은 용량이 커서 안좋으므로 [2]번 방법을 사용해서
+// 5:5:5로 같은 방식으로 저장되도록 한다.
 //
-// Memory�� 5:5:5�� 5:6:5�� ���������
-// disk���� 5:6:5�� ����ȴ�.
+// Memory는 5:5:5나 5:6:5로 사용하지만
+// disk에는 5:6:5로 저장된다.
 //
-// ��, 5:5:5�� ����ϴ� system������ 
-//    File(5:6:5) ---(5:5:5�� ��ȯ)--> Memory(5:5:5)
-//    File(5:6:5) <--(5:6:5�� ��ȯ)--- Memory(5:5:5)  �̷��� �ؾߵȴ�.
+// 즉, 5:5:5를 사용하는 system에서는 
+//    File(5:6:5) ---(5:5:5로 변환)--> Memory(5:5:5)
+//    File(5:6:5) <--(5:6:5로 변환)--- Memory(5:5:5)  이렇게 해야된다.
 //
 //----------------------------------------------------------------------
-// ���������� 0�� ������ ����Ѵ�.
+// 내부적으로 0번 압축을 사용한다.
 //
-// = �� ���� ����
+// = 한 줄의 정보
 //
-// (�ݺ�ȸ��) (������, �����, �����(alpha,����,alpha,����...)) (������, �����, �����(alpha,����,alpha,����...)...) ..
+// (반복회수) (투명수, 색깔수, 색깔들(alpha,색깔,alpha,색깔...)) (투명수, 색깔수, 색깔들(alpha,색깔,alpha,색깔...)...) ..
 //
 //
-// Alpha���� ������ ���� �����Ѵ�.
+// Alpha값과 색깔값을 같이 저장한다.
 //----------------------------------------------------------------------
 
 class CAlphaSprite
@@ -62,18 +62,18 @@ class CAlphaSprite
 		void		operator = (const CAlphaSprite& Sprite);
 
 		//---------------------------------------------------------
-		// m_Pixels�� memory�� Release�Ѵ�.		
+		// m_Pixels의 memory를 Release한다.		
 		//---------------------------------------------------------
 		void		Release();
 
 		//---------------------------------------------------------
-		// ���� Color 
+		// 투명 Color 
 		//---------------------------------------------------------
 		static void	SetColorkey(WORD color)			{ s_Colorkey = color; }
 		static WORD	GetColorkey() 					{ return s_Colorkey; }
 
 		//---------------------------------------------------------
-		// fstream���� save/load�� �Ѵ�.
+		// fstream에서 save/load를 한다.
 		//---------------------------------------------------------
 		virtual bool		SaveToFile(std::ofstream& file) = 0;
 		virtual bool		LoadFromFile(std::ifstream& file) = 0;		
@@ -81,13 +81,13 @@ class CAlphaSprite
 		//void		LoadFromBuffer();
 			
 		//---------------------------------------------------------
-		// CDirectDrawSurface�� ������ �о m_Pixels�� �����Ѵ�.
+		// CDirectDrawSurface의 영역을 읽어서 m_Pixels에 저장한다.
 		//---------------------------------------------------------
 		void		SetPixel(WORD* pSource, WORD sourcePitch, 
 							 WORD* pFilter, WORD filterPitch, 
 							 WORD width, WORD height);
 
-		// (x,y)�� sprite�� ���� �κ��ΰ�?
+		// (x,y)는 sprite의 색깔 부분인가?
 		bool		IsColorPixel(short x, short y);
 
 		//---------------------------------------------------------
@@ -113,7 +113,7 @@ class CAlphaSprite
 		//---------------------------------------------------------
 
 		//---------------------------------------------------------
-		// �������� Blt
+		// 정상적인 Blt
 		//---------------------------------------------------------
 		void		Blt(WORD *pDest, WORD pitch);				
 		void		BltClip(WORD* pDest, WORD pitch, RECT* pRect);
@@ -132,7 +132,7 @@ class CAlphaSprite
 		void		Blt4444ClipHeight(WORD *pDest, WORD pitch, RECT* pRect);
 
 		//---------------------------------------------------------
-		// Blt 4444 NotTrans for Texture (�����κе� �˰� ĥ�Ѵ�)
+		// Blt 4444 NotTrans for Texture (투명부분도 검게 칠한다)
 		//---------------------------------------------------------
 		void		Blt4444NotTrans(WORD *pDest, WORD pitch);				
 		void		Blt4444NotTransClipLeft(WORD *pDest, WORD pitch, RECT* pRect);
@@ -141,17 +141,17 @@ class CAlphaSprite
 		void		Blt4444NotTransClipHeight(WORD *pDest, WORD pitch, RECT* pRect);
 
 		//---------------------------------------------------------
-		// shift��ŭ shift�ؼ� ũ�⸦ �۰� ��½�Ų��.
+		// shift만큼 shift해서 크기를 작게 출력시킨다.
 		//---------------------------------------------------------
 		void		Blt4444SmallNotTrans(WORD *pDest, WORD pitch, BYTE shift);
 
 		//---------------------------------------------------------
-		// �¿� �ٲ�
+		// 좌우 바뀜
 		//---------------------------------------------------------
 	
 
 		//---------------------------------------------------------
-		// ������
+		// 반투명
 		//---------------------------------------------------------
 		//void		BltHalf(WORD *pDest, WORD pitch);		
 		//void		BltHalfClipLeft(WORD *pDest, WORD pitch, RECT* pRect);
@@ -168,7 +168,7 @@ class CAlphaSprite
 		void		BltAlphaClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha);
 
 		//---------------------------------------------------------
-		// RGB�� �ٲ�
+		// RGB값 바뀜
 		//---------------------------------------------------------
 		//void		BltColor(WORD *pDest, WORD pitch, BYTE rgb);		
 		//void		BltColorClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb);
@@ -176,7 +176,7 @@ class CAlphaSprite
 		//void		BltColorClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb);
 
 		//---------------------------------------------------------
-		// ��Ӱ� �ϱ�
+		// 어둡게 하기
 		//---------------------------------------------------------
 		//void		BltDarkness(WORD *pDest, WORD pitch, BYTE DarkBits);		
 		//void		BltDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE DarkBits);
@@ -192,7 +192,7 @@ class CAlphaSprite
 		//void		BltEffectClipHeight(WORD *pDest, WORD pitch, RECT* pRect);
 
 		//---------------------------------------------------------
-		// AlphaChannel Filter�� �̿��� ���
+		// AlphaChannel Filter를 이용한 출력
 		//---------------------------------------------------------
 		//void		BltAlphaFilter(WORD *pDest, WORD pitch, CFilter* pFilter);		
 
@@ -224,10 +224,10 @@ class CAlphaSprite
 
 
 	protected :
-		WORD			m_Width;		// ���� pixel��
-		WORD			m_Height;		// ���� pixel��
+		WORD			m_Width;		// 가로 pixel수
+		WORD			m_Height;		// 세로 pixel수		
 		WORD**			m_Pixels;		// pixels
-		bool			m_bInit;		// data�� �ִ°�?
+		bool			m_bInit;		// data가 있는가?
 
 #ifdef SPRITELIB_BACKEND_SDL
 		spritectl_sprite_t	m_backend_sprite;	// Backend sprite handle

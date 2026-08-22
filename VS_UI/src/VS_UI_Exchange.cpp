@@ -153,7 +153,7 @@ C_VS_UI_EXCHANGE::C_VS_UI_EXCHANGE()
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(x+button_x, y+ok_button_y, gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_BUTTON_O), gpC_global_resource->m_pC_assemble_box_button_spk->GetHeight(C_GLOBAL_RESOURCE::AB_BUTTON_O), EXCHANGE_OK_ID, this, C_GLOBAL_RESOURCE::AB_BUTTON_O));
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(x+help_x, y+help_y, gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_BUTTON_QUESTION), gpC_global_resource->m_pC_assemble_box_button_spk->GetHeight(C_GLOBAL_RESOURCE::AB_BUTTON_QUESTION), HELP_ID, this, C_GLOBAL_RESOURCE::AB_BUTTON_QUESTION));
 
-	// ���� ������ pointer.. by sigi
+	// 단지 참조용 pointer.. by sigi
 	m_pC_button_cancel = new C_VS_UI_EVENT_BUTTON(x+button_x, y+close_button_y, gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_BUTTON_X), gpC_global_resource->m_pC_assemble_box_button_spk->GetHeight(C_GLOBAL_RESOURCE::AB_BUTTON_X), EXCHANGE_CANCEL_ID, this, C_GLOBAL_RESOURCE::AB_BUTTON_X);
 	m_pC_button_group->Add(m_pC_button_cancel);
 
@@ -178,7 +178,7 @@ C_VS_UI_EXCHANGE::C_VS_UI_EXCHANGE()
 
 	MItem* pItem;
 	//----------------------------------------------------
-	// Item ���� --> �߰�
+	// Item 생성 --> 추가
 	//----------------------------------------------------
 	pItem = MItem::NewItem( ITEM_CLASS_PET_ITEM );
 	pItem->SetID( 6120 );
@@ -189,7 +189,7 @@ C_VS_UI_EXCHANGE::C_VS_UI_EXCHANGE()
 	g_pTradeManager->GetOtherInventory()->AddItem( pItem,  2, 1 );
 
 	//----------------------------------------------------
-	// Item ���� --> �߰�
+	// Item 생성 --> 추가
 	//----------------------------------------------------
 	pItem = MItem::NewItem( ITEM_CLASS_POTION );
 	pItem->SetID( 361 );
@@ -199,7 +199,7 @@ C_VS_UI_EXCHANGE::C_VS_UI_EXCHANGE()
 	g_pTradeManager->GetOtherInventory()->AddItem( pItem,  4, 0 );
 
 	//----------------------------------------------------
-	// Item ���� --> �߰�
+	// Item 생성 --> 추가
 	//----------------------------------------------------
 	pItem = MItem::NewItem( ITEM_CLASS_COAT );
 	pItem->SetID( 642 );
@@ -208,7 +208,7 @@ C_VS_UI_EXCHANGE::C_VS_UI_EXCHANGE()
 	pItem->SetCurrentDurability( 300 );	
 	g_pTradeManager->GetOtherInventory()->AddItem( pItem,  7, 2 );
 	
-	//g_pTradeManager->AcceptOtherTrade();	// �ٸ� ����� OK����.
+	//g_pTradeManager->AcceptOtherTrade();	// 다른 사람이 OK누름.
 #endif
 }
 
@@ -229,13 +229,13 @@ C_VS_UI_EXCHANGE::~C_VS_UI_EXCHANGE()
 //-----------------------------------------------------------------------------
 // C_VS_UI_EXCHANGE::Click
 //
-// ���� Item�� ��� ������ ������ ��ü�ϰ�, ��� ���� ������ ��ȯâ�� �ִ�
-// ���� ���´�.
+// 현재 Item을 들고 있으면 놓던가 교체하고, 들고 있지 않으면 교환창에 있는
+// 것을 집는다.
 //
-// ���� �ߴٸ� true��, �׷��������� false�� ��ȯ�Ѵ�.
+// 뭔가 했다면 true를, 그렇지않으면 false를 반환한다.
 //
-// grid_start_x, grid_start_y�� igrid �������̴�. �̰��� �����Ͽ� item
-// (x, y)�� ���Ѵ�.
+// grid_start_x, grid_start_y는 igrid 시작점이다. 이것을 참조하여 item
+// (x, y)를 구한다.
 //-----------------------------------------------------------------------------
 bool C_VS_UI_EXCHANGE::Click(int grid_start_x, int grid_start_y)
 {
@@ -249,50 +249,50 @@ bool C_VS_UI_EXCHANGE::Click(int grid_start_x, int grid_start_y)
 	int item_x, item_y;
 
 	//-----------------------------------------------------------
-	// ���� OK�� ���� �����ΰ�??
+	// 내가 OK를 누른 상태인가??
 	//-----------------------------------------------------------
 	BOOL bAcceptTrade = g_pTradeManager->IsAcceptMyTrade();
 
 	//-----------------------------------------------------------
-	// inventory�� �ִ°Ͱ� ��ȯ�ϰų�.. �׳� ������
+	// inventory에 있는것과 교환하거나.. 그냥 놓을때
 	//-----------------------------------------------------------
-	if (gpC_mouse_pointer->GetPickUpItem()) // ��� �ִ°�?
+	if (gpC_mouse_pointer->GetPickUpItem()) // 들고 있는가?
 	{
 		const MItem* p_cur_item = g_pTradeManager->GetMyInventory()->GetItem(m_focus_grid_x, m_focus_grid_y);
 
 		//-----------------------------------------------------------
-		// �ѿ� źâ�� ����� �Ͱ� ���� ���� insert item�̴�.
+		// 총에 탄창을 끼우는 것과 같은 것이 insert item이다.
 		//-----------------------------------------------------------
 		if (gpC_mouse_pointer->GetPickUpItem()->IsInsertToItem( p_cur_item ))
 		{
-			// ������ �ִ� item�� �߰��� �� �ִ� ���
+			// 이전에 있던 item에 추가될 수 있는 경우
 
-			// ��� Item�� ��� �ִ�(�߰��� Item)�� Client���� �˾ƾ� �Ѵ�.
-			// ��� �ִ� Item�� Client���� access�� �� �����Ƿ� ��� Item�� ������.
+			// 대상 Item과 들고 있는(추가할 Item)을 Client에서 알아야 한다.
+			// 들고 있는 Item은 Client에서 access할 수 있으므로 대상 Item을 보낸다.
 			gpC_base->SendMessage(UI_ITEM_INSERT_FROM_INVENTORY,
 																  m_focus_grid_x, m_focus_grid_y,
-																  (void *)p_cur_item); // ��� Item
+																  (void *)p_cur_item); // 대상 Item
 		}
 		//-----------------------------------------------------------
-		// inventory�� �����۰� mouse �������� �ٲ�� ���
+		// inventory의 아이템과 mouse 아이템이 바뀌는 경우
 		//-----------------------------------------------------------
 		else
 		{	
-			// �߰��� �� ���� ���
+			// 추가될 수 없는 경우
 			MItem* p_old_item  = NULL;
 
 			//-----------------------------------------------------------
-			// ���� OK���� ����
+			// 내가 OK누른 상태
 			//-----------------------------------------------------------
 			if (bAcceptTrade)
 			{
-				if (g_pTradeManager->GetMyInventory()->CanReplaceItem(gpC_mouse_pointer->GetPickUpItem(),		// �߰��� item
-															m_focus_grid_x, m_focus_grid_y,	// �߰��� ��ġ 
-															p_old_item))								// �����ִ� item
+				if (g_pTradeManager->GetMyInventory()->CanReplaceItem(gpC_mouse_pointer->GetPickUpItem(),		// 추가할 item
+															m_focus_grid_x, m_focus_grid_y,	// 추가할 위치 
+															p_old_item))								// 원래있던 item
 				{
 					gpC_base->SendMessage(UI_ITEM_DROP_TO_INVENTORY,
 											  m_focus_grid_x, m_focus_grid_y,
-											  p_old_item); // ��� �ִ� ���� ������.
+											  p_old_item); // 들고 있던 것을 보낸다.
 				}
 				else
 				{
@@ -301,24 +301,24 @@ bool C_VS_UI_EXCHANGE::Click(int grid_start_x, int grid_start_y)
 				}
 			}
 			//-----------------------------------------------------------
-			// OK �� ���� ����
+			// OK 안 누른 상태
 			//-----------------------------------------------------------
 			else
 			{
-				if (g_pTradeManager->GetMyInventory()->CanReplaceItem(gpC_mouse_pointer->GetPickUpItem(),		// �߰��� item
-															m_focus_grid_x, m_focus_grid_y,	// �߰��� ��ġ 
-															p_old_item))								// �����ִ� item
+				if (g_pTradeManager->GetMyInventory()->CanReplaceItem(gpC_mouse_pointer->GetPickUpItem(),		// 추가할 item
+															m_focus_grid_x, m_focus_grid_y,	// 추가할 위치 
+															p_old_item))								// 원래있던 item
 				{
-					if (p_old_item != NULL) // replace �Ǿ��°�?
+					if (p_old_item != NULL) // replace 되었는가?
 					{
 						item_x = grid_start_x+p_old_item->GetGridX()*C_VS_UI_INVENTORY::GRID_UNIT_PIXEL_X+(p_old_item->GetGridWidth()*C_VS_UI_INVENTORY::GRID_UNIT_PIXEL_X)/2-gpC_item->GetWidth(p_old_item->GetInventoryFrameID())/2;
 						item_y = grid_start_y+p_old_item->GetGridY()*C_VS_UI_INVENTORY::GRID_UNIT_PIXEL_Y+(p_old_item->GetGridHeight()*C_VS_UI_INVENTORY::GRID_UNIT_PIXEL_Y)/2-gpC_item->GetHeight(p_old_item->GetInventoryFrameID())/2;
 
 						gpC_base->SendMessage(UI_ITEM_DROP_TO_INVENTORY,
 											  m_focus_grid_x, m_focus_grid_y,
-											  p_old_item); // ��ȯ�� ������..
+											  p_old_item); // 교환될 아이템..
 
-						// UI���� �ٲ�� �Ѵ�.
+						// UI에서 바꿔야 한다.
 						//gpC_mouse_pointer->PickUpItem((MItem *)p_old_item);
 					}
 					else
@@ -329,7 +329,7 @@ bool C_VS_UI_EXCHANGE::Click(int grid_start_x, int grid_start_y)
 											  m_focus_grid_x, m_focus_grid_y,
 											  p_old_item);
 
-						// 100% ���� �� �����ϱ� UI���� drop��Ų��.
+						// 100% 놓을 수 있으니까 UI에서 drop시킨다.
 						//gpC_mouse_pointer->DropItem();
 					}
 				}
@@ -342,18 +342,18 @@ bool C_VS_UI_EXCHANGE::Click(int grid_start_x, int grid_start_y)
 		}
 	}
 	//-----------------------------------------------------------
-	// inventory�� �ִ� �� ���� ��
+	// inventory에 있는 걸 집을 때
 	//-----------------------------------------------------------
 	else
 	{
-		// ���´�.
+		// 집는다.
 		const MItem * p_item = g_pTradeManager->GetMyInventory()->GetItem(m_focus_grid_x, m_focus_grid_y);
 
-		if (p_item != NULL) // Item�� �ִ�.
+		if (p_item != NULL) // Item이 있다.
 		{
 			{
 				//-----------------------------------------------------------
-				// OK ���� ����
+				// OK 누른 상태
 				//-----------------------------------------------------------
 				if (bAcceptTrade)
 				{
@@ -387,11 +387,11 @@ bool C_VS_UI_EXCHANGE::Click(int grid_start_x, int grid_start_y)
 //-----------------------------------------------------------------------------
 // C_VS_UI_EXCHANGE::Check
 //
-// ��ȯ�ҷ��� item�� üũ�Ѵ�. 
-// �̹� üũ�Ǿ��ִٸ�.. ����Ѵ�.
+// 교환할려는 item을 체크한다. 
+// 이미 체크되어있다면.. 취소한다.
 //
-// grid_start_x, grid_start_y�� igrid �������̴�. �̰��� �����Ͽ� item
-// (x, y)�� ���Ѵ�.
+// grid_start_x, grid_start_y는 igrid 시작점이다. 이것을 참조하여 item
+// (x, y)를 구한다.
 //-----------------------------------------------------------------------------
 bool C_VS_UI_EXCHANGE::Check(int grid_start_x, int grid_start_y)
 {
@@ -402,7 +402,7 @@ bool C_VS_UI_EXCHANGE::Check(int grid_start_x, int grid_start_y)
 		return false;
 	}
 	
-	// ���´�.
+	// 집는다.
 	const MItem * p_item = g_pTradeManager->GetMyInventory()->GetItem(m_focus_grid_x, m_focus_grid_y);
 
 	if (p_item != NULL && p_item->GetItemClass() != ITEM_CLASS_RELIC
@@ -410,9 +410,9 @@ bool C_VS_UI_EXCHANGE::Check(int grid_start_x, int grid_start_y)
 		&& p_item->GetItemClass() != ITEM_CLASS_COUPLE_RING
 		&& p_item->GetItemClass() != ITEM_CLASS_VAMPIRE_COUPLE_RING
 		&& !p_item->IsQuestItem()
-		) // Item�� �ִ�. �׸��� ������ �ƴϴ�.
+		) // Item이 있다. 그리고 성물이 아니다.
 	{
-		// ó���� client�� �ñ��.
+		// 처리는 client에 맡긴다.
 		gpC_base->SendMessage(UI_ITEM_SELECT_EXCHANGE,
 							  m_focus_grid_x, m_focus_grid_y,
 							  (MItem *)p_item);				
@@ -543,13 +543,13 @@ void	C_VS_UI_EXCHANGE::Run(id_t id)
 	{
 		case EXCHANGE_OK_ID:
 			if(!g_pTradeManager->IsAcceptTime())break;
-			// OK�ѰŸ� ����Ҽ� �ְ� �Ѵ�.
+			// OK한거를 취소할수 있게 한다.
 			if (m_pC_button_cancel!=NULL)
 			{
 				m_pC_button_cancel->SetID( EXCHANGE_OK_CANCEL_ID );
 			}
 			
-			// �̹� ������ ���°� �ƴ� ��츸 �޼��� ������.
+			// 이미 눌려진 상태가 아닌 경우만 메세지 보낸다.
 			if (!g_pTradeManager->IsAcceptMyTrade())
 			{
 				gpC_base->SendMessage(UI_OK_EXCHANGE);
@@ -557,7 +557,7 @@ void	C_VS_UI_EXCHANGE::Run(id_t id)
 			//m_CheckMoneyMove = true;
 			break;
 
-		// OK�ѰŸ� ����ϴ� ��� --> cancel�� �ٽ� ������(-_-;) cancel�� �ٲ��.
+		// OK한거를 취소하는 경우 --> cancel은 다시 진정한(-_-;) cancel로 바뀐다.
 		case EXCHANGE_OK_CANCEL_ID :
 			if (m_pC_button_cancel!=NULL)
 			{
@@ -580,8 +580,8 @@ void	C_VS_UI_EXCHANGE::Run(id_t id)
 			break;
 
 		case MONEY_ID:
-			// money button�� ���ȴ�.
-			// ��ȯ�� ������ ����
+			// money button이 눌렸다.
+			// 교환할 돈에서 뺀다
 			DeleteNew(m_pC_dialog_withdraw_money);
 			if (false == m_CheckMoneyMove && g_pTradeManager->GetMyMoneyManager()->GetMoney() > 0)
 			{
@@ -595,8 +595,8 @@ void	C_VS_UI_EXCHANGE::Run(id_t id)
 			break;
 			
 		case INVENTORY_MONEY_ID:
-			// money button�� ���ȴ�.
-			// ��ȯ�� ���� �߰��Ѵ�.
+			// money button이 눌렸다.
+			// 교환할 돈을 추가한다.
 			DeleteNew(m_pC_dialog_exchange_money);
 			if (false == m_CheckMoneyMove && g_pMoneyManager->GetMoney() > 0)
 			{
@@ -771,7 +771,7 @@ bool	C_VS_UI_EXCHANGE::MouseControl(UINT message, int _x, int _y)
 
 					if (loop == ITEM_REF_POINT_COUNT)
 					{
-						// item�� grid ������ ������� ������ ������ ��ġ��Ų��.
+						// item이 grid 영역에 어느정도 들어오면 안으로 위치시킨다.
 						const MItem * p_pickup_item = gpC_mouse_pointer->GetPickUpItem();
 						int a, b;
 						switch (i)
@@ -826,7 +826,7 @@ bool	C_VS_UI_EXCHANGE::MouseControl(UINT message, int _x, int _y)
 
 					if (loop == ITEM_REF_POINT_COUNT)
 					{
-						// item�� grid ������ ������� ������ ������ ��ġ��Ų��.
+						// item이 grid 영역에 어느정도 들어오면 안으로 위치시킨다.
 						const MItem * p_pickup_item = gpC_mouse_pointer->GetPickUpItem();
 						int a, b;
 						switch (i)
@@ -877,7 +877,7 @@ bool	C_VS_UI_EXCHANGE::MouseControl(UINT message, int _x, int _y)
 		case M_LEFTBUTTON_DOWN:
 		case M_LB_DOUBLECLICK:
 			//
-			// Item�� ������ ���´�.
+			// Item을 집던가 놓는다.
 			//
 			{
 				bool ret = Click(m_my_grid_rect.x, m_my_grid_rect.y);
@@ -971,7 +971,7 @@ void	C_VS_UI_EXCHANGE::Show()
 		return;
 	}
 
-	//���� �����͵��� ����ص״ٰ� �Ѳ����� ��´�.
+	//글자 찍을것들을 기억해뒀다가 한꺼번에 찍는다.
 	std::vector<RECT>	vNumRect;
 	std::vector<int>	vNum;
 	
@@ -1004,7 +1004,7 @@ void	C_VS_UI_EXCHANGE::Show()
 		gpC_global_resource->m_pC_assemble_box_button_spk->BltLocked(x+m_your_money_button_point.x+25, y+m_your_money_button_point.y, C_GLOBAL_RESOURCE::AB_MONEY_BAR);
 
 		//----------------------------------------------------------------
-		// ������ OK��ư ���¸� ǥ���Ѵ�.
+		// 상대방의 OK버튼 상태를 표시한다.
 		//----------------------------------------------------------------
 		if(g_pTradeManager->IsAcceptOtherTrade()&&g_pTradeManager->IsAcceptTime())
 		{
@@ -1030,7 +1030,7 @@ void	C_VS_UI_EXCHANGE::Show()
 		{
 			const MItem * p_item = g_pTradeManager->GetMyInventory()->Get();
 
-			// p_item�� NULL�� �ݵ�� �ƴϴ�. �ֳ��ϸ� �����ϴ� �͸� Get()�ϱ� �����̴�.
+			// p_item은 NULL이 반드시 아니다. 왜냐하면 존재하는 것만 Get()하기 때문이다.
 			assert(p_item);
 
 			// frame id -> sprite id
@@ -1042,14 +1042,14 @@ void	C_VS_UI_EXCHANGE::Show()
 			int print_y = item_y + p_item->GetGridHeight()*C_VS_UI_INVENTORY::GRID_UNIT_PIXEL_Y - 12;
 			int print_x = item_x + p_item->GetGridWidth()*C_VS_UI_INVENTORY::GRID_UNIT_PIXEL_X-1;
 
-			// Item�� �����ִ� ���� ǥ��
+			// Item이 놓여있는 영역 표시
 			for (int j = 0; j < p_item->GetGridHeight(); j++)
 				for (int i = 0; i < p_item->GetGridWidth(); i++)
 				{
 //					int back_color = (p_item->GetGridY()+j)*C_VS_UI_INVENTORY::GRID_X+(p_item->GetGridX()+i);
 
 					//------------------------------------------------------------
-					// ��ȯ�ҷ��� �������� ���
+					// 교환할려는 아이템인 경우
 					//------------------------------------------------------------
 					if (p_item->IsTrade())
 					{
@@ -1069,7 +1069,7 @@ void	C_VS_UI_EXCHANGE::Show()
 						}						
 					}
 					//------------------------------------------------------------
-					// ��ȯ�ҷ��� �������� �ƴ� ���
+					// 교환할려는 아이템이 아닌 경우
 					//------------------------------------------------------------
 //					else
 //					{
@@ -1100,7 +1100,7 @@ void	C_VS_UI_EXCHANGE::Show()
 						eType == ITEMTABLE_INFO::ELEMENTAL_TYPE_EARTH
 						)
 					{
-						// 2004, 3, 9 sobeit - x,y ����
+						// 2004, 3, 9 sobeit - x,y 변경
 						//gpC_global_resource->m_pC_info_spk->BltLockedOutline(item_x-(p_item->GetGridWidth()*C_VS_UI_INVENTORY::GRID_UNIT_PIXEL_X)/2, item_y-(p_item->GetGridHeight()*C_VS_UI_INVENTORY::GRID_UNIT_PIXEL_Y)/2, RGB_WHITE, C_GLOBAL_RESOURCE::OUSTERS_ELEMENTAL_MARK_FIRE+eType);
 						gpC_global_resource->m_pC_info_spk->BltLockedOutline(GetFocusedItemGridX(p_item), GetFocusedItemGridY(p_item), RGB_WHITE, C_GLOBAL_RESOURCE::OUSTERS_ELEMENTAL_MARK_FIRE+eType);
 
@@ -1118,7 +1118,7 @@ void	C_VS_UI_EXCHANGE::Show()
 					CIndexSprite::SetUsingColorSet(const_cast<MItem *>(p_item)->GetItemOptionColorSet(), 0);
 
 				//------------------------------------------------------------
-				// ��ȯ�ҷ��� �������� ���
+				// 교환할려는 아이템인 경우
 				//------------------------------------------------------------
 				if (p_item->IsTrade())
 				{
@@ -1134,7 +1134,7 @@ void	C_VS_UI_EXCHANGE::Show()
 								eType == ITEMTABLE_INFO::ELEMENTAL_TYPE_EARTH
 								)
 							{
-								// 2004, 3, 9 sobeit - x,y ����
+								// 2004, 3, 9 sobeit - x,y 변경
 								//gpC_global_resource->m_pC_info_spk->BltLocked(item_x-(p_item->GetGridWidth()*C_VS_UI_INVENTORY::GRID_UNIT_PIXEL_X)/2, item_y-(p_item->GetGridHeight()*C_VS_UI_INVENTORY::GRID_UNIT_PIXEL_Y)/2, C_GLOBAL_RESOURCE::OUSTERS_ELEMENTAL_MARK_FIRE+eType);
 								gpC_global_resource->m_pC_info_spk->BltLocked(GetFocusedItemGridX(p_item), GetFocusedItemGridY(p_item), C_GLOBAL_RESOURCE::OUSTERS_ELEMENTAL_MARK_FIRE+eType);
 							}
@@ -1151,7 +1151,7 @@ void	C_VS_UI_EXCHANGE::Show()
 								eType == ITEMTABLE_INFO::ELEMENTAL_TYPE_EARTH
 								)
 							{
-								// 2004, 3, 9 sobeit - x,y ����
+								// 2004, 3, 9 sobeit - x,y 변경
 								//gpC_global_resource->m_pC_info_spk->BltLockedColor(item_x-(p_item->GetGridWidth()*C_VS_UI_INVENTORY::GRID_UNIT_PIXEL_X)/2, item_y-(p_item->GetGridHeight()*C_VS_UI_INVENTORY::GRID_UNIT_PIXEL_Y)/2, C_GLOBAL_RESOURCE::OUSTERS_ELEMENTAL_MARK_FIRE+eType, 0);
 								gpC_global_resource->m_pC_info_spk->BltLockedColor(GetFocusedItemGridX(p_item), GetFocusedItemGridY(p_item), C_GLOBAL_RESOURCE::OUSTERS_ELEMENTAL_MARK_FIRE+eType, 0);
 							}
@@ -1159,7 +1159,7 @@ void	C_VS_UI_EXCHANGE::Show()
 					}
 				}
 				//------------------------------------------------------------
-				// ��ȯ�ҷ��� �������� �ƴ� ���
+				// 교환할려는 아이템이 아닌 경우
 				//------------------------------------------------------------
 				else
 				{
@@ -1172,7 +1172,7 @@ void	C_VS_UI_EXCHANGE::Show()
 							eType == ITEMTABLE_INFO::ELEMENTAL_TYPE_EARTH
 							)
 						{
-							// 2004, 3, 9 sobeit - x,y ����
+							// 2004, 3, 9 sobeit - x,y 변경
 							//gpC_global_resource->m_pC_info_spk->BltLockedDarkness(item_x-(p_item->GetGridWidth()*C_VS_UI_INVENTORY::GRID_UNIT_PIXEL_X)/2, item_y-(p_item->GetGridHeight()*C_VS_UI_INVENTORY::GRID_UNIT_PIXEL_Y)/2, C_GLOBAL_RESOURCE::OUSTERS_ELEMENTAL_MARK_FIRE+eType, DARKBITS_NOT_TRADE);
 							gpC_global_resource->m_pC_info_spk->BltLockedDarkness(GetFocusedItemGridX(p_item), GetFocusedItemGridY(p_item), C_GLOBAL_RESOURCE::OUSTERS_ELEMENTAL_MARK_FIRE+eType, DARKBITS_NOT_TRADE);
 						}
@@ -1180,7 +1180,7 @@ void	C_VS_UI_EXCHANGE::Show()
 				}
 			}
 
-			//������ ���� ���� alphabox ���ڴ� ���� �ʴ´� ������ �״ٰ� ���߿� ���Ƽ� �Ѳ����� ��´�
+			//아이템 개수 찍을 alphabox 숫자는 찍지 않는다 저장해 뒀다가 나중에 몰아서 한꺼번에 찍는다
 			if(p_item->IsPileItem() || p_item->IsChargeItem())
 			{
 				RECT rt;
@@ -1206,7 +1206,7 @@ void	C_VS_UI_EXCHANGE::Show()
 
 		//----------------------------------------------------------------
 		//
-		// Item�� ��� ������ grid ��ġ�� �̸� �� �� �ֵ��� �Ѵ�.
+		// Item을 들고 있으면 grid 위치를 미리 알 수 있도록 한다.
 		//
 		//----------------------------------------------------------------
 		if (gpC_mouse_pointer->GetPickUpItem() && 
@@ -1243,7 +1243,7 @@ void	C_VS_UI_EXCHANGE::Show()
 		{
 			const MItem * p_item = g_pTradeManager->GetOtherInventory()->Get();
 
-			// p_item�� NULL�� �ݵ�� �ƴϴ�. �ֳ��ϸ� �����ϴ� �͸� Get()�ϱ� �����̴�.
+			// p_item은 NULL이 반드시 아니다. 왜냐하면 존재하는 것만 Get()하기 때문이다.
 			assert(p_item);
 
 			// frame id -> sprite id
@@ -1255,7 +1255,7 @@ void	C_VS_UI_EXCHANGE::Show()
 			int print_y = item_y + p_item->GetGridHeight()*C_VS_UI_INVENTORY::GRID_UNIT_PIXEL_Y - 12;
 			int print_x = item_x + p_item->GetGridWidth()*C_VS_UI_INVENTORY::GRID_UNIT_PIXEL_X-1;
 			
-			// Item�� �����ִ� ���� ǥ��
+			// Item이 놓여있는 영역 표시
 			for (int j = 0; j < p_item->GetGridHeight(); j++)
 				for (int i = 0; i < p_item->GetGridWidth(); i++)
 				{
@@ -1297,7 +1297,7 @@ void	C_VS_UI_EXCHANGE::Show()
 						eType == ITEMTABLE_INFO::ELEMENTAL_TYPE_EARTH
 						)
 					{
-						// 2004, 3, 9 sobeit - x,y ����
+						// 2004, 3, 9 sobeit - x,y 변경
 						//gpC_global_resource->m_pC_info_spk->BltLocked(item_x-(p_item->GetGridWidth()*C_VS_UI_INVENTORY::GRID_UNIT_PIXEL_X)/2, item_y-(p_item->GetGridHeight()*C_VS_UI_INVENTORY::GRID_UNIT_PIXEL_Y)/2, C_GLOBAL_RESOURCE::OUSTERS_ELEMENTAL_MARK_FIRE+eType);
 						gpC_global_resource->m_pC_info_spk->BltLocked(GetFocusedItemGridX(p_item), GetFocusedItemGridY(p_item), C_GLOBAL_RESOURCE::OUSTERS_ELEMENTAL_MARK_FIRE+eType);
 					}
@@ -1314,14 +1314,14 @@ void	C_VS_UI_EXCHANGE::Show()
 						eType == ITEMTABLE_INFO::ELEMENTAL_TYPE_EARTH
 						)
 					{
-						// 2004, 3, 9 sobeit - x,y ����
+						// 2004, 3, 9 sobeit - x,y 변경
 						//gpC_global_resource->m_pC_info_spk->BltLockedColor(item_x-(p_item->GetGridWidth()*C_VS_UI_INVENTORY::GRID_UNIT_PIXEL_X)/2, item_y-(p_item->GetGridHeight()*C_VS_UI_INVENTORY::GRID_UNIT_PIXEL_Y)/2, C_GLOBAL_RESOURCE::OUSTERS_ELEMENTAL_MARK_FIRE+eType, 0);
 						gpC_global_resource->m_pC_info_spk->BltLockedColor(GetFocusedItemGridX(p_item), GetFocusedItemGridY(p_item), C_GLOBAL_RESOURCE::OUSTERS_ELEMENTAL_MARK_FIRE+eType, 0);
 					}
 				}
 			}
 
-			//������ ���� ���� alphabox ���ڴ� ���� �ʴ´� ������ �״ٰ� ���߿� ���Ƽ� �Ѳ����� ��´�
+			//아이템 개수 찍을 alphabox 숫자는 찍지 않는다 저장해 뒀다가 나중에 몰아서 한꺼번에 찍는다
 			if(p_item->IsPileItem() || p_item->IsChargeItem())
 			{
 				RECT rt;
@@ -1350,7 +1350,7 @@ void	C_VS_UI_EXCHANGE::Show()
 	}
 	
 
-//���� ��¿� dc�� ��´�.
+//글자 출력용 dc를 잡는다.
 	g_FL2_GetDC();
 	m_pC_button_group->ShowDescription();
 
@@ -1363,7 +1363,7 @@ void	C_VS_UI_EXCHANGE::Show()
 	}
 
 	//----------------------------------------------------------------
-	// ���� ���� ��	
+	// 내가 가진 돈	
 	//----------------------------------------------------------------
 	// 2004, 12, 14, sobeit modify start
 	char money_buf[512];
@@ -1386,7 +1386,7 @@ void	C_VS_UI_EXCHANGE::Show()
 	}
 	// 2004, 12, 14, sobeit modify end
 	//----------------------------------------------------------------
-	// ��ȯ�� �� ��
+	// 교환할 내 돈
 	//----------------------------------------------------------------
 	// 2004, 12, 14, sobeit modify start
 //	wsprintf(money_buf, "%d", g_pTradeManager->GetMyMoneyManager()->GetMoney());
@@ -1414,7 +1414,7 @@ void	C_VS_UI_EXCHANGE::Show()
 	}
 	// 2004, 12, 14, sobeit modify end
 	//----------------------------------------------------------------
-	// �� �� - -;
+	// 남 돈 - -;
 	//----------------------------------------------------------------
 	// 2004, 12, 14, sobeit modify start
 //	wsprintf(money_buf, "%d", g_pTradeManager->GetOtherMoneyManager()->GetMoney());
@@ -1447,7 +1447,7 @@ void	C_VS_UI_EXCHANGE::Show()
 	// show your name on trade interface
 	g_Print(x+m_your_name_x+6, y+m_your_name_y+2, g_pTradeManager->GetOtherName(), &gpC_base->m_char_value_pi);
 
-//���� ��¿� dc�� Ǯ���ش�.
+//글자 출력용 dc를 풀어준다.
 	g_FL2_ReleaseDC();
 
 	SHOW_WINDOW_ATTR;

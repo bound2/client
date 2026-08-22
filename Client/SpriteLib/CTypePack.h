@@ -71,7 +71,7 @@ protected:
 	bool			m_bRunningLoad;
 
 	// runtime loading
-	WORD			m_nLoadData;	// Loading �� CSprite�� ����
+	WORD			m_nLoadData;	// Loading 된 CSprite의 개수
 	std::ifstream *m_file;
 	int*			m_file_index;
 };
@@ -143,8 +143,8 @@ Type &CTypePack<Type>::Get(WORD n)
 	if(m_bRunningLoad && !m_pData[n].IsInit())
 	{
 		m_file->seekg(m_file_index[n]);
-		// file�� �ִ� Sprite���� Load	
-		m_pData[n].LoadFromFile(*m_file);	// Sprite �о����
+		// file에 있는 Sprite들을 Load	
+		m_pData[n].LoadFromFile(*m_file);	// Sprite 읽어오기
 		if(++m_nLoadData >= m_Size)
 		{
 			m_bRunningLoad = false;
@@ -209,12 +209,12 @@ bool CTypePack<Type>::LoadFromFile(std::ifstream&file)
 //----------------------------------------------------------------------
 // Load From File Running
 //----------------------------------------------------------------------
-// �ǽð� �ε�
+// 실시간 로딩
 //----------------------------------------------------------------------
 template <class Type>
 bool CTypePack<Type>::LoadFromFileRunning(LPCTSTR lpszFilename)
 {
-	//�ε��� ���� �ε�
+	//인덱스 파일 로딩
 	std::string filename = lpszFilename;
 	filename += 'i';
 	std::ifstream indexFile(filename.c_str(), ios::binary);
@@ -233,7 +233,7 @@ bool CTypePack<Type>::LoadFromFileRunning(LPCTSTR lpszFilename)
 	}
 	indexFile.close();
 	
-	// file���� sprite ������ �о�´�.	
+	// file에서 sprite 개수를 읽어온다.	
 	m_file->open(lpszFilename, ios::binary);
 	
 	m_file->read((char*)&m_Size, 2);
@@ -248,13 +248,13 @@ template <class Type>
 bool CTypePack<Type>::SaveToFile(std::ofstream&dataFile, std::ofstream&indexFile)
 {
 	//--------------------------------------------------
-	// index file�� �����ϱ� ���� ����
+	// index file을 생성하기 위한 정보
 	//--------------------------------------------------
 //	long*	pIndex = new long [m_Size];
 	std::vector<DWORD> vIndex;
 
 	//--------------------------------------------------
-	// Size ����
+	// Size 저장
 	//--------------------------------------------------
 	dataFile.write((const char *)&m_Size, 2);
 	indexFile.write((const char *)&m_Size, 2);
@@ -288,7 +288,7 @@ bool CTypePack<Type>::SaveToFile(std::ofstream&dataFile, std::ofstream&indexFile
 	}
 
 	//--------------------------------------------------
-	// index ����
+	// index 저장
 	//--------------------------------------------------
 	for (i=0; i<vIndex.size(); i++)
 	{
@@ -382,7 +382,7 @@ bool CTypePack<Type>::LoadFromFileData(int dataID, int fileID, LPCTSTR packFilen
 	}
 	
 	//-------------------------------------------------------------------
-	// index�� ������ üũ�Ѵ�. fileID�� �ִ���..?
+	// index의 개수를 체크한다. fileID가 있는지..?
 	//-------------------------------------------------------------------
 	TYPE_SPRITEID num;
 	indexFile.read((char*)&num, sizeof(WORD));
@@ -393,7 +393,7 @@ bool CTypePack<Type>::LoadFromFileData(int dataID, int fileID, LPCTSTR packFilen
 	}
 	
 	//-------------------------------------------------------------------
-	// load�� data�� file pointer�� �д´�.
+	// load할 data의 file pointer를 읽는다.
 	//-------------------------------------------------------------------
 int32_t fp = 0;	
 	indexFile.seekg( 2 + fileID*4 );		// 2(num) + spriteID * (4 bytes)
@@ -465,7 +465,7 @@ protected:
 	bool			m_bRunningLoad;
 
 	// runtime loading
-	WORD			m_nLoadData;	// Loading �� CSprite�� ����
+	WORD			m_nLoadData;	// Loading 된 CSprite의 개수
 	std::ifstream *m_file;
 	int*			m_file_index;
 	bool			m_bSecond;
@@ -579,7 +579,7 @@ TypeBase &CTypePack2<TypeBase, Type1, Type2>::Get(WORD n)
 				return m_pData[n];
 			}
 			m_file->seekg(m_file_index[n]);
-			m_pData[n].LoadFromFile(*m_file);	// Sprite �о����
+			m_pData[n].LoadFromFile(*m_file);	// Sprite 읽어오기
 		}
 		catch (...)
 		{
@@ -653,12 +653,12 @@ bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFile(std::ifstream&file)
 //----------------------------------------------------------------------
 // Load From File Running
 //----------------------------------------------------------------------
-// �ǽð� �ε�
+// 실시간 로딩
 //----------------------------------------------------------------------
 template <class TypeBase, class Type1, class Type2>
 bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFileRunning(LPCTSTR lpszFilename)
 {
-	//�ε��� ���� �ε�
+	//인덱스 파일 로딩
 	std::string filename = lpszFilename;
 	filename += 'i';
 	std::ifstream indexFile(filename.c_str(), ios::binary);
@@ -698,7 +698,7 @@ bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFileRunning(LPCTSTR lpszFilenam
 	}
 	indexFile.close();
 
-	// file���� sprite ������ �о�´�.
+	// file에서 sprite 개수를 읽어온다.	
 	m_file->open(lpszFilename, ios::binary);
 
 	// Check if data file opened successfully
@@ -737,13 +737,13 @@ template <class TypeBase, class Type1, class Type2>
 bool CTypePack2<TypeBase, Type1, Type2>::SaveToFile(std::ofstream&dataFile, std::ofstream&indexFile)
 {
 	//--------------------------------------------------
-	// index file�� �����ϱ� ���� ����
+	// index file을 생성하기 위한 정보
 	//--------------------------------------------------
 //	long*	pIndex = new long [m_Size];
 	std::vector<DWORD> vIndex;
 
 	//--------------------------------------------------
-	// Size ����
+	// Size 저장
 	//--------------------------------------------------
 	dataFile.write((const char *)&m_Size, 2);
 	indexFile.write((const char *)&m_Size, 2);
@@ -777,7 +777,7 @@ bool CTypePack2<TypeBase, Type1, Type2>::SaveToFile(std::ofstream&dataFile, std:
 	}
 
 	//--------------------------------------------------
-	// index ����
+	// index 저장
 	//--------------------------------------------------
 	for (i=0; i<vIndex.size(); i++)
 	{
@@ -871,7 +871,7 @@ bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFileData(int dataID, int fileID
 	}
 	
 	//-------------------------------------------------------------------
-	// index�� ������ üũ�Ѵ�. fileID�� �ִ���..?
+	// index의 개수를 체크한다. fileID가 있는지..?
 	//-------------------------------------------------------------------
 	TYPE_SPRITEID num;
 	indexFile.read((char*)&num, sizeof(WORD));
@@ -882,7 +882,7 @@ bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFileData(int dataID, int fileID
 	}
 	
 	//-------------------------------------------------------------------
-	// load�� data�� file pointer�� �д´�.
+	// load할 data의 file pointer를 읽는다.
 	//-------------------------------------------------------------------
 int32_t fp = 0;	
 	indexFile.seekg( 2 + fileID*4 );		// 2(num) + spriteID * (4 bytes)

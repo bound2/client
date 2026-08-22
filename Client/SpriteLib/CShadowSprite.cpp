@@ -56,7 +56,7 @@ CShadowSprite::~CShadowSprite()
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// m_Pixels�� memory�� �����Ѵ�.
+// m_Pixels의 memory를 해제한다.
 //----------------------------------------------------------------------
 void	
 CShadowSprite::Release()
@@ -89,21 +89,21 @@ CShadowSprite::Release()
 void		
 CShadowSprite::operator = (const CShadowSprite& Sprite)
 {
-	// �޸� ����
+	// 메모리 해제
 	Release();
 
-	// NULL�̸� �������� �ʴ´�.
+	// NULL이면 저장하지 않는다.
 	if (Sprite.m_Pixels==NULL || Sprite.m_Width==0 || Sprite.m_Height==0)
 		return;
 
-	// ũ�� ����
+	// 크기 설정
 	m_Width = Sprite.m_Width;
 	m_Height = Sprite.m_Height;	
 
-	// ���� �� �� ����
+	// 압축 된 것 저장
 	WORD index;	
 
-	// �޸� ���
+	// 메모리 잡기
 	m_Pixels = new WORD* [m_Height];
 
 	//--------------------------------
@@ -111,10 +111,10 @@ CShadowSprite::operator = (const CShadowSprite& Sprite)
 	//--------------------------------
 	for (int i=0; i<m_Height; i++)
 	{
-		// �ݺ��� + �ݺ���*2byte
+		// 반복수 + 반복수*2byte
 		index	= 1 + m_Pixels[i][0]*2;	
 
-		// �޸� ���
+		// 메모리 잡기
 		m_Pixels[i] = new WORD [index];
 		memcpy(m_Pixels[i], Sprite.m_Pixels[i], index<<1);
 	}
@@ -122,20 +122,20 @@ CShadowSprite::operator = (const CShadowSprite& Sprite)
 }
 
 //----------------------------------------------------------------------
-// fstream�� save �Ѵ�.    ( file���� 5:6:5�� �����Ѵ�. )
+// fstream에 save 한다.    ( file에는 5:6:5로 저장한다. )
 //----------------------------------------------------------------------
 bool	
 CShadowSprite::SaveToFile(ofstream& file)
 {
-	// width�� height�� �����Ѵ�.
+	// width와 height를 저장한다.
 	file.write((const char*)&m_Width , 2);
 	file.write((const char*)&m_Height, 2);
 
-	// NULL�̸� �������� �ʴ´�. ���̸� ����Ǵ� ���̴�.
+	// NULL이면 저장하지 않는다. 길이만 저장되는 것이다.
 	if (m_Pixels==NULL || m_Width==0 || m_Height==0)
 		return false;
 	
-	// ���� �� �� ����
+	// 압축 된 것 저장
 	WORD index;	
 
 	//--------------------------------
@@ -143,10 +143,10 @@ CShadowSprite::SaveToFile(ofstream& file)
 	//--------------------------------
 	for (int i=0; i<m_Height; i++)
 	{
-		// �ݺ��� + �ݺ���*2byte
+		// 반복수 + 반복수*2byte
 		index	= 1 + m_Pixels[i][0]*2;	
 
-		// byte���� ���� data�� �����Ѵ�.
+		// byte수와 실제 data를 저장한다.
 		file.write((const char*)&index, 2);
 		file.write((const char*)m_Pixels[i], index<<1);
 	}
@@ -156,19 +156,19 @@ CShadowSprite::SaveToFile(ofstream& file)
 }
 
 //----------------------------------------------------------------------
-// fstream���� load�Ѵ�.
+// fstream에서 load한다.
 //----------------------------------------------------------------------
 bool	
 CShadowSprite::LoadFromFile(ifstream& file)
 {
-	// �̹� �����ִ� memory�� release�Ѵ�.
+	// 이미 잡혀있는 memory를 release한다.
 	Release();
 
-	// width�� height�� Load�Ѵ�.
+	// width와 height를 Load한다.
 	file.read((char*)&m_Width , 2);
 	file.read((char*)&m_Height, 2);	
 
-	// ���̰� 0�̸� �� Load�Ұ� ������..
+	// 길이가 0이면 더 Load할게 없겠지..
 	if (m_Width==0 || m_Height==0) 
 	{	
 		m_bInit = true;
@@ -187,7 +187,7 @@ CShadowSprite::LoadFromFile(ifstream& file)
 	//--------------------------------
 	for (int i=0; i<m_Height; i++)
 	{
-		// byte���� ���� data�� Load�Ѵ�.
+		// byte수와 실제 data를 Load한다.
 		file.read((char*)&len, 2);
 		
 		m_Pixels[i] = NULL;
@@ -202,41 +202,41 @@ CShadowSprite::LoadFromFile(ifstream& file)
 }
 
 //----------------------------------------------------------------------
-// CDirectDrawSurface�� (x,y)+(width, height)������ �о m_Pixels�� �����Ѵ�.
+// CDirectDrawSurface의 (x,y)+(width, height)영역을 읽어서 m_Pixels에 저장한다.
 //----------------------------------------------------------------------
-// m_Pixels�� 0�� ���� Format���� �ٲ۴�.
+// m_Pixels를 0번 압축 Format으로 바꾼다.
 //
-// �� line���� ������ ���� ������ ������.
+// 각 line마다 다음과 같은 구조를 가진다.
 //
-//    [�ݺ���] (������,�����)(������,�����)......
+//    [반복수] (투명수,색깔수)(투명수,색깔수)......
 //
-// �ݺ����� 2 bytes�̰�
-// �������� ������� ���� 2 byte
+// 반복수는 2 bytes이고
+// 투명수와 색깔수는 각각 2 byte
 //
 //----------------------------------------------------------------------
 void
 CShadowSprite::SetPixel(WORD *pSource, WORD pitch, WORD width, WORD height)
 {
-	// memory����
+	// memory해제
 	Release();
 
 	m_Width = width;
 	m_Height = height;
 
-	// �ϴ� memory�� ������ ��Ƶд�.	
+	// 일단 memory를 적당히 잡아둔다.	
 	WORD*	data = new WORD[m_Width+2];
 
-	int	index;				// data�� index�� ���			
-	int	count;				// �ݺ���
-	int	trans,				// ������ ����
-			color;				// ������ �ƴѻ� ����
+	int	index;				// data의 index로 사용			
+	int	count;				// 반복수
+	int	trans,				// 투명색 개수
+			color;				// 투명이 아닌색 개수
 
-	BOOL	bCheckTrans;		// �ֱٿ� �˻��Ѱ� �������ΰ�?
+	BOOL	bCheckTrans;		// 최근에 검사한게 투명색인가?
 
 	WORD	*pSourceTemp;
 
 
-	// height�� ��ŭ memory���
+	// height줄 만큼 memory잡기
 	m_Pixels = new WORD* [height];
 
 	register int i;
@@ -252,16 +252,16 @@ CShadowSprite::SetPixel(WORD *pSource, WORD pitch, WORD width, WORD height)
 
 		pSourceTemp = pSource;
 
-		// �� line�� ���ؼ� ����~
+		// 각 line에 대해서 압축~
 		for (j=0; j<width; j++)
 		{
-			// 0�� color�� ���ؼ� ����
+			// 0번 color에 대해서 압축
 			if (*pSourceTemp==s_Colorkey)
 			{
-				// �ֱٿ� �˻��Ѱ� �������� �ƴϾ��ٸ�
+				// 최근에 검사한게 투명색이 아니었다면
 				if (!bCheckTrans)
 				{
-					// ' (����,�����) '�� �� set�� �������� �ǹ��ϹǷ�
+					// ' (투명,색깔수) '의 한 set가 끝났음을 의미하므로
 					count++;
 					
 					data[index++] = color;
@@ -274,10 +274,10 @@ CShadowSprite::SetPixel(WORD *pSource, WORD pitch, WORD width, WORD height)
 			}
 			else
 			{
-				// �ֱٿ� �˻��Ѱ� �������̾��ٸ�..
+				// 최근에 검사한게 투명색이었다면..
 				if (bCheckTrans)
 				{						
-					data[index++] = trans;		// ���� byte�� �������� �ִ´�.
+					data[index++] = trans;		// 상위 byte에 투명수를 넣는다.
 					trans = 0;
 
 					bCheckTrans = FALSE;
@@ -289,23 +289,23 @@ CShadowSprite::SetPixel(WORD *pSource, WORD pitch, WORD width, WORD height)
 			pSourceTemp++;
 		}
 		
-		// �� ���� ������ ���� �������ΰ�?
+		// 한 줄의 마지막 점이 투명색인가?
 		if (bCheckTrans)
 		{
-			// �������̸� ���ٸ� ó���� �����൵ �ɰ� ����.
+			// 투명색이면 별다른 처리를 안해줘도 될거 같다.
 		}	
-		// �������� �ƴ� ���, ���� ������ ���������� �Ѵ�.
+		// 투명색이 아닌 경우, 점의 개수를 저장시켜줘야 한다.
 		else
 		{			
 			count++;
 			data[index++] = color;
 		}
 		
-		// memory�� �ٽ� ��´�.
+		// memory를 다시 잡는다.
 		m_Pixels[i] = new WORD [index+1];
 
-		// m_Pixels[i]�� ���������Ƿ� data�� ��ü�Ѵ�.
-		// m_Pixels[i][0]���� count�� �־�� �Ѵ�.
+		// m_Pixels[i]를 압축했으므로 data로 대체한다.
+		// m_Pixels[i][0]에는 count를 넣어야 한다.
 		m_Pixels[i][0] = count;
 		memcpy(m_Pixels[i]+1, data, index<<1);
 
@@ -325,7 +325,7 @@ CShadowSprite::SetPixel(WORD *pSource, WORD pitch, WORD width, WORD height)
 void		
 CShadowSprite::SetPixel(CIndexSprite& ispr)
 {
-	// memory����
+	// memory해제
 	Release();
 
 	m_Width = ispr.GetWidth();
@@ -341,38 +341,38 @@ CShadowSprite::SetPixel(CIndexSprite& ispr)
 	register int i;
 	register int j;	
 
-	// height�� ��ŭ memory���
+	// height줄 만큼 memory잡기
 	m_Pixels = new WORD* [m_Height];
 
 	for (int i=0; i<m_Height; i++)
 	{			
 		pPixels		= ispr.GetPixelLine( i );
 		
-		// (������,Index��,�����)�� �ݺ� ��		
+		// (투명수,Index색,색깔들)의 반복 수		
 		transPair	= *pPixels++;
 
-		// �ݺ��� + (������,�׸��ڼ�)*�ݺ���
+		// 반복수 + (투명수,그림자수)*반복수
 		m_Pixels[i] = new WORD [1 + (transPair<<1)];
 		index = 0;
 		m_Pixels[i][index++] = transPair;
 		
- 		// �� �� ���
+ 		// 한 줄 출력
 		for (j=0; j<transPair; j++)
 		{			
 			//------------------------------------
-			// ������ ��
+			// 투명색 수
 			//------------------------------------
 			m_Pixels[i][index++] = *pPixels;	
 			pPixels++;			
 
-			indexCount = *pPixels++;	// Index�ݺ� ��			
-			pPixels += indexCount;		// Index���鸸ŭ ����
+			indexCount = *pPixels++;	// Index반복 수			
+			pPixels += indexCount;		// Index색들만큼 증가
 			
-			colorCount = *pPixels++;	// color ���� ��			
-			pPixels		+= colorCount;	// Color ����ŭ ����
+			colorCount = *pPixels++;	// color 색깔 수			
+			pPixels		+= colorCount;	// Color 색만큼 증가
 
 			//------------------------------------
-			// �׸��� �� = Index + Color��
+			// 그림자 수 = Index + Color수
 			//------------------------------------
 			m_Pixels[i][index++] = indexCount + colorCount;
 		}
@@ -389,7 +389,7 @@ CShadowSprite::SetPixel(CIndexSprite& ispr)
 void		
 CShadowSprite::SetPixel(CSprite& spr)
 {
-	// memory����
+	// memory해제
 	Release();
 
 	m_Width = spr.GetWidth();
@@ -404,35 +404,35 @@ CShadowSprite::SetPixel(CSprite& spr)
 	register int i;
 	register int j;	
 
-	// height�� ��ŭ memory���
+	// height줄 만큼 memory잡기
 	m_Pixels = new WORD* [m_Height];
 
 	for (int i=0; i<m_Height; i++)
 	{			
 		pPixels		= spr.GetPixelLine( i );
 		
-		// (������,�����)�� �ݺ� ��		
+		// (투명수,색깔들)의 반복 수		
 		transPair	= *pPixels++;
 
-		// �ݺ��� + (������,�׸��ڼ�)*�ݺ���
+		// 반복수 + (투명수,그림자수)*반복수
 		m_Pixels[i] = new WORD [1 + (transPair<<1)];
 		index = 0;
 		m_Pixels[i][index++] = transPair;
 		
- 		// �� �� ���
+ 		// 한 줄 출력
 		for (j=0; j<transPair; j++)
 		{			
 			//------------------------------------
-			// ������ ��
+			// 투명색 수
 			//------------------------------------
 			m_Pixels[i][index++] = *pPixels;	
 			pPixels++;			
 
-			colorCount = *pPixels++;	// color ���� ��			
-			pPixels		+= colorCount;	// Color ����ŭ ����
+			colorCount = *pPixels++;	// color 색깔 수			
+			pPixels		+= colorCount;	// Color 색만큼 증가
 
 			//------------------------------------
-			// �׸��� �� = Index + Color��
+			// 그림자 수 = Index + Color수
 			//------------------------------------
 			m_Pixels[i][index++] = colorCount;
 		}
@@ -452,23 +452,23 @@ CShadowSprite::Uncompress()
 //----------------------------------------------------------------------
 // Is ColorPixel ?
 //----------------------------------------------------------------------
-// Sprite�ȿ��� (x,y)�� ������ �ִ°�?(�������� �ƴ� ���)
+// Sprite안에서 (x,y)는 색깔이 있는가?(투명색이 아닌 경우)
 //----------------------------------------------------------------------
 bool		
 CShadowSprite::IsColorPixel(short x, short y)
 {
-	// ���� �ʱ�ȭ ���� ���� ���
+	// 아직 초기화 되지 않은 경우
 	if (m_Pixels==NULL)
 		return false; 
 
-	// Sprite�� ������ ����� false
+	// Sprite의 영역을 벗어나면 false
 	if (x<0 || y<0 || x>=m_Width || y>=m_Height)
 		return false;
 
-	// y��° ��
+	// y번째 줄
 	WORD	*pPixels = m_Pixels[y];
 
-	// y��° ���� �ݺ� ��
+	// y번째 줄의 반복 수
 	int	count = *pPixels++;
 
 	int	transCount, 
@@ -482,16 +482,16 @@ CShadowSprite::IsColorPixel(short x, short y)
 
 		index += transCount;
 
-		// �̹� loop�ȿ� �����ϴ� ��
+		// 이번 loop안에 존재하는 점
 		if (x < index+colorCount)
 		{
-			// �������������� ���� ���
+			// 투명색까지보다 적은 경우
 			if (x < index)
 			{
 				return false;
 			}
 
-			// ���� ���Ѵ�.
+			// 색깔에 속한다.
 			return true;
 		}
 
@@ -505,7 +505,7 @@ CShadowSprite::IsColorPixel(short x, short y)
 //----------------------------------------------------------------------
 // Blt
 //----------------------------------------------------------------------
-// Clipping���� �ʴ´�.
+// Clipping하지 않는다.
 //----------------------------------------------------------------------
 void
 CShadowSprite::Blt(WORD *pDest, WORD pitch)
@@ -524,18 +524,18 @@ CShadowSprite::Blt(WORD *pDest, WORD pitch)
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����)�� �ݺ� ��		
+		// (투명수,색깔수)의 반복 수		
 		count	= *pPixels++;		
- 		// �� �� ���
+ 		// 한 줄 출력
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{
-				pDestTemp += *pPixels++;			// ��������ŭ �ǳ� �ڴ�.
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+				pDestTemp += *pPixels++;			// 투명색만큼 건너 뛴다.
+				colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-				// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+				// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 				memset((void*)pDestTemp, 0, colorCount<<1);
 		
 				pDestTemp	+= colorCount;
@@ -550,8 +550,8 @@ CShadowSprite::Blt(WORD *pDest, WORD pitch)
 //----------------------------------------------------------------------
 // Blt ClipLeft
 //----------------------------------------------------------------------
-// ���� clipping.  
-// pRect->left���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
+// 왼쪽 clipping.  
+// pRect->left개의 점을 건너띈 다음부터 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CShadowSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
@@ -560,7 +560,7 @@ CShadowSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -572,104 +572,104 @@ CShadowSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	for (int i=pRect->top; i<pRect->bottom; i++)
 	{
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > pRect->left)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > pRect->left)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - pRect->left;
 
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						//memcpy(pDestTemp, pPixels, colorCount<<1);
-						// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+						// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 						memset((void*)pDestTemp, 0, colorCount<<1);
 
 						pDestTemp += colorCount;
 						//pPixels += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = pRect->left - index;
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						//memcpy(pDestTemp, pPixels+dist, (colorCount-dist)<<1);					
-						// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+						// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 						memset((void*)pDestTemp, 0, (colorCount-dist)<<1);
 
 						pDestTemp += colorCount-dist;
 						//pPixels += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				//pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			// 이제부터는 계속 출력한다.		
 			//---------------------------------------------		
 			if (--j > 0)
 			{
 				do
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ �ǳ� �ڴ�.
+					// 투명색만큼 건너 뛴다.
 					pDestTemp += transCount;			
 					
-					// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+					// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 					memset((void*)pDestTemp, 0, colorCount<<1);
 
-					// memory addr ����
+					// memory addr 증가
 					pDestTemp += colorCount;
 					//pPixels += colorCount;			
 				} while (--j);
@@ -684,8 +684,8 @@ CShadowSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // Blt ClipRight
 //----------------------------------------------------------------------
-// ������ clipping.  
-// pRect->right�� ������ ���� pDest�� ����Ѵ�.
+// 오른쪽 clipping.  
+// pRect->right개 까지의 점만 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CShadowSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
@@ -694,7 +694,7 @@ CShadowSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -709,64 +709,64 @@ CShadowSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		// 각 줄마다 Clipping을 해줘야 하는데...		
+		// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 		//---------------------------------------------
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{		
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����
+				// 투명색만큼 index증가
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+				// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 				//---------------------------------------------
-				// ������ ������ �������� ���
+				// 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+colorCount > pRect->right)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					// 투명색만으로 더 출력할 필요가 없을 때
 					if (index > pRect->right)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					// 투명색 아닌 것을 조금 출력해야 할 경우
 					else
 					{
 						pDestTemp += transCount;
 					
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						//memcpy(pDestTemp, pPixels, (pRect->right - index)<<1);
-						// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+						// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 						memset((void*)pDestTemp, 0, (pRect->right - index)<<1);
 
 						break;
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				// 투명색만큼 건너띄고
 				pDestTemp += transCount;
 
-				// ���
+				// 출력
 				//memcpy(pDestTemp, pPixels, colorCount<<1);
-				// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+				// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 				memset((void*)pDestTemp, 0, colorCount<<1);
 
 				pDestTemp += colorCount;
@@ -782,9 +782,9 @@ CShadowSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // Blt ClipWidth
 //----------------------------------------------------------------------
-// ���� clipping.  
-// pRect->left���� ���� �ǳʶ� �������� pDest�� ����ϴٰ�
-// pRect->Right������ ����Ѵ�.
+// 왼쪽 clipping.  
+// pRect->left개의 점을 건너띈 다음부터 pDest에 출력하다가
+// pRect->Right까지만 출력한다.
 //----------------------------------------------------------------------
 void
 CShadowSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
@@ -793,7 +793,7 @@ CShadowSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -805,55 +805,55 @@ CShadowSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 	register short j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	for (int i=pRect->top; i<pRect->bottom; i++)
 	{
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{		
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > pRect->left)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > pRect->left)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - pRect->left;
 
-						// �̹� �ܰ�� ��� ���?
-						// ������ ���� �Ѿ�� ���..
+						// 이번 단계는 모두 출력?
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > pRect->right)
 						{							
-							// ������������ ������ �� �Ѿ�� ���
+							// 투명색만으로 오른쪽 끝 넘어가는 경우
 							if (index > pRect->right)
 							{
 							}
@@ -873,18 +873,18 @@ CShadowSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 						//pPixels += colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{		
 						dist = pRect->left - index;
 
-						// ������ ���� �Ѿ�� ���..
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > pRect->right)
 						{						
 							memset((void*)pDestTemp, 0, pRect->right - pRect->left);
@@ -893,76 +893,76 @@ CShadowSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 							break;
 						}
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						//memcpy(pDestTemp, pPixels+dist, (colorCount-dist)<<1);					
-						// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+						// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 						memset((void*)pDestTemp, 0, (colorCount-dist)<<1);
 
 						pDestTemp += colorCount-dist;
 						//pPixels += colorCount;		
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.					
+						// 이제부터는 계속 출력한다.					
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				//pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			// 각 줄마다 Clipping을 해줘야 하는데...		
+			// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����
+					// 투명색만큼 index증가
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 					//---------------------------------------------
-					// ������ ������ �������� ���
+					// 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+colorCount > pRect->right)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						// 투명색만으로 더 출력할 필요가 없을 때
 						if (index > pRect->right)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						// 투명색 아닌 것을 조금 출력해야 할 경우
 						else
 						{
 							pDestTemp += transCount;
 						
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							//memcpy(pDestTemp, pPixels, (pRect->right - index)<<1);
-							// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+							// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 							memset((void*)pDestTemp, 0, (pRect->right - index)<<1);
 
 							break;
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					// 투명색만큼 건너띄고
 					pDestTemp += transCount;
 
-					// ���
+					// 출력
 					//memcpy(pDestTemp, pPixels, colorCount<<1);
-					// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+					// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 					memset((void*)pDestTemp, 0, colorCount<<1);
 
 					pDestTemp += colorCount;
@@ -980,7 +980,7 @@ CShadowSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // Blt Clip Height
 //----------------------------------------------------------------------
-// pRect->top, pRect->bottom��ŭ�� ����Ѵ�.
+// pRect->top, pRect->bottom만큼만 출력한다.
 //----------------------------------------------------------------------
 void
 CShadowSprite::BltClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
@@ -1000,21 +1000,21 @@ CShadowSprite::BltClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		// (투명수,색깔수,색깔들)의 반복 수		
 		count	= *pPixels++;		
 
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{
-				pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+				pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+				colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-				// ������ �ƴ� ������ Surface�� ����Ѵ�.
+				// 투명이 아닌 색들을 Surface에 출력한다.
 				//memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
-				// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+				// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 				memset((void*)pDestTemp, 0, colorCount<<1);
 				
 				pDestTemp	+= colorCount;
@@ -1030,7 +1030,7 @@ CShadowSprite::BltClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // BltDarkness
 //----------------------------------------------------------------------
-// Clipping���� �ʴ´�.
+// Clipping하지 않는다.
 //----------------------------------------------------------------------
 void
 CShadowSprite::BltDarkness(WORD *pDest, WORD pitch, BYTE DarkBits)
@@ -1051,18 +1051,18 @@ CShadowSprite::BltDarkness(WORD *pDest, WORD pitch, BYTE DarkBits)
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����)�� �ݺ� ��		
+		// (투명수,색깔수)의 반복 수		
 		count	= *pPixels++;		
- 		// �� �� ���
+ 		// 한 줄 출력
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{						
-				pDestTemp += *pPixels++;			// ��������ŭ �ǳ� �ڴ�.
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+				pDestTemp += *pPixels++;			// 투명색만큼 건너 뛴다.
+				colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-				// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+				// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 				//memset((void*)pDestTemp, 0, colorCount<<1);
 				memcpyShadowDarkness(pDestTemp, colorCount);
 		
@@ -1078,8 +1078,8 @@ CShadowSprite::BltDarkness(WORD *pDest, WORD pitch, BYTE DarkBits)
 //----------------------------------------------------------------------
 // BltDarkness ClipLeft
 //----------------------------------------------------------------------
-// ���� clipping.  
-// pRect->left���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
+// 왼쪽 clipping.  
+// pRect->left개의 점을 건너띈 다음부터 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CShadowSprite::BltDarknessClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE DarkBits)
@@ -1090,7 +1090,7 @@ CShadowSprite::BltDarknessClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE Da
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -1102,107 +1102,107 @@ CShadowSprite::BltDarknessClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE Da
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	for (int i=pRect->top; i<pRect->bottom; i++)
 	{
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > pRect->left)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > pRect->left)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - pRect->left;
 
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						//memcpy(pDestTemp, pPixels, colorCount<<1);
-						// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+						// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 						//memset((void*)pDestTemp, 0, colorCount<<1);
 						memcpyShadowDarkness(pDestTemp, colorCount);
 
 						pDestTemp += colorCount;
 						//pPixels += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = pRect->left - index;
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						//memcpy(pDestTemp, pPixels+dist, (colorCount-dist)<<1);					
-						// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+						// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 						//memset((void*)pDestTemp, 0, (colorCount-dist)<<1);
 						memcpyShadowDarkness(pDestTemp, colorCount-dist);
 
 						pDestTemp += colorCount-dist;
 						//pPixels += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				//pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			// 이제부터는 계속 출력한다.		
 			//---------------------------------------------		
 			if (--j > 0)
 			{
 				do
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ �ǳ� �ڴ�.
+					// 투명색만큼 건너 뛴다.
 					pDestTemp += transCount;			
 					
-					// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+					// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 					//memset((void*)pDestTemp, 0, colorCount<<1);
 					memcpyShadowDarkness(pDestTemp, colorCount);
 
-					// memory addr ����
+					// memory addr 증가
 					pDestTemp += colorCount;
 					//pPixels += colorCount;			
 				} while (--j);
@@ -1217,8 +1217,8 @@ CShadowSprite::BltDarknessClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE Da
 //----------------------------------------------------------------------
 // BltDarkness ClipRight
 //----------------------------------------------------------------------
-// ������ clipping.  
-// pRect->right�� ������ ���� pDest�� ����Ѵ�.
+// 오른쪽 clipping.  
+// pRect->right개 까지의 점만 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CShadowSprite::BltDarknessClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE DarkBits)
@@ -1229,7 +1229,7 @@ CShadowSprite::BltDarknessClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE D
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -1244,52 +1244,52 @@ CShadowSprite::BltDarknessClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE D
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		// 각 줄마다 Clipping을 해줘야 하는데...		
+		// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 		//---------------------------------------------
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����
+				// 투명색만큼 index증가
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+				// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 				//---------------------------------------------
-				// ������ ������ �������� ���
+				// 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+colorCount > pRect->right)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					// 투명색만으로 더 출력할 필요가 없을 때
 					if (index > pRect->right)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					// 투명색 아닌 것을 조금 출력해야 할 경우
 					else
 					{
 						pDestTemp += transCount;
 					
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						//memcpy(pDestTemp, pPixels, (pRect->right - index)<<1);
-						// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+						// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 						//memset((void*)pDestTemp, 0, (pRect->right - index)<<1);
 						memcpyShadowDarkness(pDestTemp, pRect->right - index);
 
@@ -1297,12 +1297,12 @@ CShadowSprite::BltDarknessClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE D
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				// 투명색만큼 건너띄고
 				pDestTemp += transCount;
 
-				// ���
+				// 출력
 				//memcpy(pDestTemp, pPixels, colorCount<<1);
-				// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+				// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 				//memset((void*)pDestTemp, 0, colorCount<<1);
 				memcpyShadowDarkness(pDestTemp, colorCount);
 
@@ -1319,9 +1319,9 @@ CShadowSprite::BltDarknessClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE D
 //----------------------------------------------------------------------
 // BltDarkness ClipWidth
 //----------------------------------------------------------------------
-// ���� clipping.  
-// pRect->left���� ���� �ǳʶ� �������� pDest�� ����ϴٰ�
-// pRect->Right������ ����Ѵ�.
+// 왼쪽 clipping.  
+// pRect->left개의 점을 건너띈 다음부터 pDest에 출력하다가
+// pRect->Right까지만 출력한다.
 //----------------------------------------------------------------------
 void
 CShadowSprite::BltDarknessClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE DarkBits)
@@ -1332,7 +1332,7 @@ CShadowSprite::BltDarknessClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE D
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -1344,55 +1344,55 @@ CShadowSprite::BltDarknessClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE D
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	for (int i=pRect->top; i<pRect->bottom; i++)
 	{
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > pRect->left)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > pRect->left)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - pRect->left;
 
-						// �̹� �ܰ�� ��� ���?
-						// ������ ���� �Ѿ�� ���..
+						// 이번 단계는 모두 출력?
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > pRect->right)
 						{							
-							// ������������ ������ �� �Ѿ�� ���
+							// 투명색만으로 오른쪽 끝 넘어가는 경우
 							if (index > pRect->right)
 							{
 							}
@@ -1407,9 +1407,9 @@ CShadowSprite::BltDarknessClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE D
 							break;
 						}
 
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						//memcpy(pDestTemp, pPixels, colorCount<<1);
-						// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+						// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 						//memset((void*)pDestTemp, 0, colorCount<<1);
 						memcpyShadowDarkness(pDestTemp, colorCount);
 
@@ -1417,18 +1417,18 @@ CShadowSprite::BltDarknessClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE D
 						//pPixels += colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = pRect->left - index;
 
-						// ������ ���� �Ѿ�� ���..
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > pRect->right)
 						{
 							memcpyShadowDarkness(pDestTemp, pRect->right - pRect->left);
@@ -1437,9 +1437,9 @@ CShadowSprite::BltDarknessClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE D
 							break;
 						}
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						//memcpy(pDestTemp, pPixels+dist, (colorCount-dist)<<1);					
-						// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+						// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 						//memset((void*)pDestTemp, 0, (colorCount-dist)<<1);
 						memcpyShadowDarkness(pDestTemp, colorCount-dist);
 
@@ -1447,55 +1447,55 @@ CShadowSprite::BltDarknessClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE D
 						//pPixels += colorCount;		
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.					
+						// 이제부터는 계속 출력한다.					
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				//pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			// 각 줄마다 Clipping을 해줘야 하는데...		
+			// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����
+					// 투명색만큼 index증가
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 					//---------------------------------------------
-					// ������ ������ �������� ���
+					// 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+colorCount > pRect->right)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						// 투명색만으로 더 출력할 필요가 없을 때
 						if (index > pRect->right)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						// 투명색 아닌 것을 조금 출력해야 할 경우
 						else
 						{
 							pDestTemp += transCount;
 						
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							//memcpy(pDestTemp, pPixels, (pRect->right - index)<<1);
-							// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+							// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 							//memset((void*)pDestTemp, 0, (pRect->right - index)<<1);
 							memcpyShadowDarkness(pDestTemp, pRect->right-index);
 
@@ -1503,12 +1503,12 @@ CShadowSprite::BltDarknessClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE D
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					// 투명색만큼 건너띄고
 					pDestTemp += transCount;
 
-					// ���
+					// 출력
 					//memcpy(pDestTemp, pPixels, colorCount<<1);
-					// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+					// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 					//memset((void*)pDestTemp, 0, colorCount<<1);
 					memcpyShadowDarkness(pDestTemp, colorCount);
 
@@ -1527,7 +1527,7 @@ CShadowSprite::BltDarknessClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE D
 //----------------------------------------------------------------------
 // BltDarkness Clip Height
 //----------------------------------------------------------------------
-// pRect->top, pRect->bottom��ŭ�� ����Ѵ�.
+// pRect->top, pRect->bottom만큼만 출력한다.
 //----------------------------------------------------------------------
 void
 CShadowSprite::BltDarknessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE DarkBits)
@@ -1549,21 +1549,21 @@ CShadowSprite::BltDarknessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		// (투명수,색깔수,색깔들)의 반복 수		
 		count	= *pPixels++;		
 
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{
-				pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+				pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+				colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-				// ������ �ƴ� ������ Surface�� ����Ѵ�.
+				// 투명이 아닌 색들을 Surface에 출력한다.
 				//memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
-				// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+				// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 				//memset((void*)pDestTemp, 0, colorCount<<1);
 				memcpyShadowDarkness(pDestTemp, colorCount);
 				
@@ -1579,7 +1579,7 @@ CShadowSprite::BltDarknessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 //----------------------------------------------------------------------
 // ShadowDarkness Copy
 //----------------------------------------------------------------------
-// dest�� pixels���� s_Value1��ŭ ��Ӱ� ����� �Ѵ�.
+// dest의 pixels개를 s_Value1만큼 어둡게 출력을 한다.
 //----------------------------------------------------------------------
 void	
 CShadowSprite::memcpyShadowDarkness(WORD* pDest, WORD pixels)
@@ -1590,14 +1590,14 @@ CShadowSprite::memcpyShadowDarkness(WORD* pDest, WORD pixels)
 
 	BYTE qTimes = pixels >> 2;	// pixels / 4
 
-	// ������
+	// 반투명
 	switch ( pixels & 0x03 )	// pixels % 4
 	{
 		//------------------
-		// 4����
+		// 4점씩
 		//------------------
 		case 0 :			
-			// ������ ���
+			// 네점씩 찍기
 			for (j=0; j<qTimes; j++)
 			{
 				*qpDest = ((*qpDest >> s_Value1) & ColorDraw::s_qwMASK_SHIFT[s_Value1]);				
@@ -1607,16 +1607,16 @@ CShadowSprite::memcpyShadowDarkness(WORD* pDest, WORD pixels)
 		break;
 
 		//------------------
-		// 1�� + 4����
+		// 1점 + 4점씩
 		//------------------
 		case 1 :
-			// ���� ���
+			// 한점 찍기
 			*(WORD*)qpDest = ((*(WORD*)qpDest >> s_Value1) & ColorDraw::s_wMASK_SHIFT[s_Value1]);
 			
 				
 			qpDest = (QWORD*)((WORD*)qpDest + 1);			
 
-			// ������ ���
+			// 네점씩 찍기
 			for (j=0; j<qTimes; j++)
 			{
 				*qpDest = ((*qpDest >> s_Value1) & ColorDraw::s_qwMASK_SHIFT[s_Value1]);
@@ -1627,15 +1627,15 @@ CShadowSprite::memcpyShadowDarkness(WORD* pDest, WORD pixels)
 		break;
 
 		//------------------
-		// 2�� + 4����
+		// 2점 + 4점씩
 		//------------------
 		case 2 :
-			// ���� ���
+			// 두점 찍기
 			*(DWORD*)qpDest = ((*(DWORD*)qpDest >> s_Value1) & ColorDraw::s_dwMASK_SHIFT[s_Value1]);			
 				
 			qpDest = (QWORD*)((DWORD*)qpDest + 1);			
 
-			// ������ ���
+			// 네점씩 찍기
 			for (j=0; j<qTimes; j++)
 			{
 				*qpDest = ((*qpDest >> s_Value1) & ColorDraw::s_qwMASK_SHIFT[s_Value1]);
@@ -1645,18 +1645,18 @@ CShadowSprite::memcpyShadowDarkness(WORD* pDest, WORD pixels)
 		break;
 
 		//------------------
-		// 1�� + 2�� + 4����
+		// 1점 + 2점 + 4점씩
 		//------------------
 		case 3 :
-			// ���� ���
+			// 한점 찍기
 			*(WORD*)qpDest = ((*(WORD*)qpDest >> s_Value1) & ColorDraw::s_wMASK_SHIFT[s_Value1]);	
 
-			// ���� ���
+			// 두점 찍기
 			*(DWORD*)qpDest = ((*(DWORD*)qpDest >> s_Value1) & ColorDraw::s_dwMASK_SHIFT[s_Value1]);
 				
 			qpDest = (QWORD*)((DWORD*)qpDest + 1);			
 
-			// ������ ���
+			// 네점씩 찍기
 			for (j=0; j<qTimes; j++)
 			{
 				*qpDest = ((*qpDest >> s_Value1) & ColorDraw::s_qwMASK_SHIFT[s_Value1]);
@@ -1670,7 +1670,7 @@ CShadowSprite::memcpyShadowDarkness(WORD* pDest, WORD pixels)
 //----------------------------------------------------------------------
 // Blt4444
 //----------------------------------------------------------------------
-// Clipping���� �ʴ´�.
+// Clipping하지 않는다.
 //----------------------------------------------------------------------
 void
 CShadowSprite::Blt4444(WORD *pDest, WORD pitch, WORD pixel)
@@ -1688,15 +1688,15 @@ CShadowSprite::Blt4444(WORD *pDest, WORD pitch, WORD pixel)
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����)�� �ݺ� ��		
+		// (투명수,색깔수)의 반복 수		
 		count	= *pPixels++;		
- 		// �� �� ���
+ 		// 한 줄 출력
 		for (register int j=0; j<count; j++)
 		{				
-			pDestTemp += *pPixels++;			// ��������ŭ �ǳ� �ڴ�.
-			colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+			pDestTemp += *pPixels++;			// 투명색만큼 건너 뛴다.
+			colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-			// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+			// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 			//memset((void*)pDestTemp, 0, colorCount<<1);
 			memcpyShadow4444(pDestTemp, colorCount);
 	
@@ -1711,8 +1711,8 @@ CShadowSprite::Blt4444(WORD *pDest, WORD pitch, WORD pixel)
 //----------------------------------------------------------------------
 // Blt4444 ClipLeft
 //----------------------------------------------------------------------
-// ���� clipping.  
-// pRect->left���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
+// 왼쪽 clipping.  
+// pRect->left개의 점을 건너띈 다음부터 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CShadowSprite::Blt4444ClipLeft(WORD* pDest, WORD pitch, RECT* pRect, WORD pixel)
@@ -1723,7 +1723,7 @@ CShadowSprite::Blt4444ClipLeft(WORD* pDest, WORD pitch, RECT* pRect, WORD pixel)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -1735,102 +1735,102 @@ CShadowSprite::Blt4444ClipLeft(WORD* pDest, WORD pitch, RECT* pRect, WORD pixel)
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	for (int i=pRect->top; i<pRect->bottom; i++)
 	{
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		for (j=0; j<count; j++)
 		{
-			transCount = *pPixels++;		// ������ ��			
-			colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+			transCount = *pPixels++;		// 투명색 수			
+			colorCount = *pPixels++;		// 투명 아닌 색 수			
 					
-			// ��������ŭ index����			
+			// 투명색만큼 index증가			
 			index += transCount;
 			
 		
 			//---------------------------------------------
-			// xxxx������ �Ѿ�� �Ǵ� ���
+			// xxxx범위를 넘어가게 되는 경우
 			//---------------------------------------------
 			if (index+colorCount > pRect->left)
 			{
 				//---------------------------------------------
-				// ������������ xxxx������ �Ѿ�� ���
+				// 투명색만으로 xxxx범위를 넘어갔을 경우
 				//---------------------------------------------
 				if (index > pRect->left)
 				{	
-					// �������κ� �ǳʶ�
+					// 투명색부분 건너띔
 					pDestTemp += index - pRect->left;
 
-					// �̹� �ܰ�� ��� ���
+					// 이번 단계는 모두 출력
 					//memcpy(pDestTemp, pPixels, colorCount<<1);
-					// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+					// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 					//memset((void*)pDestTemp, 0, colorCount<<1);
 					memcpyShadow4444(pDestTemp, colorCount);
 
 					pDestTemp += colorCount;
 					//pPixels += colorCount;
 
-					// �������ʹ� ��� ����Ѵ�.
+					// 이제부터는 계속 출력한다.
 					break;
 				}
 				//---------------------------------------------
-				// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// 투명색+투명아닌색의 일부까지 출력하면 
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				else
 				{
 					dist = pRect->left - index;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					//memcpy(pDestTemp, pPixels+dist, (colorCount-dist)<<1);					
-					// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+					// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 					//memset((void*)pDestTemp, 0, (colorCount-dist)<<1);
 					memcpyShadow4444(pDestTemp, colorCount-dist);
 
 					pDestTemp += colorCount-dist;
 					//pPixels += colorCount;
 
-					// �������ʹ� ��� ����Ѵ�.
+					// 이제부터는 계속 출력한다.
 					break;
 				}
 			}					
 
-			// ������ �ƴ� ����ŭ index����				
+			// 투명이 아닌 색만큼 index증가				
 			//pPixels += colorCount;
 			index += colorCount;
 		}
 
 		//---------------------------------------------
-		// �������ʹ� ��� ����Ѵ�.		
+		// 이제부터는 계속 출력한다.		
 		//---------------------------------------------		
 		for (j++; j<count; j++)
 		{
-			transCount = *pPixels++;		// ������ ��			
-			colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+			transCount = *pPixels++;		// 투명색 수			
+			colorCount = *pPixels++;		// 투명 아닌 색 수			
 					
-			// ��������ŭ �ǳ� �ڴ�.
+			// 투명색만큼 건너 뛴다.
 			pDestTemp += transCount;			
 			
-			// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+			// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 			//memset((void*)pDestTemp, 0, colorCount<<1);
 			memcpyShadow4444(pDestTemp, colorCount);
 
-			// memory addr ����
+			// memory addr 증가
 			pDestTemp += colorCount;
 			//pPixels += colorCount;			
 		}
@@ -1843,8 +1843,8 @@ CShadowSprite::Blt4444ClipLeft(WORD* pDest, WORD pitch, RECT* pRect, WORD pixel)
 //----------------------------------------------------------------------
 // Blt4444 ClipRight
 //----------------------------------------------------------------------
-// ������ clipping.  
-// pRect->right�� ������ ���� pDest�� ����Ѵ�.
+// 오른쪽 clipping.  
+// pRect->right개 까지의 점만 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CShadowSprite::Blt4444ClipRight(WORD* pDest, WORD pitch, RECT* pRect, WORD pixel)
@@ -1855,7 +1855,7 @@ CShadowSprite::Blt4444ClipRight(WORD* pDest, WORD pitch, RECT* pRect, WORD pixel
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -1870,49 +1870,49 @@ CShadowSprite::Blt4444ClipRight(WORD* pDest, WORD pitch, RECT* pRect, WORD pixel
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		// 각 줄마다 Clipping을 해줘야 하는데...		
+		// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 		//---------------------------------------------
 		for (j=0; j<count; j++)
 		{
-			transCount = *pPixels++;		// ������ ��			
-			colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+			transCount = *pPixels++;		// 투명색 수			
+			colorCount = *pPixels++;		// 투명 아닌 색 수			
 					
-			// ��������ŭ index����
+			// 투명색만큼 index증가
 			index += transCount;
 			
-			// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-			// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+			// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+			// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-			// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+			// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 			//---------------------------------------------
-			// ������ ������ �������� ���
+			// 오른쪽 끝까지 도달했을 경우
 			//---------------------------------------------			
 			if (index+colorCount > pRect->right)
 			{
-				// ������������ �� ����� �ʿ䰡 ���� ��
+				// 투명색만으로 더 출력할 필요가 없을 때
 				if (index > pRect->right)
 				{
 					break;
 				}
-				// ������ �ƴ� ���� ���� ����ؾ� �� ���
+				// 투명색 아닌 것을 조금 출력해야 할 경우
 				else
 				{
 					pDestTemp += transCount;
 				
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					//memcpy(pDestTemp, pPixels, (pRect->right - index)<<1);
-					// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+					// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 					//memset((void*)pDestTemp, 0, (pRect->right - index)<<1);
 					memcpyShadow4444(pDestTemp, pRect->right - index);
 
@@ -1920,12 +1920,12 @@ CShadowSprite::Blt4444ClipRight(WORD* pDest, WORD pitch, RECT* pRect, WORD pixel
 				}
 			}
 
-			// ��������ŭ �ǳʶ��
+			// 투명색만큼 건너띄고
 			pDestTemp += transCount;
 
-			// ���
+			// 출력
 			//memcpy(pDestTemp, pPixels, colorCount<<1);
-			// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+			// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 			//memset((void*)pDestTemp, 0, colorCount<<1);
 			memcpyShadow4444(pDestTemp, colorCount);
 
@@ -1941,9 +1941,9 @@ CShadowSprite::Blt4444ClipRight(WORD* pDest, WORD pitch, RECT* pRect, WORD pixel
 //----------------------------------------------------------------------
 // Blt4444 ClipWidth
 //----------------------------------------------------------------------
-// ���� clipping.  
-// pRect->left���� ���� �ǳʶ� �������� pDest�� ����ϴٰ�
-// pRect->Right������ ����Ѵ�.
+// 왼쪽 clipping.  
+// pRect->left개의 점을 건너띈 다음부터 pDest에 출력하다가
+// pRect->Right까지만 출력한다.
 //----------------------------------------------------------------------
 void
 CShadowSprite::Blt4444ClipWidth(WORD* pDest, WORD pitch, RECT* pRect, WORD pixel)
@@ -1954,7 +1954,7 @@ CShadowSprite::Blt4444ClipWidth(WORD* pDest, WORD pitch, RECT* pRect, WORD pixel
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -1966,52 +1966,52 @@ CShadowSprite::Blt4444ClipWidth(WORD* pDest, WORD pitch, RECT* pRect, WORD pixel
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	for (int i=pRect->top; i<pRect->bottom; i++)
 	{
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		for (j=0; j<count; j++)
 		{
-			transCount = *pPixels++;		// ������ ��			
-			colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+			transCount = *pPixels++;		// 투명색 수			
+			colorCount = *pPixels++;		// 투명 아닌 색 수			
 					
-			// ��������ŭ index����			
+			// 투명색만큼 index증가			
 			index += transCount;
 			
 		
 			//---------------------------------------------
-			// xxxx������ �Ѿ�� �Ǵ� ���
+			// xxxx범위를 넘어가게 되는 경우
 			//---------------------------------------------
 			if (index+colorCount > pRect->left)
 			{
 				//---------------------------------------------
-				// ������������ xxxx������ �Ѿ�� ���
+				// 투명색만으로 xxxx범위를 넘어갔을 경우
 				//---------------------------------------------
 				if (index > pRect->left)
 				{	
-					// �������κ� �ǳʶ�
+					// 투명색부분 건너띔
 					pDestTemp += index - pRect->left;
 
-					// �̹� �ܰ�� ��� ���?
-					// ������ ���� �Ѿ�� ���..
+					// 이번 단계는 모두 출력?
+					// 오른쪽 끝을 넘어가는 경우..
 					if (index+colorCount > pRect->right)
 					{							
-						// ������������ ������ �� �Ѿ�� ���
+						// 투명색만으로 오른쪽 끝 넘어가는 경우
 						if (index > pRect->right)
 						{
 						}
@@ -2026,9 +2026,9 @@ CShadowSprite::Blt4444ClipWidth(WORD* pDest, WORD pitch, RECT* pRect, WORD pixel
 						break;
 					}
 
-					// �̹� �ܰ�� ��� ���
+					// 이번 단계는 모두 출력
 					//memcpy(pDestTemp, pPixels, colorCount<<1);
-					// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+					// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 					//memset((void*)pDestTemp, 0, colorCount<<1);
 					memcpyShadow4444(pDestTemp, colorCount);
 
@@ -2036,18 +2036,18 @@ CShadowSprite::Blt4444ClipWidth(WORD* pDest, WORD pitch, RECT* pRect, WORD pixel
 					//pPixels += colorCount;
 					index += colorCount;
 
-					// �������ʹ� ��� ����Ѵ�.
+					// 이제부터는 계속 출력한다.
 					break;
 				}
 				//---------------------------------------------
-				// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// 투명색+투명아닌색의 일부까지 출력하면 
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				else
 				{
 					dist = pRect->left - index;
 
-					// ������ ���� �Ѿ�� ���..
+					// 오른쪽 끝을 넘어가는 경우..
 					if (index+colorCount > pRect->right)
 					{
 						memcpyShadow4444(pDestTemp, pRect->right - pRect->left);
@@ -2056,9 +2056,9 @@ CShadowSprite::Blt4444ClipWidth(WORD* pDest, WORD pitch, RECT* pRect, WORD pixel
 						break;
 					}
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					//memcpy(pDestTemp, pPixels+dist, (colorCount-dist)<<1);					
-					// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+					// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 					//memset((void*)pDestTemp, 0, (colorCount-dist)<<1);
 					memcpyShadow4444(pDestTemp, colorCount-dist);
 
@@ -2066,53 +2066,53 @@ CShadowSprite::Blt4444ClipWidth(WORD* pDest, WORD pitch, RECT* pRect, WORD pixel
 					//pPixels += colorCount;		
 					index += colorCount;
 
-					// �������ʹ� ��� ����Ѵ�.					
+					// 이제부터는 계속 출력한다.					
 					break;
 				}
 			}					
 
-			// ������ �ƴ� ����ŭ index����				
+			// 투명이 아닌 색만큼 index증가				
 			//pPixels += colorCount;
 			index += colorCount;
 		}
 
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		// 각 줄마다 Clipping을 해줘야 하는데...		
+		// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 		//---------------------------------------------
 		for (j++; j<count; j++)
 		{
-			transCount = *pPixels++;		// ������ ��			
-			colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+			transCount = *pPixels++;		// 투명색 수			
+			colorCount = *pPixels++;		// 투명 아닌 색 수			
 					
-			// ��������ŭ index����
+			// 투명색만큼 index증가
 			index += transCount;
 			
-			// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-			// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+			// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+			// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-			// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+			// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 			//---------------------------------------------
-			// ������ ������ �������� ���
+			// 오른쪽 끝까지 도달했을 경우
 			//---------------------------------------------			
 			if (index+colorCount > pRect->right)
 			{
-				// ������������ �� ����� �ʿ䰡 ���� ��
+				// 투명색만으로 더 출력할 필요가 없을 때
 				if (index > pRect->right)
 				{
 					break;
 				}
-				// ������ �ƴ� ���� ���� ����ؾ� �� ���
+				// 투명색 아닌 것을 조금 출력해야 할 경우
 				else
 				{
 					pDestTemp += transCount;
 				
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					//memcpy(pDestTemp, pPixels, (pRect->right - index)<<1);
-					// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+					// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 					//memset((void*)pDestTemp, 0, (pRect->right - index)<<1);
 					memcpyShadow4444(pDestTemp, pRect->right-index);
 
@@ -2120,12 +2120,12 @@ CShadowSprite::Blt4444ClipWidth(WORD* pDest, WORD pitch, RECT* pRect, WORD pixel
 				}
 			}
 
-			// ��������ŭ �ǳʶ��
+			// 투명색만큼 건너띄고
 			pDestTemp += transCount;
 
-			// ���
+			// 출력
 			//memcpy(pDestTemp, pPixels, colorCount<<1);
-			// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+			// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 			//memset((void*)pDestTemp, 0, colorCount<<1);
 			memcpyShadow4444(pDestTemp, colorCount);
 
@@ -2142,7 +2142,7 @@ CShadowSprite::Blt4444ClipWidth(WORD* pDest, WORD pitch, RECT* pRect, WORD pixel
 //----------------------------------------------------------------------
 // Blt4444 Clip Height
 //----------------------------------------------------------------------
-// pRect->top, pRect->bottom��ŭ�� ����Ѵ�.
+// pRect->top, pRect->bottom만큼만 출력한다.
 //----------------------------------------------------------------------
 void
 CShadowSprite::Blt4444ClipHeight(WORD *pDest, WORD pitch, RECT* pRect, WORD pixel)
@@ -2164,18 +2164,18 @@ CShadowSprite::Blt4444ClipHeight(WORD *pDest, WORD pitch, RECT* pRect, WORD pixe
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		// (투명수,색깔수,색깔들)의 반복 수		
 		count	= *pPixels++;		
 
-		// �� �� ���
+		// 한 줄 출력
 		for (j=0; j<count; j++)
 		{				
-			pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-			colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+			pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+			colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-			// ������ �ƴ� ������ Surface�� ����Ѵ�.
+			// 투명이 아닌 색들을 Surface에 출력한다.
 			//memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
-			// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+			// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 			//memset((void*)pDestTemp, 0, colorCount<<1);
 			memcpyShadow4444(pDestTemp, colorCount);
 			
@@ -2190,7 +2190,7 @@ CShadowSprite::Blt4444ClipHeight(WORD *pDest, WORD pitch, RECT* pRect, WORD pixe
 //----------------------------------------------------------------------
 // ShadowDarkness Copy
 //----------------------------------------------------------------------
-// dest�� pixels���� s_wValue1�� �Ѵ�.
+// dest의 pixels개를 s_wValue1로 한다.
 //----------------------------------------------------------------------
 void	
 CShadowSprite::memcpyShadow4444(WORD* pDest, WORD pixels)
@@ -2210,19 +2210,19 @@ CShadowSprite::memcpyShadow4444(WORD* pDest, WORD pixels)
 //----------------------------------------------------------------------
 // Blt Small
 //----------------------------------------------------------------------
-// 2^shift byte���� �� ������ ����Ѵ�.
+// 2^shift byte수당 한 점씩만 출력한다.
 //
-// 100*100 Sprite�� ��� 
+// 100*100 Sprite일 경우 
 // shift = 0 , 100*100
 // shift = 1 , 50*50
 // shift = 2 , 25*25
 // shift = 3 , 12*12
 // shift = 4 , 6*6
 // ...
-// Clipping���� �ʴ´�.
+// Clipping하지 않는다.
 //----------------------------------------------------------------------
-// ���� �����ؾߵǴµ�...
-// clipping �Լ��鿡���� ���Ѵ�. - -; �����Ƽ�.. ������.
+// 길이 보정해야되는데...
+// clipping 함수들에서는 안한다. - -; 귀찮아서.. 음하하.
 //----------------------------------------------------------------------
 void
 CShadowSprite::BltSmall(WORD *pDest, WORD pitch, BYTE shift)
@@ -2246,16 +2246,16 @@ CShadowSprite::BltSmall(WORD *pDest, WORD pitch, BYTE shift)
 	if (m_Height > 0)
 	{
 		i = m_Height-1;
-		int stepY = 1 << shift;		// y�� �ǳʶ�� pixel��
+		int stepY = 1 << shift;		// y줄 건너띄는 pixel수
 		pDest = (WORD*)((BYTE*)pDest + (i>>shift)*pitch);
 
 		do {	
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,�����)�� �ݺ� ��		
+			// (투명수,색깔수)의 반복 수		
 			count	= *pPixels++;		
- 			// �� �� ���
+ 			// 한 줄 출력
 			totalCount = 0;
 			totalShiftCount = 0;
 			if (count > 0)
@@ -2264,41 +2264,41 @@ CShadowSprite::BltSmall(WORD *pDest, WORD pitch, BYTE shift)
 				do
 				{
 					transCount = *pPixels++;
-					colorCount = *pPixels++;				// ���� �ƴ� �� ��
+					colorCount = *pPixels++;				// 투명 아닌 색 수
 					
 					transCountShift = transCount >> shift;
 					colorCountShift = colorCount >> shift;
 
 					//--------------------------------------------------
-					//				���� �κ� ���� ����
+					//				투명 부분 길이 보정
 					//--------------------------------------------------
-					// ���� size�� pixel��..
+					// 실제 size의 pixel수..
 					//--------------------------------------------------
 					totalCount += transCount;
 					totalShiftCount += transCountShift;
 
-					// ����pixel - shift�ؼ� �ø� pixel(-_-;)
+					// 실제pixel - shift해서 늘린 pixel(-_-;)
 					pixelGap = totalCount - (totalShiftCount << shift);
 
-					// gap�� �ٽ� shift�ؼ� �����ش�.
+					// gap을 다시 shift해서 더해준다.
 					pixelGapShift = pixelGap >> shift;
 					transCountShift += pixelGapShift;
 					totalShiftCount += pixelGapShift;
 
 					//--------------------------------------------------
-					// ��������ŭ �ǳ� �ڴ�.
+					// 투명색만큼 건너 뛴다.
 					//--------------------------------------------------
 					pDestTemp += transCountShift;		
 
 					
 					//--------------------------------------------------
-					//				�׸��� �κ� ���� ����
+					//				그림자 부분 길이 보정
 					//--------------------------------------------------
 					totalCount += colorCount;
 					totalShiftCount += colorCountShift;
 					
 					//--------------------------------------------------
-					// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+					// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 					//--------------------------------------------------
 					memset((void*)pDestTemp, 0, colorCount);
 			
@@ -2318,8 +2318,8 @@ CShadowSprite::BltSmall(WORD *pDest, WORD pitch, BYTE shift)
 //----------------------------------------------------------------------
 // BltSmall ClipLeft
 //----------------------------------------------------------------------
-// ���� clipping.  
-// pRect->left���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
+// 왼쪽 clipping.  
+// pRect->left개의 점을 건너띈 다음부터 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CShadowSprite::BltSmallClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE shift)
@@ -2328,7 +2328,7 @@ CShadowSprite::BltSmallClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE shift
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -2340,115 +2340,115 @@ CShadowSprite::BltSmallClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE shift
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
-	int stepY = 1 << shift;		// y�� �ǳʶ�� pixel��
+	int stepY = 1 << shift;		// y줄 건너띄는 pixel수
 	int endY = pRect->bottom << shift;
 	for (int i=pRect->top; i<endY; i+=stepY)
 	{
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > pRect->left)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > pRect->left)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += (index - pRect->left) >> shift;
 
-						// shift��ŭ �ٿ�������.
+						// shift만큼 줄여버린다.
 						colorCount >>= shift;
 
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						//memcpy(pDestTemp, pPixels, colorCount<<1);
-						// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+						// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 						memset((void*)pDestTemp, 0, colorCount<<1);
 
 						pDestTemp += colorCount;
 						//pPixels += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = pRect->left - index;
 
-						// shift��ŭ �ٿ�������.
+						// shift만큼 줄여버린다.
 						colorCount = (colorCount-dist) >> shift;
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						//memcpy(pDestTemp, pPixels+dist, (colorCount-dist)<<1);					
-						// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+						// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 						memset((void*)pDestTemp, 0, colorCount<<1);
 
 						pDestTemp += colorCount;
 						//pPixels += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				//pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			// 이제부터는 계속 출력한다.		
 			//---------------------------------------------		
 			if (--j > 0)
 			{
 				do
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ �ǳ� �ڴ�.
+					// 투명색만큼 건너 뛴다.
 					pDestTemp += transCount>>shift;			
 
-					// shift��ŭ �ٿ�������.
+					// shift만큼 줄여버린다.
 					colorCount >>= shift;
 					
-					// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+					// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 					memset((void*)pDestTemp, 0, colorCount<<1);
 
-					// memory addr ����
+					// memory addr 증가
 					pDestTemp += colorCount;
 					//pPixels += colorCount;			
 				} while (--j);
@@ -2463,8 +2463,8 @@ CShadowSprite::BltSmallClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE shift
 //----------------------------------------------------------------------
 // BltSmall ClipRight
 //----------------------------------------------------------------------
-// ������ clipping.  
-// pRect->right�� ������ ���� pDest�� ����Ѵ�.
+// 오른쪽 clipping.  
+// pRect->right개 까지의 점만 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CShadowSprite::BltSmallClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE shift)
@@ -2473,7 +2473,7 @@ CShadowSprite::BltSmallClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE shif
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -2483,73 +2483,73 @@ CShadowSprite::BltSmallClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE shif
 	register int	i;
 	register int	j;
 
-	int stepY = 1 << shift;		// y�� �ǳʶ�� pixel��
+	int stepY = 1 << shift;		// y줄 건너띄는 pixel수
 	int endY = pRect->bottom << shift;
 	for (int i=pRect->top; i<endY; i+=stepY)
 	{
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		// 각 줄마다 Clipping을 해줘야 하는데...		
+		// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 		//---------------------------------------------
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{		
-				transCount = *pPixels++ >> shift;		// ������ ��			
-				colorCount = *pPixels++ >> shift;		// ���� �ƴ� �� ��		
+				transCount = *pPixels++ >> shift;		// 투명색 수			
+				colorCount = *pPixels++ >> shift;		// 투명 아닌 색 수		
 						
-				// ��������ŭ index����
+				// 투명색만큼 index증가
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+				// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 				//---------------------------------------------
-				// ������ ������ �������� ���
+				// 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+colorCount > pRect->right)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					// 투명색만으로 더 출력할 필요가 없을 때
 					if (index > pRect->right)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					// 투명색 아닌 것을 조금 출력해야 할 경우
 					else
 					{
 						pDestTemp += transCount;
 					
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						//memcpy(pDestTemp, pPixels, (pRect->right - index)<<1);
-						// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+						// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 						memset((void*)pDestTemp, 0, (pRect->right - index)<<1);
 
 						break;
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				// 투명색만큼 건너띄고
 				pDestTemp += transCount;
 
 				index += colorCount;
 				
-				// ���
+				// 출력
 				//memcpy(pDestTemp, pPixels, colorCount<<1);
-				// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+				// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 				memset((void*)pDestTemp, 0, colorCount<<1);
 
 				pDestTemp += colorCount;
@@ -2564,9 +2564,9 @@ CShadowSprite::BltSmallClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE shif
 //----------------------------------------------------------------------
 // BltSmall ClipWidth
 //----------------------------------------------------------------------
-// ���� clipping.  
-// pRect->left���� ���� �ǳʶ� �������� pDest�� ����ϴٰ�
-// pRect->Right������ ����Ѵ�.
+// 왼쪽 clipping.  
+// pRect->left개의 점을 건너띈 다음부터 pDest에 출력하다가
+// pRect->Right까지만 출력한다.
 //----------------------------------------------------------------------
 void
 CShadowSprite::BltSmallClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE shift)
@@ -2575,7 +2575,7 @@ CShadowSprite::BltSmallClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE shif
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -2587,57 +2587,57 @@ CShadowSprite::BltSmallClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE shif
 	register short j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
-	int stepY = 1 << shift;		// y�� �ǳʶ�� pixel��
+	int stepY = 1 << shift;		// y줄 건너띄는 pixel수
 	int endY = pRect->bottom << shift;
 	for (int i=pRect->top; i<endY; i+=stepY)
 	{
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{		
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > pRect->left)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > pRect->left)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += (index - pRect->left)>>shift;
 
-						// �̹� �ܰ�� ��� ���?
-						// ������ ���� �Ѿ�� ���..
+						// 이번 단계는 모두 출력?
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > pRect->right)
 						{							
-							// ������������ ������ �� �Ѿ�� ���
+							// 투명색만으로 오른쪽 끝 넘어가는 경우
 							if (index > pRect->right)
 							{
 							}
@@ -2651,7 +2651,7 @@ CShadowSprite::BltSmallClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE shif
 							break;
 						}
 
-						// shift��ŭ �ٿ�������.
+						// shift만큼 줄여버린다.
 						colorCount >>= shift;
 					
 						memset((void*)pDestTemp, 0, colorCount<<1);
@@ -2660,18 +2660,18 @@ CShadowSprite::BltSmallClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE shif
 						//pPixels += colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{		
 						dist = pRect->left - index;
 
-						// ������ ���� �Ѿ�� ���..
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > pRect->right)
 						{						
 							memset((void*)pDestTemp, 0, (pRect->right - pRect->left)>>shift);
@@ -2680,85 +2680,85 @@ CShadowSprite::BltSmallClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE shif
 							break;
 						}
 
-						// shift��ŭ �ٿ�������.
+						// shift만큼 줄여버린다.
 						index += colorCount;
 						colorCount = (colorCount-dist) >> shift;
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						//memcpy(pDestTemp, pPixels+dist, (colorCount-dist)<<1);					
-						// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+						// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 						memset((void*)pDestTemp, 0, colorCount<<1);
 
 						pDestTemp += colorCount;
 						//pPixels += colorCount;		
 						
 
-						// �������ʹ� ��� ����Ѵ�.					
+						// 이제부터는 계속 출력한다.					
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				//pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			// 각 줄마다 Clipping을 해줘야 하는데...		
+			// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����
+					// 투명색만큼 index증가
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 					//---------------------------------------------
-					// ������ ������ �������� ���
+					// 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+colorCount > pRect->right)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						// 투명색만으로 더 출력할 필요가 없을 때
 						if (index > pRect->right)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						// 투명색 아닌 것을 조금 출력해야 할 경우
 						else
 						{
 							pDestTemp += transCount>>shift;
 						
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							//memcpy(pDestTemp, pPixels, (pRect->right - index)<<1);
-							// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+							// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 							memset((void*)pDestTemp, 0, ((pRect->right - index)>>shift)<<1);
 
 							break;
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					// 투명색만큼 건너띄고
 					pDestTemp += transCount>>shift;
 
 
 					index += colorCount;
-					// shift��ŭ �ٿ��ش�.
+					// shift만큼 줄여준다.
 					colorCount >>= shift;
 
-					// ���
+					// 출력
 					//memcpy(pDestTemp, pPixels, colorCount<<1);
-					// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+					// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 					memset((void*)pDestTemp, 0, colorCount<<1);
 
 					pDestTemp += colorCount;
@@ -2775,7 +2775,7 @@ CShadowSprite::BltSmallClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE shif
 //----------------------------------------------------------------------
 // BltSmall Clip Height
 //----------------------------------------------------------------------
-// pRect->top, pRect->bottom��ŭ�� ����Ѵ�.
+// pRect->top, pRect->bottom만큼만 출력한다.
 //----------------------------------------------------------------------
 void
 CShadowSprite::BltSmallClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE shift)
@@ -2790,14 +2790,14 @@ CShadowSprite::BltSmallClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE shi
 	register int i;
 	register int j;
 	
-	int stepY = 1 << shift;		// y�� �ǳʶ�� pixel��
+	int stepY = 1 << shift;		// y줄 건너띄는 pixel수
 	int endY = pRect->bottom << shift;
 	for (int i=pRect->top; i<endY; i+=stepY)
 	{			
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		// (투명수,색깔수,색깔들)의 반복 수		
 		count	= *pPixels++;		
 
 		if (count > 0)
@@ -2805,12 +2805,12 @@ CShadowSprite::BltSmallClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE shi
 			j = count;
 			do
 			{
-				pDestTemp += ((*pPixels++)>>shift);		// ��������ŭ �ǳ� �ڴ�.
-				colorCount = *pPixels++;				// ���� �ƴ� �� ��
+				pDestTemp += ((*pPixels++)>>shift);		// 투명색만큼 건너 뛴다.
+				colorCount = *pPixels++;				// 투명 아닌 색 수
 				
 				colorCount >>= shift;
 
-				// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+				// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 				memset((void*)pDestTemp, 0, colorCount<<1);
 		
 				pDestTemp	+= colorCount;
@@ -2826,24 +2826,24 @@ CShadowSprite::BltSmallClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE shi
 //----------------------------------------------------------------------
 // Blt Small4444
 //----------------------------------------------------------------------
-// 2^shift byte���� �� ������ ����Ѵ�.
+// 2^shift byte수당 한 점씩만 출력한다.
 //
-// 100*100 Sprite�� ��� 
+// 100*100 Sprite일 경우 
 // shift = 0 , 100*100
 // shift = 1 , 50*50
 // shift = 2 , 25*25
 // shift = 3 , 12*12
 // shift = 4 , 6*6
 // ...
-// Clipping���� �ʴ´�.
+// Clipping하지 않는다.
 //----------------------------------------------------------------------
-// ���� �����ؾߵǴµ�...
-// clipping �Լ��鿡���� ���Ѵ�. - -; �����Ƽ�.. ������.
+// 길이 보정해야되는데...
+// clipping 함수들에서는 안한다. - -; 귀찮아서.. 음하하.
 //----------------------------------------------------------------------
 void
 CShadowSprite::BltSmall4444(WORD *pDest, WORD pitch, WORD pixel, BYTE shift)
 {
-	// Shadow���� ����
+	// Shadow색깔 설정
 	s_wValue1 = pixel;
 
 	int		count,		
@@ -2864,7 +2864,7 @@ CShadowSprite::BltSmall4444(WORD *pDest, WORD pitch, WORD pixel, BYTE shift)
 	register int j;
 
 	/*
-	int stepY = 1 << shift;		// y�� �ǳʶ�� pixel��		
+	int stepY = 1 << shift;		// y줄 건너띄는 pixel수		
 	int m_Height_1 = m_Height - 1;
 
 	if (m_Height > 0)
@@ -2876,9 +2876,9 @@ CShadowSprite::BltSmall4444(WORD *pDest, WORD pitch, WORD pixel, BYTE shift)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,�����)�� �ݺ� ��		
+			// (투명수,색깔수)의 반복 수		
 			count	= *pPixels++;		
- 			// �� �� ���
+ 			// 한 줄 출력
 			totalCount = 0;
 			totalShiftCount = 0;
 			if (count > 0)
@@ -2887,41 +2887,41 @@ CShadowSprite::BltSmall4444(WORD *pDest, WORD pitch, WORD pixel, BYTE shift)
 				do
 				{
 					transCount = *pPixels++;
-					colorCount = *pPixels++;				// ���� �ƴ� �� ��
+					colorCount = *pPixels++;				// 투명 아닌 색 수
 					
 					transCountShift = transCount >> shift;
 					colorCountShift = colorCount >> shift;
 
 					//--------------------------------------------------
-					//				���� �κ� ���� ����
+					//				투명 부분 길이 보정
 					//--------------------------------------------------
-					// ���� size�� pixel��..
+					// 실제 size의 pixel수..
 					//--------------------------------------------------
 					totalCount += transCount;
 					totalShiftCount += transCountShift;
 
-					// ����pixel - shift�ؼ� �ø� pixel(-_-;)
+					// 실제pixel - shift해서 늘린 pixel(-_-;)
 					pixelGap = totalCount - (totalShiftCount << shift);
 
-					// gap�� �ٽ� shift�ؼ� �����ش�.
+					// gap을 다시 shift해서 더해준다.
 					pixelGapShift = pixelGap >> shift;
 					transCountShift += pixelGapShift;
 					totalShiftCount += pixelGapShift;
 
 					//--------------------------------------------------
-					// ��������ŭ �ǳ� �ڴ�.
+					// 투명색만큼 건너 뛴다.
 					//--------------------------------------------------
 					pDestTemp += transCountShift;		
 
 					
 					//--------------------------------------------------
-					//				�׸��� �κ� ���� ����
+					//				그림자 부분 길이 보정
 					//--------------------------------------------------
 					totalCount += colorCount;
 					totalShiftCount += colorCountShift;
 					
 					//--------------------------------------------------
-					// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+					// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 					//--------------------------------------------------
 					memcpyShadow4444(pDestTemp, colorCountShift);
 			
@@ -2938,16 +2938,16 @@ CShadowSprite::BltSmall4444(WORD *pDest, WORD pitch, WORD pixel, BYTE shift)
 	}
 	*/
 
-	int stepY = 1 << shift;		// y�� �ǳʶ�� pixel��		
+	int stepY = 1 << shift;		// y줄 건너띄는 pixel수		
 	
 	for (int i=0; i<m_Height; i+=stepY)
 	{
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����)�� �ݺ� ��		
+		// (투명수,색깔수)의 반복 수		
 		count	= *pPixels++;		
- 		// �� �� ���
+ 		// 한 줄 출력
 		totalCount = 0;
 		totalShiftCount = 0;
 
@@ -2958,40 +2958,40 @@ CShadowSprite::BltSmall4444(WORD *pDest, WORD pitch, WORD pixel, BYTE shift)
 			do
 			{
 				transCount = *pPixels++;
-				colorCount = *pPixels++;				// ���� �ƴ� �� ��
+				colorCount = *pPixels++;				// 투명 아닌 색 수
 				
 				transCountShift = transCount >> shift;
 				colorCountShift = colorCount >> shift;
 
 				//--------------------------------------------------
-				//				���� �κ� ���� ����
+				//				투명 부분 길이 보정
 				//--------------------------------------------------
-				// ���� size�� pixel��..
+				// 실제 size의 pixel수..
 				//--------------------------------------------------
 				totalCount += transCount;
 				totalShiftCount += transCountShift;
 
-				// ����pixel - shift�ؼ� �ø� pixel(-_-;)
+				// 실제pixel - shift해서 늘린 pixel(-_-;)
 				pixelGap = totalCount - (totalShiftCount << shift);
 
-				// gap�� �ٽ� shift�ؼ� �����ش�.
+				// gap을 다시 shift해서 더해준다.
 				pixelGapShift = pixelGap >> shift;
 				transCountShift += pixelGapShift;
 				totalShiftCount += pixelGapShift;
 
 				//--------------------------------------------------
-				// ��������ŭ �ǳ� �ڴ�.
+				// 투명색만큼 건너 뛴다.
 				//--------------------------------------------------
 				pDestTemp += transCountShift;		
 			
 				//--------------------------------------------------
-				//				�׸��� �κ� ���� ����
+				//				그림자 부분 길이 보정
 				//--------------------------------------------------
 				totalCount += colorCount;
 				totalShiftCount += colorCountShift;
 				
 				//--------------------------------------------------
-				// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+				// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 				//--------------------------------------------------
 				memcpyShadow4444(pDestTemp, colorCountShift);
 
@@ -3009,20 +3009,20 @@ CShadowSprite::BltSmall4444(WORD *pDest, WORD pitch, WORD pixel, BYTE shift)
 //----------------------------------------------------------------------
 // BltSmall4444 ClipLeft
 //----------------------------------------------------------------------
-// ���� clipping.  
-// pRect->left���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
+// 왼쪽 clipping.  
+// pRect->left개의 점을 건너띈 다음부터 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CShadowSprite::BltSmall4444ClipLeft(WORD* pDest, WORD pitch, RECT* pRect, WORD pixel, BYTE shift)
 {
-	// Shadow���� ����
+	// Shadow색깔 설정
 	s_wValue1 = pixel;
 
 	WORD	*pPixels,
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -3034,115 +3034,115 @@ CShadowSprite::BltSmall4444ClipLeft(WORD* pDest, WORD pitch, RECT* pRect, WORD p
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
-	int stepY = 1 << shift;		// y�� �ǳʶ�� pixel��
+	int stepY = 1 << shift;		// y줄 건너띄는 pixel수
 	int endY = pRect->bottom << shift;
 	for (int i=pRect->top; i<endY; i+=stepY)
 	{
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > pRect->left)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > pRect->left)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += (index - pRect->left) >> shift;
 
-						// shift��ŭ �ٿ�������.
+						// shift만큼 줄여버린다.
 						colorCount >>= shift;
 
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						//memcpy(pDestTemp, pPixels, colorCount<<1);
-						// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+						// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 						memcpyShadow4444(pDestTemp, colorCount);
 
 						pDestTemp += colorCount;
 						//pPixels += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = pRect->left - index;
 
-						// shift��ŭ �ٿ�������.
+						// shift만큼 줄여버린다.
 						colorCount = (colorCount-dist) >> shift;
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						//memcpy(pDestTemp, pPixels+dist, (colorCount-dist)<<1);					
-						// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+						// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 						memcpyShadow4444(pDestTemp, colorCount);
 
 						pDestTemp += colorCount;
 						//pPixels += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				//pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			// 이제부터는 계속 출력한다.		
 			//---------------------------------------------		
 			if (--j > 0)
 			{
 				do
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ �ǳ� �ڴ�.
+					// 투명색만큼 건너 뛴다.
 					pDestTemp += transCount>>shift;			
 
-					// shift��ŭ �ٿ�������.
+					// shift만큼 줄여버린다.
 					colorCount >>= shift;
 					
-					// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+					// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 					memcpyShadow4444(pDestTemp, colorCount);
 
-					// memory addr ����
+					// memory addr 증가
 					pDestTemp += colorCount;
 					//pPixels += colorCount;			
 				} while (--j);
@@ -3157,20 +3157,20 @@ CShadowSprite::BltSmall4444ClipLeft(WORD* pDest, WORD pitch, RECT* pRect, WORD p
 //----------------------------------------------------------------------
 // BltSmall4444 ClipRight
 //----------------------------------------------------------------------
-// ������ clipping.  
-// pRect->right�� ������ ���� pDest�� ����Ѵ�.
+// 오른쪽 clipping.  
+// pRect->right개 까지의 점만 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CShadowSprite::BltSmall4444ClipRight(WORD* pDest, WORD pitch, RECT* pRect, WORD pixel, BYTE shift)
 {
-	// Shadow���� ����
+	// Shadow색깔 설정
 	s_wValue1 = pixel;
 
 	WORD	*pPixels,
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -3180,73 +3180,73 @@ CShadowSprite::BltSmall4444ClipRight(WORD* pDest, WORD pitch, RECT* pRect, WORD 
 	register int	i;
 	register int	j;
 
-	int stepY = 1 << shift;		// y�� �ǳʶ�� pixel��
+	int stepY = 1 << shift;		// y줄 건너띄는 pixel수
 	int endY = pRect->bottom << shift;
 	for (int i=pRect->top; i<endY; i+=stepY)
 	{
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		// 각 줄마다 Clipping을 해줘야 하는데...		
+		// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 		//---------------------------------------------
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{		
-				transCount = *pPixels++ >> shift;		// ������ ��			
-				colorCount = *pPixels++ >> shift;		// ���� �ƴ� �� ��		
+				transCount = *pPixels++ >> shift;		// 투명색 수			
+				colorCount = *pPixels++ >> shift;		// 투명 아닌 색 수		
 						
-				// ��������ŭ index����
+				// 투명색만큼 index증가
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+				// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 				//---------------------------------------------
-				// ������ ������ �������� ���
+				// 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+colorCount > pRect->right)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					// 투명색만으로 더 출력할 필요가 없을 때
 					if (index > pRect->right)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					// 투명색 아닌 것을 조금 출력해야 할 경우
 					else
 					{
 						pDestTemp += transCount;
 					
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						//memcpy(pDestTemp, pPixels, (pRect->right - index)<<1);
-						// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+						// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 						memcpyShadow4444(pDestTemp, (pRect->right - index));
 
 						break;
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				// 투명색만큼 건너띄고
 				pDestTemp += transCount;
 
 				index += colorCount;
 				
-				// ���
+				// 출력
 				//memcpy(pDestTemp, pPixels, colorCount<<1);
-				// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+				// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 				memcpyShadow4444(pDestTemp, colorCount);
 
 				pDestTemp += colorCount;
@@ -3261,21 +3261,21 @@ CShadowSprite::BltSmall4444ClipRight(WORD* pDest, WORD pitch, RECT* pRect, WORD 
 //----------------------------------------------------------------------
 // BltSmall4444 ClipWidth
 //----------------------------------------------------------------------
-// ���� clipping.  
-// pRect->left���� ���� �ǳʶ� �������� pDest�� ����ϴٰ�
-// pRect->Right������ ����Ѵ�.
+// 왼쪽 clipping.  
+// pRect->left개의 점을 건너띈 다음부터 pDest에 출력하다가
+// pRect->Right까지만 출력한다.
 //----------------------------------------------------------------------
 void
 CShadowSprite::BltSmall4444ClipWidth(WORD* pDest, WORD pitch, RECT* pRect, WORD pixel, BYTE shift)
 {
-	// Shadow���� ����
+	// Shadow색깔 설정
 	s_wValue1 = pixel;
 
 	WORD	*pPixels,
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -3287,57 +3287,57 @@ CShadowSprite::BltSmall4444ClipWidth(WORD* pDest, WORD pitch, RECT* pRect, WORD 
 	register short j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
-	int stepY = 1 << shift;		// y�� �ǳʶ�� pixel��
+	int stepY = 1 << shift;		// y줄 건너띄는 pixel수
 	int endY = pRect->bottom << shift;
 	for (int i=pRect->top; i<endY; i+=stepY)
 	{
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{			
 			j = count;
 			do
 			{		
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > pRect->left)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > pRect->left)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += (index - pRect->left)>>shift;
 
-						// �̹� �ܰ�� ��� ���?
-						// ������ ���� �Ѿ�� ���..
+						// 이번 단계는 모두 출력?
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > pRect->right)
 						{							
-							// ������������ ������ �� �Ѿ�� ���
+							// 투명색만으로 오른쪽 끝 넘어가는 경우
 							if (index > pRect->right)
 							{
 							}
@@ -3351,7 +3351,7 @@ CShadowSprite::BltSmall4444ClipWidth(WORD* pDest, WORD pitch, RECT* pRect, WORD 
 							break;
 						}
 
-						// shift��ŭ �ٿ�������.
+						// shift만큼 줄여버린다.
 						colorCount >>= shift;
 					
 						memcpyShadow4444(pDestTemp, colorCount);
@@ -3360,18 +3360,18 @@ CShadowSprite::BltSmall4444ClipWidth(WORD* pDest, WORD pitch, RECT* pRect, WORD 
 						//pPixels += colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{		
 						dist = pRect->left - index;
 
-						// ������ ���� �Ѿ�� ���..
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > pRect->right)
 						{						
 							memcpyShadow4444(pDestTemp, (pRect->right - pRect->left)>>shift);
@@ -3380,85 +3380,85 @@ CShadowSprite::BltSmall4444ClipWidth(WORD* pDest, WORD pitch, RECT* pRect, WORD 
 							break;
 						}
 
-						// shift��ŭ �ٿ�������.
+						// shift만큼 줄여버린다.
 						index += colorCount;
 						colorCount = (colorCount-dist) >> shift;
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						//memcpy(pDestTemp, pPixels+dist, (colorCount-dist)<<1);					
-						// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+						// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 						memcpyShadow4444(pDestTemp, colorCount);
 
 						pDestTemp += colorCount;
 						//pPixels += colorCount;		
 						
 
-						// �������ʹ� ��� ����Ѵ�.					
+						// 이제부터는 계속 출력한다.					
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				//pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			// 각 줄마다 Clipping을 해줘야 하는데...		
+			// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����
+					// 투명색만큼 index증가
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 					//---------------------------------------------
-					// ������ ������ �������� ���
+					// 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+colorCount > pRect->right)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						// 투명색만으로 더 출력할 필요가 없을 때
 						if (index > pRect->right)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						// 투명색 아닌 것을 조금 출력해야 할 경우
 						else
 						{
 							pDestTemp += transCount>>shift;
 						
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							//memcpy(pDestTemp, pPixels, (pRect->right - index)<<1);
-							// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+							// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 							memcpyShadow4444(pDestTemp, (pRect->right - index)>>shift);
 
 							break;
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					// 투명색만큼 건너띄고
 					pDestTemp += transCount>>shift;
 
 
 					index += colorCount;
-					// shift��ŭ �ٿ��ش�.
+					// shift만큼 줄여준다.
 					colorCount >>= shift;
 
-					// ���
+					// 출력
 					//memcpy(pDestTemp, pPixels, colorCount<<1);
-					// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+					// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 					memcpyShadow4444(pDestTemp, colorCount);
 
 					pDestTemp += colorCount;
@@ -3475,12 +3475,12 @@ CShadowSprite::BltSmall4444ClipWidth(WORD* pDest, WORD pitch, RECT* pRect, WORD 
 //----------------------------------------------------------------------
 // BltSmall4444 Clip Height
 //----------------------------------------------------------------------
-// pRect->top, pRect->bottom��ŭ�� ����Ѵ�.
+// pRect->top, pRect->bottom만큼만 출력한다.
 //----------------------------------------------------------------------
 void
 CShadowSprite::BltSmall4444ClipHeight(WORD *pDest, WORD pitch, RECT* pRect, WORD pixel, BYTE shift)
 {
-	// Shadow���� ����
+	// Shadow색깔 설정
 	s_wValue1 = pixel;
 
 	int		count,			
@@ -3493,14 +3493,14 @@ CShadowSprite::BltSmall4444ClipHeight(WORD *pDest, WORD pitch, RECT* pRect, WORD
 	register int i;
 	register int j;
 	
-	int stepY = 1 << shift;		// y�� �ǳʶ�� pixel��
+	int stepY = 1 << shift;		// y줄 건너띄는 pixel수
 	int endY = pRect->bottom << shift;
 	for (int i=pRect->top; i<endY; i+=stepY)
 	{			
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		// (투명수,색깔수,색깔들)의 반복 수		
 		count	= *pPixels++;		
 
 		if (count > 0)
@@ -3508,12 +3508,12 @@ CShadowSprite::BltSmall4444ClipHeight(WORD *pDest, WORD pitch, RECT* pRect, WORD
 			j = count;
 			do
 			{
-				pDestTemp += ((*pPixels++)>>shift);		// ��������ŭ �ǳ� �ڴ�.
-				colorCount = *pPixels++;				// ���� �ƴ� �� ��
+				pDestTemp += ((*pPixels++)>>shift);		// 투명색만큼 건너 뛴다.
+				colorCount = *pPixels++;				// 투명 아닌 색 수
 				
 				colorCount >>= shift;
 
-				// 0��(������, 5:5:5�� 5:6:5�� �Ȱ���)������ ���
+				// 0번(검정색, 5:5:5나 5:6:5나 똑같다)색으로 출력
 				memcpyShadow4444(pDestTemp, colorCount);
 		
 				pDestTemp	+= colorCount;

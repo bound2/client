@@ -2,11 +2,11 @@
 // COrderedList.h
 //----------------------------------------------------------------------
 // 
-// �� �ϳ��� ���� �ִ� class�̴�.
+// 값 하나를 갖고 있는 class이다.
 //
-// ������ ������ �ߺ��� ������� �ʴ´�.
+// 순서를 가지고 중복을 허용하지 않는다.
 //
-// list�� �����Ѵ�.
+// list로 구현한다.
 //
 //----------------------------------------------------------------------
 
@@ -32,7 +32,7 @@ template <class Type>
 class COrderedList {
 	public :
 		//----------------------------------------------------------------------
-		// BUILDING_INFO_LIST�� �����Ѵ�.
+		// BUILDING_INFO_LIST를 정의한다.
 		//----------------------------------------------------------------------
 		typedef	std::list<Type>	DATA_LIST;
 
@@ -46,12 +46,12 @@ class COrderedList {
 		void		Release();
 
 		//--------------------------------------------------------------
-		// Add    : data�� �߰�. �̹� �ִ��� check�غ��� �Ѵ�.
+		// Add    : data를 추가. 이미 있는지 check해봐야 한다.
 		//--------------------------------------------------------------
 		bool		Add(Type data);
 
 		//--------------------------------------------------------------
-		// Remove : data�� ����
+		// Remove : data를 제거
 		//--------------------------------------------------------------
 		bool		Remove(Type data);
 
@@ -106,8 +106,8 @@ COrderedList<Type>::Release()
 //----------------------------------------------------------------------
 // Add(x,y)
 //----------------------------------------------------------------------
-// (x,y)�� �߰� : �̹� �ִ��� check�غ��� �Ѵ�.
-// ���ǻ�.. X, Y������ Sort�ؼ� �߰��Ѵ�.
+// (x,y)를 추가 : 이미 있는지 check해봐야 한다.
+// 편의상.. X, Y순으로 Sort해서 추가한다.
 //----------------------------------------------------------------------
 template <class Type>
 bool
@@ -115,20 +115,20 @@ COrderedList<Type>::Add(Type data)
 {
 	typename DATA_LIST::iterator iData = m_List.begin();
 
-	// �̹� list�� ����ִ� ��� Data�� ���غ���
-	// ������ ���� �� �߰��Ѵ�.
+	// 이미 list에 들어있는 모든 Data과 비교해보고
+	// 같은게 없을 때 추가한다.
 	while (iData != m_List.end())
 	{
-		// ���� ����ִ°� �߰��ҷ��°ͺ��� Ŭ ���,
-		// ���� ��ġ�� �߰��ϸ� �ȴ�.
+		// 현재 들어있는게 추가할려는것보다 클 경우,
+		// 현재 위치에 추가하면 된다.
 		if (*iData > data)
 		{
 			m_List.insert(iData, data);
 			return true;
 		}
 
-		// �̹� �ִ� ���̸�
-		// �߰����� �ʴ´�.
+		// 이미 있는 값이면
+		// 추가하지 않는다.
 		if (*iData==data)
 		{
 			return false;
@@ -137,8 +137,8 @@ COrderedList<Type>::Add(Type data)
 		iData++;
 	}	
 
-	// list�� ��� ���ҵ麸�� ũ�Ƿ� 
-	// list�� ���� �߰��Ѵ�.
+	// list의 모든 원소들보다 크므로 
+	// list의 끝에 추가한다.
 	m_List.push_back( data );
 
 	return true;
@@ -147,7 +147,7 @@ COrderedList<Type>::Add(Type data)
 //----------------------------------------------------------------------
 // Remove
 //----------------------------------------------------------------------
-// (x,y)�� ����
+// (x,y)를 제거
 //----------------------------------------------------------------------
 template <class Type>
 bool		
@@ -155,18 +155,18 @@ COrderedList<Type>::Remove(Type data)
 {
 	typename DATA_LIST::iterator iData = m_List.begin();
 
-	// list�� Node���� ������ ������ �����.
+	// list의 Node에서 같은게 있으면 지운다.
 	while (iData != m_List.end())
 	{		
-		// ���� ���̸� �����.
+		// 같은 값이면 지운다.
 		if (*iData==data)
 		{
 			m_List.erase(iData);
 			return true;
 		}
 		
-		// ���� ��ġ�� �ִ� ���� Data���� ũ�ٸ�
-		// ��� ū ���� �����Ƿ� Data���� ���� ���̴�.
+		// 현재 위치에 있는 값이 Data보다 크다면
+		// 계속 큰 값만 있으므로 Data값이 없는 것이다.
 		if (*iData > data)
 		{			
 			return false;
@@ -175,14 +175,14 @@ COrderedList<Type>::Remove(Type data)
 		iData++;
 	}	
 
-	// ���� ���
+	// 없는 경우
 	return false;
 }
 
 //----------------------------------------------------------------------
 // operator -=
 //----------------------------------------------------------------------
-// ������ list���� listSub�� �ִ°� ���� �����Ѵ�.
+// 현재의 list에서 listSub에 있는것 들을 제거한다.
 //----------------------------------------------------------------------
 template <class Type>
 void		
@@ -192,28 +192,28 @@ COrderedList<Type>::operator -= (const COrderedList<Type>& listSub)
 	typename DATA_LIST::const_iterator iDataSub = listSub.m_List.begin();
 	typename DATA_LIST::iterator iDataTemp;
 
-	// �� �߿� �ϳ��� list�� ���̸�.. �� ����Ұ� ����.
+	// 둘 중에 하나라도 list가 끝이면.. 더 계산할게 없다.
 	while (iDataThis != m_List.end() && iDataSub != listSub.m_List.end())
 	{		
-		// ���� ���̸�.. this���� �����.
+		// 같은 것이면.. this에서 지운다.
 		if (*iDataThis == *iDataSub)
 		{
-			iDataTemp = iDataThis;		// �ӽ÷� ���
+			iDataTemp = iDataThis;		// 임시로 기억
 
-			// ���� ��
+			// 다음 것
 			iDataThis++;
 			iDataSub++;
 
-			// ����
+			// 삭제
 			m_List.erase( iDataTemp );
 		}
-		// this�� �� ���� ���..
+		// this가 더 작은 경우..
 		else if (*iDataThis < *iDataSub)
 		{
-			// this�� ���� ������..
+			// this를 다음 것으로..
 			iDataThis++;
 		}
-		// this�� �� ū ���
+		// this가 더 큰 경우
 		else
 		{
 			iDataSub++;

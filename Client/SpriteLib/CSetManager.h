@@ -2,11 +2,11 @@
 // CSetManager.h
 //----------------------------------------------------------------------
 // Template Sorted List
-// ���������� stl�� list�� ����ߴ�.
+// 내부적으로 stl의 list를 사용했다.
 //----------------------------------------------------------------------
 //
-// ���� DataType���� �����Ѵ�.
-// Ascending Sort�̴�.
+// 단지 DataType값만 저장한다.
+// Ascending Sort이다.
 //
 //----------------------------------------------------------------------
 
@@ -56,13 +56,13 @@ class CSetManager {
 		//--------------------------------------------------------
 		SizeType	GetSize() const	{ return m_List.size(); }
 
-		// ù��° ��ġ�� List Iterater�� �Ѱ��ش�.
+		// 첫번째 위치의 List Iterater를 넘겨준다.
 		typename DATA_LIST::const_iterator	GetIterator() const	{ return m_List.begin(); }
 
 	protected :			
-		DATA_LIST			m_List;		// Data pointer���� �����صд�.
+		DATA_LIST			m_List;		// Data pointer들을 저장해둔다.
 
-		// sizeof(SizeType) �� ��
+		// sizeof(SizeType) 의 값
 		static BYTE			s_SIZEOF_SizeType;
 };
 
@@ -113,10 +113,10 @@ CSetManager<DataType, SizeType>::Release()
 //----------------------------------------------------------------------
 // Add
 //----------------------------------------------------------------------
-// list�� data�� �߰��Ѵ�.
-// Sort�Ǿ� �߰��ǰ� �ߺ��� ������� �ʴ´�.
+// list에 data를 추가한다.
+// Sort되어 추가되고 중복을 허용하지 않는다.
 // 
-// �̹� �����ϴ� ���̸� false�� return�Ѵ�.
+// 이미 존재하는 값이면 false를 return한다.
 //----------------------------------------------------------------------
 template <class DataType, class SizeType>
 bool	
@@ -126,16 +126,16 @@ CSetManager<DataType, SizeType>::Add(const DataType data)
 
 	while (iData != m_List.end())
 	{		
-		// ���� ����ִ°� �߰��ҷ��°ͺ��� Ŭ ���,
-		// ���� ��ġ�� �߰��ϸ� �ȴ�.
+		// 현재 들어있는게 추가할려는것보다 클 경우,
+		// 현재 위치에 추가하면 된다.
 		if (*iData > data)
 		{
 			m_List.insert(iData, data);
 			return true;
 		}
 
-		// �̹� �ִ� ���̸�
-		// �߰����� �ʴ´�.
+		// 이미 있는 값이면
+		// 추가하지 않는다.
 		if (*iData==data)
 		{
 			return false;
@@ -144,8 +144,8 @@ CSetManager<DataType, SizeType>::Add(const DataType data)
 		iData++;
 	}	
 
-	// list�� ��� ���ҵ麸�� ũ�Ƿ� 
-	// list�� ���� �߰��Ѵ�.
+	// list의 모든 원소들보다 크므로 
+	// list의 끝에 추가한다.
 	m_List.push_back( data );
 
 	return true;
@@ -154,9 +154,9 @@ CSetManager<DataType, SizeType>::Add(const DataType data)
 //----------------------------------------------------------------------
 // Remove
 //----------------------------------------------------------------------
-// list���� data�� �����.
+// list에서 data를 지운다.
 //
-// ���� ���̸� return false
+// 없는 값이면 return false
 //----------------------------------------------------------------------
 template <class DataType, class SizeType>
 bool
@@ -166,15 +166,15 @@ CSetManager<DataType, SizeType>::Remove(const DataType data)
 
 	while (iData != m_List.end())
 	{		
-		// ���� ���̸� �����.
+		// 같은 값이면 지운다.
 		if (*iData==data)
 		{
 			m_List.erase(iData);
 			return true;
 		}
 		
-		// ���� ��ġ�� �ִ� ���� data���� ũ�ٸ�
-		// ��� ū ���� �����Ƿ� data���� ���� ���̴�.
+		// 현재 위치에 있는 값이 data보다 크다면
+		// 계속 큰 값만 있으므로 data값이 없는 것이다.
 		if (*iData > data)
 		{			
 			return false;
@@ -183,7 +183,7 @@ CSetManager<DataType, SizeType>::Remove(const DataType data)
 		iData++;
 	}	
 
-	// ���� ���
+	// 없는 경우
 	return false;
 }
 
@@ -192,8 +192,8 @@ CSetManager<DataType, SizeType>::Remove(const DataType data)
 // Save To File
 //----------------------------------------------------------------------
 //
-// size�� �����ϰ�
-// ��� list�� node���� �����Ѵ�.
+// size를 저장하고
+// 모든 list의 node들을 저장한다.
 //
 //----------------------------------------------------------------------
 template <class DataType, class SizeType>
@@ -203,10 +203,10 @@ CSetManager<DataType, SizeType>::SaveToFile(std::ofstream& file)
 	// size
 	SizeType size = m_List.size();
 
-	// size����
+	// size저장
 	file.write((const char *)&size, s_SIZEOF_SizeType);
 
-	// �ƹ� �͵� ������
+	// 아무 것도 없으면
 	if (size==0)
 	{
 		return false;
@@ -214,7 +214,7 @@ CSetManager<DataType, SizeType>::SaveToFile(std::ofstream& file)
 
 	DataType data;
 
-	// ��� Data���� save�Ѵ�.
+	// 모든 Data들을 save한다.
 	typename DATA_LIST::iterator iData = m_List.begin();
 
 	int dataSize = sizeof(DataType);
@@ -223,7 +223,7 @@ CSetManager<DataType, SizeType>::SaveToFile(std::ofstream& file)
 	{
 		data = *iData;
 
-		// file�� ����
+		// file에 저장
 		file.write((const char *)&data, dataSize);		
 
 		iData++;
@@ -239,15 +239,15 @@ template <class DataType, class SizeType>
 bool
 CSetManager<DataType, SizeType>::LoadFromFile(std::ifstream& file)
 {
-	// ������ �ִ� list�� �����.
+	// 이전에 있던 list를 지운다.
 	Release();
 
 	SizeType size;
 
-	// file���� size�� �о�´�.
+	// file에서 size를 읽어온다.
 	file.read((char*)&size, s_SIZEOF_SizeType);
 
-	// �ƹ��͵� ����Ȱ� ���� ���
+	// 아무것도 저장된게 없을 경우
 	if (size==0)
 	{
 		return false;
@@ -257,13 +257,13 @@ CSetManager<DataType, SizeType>::LoadFromFile(std::ifstream& file)
 
 	int dataSize = sizeof(DataType);
 
-	// size�� ��ŭ�� load�Ѵ�.
+	// size개 만큼을 load한다.
 	for (SizeType i=0; i<size; i++)
 	{
-		// file���� load�Ѵ�.
+		// file에서 load한다.
 		file.read((char*)&data, dataSize);
 
-		// list�� �߰��Ѵ�.
+		// list에 추가한다.
 		Add( data );
 	}
 	

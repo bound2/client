@@ -100,7 +100,7 @@ CSpriteSurface::~CSpriteSurface()
 //----------------------------------------------------------------------
 // VLine
 //----------------------------------------------------------------------
-// ���� �� �׸��� 
+// 세로 선 그리기 
 //----------------------------------------------------------------------
 void
 CSpriteSurface::VLine(int x, int y, int length, WORD color)
@@ -117,7 +117,7 @@ CSpriteSurface::VLine(int x, int y, int length, WORD color)
 //----------------------------------------------------------------------
 // HLine
 //----------------------------------------------------------------------
-// ���μ� �׸��� 
+// 가로선 그리기 
 //----------------------------------------------------------------------
 void
 CSpriteSurface::HLine(int x, int y, int length, WORD color)
@@ -134,7 +134,7 @@ CSpriteSurface::HLine(int x, int y, int length, WORD color)
 //----------------------------------------------------------------------
 // DrawRect
 //----------------------------------------------------------------------
-// ���� �� ���� �׸��� 
+// 속이 빈 상자 그리기 
 //----------------------------------------------------------------------
 void
 CSpriteSurface::DrawRect(RECT* pRect, WORD color)
@@ -153,12 +153,12 @@ CSpriteSurface::DrawRect(RECT* pRect, WORD color)
 }
 
 //----------------------------------------------------------------------
-// ���� �׸��� 
+// 직선 그리기 
 //----------------------------------------------------------------------
 void
 CSpriteSurface::Line(int x1, int y1, int x2, int y2, WORD color)
 {
-	// �� ���� �� ������ �׸���.	
+	// 한 점씩 찍어서 직선을 그린다.	
 	WORD*	lpSurface	= (WORD*)m_ddsd.lpSurface;
 	WORD	lPitch		= m_ddsd.lPitch;
 
@@ -276,13 +276,13 @@ CSpriteSurface::Line(int x1, int y1, int x2, int y2, WORD color)
 }
 
 //----------------------------------------------------------------------
-// Rect������ �о Point��ġ�� ���� ���
-// ȭ�� ũ�⸦ ���� �ʵ��� ��ǥ�� �ٽ� �������ش�.
+// Rect영역을 읽어서 Point위치에 찍을 경우
+// 화면 크기를 넘지 않도록 좌표를 다시 설정해준다.
 //----------------------------------------------------------------------
 bool
 CSpriteSurface::ClippingRectToPoint(RECT*& pRect, POINT*& pPoint)
 {
-	// ������ �Ѿ������ ���� üũ
+	// 영역을 넘어가는지에 대한 체크
 	if (pPoint->x>=(int)m_ClipRight || pPoint->y>=(int)m_ClipBottom)		
 		return false;
 
@@ -308,7 +308,7 @@ CSpriteSurface::ClippingRectToPoint(RECT*& pRect, POINT*& pPoint)
 		pRect->bottom = pRect->top+ m_ClipBottom-pPoint->y;
 	}
 
-	// ȭ�� ������ �Ѿ�� �ȵȴ�->
+	// 화면 영역을 넘어가면 안된다->
 	if (pRect->left >= pRect->right || pRect->top >= pRect->bottom)
 		return false;
 
@@ -319,7 +319,7 @@ CSpriteSurface::ClippingRectToPoint(RECT*& pRect, POINT*& pPoint)
 //----------------------------------------------------------------------
 // Blt Darkness
 //----------------------------------------------------------------------
-// SourceSurface�� DarkBits��ŭ ��Ӱ� ���� *this�� ���
+// SourceSurface를 DarkBits만큼 어둡게 만들어서 *this에 출력
 //----------------------------------------------------------------------
 void
 CSpriteSurface::BltHalf(POINT* pPoint, 
@@ -328,7 +328,7 @@ CSpriteSurface::BltHalf(POINT* pPoint,
 	//------------------------
 	// Clipping
 	//------------------------
-	// TargetSurface�� ������ �Ѿ������ ���� üũ
+	// TargetSurface의 영역을 넘어가는지에 대한 체크
 	if (pPoint->x>=(int)m_ClipRight || pPoint->y>=(int)m_ClipBottom) 
 		return;
 
@@ -363,7 +363,7 @@ CSpriteSurface::BltHalf(POINT* pPoint,
 	WORD*	lpTargetSurface	= (WORD*)m_ddsd.lpSurface;
 	WORD	lTargetPitch	= m_ddsd.lPitch;
 
-	// �� Surface�� Lock�� �Ǵ�.	
+	// 두 Surface에 Lock을 건다.	
 	SourceSurface->Lock();
 
 	WORD*	lpSourceSurface	= (WORD*)m_ddsd.lpSurface;
@@ -393,7 +393,7 @@ CSpriteSurface::BltHalf(POINT* pPoint,
 //----------------------------------------------------------------------
 // Blt Darkness
 //----------------------------------------------------------------------
-// SourceSurface�� DarkBits��ŭ ��Ӱ� ���� *this�� ���
+// SourceSurface를 DarkBits만큼 어둡게 만들어서 *this에 출력
 //----------------------------------------------------------------------
 void
 CSpriteSurface::BltDarkness(POINT* pPoint, 
@@ -403,7 +403,7 @@ CSpriteSurface::BltDarkness(POINT* pPoint,
 	//------------------------
 	// Clipping
 	//------------------------
-	// TargetSurface�� ������ �Ѿ������ ���� üũ
+	// TargetSurface의 영역을 넘어가는지에 대한 체크
 	if (pPoint->x>=(int)m_ClipRight || pPoint->y>=(int)m_ClipBottom) 
 		return;
 
@@ -438,7 +438,7 @@ CSpriteSurface::BltDarkness(POINT* pPoint,
 	WORD*	lpTargetSurface	= (WORD*)m_ddsd.lpSurface;
 	WORD	lTargetPitch	= m_ddsd.lPitch;
 
-	// �� Surface�� Lock�� �Ǵ�.	
+	// 두 Surface에 Lock을 건다.	
 	SourceSurface->Lock();
 
 	WORD*	lpSourceSurface	= (WORD*)m_ddsd.lpSurface;
@@ -467,7 +467,7 @@ CSpriteSurface::BltDarkness(POINT* pPoint,
 //----------------------------------------------------------------------
 // Blt Darkness
 //----------------------------------------------------------------------
-// SourceSurface�� DarkBits��ŭ ��Ӱ� ���� *this�� ���
+// SourceSurface를 DarkBits만큼 어둡게 만들어서 *this에 출력
 //----------------------------------------------------------------------
 void
 CSpriteSurface::BltBrightness(POINT* pPoint, 
@@ -477,7 +477,7 @@ CSpriteSurface::BltBrightness(POINT* pPoint,
 	//------------------------
 	// Clipping
 	//------------------------
-	// TargetSurface�� ������ �Ѿ������ ���� üũ
+	// TargetSurface의 영역을 넘어가는지에 대한 체크
 	if (pPoint->x>=(int)m_ClipRight || pPoint->y>=(int)m_ClipBottom) 
 		return;
 
@@ -512,7 +512,7 @@ CSpriteSurface::BltBrightness(POINT* pPoint,
 	WORD*	lpTargetSurface	= (WORD*)m_ddsd.lpSurface;
 	WORD	lTargetPitch	= m_ddsd.lPitch;
 
-	// �� Surface�� Lock�� �Ǵ�.	
+	// 두 Surface에 Lock을 건다.	
 	SourceSurface->Lock();
 
 	WORD*	lpSourceSurface	= (WORD*)m_ddsd.lpSurface;
@@ -541,9 +541,9 @@ CSpriteSurface::BltBrightness(POINT* pPoint,
 //----------------------------------------------------------------------
 // Blt DarknessFilter
 //----------------------------------------------------------------------
-// SourceSurface�� Filter�� �����ؼ�
-// ���� Surface�� �� ��(R,G,B)���� 
-// SourceSurface�� �� ��(R,G,B) ��ŭ�� ���־ ��Ӱ� �����.
+// SourceSurface를 Filter로 생각해서
+// 현재 Surface의 각 점(R,G,B)에서 
+// SourceSurface의 각 점(R,G,B) 만큼을 빼주어서 어둡게 만든다.
 //----------------------------------------------------------------------
 void
 CSpriteSurface::BltDarknessFilter(POINT* pPoint, 
@@ -553,7 +553,7 @@ CSpriteSurface::BltDarknessFilter(POINT* pPoint,
 	//------------------------
 	// Clipping
 	//------------------------
-	// TargetSurface�� ������ �Ѿ������ ���� üũ
+	// TargetSurface의 영역을 넘어가는지에 대한 체크
 	if (pPoint->x>=(int)m_ClipRight || pPoint->y>=(int)m_ClipBottom) 
 		return;
 
@@ -588,7 +588,7 @@ CSpriteSurface::BltDarknessFilter(POINT* pPoint,
 			*lpTargetTemp, *lpSourceTemp;
 	WORD	lTargetPitch, lSourcePitch;
 
-	// �� Surface�� Lock�� �Ǵ�.
+	// 두 Surface에 Lock을 건다.
 	LockW(lpTargetSurface, lTargetPitch);
 	SourceSurface->LockW(lpSourceSurface, lSourcePitch);
 
@@ -607,10 +607,10 @@ CSpriteSurface::BltDarknessFilter(POINT* pPoint,
 
 		for (int register j=pRect->left; j<pRect->right; j++)
 		{	
-			// �������� �ƴҶ� ���
+			// 투명색이 아닐때 출력
 			if (*lpTargetTemp != TransColor)
 			{				
-				filter = *lpSourceTemp & 0x1F;	// Blue��
+				filter = *lpSourceTemp & 0x1F;	// Blue값
 
 				*lpTargetTemp = 
 					(((((*lpTargetTemp >> 11) & 0x1F) * filter) >> 5) << 11)
@@ -640,7 +640,7 @@ CSpriteSurface::BltSpriteOutline(CSpriteOutlineManager* pSOM, WORD color)
 	POINT	point = pSOM->GetPosition();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (point.x >= m_ClipRight || point.y >= m_ClipBottom)
 		return;
@@ -649,7 +649,7 @@ CSpriteSurface::BltSpriteOutline(CSpriteOutlineManager* pSOM, WORD color)
 	//WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSOM->GetWidth();
@@ -663,13 +663,13 @@ CSpriteSurface::BltSpriteOutline(CSpriteOutlineManager* pSOM, WORD color)
 	int yPlusSpriteHeight	= point.y + pSOM->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (point.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -677,24 +677,24 @@ CSpriteSurface::BltSpriteOutline(CSpriteOutlineManager* pSOM, WORD color)
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -point.x + m_ClipLeft;		
 		point.x = m_ClipLeft;
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - point.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -702,7 +702,7 @@ CSpriteSurface::BltSpriteOutline(CSpriteOutlineManager* pSOM, WORD color)
 				point.y = m_ClipTop;
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -713,7 +713,7 @@ CSpriteSurface::BltSpriteOutline(CSpriteOutlineManager* pSOM, WORD color)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + point.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -721,17 +721,17 @@ CSpriteSurface::BltSpriteOutline(CSpriteOutlineManager* pSOM, WORD color)
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			//pSOM->BltClipWidth( (WORD*)m_ddsd.lpSurface, Pitch, color, &rect);
 			pSOM->BltClip( (WORD*)m_ddsd.lpSurface, m_ddsd.lPitch, color, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -739,7 +739,7 @@ CSpriteSurface::BltSpriteOutline(CSpriteOutlineManager* pSOM, WORD color)
 				point.y = m_ClipTop;
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -750,7 +750,7 @@ CSpriteSurface::BltSpriteOutline(CSpriteOutlineManager* pSOM, WORD color)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + point.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -758,26 +758,26 @@ CSpriteSurface::BltSpriteOutline(CSpriteOutlineManager* pSOM, WORD color)
 				}				
 			}
 
-			// ���� Clip			
+			// 왼쪽 Clip			
 			//pSOM->BltClipLeft( (WORD*)m_ddsd.lpSurface, Pitch, color, &rect);
 			pSOM->BltClip( (WORD*)m_ddsd.lpSurface, m_ddsd.lPitch, color, &rect);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - point.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -786,7 +786,7 @@ CSpriteSurface::BltSpriteOutline(CSpriteOutlineManager* pSOM, WORD color)
 				point.y = m_ClipTop;
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -797,7 +797,7 @@ CSpriteSurface::BltSpriteOutline(CSpriteOutlineManager* pSOM, WORD color)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + point.y*Pitch + (point.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -805,17 +805,17 @@ CSpriteSurface::BltSpriteOutline(CSpriteOutlineManager* pSOM, WORD color)
 				}								
 			}	
 			
-			// ������ Clip			
+			// 오른쪽 Clip			
 			//pSOM->BltClipRight( (WORD*)m_ddsd.lpSurface, Pitch, color, &rect);
 			pSOM->BltClip( (WORD*)m_ddsd.lpSurface, m_ddsd.lPitch, color, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -824,14 +824,14 @@ CSpriteSurface::BltSpriteOutline(CSpriteOutlineManager* pSOM, WORD color)
 				point.y = m_ClipTop;
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - point.y;					
 				}
 				
-				// Height�� Clip
+				// Height만 Clip
 				//pSOM->BltClipHeight( (WORD*)m_ddsd.lpSurface, Pitch, color, &rect);
 				pSOM->BltClip( (WORD*)m_ddsd.lpSurface, m_ddsd.lPitch, color, &rect);
 			}
@@ -839,12 +839,12 @@ CSpriteSurface::BltSpriteOutline(CSpriteOutlineManager* pSOM, WORD color)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + point.y*Pitch + (point.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - point.y;					
-					// Height�� Clip
+					// Height만 Clip
 					//pSOM->BltClipHeight( (WORD*)m_ddsd.lpSurface, Pitch, color, &rect);
 					pSOM->BltClip( (WORD*)m_ddsd.lpSurface, m_ddsd.lPitch, color, &rect);
 				}
@@ -871,7 +871,7 @@ CSpriteSurface::BltSpriteOutlineOnly(CSpriteOutlineManager* pSOM, WORD color)
 	POINT	point = pSOM->GetPosition();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (point.x >= m_ClipRight || point.y >= m_ClipBottom)
 		return;
@@ -881,7 +881,7 @@ CSpriteSurface::BltSpriteOutlineOnly(CSpriteOutlineManager* pSOM, WORD color)
 	//WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSOM->GetWidth();
@@ -895,13 +895,13 @@ CSpriteSurface::BltSpriteOutlineOnly(CSpriteOutlineManager* pSOM, WORD color)
 	int yPlusSpriteHeight	= point.y + pSOM->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (point.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -909,24 +909,24 @@ CSpriteSurface::BltSpriteOutlineOnly(CSpriteOutlineManager* pSOM, WORD color)
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -point.x + m_ClipLeft;		
 		point.x = m_ClipLeft;
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - point.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -934,7 +934,7 @@ CSpriteSurface::BltSpriteOutlineOnly(CSpriteOutlineManager* pSOM, WORD color)
 				point.y = m_ClipTop;
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -945,7 +945,7 @@ CSpriteSurface::BltSpriteOutlineOnly(CSpriteOutlineManager* pSOM, WORD color)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + point.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -953,17 +953,17 @@ CSpriteSurface::BltSpriteOutlineOnly(CSpriteOutlineManager* pSOM, WORD color)
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			//pSOM->BltOutlineClipWidth( (WORD*)m_ddsd.lpSurface, Pitch, color, &rect);
 			pSOM->BltOutlineClip( (WORD*)m_ddsd.lpSurface, m_ddsd.lPitch, color, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -971,7 +971,7 @@ CSpriteSurface::BltSpriteOutlineOnly(CSpriteOutlineManager* pSOM, WORD color)
 				point.y = m_ClipTop;
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -982,7 +982,7 @@ CSpriteSurface::BltSpriteOutlineOnly(CSpriteOutlineManager* pSOM, WORD color)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + point.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -990,26 +990,26 @@ CSpriteSurface::BltSpriteOutlineOnly(CSpriteOutlineManager* pSOM, WORD color)
 				}				
 			}
 
-			// ���� Clip			
+			// 왼쪽 Clip			
 			//pSOM->BltOutlineClipLeft( (WORD*)m_ddsd.lpSurface, Pitch, color, &rect);
 			pSOM->BltOutlineClip( (WORD*)m_ddsd.lpSurface, m_ddsd.lPitch, color, &rect);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - point.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -1018,7 +1018,7 @@ CSpriteSurface::BltSpriteOutlineOnly(CSpriteOutlineManager* pSOM, WORD color)
 				point.y = m_ClipTop;
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -1029,7 +1029,7 @@ CSpriteSurface::BltSpriteOutlineOnly(CSpriteOutlineManager* pSOM, WORD color)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + point.y*Pitch + (point.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -1037,17 +1037,17 @@ CSpriteSurface::BltSpriteOutlineOnly(CSpriteOutlineManager* pSOM, WORD color)
 				}								
 			}	
 			
-			// ������ Clip			
+			// 오른쪽 Clip			
 			//pSOM->BltOutlineClipRight( (WORD*)m_ddsd.lpSurface, Pitch, color, &rect);
 			pSOM->BltOutlineClip( (WORD*)m_ddsd.lpSurface, m_ddsd.lPitch, color, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -1056,14 +1056,14 @@ CSpriteSurface::BltSpriteOutlineOnly(CSpriteOutlineManager* pSOM, WORD color)
 				point.y = m_ClipTop;
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - point.y;					
 				}
 				
-				// Height�� Clip
+				// Height만 Clip
 				//pSOM->BltOutlineClipHeight( (WORD*)m_ddsd.lpSurface, Pitch, color, &rect);
 				pSOM->BltOutlineClip( (WORD*)m_ddsd.lpSurface, m_ddsd.lPitch, color, &rect);
 			}
@@ -1071,12 +1071,12 @@ CSpriteSurface::BltSpriteOutlineOnly(CSpriteOutlineManager* pSOM, WORD color)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + point.y*Pitch + (point.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - point.y;					
-					// Height�� Clip
+					// Height만 Clip
 					//pSOM->BltOutlineClipHeight( (WORD*)m_ddsd.lpSurface, Pitch, color, &rect);
 					pSOM->BltOutlineClip( (WORD*)m_ddsd.lpSurface, m_ddsd.lPitch, color, &rect);
 				}
@@ -1103,7 +1103,7 @@ CSpriteSurface::BltSpriteOutlineDarkness(CSpriteOutlineManager* pSOM, WORD color
 	POINT	point = pSOM->GetPosition();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (point.x >= m_ClipRight || point.y >= m_ClipBottom)
 		return;
@@ -1113,7 +1113,7 @@ CSpriteSurface::BltSpriteOutlineDarkness(CSpriteOutlineManager* pSOM, WORD color
 	//WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSOM->GetWidth();
@@ -1127,13 +1127,13 @@ CSpriteSurface::BltSpriteOutlineDarkness(CSpriteOutlineManager* pSOM, WORD color
 	int yPlusSpriteHeight	= point.y + pSOM->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (point.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -1141,24 +1141,24 @@ CSpriteSurface::BltSpriteOutlineDarkness(CSpriteOutlineManager* pSOM, WORD color
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -point.x + m_ClipLeft;		
 		point.x = m_ClipLeft;
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - point.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -1166,7 +1166,7 @@ CSpriteSurface::BltSpriteOutlineDarkness(CSpriteOutlineManager* pSOM, WORD color
 				point.y = m_ClipTop;
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -1177,7 +1177,7 @@ CSpriteSurface::BltSpriteOutlineDarkness(CSpriteOutlineManager* pSOM, WORD color
 			{
 				//lpSurface = (WORD*)( (BYTE*)lpSurface + point.y*m_ddsd.lPitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -1185,17 +1185,17 @@ CSpriteSurface::BltSpriteOutlineDarkness(CSpriteOutlineManager* pSOM, WORD color
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			//pSOM->BltClipWidth( (WORD*)m_ddsd.lpSurface, m_ddsd.lPitch, color, &rect);
 			pSOM->BltDarknessClip( (WORD*)m_ddsd.lpSurface, m_ddsd.lPitch, color, DarkBits, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -1203,7 +1203,7 @@ CSpriteSurface::BltSpriteOutlineDarkness(CSpriteOutlineManager* pSOM, WORD color
 				point.y = m_ClipTop;
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -1214,7 +1214,7 @@ CSpriteSurface::BltSpriteOutlineDarkness(CSpriteOutlineManager* pSOM, WORD color
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + point.y*m_ddsd.lPitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -1222,26 +1222,26 @@ CSpriteSurface::BltSpriteOutlineDarkness(CSpriteOutlineManager* pSOM, WORD color
 				}				
 			}
 
-			// ���� Clip			
+			// 왼쪽 Clip			
 			//pSOM->BltClipLeft( (WORD*)m_ddsd.lpSurface, m_ddsd.lPitch, color, &rect);
 			pSOM->BltDarknessClip( (WORD*)m_ddsd.lpSurface, m_ddsd.lPitch, color, DarkBits, &rect);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - point.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -1250,7 +1250,7 @@ CSpriteSurface::BltSpriteOutlineDarkness(CSpriteOutlineManager* pSOM, WORD color
 				point.y = m_ClipTop;
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -1261,7 +1261,7 @@ CSpriteSurface::BltSpriteOutlineDarkness(CSpriteOutlineManager* pSOM, WORD color
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + point.y*m_ddsd.lPitch + (point.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -1269,17 +1269,17 @@ CSpriteSurface::BltSpriteOutlineDarkness(CSpriteOutlineManager* pSOM, WORD color
 				}								
 			}	
 			
-			// ������ Clip			
+			// 오른쪽 Clip			
 			//pSOM->BltClipRight( (WORD*)m_ddsd.lpSurface, m_ddsd.lPitch, color, &rect);
 			pSOM->BltDarknessClip( (WORD*)m_ddsd.lpSurface, m_ddsd.lPitch, color, DarkBits, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -1288,14 +1288,14 @@ CSpriteSurface::BltSpriteOutlineDarkness(CSpriteOutlineManager* pSOM, WORD color
 				point.y = m_ClipTop;
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - point.y;					
 				}
 				
-				// Height�� Clip
+				// Height만 Clip
 				//pSOM->BltClipHeight( (WORD*)m_ddsd.lpSurface, m_ddsd.lPitch, color, &rect);
 				pSOM->BltDarknessClip( (WORD*)m_ddsd.lpSurface, m_ddsd.lPitch, color, DarkBits, &rect);
 			}
@@ -1303,12 +1303,12 @@ CSpriteSurface::BltSpriteOutlineDarkness(CSpriteOutlineManager* pSOM, WORD color
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + point.y*m_ddsd.lPitch + (point.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - point.y;					
-					// Height�� Clip
+					// Height만 Clip
 					//pSOM->BltClipHeight( (WORD*)m_ddsd.lpSurface, m_ddsd.lPitch, color, &rect);
 					pSOM->BltDarknessClip( (WORD*)m_ddsd.lpSurface, m_ddsd.lPitch, color, DarkBits, &rect);
 				}
@@ -1330,10 +1330,10 @@ CSpriteSurface::BltSpriteOutlineDarkness(CSpriteOutlineManager* pSOM, WORD color
 //----------------------------------------------------------------------
 // Change Brightness
 //----------------------------------------------------------------------
-// m_pDDSurface�� pRect������ ��Ӱ� �Ѵ�. 
-// DarkBits�� (0~5) bit������ 1, 1/2, 1/4, 1/8, 1/16, 1/32, 0�̴�.
+// m_pDDSurface의 pRect영역을 어둡게 한다. 
+// DarkBits는 (0~5) bit단위로 1, 1/2, 1/4, 1/8, 1/16, 1/32, 0이다.
 //----------------------------------------------------------------------
-// pRect�� ������ right, bottom�� ��ǥ�� �������� �ʴ´�.  -1�����̴�.
+// pRect의 영역은 right, bottom의 좌표는 포함하지 않는다.  -1까지이다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::ChangeBrightnessBit(RECT*  pRect, BYTE DarkBits)
@@ -1345,7 +1345,7 @@ CSpriteSurface::ChangeBrightnessBit(RECT*  pRect, BYTE DarkBits)
 	if (pRect->top < m_ClipTop) pRect->top=m_ClipTop;
 	if ((WORD)pRect->bottom > m_ClipBottom) pRect->bottom=m_ClipBottom;
 
-	// ������ ����� ���
+	// 영역을 벗어나는 경우
 	if (pRect->left >= pRect->right || pRect->top >= pRect->bottom)
 		return;
 
@@ -1354,7 +1354,7 @@ CSpriteSurface::ChangeBrightnessBit(RECT*  pRect, BYTE DarkBits)
 	QWORD	*lpTargetSurface	= (QWORD*)m_ddsd.lpSurface;
 	WORD	Pitch			= m_ddsd.lPitch;
 	
-	// ��� ���� ��ġ
+	// 출력 시작 위치
 	lpTargetSurface = (QWORD*)((BYTE*)lpTargetSurface + pRect->top*Pitch + (pRect->left<<1));
 
 	register int i;
@@ -1365,101 +1365,101 @@ CSpriteSurface::ChangeBrightnessBit(RECT*  pRect, BYTE DarkBits)
 	int width = pRect->right - pRect->left;
 	int qTimes = width >> 2;
 
-	// Target Surface�� ������ ������ ��Ӱ� �Ѵ�.
+	// Target Surface의 정해진 영역을 어둡게 한다.
 	/*
 	switch ( width & 0x03 )
 	{
 		//------------------
-		// 4����
+		// 4점씩
 		//------------------
 		case 0 :			
 			for (int i=pRect->top; i<rectBottom; i++)
 			{
 				lpTargetTemp = lpTargetSurface;	
 
-				// ������ ���
+				// 네점씩 찍기
 				for (j=0; j<qTimes; j++)
 				{
 					*lpTargetTemp++ = (*lpTargetTemp >> DarkBits) & s_qwMASK_SHIFT[DarkBits];					
 				}
 
-				// ���� ��
+				// 다음 줄
 				lpTargetSurface = (QWORD*)((BYTE*)lpTargetSurface + Pitch);
 			}
 		break;
 
 		//------------------
-		// 1�� + 4����
+		// 1점 + 4점씩
 		//------------------
 		case 1 :
 			for (int i=pRect->top; i<rectBottom; i++)
 			{
 				lpTargetTemp = lpTargetSurface;	
 
-				// ���� ���
+				// 한점 찍기
 				*((WORD*)lpTargetTemp) = 
 					(*((WORD*)lpTargetTemp) >> DarkBits) & s_wMASK_SHIFT[DarkBits];
 				
 				lpTargetTemp = (QWORD*)((WORD*)lpTargetTemp + 1);
 
-				// ������ ���
+				// 네점씩 찍기
 				for (j=0; j<qTimes; j++)
 				{
 					*lpTargetTemp++ = (*lpTargetTemp >> DarkBits) & s_qwMASK_SHIFT[DarkBits];
 				}
 
-				// ���� ��
+				// 다음 줄
 				lpTargetSurface = (QWORD*)((BYTE*)lpTargetSurface + Pitch);
 			}
 		break;
 
 		//------------------
-		// 2�� + 4����
+		// 2점 + 4점씩
 		//------------------
 		case 2 :
 			for (int i=pRect->top; i<rectBottom; i++)
 			{
 				lpTargetTemp = lpTargetSurface;	
 
-				// ���� ���
+				// 두점 찍기
 				*((DWORD*)lpTargetTemp) = (*((DWORD*)lpTargetTemp) >> DarkBits) & s_dwMASK_SHIFT[DarkBits];
 				lpTargetTemp = (QWORD*)((DWORD*)lpTargetTemp + 1);
 
-				// ������ ���
+				// 네점씩 찍기
 				for (j=0; j<qTimes; j++)
 				{
 					*lpTargetTemp++ = (*lpTargetTemp >> DarkBits) & s_qwMASK_SHIFT[DarkBits];
 				}
 
-				// ���� ��
+				// 다음 줄
 				lpTargetSurface = (QWORD*)((BYTE*)lpTargetSurface + Pitch);
 			}
 		break;
 
 		//------------------
-		// 1�� + 2�� + 4����
+		// 1점 + 2점 + 4점씩
 		//------------------
 		case 3 :
 			for (int i=pRect->top; i<rectBottom; i++)
 			{
 				lpTargetTemp = lpTargetSurface;	
 
-				// ���� ���
+				// 한점 찍기
 				*((WORD*)lpTargetTemp) = 
 					(*((WORD*)lpTargetTemp) >> DarkBits) & s_wMASK_SHIFT[DarkBits];
 				lpTargetTemp = (QWORD*)((WORD*)lpTargetTemp + 1);
 
-				// ���� ���
+				// 두점 찍기
 				*((DWORD*)lpTargetTemp) = (*((DWORD*)lpTargetTemp) >> DarkBits) & s_dwMASK_SHIFT[DarkBits];
 				lpTargetTemp = (QWORD*)((DWORD*)lpTargetTemp + 1);
 
-				// ������ ���
+				// 네점씩 찍기
 				for (j=0; j<qTimes; j++)
 				{
 					*lpTargetTemp++ = (*lpTargetTemp >> DarkBits) & s_qwMASK_SHIFT[DarkBits];
 				}
 
-				// ���� ��
+				// 다음 줄
 				lpTargetSurface = (QWORD*)((BYTE*)lpTargetSurface + Pitch);
 			}
 		break;
@@ -1467,7 +1467,7 @@ CSpriteSurface::ChangeBrightnessBit(RECT*  pRect, BYTE DarkBits)
 	*/
 
 ///*
-	// �帧�� �ٲ۴�.. ����..~	
+	// 흐름을 바꾼다.. 으흠..~	
 	int maxWave = 8;		// 2, 4, 8, 16...
 
 	if (maxWave >= width)
@@ -1492,8 +1492,8 @@ CSpriteSurface::ChangeBrightnessBit(RECT*  pRect, BYTE DarkBits)
 
 	for (int i=pRect->top; i<rectBottom; i++)
 	{			
-		// step��ŭ �����ʿ��� ����Ѵ�. 
-		// 4-step��ŭ�� �� ����Ѵ�.
+		// step만큼 오른쪽에서 출력한다. 
+		// 4-step만큼은 덜 출력한다.
 		int widthPlus = (width - width2)>>1;
 
 		int newWidth = width2 - maxWave + step;
@@ -1505,7 +1505,7 @@ CSpriteSurface::ChangeBrightnessBit(RECT*  pRect, BYTE DarkBits)
 		switch (newWidth & 0x03)
 		{
 			//------------------
-			// 4����
+			// 4점씩
 			//------------------
 			case 0 :
 				for (j=0; j<qTimes; j++)
@@ -1515,16 +1515,16 @@ CSpriteSurface::ChangeBrightnessBit(RECT*  pRect, BYTE DarkBits)
 			break;			
 
 			//------------------
-			// 1�� + 4����
+			// 1점 + 4점씩
 			//------------------
 			case 1 :
-				// ���� ���
+				// 한점 찍기
 				*((WORD*)lpTargetTemp) = *((WORD*)pSourceTemp);
 				
 				lpTargetTemp = (QWORD*)((WORD*)lpTargetTemp + 1);
 				pSourceTemp = (QWORD*)((WORD*)pSourceTemp + 1);
 
-				// ������ ���
+				// 네점씩 찍기
 				for (j=0; j<qTimes; j++)
 				{
 					*lpTargetTemp++ = *pSourceTemp++;
@@ -1532,15 +1532,15 @@ CSpriteSurface::ChangeBrightnessBit(RECT*  pRect, BYTE DarkBits)
 			break;
 
 			//------------------
-			// 2�� + 4����
+			// 2점 + 4점씩
 			//------------------
 			case 2 :
-				// ���� ���
+				// 두점 찍기
 				*((DWORD*)lpTargetTemp) = *((DWORD*)pSourceTemp);
 				lpTargetTemp = (QWORD*)((DWORD*)lpTargetTemp + 1);
 				pSourceTemp = (QWORD*)((DWORD*)pSourceTemp + 1);
 
-				// ������ ���
+				// 네점씩 찍기
 				for (j=0; j<qTimes; j++)
 				{
 					*lpTargetTemp++ = *pSourceTemp++;
@@ -1548,20 +1548,20 @@ CSpriteSurface::ChangeBrightnessBit(RECT*  pRect, BYTE DarkBits)
 			break;
 
 			//------------------
-			// 1�� + 2�� + 4����
+			// 1점 + 2점 + 4점씩
 			//------------------
 			case 3 :			
-				// ���� ���
+				// 한점 찍기
 				*((WORD*)lpTargetTemp) = *((WORD*)pSourceTemp);
 				lpTargetTemp = (QWORD*)((WORD*)lpTargetTemp + 1);
 				pSourceTemp = (QWORD*)((WORD*)pSourceTemp + 1);
 
-				// ���� ���
+				// 두점 찍기
 				*((DWORD*)lpTargetTemp) = *((DWORD*)pSourceTemp);
 				lpTargetTemp = (QWORD*)((DWORD*)lpTargetTemp + 1);
 				pSourceTemp = (QWORD*)((DWORD*)pSourceTemp + 1);
 
-				// ������ ���
+				// 네점씩 찍기
 				for (j=0; j<qTimes; j++)
 				{
 					*lpTargetTemp++ = *pSourceTemp++;
@@ -1569,7 +1569,7 @@ CSpriteSurface::ChangeBrightnessBit(RECT*  pRect, BYTE DarkBits)
 			break;
 		}
 
-		// ���� ��
+		// 다음 줄
 		lpTargetSurface = (QWORD*)((BYTE*)lpTargetSurface + Pitch);
 
 		step += stepInc;
@@ -1603,8 +1603,8 @@ CSpriteSurface::ChangeBrightnessBit(RECT*  pRect, BYTE DarkBits)
 //----------------------------------------------------------------------
 // Blt Color Alpha
 //----------------------------------------------------------------------
-// �ܻ�����(color) Surface�� pRect������
-// alpha����ŭ alpha blending�Ѵ�.
+// 단색으로(color) Surface의 pRect영역을
+// alpha값만큼 alpha blending한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltColorAlpha(RECT* pRect, WORD color, BYTE alpha2)
@@ -1616,7 +1616,7 @@ CSpriteSurface::BltColorAlpha(RECT* pRect, WORD color, BYTE alpha2)
 	if (pRect->top < m_ClipTop) pRect->top=m_ClipTop;
 	if ((WORD)pRect->bottom > m_ClipBottom) pRect->bottom=m_ClipBottom;
 
-	// ������ ����� ���
+	// 영역을 벗어나는 경우
 	if (pRect->left >= pRect->right || pRect->top >= pRect->bottom)
 		return;
 
@@ -1624,7 +1624,7 @@ CSpriteSurface::BltColorAlpha(RECT* pRect, WORD color, BYTE alpha2)
 	QWORD	*lpTargetSurface	= (QWORD*)m_ddsd.lpSurface;
 	WORD	Pitch			= m_ddsd.lPitch;
 	
-	// ��� ���� ��ġ
+	// 출력 시작 위치
 	lpTargetSurface = (QWORD*)((BYTE*)lpTargetSurface + pRect->top*Pitch + (pRect->left<<1));
 
 	register int i;
@@ -1648,12 +1648,12 @@ CSpriteSurface::BltColorAlpha(RECT* pRect, WORD color, BYTE alpha2)
 	BYTE alpha = 31 - alpha2;
 		
 	//-----------------------------------------------------
-	// Surface�� ������ ������ alpha blending				
+	// Surface의 정해진 영역을 alpha blending				
 	//-----------------------------------------------------
 	switch ( width & 0x03 )
 	{
 		//-----------------------------------------------------
-		// ��Ȯ�� 4�� ����� �Ǵ� ���..
+		// 정확히 4의 배수가 되는 경우..
 		//-----------------------------------------------------
 		case 0 :
 			for (int i=pRect->top; i<rectBottom; i++)
@@ -1663,7 +1663,7 @@ CSpriteSurface::BltColorAlpha(RECT* pRect, WORD color, BYTE alpha2)
 				int qTimesTemp = qTimes;
 
 				//-----------------------------------
-				// 4����...
+				// 4점씩...
 				//-----------------------------------
 				while (qTimesTemp--)
 				{
@@ -1698,13 +1698,13 @@ CSpriteSurface::BltColorAlpha(RECT* pRect, WORD color, BYTE alpha2)
 					lpTargetTemp++;					
 				}
 
-				// ���� ��
+				// 다음 줄
 				lpTargetSurface = (QWORD*)((BYTE*)lpTargetSurface + Pitch);
 			}
 		break;
 
 		//-----------------------------------------------------
-		// 1�� ���  4����...
+		// 1점 찍고  4점씩...
 		//-----------------------------------------------------
 		case 1 :
 			for (int i=pRect->top; i<rectBottom; i++)
@@ -1712,7 +1712,7 @@ CSpriteSurface::BltColorAlpha(RECT* pRect, WORD color, BYTE alpha2)
 				lpTargetTemp = lpTargetSurface;	
 
 				//-----------------------------------
-				// �� �� ���...
+				// 한 점 찍기...
 				//-----------------------------------
 				destColor2 = *(WORD*)lpTargetTemp;
 
@@ -1748,7 +1748,7 @@ CSpriteSurface::BltColorAlpha(RECT* pRect, WORD color, BYTE alpha2)
 				int qTimesTemp = qTimes;
 				
 				//-----------------------------------
-				// 4����..
+				// 4점씩..
 				//-----------------------------------
 				while (qTimesTemp--)
 				{
@@ -1783,13 +1783,13 @@ CSpriteSurface::BltColorAlpha(RECT* pRect, WORD color, BYTE alpha2)
 					lpTargetTemp++;					
 				}
 
-				// ���� ��
+				// 다음 줄
 				lpTargetSurface = (QWORD*)((BYTE*)lpTargetSurface + Pitch);
 			}
 		break;
 
 		//-----------------------------------------------------
-		// 2�����.. 4����...
+		// 2점찍고.. 4점씩...
 		//-----------------------------------------------------
 		case 2 :
 			for (int i=pRect->top; i<rectBottom; i++)
@@ -1797,7 +1797,7 @@ CSpriteSurface::BltColorAlpha(RECT* pRect, WORD color, BYTE alpha2)
 				lpTargetTemp = lpTargetSurface;	
 			
 				//-----------------------------------
-				// �� �� ���..
+				// 두 점 찍기..
 				//-----------------------------------
 				destColor2 = *(DWORD*)lpTargetTemp;
 
@@ -1833,7 +1833,7 @@ CSpriteSurface::BltColorAlpha(RECT* pRect, WORD color, BYTE alpha2)
 				int qTimesTemp = qTimes;
 				
 				//-----------------------------------
-				// 4����..
+				// 4점씩..
 				//-----------------------------------
 				while (qTimesTemp--)
 				{
@@ -1868,13 +1868,13 @@ CSpriteSurface::BltColorAlpha(RECT* pRect, WORD color, BYTE alpha2)
 					lpTargetTemp++;					
 				}
 
-				// ���� ��
+				// 다음 줄
 				lpTargetSurface = (QWORD*)((BYTE*)lpTargetSurface + Pitch);
 			}
 		break;
 
 		//-----------------------------------------------------
-		// 1�� ��� 2�����.. 4����...
+		// 1점 찍고 2점찍고.. 4점씩...
 		//-----------------------------------------------------
 		case 3 :
 			for (int i=pRect->top; i<rectBottom; i++)
@@ -1882,7 +1882,7 @@ CSpriteSurface::BltColorAlpha(RECT* pRect, WORD color, BYTE alpha2)
 				lpTargetTemp = lpTargetSurface;	
 
 				//-----------------------------------
-				// �� �� ���...
+				// 한 점 찍기...
 				//-----------------------------------
 				destColor2 = *(WORD*)lpTargetTemp;
 
@@ -1915,7 +1915,7 @@ CSpriteSurface::BltColorAlpha(RECT* pRect, WORD color, BYTE alpha2)
 				lpTargetTemp = (QWORD*)((WORD*)lpTargetTemp + 1);	
 
 				//-----------------------------------
-				// �� �� ���..
+				// 두 점 찍기..
 				//-----------------------------------
 				destColor2 = *(DWORD*)lpTargetTemp;
 
@@ -1951,7 +1951,7 @@ CSpriteSurface::BltColorAlpha(RECT* pRect, WORD color, BYTE alpha2)
 				int qTimesTemp = qTimes;
 				
 				//-----------------------------------
-				// 4����..
+				// 4점씩..
 				//-----------------------------------
 				while (qTimesTemp--)
 				{
@@ -1986,7 +1986,7 @@ CSpriteSurface::BltColorAlpha(RECT* pRect, WORD color, BYTE alpha2)
 					lpTargetTemp++;					
 				}
 
-				// ���� ��
+				// 다음 줄
 				lpTargetSurface = (QWORD*)((BYTE*)lpTargetSurface + Pitch);
 			}
 		break;
@@ -1996,17 +1996,17 @@ CSpriteSurface::BltColorAlpha(RECT* pRect, WORD color, BYTE alpha2)
 //----------------------------------------------------------------------
 // Blt Sprite
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
+// pPoint에 pSprite를 출력한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltSprite(POINT* pPoint, CSprite* pSprite)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -2017,7 +2017,7 @@ CSpriteSurface::BltSprite(POINT* pPoint, CSprite* pSprite)
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -2031,13 +2031,13 @@ CSpriteSurface::BltSprite(POINT* pPoint, CSprite* pSprite)
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -2045,30 +2045,30 @@ CSpriteSurface::BltSprite(POINT* pPoint, CSprite* pSprite)
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;			
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -2081,7 +2081,7 @@ CSpriteSurface::BltSprite(POINT* pPoint, CSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -2089,24 +2089,24 @@ CSpriteSurface::BltSprite(POINT* pPoint, CSprite* pSprite)
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltClipWidth(lpSurface, Pitch, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -2119,7 +2119,7 @@ CSpriteSurface::BltSprite(POINT* pPoint, CSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -2127,26 +2127,26 @@ CSpriteSurface::BltSprite(POINT* pPoint, CSprite* pSprite)
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltClipLeft(lpSurface, Pitch, &rect);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -2154,7 +2154,7 @@ CSpriteSurface::BltSprite(POINT* pPoint, CSprite* pSprite)
 				rect.top = -pt.y + m_ClipTop;				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -2167,7 +2167,7 @@ CSpriteSurface::BltSprite(POINT* pPoint, CSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -2175,17 +2175,17 @@ CSpriteSurface::BltSprite(POINT* pPoint, CSprite* pSprite)
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			pSprite->BltClipRight(lpSurface, Pitch, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -2193,7 +2193,7 @@ CSpriteSurface::BltSprite(POINT* pPoint, CSprite* pSprite)
 				rect.top = -pt.y + m_ClipTop;				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -2202,7 +2202,7 @@ CSpriteSurface::BltSprite(POINT* pPoint, CSprite* pSprite)
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				pSprite->BltClipHeight(lpSurface, Pitch, &rect);
 			}
@@ -2210,12 +2210,12 @@ CSpriteSurface::BltSprite(POINT* pPoint, CSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					pSprite->BltClipHeight(lpSurface, Pitch, &rect);
 				}
@@ -2240,7 +2240,7 @@ CSpriteSurface::BltSprite(POINT* pPoint, CSprite* pSprite)
 void	
 CSpriteSurface::BltSpriteNoClip(POINT* pPoint, CSprite* pSprite)
 {
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
@@ -2250,10 +2250,10 @@ CSpriteSurface::BltSpriteNoClip(POINT* pPoint, CSprite* pSprite)
 	// Lock
 	//LockW(lpSurface, Pitch);
 
-	// ��� ���� ��ġ			
+	// 출력 시작 위치			
 	lpSurface = (WORD*)((BYTE*)lpSurface + pPoint->y*Pitch + (pPoint->x<<1));
 
-	// ���
+	// 출력
 	pSprite->Blt(lpSurface, Pitch);	
 
 	// Unlock
@@ -2266,12 +2266,12 @@ CSpriteSurface::BltSpriteNoClip(POINT* pPoint, CSprite* pSprite)
 void	
 CSpriteSurface::BltSpriteHalf(POINT* pPoint, CSprite* pSprite)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -2282,7 +2282,7 @@ CSpriteSurface::BltSpriteHalf(POINT* pPoint, CSprite* pSprite)
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -2296,13 +2296,13 @@ CSpriteSurface::BltSpriteHalf(POINT* pPoint, CSprite* pSprite)
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -2310,31 +2310,31 @@ CSpriteSurface::BltSpriteHalf(POINT* pPoint, CSprite* pSprite)
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -2347,7 +2347,7 @@ CSpriteSurface::BltSpriteHalf(POINT* pPoint, CSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -2355,24 +2355,24 @@ CSpriteSurface::BltSpriteHalf(POINT* pPoint, CSprite* pSprite)
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltHalfClipWidth(lpSurface, Pitch, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -2385,7 +2385,7 @@ CSpriteSurface::BltSpriteHalf(POINT* pPoint, CSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -2393,26 +2393,26 @@ CSpriteSurface::BltSpriteHalf(POINT* pPoint, CSprite* pSprite)
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltHalfClipLeft(lpSurface, Pitch, &rect);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -2420,7 +2420,7 @@ CSpriteSurface::BltSpriteHalf(POINT* pPoint, CSprite* pSprite)
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -2433,7 +2433,7 @@ CSpriteSurface::BltSpriteHalf(POINT* pPoint, CSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -2441,17 +2441,17 @@ CSpriteSurface::BltSpriteHalf(POINT* pPoint, CSprite* pSprite)
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			pSprite->BltHalfClipRight(lpSurface, Pitch, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -2459,7 +2459,7 @@ CSpriteSurface::BltSpriteHalf(POINT* pPoint, CSprite* pSprite)
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -2468,7 +2468,7 @@ CSpriteSurface::BltSpriteHalf(POINT* pPoint, CSprite* pSprite)
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				pSprite->BltHalfClipHeight(lpSurface, Pitch, &rect);
 			}
@@ -2476,12 +2476,12 @@ CSpriteSurface::BltSpriteHalf(POINT* pPoint, CSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					pSprite->BltHalfClipHeight(lpSurface, Pitch, &rect);
 				}
@@ -2503,17 +2503,17 @@ CSpriteSurface::BltSpriteHalf(POINT* pPoint, CSprite* pSprite)
 //----------------------------------------------------------------------
 // Blt Sprite Alpha
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
+// pPoint에 pSprite를 출력한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltSpriteAlpha(POINT* pPoint, CSprite* pSprite, BYTE alpha)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -2524,7 +2524,7 @@ CSpriteSurface::BltSpriteAlpha(POINT* pPoint, CSprite* pSprite, BYTE alpha)
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -2538,13 +2538,13 @@ CSpriteSurface::BltSpriteAlpha(POINT* pPoint, CSprite* pSprite, BYTE alpha)
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -2552,31 +2552,31 @@ CSpriteSurface::BltSpriteAlpha(POINT* pPoint, CSprite* pSprite, BYTE alpha)
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -2589,7 +2589,7 @@ CSpriteSurface::BltSpriteAlpha(POINT* pPoint, CSprite* pSprite, BYTE alpha)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -2597,24 +2597,24 @@ CSpriteSurface::BltSpriteAlpha(POINT* pPoint, CSprite* pSprite, BYTE alpha)
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltAlphaClipWidth(lpSurface, Pitch, &rect, alpha);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -2627,7 +2627,7 @@ CSpriteSurface::BltSpriteAlpha(POINT* pPoint, CSprite* pSprite, BYTE alpha)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -2635,26 +2635,26 @@ CSpriteSurface::BltSpriteAlpha(POINT* pPoint, CSprite* pSprite, BYTE alpha)
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltAlphaClipLeft(lpSurface, Pitch, &rect, alpha);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -2662,7 +2662,7 @@ CSpriteSurface::BltSpriteAlpha(POINT* pPoint, CSprite* pSprite, BYTE alpha)
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -2675,7 +2675,7 @@ CSpriteSurface::BltSpriteAlpha(POINT* pPoint, CSprite* pSprite, BYTE alpha)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -2683,17 +2683,17 @@ CSpriteSurface::BltSpriteAlpha(POINT* pPoint, CSprite* pSprite, BYTE alpha)
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			pSprite->BltAlphaClipRight(lpSurface, Pitch, &rect, alpha);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -2701,7 +2701,7 @@ CSpriteSurface::BltSpriteAlpha(POINT* pPoint, CSprite* pSprite, BYTE alpha)
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -2710,7 +2710,7 @@ CSpriteSurface::BltSpriteAlpha(POINT* pPoint, CSprite* pSprite, BYTE alpha)
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				pSprite->BltAlphaClipHeight(lpSurface, Pitch, &rect, alpha);
 			}
@@ -2718,12 +2718,12 @@ CSpriteSurface::BltSpriteAlpha(POINT* pPoint, CSprite* pSprite, BYTE alpha)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					pSprite->BltAlphaClipHeight(lpSurface, Pitch, &rect, alpha);
 				}
@@ -2746,17 +2746,17 @@ CSpriteSurface::BltSpriteAlpha(POINT* pPoint, CSprite* pSprite, BYTE alpha)
 //----------------------------------------------------------------------
 // Blt Sprite Color
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
+// pPoint에 pSprite를 출력한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltSpriteColor(POINT* pPoint, CSprite* pSprite, BYTE rgb)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -2767,7 +2767,7 @@ CSpriteSurface::BltSpriteColor(POINT* pPoint, CSprite* pSprite, BYTE rgb)
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -2781,13 +2781,13 @@ CSpriteSurface::BltSpriteColor(POINT* pPoint, CSprite* pSprite, BYTE rgb)
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -2795,31 +2795,31 @@ CSpriteSurface::BltSpriteColor(POINT* pPoint, CSprite* pSprite, BYTE rgb)
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -2832,7 +2832,7 @@ CSpriteSurface::BltSpriteColor(POINT* pPoint, CSprite* pSprite, BYTE rgb)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -2840,24 +2840,24 @@ CSpriteSurface::BltSpriteColor(POINT* pPoint, CSprite* pSprite, BYTE rgb)
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltColorClipWidth(lpSurface, Pitch, &rect, rgb);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -2870,7 +2870,7 @@ CSpriteSurface::BltSpriteColor(POINT* pPoint, CSprite* pSprite, BYTE rgb)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -2878,26 +2878,26 @@ CSpriteSurface::BltSpriteColor(POINT* pPoint, CSprite* pSprite, BYTE rgb)
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltColorClipLeft(lpSurface, Pitch, &rect, rgb);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -2905,7 +2905,7 @@ CSpriteSurface::BltSpriteColor(POINT* pPoint, CSprite* pSprite, BYTE rgb)
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -2918,7 +2918,7 @@ CSpriteSurface::BltSpriteColor(POINT* pPoint, CSprite* pSprite, BYTE rgb)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -2926,17 +2926,17 @@ CSpriteSurface::BltSpriteColor(POINT* pPoint, CSprite* pSprite, BYTE rgb)
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			pSprite->BltColorClipRight(lpSurface, Pitch, &rect, rgb);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -2944,7 +2944,7 @@ CSpriteSurface::BltSpriteColor(POINT* pPoint, CSprite* pSprite, BYTE rgb)
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -2953,7 +2953,7 @@ CSpriteSurface::BltSpriteColor(POINT* pPoint, CSprite* pSprite, BYTE rgb)
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				pSprite->BltColorClipHeight(lpSurface, Pitch, &rect, rgb);
 			}
@@ -2961,12 +2961,12 @@ CSpriteSurface::BltSpriteColor(POINT* pPoint, CSprite* pSprite, BYTE rgb)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					pSprite->BltColorClipHeight(lpSurface, Pitch, &rect, rgb);
 				}
@@ -2989,17 +2989,17 @@ CSpriteSurface::BltSpriteColor(POINT* pPoint, CSprite* pSprite, BYTE rgb)
 //----------------------------------------------------------------------
 // Blt Sprite ColorSet
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
+// pPoint에 pSprite를 출력한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltSpriteColorSet(POINT* pPoint, CSprite* pSprite, WORD colorSet)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -3010,7 +3010,7 @@ CSpriteSurface::BltSpriteColorSet(POINT* pPoint, CSprite* pSprite, WORD colorSet
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -3024,13 +3024,13 @@ CSpriteSurface::BltSpriteColorSet(POINT* pPoint, CSprite* pSprite, WORD colorSet
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -3038,31 +3038,31 @@ CSpriteSurface::BltSpriteColorSet(POINT* pPoint, CSprite* pSprite, WORD colorSet
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -3075,7 +3075,7 @@ CSpriteSurface::BltSpriteColorSet(POINT* pPoint, CSprite* pSprite, WORD colorSet
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -3083,24 +3083,24 @@ CSpriteSurface::BltSpriteColorSet(POINT* pPoint, CSprite* pSprite, WORD colorSet
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltColorSetClipWidth(lpSurface, Pitch, &rect, colorSet);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -3113,7 +3113,7 @@ CSpriteSurface::BltSpriteColorSet(POINT* pPoint, CSprite* pSprite, WORD colorSet
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -3121,26 +3121,26 @@ CSpriteSurface::BltSpriteColorSet(POINT* pPoint, CSprite* pSprite, WORD colorSet
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltColorSetClipLeft(lpSurface, Pitch, &rect, colorSet);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -3148,7 +3148,7 @@ CSpriteSurface::BltSpriteColorSet(POINT* pPoint, CSprite* pSprite, WORD colorSet
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -3161,7 +3161,7 @@ CSpriteSurface::BltSpriteColorSet(POINT* pPoint, CSprite* pSprite, WORD colorSet
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -3169,17 +3169,17 @@ CSpriteSurface::BltSpriteColorSet(POINT* pPoint, CSprite* pSprite, WORD colorSet
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			pSprite->BltColorSetClipRight(lpSurface, Pitch, &rect, colorSet);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -3187,7 +3187,7 @@ CSpriteSurface::BltSpriteColorSet(POINT* pPoint, CSprite* pSprite, WORD colorSet
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -3196,7 +3196,7 @@ CSpriteSurface::BltSpriteColorSet(POINT* pPoint, CSprite* pSprite, WORD colorSet
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				pSprite->BltColorSetClipHeight(lpSurface, Pitch, &rect, colorSet);
 			}
@@ -3204,12 +3204,12 @@ CSpriteSurface::BltSpriteColorSet(POINT* pPoint, CSprite* pSprite, WORD colorSet
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					pSprite->BltColorSetClipHeight(lpSurface, Pitch, &rect, colorSet);
 				}
@@ -3231,17 +3231,17 @@ CSpriteSurface::BltSpriteColorSet(POINT* pPoint, CSprite* pSprite, WORD colorSet
 //----------------------------------------------------------------------
 // Blt Sprite Darkness
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
+// pPoint에 pSprite를 출력한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltSpriteDarkness(POINT* pPoint, CSprite* pSprite, BYTE DarkBits)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -3252,7 +3252,7 @@ CSpriteSurface::BltSpriteDarkness(POINT* pPoint, CSprite* pSprite, BYTE DarkBits
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -3266,13 +3266,13 @@ CSpriteSurface::BltSpriteDarkness(POINT* pPoint, CSprite* pSprite, BYTE DarkBits
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -3280,31 +3280,31 @@ CSpriteSurface::BltSpriteDarkness(POINT* pPoint, CSprite* pSprite, BYTE DarkBits
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -3317,7 +3317,7 @@ CSpriteSurface::BltSpriteDarkness(POINT* pPoint, CSprite* pSprite, BYTE DarkBits
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -3325,24 +3325,24 @@ CSpriteSurface::BltSpriteDarkness(POINT* pPoint, CSprite* pSprite, BYTE DarkBits
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltDarknessClipWidth(lpSurface, Pitch, &rect, DarkBits);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -3355,7 +3355,7 @@ CSpriteSurface::BltSpriteDarkness(POINT* pPoint, CSprite* pSprite, BYTE DarkBits
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -3363,26 +3363,26 @@ CSpriteSurface::BltSpriteDarkness(POINT* pPoint, CSprite* pSprite, BYTE DarkBits
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltDarknessClipLeft(lpSurface, Pitch, &rect, DarkBits);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -3390,7 +3390,7 @@ CSpriteSurface::BltSpriteDarkness(POINT* pPoint, CSprite* pSprite, BYTE DarkBits
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -3403,7 +3403,7 @@ CSpriteSurface::BltSpriteDarkness(POINT* pPoint, CSprite* pSprite, BYTE DarkBits
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -3411,17 +3411,17 @@ CSpriteSurface::BltSpriteDarkness(POINT* pPoint, CSprite* pSprite, BYTE DarkBits
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			pSprite->BltDarknessClipRight(lpSurface, Pitch, &rect, DarkBits);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -3429,7 +3429,7 @@ CSpriteSurface::BltSpriteDarkness(POINT* pPoint, CSprite* pSprite, BYTE DarkBits
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -3438,7 +3438,7 @@ CSpriteSurface::BltSpriteDarkness(POINT* pPoint, CSprite* pSprite, BYTE DarkBits
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				pSprite->BltDarknessClipHeight(lpSurface, Pitch, &rect, DarkBits);
 			}
@@ -3446,12 +3446,12 @@ CSpriteSurface::BltSpriteDarkness(POINT* pPoint, CSprite* pSprite, BYTE DarkBits
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					pSprite->BltDarknessClipHeight(lpSurface, Pitch, &rect, DarkBits);
 				}
@@ -3473,17 +3473,17 @@ CSpriteSurface::BltSpriteDarkness(POINT* pPoint, CSprite* pSprite, BYTE DarkBits
 //----------------------------------------------------------------------
 // Blt Sprite Effect
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
+// pPoint에 pSprite를 출력한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltSpriteEffect(POINT* pPoint, CSprite* pSprite)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -3494,7 +3494,7 @@ CSpriteSurface::BltSpriteEffect(POINT* pPoint, CSprite* pSprite)
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -3508,13 +3508,13 @@ CSpriteSurface::BltSpriteEffect(POINT* pPoint, CSprite* pSprite)
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -3522,31 +3522,31 @@ CSpriteSurface::BltSpriteEffect(POINT* pPoint, CSprite* pSprite)
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -3559,7 +3559,7 @@ CSpriteSurface::BltSpriteEffect(POINT* pPoint, CSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -3567,24 +3567,24 @@ CSpriteSurface::BltSpriteEffect(POINT* pPoint, CSprite* pSprite)
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltEffectClipWidth(lpSurface, Pitch, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -3597,7 +3597,7 @@ CSpriteSurface::BltSpriteEffect(POINT* pPoint, CSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -3605,26 +3605,26 @@ CSpriteSurface::BltSpriteEffect(POINT* pPoint, CSprite* pSprite)
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltEffectClipLeft(lpSurface, Pitch, &rect);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -3632,7 +3632,7 @@ CSpriteSurface::BltSpriteEffect(POINT* pPoint, CSprite* pSprite)
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -3645,7 +3645,7 @@ CSpriteSurface::BltSpriteEffect(POINT* pPoint, CSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -3653,17 +3653,17 @@ CSpriteSurface::BltSpriteEffect(POINT* pPoint, CSprite* pSprite)
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			pSprite->BltEffectClipRight(lpSurface, Pitch, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -3671,7 +3671,7 @@ CSpriteSurface::BltSpriteEffect(POINT* pPoint, CSprite* pSprite)
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -3680,7 +3680,7 @@ CSpriteSurface::BltSpriteEffect(POINT* pPoint, CSprite* pSprite)
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));			
 				pSprite->BltEffectClipHeight(lpSurface, Pitch, &rect);
 			}
@@ -3688,12 +3688,12 @@ CSpriteSurface::BltSpriteEffect(POINT* pPoint, CSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));			
 					pSprite->BltEffectClipHeight(lpSurface, Pitch, &rect);
 				}
@@ -3715,18 +3715,18 @@ CSpriteSurface::BltSpriteEffect(POINT* pPoint, CSprite* pSprite)
 //----------------------------------------------------------------------
 // Blt Sprite Effect
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
+// pPoint에 pSprite를 출력한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltSpritePalEffect(POINT* pPoint, CSpritePal* pSprite, MPalette &pal)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -3737,7 +3737,7 @@ CSpriteSurface::BltSpritePalEffect(POINT* pPoint, CSpritePal* pSprite, MPalette 
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -3751,13 +3751,13 @@ CSpriteSurface::BltSpritePalEffect(POINT* pPoint, CSpritePal* pSprite, MPalette 
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -3765,31 +3765,31 @@ CSpriteSurface::BltSpritePalEffect(POINT* pPoint, CSpritePal* pSprite, MPalette 
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -3802,7 +3802,7 @@ CSpriteSurface::BltSpritePalEffect(POINT* pPoint, CSpritePal* pSprite, MPalette 
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -3810,24 +3810,24 @@ CSpriteSurface::BltSpritePalEffect(POINT* pPoint, CSpritePal* pSprite, MPalette 
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltEffectClipWidth(lpSurface, Pitch, &rect, pal);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -3840,7 +3840,7 @@ CSpriteSurface::BltSpritePalEffect(POINT* pPoint, CSpritePal* pSprite, MPalette 
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -3848,26 +3848,26 @@ CSpriteSurface::BltSpritePalEffect(POINT* pPoint, CSpritePal* pSprite, MPalette 
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltEffectClipLeft(lpSurface, Pitch, &rect, pal);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -3875,7 +3875,7 @@ CSpriteSurface::BltSpritePalEffect(POINT* pPoint, CSpritePal* pSprite, MPalette 
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -3888,7 +3888,7 @@ CSpriteSurface::BltSpritePalEffect(POINT* pPoint, CSpritePal* pSprite, MPalette 
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -3896,17 +3896,17 @@ CSpriteSurface::BltSpritePalEffect(POINT* pPoint, CSpritePal* pSprite, MPalette 
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			pSprite->BltEffectClipRight(lpSurface, Pitch, &rect, pal);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -3914,7 +3914,7 @@ CSpriteSurface::BltSpritePalEffect(POINT* pPoint, CSpritePal* pSprite, MPalette 
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -3923,7 +3923,7 @@ CSpriteSurface::BltSpritePalEffect(POINT* pPoint, CSpritePal* pSprite, MPalette 
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));			
 				pSprite->BltEffectClipHeight(lpSurface, Pitch, &rect, pal);
 			}
@@ -3931,12 +3931,12 @@ CSpriteSurface::BltSpritePalEffect(POINT* pPoint, CSpritePal* pSprite, MPalette 
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));			
 					pSprite->BltEffectClipHeight(lpSurface, Pitch, &rect, pal);
 				}
@@ -3958,17 +3958,17 @@ CSpriteSurface::BltSpritePalEffect(POINT* pPoint, CSpritePal* pSprite, MPalette 
 //----------------------------------------------------------------------
 // Blt Sprite Scale 
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
+// pPoint에 pSprite를 출력한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltSpriteScale(POINT* pPoint, CSprite* pSprite, BYTE scale)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -3979,7 +3979,7 @@ CSpriteSurface::BltSpriteScale(POINT* pPoint, CSprite* pSprite, BYTE scale)
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -3993,13 +3993,13 @@ CSpriteSurface::BltSpriteScale(POINT* pPoint, CSprite* pSprite, BYTE scale)
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -4007,31 +4007,31 @@ CSpriteSurface::BltSpriteScale(POINT* pPoint, CSprite* pSprite, BYTE scale)
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -4044,7 +4044,7 @@ CSpriteSurface::BltSpriteScale(POINT* pPoint, CSprite* pSprite, BYTE scale)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -4052,24 +4052,24 @@ CSpriteSurface::BltSpriteScale(POINT* pPoint, CSprite* pSprite, BYTE scale)
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));			
 			pSprite->BltScaleClipWidth(lpSurface, Pitch, &rect, scale);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -4082,7 +4082,7 @@ CSpriteSurface::BltSpriteScale(POINT* pPoint, CSprite* pSprite, BYTE scale)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -4090,26 +4090,26 @@ CSpriteSurface::BltSpriteScale(POINT* pPoint, CSprite* pSprite, BYTE scale)
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));			
 			pSprite->BltScaleClipLeft(lpSurface, Pitch, &rect, scale);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -4117,7 +4117,7 @@ CSpriteSurface::BltSpriteScale(POINT* pPoint, CSprite* pSprite, BYTE scale)
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -4130,7 +4130,7 @@ CSpriteSurface::BltSpriteScale(POINT* pPoint, CSprite* pSprite, BYTE scale)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -4138,17 +4138,17 @@ CSpriteSurface::BltSpriteScale(POINT* pPoint, CSprite* pSprite, BYTE scale)
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));			
 			pSprite->BltScaleClipRight(lpSurface, Pitch, &rect, scale);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -4156,7 +4156,7 @@ CSpriteSurface::BltSpriteScale(POINT* pPoint, CSprite* pSprite, BYTE scale)
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -4165,7 +4165,7 @@ CSpriteSurface::BltSpriteScale(POINT* pPoint, CSprite* pSprite, BYTE scale)
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));			
 				pSprite->BltScaleClipHeight(lpSurface, Pitch, &rect, scale);
 			}
@@ -4173,12 +4173,12 @@ CSpriteSurface::BltSpriteScale(POINT* pPoint, CSprite* pSprite, BYTE scale)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));			
 					pSprite->BltScaleClipHeight(lpSurface, Pitch, &rect, scale);
 				}
@@ -4202,17 +4202,17 @@ CSpriteSurface::BltSpriteScale(POINT* pPoint, CSprite* pSprite, BYTE scale)
 //----------------------------------------------------------------------
 // Blt AlphaSprite
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
+// pPoint에 pSprite를 출력한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltAlphaSprite(POINT* pPoint, CAlphaSprite* pSprite)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -4224,7 +4224,7 @@ CSpriteSurface::BltAlphaSprite(POINT* pPoint, CAlphaSprite* pSprite)
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -4238,13 +4238,13 @@ CSpriteSurface::BltAlphaSprite(POINT* pPoint, CAlphaSprite* pSprite)
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -4252,31 +4252,31 @@ CSpriteSurface::BltAlphaSprite(POINT* pPoint, CAlphaSprite* pSprite)
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -4289,7 +4289,7 @@ CSpriteSurface::BltAlphaSprite(POINT* pPoint, CAlphaSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -4297,24 +4297,24 @@ CSpriteSurface::BltAlphaSprite(POINT* pPoint, CAlphaSprite* pSprite)
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));			
 			pSprite->BltClipWidth(lpSurface, Pitch, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -4327,7 +4327,7 @@ CSpriteSurface::BltAlphaSprite(POINT* pPoint, CAlphaSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -4335,26 +4335,26 @@ CSpriteSurface::BltAlphaSprite(POINT* pPoint, CAlphaSprite* pSprite)
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));			
 			pSprite->BltClipLeft(lpSurface, Pitch, &rect);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -4362,7 +4362,7 @@ CSpriteSurface::BltAlphaSprite(POINT* pPoint, CAlphaSprite* pSprite)
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -4375,7 +4375,7 @@ CSpriteSurface::BltAlphaSprite(POINT* pPoint, CAlphaSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -4383,17 +4383,17 @@ CSpriteSurface::BltAlphaSprite(POINT* pPoint, CAlphaSprite* pSprite)
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));			
 			pSprite->BltClipRight(lpSurface, Pitch, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -4401,7 +4401,7 @@ CSpriteSurface::BltAlphaSprite(POINT* pPoint, CAlphaSprite* pSprite)
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -4410,7 +4410,7 @@ CSpriteSurface::BltAlphaSprite(POINT* pPoint, CAlphaSprite* pSprite)
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));			
 				pSprite->BltClipHeight(lpSurface, Pitch, &rect);
 			}
@@ -4418,12 +4418,12 @@ CSpriteSurface::BltAlphaSprite(POINT* pPoint, CAlphaSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));			
 					pSprite->BltClipHeight(lpSurface, Pitch, &rect);
 				}
@@ -4445,18 +4445,18 @@ CSpriteSurface::BltAlphaSprite(POINT* pPoint, CAlphaSprite* pSprite)
 //----------------------------------------------------------------------
 // Blt AlphaSprite
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
+// pPoint에 pSprite를 출력한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltAlphaSpritePal(POINT* pPoint, CAlphaSpritePal* pSprite, MPalette &pal)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 	
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -4468,7 +4468,7 @@ CSpriteSurface::BltAlphaSpritePal(POINT* pPoint, CAlphaSpritePal* pSprite, MPale
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -4482,13 +4482,13 @@ CSpriteSurface::BltAlphaSpritePal(POINT* pPoint, CAlphaSpritePal* pSprite, MPale
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -4496,31 +4496,31 @@ CSpriteSurface::BltAlphaSpritePal(POINT* pPoint, CAlphaSpritePal* pSprite, MPale
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -4533,7 +4533,7 @@ CSpriteSurface::BltAlphaSpritePal(POINT* pPoint, CAlphaSpritePal* pSprite, MPale
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -4541,24 +4541,24 @@ CSpriteSurface::BltAlphaSpritePal(POINT* pPoint, CAlphaSpritePal* pSprite, MPale
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));			
 			pSprite->BltClipWidth(lpSurface, Pitch, &rect, pal);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -4571,7 +4571,7 @@ CSpriteSurface::BltAlphaSpritePal(POINT* pPoint, CAlphaSpritePal* pSprite, MPale
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -4579,26 +4579,26 @@ CSpriteSurface::BltAlphaSpritePal(POINT* pPoint, CAlphaSpritePal* pSprite, MPale
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));			
 			pSprite->BltClipLeft(lpSurface, Pitch, &rect, pal);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -4606,7 +4606,7 @@ CSpriteSurface::BltAlphaSpritePal(POINT* pPoint, CAlphaSpritePal* pSprite, MPale
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -4619,7 +4619,7 @@ CSpriteSurface::BltAlphaSpritePal(POINT* pPoint, CAlphaSpritePal* pSprite, MPale
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -4627,17 +4627,17 @@ CSpriteSurface::BltAlphaSpritePal(POINT* pPoint, CAlphaSpritePal* pSprite, MPale
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));			
 			pSprite->BltClipRight(lpSurface, Pitch, &rect, pal);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -4645,7 +4645,7 @@ CSpriteSurface::BltAlphaSpritePal(POINT* pPoint, CAlphaSpritePal* pSprite, MPale
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -4654,7 +4654,7 @@ CSpriteSurface::BltAlphaSpritePal(POINT* pPoint, CAlphaSpritePal* pSprite, MPale
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));			
 				pSprite->BltClipHeight(lpSurface, Pitch, &rect, pal);
 			}
@@ -4662,12 +4662,12 @@ CSpriteSurface::BltAlphaSpritePal(POINT* pPoint, CAlphaSpritePal* pSprite, MPale
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));			
 					pSprite->BltClipHeight(lpSurface, Pitch, &rect, pal);
 				}
@@ -4690,17 +4690,17 @@ CSpriteSurface::BltAlphaSpritePal(POINT* pPoint, CAlphaSpritePal* pSprite, MPale
 //----------------------------------------------------------------------
 // Blt AlphaSprite Alpha
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
+// pPoint에 pSprite를 출력한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltAlphaSpriteAlpha(POINT* pPoint, CAlphaSprite* pSprite, BYTE alpha)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -4712,7 +4712,7 @@ CSpriteSurface::BltAlphaSpriteAlpha(POINT* pPoint, CAlphaSprite* pSprite, BYTE a
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -4726,13 +4726,13 @@ CSpriteSurface::BltAlphaSpriteAlpha(POINT* pPoint, CAlphaSprite* pSprite, BYTE a
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -4740,31 +4740,31 @@ CSpriteSurface::BltAlphaSpriteAlpha(POINT* pPoint, CAlphaSprite* pSprite, BYTE a
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -4777,7 +4777,7 @@ CSpriteSurface::BltAlphaSpriteAlpha(POINT* pPoint, CAlphaSprite* pSprite, BYTE a
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -4785,24 +4785,24 @@ CSpriteSurface::BltAlphaSpriteAlpha(POINT* pPoint, CAlphaSprite* pSprite, BYTE a
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));			
 			pSprite->BltAlphaClipWidth(lpSurface, Pitch, &rect, alpha);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -4815,7 +4815,7 @@ CSpriteSurface::BltAlphaSpriteAlpha(POINT* pPoint, CAlphaSprite* pSprite, BYTE a
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -4823,26 +4823,26 @@ CSpriteSurface::BltAlphaSpriteAlpha(POINT* pPoint, CAlphaSprite* pSprite, BYTE a
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));			
 			pSprite->BltAlphaClipLeft(lpSurface, Pitch, &rect, alpha);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -4850,7 +4850,7 @@ CSpriteSurface::BltAlphaSpriteAlpha(POINT* pPoint, CAlphaSprite* pSprite, BYTE a
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -4863,7 +4863,7 @@ CSpriteSurface::BltAlphaSpriteAlpha(POINT* pPoint, CAlphaSprite* pSprite, BYTE a
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -4871,17 +4871,17 @@ CSpriteSurface::BltAlphaSpriteAlpha(POINT* pPoint, CAlphaSprite* pSprite, BYTE a
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));			
 			pSprite->BltAlphaClipRight(lpSurface, Pitch, &rect, alpha);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -4889,7 +4889,7 @@ CSpriteSurface::BltAlphaSpriteAlpha(POINT* pPoint, CAlphaSprite* pSprite, BYTE a
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -4898,7 +4898,7 @@ CSpriteSurface::BltAlphaSpriteAlpha(POINT* pPoint, CAlphaSprite* pSprite, BYTE a
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));			
 				pSprite->BltAlphaClipHeight(lpSurface, Pitch, &rect, alpha);
 			}
@@ -4906,12 +4906,12 @@ CSpriteSurface::BltAlphaSpriteAlpha(POINT* pPoint, CAlphaSprite* pSprite, BYTE a
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));			
 					pSprite->BltAlphaClipHeight(lpSurface, Pitch, &rect, alpha);
 				}
@@ -4933,18 +4933,18 @@ CSpriteSurface::BltAlphaSpriteAlpha(POINT* pPoint, CAlphaSprite* pSprite, BYTE a
 //----------------------------------------------------------------------
 // Blt AlphaSprite Alpha
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
+// pPoint에 pSprite를 출력한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltAlphaSpritePalAlpha(POINT* pPoint, CAlphaSpritePal* pSprite, BYTE alpha, MPalette &pal)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -4957,7 +4957,7 @@ CSpriteSurface::BltAlphaSpritePalAlpha(POINT* pPoint, CAlphaSpritePal* pSprite, 
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -4971,13 +4971,13 @@ CSpriteSurface::BltAlphaSpritePalAlpha(POINT* pPoint, CAlphaSpritePal* pSprite, 
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -4985,31 +4985,31 @@ CSpriteSurface::BltAlphaSpritePalAlpha(POINT* pPoint, CAlphaSpritePal* pSprite, 
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -5022,7 +5022,7 @@ CSpriteSurface::BltAlphaSpritePalAlpha(POINT* pPoint, CAlphaSpritePal* pSprite, 
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -5030,24 +5030,24 @@ CSpriteSurface::BltAlphaSpritePalAlpha(POINT* pPoint, CAlphaSpritePal* pSprite, 
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));			
 			pSprite->BltAlphaClipWidth(lpSurface, Pitch, &rect, alpha, pal);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -5060,7 +5060,7 @@ CSpriteSurface::BltAlphaSpritePalAlpha(POINT* pPoint, CAlphaSpritePal* pSprite, 
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -5068,26 +5068,26 @@ CSpriteSurface::BltAlphaSpritePalAlpha(POINT* pPoint, CAlphaSpritePal* pSprite, 
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));			
 			pSprite->BltAlphaClipLeft(lpSurface, Pitch, &rect, alpha, pal);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -5095,7 +5095,7 @@ CSpriteSurface::BltAlphaSpritePalAlpha(POINT* pPoint, CAlphaSpritePal* pSprite, 
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -5108,7 +5108,7 @@ CSpriteSurface::BltAlphaSpritePalAlpha(POINT* pPoint, CAlphaSpritePal* pSprite, 
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -5116,17 +5116,17 @@ CSpriteSurface::BltAlphaSpritePalAlpha(POINT* pPoint, CAlphaSpritePal* pSprite, 
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));			
 			pSprite->BltAlphaClipRight(lpSurface, Pitch, &rect, alpha, pal);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -5134,7 +5134,7 @@ CSpriteSurface::BltAlphaSpritePalAlpha(POINT* pPoint, CAlphaSpritePal* pSprite, 
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -5143,7 +5143,7 @@ CSpriteSurface::BltAlphaSpritePalAlpha(POINT* pPoint, CAlphaSpritePal* pSprite, 
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));			
 				pSprite->BltAlphaClipHeight(lpSurface, Pitch, &rect, alpha, pal);
 			}
@@ -5151,12 +5151,12 @@ CSpriteSurface::BltAlphaSpritePalAlpha(POINT* pPoint, CAlphaSpritePal* pSprite, 
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));			
 					pSprite->BltAlphaClipHeight(lpSurface, Pitch, &rect, alpha, pal);
 				}
@@ -5179,17 +5179,17 @@ CSpriteSurface::BltAlphaSpritePalAlpha(POINT* pPoint, CAlphaSpritePal* pSprite, 
 //----------------------------------------------------------------------
 // Blt AlphaSprite4444
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
+// pPoint에 pSprite를 출력한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltAlphaSprite4444(POINT* pPoint, CAlphaSprite* pSprite)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -5201,7 +5201,7 @@ CSpriteSurface::BltAlphaSprite4444(POINT* pPoint, CAlphaSprite* pSprite)
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -5215,13 +5215,13 @@ CSpriteSurface::BltAlphaSprite4444(POINT* pPoint, CAlphaSprite* pSprite)
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -5229,31 +5229,31 @@ CSpriteSurface::BltAlphaSprite4444(POINT* pPoint, CAlphaSprite* pSprite)
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -5266,7 +5266,7 @@ CSpriteSurface::BltAlphaSprite4444(POINT* pPoint, CAlphaSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -5274,24 +5274,24 @@ CSpriteSurface::BltAlphaSprite4444(POINT* pPoint, CAlphaSprite* pSprite)
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));			
 			pSprite->Blt4444ClipWidth(lpSurface, Pitch, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -5304,7 +5304,7 @@ CSpriteSurface::BltAlphaSprite4444(POINT* pPoint, CAlphaSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -5312,26 +5312,26 @@ CSpriteSurface::BltAlphaSprite4444(POINT* pPoint, CAlphaSprite* pSprite)
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));			
 			pSprite->Blt4444ClipLeft(lpSurface, Pitch, &rect);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -5339,7 +5339,7 @@ CSpriteSurface::BltAlphaSprite4444(POINT* pPoint, CAlphaSprite* pSprite)
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -5352,7 +5352,7 @@ CSpriteSurface::BltAlphaSprite4444(POINT* pPoint, CAlphaSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -5360,17 +5360,17 @@ CSpriteSurface::BltAlphaSprite4444(POINT* pPoint, CAlphaSprite* pSprite)
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			pSprite->Blt4444ClipRight(lpSurface, Pitch, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -5378,7 +5378,7 @@ CSpriteSurface::BltAlphaSprite4444(POINT* pPoint, CAlphaSprite* pSprite)
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -5387,7 +5387,7 @@ CSpriteSurface::BltAlphaSprite4444(POINT* pPoint, CAlphaSprite* pSprite)
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				pSprite->Blt4444ClipHeight(lpSurface, Pitch, &rect);
 			}
@@ -5395,12 +5395,12 @@ CSpriteSurface::BltAlphaSprite4444(POINT* pPoint, CAlphaSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					pSprite->Blt4444ClipHeight(lpSurface, Pitch, &rect);
 				}
@@ -5422,18 +5422,18 @@ CSpriteSurface::BltAlphaSprite4444(POINT* pPoint, CAlphaSprite* pSprite)
 //----------------------------------------------------------------------
 // Blt AlphaSprite4444
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
+// pPoint에 pSprite를 출력한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltAlphaSpritePal4444(POINT* pPoint, CAlphaSpritePal* pSprite, MPalette &pal)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -5445,7 +5445,7 @@ CSpriteSurface::BltAlphaSpritePal4444(POINT* pPoint, CAlphaSpritePal* pSprite, M
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -5459,13 +5459,13 @@ CSpriteSurface::BltAlphaSpritePal4444(POINT* pPoint, CAlphaSpritePal* pSprite, M
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -5473,31 +5473,31 @@ CSpriteSurface::BltAlphaSpritePal4444(POINT* pPoint, CAlphaSpritePal* pSprite, M
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -5510,7 +5510,7 @@ CSpriteSurface::BltAlphaSpritePal4444(POINT* pPoint, CAlphaSpritePal* pSprite, M
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -5518,24 +5518,24 @@ CSpriteSurface::BltAlphaSpritePal4444(POINT* pPoint, CAlphaSpritePal* pSprite, M
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));			
 			pSprite->Blt4444ClipWidth(lpSurface, Pitch, &rect, pal);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -5548,7 +5548,7 @@ CSpriteSurface::BltAlphaSpritePal4444(POINT* pPoint, CAlphaSpritePal* pSprite, M
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -5556,26 +5556,26 @@ CSpriteSurface::BltAlphaSpritePal4444(POINT* pPoint, CAlphaSpritePal* pSprite, M
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));			
 			pSprite->Blt4444ClipLeft(lpSurface, Pitch, &rect, pal);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -5583,7 +5583,7 @@ CSpriteSurface::BltAlphaSpritePal4444(POINT* pPoint, CAlphaSpritePal* pSprite, M
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -5596,7 +5596,7 @@ CSpriteSurface::BltAlphaSpritePal4444(POINT* pPoint, CAlphaSpritePal* pSprite, M
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -5604,17 +5604,17 @@ CSpriteSurface::BltAlphaSpritePal4444(POINT* pPoint, CAlphaSpritePal* pSprite, M
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			pSprite->Blt4444ClipRight(lpSurface, Pitch, &rect, pal);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -5622,7 +5622,7 @@ CSpriteSurface::BltAlphaSpritePal4444(POINT* pPoint, CAlphaSpritePal* pSprite, M
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -5631,7 +5631,7 @@ CSpriteSurface::BltAlphaSpritePal4444(POINT* pPoint, CAlphaSpritePal* pSprite, M
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				pSprite->Blt4444ClipHeight(lpSurface, Pitch, &rect, pal);
 			}
@@ -5639,12 +5639,12 @@ CSpriteSurface::BltAlphaSpritePal4444(POINT* pPoint, CAlphaSpritePal* pSprite, M
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					pSprite->Blt4444ClipHeight(lpSurface, Pitch, &rect, pal);
 				}
@@ -5667,17 +5667,17 @@ CSpriteSurface::BltAlphaSpritePal4444(POINT* pPoint, CAlphaSpritePal* pSprite, M
 //----------------------------------------------------------------------
 // Blt AlphaSprite4444 NotTrans
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�. ������ �κ��� �˰� ĥ�Ѵ�.
+// pPoint에 pSprite를 출력한다. 투명색 부분은 검게 칠한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltAlphaSprite4444NotTrans(POINT* pPoint, CAlphaSprite* pSprite)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -5689,7 +5689,7 @@ CSpriteSurface::BltAlphaSprite4444NotTrans(POINT* pPoint, CAlphaSprite* pSprite)
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -5703,13 +5703,13 @@ CSpriteSurface::BltAlphaSprite4444NotTrans(POINT* pPoint, CAlphaSprite* pSprite)
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -5717,31 +5717,31 @@ CSpriteSurface::BltAlphaSprite4444NotTrans(POINT* pPoint, CAlphaSprite* pSprite)
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -5754,7 +5754,7 @@ CSpriteSurface::BltAlphaSprite4444NotTrans(POINT* pPoint, CAlphaSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -5762,24 +5762,24 @@ CSpriteSurface::BltAlphaSprite4444NotTrans(POINT* pPoint, CAlphaSprite* pSprite)
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->Blt4444NotTransClipWidth(lpSurface, Pitch, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -5792,7 +5792,7 @@ CSpriteSurface::BltAlphaSprite4444NotTrans(POINT* pPoint, CAlphaSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -5800,26 +5800,26 @@ CSpriteSurface::BltAlphaSprite4444NotTrans(POINT* pPoint, CAlphaSprite* pSprite)
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->Blt4444NotTransClipLeft(lpSurface, Pitch, &rect);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -5827,7 +5827,7 @@ CSpriteSurface::BltAlphaSprite4444NotTrans(POINT* pPoint, CAlphaSprite* pSprite)
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -5840,7 +5840,7 @@ CSpriteSurface::BltAlphaSprite4444NotTrans(POINT* pPoint, CAlphaSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -5848,17 +5848,17 @@ CSpriteSurface::BltAlphaSprite4444NotTrans(POINT* pPoint, CAlphaSprite* pSprite)
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			pSprite->Blt4444NotTransClipRight(lpSurface, Pitch, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -5866,7 +5866,7 @@ CSpriteSurface::BltAlphaSprite4444NotTrans(POINT* pPoint, CAlphaSprite* pSprite)
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -5875,7 +5875,7 @@ CSpriteSurface::BltAlphaSprite4444NotTrans(POINT* pPoint, CAlphaSprite* pSprite)
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				pSprite->Blt4444NotTransClipHeight(lpSurface, Pitch, &rect);
 			}
@@ -5883,12 +5883,12 @@ CSpriteSurface::BltAlphaSprite4444NotTrans(POINT* pPoint, CAlphaSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					pSprite->Blt4444NotTransClipHeight(lpSurface, Pitch, &rect);
 				}
@@ -5910,17 +5910,17 @@ CSpriteSurface::BltAlphaSprite4444NotTrans(POINT* pPoint, CAlphaSprite* pSprite)
 //----------------------------------------------------------------------
 // Blt AlphaSprite4444 NotTrans
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�. ������ �κ��� �˰� ĥ�Ѵ�.
+// pPoint에 pSprite를 출력한다. 투명색 부분은 검게 칠한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltAlphaSpritePal4444NotTrans(POINT* pPoint, CAlphaSpritePal* pSprite, MPalette &pal)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -5932,7 +5932,7 @@ CSpriteSurface::BltAlphaSpritePal4444NotTrans(POINT* pPoint, CAlphaSpritePal* pS
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -5946,13 +5946,13 @@ CSpriteSurface::BltAlphaSpritePal4444NotTrans(POINT* pPoint, CAlphaSpritePal* pS
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -5960,31 +5960,31 @@ CSpriteSurface::BltAlphaSpritePal4444NotTrans(POINT* pPoint, CAlphaSpritePal* pS
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -5997,7 +5997,7 @@ CSpriteSurface::BltAlphaSpritePal4444NotTrans(POINT* pPoint, CAlphaSpritePal* pS
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -6005,24 +6005,24 @@ CSpriteSurface::BltAlphaSpritePal4444NotTrans(POINT* pPoint, CAlphaSpritePal* pS
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->Blt4444NotTransClipWidth(lpSurface, Pitch, &rect, pal);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -6035,7 +6035,7 @@ CSpriteSurface::BltAlphaSpritePal4444NotTrans(POINT* pPoint, CAlphaSpritePal* pS
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -6043,26 +6043,26 @@ CSpriteSurface::BltAlphaSpritePal4444NotTrans(POINT* pPoint, CAlphaSpritePal* pS
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->Blt4444NotTransClipLeft(lpSurface, Pitch, &rect, pal);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -6070,7 +6070,7 @@ CSpriteSurface::BltAlphaSpritePal4444NotTrans(POINT* pPoint, CAlphaSpritePal* pS
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -6083,7 +6083,7 @@ CSpriteSurface::BltAlphaSpritePal4444NotTrans(POINT* pPoint, CAlphaSpritePal* pS
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -6091,17 +6091,17 @@ CSpriteSurface::BltAlphaSpritePal4444NotTrans(POINT* pPoint, CAlphaSpritePal* pS
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			pSprite->Blt4444NotTransClipRight(lpSurface, Pitch, &rect, pal);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -6109,7 +6109,7 @@ CSpriteSurface::BltAlphaSpritePal4444NotTrans(POINT* pPoint, CAlphaSpritePal* pS
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -6118,7 +6118,7 @@ CSpriteSurface::BltAlphaSpritePal4444NotTrans(POINT* pPoint, CAlphaSpritePal* pS
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				pSprite->Blt4444NotTransClipHeight(lpSurface, Pitch, &rect, pal);
 			}
@@ -6126,12 +6126,12 @@ CSpriteSurface::BltAlphaSpritePal4444NotTrans(POINT* pPoint, CAlphaSpritePal* pS
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					pSprite->Blt4444NotTransClipHeight(lpSurface, Pitch, &rect, pal);
 				}
@@ -6154,17 +6154,17 @@ CSpriteSurface::BltAlphaSpritePal4444NotTrans(POINT* pPoint, CAlphaSpritePal* pS
 //----------------------------------------------------------------------
 // Blt AlphaSprite4444 NotTrans
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�. ������ �κ��� �˰� ĥ�Ѵ�.
+// pPoint에 pSprite를 출력한다. 투명색 부분은 검게 칠한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltAlphaSprite4444SmallNotTrans(POINT* pPoint, CAlphaSprite* pSprite, BYTE shift)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -6176,7 +6176,7 @@ CSpriteSurface::BltAlphaSprite4444SmallNotTrans(POINT* pPoint, CAlphaSprite* pSp
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth() >> shift;
@@ -6190,13 +6190,13 @@ CSpriteSurface::BltAlphaSprite4444SmallNotTrans(POINT* pPoint, CAlphaSprite* pSp
 	int yPlusSpriteHeight	= pt.y + (pSprite->GetHeight() >> shift);
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -6204,30 +6204,30 @@ CSpriteSurface::BltAlphaSprite4444SmallNotTrans(POINT* pPoint, CAlphaSprite* pSp
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -(pt.x << shift);		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -6240,7 +6240,7 @@ CSpriteSurface::BltAlphaSprite4444SmallNotTrans(POINT* pPoint, CAlphaSprite* pSp
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -6248,24 +6248,24 @@ CSpriteSurface::BltAlphaSprite4444SmallNotTrans(POINT* pPoint, CAlphaSprite* pSp
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			//pSprite->Blt4444SmallClipWidth(lpSurface, Pitch, &rect, shift);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -6278,7 +6278,7 @@ CSpriteSurface::BltAlphaSprite4444SmallNotTrans(POINT* pPoint, CAlphaSprite* pSp
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -6286,26 +6286,26 @@ CSpriteSurface::BltAlphaSprite4444SmallNotTrans(POINT* pPoint, CAlphaSprite* pSp
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			//pSprite->Blt4444SmallClipLeft(lpSurface, Pitch, &rect, shift);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -6313,7 +6313,7 @@ CSpriteSurface::BltAlphaSprite4444SmallNotTrans(POINT* pPoint, CAlphaSprite* pSp
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -6326,7 +6326,7 @@ CSpriteSurface::BltAlphaSprite4444SmallNotTrans(POINT* pPoint, CAlphaSprite* pSp
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -6334,17 +6334,17 @@ CSpriteSurface::BltAlphaSprite4444SmallNotTrans(POINT* pPoint, CAlphaSprite* pSp
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			//pSprite->Blt4444SmallClipRight(lpSurface, Pitch, &rect, shift);			
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -6352,14 +6352,14 @@ CSpriteSurface::BltAlphaSprite4444SmallNotTrans(POINT* pPoint, CAlphaSprite* pSp
 				rect.top = -(pt.y << shift);
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
 				}
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//pSprite->Blt4444SmallClipHeight(lpSurface, Pitch, &rect, shift);
 			}
@@ -6367,12 +6367,12 @@ CSpriteSurface::BltAlphaSprite4444SmallNotTrans(POINT* pPoint, CAlphaSprite* pSp
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					//pSprite->Blt4444SmallClipHeight(lpSurface, Pitch, &rect, shift);
 				}
@@ -6394,18 +6394,18 @@ CSpriteSurface::BltAlphaSprite4444SmallNotTrans(POINT* pPoint, CAlphaSprite* pSp
 //----------------------------------------------------------------------
 // Blt AlphaSprite4444 NotTrans
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�. ������ �κ��� �˰� ĥ�Ѵ�.
+// pPoint에 pSprite를 출력한다. 투명색 부분은 검게 칠한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltAlphaSpritePal4444SmallNotTrans(POINT* pPoint, CAlphaSpritePal* pSprite, BYTE shift, MPalette &pal)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -6417,7 +6417,7 @@ CSpriteSurface::BltAlphaSpritePal4444SmallNotTrans(POINT* pPoint, CAlphaSpritePa
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth() >> shift;
@@ -6431,13 +6431,13 @@ CSpriteSurface::BltAlphaSpritePal4444SmallNotTrans(POINT* pPoint, CAlphaSpritePa
 	int yPlusSpriteHeight	= pt.y + (pSprite->GetHeight() >> shift);
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -6445,30 +6445,30 @@ CSpriteSurface::BltAlphaSpritePal4444SmallNotTrans(POINT* pPoint, CAlphaSpritePa
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -(pt.x << shift);		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -6481,7 +6481,7 @@ CSpriteSurface::BltAlphaSpritePal4444SmallNotTrans(POINT* pPoint, CAlphaSpritePa
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -6489,24 +6489,24 @@ CSpriteSurface::BltAlphaSpritePal4444SmallNotTrans(POINT* pPoint, CAlphaSpritePa
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			//pSprite->Blt4444SmallClipWidth(lpSurface, Pitch, &rect, shift);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -6519,7 +6519,7 @@ CSpriteSurface::BltAlphaSpritePal4444SmallNotTrans(POINT* pPoint, CAlphaSpritePa
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -6527,26 +6527,26 @@ CSpriteSurface::BltAlphaSpritePal4444SmallNotTrans(POINT* pPoint, CAlphaSpritePa
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			//pSprite->Blt4444SmallClipLeft(lpSurface, Pitch, &rect, shift);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -6554,7 +6554,7 @@ CSpriteSurface::BltAlphaSpritePal4444SmallNotTrans(POINT* pPoint, CAlphaSpritePa
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -6567,7 +6567,7 @@ CSpriteSurface::BltAlphaSpritePal4444SmallNotTrans(POINT* pPoint, CAlphaSpritePa
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -6575,17 +6575,17 @@ CSpriteSurface::BltAlphaSpritePal4444SmallNotTrans(POINT* pPoint, CAlphaSpritePa
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			//pSprite->Blt4444SmallClipRight(lpSurface, Pitch, &rect, shift);			
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -6593,14 +6593,14 @@ CSpriteSurface::BltAlphaSpritePal4444SmallNotTrans(POINT* pPoint, CAlphaSpritePa
 				rect.top = -(pt.y << shift);
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
 				}
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//pSprite->Blt4444SmallClipHeight(lpSurface, Pitch, &rect, shift);
 			}
@@ -6608,12 +6608,12 @@ CSpriteSurface::BltAlphaSpritePal4444SmallNotTrans(POINT* pPoint, CAlphaSpritePa
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					//pSprite->Blt4444SmallClipHeight(lpSurface, Pitch, &rect, shift);
 				}
@@ -6636,17 +6636,17 @@ CSpriteSurface::BltAlphaSpritePal4444SmallNotTrans(POINT* pPoint, CAlphaSpritePa
 //----------------------------------------------------------------------
 // Blt IndexSprite
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
+// pPoint에 pSprite를 출력한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltIndexSprite(POINT* pPoint, CIndexSprite* pSprite)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -6657,7 +6657,7 @@ CSpriteSurface::BltIndexSprite(POINT* pPoint, CIndexSprite* pSprite)
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -6671,13 +6671,13 @@ CSpriteSurface::BltIndexSprite(POINT* pPoint, CIndexSprite* pSprite)
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -6685,31 +6685,31 @@ CSpriteSurface::BltIndexSprite(POINT* pPoint, CIndexSprite* pSprite)
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -6722,7 +6722,7 @@ CSpriteSurface::BltIndexSprite(POINT* pPoint, CIndexSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -6730,24 +6730,24 @@ CSpriteSurface::BltIndexSprite(POINT* pPoint, CIndexSprite* pSprite)
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltClipWidth(lpSurface, Pitch, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -6760,7 +6760,7 @@ CSpriteSurface::BltIndexSprite(POINT* pPoint, CIndexSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -6768,26 +6768,26 @@ CSpriteSurface::BltIndexSprite(POINT* pPoint, CIndexSprite* pSprite)
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltClipLeft(lpSurface, Pitch, &rect);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -6795,7 +6795,7 @@ CSpriteSurface::BltIndexSprite(POINT* pPoint, CIndexSprite* pSprite)
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -6808,7 +6808,7 @@ CSpriteSurface::BltIndexSprite(POINT* pPoint, CIndexSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -6816,17 +6816,17 @@ CSpriteSurface::BltIndexSprite(POINT* pPoint, CIndexSprite* pSprite)
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			pSprite->BltClipRight(lpSurface, Pitch, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -6834,7 +6834,7 @@ CSpriteSurface::BltIndexSprite(POINT* pPoint, CIndexSprite* pSprite)
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -6843,7 +6843,7 @@ CSpriteSurface::BltIndexSprite(POINT* pPoint, CIndexSprite* pSprite)
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				pSprite->BltClipHeight(lpSurface, Pitch, &rect);
 			}
@@ -6851,12 +6851,12 @@ CSpriteSurface::BltIndexSprite(POINT* pPoint, CIndexSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					pSprite->BltClipHeight(lpSurface, Pitch, &rect);
 				}
@@ -6878,17 +6878,17 @@ CSpriteSurface::BltIndexSprite(POINT* pPoint, CIndexSprite* pSprite)
 //----------------------------------------------------------------------
 // Blt IndexSprite Darkness
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
+// pPoint에 pSprite를 출력한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltIndexSpriteDarkness(POINT* pPoint, CIndexSprite* pSprite, BYTE DarkBits)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -6900,7 +6900,7 @@ CSpriteSurface::BltIndexSpriteDarkness(POINT* pPoint, CIndexSprite* pSprite, BYT
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -6914,13 +6914,13 @@ CSpriteSurface::BltIndexSpriteDarkness(POINT* pPoint, CIndexSprite* pSprite, BYT
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -6928,31 +6928,31 @@ CSpriteSurface::BltIndexSpriteDarkness(POINT* pPoint, CIndexSprite* pSprite, BYT
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -6965,7 +6965,7 @@ CSpriteSurface::BltIndexSpriteDarkness(POINT* pPoint, CIndexSprite* pSprite, BYT
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -6973,24 +6973,24 @@ CSpriteSurface::BltIndexSpriteDarkness(POINT* pPoint, CIndexSprite* pSprite, BYT
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltDarknessClipWidth(lpSurface, Pitch, &rect, DarkBits);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -7003,7 +7003,7 @@ CSpriteSurface::BltIndexSpriteDarkness(POINT* pPoint, CIndexSprite* pSprite, BYT
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -7011,26 +7011,26 @@ CSpriteSurface::BltIndexSpriteDarkness(POINT* pPoint, CIndexSprite* pSprite, BYT
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltDarknessClipLeft(lpSurface, Pitch, &rect, DarkBits);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -7038,7 +7038,7 @@ CSpriteSurface::BltIndexSpriteDarkness(POINT* pPoint, CIndexSprite* pSprite, BYT
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -7051,7 +7051,7 @@ CSpriteSurface::BltIndexSpriteDarkness(POINT* pPoint, CIndexSprite* pSprite, BYT
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -7059,17 +7059,17 @@ CSpriteSurface::BltIndexSpriteDarkness(POINT* pPoint, CIndexSprite* pSprite, BYT
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			pSprite->BltDarknessClipRight(lpSurface, Pitch, &rect, DarkBits);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -7077,7 +7077,7 @@ CSpriteSurface::BltIndexSpriteDarkness(POINT* pPoint, CIndexSprite* pSprite, BYT
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -7086,7 +7086,7 @@ CSpriteSurface::BltIndexSpriteDarkness(POINT* pPoint, CIndexSprite* pSprite, BYT
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				pSprite->BltDarknessClipHeight(lpSurface, Pitch, &rect, DarkBits);
 			}
@@ -7094,12 +7094,12 @@ CSpriteSurface::BltIndexSpriteDarkness(POINT* pPoint, CIndexSprite* pSprite, BYT
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					pSprite->BltDarknessClipHeight(lpSurface, Pitch, &rect, DarkBits);
 				}
@@ -7121,17 +7121,17 @@ CSpriteSurface::BltIndexSpriteDarkness(POINT* pPoint, CIndexSprite* pSprite, BYT
 //----------------------------------------------------------------------
 // Blt IndexSprite Alpha
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
+// pPoint에 pSprite를 출력한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltIndexSpriteAlpha(POINT* pPoint, CIndexSprite* pSprite, BYTE alpha)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -7143,7 +7143,7 @@ CSpriteSurface::BltIndexSpriteAlpha(POINT* pPoint, CIndexSprite* pSprite, BYTE a
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -7157,13 +7157,13 @@ CSpriteSurface::BltIndexSpriteAlpha(POINT* pPoint, CIndexSprite* pSprite, BYTE a
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -7171,31 +7171,31 @@ CSpriteSurface::BltIndexSpriteAlpha(POINT* pPoint, CIndexSprite* pSprite, BYTE a
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -7208,7 +7208,7 @@ CSpriteSurface::BltIndexSpriteAlpha(POINT* pPoint, CIndexSprite* pSprite, BYTE a
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -7216,24 +7216,24 @@ CSpriteSurface::BltIndexSpriteAlpha(POINT* pPoint, CIndexSprite* pSprite, BYTE a
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltAlphaClipWidth(lpSurface, Pitch, &rect, alpha);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -7246,7 +7246,7 @@ CSpriteSurface::BltIndexSpriteAlpha(POINT* pPoint, CIndexSprite* pSprite, BYTE a
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -7254,26 +7254,26 @@ CSpriteSurface::BltIndexSpriteAlpha(POINT* pPoint, CIndexSprite* pSprite, BYTE a
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltAlphaClipLeft(lpSurface, Pitch, &rect, alpha);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -7281,7 +7281,7 @@ CSpriteSurface::BltIndexSpriteAlpha(POINT* pPoint, CIndexSprite* pSprite, BYTE a
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -7294,7 +7294,7 @@ CSpriteSurface::BltIndexSpriteAlpha(POINT* pPoint, CIndexSprite* pSprite, BYTE a
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -7302,17 +7302,17 @@ CSpriteSurface::BltIndexSpriteAlpha(POINT* pPoint, CIndexSprite* pSprite, BYTE a
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			pSprite->BltAlphaClipRight(lpSurface, Pitch, &rect, alpha);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -7320,7 +7320,7 @@ CSpriteSurface::BltIndexSpriteAlpha(POINT* pPoint, CIndexSprite* pSprite, BYTE a
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -7329,7 +7329,7 @@ CSpriteSurface::BltIndexSpriteAlpha(POINT* pPoint, CIndexSprite* pSprite, BYTE a
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				pSprite->BltAlphaClipHeight(lpSurface, Pitch, &rect, alpha);
 			}
@@ -7337,12 +7337,12 @@ CSpriteSurface::BltIndexSpriteAlpha(POINT* pPoint, CIndexSprite* pSprite, BYTE a
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					pSprite->BltAlphaClipHeight(lpSurface, Pitch, &rect, alpha);
 				}
@@ -7366,17 +7366,17 @@ CSpriteSurface::BltIndexSpriteAlpha(POINT* pPoint, CIndexSprite* pSprite, BYTE a
 //----------------------------------------------------------------------
 // Blt IndexSprite Color
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
+// pPoint에 pSprite를 출력한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltIndexSpriteColor(POINT* pPoint, CIndexSprite* pSprite, BYTE rgb)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -7388,7 +7388,7 @@ CSpriteSurface::BltIndexSpriteColor(POINT* pPoint, CIndexSprite* pSprite, BYTE r
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -7402,13 +7402,13 @@ CSpriteSurface::BltIndexSpriteColor(POINT* pPoint, CIndexSprite* pSprite, BYTE r
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -7416,31 +7416,31 @@ CSpriteSurface::BltIndexSpriteColor(POINT* pPoint, CIndexSprite* pSprite, BYTE r
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -7453,7 +7453,7 @@ CSpriteSurface::BltIndexSpriteColor(POINT* pPoint, CIndexSprite* pSprite, BYTE r
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -7461,24 +7461,24 @@ CSpriteSurface::BltIndexSpriteColor(POINT* pPoint, CIndexSprite* pSprite, BYTE r
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltColorClipWidth(lpSurface, Pitch, &rect, rgb);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -7491,7 +7491,7 @@ CSpriteSurface::BltIndexSpriteColor(POINT* pPoint, CIndexSprite* pSprite, BYTE r
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -7499,26 +7499,26 @@ CSpriteSurface::BltIndexSpriteColor(POINT* pPoint, CIndexSprite* pSprite, BYTE r
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltColorClipLeft(lpSurface, Pitch, &rect, rgb);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -7526,7 +7526,7 @@ CSpriteSurface::BltIndexSpriteColor(POINT* pPoint, CIndexSprite* pSprite, BYTE r
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -7539,7 +7539,7 @@ CSpriteSurface::BltIndexSpriteColor(POINT* pPoint, CIndexSprite* pSprite, BYTE r
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -7547,17 +7547,17 @@ CSpriteSurface::BltIndexSpriteColor(POINT* pPoint, CIndexSprite* pSprite, BYTE r
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			pSprite->BltColorClipRight(lpSurface, Pitch, &rect, rgb);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -7565,7 +7565,7 @@ CSpriteSurface::BltIndexSpriteColor(POINT* pPoint, CIndexSprite* pSprite, BYTE r
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -7574,7 +7574,7 @@ CSpriteSurface::BltIndexSpriteColor(POINT* pPoint, CIndexSprite* pSprite, BYTE r
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				pSprite->BltColorClipHeight(lpSurface, Pitch, &rect, rgb);
 			}
@@ -7582,12 +7582,12 @@ CSpriteSurface::BltIndexSpriteColor(POINT* pPoint, CIndexSprite* pSprite, BYTE r
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					pSprite->BltColorClipHeight(lpSurface, Pitch, &rect, rgb);
 				}
@@ -7609,17 +7609,17 @@ CSpriteSurface::BltIndexSpriteColor(POINT* pPoint, CIndexSprite* pSprite, BYTE r
 //----------------------------------------------------------------------
 // Blt IndexSprite ColorSet
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
+// pPoint에 pSprite를 출력한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltIndexSpriteColorSet(POINT* pPoint, CIndexSprite* pSprite, WORD colorSet)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -7631,7 +7631,7 @@ CSpriteSurface::BltIndexSpriteColorSet(POINT* pPoint, CIndexSprite* pSprite, WOR
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -7645,13 +7645,13 @@ CSpriteSurface::BltIndexSpriteColorSet(POINT* pPoint, CIndexSprite* pSprite, WOR
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -7659,31 +7659,31 @@ CSpriteSurface::BltIndexSpriteColorSet(POINT* pPoint, CIndexSprite* pSprite, WOR
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -7696,7 +7696,7 @@ CSpriteSurface::BltIndexSpriteColorSet(POINT* pPoint, CIndexSprite* pSprite, WOR
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -7704,24 +7704,24 @@ CSpriteSurface::BltIndexSpriteColorSet(POINT* pPoint, CIndexSprite* pSprite, WOR
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltColorSetClipWidth(lpSurface, Pitch, &rect, colorSet);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -7734,7 +7734,7 @@ CSpriteSurface::BltIndexSpriteColorSet(POINT* pPoint, CIndexSprite* pSprite, WOR
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -7742,26 +7742,26 @@ CSpriteSurface::BltIndexSpriteColorSet(POINT* pPoint, CIndexSprite* pSprite, WOR
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltColorSetClipLeft(lpSurface, Pitch, &rect, colorSet);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -7769,7 +7769,7 @@ CSpriteSurface::BltIndexSpriteColorSet(POINT* pPoint, CIndexSprite* pSprite, WOR
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -7782,7 +7782,7 @@ CSpriteSurface::BltIndexSpriteColorSet(POINT* pPoint, CIndexSprite* pSprite, WOR
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -7790,17 +7790,17 @@ CSpriteSurface::BltIndexSpriteColorSet(POINT* pPoint, CIndexSprite* pSprite, WOR
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			pSprite->BltColorSetClipRight(lpSurface, Pitch, &rect, colorSet);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -7808,7 +7808,7 @@ CSpriteSurface::BltIndexSpriteColorSet(POINT* pPoint, CIndexSprite* pSprite, WOR
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -7817,7 +7817,7 @@ CSpriteSurface::BltIndexSpriteColorSet(POINT* pPoint, CIndexSprite* pSprite, WOR
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				pSprite->BltColorSetClipHeight(lpSurface, Pitch, &rect, colorSet);
 			}
@@ -7825,12 +7825,12 @@ CSpriteSurface::BltIndexSpriteColorSet(POINT* pPoint, CIndexSprite* pSprite, WOR
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					pSprite->BltColorSetClipHeight(lpSurface, Pitch, &rect, colorSet);
 				}
@@ -7853,17 +7853,17 @@ CSpriteSurface::BltIndexSpriteColorSet(POINT* pPoint, CIndexSprite* pSprite, WOR
 //----------------------------------------------------------------------
 // Blt IndexSpriteEffect
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
+// pPoint에 pSprite를 출력한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltIndexSpriteEffect(POINT* pPoint, CIndexSprite* pSprite)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -7875,7 +7875,7 @@ CSpriteSurface::BltIndexSpriteEffect(POINT* pPoint, CIndexSprite* pSprite)
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -7889,13 +7889,13 @@ CSpriteSurface::BltIndexSpriteEffect(POINT* pPoint, CIndexSprite* pSprite)
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -7903,31 +7903,31 @@ CSpriteSurface::BltIndexSpriteEffect(POINT* pPoint, CIndexSprite* pSprite)
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -7940,7 +7940,7 @@ CSpriteSurface::BltIndexSpriteEffect(POINT* pPoint, CIndexSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -7948,24 +7948,24 @@ CSpriteSurface::BltIndexSpriteEffect(POINT* pPoint, CIndexSprite* pSprite)
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltEffectClipWidth(lpSurface, Pitch, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -7978,7 +7978,7 @@ CSpriteSurface::BltIndexSpriteEffect(POINT* pPoint, CIndexSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -7986,26 +7986,26 @@ CSpriteSurface::BltIndexSpriteEffect(POINT* pPoint, CIndexSprite* pSprite)
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltEffectClipLeft(lpSurface, Pitch, &rect);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -8013,7 +8013,7 @@ CSpriteSurface::BltIndexSpriteEffect(POINT* pPoint, CIndexSprite* pSprite)
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -8026,7 +8026,7 @@ CSpriteSurface::BltIndexSpriteEffect(POINT* pPoint, CIndexSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -8034,17 +8034,17 @@ CSpriteSurface::BltIndexSpriteEffect(POINT* pPoint, CIndexSprite* pSprite)
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			pSprite->BltEffectClipRight(lpSurface, Pitch, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -8052,7 +8052,7 @@ CSpriteSurface::BltIndexSpriteEffect(POINT* pPoint, CIndexSprite* pSprite)
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -8061,7 +8061,7 @@ CSpriteSurface::BltIndexSpriteEffect(POINT* pPoint, CIndexSprite* pSprite)
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				pSprite->BltEffectClipHeight(lpSurface, Pitch, &rect);
 			}
@@ -8069,12 +8069,12 @@ CSpriteSurface::BltIndexSpriteEffect(POINT* pPoint, CIndexSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					pSprite->BltEffectClipHeight(lpSurface, Pitch, &rect);
 				}
@@ -8096,7 +8096,7 @@ CSpriteSurface::BltIndexSpriteEffect(POINT* pPoint, CIndexSprite* pSprite)
 //----------------------------------------------------------------------
 // Blt SpriteAlpha Filter
 //----------------------------------------------------------------------
-// ���� Clipping�� �������� ����
+// 아직 Clipping이 지원되지 않음
 //----------------------------------------------------------------------
 /*
 void	
@@ -8108,7 +8108,7 @@ CSpriteSurface::BltSpriteAlphaFilter(POINT* pPoint, CSprite* pSprite, CFilter* p
 	// Lock
 	LockW(lpSurface, Pitch);
 
-	// ��� ���� ��ġ			
+	// 출력 시작 위치			
 	//lpSurface = (WORD*)((BYTE*)lpSurface + pPoint->y*Pitch + (pPoint->x<<1));
 	lpSurface = (WORD*)((BYTE*)lpSurface + pPoint->y*Pitch + (pPoint->x<<1));
 	pSprite->BltAlphaFilter(lpSurface, Pitch, pFilter);
@@ -8121,22 +8121,22 @@ CSpriteSurface::BltSpriteAlphaFilter(POINT* pPoint, CSprite* pSprite, CFilter* p
 //----------------------------------------------------------------------
 // Blt SpriteAlphaFilter
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
-// Filter�� CSprite::SetFilter(...)�� ���ؼ� �����ȴ�.
+// pPoint에 pSprite를 출력한다.
+// Filter는 CSprite::SetFilter(...)를 통해서 설정된다.
 //
-// Filter�� Sprite�� ��ġ�� �ʴ� ���...
-// BltSprite�� ȣ���ϵ��� �Ѵ�.
+// Filter가 Sprite와 겹치지 않는 경우...
+// BltSprite를 호출하도록 한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltSpriteAlphaFilter(POINT* pPoint, CSprite* pSprite)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit() || CSprite::GetFilter()->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// Filter�� Sprite�� ��ġ�� �ʴ� ���...
-	// BltSprite�� ȣ���ϵ��� �Ѵ�.
+	// Filter가 Sprite와 겹치지 않는 경우...
+	// BltSprite를 호출하도록 한다.
 	//-------------------------------------------------------------
 	if (!pSprite->IsIntersectFilter())
 	{
@@ -8145,7 +8145,7 @@ CSpriteSurface::BltSpriteAlphaFilter(POINT* pPoint, CSprite* pSprite)
 	}
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -8157,7 +8157,7 @@ CSpriteSurface::BltSpriteAlphaFilter(POINT* pPoint, CSprite* pSprite)
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -8171,13 +8171,13 @@ CSpriteSurface::BltSpriteAlphaFilter(POINT* pPoint, CSprite* pSprite)
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -8185,31 +8185,31 @@ CSpriteSurface::BltSpriteAlphaFilter(POINT* pPoint, CSprite* pSprite)
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -8222,7 +8222,7 @@ CSpriteSurface::BltSpriteAlphaFilter(POINT* pPoint, CSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -8230,24 +8230,24 @@ CSpriteSurface::BltSpriteAlphaFilter(POINT* pPoint, CSprite* pSprite)
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltAlphaFilterClipWidth(lpSurface, Pitch, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -8260,7 +8260,7 @@ CSpriteSurface::BltSpriteAlphaFilter(POINT* pPoint, CSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -8268,26 +8268,26 @@ CSpriteSurface::BltSpriteAlphaFilter(POINT* pPoint, CSprite* pSprite)
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltAlphaFilterClipLeft(lpSurface, Pitch, &rect);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -8295,7 +8295,7 @@ CSpriteSurface::BltSpriteAlphaFilter(POINT* pPoint, CSprite* pSprite)
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -8308,7 +8308,7 @@ CSpriteSurface::BltSpriteAlphaFilter(POINT* pPoint, CSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -8316,17 +8316,17 @@ CSpriteSurface::BltSpriteAlphaFilter(POINT* pPoint, CSprite* pSprite)
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			pSprite->BltAlphaFilterClipRight(lpSurface, Pitch, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -8334,7 +8334,7 @@ CSpriteSurface::BltSpriteAlphaFilter(POINT* pPoint, CSprite* pSprite)
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -8343,7 +8343,7 @@ CSpriteSurface::BltSpriteAlphaFilter(POINT* pPoint, CSprite* pSprite)
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				pSprite->BltAlphaFilterClipHeight(lpSurface, Pitch, &rect);
 			}
@@ -8351,12 +8351,12 @@ CSpriteSurface::BltSpriteAlphaFilter(POINT* pPoint, CSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					pSprite->BltAlphaFilterClipHeight(lpSurface, Pitch, &rect);
 				}
@@ -8379,22 +8379,22 @@ CSpriteSurface::BltSpriteAlphaFilter(POINT* pPoint, CSprite* pSprite)
 //----------------------------------------------------------------------
 // Blt SpriteAlphaFilter Darkness
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
-// Filter�� CSprite::SetFilter(...)�� ���ؼ� �����ȴ�.
+// pPoint에 pSprite를 출력한다.
+// Filter는 CSprite::SetFilter(...)를 통해서 설정된다.
 //
-// Filter�� Sprite�� ��ġ�� �ʴ� ���...
-// BltSpriteDarkness�� ȣ���ϵ��� �Ѵ�.
+// Filter가 Sprite와 겹치지 않는 경우...
+// BltSpriteDarkness를 호출하도록 한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltSpriteAlphaFilterDarkness(POINT* pPoint, CSprite* pSprite, BYTE DarkBits)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit() || CSprite::GetFilter()->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// Filter�� Sprite�� ��ġ�� �ʴ� ���...
-	// BltSprite�� ȣ���ϵ��� �Ѵ�.
+	// Filter가 Sprite와 겹치지 않는 경우...
+	// BltSprite를 호출하도록 한다.
 	//-------------------------------------------------------------
 	if (!pSprite->IsIntersectFilter())
 	{
@@ -8403,7 +8403,7 @@ CSpriteSurface::BltSpriteAlphaFilterDarkness(POINT* pPoint, CSprite* pSprite, BY
 	}
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -8415,7 +8415,7 @@ CSpriteSurface::BltSpriteAlphaFilterDarkness(POINT* pPoint, CSprite* pSprite, BY
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -8429,13 +8429,13 @@ CSpriteSurface::BltSpriteAlphaFilterDarkness(POINT* pPoint, CSprite* pSprite, BY
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -8443,31 +8443,31 @@ CSpriteSurface::BltSpriteAlphaFilterDarkness(POINT* pPoint, CSprite* pSprite, BY
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -8480,7 +8480,7 @@ CSpriteSurface::BltSpriteAlphaFilterDarkness(POINT* pPoint, CSprite* pSprite, BY
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -8488,24 +8488,24 @@ CSpriteSurface::BltSpriteAlphaFilterDarkness(POINT* pPoint, CSprite* pSprite, BY
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltAlphaFilterDarknessClipWidth(lpSurface, Pitch, &rect, DarkBits);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -8518,7 +8518,7 @@ CSpriteSurface::BltSpriteAlphaFilterDarkness(POINT* pPoint, CSprite* pSprite, BY
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -8526,26 +8526,26 @@ CSpriteSurface::BltSpriteAlphaFilterDarkness(POINT* pPoint, CSprite* pSprite, BY
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltAlphaFilterDarknessClipLeft(lpSurface, Pitch, &rect, DarkBits);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -8553,7 +8553,7 @@ CSpriteSurface::BltSpriteAlphaFilterDarkness(POINT* pPoint, CSprite* pSprite, BY
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -8566,7 +8566,7 @@ CSpriteSurface::BltSpriteAlphaFilterDarkness(POINT* pPoint, CSprite* pSprite, BY
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -8574,17 +8574,17 @@ CSpriteSurface::BltSpriteAlphaFilterDarkness(POINT* pPoint, CSprite* pSprite, BY
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			pSprite->BltAlphaFilterDarknessClipRight(lpSurface, Pitch, &rect, DarkBits);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -8592,7 +8592,7 @@ CSpriteSurface::BltSpriteAlphaFilterDarkness(POINT* pPoint, CSprite* pSprite, BY
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -8601,7 +8601,7 @@ CSpriteSurface::BltSpriteAlphaFilterDarkness(POINT* pPoint, CSprite* pSprite, BY
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				pSprite->BltAlphaFilterDarknessClipHeight(lpSurface, Pitch, &rect, DarkBits);
 			}
@@ -8609,12 +8609,12 @@ CSpriteSurface::BltSpriteAlphaFilterDarkness(POINT* pPoint, CSprite* pSprite, BY
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					pSprite->BltAlphaFilterDarknessClipHeight(lpSurface, Pitch, &rect, DarkBits);
 				}
@@ -8636,17 +8636,17 @@ CSpriteSurface::BltSpriteAlphaFilterDarkness(POINT* pPoint, CSprite* pSprite, BY
 //----------------------------------------------------------------------
 // Blt Sprite Alpha4444 NotTrans
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�. ������ �κ��� �˰� ĥ�Ѵ�.
+// pPoint에 pSprite를 출력한다. 투명색 부분은 검게 칠한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltSpriteAlpha4444NotTrans(POINT* pPoint, CSprite* pSprite, BYTE alpha)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -8658,7 +8658,7 @@ CSpriteSurface::BltSpriteAlpha4444NotTrans(POINT* pPoint, CSprite* pSprite, BYTE
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -8672,13 +8672,13 @@ CSpriteSurface::BltSpriteAlpha4444NotTrans(POINT* pPoint, CSprite* pSprite, BYTE
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -8686,31 +8686,31 @@ CSpriteSurface::BltSpriteAlpha4444NotTrans(POINT* pPoint, CSprite* pSprite, BYTE
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -8723,7 +8723,7 @@ CSpriteSurface::BltSpriteAlpha4444NotTrans(POINT* pPoint, CSprite* pSprite, BYTE
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -8731,24 +8731,24 @@ CSpriteSurface::BltSpriteAlpha4444NotTrans(POINT* pPoint, CSprite* pSprite, BYTE
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			//pSprite->Blt4444NotTransClipWidth(lpSurface, Pitch, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -8761,7 +8761,7 @@ CSpriteSurface::BltSpriteAlpha4444NotTrans(POINT* pPoint, CSprite* pSprite, BYTE
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -8769,26 +8769,26 @@ CSpriteSurface::BltSpriteAlpha4444NotTrans(POINT* pPoint, CSprite* pSprite, BYTE
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			//pSprite->Blt4444NotTransClipLeft(lpSurface, Pitch, &rect);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -8796,7 +8796,7 @@ CSpriteSurface::BltSpriteAlpha4444NotTrans(POINT* pPoint, CSprite* pSprite, BYTE
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -8809,7 +8809,7 @@ CSpriteSurface::BltSpriteAlpha4444NotTrans(POINT* pPoint, CSprite* pSprite, BYTE
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -8817,17 +8817,17 @@ CSpriteSurface::BltSpriteAlpha4444NotTrans(POINT* pPoint, CSprite* pSprite, BYTE
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			//pSprite->Blt4444NotTransClipRight(lpSurface, Pitch, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -8835,7 +8835,7 @@ CSpriteSurface::BltSpriteAlpha4444NotTrans(POINT* pPoint, CSprite* pSprite, BYTE
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -8844,7 +8844,7 @@ CSpriteSurface::BltSpriteAlpha4444NotTrans(POINT* pPoint, CSprite* pSprite, BYTE
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//pSprite->Blt4444NotTransClipHeight(lpSurface, Pitch, &rect);
 			}
@@ -8852,12 +8852,12 @@ CSpriteSurface::BltSpriteAlpha4444NotTrans(POINT* pPoint, CSprite* pSprite, BYTE
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					//pSprite->Blt4444NotTransClipHeight(lpSurface, Pitch, &rect);
 				}
@@ -8879,17 +8879,17 @@ CSpriteSurface::BltSpriteAlpha4444NotTrans(POINT* pPoint, CSprite* pSprite, BYTE
 //----------------------------------------------------------------------
 // Blt AlphaSprite4444 NotTrans
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�. ������ �κ��� �˰� ĥ�Ѵ�.
+// pPoint에 pSprite를 출력한다. 투명색 부분은 검게 칠한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltSpriteAlpha4444SmallNotTrans(POINT* pPoint, CSprite* pSprite, BYTE alpha, BYTE shift)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -8901,7 +8901,7 @@ CSpriteSurface::BltSpriteAlpha4444SmallNotTrans(POINT* pPoint, CSprite* pSprite,
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth() >> shift;
@@ -8915,13 +8915,13 @@ CSpriteSurface::BltSpriteAlpha4444SmallNotTrans(POINT* pPoint, CSprite* pSprite,
 	int yPlusSpriteHeight	= pt.y + (pSprite->GetHeight() >> shift);
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -8929,30 +8929,30 @@ CSpriteSurface::BltSpriteAlpha4444SmallNotTrans(POINT* pPoint, CSprite* pSprite,
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -(pt.x << shift);		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -8965,7 +8965,7 @@ CSpriteSurface::BltSpriteAlpha4444SmallNotTrans(POINT* pPoint, CSprite* pSprite,
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -8973,24 +8973,24 @@ CSpriteSurface::BltSpriteAlpha4444SmallNotTrans(POINT* pPoint, CSprite* pSprite,
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			//pSprite->Blt4444SmallClipWidth(lpSurface, Pitch, &rect, shift);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -9003,7 +9003,7 @@ CSpriteSurface::BltSpriteAlpha4444SmallNotTrans(POINT* pPoint, CSprite* pSprite,
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -9011,26 +9011,26 @@ CSpriteSurface::BltSpriteAlpha4444SmallNotTrans(POINT* pPoint, CSprite* pSprite,
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			//pSprite->Blt4444SmallClipLeft(lpSurface, Pitch, &rect, shift);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -9038,7 +9038,7 @@ CSpriteSurface::BltSpriteAlpha4444SmallNotTrans(POINT* pPoint, CSprite* pSprite,
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -9051,7 +9051,7 @@ CSpriteSurface::BltSpriteAlpha4444SmallNotTrans(POINT* pPoint, CSprite* pSprite,
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -9059,17 +9059,17 @@ CSpriteSurface::BltSpriteAlpha4444SmallNotTrans(POINT* pPoint, CSprite* pSprite,
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			//pSprite->Blt4444SmallClipRight(lpSurface, Pitch, &rect, shift);			
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -9077,14 +9077,14 @@ CSpriteSurface::BltSpriteAlpha4444SmallNotTrans(POINT* pPoint, CSprite* pSprite,
 				rect.top = -(pt.y << shift);
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
 				}
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//pSprite->Blt4444SmallClipHeight(lpSurface, Pitch, &rect, shift);
 			}
@@ -9092,12 +9092,12 @@ CSpriteSurface::BltSpriteAlpha4444SmallNotTrans(POINT* pPoint, CSprite* pSprite,
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					//pSprite->Blt4444SmallClipHeight(lpSurface, Pitch, &rect, shift);
 				}
@@ -9119,17 +9119,17 @@ CSpriteSurface::BltSpriteAlpha4444SmallNotTrans(POINT* pPoint, CSprite* pSprite,
 //----------------------------------------------------------------------
 // Blt Sprite 1555 NotTrans
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�. ������ �κ��� �˰� ĥ�Ѵ�.
+// pPoint에 pSprite를 출력한다. 투명색 부분은 검게 칠한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltSprite1555NotTrans(POINT* pPoint, CSprite* pSprite)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -9141,7 +9141,7 @@ CSpriteSurface::BltSprite1555NotTrans(POINT* pPoint, CSprite* pSprite)
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -9155,13 +9155,13 @@ CSpriteSurface::BltSprite1555NotTrans(POINT* pPoint, CSprite* pSprite)
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -9169,31 +9169,31 @@ CSpriteSurface::BltSprite1555NotTrans(POINT* pPoint, CSprite* pSprite)
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -9206,7 +9206,7 @@ CSpriteSurface::BltSprite1555NotTrans(POINT* pPoint, CSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -9214,24 +9214,24 @@ CSpriteSurface::BltSprite1555NotTrans(POINT* pPoint, CSprite* pSprite)
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			//pSprite->Blt4444NotTransClipWidth(lpSurface, Pitch, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -9244,7 +9244,7 @@ CSpriteSurface::BltSprite1555NotTrans(POINT* pPoint, CSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -9252,26 +9252,26 @@ CSpriteSurface::BltSprite1555NotTrans(POINT* pPoint, CSprite* pSprite)
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			//pSprite->Blt4444NotTransClipLeft(lpSurface, Pitch, &rect);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -9279,7 +9279,7 @@ CSpriteSurface::BltSprite1555NotTrans(POINT* pPoint, CSprite* pSprite)
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -9292,7 +9292,7 @@ CSpriteSurface::BltSprite1555NotTrans(POINT* pPoint, CSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -9300,17 +9300,17 @@ CSpriteSurface::BltSprite1555NotTrans(POINT* pPoint, CSprite* pSprite)
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			//pSprite->Blt4444NotTransClipRight(lpSurface, Pitch, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -9318,7 +9318,7 @@ CSpriteSurface::BltSprite1555NotTrans(POINT* pPoint, CSprite* pSprite)
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -9327,7 +9327,7 @@ CSpriteSurface::BltSprite1555NotTrans(POINT* pPoint, CSprite* pSprite)
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//pSprite->Blt4444NotTransClipHeight(lpSurface, Pitch, &rect);
 			}
@@ -9335,12 +9335,12 @@ CSpriteSurface::BltSprite1555NotTrans(POINT* pPoint, CSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					//pSprite->Blt4444NotTransClipHeight(lpSurface, Pitch, &rect);
 				}
@@ -9363,18 +9363,18 @@ CSpriteSurface::BltSprite1555NotTrans(POINT* pPoint, CSprite* pSprite)
 //----------------------------------------------------------------------
 // Blt Sprite 1555 NotTrans
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�. ������ �κ��� �˰� ĥ�Ѵ�.
+// pPoint에 pSprite를 출력한다. 투명색 부분은 검게 칠한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltSpritePal1555NotTrans(POINT* pPoint, CSpritePal* pSprite, MPalette &pal)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -9386,7 +9386,7 @@ CSpriteSurface::BltSpritePal1555NotTrans(POINT* pPoint, CSpritePal* pSprite, MPa
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -9400,13 +9400,13 @@ CSpriteSurface::BltSpritePal1555NotTrans(POINT* pPoint, CSpritePal* pSprite, MPa
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -9414,31 +9414,31 @@ CSpriteSurface::BltSpritePal1555NotTrans(POINT* pPoint, CSpritePal* pSprite, MPa
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -9451,7 +9451,7 @@ CSpriteSurface::BltSpritePal1555NotTrans(POINT* pPoint, CSpritePal* pSprite, MPa
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -9459,24 +9459,24 @@ CSpriteSurface::BltSpritePal1555NotTrans(POINT* pPoint, CSpritePal* pSprite, MPa
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			//pSprite->Blt4444NotTransClipWidth(lpSurface, Pitch, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -9489,7 +9489,7 @@ CSpriteSurface::BltSpritePal1555NotTrans(POINT* pPoint, CSpritePal* pSprite, MPa
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -9497,26 +9497,26 @@ CSpriteSurface::BltSpritePal1555NotTrans(POINT* pPoint, CSpritePal* pSprite, MPa
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			//pSprite->Blt4444NotTransClipLeft(lpSurface, Pitch, &rect);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -9524,7 +9524,7 @@ CSpriteSurface::BltSpritePal1555NotTrans(POINT* pPoint, CSpritePal* pSprite, MPa
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -9537,7 +9537,7 @@ CSpriteSurface::BltSpritePal1555NotTrans(POINT* pPoint, CSpritePal* pSprite, MPa
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -9545,17 +9545,17 @@ CSpriteSurface::BltSpritePal1555NotTrans(POINT* pPoint, CSpritePal* pSprite, MPa
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			//pSprite->Blt4444NotTransClipRight(lpSurface, Pitch, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -9563,7 +9563,7 @@ CSpriteSurface::BltSpritePal1555NotTrans(POINT* pPoint, CSpritePal* pSprite, MPa
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -9572,7 +9572,7 @@ CSpriteSurface::BltSpritePal1555NotTrans(POINT* pPoint, CSpritePal* pSprite, MPa
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//pSprite->Blt4444NotTransClipHeight(lpSurface, Pitch, &rect);
 			}
@@ -9580,12 +9580,12 @@ CSpriteSurface::BltSpritePal1555NotTrans(POINT* pPoint, CSpritePal* pSprite, MPa
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					//pSprite->Blt4444NotTransClipHeight(lpSurface, Pitch, &rect);
 				}
@@ -9607,17 +9607,17 @@ CSpriteSurface::BltSpritePal1555NotTrans(POINT* pPoint, CSpritePal* pSprite, MPa
 //----------------------------------------------------------------------
 // Blt AlphaSprite4444 NotTrans
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�. ������ �κ��� �˰� ĥ�Ѵ�.
+// pPoint에 pSprite를 출력한다. 투명색 부분은 검게 칠한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltSprite1555SmallNotTrans(POINT* pPoint, CSprite* pSprite, BYTE shift)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -9629,7 +9629,7 @@ CSpriteSurface::BltSprite1555SmallNotTrans(POINT* pPoint, CSprite* pSprite, BYTE
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth() >> shift;
@@ -9643,13 +9643,13 @@ CSpriteSurface::BltSprite1555SmallNotTrans(POINT* pPoint, CSprite* pSprite, BYTE
 	int yPlusSpriteHeight	= pt.y + (pSprite->GetHeight() >> shift);
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -9657,30 +9657,30 @@ CSpriteSurface::BltSprite1555SmallNotTrans(POINT* pPoint, CSprite* pSprite, BYTE
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -(pt.x << shift);		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -9693,7 +9693,7 @@ CSpriteSurface::BltSprite1555SmallNotTrans(POINT* pPoint, CSprite* pSprite, BYTE
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -9701,24 +9701,24 @@ CSpriteSurface::BltSprite1555SmallNotTrans(POINT* pPoint, CSprite* pSprite, BYTE
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			//pSprite->Blt4444SmallClipWidth(lpSurface, Pitch, &rect, shift);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -9731,7 +9731,7 @@ CSpriteSurface::BltSprite1555SmallNotTrans(POINT* pPoint, CSprite* pSprite, BYTE
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -9739,26 +9739,26 @@ CSpriteSurface::BltSprite1555SmallNotTrans(POINT* pPoint, CSprite* pSprite, BYTE
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			//pSprite->Blt4444SmallClipLeft(lpSurface, Pitch, &rect, shift);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -9766,7 +9766,7 @@ CSpriteSurface::BltSprite1555SmallNotTrans(POINT* pPoint, CSprite* pSprite, BYTE
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -9779,7 +9779,7 @@ CSpriteSurface::BltSprite1555SmallNotTrans(POINT* pPoint, CSprite* pSprite, BYTE
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -9787,17 +9787,17 @@ CSpriteSurface::BltSprite1555SmallNotTrans(POINT* pPoint, CSprite* pSprite, BYTE
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			//pSprite->Blt4444SmallClipRight(lpSurface, Pitch, &rect, shift);			
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -9805,14 +9805,14 @@ CSpriteSurface::BltSprite1555SmallNotTrans(POINT* pPoint, CSprite* pSprite, BYTE
 				rect.top = -(pt.y << shift);
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
 				}
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//pSprite->Blt4444SmallClipHeight(lpSurface, Pitch, &rect, shift);
 			}
@@ -9820,12 +9820,12 @@ CSpriteSurface::BltSprite1555SmallNotTrans(POINT* pPoint, CSprite* pSprite, BYTE
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					//pSprite->Blt4444SmallClipHeight(lpSurface, Pitch, &rect, shift);
 				}
@@ -9848,18 +9848,18 @@ CSpriteSurface::BltSprite1555SmallNotTrans(POINT* pPoint, CSprite* pSprite, BYTE
 //----------------------------------------------------------------------
 // Blt AlphaSprite4444 NotTrans
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�. ������ �κ��� �˰� ĥ�Ѵ�.
+// pPoint에 pSprite를 출력한다. 투명색 부분은 검게 칠한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltSpritePal1555SmallNotTrans(POINT* pPoint, CSpritePal* pSprite, BYTE shift, MPalette &pal)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -9871,7 +9871,7 @@ CSpriteSurface::BltSpritePal1555SmallNotTrans(POINT* pPoint, CSpritePal* pSprite
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth() >> shift;
@@ -9885,13 +9885,13 @@ CSpriteSurface::BltSpritePal1555SmallNotTrans(POINT* pPoint, CSpritePal* pSprite
 	int yPlusSpriteHeight	= pt.y + (pSprite->GetHeight() >> shift);
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -9899,30 +9899,30 @@ CSpriteSurface::BltSpritePal1555SmallNotTrans(POINT* pPoint, CSpritePal* pSprite
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -(pt.x << shift);		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -9935,7 +9935,7 @@ CSpriteSurface::BltSpritePal1555SmallNotTrans(POINT* pPoint, CSpritePal* pSprite
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -9943,24 +9943,24 @@ CSpriteSurface::BltSpritePal1555SmallNotTrans(POINT* pPoint, CSpritePal* pSprite
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			//pSprite->Blt4444SmallClipWidth(lpSurface, Pitch, &rect, shift);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -9973,7 +9973,7 @@ CSpriteSurface::BltSpritePal1555SmallNotTrans(POINT* pPoint, CSpritePal* pSprite
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -9981,26 +9981,26 @@ CSpriteSurface::BltSpritePal1555SmallNotTrans(POINT* pPoint, CSpritePal* pSprite
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			//pSprite->Blt4444SmallClipLeft(lpSurface, Pitch, &rect, shift);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -10008,7 +10008,7 @@ CSpriteSurface::BltSpritePal1555SmallNotTrans(POINT* pPoint, CSpritePal* pSprite
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -10021,7 +10021,7 @@ CSpriteSurface::BltSpritePal1555SmallNotTrans(POINT* pPoint, CSpritePal* pSprite
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -10029,17 +10029,17 @@ CSpriteSurface::BltSpritePal1555SmallNotTrans(POINT* pPoint, CSpritePal* pSprite
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			//pSprite->Blt4444SmallClipRight(lpSurface, Pitch, &rect, shift);			
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -10047,14 +10047,14 @@ CSpriteSurface::BltSpritePal1555SmallNotTrans(POINT* pPoint, CSpritePal* pSprite
 				rect.top = -(pt.y << shift);
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
 				}
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//pSprite->Blt4444SmallClipHeight(lpSurface, Pitch, &rect, shift);
 			}
@@ -10062,12 +10062,12 @@ CSpriteSurface::BltSpritePal1555SmallNotTrans(POINT* pPoint, CSpritePal* pSprite
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					//pSprite->Blt4444SmallClipHeight(lpSurface, Pitch, &rect, shift);
 				}
@@ -10090,25 +10090,25 @@ CSpriteSurface::BltSpritePal1555SmallNotTrans(POINT* pPoint, CSpritePal* pSprite
 //----------------------------------------------------------------------
 // Blt SpriteDarkerFilter
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
-// Filter�� CSprite::SetFilter(...)�� ���ؼ� �����ȴ�.
+// pPoint에 pSprite를 출력한다.
+// Filter는 CSprite::SetFilter(...)를 통해서 설정된다.
 //
-// Filter�� Sprite�� ��ġ�� �ʴ� ���...
-// BltSprite�� ȣ���ϵ��� �Ѵ�.
+// Filter가 Sprite와 겹치지 않는 경우...
+// BltSprite를 호출하도록 한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltSpriteDarkerFilter(POINT* pPoint, CSprite* pSprite)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit() || CSprite::GetFilter()->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// Filter�� Sprite�� ��ġ�� �ʴ� ���...
-	// BltSprite�� ȣ���ϵ��� �Ѵ�.
+	// Filter가 Sprite와 겹치지 않는 경우...
+	// BltSprite를 호출하도록 한다.
 	//-------------------------------------------------------------
-	// Darker�� Tile������ ����� �����̹Ƿ�..
-	// �ϴ���... 
+	// Darker는 Tile에서만 사용할 예정이므로..
+	// 일단은... 
 	/*
 	if (!pSprite->IsIntersectFilter())
 	{
@@ -10118,7 +10118,7 @@ CSpriteSurface::BltSpriteDarkerFilter(POINT* pPoint, CSprite* pSprite)
 	*/
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -10130,7 +10130,7 @@ CSpriteSurface::BltSpriteDarkerFilter(POINT* pPoint, CSprite* pSprite)
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -10144,13 +10144,13 @@ CSpriteSurface::BltSpriteDarkerFilter(POINT* pPoint, CSprite* pSprite)
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -10158,31 +10158,31 @@ CSpriteSurface::BltSpriteDarkerFilter(POINT* pPoint, CSprite* pSprite)
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -10195,7 +10195,7 @@ CSpriteSurface::BltSpriteDarkerFilter(POINT* pPoint, CSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -10203,24 +10203,24 @@ CSpriteSurface::BltSpriteDarkerFilter(POINT* pPoint, CSprite* pSprite)
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltDarkerFilterClipWidth(lpSurface, Pitch, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -10233,7 +10233,7 @@ CSpriteSurface::BltSpriteDarkerFilter(POINT* pPoint, CSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -10241,26 +10241,26 @@ CSpriteSurface::BltSpriteDarkerFilter(POINT* pPoint, CSprite* pSprite)
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltDarkerFilterClipLeft(lpSurface, Pitch, &rect);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -10268,7 +10268,7 @@ CSpriteSurface::BltSpriteDarkerFilter(POINT* pPoint, CSprite* pSprite)
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -10281,7 +10281,7 @@ CSpriteSurface::BltSpriteDarkerFilter(POINT* pPoint, CSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -10289,17 +10289,17 @@ CSpriteSurface::BltSpriteDarkerFilter(POINT* pPoint, CSprite* pSprite)
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			pSprite->BltDarkerFilterClipRight(lpSurface, Pitch, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -10307,7 +10307,7 @@ CSpriteSurface::BltSpriteDarkerFilter(POINT* pPoint, CSprite* pSprite)
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -10316,7 +10316,7 @@ CSpriteSurface::BltSpriteDarkerFilter(POINT* pPoint, CSprite* pSprite)
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				pSprite->BltDarkerFilterClipHeight(lpSurface, Pitch, &rect);
 			}
@@ -10324,12 +10324,12 @@ CSpriteSurface::BltSpriteDarkerFilter(POINT* pPoint, CSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					pSprite->BltDarkerFilterClipHeight(lpSurface, Pitch, &rect);
 				}
@@ -10352,17 +10352,17 @@ CSpriteSurface::BltSpriteDarkerFilter(POINT* pPoint, CSprite* pSprite)
 //----------------------------------------------------------------------
 // Blt Sprite
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
+// pPoint에 pSprite를 출력한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltShadowSprite(POINT* pPoint, CShadowSprite* pSprite)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -10374,7 +10374,7 @@ CSpriteSurface::BltShadowSprite(POINT* pPoint, CShadowSprite* pSprite)
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -10388,13 +10388,13 @@ CSpriteSurface::BltShadowSprite(POINT* pPoint, CShadowSprite* pSprite)
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -10402,31 +10402,31 @@ CSpriteSurface::BltShadowSprite(POINT* pPoint, CShadowSprite* pSprite)
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -10439,7 +10439,7 @@ CSpriteSurface::BltShadowSprite(POINT* pPoint, CShadowSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -10447,24 +10447,24 @@ CSpriteSurface::BltShadowSprite(POINT* pPoint, CShadowSprite* pSprite)
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltClipWidth(lpSurface, Pitch, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -10477,7 +10477,7 @@ CSpriteSurface::BltShadowSprite(POINT* pPoint, CShadowSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -10485,26 +10485,26 @@ CSpriteSurface::BltShadowSprite(POINT* pPoint, CShadowSprite* pSprite)
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltClipLeft(lpSurface, Pitch, &rect);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -10512,7 +10512,7 @@ CSpriteSurface::BltShadowSprite(POINT* pPoint, CShadowSprite* pSprite)
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -10525,7 +10525,7 @@ CSpriteSurface::BltShadowSprite(POINT* pPoint, CShadowSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -10533,17 +10533,17 @@ CSpriteSurface::BltShadowSprite(POINT* pPoint, CShadowSprite* pSprite)
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			pSprite->BltClipRight(lpSurface, Pitch, &rect);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -10551,7 +10551,7 @@ CSpriteSurface::BltShadowSprite(POINT* pPoint, CShadowSprite* pSprite)
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -10560,7 +10560,7 @@ CSpriteSurface::BltShadowSprite(POINT* pPoint, CShadowSprite* pSprite)
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				pSprite->BltClipHeight(lpSurface, Pitch, &rect);
 			}
@@ -10568,12 +10568,12 @@ CSpriteSurface::BltShadowSprite(POINT* pPoint, CShadowSprite* pSprite)
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					pSprite->BltClipHeight(lpSurface, Pitch, &rect);
 				}
@@ -10596,17 +10596,17 @@ CSpriteSurface::BltShadowSprite(POINT* pPoint, CShadowSprite* pSprite)
 //----------------------------------------------------------------------
 // BltDarkness Sprite
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
+// pPoint에 pSprite를 출력한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltShadowSpriteDarkness(POINT* pPoint, CShadowSprite* pSprite, BYTE DarkBits)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -10618,7 +10618,7 @@ CSpriteSurface::BltShadowSpriteDarkness(POINT* pPoint, CShadowSprite* pSprite, B
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -10632,13 +10632,13 @@ CSpriteSurface::BltShadowSpriteDarkness(POINT* pPoint, CShadowSprite* pSprite, B
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -10646,31 +10646,31 @@ CSpriteSurface::BltShadowSpriteDarkness(POINT* pPoint, CShadowSprite* pSprite, B
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -10683,7 +10683,7 @@ CSpriteSurface::BltShadowSpriteDarkness(POINT* pPoint, CShadowSprite* pSprite, B
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -10691,24 +10691,24 @@ CSpriteSurface::BltShadowSpriteDarkness(POINT* pPoint, CShadowSprite* pSprite, B
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltDarknessClipWidth(lpSurface, Pitch, &rect, DarkBits);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -10721,7 +10721,7 @@ CSpriteSurface::BltShadowSpriteDarkness(POINT* pPoint, CShadowSprite* pSprite, B
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -10729,26 +10729,26 @@ CSpriteSurface::BltShadowSpriteDarkness(POINT* pPoint, CShadowSprite* pSprite, B
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltDarknessClipLeft(lpSurface, Pitch, &rect, DarkBits);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -10756,7 +10756,7 @@ CSpriteSurface::BltShadowSpriteDarkness(POINT* pPoint, CShadowSprite* pSprite, B
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -10769,7 +10769,7 @@ CSpriteSurface::BltShadowSpriteDarkness(POINT* pPoint, CShadowSprite* pSprite, B
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -10777,17 +10777,17 @@ CSpriteSurface::BltShadowSpriteDarkness(POINT* pPoint, CShadowSprite* pSprite, B
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			pSprite->BltDarknessClipRight(lpSurface, Pitch, &rect, DarkBits);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -10795,7 +10795,7 @@ CSpriteSurface::BltShadowSpriteDarkness(POINT* pPoint, CShadowSprite* pSprite, B
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -10804,7 +10804,7 @@ CSpriteSurface::BltShadowSpriteDarkness(POINT* pPoint, CShadowSprite* pSprite, B
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				pSprite->BltDarknessClipHeight(lpSurface, Pitch, &rect, DarkBits);
 			}
@@ -10812,12 +10812,12 @@ CSpriteSurface::BltShadowSpriteDarkness(POINT* pPoint, CShadowSprite* pSprite, B
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					pSprite->BltDarknessClipHeight(lpSurface, Pitch, &rect, DarkBits);
 				}
@@ -10839,17 +10839,17 @@ CSpriteSurface::BltShadowSpriteDarkness(POINT* pPoint, CShadowSprite* pSprite, B
 //----------------------------------------------------------------------
 // BltSmall Sprite
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
+// pPoint에 pSprite를 출력한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltShadowSpriteSmall(POINT* pPoint, CShadowSprite* pSprite, BYTE shift)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -10861,7 +10861,7 @@ CSpriteSurface::BltShadowSpriteSmall(POINT* pPoint, CShadowSprite* pSprite, BYTE
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth() >> shift;
@@ -10875,13 +10875,13 @@ CSpriteSurface::BltShadowSpriteSmall(POINT* pPoint, CShadowSprite* pSprite, BYTE
 	int yPlusSpriteHeight	= pt.y + (pSprite->GetHeight() >> shift);
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -10889,30 +10889,30 @@ CSpriteSurface::BltShadowSpriteSmall(POINT* pPoint, CShadowSprite* pSprite, BYTE
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -(pt.x << shift);		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -10925,7 +10925,7 @@ CSpriteSurface::BltShadowSpriteSmall(POINT* pPoint, CShadowSprite* pSprite, BYTE
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -10933,24 +10933,24 @@ CSpriteSurface::BltShadowSpriteSmall(POINT* pPoint, CShadowSprite* pSprite, BYTE
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltSmallClipWidth(lpSurface, Pitch, &rect, shift);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -10963,7 +10963,7 @@ CSpriteSurface::BltShadowSpriteSmall(POINT* pPoint, CShadowSprite* pSprite, BYTE
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -10971,26 +10971,26 @@ CSpriteSurface::BltShadowSpriteSmall(POINT* pPoint, CShadowSprite* pSprite, BYTE
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltSmallClipLeft(lpSurface, Pitch, &rect, shift);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -10998,7 +10998,7 @@ CSpriteSurface::BltShadowSpriteSmall(POINT* pPoint, CShadowSprite* pSprite, BYTE
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -11011,7 +11011,7 @@ CSpriteSurface::BltShadowSpriteSmall(POINT* pPoint, CShadowSprite* pSprite, BYTE
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -11019,17 +11019,17 @@ CSpriteSurface::BltShadowSpriteSmall(POINT* pPoint, CShadowSprite* pSprite, BYTE
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			pSprite->BltSmallClipRight(lpSurface, Pitch, &rect, shift);			
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -11037,14 +11037,14 @@ CSpriteSurface::BltShadowSpriteSmall(POINT* pPoint, CShadowSprite* pSprite, BYTE
 				rect.top = -(pt.y << shift);
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
 				}
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				pSprite->BltSmallClipHeight(lpSurface, Pitch, &rect, shift);
 			}
@@ -11052,12 +11052,12 @@ CSpriteSurface::BltShadowSpriteSmall(POINT* pPoint, CShadowSprite* pSprite, BYTE
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					pSprite->BltSmallClipHeight(lpSurface, Pitch, &rect, shift);
 				}
@@ -11080,17 +11080,17 @@ CSpriteSurface::BltShadowSpriteSmall(POINT* pPoint, CShadowSprite* pSprite, BYTE
 //----------------------------------------------------------------------
 // BltSmall4444 Sprite
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
+// pPoint에 pSprite를 출력한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltShadowSpriteSmall4444(POINT* pPoint, CShadowSprite* pSprite, WORD pixel, BYTE shift)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -11102,7 +11102,7 @@ CSpriteSurface::BltShadowSpriteSmall4444(POINT* pPoint, CShadowSprite* pSprite, 
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth() >> shift;
@@ -11116,13 +11116,13 @@ CSpriteSurface::BltShadowSpriteSmall4444(POINT* pPoint, CShadowSprite* pSprite, 
 	int yPlusSpriteHeight	= pt.y + (pSprite->GetHeight() >> shift);
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -11130,30 +11130,30 @@ CSpriteSurface::BltShadowSpriteSmall4444(POINT* pPoint, CShadowSprite* pSprite, 
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -(pt.x << shift);		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -11166,7 +11166,7 @@ CSpriteSurface::BltShadowSpriteSmall4444(POINT* pPoint, CShadowSprite* pSprite, 
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -11174,24 +11174,24 @@ CSpriteSurface::BltShadowSpriteSmall4444(POINT* pPoint, CShadowSprite* pSprite, 
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			//pSprite->BltSmall4444ClipWidth(lpSurface, Pitch, &rect, pixel, shift);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -11204,7 +11204,7 @@ CSpriteSurface::BltShadowSpriteSmall4444(POINT* pPoint, CShadowSprite* pSprite, 
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -11212,26 +11212,26 @@ CSpriteSurface::BltShadowSpriteSmall4444(POINT* pPoint, CShadowSprite* pSprite, 
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			//pSprite->BltSmall4444ClipLeft(lpSurface, Pitch, &rect, pixel, shift);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -11239,7 +11239,7 @@ CSpriteSurface::BltShadowSpriteSmall4444(POINT* pPoint, CShadowSprite* pSprite, 
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -11252,7 +11252,7 @@ CSpriteSurface::BltShadowSpriteSmall4444(POINT* pPoint, CShadowSprite* pSprite, 
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -11260,17 +11260,17 @@ CSpriteSurface::BltShadowSpriteSmall4444(POINT* pPoint, CShadowSprite* pSprite, 
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 //			pSprite->BltSmall4444ClipRight(lpSurface, Pitch, &rect, pixel, shift);			
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -11278,14 +11278,14 @@ CSpriteSurface::BltShadowSpriteSmall4444(POINT* pPoint, CShadowSprite* pSprite, 
 				rect.top = -(pt.y << shift);
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
 				}
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 //				pSprite->BltSmall4444ClipHeight(lpSurface, Pitch, &rect, pixel, shift);
 			}
@@ -11293,12 +11293,12 @@ CSpriteSurface::BltShadowSpriteSmall4444(POINT* pPoint, CShadowSprite* pSprite, 
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 //					pSprite->BltSmall4444ClipHeight(lpSurface, Pitch, &rect, pixel, shift);
 				}
@@ -11320,17 +11320,17 @@ CSpriteSurface::BltShadowSpriteSmall4444(POINT* pPoint, CShadowSprite* pSprite, 
 //----------------------------------------------------------------------
 // Blt ShadowSprite4444
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
+// pPoint에 pSprite를 출력한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltShadowSprite4444(POINT* pPoint, CShadowSprite* pSprite, WORD pixel)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -11342,7 +11342,7 @@ CSpriteSurface::BltShadowSprite4444(POINT* pPoint, CShadowSprite* pSprite, WORD 
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -11356,13 +11356,13 @@ CSpriteSurface::BltShadowSprite4444(POINT* pPoint, CShadowSprite* pSprite, WORD 
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -11370,31 +11370,31 @@ CSpriteSurface::BltShadowSprite4444(POINT* pPoint, CShadowSprite* pSprite, WORD 
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -11407,7 +11407,7 @@ CSpriteSurface::BltShadowSprite4444(POINT* pPoint, CShadowSprite* pSprite, WORD 
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -11415,24 +11415,24 @@ CSpriteSurface::BltShadowSprite4444(POINT* pPoint, CShadowSprite* pSprite, WORD 
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->Blt4444ClipWidth(lpSurface, Pitch, &rect, pixel);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -11445,7 +11445,7 @@ CSpriteSurface::BltShadowSprite4444(POINT* pPoint, CShadowSprite* pSprite, WORD 
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -11453,26 +11453,26 @@ CSpriteSurface::BltShadowSprite4444(POINT* pPoint, CShadowSprite* pSprite, WORD 
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->Blt4444ClipLeft(lpSurface, Pitch, &rect, pixel);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -11480,7 +11480,7 @@ CSpriteSurface::BltShadowSprite4444(POINT* pPoint, CShadowSprite* pSprite, WORD 
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -11493,7 +11493,7 @@ CSpriteSurface::BltShadowSprite4444(POINT* pPoint, CShadowSprite* pSprite, WORD 
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -11501,17 +11501,17 @@ CSpriteSurface::BltShadowSprite4444(POINT* pPoint, CShadowSprite* pSprite, WORD 
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			pSprite->Blt4444ClipRight(lpSurface, Pitch, &rect, pixel);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -11519,7 +11519,7 @@ CSpriteSurface::BltShadowSprite4444(POINT* pPoint, CShadowSprite* pSprite, WORD 
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -11528,7 +11528,7 @@ CSpriteSurface::BltShadowSprite4444(POINT* pPoint, CShadowSprite* pSprite, WORD 
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				pSprite->Blt4444ClipHeight(lpSurface, Pitch, &rect, pixel);
 			}
@@ -11536,12 +11536,12 @@ CSpriteSurface::BltShadowSprite4444(POINT* pPoint, CShadowSprite* pSprite, WORD 
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					pSprite->Blt4444ClipHeight(lpSurface, Pitch, &rect, pixel);
 				}
@@ -11565,7 +11565,7 @@ CSpriteSurface::BltShadowSprite4444(POINT* pPoint, CShadowSprite* pSprite, WORD 
 //----------------------------------------------------------------------
 // Half Copy
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ ������ ����� �Ѵ�.
+// source --> dest 로 pixels만큼 반투명 출력을 한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyHalf(WORD* pDest, WORD* pSource, WORD pixels)
@@ -11576,14 +11576,14 @@ CSpriteSurface::memcpyHalf(WORD* pDest, WORD* pSource, WORD pixels)
 
 	register int qTimes = pixels >> 2;	// pixels / 4
 
-	// ������
+	// 반투명
 	switch ( pixels & 0x03 )	// pixels % 4
 	{
 		//------------------
-		// 4����
+		// 4점씩
 		//------------------
 		case 0 :			
-			// ������ ���
+			// 네점씩 찍기
 			while (qTimes--)
 			{
 				*qpDest = 
@@ -11597,10 +11597,10 @@ CSpriteSurface::memcpyHalf(WORD* pDest, WORD* pSource, WORD pixels)
 		break;
 
 		//------------------
-		// 1�� + 4����
+		// 1점 + 4점씩
 		//------------------
 		case 1 :
-			// ���� ���
+			// 한점 찍기
 			*(WORD*)qpDest = 
 					((*(WORD*)qpDest >> 1) & ColorDraw::s_wMASK_SHIFT[1]) +
 					((*(WORD*)qpSource >> 1) & ColorDraw::s_wMASK_SHIFT[1]);
@@ -11608,7 +11608,7 @@ CSpriteSurface::memcpyHalf(WORD* pDest, WORD* pSource, WORD pixels)
 			qpDest = (QWORD*)((WORD*)qpDest + 1);
 			qpSource = (QWORD*)((WORD*)qpSource + 1);
 
-			// ������ ���
+			// 네점씩 찍기
 			while (qTimes--)
 			{
 				*qpDest = 
@@ -11622,10 +11622,10 @@ CSpriteSurface::memcpyHalf(WORD* pDest, WORD* pSource, WORD pixels)
 		break;
 
 		//------------------
-		// 2�� + 4����
+		// 2점 + 4점씩
 		//------------------
 		case 2 :
-			// ���� ���
+			// 두점 찍기
 			*(DWORD*)qpDest = 
 					((*(DWORD*)qpDest >> 1) & ColorDraw::s_dwMASK_SHIFT[1]) +
 					((*(DWORD*)qpSource >> 1) & ColorDraw::s_dwMASK_SHIFT[1]);
@@ -11634,7 +11634,7 @@ CSpriteSurface::memcpyHalf(WORD* pDest, WORD* pSource, WORD pixels)
 			qpSource = (QWORD*)((DWORD*)qpSource + 1);
 
 
-			// ������ ���
+			// 네점씩 찍기
 			while (qTimes--)
 			{
 				*qpDest = 
@@ -11647,10 +11647,10 @@ CSpriteSurface::memcpyHalf(WORD* pDest, WORD* pSource, WORD pixels)
 		break;
 
 		//------------------
-		// 1�� + 2�� + 4����
+		// 1점 + 2점 + 4점씩
 		//------------------
 		case 3 :
-			// ���� ���
+			// 한점 찍기
 			*(WORD*)qpDest = 
 					((*(WORD*)qpDest >> 1) & ColorDraw::s_wMASK_SHIFT[1]) +
 					((*(WORD*)qpSource >> 1) & ColorDraw::s_wMASK_SHIFT[1]);
@@ -11659,7 +11659,7 @@ CSpriteSurface::memcpyHalf(WORD* pDest, WORD* pSource, WORD pixels)
 			qpSource = (QWORD*)((WORD*)qpSource + 1);
 
 
-			// ���� ���
+			// 두점 찍기
 			*(DWORD*)qpDest = 
 					((*(DWORD*)qpDest >> 1) & ColorDraw::s_dwMASK_SHIFT[1]) +
 					((*(DWORD*)qpSource >> 1) & ColorDraw::s_dwMASK_SHIFT[1]);
@@ -11667,7 +11667,7 @@ CSpriteSurface::memcpyHalf(WORD* pDest, WORD* pSource, WORD pixels)
 			qpDest = (QWORD*)((DWORD*)qpDest + 1);
 			qpSource = (QWORD*)((DWORD*)qpSource + 1);
 
-			// ������ ���
+			// 네점씩 찍기
 			while (qTimes--)
 			{
 				*qpDest = 
@@ -11685,7 +11685,7 @@ CSpriteSurface::memcpyHalf(WORD* pDest, WORD* pSource, WORD pixels)
 //----------------------------------------------------------------------
 // Alpha Copy 1Pixel
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ s_Value1������ ����� �Ѵ�.
+// source --> dest 로 pixels만큼 s_Value1값으로 출력을 한다.
 //
 // s_Value1 = 1~32
 //
@@ -11696,7 +11696,7 @@ CSpriteSurface::memcpyAlpha1Pixel(WORD pDest, WORD pSource)
 {
 	WORD sr,sg,sb, dr,dg,db;
 
-	// ���� ���
+	// 한점 찍기
 	sr = ColorDraw::Red(pSource);
 	sg = ColorDraw::Green(pSource);
 	sb = ColorDraw::Blue(pSource);
@@ -11714,7 +11714,7 @@ CSpriteSurface::memcpyAlpha1Pixel(WORD pDest, WORD pSource)
 //----------------------------------------------------------------------
 // Alpha Copy
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ s_Value1������ ����� �Ѵ�.
+// source --> dest 로 pixels만큼 s_Value1값으로 출력을 한다.
 //
 // s_Value1 = 1~32
 //
@@ -11726,7 +11726,7 @@ CSpriteSurface::memcpyAlpha(WORD* pDest, WORD* pSource, WORD pixels)
 //	
 //	while(pixels--)
 //	{
-//	// ���� ���
+//	// 한점 찍기
 //	sr = ColorDraw::Red(*pSource);
 //	sg = ColorDraw::Green(*pSource);
 //	sb = ColorDraw::Blue(*pSource);
@@ -11762,10 +11762,10 @@ CSpriteSurface::memcpyAlpha(WORD* pDest, WORD* pSource, WORD pixels)
 	switch ( pixels & 0x03 )	// pixels % 4
 	{
 		//------------------
-		// 4����
+		// 4점씩
 		//------------------
 		case 0 :			
-			// ������ ���
+			// 네점씩 찍기
 			/*
 			while (qTimes--)
 			{
@@ -11830,10 +11830,10 @@ CSpriteSurface::memcpyAlpha(WORD* pDest, WORD* pSource, WORD pixels)
 		break;
 
 		//------------------
-		// 1�� + 4����
+		// 1점 + 4점씩
 		//------------------
 		case 1 :
-			// �� �� ���
+			// 한 점 찍기
 			srcColor2  = *(WORD*)qpSource;
 			destColor2 = *(WORD*)qpDest;
 
@@ -11870,7 +11870,7 @@ CSpriteSurface::memcpyAlpha(WORD* pDest, WORD* pSource, WORD pixels)
 			qpSource = (QWORD*)((WORD*)qpSource + 1);
 			
 
-			// ������ ���
+			// 네점씩 찍기
 			while (qTimes--)
 			{
 				if(*qpSource != *qpDest)
@@ -11912,10 +11912,10 @@ CSpriteSurface::memcpyAlpha(WORD* pDest, WORD* pSource, WORD pixels)
 		break;
 
 		//------------------
-		// 2�� + 4����
+		// 2점 + 4점씩
 		//------------------
 		case 2 :
-			// ���� ���
+			// 두점 찍기
 			srcColor2  = *(DWORD*)qpSource;
 			destColor2 = *(DWORD*)qpDest;
 
@@ -11952,7 +11952,7 @@ CSpriteSurface::memcpyAlpha(WORD* pDest, WORD* pSource, WORD pixels)
 			qpSource = (QWORD*)((DWORD*)qpSource + 1);
 
 
-			// ������ ���
+			// 네점씩 찍기
 			while (qTimes--)
 			{
 				if(*qpSource != *qpDest)
@@ -11992,10 +11992,10 @@ CSpriteSurface::memcpyAlpha(WORD* pDest, WORD* pSource, WORD pixels)
 		break;
 
 		//------------------
-		// 1�� + 2�� + 4����
+		// 1점 + 2점 + 4점씩
 		//------------------
 		case 3 :
-			// ���� ���
+			// 한점 찍기
 			/*
 			sTemp = *((WORD*)qpSource);
 			dTemp = *((WORD*)qpDest);
@@ -12016,7 +12016,7 @@ CSpriteSurface::memcpyAlpha(WORD* pDest, WORD* pSource, WORD pixels)
 			qpDest = (QWORD*)((WORD*)qpDest + 1);
 			qpSource = (QWORD*)((WORD*)qpSource + 1);
 			*/
-			// ���� ���		
+			// 한점 찍기		
 			srcColor2  = *(WORD*)qpSource;
 			destColor2 = *(WORD*)qpDest;
 
@@ -12053,7 +12053,7 @@ CSpriteSurface::memcpyAlpha(WORD* pDest, WORD* pSource, WORD pixels)
 			qpSource = (QWORD*)((WORD*)qpSource + 1);				
 			
 
-			// ���� ���
+			// 두점 찍기
 			srcColor2  = *(DWORD*)qpSource;
 			destColor2 = *(DWORD*)qpDest;
 
@@ -12091,7 +12091,7 @@ CSpriteSurface::memcpyAlpha(WORD* pDest, WORD* pSource, WORD pixels)
 			qpDest = (QWORD*)((DWORD*)qpDest + 1);
 			qpSource = (QWORD*)((DWORD*)qpSource + 1);
 
-			// ������ ���
+			// 네점씩 찍기
 			while (qTimes--)
 			{
 				if(*qpSource != *qpDest)
@@ -12137,7 +12137,7 @@ CSpriteSurface::memcpyAlpha(WORD* pDest, WORD* pSource, WORD pixels)
 //----------------------------------------------------------------------
 // Color Copy
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư���� Color��(s_Value1)���� ����� �Ѵ�.
+// source --> dest 로 pixels만큼 특정한 Color값(s_Value1)으로 출력을 한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyColor(WORD* pDest, WORD* pSource, WORD pixels)
@@ -12148,14 +12148,14 @@ CSpriteSurface::memcpyColor(WORD* pDest, WORD* pSource, WORD pixels)
 
 	register int qTimes = pixels >> 2;	// pixels / 4
 
-	// rgb�� �� �ϳ��� ����Ѵ�.
+	// rgb값 중 하나만 출력한다.
 	switch ( pixels & 0x03 )	// pixels % 4
 	{
 		//------------------
-		// 4����
+		// 4점씩
 		//------------------
 		case 0 :			
-			// ������ ���
+			// 네점씩 찍기
 			while (qTimes--)
 			{
 				*qpDest = (*qpSource & ColorDraw::s_qwMASK_RGB[s_Value1]);
@@ -12166,16 +12166,16 @@ CSpriteSurface::memcpyColor(WORD* pDest, WORD* pSource, WORD pixels)
 		break;
 
 		//------------------
-		// 1�� + 4����
+		// 1점 + 4점씩
 		//------------------
 		case 1 :
-			// ���� ���
+			// 한점 찍기
 			*(WORD*)qpDest = *(WORD*)qpSource & ColorDraw::s_wMASK_RGB[s_Value1];
 				
 			qpDest = (QWORD*)((WORD*)qpDest + 1);
 			qpSource = (QWORD*)((WORD*)qpSource + 1);
 
-			// ������ ���
+			// 네점씩 찍기
 			while (qTimes--)
 			{
 				*qpDest = (*qpSource & ColorDraw::s_qwMASK_RGB[s_Value1]);
@@ -12187,16 +12187,16 @@ CSpriteSurface::memcpyColor(WORD* pDest, WORD* pSource, WORD pixels)
 		break;
 
 		//------------------
-		// 2�� + 4����
+		// 2점 + 4점씩
 		//------------------
 		case 2 :
-			// ���� ���
+			// 두점 찍기
 			*(DWORD*)qpDest = *(DWORD*)qpSource & ColorDraw::s_dwMASK_RGB[s_Value1];
 				
 			qpDest = (QWORD*)((WORD*)qpDest + 1);
 			qpSource = (QWORD*)((WORD*)qpSource + 1);
 
-			// ������ ���
+			// 네점씩 찍기
 			while (qTimes--)
 			{
 				*qpDest = (*qpSource & ColorDraw::s_qwMASK_RGB[s_Value1]);
@@ -12207,22 +12207,22 @@ CSpriteSurface::memcpyColor(WORD* pDest, WORD* pSource, WORD pixels)
 		break;
 
 		//------------------
-		// 1�� + 2�� + 4����
+		// 1점 + 2점 + 4점씩
 		//------------------
 		case 3 :
-			// ���� ���
+			// 한점 찍기
 			*(WORD*)qpDest = *(WORD*)qpSource & ColorDraw::s_wMASK_RGB[s_Value1];
 				
 			qpDest = (QWORD*)((WORD*)qpDest + 1);
 			qpSource = (QWORD*)((WORD*)qpSource + 1);
 
-			// ���� ���
+			// 두점 찍기
 			*(DWORD*)qpDest = *(DWORD*)qpSource & ColorDraw::s_dwMASK_RGB[s_Value1];
 
 			qpDest = (QWORD*)((WORD*)qpDest + 1);
 			qpSource = (QWORD*)((WORD*)qpSource + 1);
 
-			// ������ ���
+			// 네점씩 찍기
 			while (qTimes--)
 			{
 				*qpDest = (*qpSource & ColorDraw::s_qwMASK_RGB[s_Value1]);
@@ -12237,11 +12237,11 @@ CSpriteSurface::memcpyColor(WORD* pDest, WORD* pSource, WORD pixels)
 //----------------------------------------------------------------------
 // Scale Copy
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Scale(s_Value1)�� �ٲ㼭 
-// ����Ѵ�. 
+// source --> dest 로 pixels만큼 Scale(s_Value1)을 바꿔서 
+// 출력한다. 
 //
-// �� �Լ��� ���� ���ӿ��� ������� �����Ƿ� 
-// �ӵ��� �Ű��� �Ƚᵵ �� ���̴�. - -;;;
+// 이 함수는 실제 게임에서 사용하지 않으므로 
+// 속도에 신경을 안써도 될 것이다. - -;;;
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyScale(WORD* pDest, WORD destPitch, WORD* pSource, WORD pixels)
@@ -12250,11 +12250,11 @@ CSpriteSurface::memcpyScale(WORD* pDest, WORD destPitch, WORD* pSource, WORD pix
 
 	register int n=pixels,i,j;
 
-	// n���� ���� ����Ѵ�.
+	// n개의 점을 출력한다.
 	while (n--)
 	{
 		pDestTemp = pDest;
-		// �� ���� ���ؼ� scale*scale�� ũ��� ����Ѵ�.
+		// 각 점에 대해서 scale*scale의 크기로 출력한다.
 
 		i = s_Value1;
 		while (i--)
@@ -12278,8 +12278,8 @@ CSpriteSurface::memcpyScale(WORD* pDest, WORD destPitch, WORD* pSource, WORD pix
 //----------------------------------------------------------------------
 // Darkness Copy
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư���� Darkness��(s_Value1)��ŭ
-// ��Ӱ� ����Ѵ�.
+// source --> dest 로 pixels만큼 특정한 Darkness값(s_Value1)만큼
+// 어둡게 출력한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyDarkness(WORD* pDest, WORD* pSource, WORD pixels)
@@ -12290,14 +12290,14 @@ CSpriteSurface::memcpyDarkness(WORD* pDest, WORD* pSource, WORD pixels)
 
 	register int qTimes = pixels >> 2;	// pixels / 4
 
-	// ��Ӱ� ����Ѵ�.
+	// 어둡게 출력한다.
 	switch ( pixels & 0x03 )	// pixels % 4
 	{
 		//------------------
-		// 4����
+		// 4점씩
 		//------------------
 		case 0 :			
-			// ������ ���
+			// 네점씩 찍기
 			while (qTimes--)
 			{					
 				*qpDest = (*qpSource >> s_Value1) & ColorDraw::s_qwMASK_SHIFT[s_Value1];
@@ -12308,16 +12308,16 @@ CSpriteSurface::memcpyDarkness(WORD* pDest, WORD* pSource, WORD pixels)
 		break;
 
 		//------------------
-		// 1�� + 4����
+		// 1점 + 4점씩
 		//------------------
 		case 1 :
-			// ���� ���
+			// 한점 찍기
 			*(WORD*)qpDest = (*(WORD*)qpSource >> s_Value1) & ColorDraw::s_wMASK_SHIFT[s_Value1];
 				
 			qpDest = (QWORD*)((WORD*)qpDest + 1);
 			qpSource = (QWORD*)((WORD*)qpSource + 1);
 
-			// ������ ���
+			// 네점씩 찍기
 			while (qTimes--)
 			{
 				*qpDest = (*qpSource >> s_Value1) & ColorDraw::s_qwMASK_SHIFT[s_Value1];
@@ -12329,16 +12329,16 @@ CSpriteSurface::memcpyDarkness(WORD* pDest, WORD* pSource, WORD pixels)
 		break;
 
 		//------------------
-		// 2�� + 4����
+		// 2점 + 4점씩
 		//------------------
 		case 2 :
-			// ���� ���
+			// 두점 찍기
 			*(DWORD*)qpDest = (*(DWORD*)qpSource >> s_Value1) & ColorDraw::s_dwMASK_SHIFT[s_Value1];
 				
 			qpDest = (QWORD*)((DWORD*)qpDest + 1);
 			qpSource = (QWORD*)((DWORD*)qpSource + 1);
 
-			// ������ ���
+			// 네점씩 찍기
 			while (qTimes--)
 			{
 				*qpDest = (*qpSource >> s_Value1) & ColorDraw::s_qwMASK_SHIFT[s_Value1];
@@ -12349,22 +12349,22 @@ CSpriteSurface::memcpyDarkness(WORD* pDest, WORD* pSource, WORD pixels)
 		break;
 
 		//------------------
-		// 1�� + 2�� + 4����
+		// 1점 + 2점 + 4점씩
 		//------------------
 		case 3 :
-			// ���� ���
+			// 한점 찍기
 			*(WORD*)qpDest = (*(WORD*)qpSource >> s_Value1) & ColorDraw::s_wMASK_SHIFT[s_Value1];
 				
 			qpDest = (QWORD*)((WORD*)qpDest + 1);
 			qpSource = (QWORD*)((WORD*)qpSource + 1);
 
-			// ���� ���
+			// 두점 찍기
 			*(DWORD*)qpDest = (*(DWORD*)qpSource >> s_Value1) & ColorDraw::s_dwMASK_SHIFT[s_Value1];
 
 			qpDest = (QWORD*)((DWORD*)qpDest + 1);
 			qpSource = (QWORD*)((DWORD*)qpSource + 1);
 
-			// ������ ���
+			// 네점씩 찍기
 			while (qTimes--)
 			{
 				*qpDest = (*qpSource >> s_Value1) & ColorDraw::s_qwMASK_SHIFT[s_Value1];
@@ -12379,8 +12379,8 @@ CSpriteSurface::memcpyDarkness(WORD* pDest, WORD* pSource, WORD pixels)
 //----------------------------------------------------------------------
 // Brightness Copy
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư���� Brightness��(s_Value1)��ŭ
-// ��� ����Ѵ�.
+// source --> dest 로 pixels만큼 특정한 Brightness값(s_Value1)만큼
+// 밝게 출력한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyBrightness(WORD* pDest, WORD* pSource, WORD pixels)
@@ -12411,7 +12411,7 @@ CSpriteSurface::memcpyBrightness(WORD* pDest, WORD* pSource, WORD pixels)
 //----------------------------------------------------------------------
 // Effect Copy - Darker
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// source --> dest 로 pixels만큼 특수효과 처리를 한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyEffectDarker(WORD* pDest, WORD* pSource, WORD pixels)
@@ -12444,7 +12444,7 @@ CSpriteSurface::memcpyEffectDarker(WORD* pDest, WORD* pSource, WORD pixels)
 //----------------------------------------------------------------------
 // Effect Copy - GrayScale
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// source --> dest 로 pixels만큼 특수효과 처리를 한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyEffectGrayScale(WORD* pDest, WORD* pSource, WORD pixels)
@@ -12474,7 +12474,7 @@ CSpriteSurface::memcpyEffectGrayScale(WORD* pDest, WORD* pSource, WORD pixels)
 //----------------------------------------------------------------------
 // Effect Copy - Lighten
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// source --> dest 로 pixels만큼 특수효과 처리를 한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyEffectLighten(WORD* pDest, WORD* pSource, WORD pixels)
@@ -12499,7 +12499,7 @@ CSpriteSurface::memcpyEffectLighten(WORD* pDest, WORD* pSource, WORD pixels)
 //----------------------------------------------------------------------
 // Effect Copy - Darken
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// source --> dest 로 pixels만큼 특수효과 처리를 한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyEffectDarken(WORD* pDest, WORD* pSource, WORD pixels)
@@ -12526,7 +12526,7 @@ CSpriteSurface::memcpyEffectDarken(WORD* pDest, WORD* pSource, WORD pixels)
 //----------------------------------------------------------------------
 // Effect Copy - ColorDodge
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// source --> dest 로 pixels만큼 특수효과 처리를 한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyEffectColorDodge(WORD* pDest, WORD* pSource, WORD pixels)
@@ -12554,7 +12554,7 @@ CSpriteSurface::memcpyEffectColorDodge(WORD* pDest, WORD* pSource, WORD pixels)
 //----------------------------------------------------------------------
 // Effect Copy - Screen
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// source --> dest 로 pixels만큼 특수효과 처리를 한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyEffectScreen(WORD* pDest, WORD* pSource, WORD pixels)
@@ -12605,7 +12605,7 @@ CSpriteSurface::memcpyEffectScreen(WORD* pDest, WORD* pSource, WORD pixels)
 //----------------------------------------------------------------------
 // Effect Copy - Screen
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// source --> dest 로 pixels만큼 특수효과 처리를 한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyEffectScreenAlpha(WORD* pDest, WORD* pSource, WORD pixels)
@@ -12647,7 +12647,7 @@ CSpriteSurface::memcpyEffectScreenAlpha(WORD* pDest, WORD* pSource, WORD pixels)
 		temp |= s_EffectScreenTableB[d][s];
 		
 		// 
-		// ���� ���
+		// 한점 찍기
 		sr = ColorDraw::Red(temp);
 		sg = ColorDraw::Green(temp);
 		sb = ColorDraw::Blue(temp);
@@ -12669,7 +12669,7 @@ CSpriteSurface::memcpyEffectScreenAlpha(WORD* pDest, WORD* pSource, WORD pixels)
 //----------------------------------------------------------------------
 // Effect Copy - DodgeBurn
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// source --> dest 로 pixels만큼 특수효과 처리를 한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyEffectDodgeBurn(WORD* pDest, WORD* pSource, WORD pixels)
@@ -12697,7 +12697,7 @@ CSpriteSurface::memcpyEffectDodgeBurn(WORD* pDest, WORD* pSource, WORD pixels)
 //----------------------------------------------------------------------
 // Effect Copy - Different
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// source --> dest 로 pixels만큼 특수효과 처리를 한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyEffectDifferent(WORD* pDest, WORD* pSource, WORD pixels)
@@ -12736,9 +12736,9 @@ CSpriteSurface::memcpyEffectDifferent(WORD* pDest, WORD* pSource, WORD pixels)
 //----------------------------------------------------------------------
 // Effect Copy - Gradation
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// source --> dest 로 pixels만큼 특수효과 처리를 한다.
 //
-// s_Value1�� ColorSet��ȣ�̴�.
+// s_Value1이 ColorSet번호이다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyEffectGradation(WORD* pDest, WORD* pSource, WORD pixels)
@@ -12772,29 +12772,29 @@ CSpriteSurface::memcpyEffectGradation(WORD* pDest, WORD* pSource, WORD pixels)
 //----------------------------------------------------------------------
 // Effect SimpleOutline
 //----------------------------------------------------------------------
-// �� �������� �ܰ��� ���(������ ������ �� �� ���� ���)
-// pixels�� 1�̻��̶�� �����Ѵ�.
+// 좀 띄엄띄엄한 외곽선 출력(투명색 압축의 양 끝 점에 출력)
+// pixels는 1이상이라고 가정한다.
 //----------------------------------------------------------------------
 void		
 CSpriteSurface::memcpyEffectSimpleOutline(WORD* pDest, WORD* pSource, WORD pixels)
 {
-	// ù ��
+	// 첫 점
 	*pDest = *pSource;
 	
 	int pixels_1 = pixels-1;
 
-	// �� �� - pixels�� 1�϶� ���ϴ°ź��� �׳� ��°� �� ������?
+	// 끝 점 - pixels가 1일때 비교하는거보다 그냥 찍는게 더 빠를까?
 	*(pDest+pixels_1) = *(pSource+pixels_1);	
 }
 
 //----------------------------------------------------------------------
 // Effect WipeOut
 //----------------------------------------------------------------------
-// s_Value1 : �� ����� ����? 
-//				64 - ����
-//				0 - �� ���
+// s_Value1 : 덜 출력할 수준? 
+//				64 - 투명
+//				0 - 다 출력
 //
-// �߽ɿ������� �������� ����������.
+// 중심에서부터 양쪽으로 지워져간다.
 //
 // ***************
 // ******   ******
@@ -12808,25 +12808,25 @@ CSpriteSurface::memcpyEffectWipeOut(WORD* pDest, WORD* pSource, WORD pixels)
 	int drawPixels = (pixels - skipPixels)>>1;
 	int drawPixels2 = pixels - drawPixels - skipPixels;
 	
-	// [1] drawPixels��ŭ ����ϰ�..
-	// [2] skipPixels ��ŭ �ǳʶ��
-	// [3] drawPixels2��ŭ ���
+	// [1] drawPixels만큼 출력하고..
+	// [2] skipPixels 만큼 건너띄고
+	// [3] drawPixels2만큼 출력
 	
 	//------------------------------------------------------------	
-	// drawPixels��ŭ ���
+	// drawPixels만큼 출력
 	//------------------------------------------------------------	
 	memcpy(pDest, pSource, (drawPixels<<1));
 	pDest += drawPixels;
 	pSource += drawPixels;
 
 	//------------------------------------------------------------	
-	// skipPixels��ŭ �ǳʶ�
+	// skipPixels만큼 건너띔
 	//------------------------------------------------------------	
 	pDest += skipPixels;
 	pSource += skipPixels;
 
 	//------------------------------------------------------------	
-	// drawPixels2��ŭ ���
+	// drawPixels2만큼 출력
 	//------------------------------------------------------------	
 	memcpy(pDest, pSource, (drawPixels2<<1));
 	//pDest += drawPixels2;
@@ -12836,9 +12836,9 @@ CSpriteSurface::memcpyEffectWipeOut(WORD* pDest, WORD* pSource, WORD pixels)
 //----------------------------------------------------------------------
 // Effect Net
 //----------------------------------------------------------------------
-// s_Value1 : �ǳʶ�� ��
+// s_Value1 : 건너띄는 점
 //
-// �� �� ���.. s_Value1�� �� ����ŭ �ǳʶ��.
+// 한 점 찍고.. s_Value1의 점 수만큼 건너띈다.
 //
 // ***************
 // * * * * * * * *	: s_Value1 = 1
@@ -12853,7 +12853,7 @@ CSpriteSurface::memcpyEffectNet(WORD* pDest, WORD* pSource, WORD pixels)
 	int skipPixels = 1 + s_Value1;
 	
 	//------------------------------------------------------------	
-	// drawPixels��ŭ ���
+	// drawPixels만큼 출력
 	//------------------------------------------------------------	
 	do {
 		//memcpy(pDest, pSource, (drawPixels<<1));
@@ -12869,10 +12869,10 @@ CSpriteSurface::memcpyEffectNet(WORD* pDest, WORD* pSource, WORD pixels)
 //----------------------------------------------------------------------
 // Effect Copy - GrayScaleVarious
 //----------------------------------------------------------------------
-// s_Value1 �� �󸶳� gray�Ǵ°�?(-_-;)�̴�..
-// s_Value1���� 0~31.. 32�ΰ�?.. - -
-// 0�̸� ���� gray
-// 32�̸� ��������
+// s_Value1 은 얼마나 gray되는가?(-_-;)이다..
+// s_Value1값은 0~31.. 32인가?.. - -
+// 0이면 완전 gray
+// 32이면 원래색깔
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyEffectGrayScaleVarious(WORD* pDest, WORD* pSource, WORD pixels)
@@ -12936,7 +12936,7 @@ CSpriteSurface::memcpyEffectGrayScaleVarious(WORD* pDest, WORD* pSource, WORD pi
 //----------------------------------------------------------------------
 // Effect Copy - Darker
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// source --> dest 로 pixels만큼 특수효과 처리를 한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectDarker(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -12969,7 +12969,7 @@ CSpriteSurface::memcpyPalEffectDarker(WORD* pDest, BYTE* pSource, WORD pixels, M
 //----------------------------------------------------------------------
 // Effect Copy - GrayScale
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// source --> dest 로 pixels만큼 특수효과 처리를 한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectGrayScale(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -12999,7 +12999,7 @@ CSpriteSurface::memcpyPalEffectGrayScale(WORD* pDest, BYTE* pSource, WORD pixels
 //----------------------------------------------------------------------
 // Effect Copy - Lighten
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// source --> dest 로 pixels만큼 특수효과 처리를 한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectLighten(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -13024,7 +13024,7 @@ CSpriteSurface::memcpyPalEffectLighten(WORD* pDest, BYTE* pSource, WORD pixels, 
 //----------------------------------------------------------------------
 // Effect Copy - Darken
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// source --> dest 로 pixels만큼 특수효과 처리를 한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectDarken(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -13051,7 +13051,7 @@ CSpriteSurface::memcpyPalEffectDarken(WORD* pDest, BYTE* pSource, WORD pixels, M
 //----------------------------------------------------------------------
 // Effect Copy - ColorDodge
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// source --> dest 로 pixels만큼 특수효과 처리를 한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectColorDodge(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -13079,7 +13079,7 @@ CSpriteSurface::memcpyPalEffectColorDodge(WORD* pDest, BYTE* pSource, WORD pixel
 //----------------------------------------------------------------------
 // Effect Copy - Screen
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// source --> dest 로 pixels만큼 특수효과 처리를 한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectScreen(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -13130,7 +13130,7 @@ CSpriteSurface::memcpyPalEffectScreen(WORD* pDest, BYTE* pSource, WORD pixels, M
 //----------------------------------------------------------------------
 // Effect Copy - Screen
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// source --> dest 로 pixels만큼 특수효과 처리를 한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectScreenAlpha(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -13140,7 +13140,7 @@ CSpriteSurface::memcpyPalEffectScreenAlpha(WORD* pDest, BYTE* pSource, WORD pixe
 //----------------------------------------------------------------------
 // Effect Copy - DodgeBurn
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// source --> dest 로 pixels만큼 특수효과 처리를 한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectDodgeBurn(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -13168,7 +13168,7 @@ CSpriteSurface::memcpyPalEffectDodgeBurn(WORD* pDest, BYTE* pSource, WORD pixels
 //----------------------------------------------------------------------
 // Effect Copy - Different
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// source --> dest 로 pixels만큼 특수효과 처리를 한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectDifferent(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -13207,9 +13207,9 @@ CSpriteSurface::memcpyPalEffectDifferent(WORD* pDest, BYTE* pSource, WORD pixels
 //----------------------------------------------------------------------
 // Effect Copy - Gradation
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// source --> dest 로 pixels만큼 특수효과 처리를 한다.
 //
-// s_Value1�� ColorSet��ȣ�̴�.
+// s_Value1이 ColorSet번호이다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectGradation(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -13243,29 +13243,29 @@ CSpriteSurface::memcpyPalEffectGradation(WORD* pDest, BYTE* pSource, WORD pixels
 //----------------------------------------------------------------------
 // Effect SimpleOutline
 //----------------------------------------------------------------------
-// �� �������� �ܰ��� ���(������ ������ �� �� ���� ���)
-// pixels�� 1�̻��̶�� �����Ѵ�.
+// 좀 띄엄띄엄한 외곽선 출력(투명색 압축의 양 끝 점에 출력)
+// pixels는 1이상이라고 가정한다.
 //----------------------------------------------------------------------
 void		
 CSpriteSurface::memcpyPalEffectSimpleOutline(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
 {
-	// ù ��
+	// 첫 점
 	*pDest = pal[*pSource];
 	
 	int pixels_1 = pixels-1;
 
-	// �� �� - pixels�� 1�϶� ���ϴ°ź��� �׳� ��°� �� ������?
+	// 끝 점 - pixels가 1일때 비교하는거보다 그냥 찍는게 더 빠를까?
 	*(pDest+pixels_1) = *(pSource+pixels_1);	
 }
 
 //----------------------------------------------------------------------
 // Effect WipeOut
 //----------------------------------------------------------------------
-// s_Value1 : �� ����� ����? 
-//				64 - ����
-//				0 - �� ���
+// s_Value1 : 덜 출력할 수준? 
+//				64 - 투명
+//				0 - 다 출력
 //
-// �߽ɿ������� �������� ����������.
+// 중심에서부터 양쪽으로 지워져간다.
 //
 // ***************
 // ******   ******
@@ -13279,25 +13279,25 @@ CSpriteSurface::memcpyPalEffectWipeOut(WORD* pDest, BYTE* pSource, WORD pixels, 
 	int drawPixels = (pixels - skipPixels)>>1;
 	int drawPixels2 = pixels - drawPixels - skipPixels;
 	
-	// [1] drawPixels��ŭ ����ϰ�..
-	// [2] skipPixels ��ŭ �ǳʶ��
-	// [3] drawPixels2��ŭ ���
+	// [1] drawPixels만큼 출력하고..
+	// [2] skipPixels 만큼 건너띄고
+	// [3] drawPixels2만큼 출력
 	
 	//------------------------------------------------------------	
-	// drawPixels��ŭ ���
+	// drawPixels만큼 출력
 	//------------------------------------------------------------	
 	memcpy(pDest, pSource, (drawPixels<<1));
 	pDest += drawPixels;
 	pSource += drawPixels;
 
 	//------------------------------------------------------------	
-	// skipPixels��ŭ �ǳʶ�
+	// skipPixels만큼 건너띔
 	//------------------------------------------------------------	
 	pDest += skipPixels;
 	pSource += skipPixels;
 
 	//------------------------------------------------------------	
-	// drawPixels2��ŭ ���
+	// drawPixels2만큼 출력
 	//------------------------------------------------------------	
 	memcpy(pDest, pSource, (drawPixels2<<1));
 	//pDest += drawPixels2;
@@ -13307,9 +13307,9 @@ CSpriteSurface::memcpyPalEffectWipeOut(WORD* pDest, BYTE* pSource, WORD pixels, 
 //----------------------------------------------------------------------
 // Effect Net
 //----------------------------------------------------------------------
-// s_Value1 : �ǳʶ�� ��
+// s_Value1 : 건너띄는 점
 //
-// �� �� ���.. s_Value1�� �� ����ŭ �ǳʶ��.
+// 한 점 찍고.. s_Value1의 점 수만큼 건너띈다.
 //
 // ***************
 // * * * * * * * *	: s_Value1 = 1
@@ -13324,7 +13324,7 @@ CSpriteSurface::memcpyPalEffectNet(WORD* pDest, BYTE* pSource, WORD pixels, MPal
 	int skipPixels = 1 + s_Value1;
 	
 	//------------------------------------------------------------	
-	// drawPixels��ŭ ���
+	// drawPixels만큼 출력
 	//------------------------------------------------------------	
 	do {
 		//memcpy(pDest, pSource, (drawPixels<<1));
@@ -13340,10 +13340,10 @@ CSpriteSurface::memcpyPalEffectNet(WORD* pDest, BYTE* pSource, WORD pixels, MPal
 //----------------------------------------------------------------------
 // Effect Copy - GrayScaleVarious
 //----------------------------------------------------------------------
-// s_Value1 �� �󸶳� gray�Ǵ°�?(-_-;)�̴�..
-// s_Value1���� 0~31.. 32�ΰ�?.. - -
-// 0�̸� ���� gray
-// 32�̸� ��������
+// s_Value1 은 얼마나 gray되는가?(-_-;)이다..
+// s_Value1값은 0~31.. 32인가?.. - -
+// 0이면 완전 gray
+// 32이면 원래색깔
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectGrayScaleVarious(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -13444,17 +13444,17 @@ CSpriteSurface::InitEffectTable()
 //----------------------------------------------------------------------
 // Blt IndexSprite Darkness
 //----------------------------------------------------------------------
-// pPoint�� pSprite�� ����Ѵ�.
+// pPoint에 pSprite를 출력한다.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::BltIndexSpriteBrightness(POINT* pPoint, CIndexSprite* pSprite, BYTE BrightBits)
 {	
-	// Sprite�� ���� �������� ���� ���..
+	// Sprite가 아직 생성되지 않은 경우..
 	if (pSprite->IsNotInit())
 		return;
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 1
+	// 화면에 보이지 않는 경우 1
 	//-------------------------------------------------------------
 	if (pPoint->x >= m_ClipRight || pPoint->y >= m_ClipBottom)
 		return;
@@ -13466,7 +13466,7 @@ CSpriteSurface::BltIndexSpriteBrightness(POINT* pPoint, CIndexSprite* pSprite, B
 	WORD	Pitch		= m_ddsd.lPitch;
 	RECT	rect;
 
-	// sprite������ ��� ����
+	// sprite내부의 출력 영역
 	rect.left = 0;
 	rect.top = 0;
 	rect.right = pSprite->GetWidth();
@@ -13480,13 +13480,13 @@ CSpriteSurface::BltIndexSpriteBrightness(POINT* pPoint, CIndexSprite* pSprite, B
 	int yPlusSpriteHeight	= pt.y + pSprite->GetHeight();
 
 	//-------------------------------------------------------------
-	// ȭ�鿡 ������ �ʴ� ��� 2
+	// 화면에 보이지 않는 경우 2
 	//-------------------------------------------------------------
 	if (xPlusSpriteWidth <= m_ClipLeft || yPlusSpriteHeight <= m_ClipTop)
 		return;
 
 	//-------------------------------------------------------------
-	// Clipping�� �ʿ��� �κп� ���� check
+	// Clipping이 필요한 부분에 대한 check
 	//-------------------------------------------------------------
 	bool	leftClip	= (pt.x < m_ClipLeft) && (xPlusSpriteWidth > m_ClipLeft);
 	bool	rightClip	= (xPlusSpriteWidth > m_ClipRight);
@@ -13494,31 +13494,31 @@ CSpriteSurface::BltIndexSpriteBrightness(POINT* pPoint, CIndexSprite* pSprite, B
 	bool	bottomClip	= (yPlusSpriteHeight > m_ClipBottom);
 
 	//------------------------------------------
-	// ���� Clipping�� �ʿ��� ����..
+	// 왼쪽 Clipping이 필요한 상태..
 	//------------------------------------------
 	if (leftClip)
 	{
-		// �������� ����ŭ�� �����ؼ� ����ؾ� �Ѵ�.
+		// 왼쪽으로 들어간만큼은 생략해서 출력해야 한다.
 		rect.left = -pt.x + m_ClipLeft;    
 		//pt.x = m_ClipLeft;		
 		
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;			
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -13531,7 +13531,7 @@ CSpriteSurface::BltIndexSpriteBrightness(POINT* pPoint, CIndexSprite* pSprite, B
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -13539,24 +13539,24 @@ CSpriteSurface::BltIndexSpriteBrightness(POINT* pPoint, CIndexSprite* pSprite, B
 				}								
 			}
 
-			// ���� + ������			
+			// 왼쪽 + 오른쪽			
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltBrightnessClipWidth(lpSurface, Pitch, &rect, BrightBits);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -13569,7 +13569,7 @@ CSpriteSurface::BltIndexSpriteBrightness(POINT* pPoint, CIndexSprite* pSprite, B
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch);
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -13577,26 +13577,26 @@ CSpriteSurface::BltIndexSpriteBrightness(POINT* pPoint, CIndexSprite* pSprite, B
 				}				
 			}
 
-			// ���� Clip
+			// 왼쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (m_ClipLeft<<1));
 			pSprite->BltBrightnessClipLeft(lpSurface, Pitch, &rect, BrightBits);
 		}
 	}
 	//------------------------------------------
-	// ���� Clipping�� �ʿ� ���� ����..
+	// 왼쪽 Clipping이 필요 없는 상태..
 	//------------------------------------------
 	else
 	{
 		//------------------------------------------
-		// ������ Clipping�� �ʿ��� ����
+		// 오른쪽 Clipping이 필요한 상태
 		//------------------------------------------
 		if (rightClip)
 		{	
-			// ���� ���̸� ���δ�.
+			// 가로 길이를 줄인다.
 			rect.right = m_ClipRight - pt.x;
 
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{				
@@ -13604,7 +13604,7 @@ CSpriteSurface::BltIndexSpriteBrightness(POINT* pPoint, CIndexSprite* pSprite, B
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{						
@@ -13617,7 +13617,7 @@ CSpriteSurface::BltIndexSpriteBrightness(POINT* pPoint, CIndexSprite* pSprite, B
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{					
@@ -13625,17 +13625,17 @@ CSpriteSurface::BltIndexSpriteBrightness(POINT* pPoint, CIndexSprite* pSprite, B
 				}								
 			}	
 			
-			// ������ Clip
+			// 오른쪽 Clip
 			lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 			pSprite->BltBrightnessClipRight(lpSurface, Pitch, &rect, BrightBits);
 		}
 		//------------------------------------------
-		// ������ Clipping�� �ʿ� ���� ����
+		// 오른쪽 Clipping이 필요 없는 상태
 		//------------------------------------------
 		else
 		{
 			//------------------------------------------
-			// ���� Clipping�� �ʿ��� ����
+			// 위쪽 Clipping이 필요한 상태
 			//------------------------------------------
 			if (topClip)
 			{
@@ -13643,7 +13643,7 @@ CSpriteSurface::BltIndexSpriteBrightness(POINT* pPoint, CIndexSprite* pSprite, B
 				rect.top = -pt.y + m_ClipTop;   				
 
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
@@ -13652,7 +13652,7 @@ CSpriteSurface::BltIndexSpriteBrightness(POINT* pPoint, CIndexSprite* pSprite, B
 
 				pt.y = m_ClipTop;
 				
-				// Height�� Clip
+				// Height만 Clip
 				lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				pSprite->BltBrightnessClipHeight(lpSurface, Pitch, &rect, BrightBits);
 			}
@@ -13660,12 +13660,12 @@ CSpriteSurface::BltIndexSpriteBrightness(POINT* pPoint, CIndexSprite* pSprite, B
 			{
 				//lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 				//------------------------------------------
-				// �Ʒ��� Clipping�� �ʿ��� ����
+				// 아래쪽 Clipping이 필요한 상태
 				//------------------------------------------
 				if (bottomClip)
 				{
 					rect.bottom = m_ClipBottom - pt.y;					
-					// Height�� Clip
+					// Height만 Clip
 					lpSurface = (WORD*)((BYTE*)lpSurface + pt.y*Pitch + (pt.x<<1));
 					pSprite->BltBrightnessClipHeight(lpSurface, Pitch, &rect, BrightBits);
 				}

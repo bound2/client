@@ -28,42 +28,42 @@
 //----------------------------------------------------------------------------
 // Globals
 //
-// C_VS_UI_GAME Object�� �����߿� ���� �� ��ȿ�ϴ�.
+// C_VS_UI_GAME Object가 실행중에 있을 때 유효하다.
 //----------------------------------------------------------------------------
 bool gbl_item_lock; // no static member, 'static GLOBAL!'
-						  // �ʱ�ȭ�� C_VS_UI_GAME::Start()���� ���ش�.
+						  // 초기화는 C_VS_UI_GAME::Start()에서 해준다.
 bool gbl_gear_lock;
 
 bool gbl_item_trade_lock;
 
-// shop���� ������ �춧�� �칰�ǿ� ���� price�� ���������ϰ�,
-// �� ���� ���� �׷����Ѵ�.
-bool gbl_sell_running; // ��� ��..
-bool gbl_buy_running; // �Ĵ� ��..
-bool gbl_repair_running; // ��ġ�� ��...
-bool gbl_silvering_running; // ������ �ϴ���
-bool gbl_buy_storage_running; // ��ġ�� ��...
-bool gbl_exchange_ask_running; // ��ȯ�ҷ�? �� �ִ� ��.. --;		// by sigi
-bool gbl_exchange_cancel_running; // ��ȯ����ҷ�? �� �ִ� ��.. --;	// by sigi
-bool gbl_party_ask_running; // ��Ƽ�ҷ�? �� �ִ� ��.. --;
-bool gbl_party_cancel_running; // ��Ƽ����ҷ�? �� �ִ� ��.. --;
-bool gbl_enchant_running; // Enchant�ҷ�? �� �ִ� ��.. --;
-bool gbl_use_pet_food_running; // �� ���� ���Ϸ�? �� �ִ���
-bool gbl_keep_petitem_running; // �� �±淡? �� �ִ���
-bool gbl_get_keep_petitem_running; // �� ã��? �� �ִ���
-bool gbl_use_askitem_running; // �������� item ����ҷ�? �� �ִ���
+// shop에서 물건을 살때는 살물건에 대한 price를 출력해줘야하고,
+// 팔 때도 또한 그래야한다.
+bool gbl_sell_running; // 사는 중..
+bool gbl_buy_running; // 파는 중..
+bool gbl_repair_running; // 고치는 중...
+bool gbl_silvering_running; // 은도금 하는중
+bool gbl_buy_storage_running; // 고치는 중...
+bool gbl_exchange_ask_running; // 교환할래? 떠 있는 중.. --;		// by sigi
+bool gbl_exchange_cancel_running; // 교환취소할래? 떠 있는 중.. --;	// by sigi
+bool gbl_party_ask_running; // 파티할래? 떠 있는 중.. --;
+bool gbl_party_cancel_running; // 파티취소할래? 떠 있는 중.. --;
+bool gbl_enchant_running; // Enchant할래? 떠 있는 중.. --;
+bool gbl_use_pet_food_running; // 펫 먹이 먹일래? 떠 있는중
+bool gbl_keep_petitem_running; // 펫 맞길래? 떠 있는중
+bool gbl_get_keep_petitem_running; // 펫 찾을? 떠 있는중
+bool gbl_use_askitem_running; // 무슨무슨 item 사용할래? 떠 있는중
 //bool gbl_option_running; // by sigi
-bool gbl_tutorial_exit_ask_running; // ���⼱���Ѱ� �ȹٲٱ� ������? ���ִ���..		//by larosel
-bool gbl_no_search_result_running; // �˻���� ���� �� �ִ� ��
-bool gbl_deposit_limit_running; // �˻���� ���� �� �ִ� ��
-bool gbl_withdraw_limit_running; // �˻���� ���� �� �ִ� ��
-bool gbl_exchange_limit_running; // �˻���� ���� �� �ִ� ��
-bool gbl_bring_fee_limit_running; // �˻���� ���� �� �ִ� ��
-bool gbl_getitem_from_itemlist_running;	// ������ ����Ʈ���� ������ �����ö�
+bool gbl_tutorial_exit_ask_running; // 무기선택한거 안바꾸구 나갈래? 떠있는중..		//by larosel
+bool gbl_no_search_result_running; // 검색결과 없음 떠 있는 중
+bool gbl_deposit_limit_running; // 검색결과 없음 떠 있는 중
+bool gbl_withdraw_limit_running; // 검색결과 없음 떠 있는 중
+bool gbl_exchange_limit_running; // 검색결과 없음 떠 있는 중
+bool gbl_bring_fee_limit_running; // 검색결과 없음 떠 있는 중
+bool gbl_getitem_from_itemlist_running;	// 아이템 리스트에서 아이템 가져올때
 bool gbl_trans_item_running;
 bool	gbl_skip_escape = false;
 
-bool gbl_swap_advancement_item_running; // ���� �����۰� ��ȯ��
+bool gbl_swap_advancement_item_running; // 승직 아이템과 교환중
 Race	g_eRaceInterface = RACE_SLAYER;  // Default to Slayer interface
 
 extern int					g_Dimension ;
@@ -285,7 +285,7 @@ void ExecF_UsePetFood(C_VS_UI_DIALOG * p_this_dialog, id_t id)
 	{
 	case DIALOG_EXECID_OK:
 		{
-			#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+			#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 				if(((C_VS_UI_ASK_DIALOG*)p_this_dialog)->GetdwTemporayValue())
 				{
 					MSubInventory* pSubInventory = (MSubInventory*)((C_VS_UI_ASK_DIALOG*)p_this_dialog)->GetpTemporayValue();
@@ -550,9 +550,9 @@ void ExecF_TutorialExitAsk(C_VS_UI_DIALOG * p_this_dialog, id_t id)
 	switch (id)
 	{
 		case DIALOG_EXECID_OK:
-			// �ּ� by sigi
+			// 주석 by sigi
 			//gpC_base->SendMessage( UI_TUTORIAL_EXIT_ACCEPT, TRUE );
-			gC_vs_ui.RunTutorialExitAccept();	// �ٷ� ���� by sigi
+			gC_vs_ui.RunTutorialExitAccept();	// 바로 실행 by sigi
 			gbl_tutorial_exit_ask_running = false;
 		break;
 
@@ -573,7 +573,7 @@ void ExecF_TutorialExitAsk(C_VS_UI_DIALOG * p_this_dialog, id_t id)
 //-----------------------------------------------------------------------------
 // Lock/Unlock Item
 //
-// Lock�Ǹ� Item ����/����/�ٲٱⰡ �Ұ���������. Unlock�� �װ��� �����Ѵ�.
+// Lock되면 Item 집기/놓기/바꾸기가 불가능해진다. Unlock은 그것을 해제한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::LockItem()
 {
@@ -629,7 +629,7 @@ void C_VS_UI_GAME::ChangeToSlayerInterface()
 	g_descriptor_manager.Unset();
 
 //	gbl_vampire_interface = false;
-	g_eRaceInterface = RACE_SLAYER; // ousters interface �߰�
+	g_eRaceInterface = RACE_SLAYER; // ousters interface 추가
 
 	DeleteNew(m_pC_tribe_interface);
 
@@ -697,7 +697,7 @@ void C_VS_UI_GAME::ChangeToVampireInterface()
 	g_descriptor_manager.Unset();
 
 //	gbl_vampire_interface = true;
-	g_eRaceInterface = RACE_VAMPIRE; // ouster interface �߰�
+	g_eRaceInterface = RACE_VAMPIRE; // ouster interface 추가
 
 	DeleteNew(m_pC_tribe_interface);
 
@@ -868,7 +868,7 @@ C_VS_UI_GAME::C_VS_UI_GAME()
 	m_pC_dialog_Campaign_Help = NULL;
 	m_pC_Quest_Npc_Dialog = NULL;
 	m_pC_WebBrowser = NULL;
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 		m_pC_SubInventory = NULL;
 	#endif
 }
@@ -909,7 +909,7 @@ C_VS_UI_GAME::~C_VS_UI_GAME()
 	DeleteNew(m_pC_dialog_Campaign_Help);
 	DeleteNew(m_pC_Quest_Npc_Dialog);
 	DeleteNew(m_pC_WebBrowser);
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 		DeleteNew(m_pC_SubInventory);
 	#endif
 	DeleteNew(m_pC_sms_message);
@@ -1391,14 +1391,14 @@ void	C_VS_UI_GAME::RunGameMenu()
 //-----------------------------------------------------------------------------
 // C_VS_UI_GAME::ClosePopupWindow
 //
-// �ϳ��� ������ true�� ��ȯ�Ѵ�.
+// 하나라도 닫히면 true를 반환한다.
 //-----------------------------------------------------------------------------
 bool	C_VS_UI_GAME::ClosePopupWindow()
 {
 	//
-	// Inventory/Gear�� �ѽ��� Popup Window�� ����. �� ���� ���� �� �ִٸ� ���� ������ ���̴�.
-	// �׵��� pinned Window�̹Ƿ� �����Ǿ� �ִ� ���� Interface���� no pinned Window�� ����
-	// ��µȴ�. ���� Inventory/Gear -> Other Window ������ close�Ѵ�.
+	// Inventory/Gear는 한쌍의 Popup Window로 본다. 이 둘이 같이 떠 있다면 같이 닫히는 것이다.
+	// 그들은 pinned Window이므로 고정되어 있는 상점 Interface같은 no pinned Window의 위에
+	// 출력된다. 따라서 Inventory/Gear -> Other Window 순으로 close한다.
 	//
 	bool charinfo_closed = false;
 
@@ -1414,7 +1414,7 @@ bool	C_VS_UI_GAME::ClosePopupWindow()
 		return true;
 	}
 
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 		if(IsRunningSubInventory())
 		{
 			CloseSubInventory();
@@ -1657,14 +1657,14 @@ bool	C_VS_UI_GAME::ClosePopupWindow()
 	}
 	
 	// by sigi
-	// å �а� ������ å �ݱ�
+	// 책 읽고 있으면 책 닫기
 	if (IsRunningBookcase() && m_pC_bookcase->IsReadingBook())
 	{
 		m_pC_bookcase->CloseBook();
 
 		return true;
 	}
-	// �ƴϸ�.. bookcase �ݱ�
+	// 아니면.. bookcase 닫기
 	else if (IsRunningBookcase())
 	{
 //		gpC_base->SendMessage(UI_CLOSE_BOOKCASE);		
@@ -1888,7 +1888,7 @@ void	C_VS_UI_GAME::AddChatToHistory(char * str, char * sz_id, CHAT_LINE_CONDITIO
 //	}
 //	else
 	{
-		// �Ϲ�ä��â����...
+		// 일반채팅창으로...
 		m_pC_chatting->AddChatToHistory(str, sz_id, condition, color);
 	}
 }
@@ -2344,7 +2344,7 @@ void	C_VS_UI_GAME::CloseSkillTree()
 //-----------------------------------------------------------------------------
 // FinishItemSelling
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::FinishItemSelling()
 {
@@ -2375,7 +2375,7 @@ void C_VS_UI_GAME::OpenInventoryToSell()
 //-----------------------------------------------------------------------------
 // FinishItemRepairing
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::FinishItemRepairing()
 {
@@ -2392,7 +2392,7 @@ void C_VS_UI_GAME::FinishItemRepairing()
 //-----------------------------------------------------------------------------
 // FinishItemSilvering
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::FinishItemSilvering()
 {
@@ -2468,7 +2468,7 @@ void C_VS_UI_GAME::SetPetStorage(MStorage* pStorage)
 //-----------------------------------------------------------------------------
 // CloseShop
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseShop()
 {
@@ -2488,7 +2488,7 @@ void C_VS_UI_GAME::CloseShop()
 //-----------------------------------------------------------------------------
 // CloseStorage
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseStorage()
 {
@@ -2502,7 +2502,7 @@ void C_VS_UI_GAME::CloseStorage()
 //-----------------------------------------------------------------------------
 // ClosePetStorage
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::ClosePetStorage()
 {
@@ -2516,7 +2516,7 @@ void C_VS_UI_GAME::ClosePetStorage()
 //-----------------------------------------------------------------------------
 // CloseExchange
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseExchange()
 {
@@ -2576,7 +2576,7 @@ bool C_VS_UI_GAME::IsRunningPointExchange() const
 //-----------------------------------------------------------------------------
 // CloseExchangeAsk
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseExchangeAsk()
 {
@@ -2595,7 +2595,7 @@ void C_VS_UI_GAME::CloseExchangeAsk()
 //-----------------------------------------------------------------------------
 // CloseExchangeCancel
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseExchangeCancel()
 {
@@ -2614,7 +2614,7 @@ void C_VS_UI_GAME::CloseExchangeCancel()
 //-----------------------------------------------------------------------------
 // CloseGameMenuOption
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 /*
 void C_VS_UI_GAME::CloseOption()
@@ -2635,7 +2635,7 @@ void C_VS_UI_GAME::CloseOption()
 //-----------------------------------------------------------------------------
 // RunShop
 //
-// Shop�� �����Ѵ�.
+// Shop을 실행한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunShop()
 {
@@ -2647,7 +2647,7 @@ void C_VS_UI_GAME::RunShop()
 
 		m_pC_tribe_interface->DoCommonActionBeforeEventOccured();
 
-		// Shop Window�� �Բ� ��� �͵��� �����Ѵ�.
+		// Shop Window와 함께 띄울 것들을 실행한다.
 		m_pC_tribe_interface->ShopRunningAnnounced();
 		m_pC_shop->Start();
 		gbl_buy_running = true;
@@ -2657,7 +2657,7 @@ void C_VS_UI_GAME::RunShop()
 //-----------------------------------------------------------------------------
 // RunStorage
 //
-// Storage�� �����Ѵ�.
+// Storage을 실행한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunStorage()
 {
@@ -2676,7 +2676,7 @@ void C_VS_UI_GAME::RunStorage()
 //-----------------------------------------------------------------------------
 // RunPetStorage
 //
-// Storage�� �����Ѵ�.
+// Storage을 실행한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunPetStorage()
 {
@@ -2695,7 +2695,7 @@ void C_VS_UI_GAME::RunPetStorage()
 //-----------------------------------------------------------------------------
 // RunStorageBuy
 //
-// Storage�� �����Ѵ�.
+// Storage을 실행한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunStorageBuy(int price)
 {
@@ -2718,7 +2718,7 @@ void C_VS_UI_GAME::RunStorageBuy(int price)
 //-----------------------------------------------------------------------------
 // RunOption
 //
-// �ɼ�â ����
+// 옵션창 띄우기
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunOption()
 {
@@ -2742,7 +2742,7 @@ void C_VS_UI_GAME::RunOption()
 //-----------------------------------------------------------------------------
 // RunSkillView //by larosel
 //
-// ��ų������ �����Ѵ�.
+// 스킬인포를 실행한다.
 //-----------------------------------------------------------------------------
 //void C_VS_UI_GAME::RunSkillView()
 //{
@@ -2762,7 +2762,7 @@ void C_VS_UI_GAME::RunOption()
 //-----------------------------------------------------------------------------
 // CloseSkillView
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 //void C_VS_UI_GAME::CloseSkillView()
 //{
@@ -2781,7 +2781,7 @@ void C_VS_UI_GAME::RunOption()
 //-----------------------------------------------------------------------------
 // RunDescDialog //by larosel
 //
-// ����â�� �����Ѵ�.
+// 설명창을 실행한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunDescDialog(int type, void *ptr, void *ptr2)
 {
@@ -2801,7 +2801,7 @@ void C_VS_UI_GAME::RunDescDialog(int type, void *ptr, void *ptr2)
 //-----------------------------------------------------------------------------
 // CloseDescDialog
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseDescDialog()
 {
@@ -2817,7 +2817,7 @@ void C_VS_UI_GAME::CloseDescDialog()
 //-----------------------------------------------------------------------------
 // RunFileDialog //by larosel
 //
-// ����â�� �����Ѵ�.
+// 파일창을 실행한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunFileDialog(C_VS_UI_FILE_DIALOG::MODE Mode, char *type)
 {
@@ -2837,7 +2837,7 @@ void C_VS_UI_GAME::RunFileDialog(C_VS_UI_FILE_DIALOG::MODE Mode, char *type)
 //-----------------------------------------------------------------------------
 // CloseFileDialog
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseFileDialog()
 {
@@ -2856,7 +2856,7 @@ void C_VS_UI_GAME::CloseFileDialog()
 //-----------------------------------------------------------------------------
 // RunElevator //by larosel
 //
-// ���������� �������̽��� �����Ѵ�.
+// 엘리베이터 인터페이스를 실행한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunElevator()
 {
@@ -2876,7 +2876,7 @@ void C_VS_UI_GAME::RunElevator()
 //-----------------------------------------------------------------------------
 // CloseElevator
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseElevator()
 {
@@ -2892,7 +2892,7 @@ void C_VS_UI_GAME::CloseElevator()
 //-----------------------------------------------------------------------------
 // RunBookcase //by larosel
 //
-// å���� �����Ѵ�.
+// 책장을 실행한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunBookcase()
 {
@@ -2912,7 +2912,7 @@ void C_VS_UI_GAME::RunBookcase()
 //-----------------------------------------------------------------------------
 // CloseBookcase
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseBookcase()
 {
@@ -2928,7 +2928,7 @@ void C_VS_UI_GAME::CloseBookcase()
 //-----------------------------------------------------------------------------
 // RunBriefing //by larosel
 //
-// �긮���� �����Ѵ�.
+// 브리핑을 실행한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunBriefing()
 {
@@ -2949,7 +2949,7 @@ void C_VS_UI_GAME::RunBriefing()
 //-----------------------------------------------------------------------------
 // CloseBriefing //by larosel
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseBriefing()
 {
@@ -2965,7 +2965,7 @@ void C_VS_UI_GAME::CloseBriefing()
 //-----------------------------------------------------------------------------
 // RunComputer //by larosel
 //
-// ��ǻ�͸� �����Ѵ�.
+// 컴퓨터를 실행한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunComputer()
 {
@@ -2999,7 +2999,7 @@ void C_VS_UI_GAME::RunComputer()
 //-----------------------------------------------------------------------------
 // CloseComputer //by larosel
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseComputer()
 {
@@ -3017,7 +3017,7 @@ void C_VS_UI_GAME::CloseComputer()
 //-----------------------------------------------------------------------------
 // RunTutorialExit //by larosel
 //
-// Ʃ�丮�� �����⸦ �����Ѵ�.
+// 튜토리얼 나가기를 실행한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunTutorialExit()
 {
@@ -3038,14 +3038,14 @@ void C_VS_UI_GAME::RunTutorialExit()
 //-----------------------------------------------------------------------------
 // CloseTutorialExit //by larosel
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseTutorialExit()
 {
 	if (!m_pC_tutorial_exit)
 		return;
 
-	// ask�� ���� �� �� �ݾ��ش� -_-; by sigi
+	// ask도 괜히 한 번 닫아준다 -_-; by sigi
 	CloseTutorialExitAsk();
 
 	DeleteNew(m_pC_tutorial_exit);
@@ -3057,7 +3057,7 @@ void C_VS_UI_GAME::CloseTutorialExit()
 //-----------------------------------------------------------------------------
 // RunTutorialExitAsk	// by larosel
 //
-// Ʃ�丮�� ������Ȯ���� �����Ѵ�.
+// 튜토리얼 나가기확인을 실행한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunTutorialExitAsk(const int select, const char* pName)
 {
@@ -3086,7 +3086,7 @@ void C_VS_UI_GAME::RunTutorialExitAccept()
 //-----------------------------------------------------------------------------
 // CloseTutorialExitAsk
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseTutorialExitAsk()
 {
@@ -3106,7 +3106,7 @@ void C_VS_UI_GAME::CloseTutorialExitAsk()
 //-----------------------------------------------------------------------------
 // RunHorn //by larosel
 //
-// �����̾� ��Ż�� �����Ѵ�.
+// 슬레이어 포탈을 실행한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunHorn(int currentZoneID)
 {
@@ -3127,7 +3127,7 @@ void C_VS_UI_GAME::RunHorn(int currentZoneID)
 //-----------------------------------------------------------------------------
 // CloseHorn //by larosel
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseHorn()
 {
@@ -3153,7 +3153,7 @@ bool	C_VS_UI_GAME::IsRunningHorn() const
 //-----------------------------------------------------------------------------
 // RunMailBox //by larosel
 //
-// ������
+// 메일함
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunMailBox()
 {
@@ -3164,7 +3164,7 @@ void C_VS_UI_GAME::RunMailBox()
 //-----------------------------------------------------------------------------
 // CloseMailBox //by larosel
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseMailBox()
 {
@@ -3231,7 +3231,7 @@ void	C_VS_UI_GAME::AddHelpMail(DWORD id,  bool open)
 //-----------------------------------------------------------------------------
 // RunFindingMine //by larosel
 //
-// �����̾� ��Ż�� �����Ѵ�.
+// 슬레이어 포탈을 실행한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunFindingMine()
 {
@@ -3252,7 +3252,7 @@ void C_VS_UI_GAME::RunFindingMine()
 //-----------------------------------------------------------------------------
 // CloseFindingMine //by larosel
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseFindingMine()
 {
@@ -3278,7 +3278,7 @@ bool	C_VS_UI_GAME::IsRunningFindingMine() const
 //-----------------------------------------------------------------------------
 // RunSlayerPortal //by larosel
 //
-// �����̾� ��Ż�� �����Ѵ�.
+// 슬레이어 포탈을 실행한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunSlayerPortal()
 {
@@ -3299,7 +3299,7 @@ void C_VS_UI_GAME::RunSlayerPortal()
 //-----------------------------------------------------------------------------
 // CloseSlayerPortal //by larosel
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseSlayerPortal()
 {
@@ -3325,7 +3325,7 @@ bool	C_VS_UI_GAME::IsRunningSlayerPortal() const
 //-----------------------------------------------------------------------------
 // RunTeamList //by larosel
 //
-// �����̾� ��Ż�� �����Ѵ�.
+// 슬레이어 포탈을 실행한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunTeamList(bool ready, bool IsUnion)
 {
@@ -3346,7 +3346,7 @@ void C_VS_UI_GAME::RunTeamList(bool ready, bool IsUnion)
 //-----------------------------------------------------------------------------
 // CloseTeamList //by larosel
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseTeamList()
 {
@@ -3383,7 +3383,7 @@ bool	C_VS_UI_GAME::IsRunningTeamList(bool IsUnion) const
 //-----------------------------------------------------------------------------
 // RunTeamMemberList //by larosel
 //
-// �����̾� ��Ż�� �����Ѵ�.
+// 슬레이어 포탈을 실행한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunTeamMemberList()
 {
@@ -3404,7 +3404,7 @@ void C_VS_UI_GAME::RunTeamMemberList()
 //-----------------------------------------------------------------------------
 // CloseTeamMemberList //by larosel
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseTeamMemberList()
 {
@@ -3450,7 +3450,7 @@ void C_VS_UI_GAME::RunTeamInfo(bool ready, void *info, bool IsUnion)
 //-----------------------------------------------------------------------------
 // CloseTeamInfo //by larosel
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseTeamInfo()
 {
@@ -3503,7 +3503,7 @@ void C_VS_UI_GAME::RunTeamMemberInfo(C_VS_UI_TEAM_MEMBER_INFO::MEMBER_INFO *info
 //-----------------------------------------------------------------------------
 // CloseTeamMemberInfo //by larosel
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseTeamMemberInfo()
 {
@@ -3549,7 +3549,7 @@ void C_VS_UI_GAME::RunTeamRegist(bool member, int reg_fee, int rank, char *date,
 //-----------------------------------------------------------------------------
 // CloseTeamRegist //by larosel
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseTeamRegist()
 {
@@ -3609,9 +3609,9 @@ bool	C_VS_UI_GAME::IsRunningTeamRegist() const
 }
 
 //-----------------------------------------------------------------------------
-// RunExchangeAsk ( ��ȯ�ҷ��� ��� �̸� )
+// RunExchangeAsk ( 교환할려는 사람 이름 )
 //
-// ��ȯ�Ұųİ� ���´�.
+// 교환할거냐고 묻는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunExchangeAsk(const char* pName)
 {
@@ -3711,7 +3711,7 @@ void C_VS_UI_GAME::RunFriendDeleteAsk(const char* pName)
 //-----------------------------------------------------------------------------
 // RunExchangeCancel
 //
-// ��ȯ�Ұųİ� ���´�.
+// 교환할거냐고 묻는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunExchangeCancel(const char* pName)
 {
@@ -3734,7 +3734,7 @@ void C_VS_UI_GAME::RunExchangeCancel(const char* pName)
 //-----------------------------------------------------------------------------
 // RunExchange
 //
-// ��ȯâ�� �����Ѵ�.
+// 교환창을 실행한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunExchange()
 {
@@ -4272,7 +4272,7 @@ void C_VS_UI_GAME::HotKey_Mark()
 		m_pC_hotkey->HotKey_Mark();
 }
 
-#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 	void C_VS_UI_GAME::HotKey_Inventory(bool IsCheckSubInventory)
 #else
 	void C_VS_UI_GAME::HotKey_Inventory()
@@ -4281,7 +4281,7 @@ void C_VS_UI_GAME::HotKey_Mark()
 	assert(m_pC_hotkey);
 
 	//if (!gpC_window_manager->GetShowState(m_pC_gamemenu))
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 		if (!m_pC_gamemenu)
 			m_pC_hotkey->HotKey_Inventory(IsCheckSubInventory);
 	#else
@@ -4407,14 +4407,14 @@ void C_VS_UI_GAME::HotKey_ExtendChat()		// ctrl + e
 void C_VS_UI_GAME::HotKey_ESC()
 {
 	//
-	// ESCŰ�� �ۿ�
+	// ESC키의 작용
 	//
-	// (1) Window�� �̵����ΰ�? -> Window�� ������Ų��.
-	// (2) ��ư�� ������ �ִ°�? -> ������ �����Ѵ�.
-	// (3) Popup Window�� �� �ִ°�? -> Window�� �ݴ´�.
-	// (3-2) event lock�� �����Ѵ�.
-	// (4) Item�� ��� �ִ°�? -> GameMenu�� ȣ���Ѵ�. �̶��� ��� Mouse pointer�� Item�� �ƴ�
-	//										������ ������ ���Ѵ�.
+	// (1) Window가 이동중인가? -> Window를 정지시킨다.
+	// (2) 버튼을 누르고 있는가? -> 눌림을 해제한다.
+	// (3) Popup Window가 떠 있는가? -> Window를 닫는다.
+	// (3-2) event lock을 해제한다.
+	// (4) Item을 들고 있는가? -> GameMenu를 호출한다. 이때는 잠시 Mouse pointer는 Item이 아닌
+	//										원래의 것으로 변한다.
 	//
 
 	if( gbl_skip_escape )
@@ -4427,15 +4427,15 @@ void C_VS_UI_GAME::HotKey_ESC()
 	if (p_window != NULL) // (1)
 	{
 		p_window->ClearInputState();
-		gpC_window_manager->CancelPushStateOfCurrentPushedWindow(); // !�߿�
+		gpC_window_manager->CancelPushStateOfCurrentPushedWindow(); // !중요
 	}
 	else if (gpC_window_manager->CancelPushStateOfCurrentPushedWindow() == false) // (2)
 	{
 		//
-		// Popup Window�� ���� ���� �켱 MessageBox�� �����Ѵ�. �׵��� topmost Window��
-		// ������� ó���Ǳ� ���Ѵ�. �̰��� hot-key ��å(VS_UI.cpp ����)�� ���� ���̴�.
-		// �׷��ϱ� escape���� �� Window�� �´� ó���� �ϰ��ϱ� ���ؼ� Window�� message��
-		// ������(topmost Window��).
+		// Popup Window를 닫을 때는 우선 MessageBox를 고려한다. 그들을 topmost Window라서
+		// 가장먼저 처리되길 원한다. 이것은 hot-key 정책(VS_UI.cpp 참조)에 따른 것이다.
+		// 그러니까 escape만은 각 Window에 맞는 처리를 하게하기 위해서 Window에 message를
+		// 보낸다(topmost Window만).
 		//
 		Window * p_first_window = gpC_window_manager->GetFirstPriorityWindow();
 		if (p_first_window != NULL)
@@ -4449,9 +4449,9 @@ void C_VS_UI_GAME::HotKey_ESC()
 			}
 /*
 		//
-		// Inventory/Gear�� �ѽ��� Popup Window�� ����. �� ���� ���� �� �ִٸ� ���� ������ ���̴�.
-		// �׵��� pinned Window�̹Ƿ� �����Ǿ� �ִ� ���� Interface���� no pinned Window�� ����
-		// ��µȴ�. ���� Inventory/Gear -> Other Window ������ close�Ѵ�.
+		// Inventory/Gear는 한쌍의 Popup Window로 본다. 이 둘이 같이 떠 있다면 같이 닫히는 것이다.
+		// 그들은 pinned Window이므로 고정되어 있는 상점 Interface같은 no pinned Window의 위에
+		// 출력된다. 따라서 Inventory/Gear -> Other Window 순으로 close한다.
 		//
 		if (m_pC_tribe_interface->CloseInventoryGearWindow() == false)
 		{
@@ -4688,7 +4688,7 @@ void C_VS_UI_GAME::Start()
 		ChangeToOustersInterface();		
 	}	
 
-	// Client ���� Inventory data structure.
+	// Client 공용 Inventory data structure.
 	g_pInventory->Init(C_VS_UI_INVENTORY::GRID_X, C_VS_UI_INVENTORY::GRID_Y);
 	g_pSlayerGear->Init();
 	g_pVampireGear->Init();
@@ -4730,7 +4730,7 @@ void C_VS_UI_GAME::SelectSkill(int id)
 //-----------------------------------------------------------------------------
 // RequestDie
 //
-// ����-_-��û? ������ ���
+// 다이-_-신청? 아이콘 띄움
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RequestDie(DWORD timer)
 {
@@ -4748,7 +4748,7 @@ void C_VS_UI_GAME::RequestDie(DWORD timer)
 //-----------------------------------------------------------------------------
 // FinishRequestDie
 //
-// ��Ƽ��û ������ ����
+// 파티신청 아이콘 닫음
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::FinishRequestDie()
 {
@@ -4775,7 +4775,7 @@ bool	C_VS_UI_GAME::IsRunningRequestDie() const
 //-----------------------------------------------------------------------------
 // RequestParty
 //
-// ��Ƽ��û ������ ���
+// 파티신청 아이콘 띄움
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RequestParty(const char *name, DWORD timer)
 {
@@ -4793,7 +4793,7 @@ void C_VS_UI_GAME::RequestParty(const char *name, DWORD timer)
 //-----------------------------------------------------------------------------
 // FinishRequestParty
 //
-// ��Ƽ��û ������ ����
+// 파티신청 아이콘 닫음
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::FinishRequestParty()
 {
@@ -4824,9 +4824,9 @@ bool	C_VS_UI_GAME::IsRunningPartyAsk() const
 }
 
 //-----------------------------------------------------------------------------
-// RunPartyAsk ( ��û�� ��� �̸� )
+// RunPartyAsk ( 신청한 사람 이름 )
 //
-// ��Ƽ�� �����Ұųİ� ���´�.
+// 파티에 가입할거냐고 묻는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunPartyAsk(const char* pName, C_VS_UI_REQUEST_PARTY::REQUEST_PARTY type)
 {
@@ -4857,7 +4857,7 @@ void C_VS_UI_GAME::RunPartyAsk(const char* pName, C_VS_UI_REQUEST_PARTY::REQUEST
 //-----------------------------------------------------------------------------
 // RunPartyCancel
 //
-// ��Ƽ�� �����ϴ°� ��Ѹ�����..
+// 파티에 참가하는거 기둘리는중..
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunPartyCancel(const char* pName)
 {
@@ -4880,7 +4880,7 @@ void C_VS_UI_GAME::RunPartyCancel(const char* pName)
 //-----------------------------------------------------------------------------
 // RunEnchant
 //
-// Enchant�ҷ� �ϰ� ������...
+// Enchant할래 하고 묻는중...
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunEnchant(int value)
 {
@@ -4903,7 +4903,7 @@ void C_VS_UI_GAME::RunEnchant(int value)
 //-----------------------------------------------------------------------------
 // CloseEnchant
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseEnchant()
 {
@@ -4923,9 +4923,9 @@ void C_VS_UI_GAME::CloseEnchant()
 //-----------------------------------------------------------------------------
 // RunUsePetFood
 //
-// �� ���� ���Ϸ� �ϰ� ������...
+// 펫 먹이 먹일래 하고 묻는중...
 //-----------------------------------------------------------------------------
-#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 	void C_VS_UI_GAME::RunUsePetFood(DWORD UsingObjectID, MItem* SubInventory)
 #else
 	void C_VS_UI_GAME::RunUsePetFood()
@@ -4938,7 +4938,7 @@ void C_VS_UI_GAME::CloseEnchant()
 	
 	// center
 
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 		m_pC_use_pet_food_dialog = new C_VS_UI_ASK_DIALOG(-1, 50, 5, 1, ExecF_UsePetFood, DIALOG_CANCEL | DIALOG_OK, 
 			C_VS_UI_ASK_DIALOG::ASK_USE_PET_FOOD, UsingObjectID, SubInventory);	// by sigi
 	#else
@@ -4957,7 +4957,7 @@ void C_VS_UI_GAME::CloseEnchant()
 //-----------------------------------------------------------------------------
 // CloseUsePetFood
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseUsePetFood()
 {
@@ -4976,7 +4976,7 @@ void C_VS_UI_GAME::CloseUsePetFood()
 //-----------------------------------------------------------------------------
 // RunKeepPetItemFood
 //
-// ���� ���� �ҷ�? �ϰ� ������...
+// 펫을 보관 할래? 하고 묻는중...
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunKeepPetItemDialog()
 {
@@ -4999,7 +4999,7 @@ void C_VS_UI_GAME::RunKeepPetItemDialog()
 //-----------------------------------------------------------------------------
 // CloseKeepPetItemDialog
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseKeepPetItemDialog()
 {
@@ -5018,7 +5018,7 @@ void C_VS_UI_GAME::CloseKeepPetItemDialog()
 //-----------------------------------------------------------------------------
 // RunGetKeepPetItemDialog
 //
-// ���� ���� �ҷ�? �ϰ� ������...
+// 펫을 보관 할래? 하고 묻는중...
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunGetKeepPetItemDialog()
 {
@@ -5041,7 +5041,7 @@ void C_VS_UI_GAME::RunGetKeepPetItemDialog()
 //-----------------------------------------------------------------------------
 // CloseKeepPetItemDialog
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseGetKeepPetItemDialog()
 {
@@ -5059,7 +5059,7 @@ void C_VS_UI_GAME::CloseGetKeepPetItemDialog()
 //-----------------------------------------------------------------------------
 // RunNoSearchResult
 //
-// �˻���� ����
+// 검색결과 없음
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunNoSearchResult()
 {
@@ -5082,7 +5082,7 @@ void C_VS_UI_GAME::RunNoSearchResult()
 //-----------------------------------------------------------------------------
 // RunDepositLimit
 //
-// �˻���� ����
+// 검색결과 없음
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunDepositLimit()
 {
@@ -5120,7 +5120,7 @@ void	C_VS_UI_GAME::RunBringFeeLimit()
 //-----------------------------------------------------------------------------
 // RunWithdrawLimit
 //
-// �˻���� ����
+// 검색결과 없음
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunWithdrawLimit()
 {
@@ -5144,7 +5144,7 @@ void C_VS_UI_GAME::RunWithdrawLimit()
 //-----------------------------------------------------------------------------
 // ClosePartyAsk
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::ClosePartyAsk()
 {
@@ -5165,7 +5165,7 @@ void C_VS_UI_GAME::ClosePartyAsk()
 //-----------------------------------------------------------------------------
 // ClosePartyCancel
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::ClosePartyCancel()
 {
@@ -5185,7 +5185,7 @@ void C_VS_UI_GAME::ClosePartyCancel()
 //-----------------------------------------------------------------------------
 // CloseNoSearchResult
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseNoSearchResult()
 {
@@ -5205,7 +5205,7 @@ void C_VS_UI_GAME::CloseNoSearchResult()
 //-----------------------------------------------------------------------------
 // CloseDepositLimit
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseDepositLimit()
 {
@@ -5225,7 +5225,7 @@ void C_VS_UI_GAME::CloseDepositLimit()
 //-----------------------------------------------------------------------------
 // CloseWithdrawLimit
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseWithdrawLimit()
 {
@@ -5265,7 +5265,7 @@ void C_VS_UI_GAME::RunPartyManager()
 //-----------------------------------------------------------------------------
 // ClosePartyManager
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::ClosePartyManager()
 {
@@ -5596,7 +5596,7 @@ void	C_VS_UI_GAME::CloseTransItem()
 //-----------------------------------------------------------------------------
 // RequestResurrect
 //
-// ����-_-��û? ������ ���
+// 다이-_-신청? 아이콘 띄움
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RequestResurrect(bool f1, bool f2, bool eternity, bool IsSiegeAttacker)
 {
@@ -5622,7 +5622,7 @@ void C_VS_UI_GAME::SetDelayRequestResurrect( C_VS_UI_REQUEST_RESURRECT::RESURREC
 //-----------------------------------------------------------------------------
 // FinishRequestResurrect
 //
-// ��Ƽ��û ������ ����
+// 파티신청 아이콘 닫음
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::FinishRequestResurrect()
 {
@@ -5664,7 +5664,7 @@ void C_VS_UI_GAME::ChangeToOustersInterface()
 	g_descriptor_manager.Unset();
 
 //	gbl_vampire_interface = true;
-	g_eRaceInterface = RACE_OUSTERS; // ousters interface �߰�
+	g_eRaceInterface = RACE_OUSTERS; // ousters interface 추가
 
 	DeleteNew(m_pC_tribe_interface);
 
@@ -5718,7 +5718,7 @@ void C_VS_UI_GAME::ChangeToOustersInterface()
 //-----------------------------------------------------------------------------
 // RunMixingForge
 //
-// MixingForge�� �����Ѵ�.
+// MixingForge을 실행한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunMixingForge(C_VS_UI_MIXING_FORGE::FORGE_CLASS forge_class, C_VS_UI_MIXING_FORGE::FORGE_TYPE forge_type)
 {
@@ -5739,7 +5739,7 @@ void C_VS_UI_GAME::RunMixingForge(C_VS_UI_MIXING_FORGE::FORGE_CLASS forge_class,
 //-----------------------------------------------------------------------------
 // CloseMixingForge
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseMixingForge()
 {
@@ -6244,7 +6244,7 @@ void C_VS_UI_GAMEMENU::Run(id_t id)
 			break;
 
 		case CONTINUE:
-			//gC_vs_ui.HotKey_ESC(); // ��ư ������ �Ͱ� u_window���� push window ���� �켱���� ������ �־ �ȵ�.
+			//gC_vs_ui.HotKey_ESC(); // 버튼 눌리는 것과 u_window에서 push window 해제 우선순위 문제가 있어서 안됨.
 			gpC_base->SendMessage(UI_GAMEMENU_CONTINUE);
 			break;
 	}
@@ -6269,7 +6269,7 @@ bool C_VS_UI_GAMEMENU::MouseControl(UINT message, int _x, int _y)
 -----------------------------------------------------------------------------*/
 void C_VS_UI_GAMEMENU::KeyboardControl(UINT message, UINT key, long extra)
 {
-	// ���� IME toggle�Ǿ� ���� ��츦 ����Ͽ� scan code�� �Ѵ�.
+	// 만약 IME toggle되어 있을 경우를 대비하여 scan code로 한다.
 
 	id_t id = INVALID_ID;
 	if (message == WM_KEYDOWN)
@@ -6552,7 +6552,7 @@ void	C_VS_UI_GAME::CloseNaming()
 //-----------------------------------------------------------------------------
 // RunUseSMSItemDialog
 //
-// sms �������� ��� �ҷ�?? �ϰ� ������...
+// sms 아이템을 사용 할래?? 하고 묻는중...
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunAskUseItemDialog(int AskType)
 {
@@ -6577,7 +6577,7 @@ void C_VS_UI_GAME::RunAskUseItemDialog(int AskType)
 //-----------------------------------------------------------------------------
 // CloseKeepPetItemDialog
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseAskUseItemDialog()
 {
@@ -6650,13 +6650,13 @@ void C_VS_UI_GAME::SetNickNameList(void* pData)
 		BYTE TempType = 0;
 		std::vector<C_VS_UI_NicknameInfo*>::iterator itr = TempList->begin();
 
-		// ����Ʈ�� �� ÷�� �г��� ���ִ� �� �߰��Ѵ�. - start
+		// 리스트의 젤 첨엔 닉네임 없애는 걸 추가한다. - start
 		C_VS_UI_NicknameInfo * FirstInfo = new C_VS_UI_NicknameInfo;
 		FirstInfo->setNicknameID(0xffff);
 		FirstInfo->setNicknameType(C_VS_UI_NicknameInfo::NICK_CUSTOM);
 		FirstInfo->setNickname((*g_pNickNameStringTable)[0].GetString());
 		m_NickNameList.push_back(FirstInfo);
-		// ����Ʈ�� �� ÷�� �г��� ���ִ� �� �߰��Ѵ�. -end
+		// 리스트의 젤 첨엔 닉네임 없애는 걸 추가한다. -end
 
 		while(itr != TempList->end())
 		{
@@ -6671,7 +6671,7 @@ void C_VS_UI_GAME::SetNickNameList(void* pData)
 			TempInfo->setNicknameIndex(TempIndex);
 			TempInfo->setNicknameType(TempType);
 			
-			// Ŀ���� �г��� �϶�
+			// 커스텀 닉네임 일때
 			if(TempType == C_VS_UI_NicknameInfo::NICK_CUSTOM_FORCED)
 			{
 				TempInfo->setNickname(TempInfo2->getNickname());
@@ -6683,7 +6683,7 @@ void C_VS_UI_GAME::SetNickNameList(void* pData)
 //				else
 					TempInfo->setNickname(TempInfo2->getNickname());
 			}
-			else // �г��� �ε����� ���� ��
+			else // 닉네임 인덱스가 있을 때
 			{
 				if(TempIndex >= g_pNickNameStringTable->GetSize())
 					TempIndex = 0;
@@ -6711,13 +6711,13 @@ void C_VS_UI_GAME::AddNickNameList(void* pData)
 	TempInfo->setNicknameIndex(TempIndex);
 	TempInfo->setNicknameType(TempType);
 	
-	// Ŀ���� �г��� �϶�
+	// 커스텀 닉네임 일때
 	if(TempType == C_VS_UI_NicknameInfo::NICK_CUSTOM_FORCED ||
 		TempType == C_VS_UI_NicknameInfo::NICK_CUSTOM)
 	{
 		TempInfo->setNickname(TempInfo2->getNickname());
 	}
-	else // �г��� �ε����� ���� ��
+	else // 닉네임 인덱스가 있을 때
 	{
 		if(TempIndex >= g_pNickNameStringTable->GetSize())
 			TempIndex = 0;
@@ -6963,7 +6963,7 @@ void	C_VS_UI_GAME::DeleteQuestItem(int nSlot)
 	m_pC_quest_manager->DeleteQuestItem(nSlot);
 }
 
-// 2004, 10, 25, sobeit add start - ���� ����
+// 2004, 10, 25, sobeit add start - 세율 변경
 void	C_VS_UI_GAME::RunModifyTax()
 {
 	if(m_pC_dialog_Modify_Tax)
@@ -7129,7 +7129,7 @@ bool	C_VS_UI_GAME::IsRunningSwapAdvancementItem() const
 // 2005, 1, 3, sobeit add end
 
 
-// 2005, 1, 11, sobeit add start - �ҿ��̿����� â
+// 2005, 1, 11, sobeit add start - 불우이웃돕기 창
 void	C_VS_UI_GAME::Run_Campaign_Help_Unfortunate_Neighbors(int value)
 {
 	if(m_pC_dialog_Campaign_Help)
@@ -7144,7 +7144,7 @@ void	C_VS_UI_GAME::Run_Campaign_Help_Unfortunate_Neighbors(int value)
 // 2005, 1, 11, sobeit add end
 
 
-// 2005, 1, 17, sobeit add start - ����Ʈ ����
+// 2005, 1, 17, sobeit add start - 퀘스트 관련
 void	C_VS_UI_GAME::SetQuestNpcDialog(void* pVoid)
 {
 	if(NULL == pVoid) 
@@ -7156,8 +7156,8 @@ void	C_VS_UI_GAME::SetQuestNpcDialog(void* pVoid)
 	m_pC_Quest_Npc_Dialog->SetQuestNpcDialog((C_VS_UI_NPC_DIALOG*)pVoid);
 	
 }
-// 2005, 1, 17, sobeit add end - ����Ʈ ����
-// 2005, 1, 24, sobeit add start - ������ �ޱ� �̺�Ʈ
+// 2005, 1, 17, sobeit add end - 퀘스트 관련
+// 2005, 1, 24, sobeit add start - 아이템 받기 이벤트
 void	C_VS_UI_GAME::Run_Confirm_GetItemEvent(int value)
 {
 	if (m_pC_get_event_item != NULL)
@@ -7218,7 +7218,7 @@ bool C_VS_UI_GAME::IsInRectPointWebBrowser(int X, int Y)
 	return m_pC_WebBrowser->IsInRectPoint(X, Y);
 }
 // 2005, 2, 1, sobeit add end
-#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 
 // 2005, 2, 24, sobeit add start
 void	C_VS_UI_GAME::RunSubInventory(MItem* pItem)

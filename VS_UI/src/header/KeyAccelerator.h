@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Set Default
 //----------------------------------------------------------------------
-// default file�� �����صΰ� load�ϴ� �͵� �������� ����.
+// default file을 생성해두고 load하는 것도 괜찮을거 같다.
 //----------------------------------------------------------------------
 /*
 void				
@@ -63,7 +63,7 @@ SetDefault()
 //----------------------------------------------------------------------
 // KeyAccelerator
 //----------------------------------------------------------------------
-// key�� WORD, accel�� BYTE.. ����.. 
+// key는 WORD, accel은 BYTE.. 케케.. 
 //----------------------------------------------------------------------
 class KeyAccelerator {
 	public :
@@ -87,9 +87,9 @@ class KeyAccelerator {
 		//------------------------------------------------------------
 		// Get Accelerator / Key
 		//------------------------------------------------------------
-		BYTE				GetAccelerator(WORD key) const;			// key�� ����� accelerator�� ã�´�.
+		BYTE				GetAccelerator(WORD key) const;			// key와 연결된 accelerator를 찾는다.
 		BYTE				GetAcceleratorSimilar(WORD key) const;	// key�� ����� accelerator�� ã�´�. key������ ������ ��쵵 üũ�Ѵ�.
-		WORD				GetKey(BYTE accel) const;				// accelerator�� ����� key�� ã�´�.
+		WORD				GetKey(BYTE accel) const;				// accelerator와 연결된 key를 찾는다.
 		const char *		GetName(BYTE accel) const
 		{
 			if(accel >= MAX_ACCELERATOR)
@@ -105,7 +105,7 @@ class KeyAccelerator {
 
 
 	protected :
-		KEY_MAP				m_Keys;					// key�� accelerator�� ����
+		KEY_MAP				m_Keys;					// key를 accelerator와 연결
 		ACCELERATOR_VECTOR	m_Accelerators;			// accelerator�� key�� ����			
 };
 

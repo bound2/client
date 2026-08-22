@@ -54,7 +54,7 @@ struct S_BLOOD_BIBLE_DESCRIPTION
 	char *		sz_player;
 };
 
-// �ֹι�ȣ�ڸ���(�ѱ�)
+// 주민번호자릿수(한국)
 #define SSN_POS_COUNT					13
 #define SSN_PART1_CHAR_COUNT			6
 #define SSN_PART2_CHAR_COUNT			7
@@ -62,7 +62,7 @@ struct S_BLOOD_BIBLE_DESCRIPTION
 
 //
 // SHOW_WINDOW_ATTR�� �� Window�� Window���¸� ����ϱ� ���� ���̴�. Window�� ������ϱ� ����
-// ���� ���̴�.
+// 만든 것이다.
 //
 #if (defined(_SHOW_WINDOW_ATTR) && !defined(_LIB))
 #define SHOW_WINDOW_ATTR { \
@@ -77,7 +77,7 @@ struct S_BLOOD_BIBLE_DESCRIPTION
 //
 // set/unset background mouse focus message
 //
-// client background�� mouse focus�� set/unset�Ѵ�.
+// client background에 mouse focus를 set/unset한다.
 // �̰��� mouse pointer�� UI Window�� acquire/unacquire�� client�� �˸��� ���̴�.
 //
 #define SET_BACKGROUND_MOUSE_FOCUS	if (gpC_window_manager->GetMouseFocusedWindow() == NULL) \
@@ -87,7 +87,7 @@ struct S_BLOOD_BIBLE_DESCRIPTION
 
 #define TEXT_LINE(x)						(x*20) // 20 font height...
 
-// LOWORD, HIWORD�� �˻��Ѵ�.
+// LOWORD, HIWORD로 검색한다.
 #define MAKEDWORD(a, b)					(DWORD)((a << 16)|b)
 
 #define INTERFACE_BLINK_VALUE_MAX	4
@@ -95,14 +95,14 @@ struct S_BLOOD_BIBLE_DESCRIPTION
 extern bool gbl_global_empty_move;
 
 //
-// EMPTY_MOVE�� ������ ���콺�Է��� MOVE�� �� �� �߻��Ѵ�.
+// EMPTY_MOVE는 강제로 마우스입력의 MOVE를 한 번 발생한다.
 //
 #define EMPTY_MOVE						gbl_global_empty_move = true;
 
 //-----------------------------------------------------------------------------
 // Global definition.
 //-----------------------------------------------------------------------------
-#define PCS_NUMBER_LIMIT				7 // 7�ڸ�
+#define PCS_NUMBER_LIMIT				7 // 7자리
 
 // rgb
 #define RGB_WHITE							RGB(255, 255, 255)
@@ -162,7 +162,7 @@ enum
 };
 
 // font id
-// ������ �� �ִ� font ����.
+// 선택할 수 있는 font 정의.
 enum font_id_t
 {
 	FONT_SLAYER,
@@ -178,13 +178,13 @@ enum font_id_t
 //---------------------------------------
 struct MOUSEPOINTER_INFO
 {
-	int		x; // screen������ (x, y)
+	int		x; // screen에서의 (x, y)
 	int		y;
 	int		width;
 	int		height;
 };
 
-// Client�� login�� ������ ���� ����ü.
+// Client로 login을 보내기 위한 구조체.
 struct DELETE_CHARACTER
 {
 	char *	sz_part1;
@@ -207,7 +207,7 @@ struct NEW_REGISTRATION
 
 	char *	sz_email;
 	char *	sz_address;
-	char *	sz_ssn_number_part1; // �ֹι�ȣ
+	char *	sz_ssn_number_part1; // 주민번호
 	char *	sz_ssn_number_part2;
 	char *	sz_homepage;
 	char *	sz_woo;
@@ -239,7 +239,7 @@ struct NEW_CHARACTER
 //-----------------------------------------------------------------------------
 // Base
 //
-// ����� �����ϴ� class�̴�.
+// 기반을 정의하는 class이다.
 // VS_UI System�� ���������� ������ ������ �͵��� ��� ���⿡ ���ǵȴ�.
 //-----------------------------------------------------------------------------
 class Base
@@ -251,7 +251,7 @@ private:
 	//
 	// m_event_occured
 	//
-	// C_VS_UI_TRIBE class ����.
+	// C_VS_UI_TRIBE class 참조.
 	//
 	// event�� �߻��ϸ� set�ȴ�.
 	//
@@ -266,7 +266,7 @@ public:
 	// Video/Font defition.
 	//
 public:
-	CSpriteSurface *		m_p_DDSurface_back; // UI�� ����� surface
+	CSpriteSurface *		m_p_DDSurface_back; // UI를 출력할 surface
 	CSpriteSurface			m_DDSurface_offscreen; // effect�� ���� offscreen
 
 private:
@@ -276,9 +276,9 @@ public:
 	PrintInfo				m_small_pi;
 	PrintInfo				m_chatting_pi;
 	PrintInfo				m_user_id_pi;
-	PrintInfo				m_value_pi; // �������ĵ� ���� ����..
+	PrintInfo				m_value_pi; // 우측정렬된 멋진 숫자..
 	PrintInfo				m_value2_pi; // �������ĵ� ���� ����..
-	PrintInfo				m_item_name_pi; // !item description�� ��µ� �� ���� ����� �� �ִ�.
+	PrintInfo				m_item_name_pi; // !item description이 출력된 후 색이 변경될 수 있다.
 	PrintInfo				m_item_desc_pi;
 	PrintInfo				m_dialog_menu_pi;
 	PrintInfo				m_dialog_msg_pi;
@@ -302,7 +302,7 @@ public:
 	// xmas
 	PrintInfo				m_xmas_pi;
 	
-	PrintInfo				m_money2_pi; // ���� ���� ��
+	PrintInfo				m_money2_pi; // 우측 정렬 돈
 
 private:
 	C_VS_UI_UI_RESULT_RECEIVER		m_C_ui_result_receiver;
@@ -332,10 +332,10 @@ extern Base * gpC_base;
 extern UINT	g_blink_value;
 extern int ga_item_blink_color_table[];
 
-extern bool gbl_sell_running; // ��� ��..
+extern bool gbl_sell_running; // 사는 중..
 extern bool gbl_buy_running; // �Ĵ� ��..
 extern bool gbl_repair_running; // ��ġ�� ��...
-extern bool gbl_silvering_running; // ��ġ�� ��...
+extern bool gbl_silvering_running; // 고치는 중...
 extern bool gbl_item_lock;
 extern bool gbl_gear_lock;
 extern bool gbl_item_trade_lock;

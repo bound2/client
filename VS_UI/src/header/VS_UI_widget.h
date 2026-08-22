@@ -2,7 +2,7 @@
 
 	VS_UI_widget.h
 
-	VS UI ���� Widget.
+	VS UI 전용 Widget.
 
 	2000.6.7. KJTINC
 
@@ -130,7 +130,7 @@ public:
 				}
 
 				// !m_alpha = 0�� ���¿��� �� m_alpha--�� �� �� �ִ�. �̰��� �ð����� ���ؼ�
-				// EventFocuxX�� �ι��̻� ����Ǳ� �����̴�.
+				// EventFocuxX가 두번이상 실행되기 때문이다.
 				if (m_alpha <= 0)
 				{
 					m_alpha = 0;
@@ -168,11 +168,11 @@ class ButtonVisual
 {
 public:
 	//
-	// �ϳ��� button�� �����ϱ� ���� id�� button�� ���� flag�� ���ڷ� �Ѵ�.
+	// 하나의 button을 구별하기 위한 id와 button의 상태 flag를 인자로 한다.
 	//
 	virtual void	ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button) = 0;
 
-	// Desciption �� �ִºκп��� ȣ��ȴ�.
+	// Desciption 이 있는부분에만 호출된다.
 	// ButtonGroup::ShowDescription(); ���� ȣ���� �Ǹ�, �ʿ����� ������� ������� �ʾƵ� ��
 	virtual void	ShowButtonDescription(C_VS_UI_EVENT_BUTTON *p_button){}
 
@@ -185,7 +185,7 @@ extern Button *	gpC_press_button;
 //-----------------------------------------------------------------------------
 // ButtonGroup
 //
-// C_VS_UI_BUTTON2 object�� �����Ѵ�.
+// C_VS_UI_BUTTON2 object를 관리한다.
 //-----------------------------------------------------------------------------
 class ButtonGroup : public SimpleDataList<C_VS_UI_EVENT_BUTTON *>
 {
@@ -346,9 +346,9 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-// ��ũ�ѹ� Ŭ�����̴�
+// 스크롤바 클래스이다
 // ���������� Show�� ������ ������ �⺻ ��ũ�ѹ� spk�� ����Ѵ�.
-// �ٸ� spk�� ����ϵ��� �����Ҽ� ������, ��������Ʈ�� ������ �⺻ spk�� ���ƾ� �Ѵ�.
+// 다른 spk를 사용하도록 설정할수 있으나, 스프라이트의 순서는 기본 spk와 같아야 한다.
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 class C_VS_UI_SCROLL_BAR : public Rect
@@ -842,7 +842,7 @@ public:
 		return m_pos;
 	}
 
-	void	SetPosMax(int max)	//pos_max�� ��ũ�ѵ� �׸��� �����̴�. ���� �� ȭ�鿡 5���� �׸��� ������, �� 10���� �׸��� �ִٸ� ��ũ�Ѱ��� 0~5 ���� �����Ƿ� pos_max == 6 �̴�. 
+	void	SetPosMax(int max)	//pos_max는 스크롤될 항목의 개수이다. 만약 한 화면에 5개의 항목이 나오고, 총 10개의 항목이 있다면 스크롤값은 0~5 까지 가지므로 pos_max == 6 이다. 
 	{
 		m_pos = 0;
 		m_pos_max = max;

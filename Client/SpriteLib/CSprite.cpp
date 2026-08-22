@@ -57,7 +57,7 @@ CSprite::~CSprite()
 
 /*
 //----------------------------------------------------------------------
-// s_Pixels�� memory�� ��´�.
+// s_Pixels의 memory를 잡는다.
 //----------------------------------------------------------------------
 void
 CSprite::InitBuffer(WORD width, WORD height)
@@ -65,13 +65,13 @@ CSprite::InitBuffer(WORD width, WORD height)
 	if (width==0 || height==0)
 		return;
 
-	// memory ����
+	// memory 해제
 	ReleaseBuffer();
 
 	s_BufferWidth	= width;
 	s_BufferHeight	= height;
 
-	// �� buffer[i]�� ���� ���� ����
+	// 각 buffer[i]에 대한 길이 저장
 	s_BufferLen = new WORD [s_BufferHeight];
 
 	s_Buffer = new WORD* [s_BufferHeight];
@@ -81,7 +81,7 @@ CSprite::InitBuffer(WORD width, WORD height)
 }
 
 //----------------------------------------------------------------------
-// s_Pixels�� memory�� �����Ѵ�.
+// s_Pixels의 memory를 해제한다.
 //----------------------------------------------------------------------
 void	
 CSprite::ReleaseBuffer()
@@ -106,7 +106,7 @@ CSprite::ReleaseBuffer()
 */
 
 //----------------------------------------------------------------------
-// m_Pixels�� memory�� �����Ѵ�.
+// m_Pixels의 memory를 해제한다.
 //----------------------------------------------------------------------
 void	
 CSprite::Release()
@@ -139,57 +139,57 @@ CSprite::Release()
 void
 CSprite::operator = (const CSprite& Sprite)
 {
-		// �޸� ����
+		// 메모리 해제
 	Release();
 
 
-	// NULL�̸� �������� �ʴ´�.
+	// NULL이면 저장하지 않는다.
 	if (Sprite.m_Pixels==NULL || Sprite.m_Width==0 || Sprite.m_Height==0)
 		return;
 
-	// ũ�� ����
+	// 크기 설정
 	m_Width = Sprite.m_Width;
 	m_Height = Sprite.m_Height;
 	
-	// ���� �� �� ����
+	// 압축 된 것 저장
 	int index;	
 	register int i;
 	register int j;
 
-	// �޸� ���
+	// 메모리 잡기
 	m_Pixels = new WORD* [m_Height];
 
 	for (int i=0; i<m_Height; i++)
 	{
-		// �ݺ� ȸ���� 2 byte
+		// 반복 회수의 2 byte
 		int	count = Sprite.m_Pixels[i][0], 
 				colorCount;
 		index	= 1;
 
-		// �� line���� byte���� ��� �����ؾ��Ѵ�.
+		// 각 line마다 byte수를 세어서 저장해야한다.
 		for (j=0; j<count; j++)
 		{
 			//transCount = m_Pixels[i][index];
 			colorCount = Sprite.m_Pixels[i][index+1];
 
-			index+=2;	// �� count ��ŭ
+			index+=2;	// 두 count 만큼
 
-			index += colorCount;	// ������ �ƴѰ͸�ŭ +				
+			index += colorCount;	// 투명색 아닌것만큼 +				
 		}
 
-		// �޸� ���
+		// 메모리 잡기
 		m_Pixels[i] = new WORD [index];
 		memcpy(m_Pixels[i], Sprite.m_Pixels[i], index<<1);		
 	}
 
-	// ���� �Ϸ�
+	// 복사 완료
 	m_bInit = true;
 }
 
 //----------------------------------------------------------------------
 // Load From Buffer
 //----------------------------------------------------------------------
-// s_Buffer�� ����� Sprite�� *this�� copy��Ų��.
+// s_Buffer에 저장된 Sprite를 *this로 copy시킨다.
 //----------------------------------------------------------------------
 /*
 void
@@ -198,7 +198,7 @@ CSprite::LoadFromBuffer()
 	if (s_Width==0 || s_Height==0)
 		return;
 
-	// ���� Sprite�� memory����
+	// 현재 Sprite의 memory해제
 	Release();
 
 	m_Width	= s_Width;
@@ -215,49 +215,49 @@ CSprite::LoadFromBuffer()
 */
 
 //----------------------------------------------------------------------
-// CDirectDrawSurface�� (x,y)+(width, height)������ �о m_Pixels�� �����Ѵ�.
+// CDirectDrawSurface의 (x,y)+(width, height)영역을 읽어서 m_Pixels에 저장한다.
 //----------------------------------------------------------------------
-// m_Pixels�� 0�� ���� Format���� �ٲ۴�.
+// m_Pixels를 0번 압축 Format으로 바꾼다.
 //
-// �� line���� ������ ���� ������ ������.
+// 각 line마다 다음과 같은 구조를 가진다.
 //
-//    [�ݺ���] (������,�����,�����)(������,�����,�����)......
+//    [반복수] (투명수,색깔수,색깔들)(투명수,색깔수,색깔들)......
 //
-// �ݺ����� 2 bytes�̰�
-// �������� ������� ���� 2 byte�̰�
-// ������� ���� 2 bytes���̴�.
+// 반복수는 2 bytes이고
+// 투명수와 색깔수는 각각 2 byte이고
+// 색깔들은 각각 2 bytes씩이다.
 //
 //----------------------------------------------------------------------
-// Smart Cut �� �����ؾ� �Ѵ�.
-//           :  �׸� ȭ�Ͽ��� Ư���� ������ Sprite�� ¥�� ��
-//              ��� ������ �����ϸ� �� �������� �ܰ��κп���..
-//              �ڵ����� ������ �κ��� �����ϰ� ������ �ִ� �κи��� 
-//              �� �������� �����ϵ��� �ϴ� ��.
+// Smart Cut 을 지원해야 한다.
+//           :  그림 화일에서 특정한 영역의 Sprite를 짜를 때
+//              어느 영역을 선택하면 그 영역안의 외곽부분에서..
+//              자동으로 투명색 부분을 제거하고 색깔이 있는 부분만을 
+//              새 영역으로 선택하도록 하는 것.
 //----------------------------------------------------------------------
 void
 CSprite::SetPixel(WORD *pSource, WORD pitch, WORD width, WORD height)
 {
-	// memory����
+	// memory해제
 	Release();
 
 	m_Width = width;
 	m_Height = height;
 
-	// �ϴ� memory�� ������ ��Ƶд�.	
+	// 일단 memory를 적당히 잡아둔다.	
 	WORD*	data = new WORD[m_Width*2+10];
 
-	int		index,				// data�� index�� ���
-			lastColorIndex;		// ������ �ƴѻ� ������ �ֱ� index
-	int		count;				// �ݺ���
-	int		trans,				// ������ ����
-			color;				// ������ �ƴѻ� ����
+	int		index,				// data의 index로 사용
+			lastColorIndex;		// 투명이 아닌색 개수의 최근 index
+	int		count;				// 반복수
+	int		trans,				// 투명색 개수
+			color;				// 투명이 아닌색 개수
 
-	BOOL	bCheckTrans;		// �ֱٿ� �˻��Ѱ� �������ΰ�?
+	BOOL	bCheckTrans;		// 최근에 검사한게 투명색인가?
 
 	WORD	*pSourceTemp;
 
 
-	// height�� ��ŭ memory���
+	// height줄 만큼 memory잡기
 	m_Pixels = new WORD* [height];
 
 	register int i;
@@ -273,16 +273,16 @@ CSprite::SetPixel(WORD *pSource, WORD pitch, WORD width, WORD height)
 
 		pSourceTemp = pSource;
 
-		// �� line�� ���ؼ� ����~
+		// 각 line에 대해서 압축~
 		for (j=0; j<width; j++)
 		{
-			// 0�� color�� ���ؼ� ����
+			// 0번 color에 대해서 압축
 			if (*pSourceTemp==s_Colorkey)
 			{
-				// �ֱٿ� �˻��Ѱ� �������� �ƴϾ��ٸ�
+				// 최근에 검사한게 투명색이 아니었다면
 				if (!bCheckTrans)
 				{
-					// ' (����,�����,�����) '�� �� set�� �������� �ǹ��ϹǷ�
+					// ' (투명,색깔수,색깔들) '의 한 set가 끝났음을 의미하므로
 					count++;
 					
 					data[lastColorIndex] = color;
@@ -295,18 +295,18 @@ CSprite::SetPixel(WORD *pSource, WORD pitch, WORD width, WORD height)
 			}
 			else
 			{
-				// �ֱٿ� �˻��Ѱ� �������̾��ٸ�..
+				// 최근에 검사한게 투명색이었다면..
 				if (bCheckTrans)
 				{						
-					data[index++] = trans;		// ���� byte�� �������� �ִ´�.
+					data[index++] = trans;		// 상위 byte에 투명수를 넣는다.
 					trans = 0;
 
-					lastColorIndex=index++;			// ������� ���� ��ġ�� ���					
+					lastColorIndex=index++;			// 색깔수를 넣을 위치를 기억					
 
 					bCheckTrans = FALSE;
 				}
 
-				data[index++] = *pSourceTemp;	// ���� ������ �����Ѵ�.
+				data[index++] = *pSourceTemp;	// 실제 색깔을 저장한다.
 
 				color++;								
 			}
@@ -314,23 +314,23 @@ CSprite::SetPixel(WORD *pSource, WORD pitch, WORD width, WORD height)
 			pSourceTemp++;
 		}
 		
-		// �� ���� ������ ���� �������ΰ�?
+		// 한 줄의 마지막 점이 투명색인가?
 		if (bCheckTrans)
 		{
-			// �������̸� ���ٸ� ó���� �����൵ �ɰ� ����.
+			// 투명색이면 별다른 처리를 안해줘도 될거 같다.
 		}	
-		// �������� �ƴ� ���, ���� ������ ���������� �Ѵ�.
+		// 투명색이 아닌 경우, 점의 개수를 저장시켜줘야 한다.
 		else
 		{			
 			count++;
 			data[lastColorIndex] = color;
 		}
 		
-		// memory�� �ٽ� ��´�.
+		// memory를 다시 잡는다.
 		m_Pixels[i] = new WORD [index+1];
 
-		// m_Pixels[i]�� ���������Ƿ� data�� ��ü�Ѵ�.
-		// m_Pixels[i][0]���� count�� �־�� �Ѵ�.
+		// m_Pixels[i]를 압축했으므로 data로 대체한다.
+		// m_Pixels[i][0]에는 count를 넣어야 한다.
 		m_Pixels[i][0] = count;
 		memcpy(m_Pixels[i]+1, data, index<<1);
 
@@ -345,32 +345,32 @@ CSprite::SetPixel(WORD *pSource, WORD pitch, WORD width, WORD height)
 //----------------------------------------------------------------------
 // Set Pixel No Colorkey
 //----------------------------------------------------------------------
-// ������ ���� �����Ѵ�.
+// 투명색 없이 저장한다.
 //----------------------------------------------------------------------
 void
 CSprite::SetPixelNoColorkey(WORD *pSource, WORD pitch, WORD width, WORD height)
 {
-	// memory����
+	// memory해제
 	Release();
 
 	m_Width = width;
 	m_Height = height;
 
-	// �ϴ� memory�� ������ ��Ƶд�.	
+	// 일단 memory를 적당히 잡아둔다.	
 	WORD*	data = new WORD[m_Width*2+10];
 
-	int	index,				// data�� index�� ���
-			lastColorIndex;		// ������ �ƴѻ� ������ �ֱ� index
-	int	count;				// �ݺ���
-	int	trans,				// ������ ����
-			color;				// ������ �ƴѻ� ����
+	int	index,				// data의 index로 사용
+			lastColorIndex;		// 투명이 아닌색 개수의 최근 index
+	int	count;				// 반복수
+	int	trans,				// 투명색 개수
+			color;				// 투명이 아닌색 개수
 
-	BOOL	bCheckTrans;		// �ֱٿ� �˻��Ѱ� �������ΰ�?
+	BOOL	bCheckTrans;		// 최근에 검사한게 투명색인가?
 
 	WORD	*pSourceTemp;
 
 
-	// height�� ��ŭ memory���
+	// height줄 만큼 memory잡기
 	m_Pixels = new WORD* [height];
 
 	register int i;
@@ -386,17 +386,17 @@ CSprite::SetPixelNoColorkey(WORD *pSource, WORD pitch, WORD width, WORD height)
 
 		pSourceTemp = pSource;
 
-		// �� line�� ���ؼ� ����~
+		// 각 line에 대해서 압축~
 		for (j=0; j<width; j++)
 		{
-			// 0�� color�� ���ؼ� ����
+			// 0번 color에 대해서 압축
 			/*
 			if (*pSourceTemp==s_Colorkey)
 			{
-				// �ֱٿ� �˻��Ѱ� �������� �ƴϾ��ٸ�
+				// 최근에 검사한게 투명색이 아니었다면
 				if (!bCheckTrans)
 				{
-					// ' (����,�����,�����) '�� �� set�� �������� �ǹ��ϹǷ�
+					// ' (투명,색깔수,색깔들) '의 한 set가 끝났음을 의미하므로
 					count++;
 					
 					data[lastColorIndex] = color;
@@ -410,18 +410,18 @@ CSprite::SetPixelNoColorkey(WORD *pSource, WORD pitch, WORD width, WORD height)
 			else
 			*/
 			{
-				// �ֱٿ� �˻��Ѱ� �������̾��ٸ�..
+				// 최근에 검사한게 투명색이었다면..
 				if (bCheckTrans)
 				{						
-					data[index++] = trans;		// ���� byte�� �������� �ִ´�.
+					data[index++] = trans;		// 상위 byte에 투명수를 넣는다.
 					trans = 0;
 
-					lastColorIndex=index++;			// ������� ���� ��ġ�� ���					
+					lastColorIndex=index++;			// 색깔수를 넣을 위치를 기억					
 
 					bCheckTrans = FALSE;
 				}
 
-				data[index++] = *pSourceTemp;	// ���� ������ �����Ѵ�.
+				data[index++] = *pSourceTemp;	// 실제 색깔을 저장한다.
 
 				color++;								
 			}
@@ -429,23 +429,23 @@ CSprite::SetPixelNoColorkey(WORD *pSource, WORD pitch, WORD width, WORD height)
 			pSourceTemp++;
 		}
 		
-		// �� ���� ������ ���� �������ΰ�?
+		// 한 줄의 마지막 점이 투명색인가?
 		if (bCheckTrans)
 		{
-			// �������̸� ���ٸ� ó���� �����൵ �ɰ� ����.
+			// 투명색이면 별다른 처리를 안해줘도 될거 같다.
 		}	
-		// �������� �ƴ� ���, ���� ������ ���������� �Ѵ�.
+		// 투명색이 아닌 경우, 점의 개수를 저장시켜줘야 한다.
 		else
 		{			
 			count++;
 			data[lastColorIndex] = color;
 		}
 		
-		// memory�� �ٽ� ��´�.
+		// memory를 다시 잡는다.
 		m_Pixels[i] = new WORD [index+1];
 
-		// m_Pixels[i]�� ���������Ƿ� data�� ��ü�Ѵ�.
-		// m_Pixels[i][0]���� count�� �־�� �Ѵ�.
+		// m_Pixels[i]를 압축했으므로 data로 대체한다.
+		// m_Pixels[i][0]에는 count를 넣어야 한다.
 		m_Pixels[i][0] = count;
 		memcpy(m_Pixels[i]+1, data, index<<1);
 
@@ -468,16 +468,16 @@ CSprite::Uncompress()
 //----------------------------------------------------------------------
 // Get ColorRect
 //----------------------------------------------------------------------
-// ������ surface�� ������ �κ��� �����ϱ� ���ؼ� ����Ѵ�....
+// 지정된 surface의 투명색 부분을 제거하기 위해서 사용한다....
 //
-// pSource�� width*height��ŭ�� ��������
-// ������ �����ϴ� �κ��� �ִ� �簢 ������ ���ؼ�(������ ����)
-// rect�� �Ѱ��ش�.
+// pSource의 width*height만큼의 영역에서
+// 색깔이 존재하는 부분의 최대 사각 영역을 구해서(투명색 제외)
+// rect로 넘겨준다.
 //----------------------------------------------------------------------
 //
 //	[ Example ]
 //
-//	x : ������,  O : ����
+//	x : 투명색,  O : 색깔
 //	width = 13, height = 9
 //
 //
@@ -493,7 +493,7 @@ CSprite::Uncompress()
 //  8	xxxxxxxxxxxxx
 //
 //
-// ---> GetColorRect(...)�� �ϸ�
+// ---> GetColorRect(...)를 하면
 //
 //		0123456789012
 //  0	xxxxxxxxxxxxx
@@ -512,9 +512,9 @@ CSprite::Uncompress()
 //      rect.bottom	= 6 + 1 = 7
 //
 //
-// [ �ܺο��� ] 
+// [ 외부에서 ] 
 //
-//	new������	= old������ + (rect.left, rect.top)
+//	new시작점	= old시작점 + (rect.left, rect.top)
 //	newWidth	= rect.right - rect.left
 //	newHeight	= rect.bottom - rect.top
 //
@@ -531,7 +531,7 @@ CSprite::GetTightColorRect(WORD *pSource, WORD pitch, WORD width, WORD height, W
 	rect.bottom = 0;
 
 	//-------------------------------------------------------
-	// left ���ϱ�
+	// left 구하기
 	//-------------------------------------------------------
 	pSourceTemp = pSource;
 	for (j=0; j<width; j++)
@@ -555,7 +555,7 @@ CSprite::GetTightColorRect(WORD *pSource, WORD pitch, WORD width, WORD height, W
 	}
 
 	//-------------------------------------------------------
-	// top ���ϱ�
+	// top 구하기
 	//-------------------------------------------------------
 	pSourceTemp = pSource;
 	for (int i=0; i<height; i++)
@@ -579,7 +579,7 @@ CSprite::GetTightColorRect(WORD *pSource, WORD pitch, WORD width, WORD height, W
 	}
 
 	//-------------------------------------------------------
-	// right ���ϱ�
+	// right 구하기
 	//-------------------------------------------------------
 	pSourceTemp = (WORD*)((BYTE*)pSource + ((width-1)<<1));
 	for (j=width-1; j>=0; j--)
@@ -590,7 +590,7 @@ CSprite::GetTightColorRect(WORD *pSource, WORD pitch, WORD width, WORD height, W
 		{
 			if (*pSourceTemp2!=colorkey)
 			{
-				rect.right = j + 1;	// right�� +1
+				rect.right = j + 1;	// right는 +1
 
 				j = 0;
 				break;
@@ -603,7 +603,7 @@ CSprite::GetTightColorRect(WORD *pSource, WORD pitch, WORD width, WORD height, W
 	}
 
 	//-------------------------------------------------------
-	// bottom ���ϱ�
+	// bottom 구하기
 	//-------------------------------------------------------
 	pSourceTemp = (WORD*)((BYTE*)pSource + (height-1)*pitch);
 	for (int i=height-1; i>=0; i--)
@@ -614,7 +614,7 @@ CSprite::GetTightColorRect(WORD *pSource, WORD pitch, WORD width, WORD height, W
 		{
 			if (*pSourceTemp2!=colorkey)
 			{
-				rect.bottom = i + 1;	// bottom�� +1
+				rect.bottom = i + 1;	// bottom은 +1
 
 				i = 0;
 				break;
@@ -629,23 +629,23 @@ CSprite::GetTightColorRect(WORD *pSource, WORD pitch, WORD width, WORD height, W
 //----------------------------------------------------------------------
 // Is ColorPixel ?
 //----------------------------------------------------------------------
-// Sprite�ȿ��� (x,y)�� ������ �ִ°�?(�������� �ƴ� ���)
+// Sprite안에서 (x,y)는 색깔이 있는가?(투명색이 아닌 경우)
 //----------------------------------------------------------------------
 bool		
 CSprite::IsColorPixel(short x, short y)
 {
-	// �ʱ�ȭ �� ���
+	// 초기화 된 경우
 	if (m_bInit)
 	{
 
-		// Sprite�� ������ ����� false
+		// Sprite의 영역을 벗어나면 false
 		if (x<0 || y<0 || x>=m_Width || y>=m_Height)
 			return false;
 
-		// y��° ��
+		// y번째 줄
 		WORD	*pPixels = m_Pixels[y];
 
-		// y��° ���� �ݺ� ��
+		// y번째 줄의 반복 수
 		int	count = *pPixels++;
 
 		int	transCount, 
@@ -661,16 +661,16 @@ CSprite::IsColorPixel(short x, short y)
 
 				index += transCount;
 
-				// �̹� loop�ȿ� �����ϴ� ��
+				// 이번 loop안에 존재하는 점
 				if (x < index+colorCount)
 				{
-					// �������������� ���� ���
+					// 투명색까지보다 적은 경우
 					if (x < index)
 					{
 						return false;
 					}
 
-					// ���� ���Ѵ�.
+					// 색깔에 속한다.
 					return true;
 				}
 
@@ -686,22 +686,22 @@ CSprite::IsColorPixel(short x, short y)
 //----------------------------------------------------------------------
 // Get Pixel ?
 //----------------------------------------------------------------------
-// Sprite�ȿ��� (x,y)�� ������ ��´�.(�������� �ƴ� ���)
+// Sprite안에서 (x,y)는 색깔을 얻는다.(투명색이 아닌 경우)
 //----------------------------------------------------------------------
 WORD		
 CSprite::GetPixel(int x, int y) const
 {
-	// �ʱ�ȭ �� ���
+	// 초기화 된 경우
 	if (m_bInit)
 	{
-		// Sprite�� ������ ����� false
+		// Sprite의 영역을 벗어나면 false
 		if (x<0 || y<0 || x>=m_Width || y>=m_Height)
 			return 0;
 
-		// y��° ��
+		// y번째 줄
 		WORD	*pPixels = m_Pixels[y];
 
-		// y��° ���� �ݺ� ��
+		// y번째 줄의 반복 수
 		int	count = *pPixels++;
 
 		int	transCount, 
@@ -717,17 +717,17 @@ CSprite::GetPixel(int x, int y) const
 
 				index += transCount;
 
-				// �̹� loop�ȿ� �����ϴ� ��
+				// 이번 loop안에 존재하는 점
 				if (x < index+colorCount)
 				{
-					// �������������� ���� ���
+					// 투명색까지보다 적은 경우
 					if (x < index)
 					{
 						return 0;
 					}
 
-					// ���� ���Ѵ�.
-					// ������ return
+					// 색깔에 속한다.
+					// 색깔을 return
 					return pPixels[x-index];					
 				}
 
@@ -743,18 +743,18 @@ CSprite::GetPixel(int x, int y) const
 //----------------------------------------------------------------------
 // Is Intersect Filter
 //----------------------------------------------------------------------
-// �� Sprite�� ������ Filter�� ������ �޴��� check�Ѵ�.
+// 이 Sprite가 설정된 Filter에 영향을 받는지 check한다.
 //----------------------------------------------------------------------
 bool
 CSprite::IsIntersectFilter()
 {
-	// s_X, s_Y�� Sprite ���ο��� Filter�� ��µǴ� ������ġ�̴�.	
+	// s_X, s_Y는 Sprite 내부에서 Filter가 출력되는 시작위치이다.	
 	if (IsNotInit() || s_pFilter->IsNotInit())
 		return false;
 
-	if (// ��� ������ġ(s_X,s_Y)�� Sprite�� �������ٴ� ���� ���
+	if (// 출력 시작위치(s_X,s_Y)가 Sprite의 끝점보다는 적을 경우
 		s_X < m_Width && s_Y < m_Height
-		// Filter�� ������ Sprite ù�� ���� ū ���
+		// Filter의 끝점이 Sprite 첫점 보다 큰 경우
 		 &&	s_X+s_pFilter->GetWidth() > 0 && s_Y+s_pFilter->GetHeight() > 0)
 		{
 			return true;
@@ -766,7 +766,7 @@ CSprite::IsIntersectFilter()
 //----------------------------------------------------------------------
 // BltClip
 //----------------------------------------------------------------------
-// pRect�� ������ ����Ѵ�.
+// pRect의 영역만 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltClip(WORD* pDest, WORD pitch, RECT* pRect)
@@ -775,13 +775,13 @@ CSprite::BltClip(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------	
-	// ù �� (x,y)
+	// 첫 점 (x,y)
 	//--------------------------------------------
 	pDest += pitch * pRect->top + pRect->left;
 	//WORD width = ((pRect->right - pRect->left)<<1);
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -800,56 +800,56 @@ CSprite::BltClip(WORD* pDest, WORD pitch, RECT* pRect)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���
+		// 한 줄 출력
 		bPut = (pRect->left==0)? TRUE:FALSE;
 		index = 0;
 			
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxxOOOOOOOOOOOOOO �̰ų�  (x:��¾���, O:�����)
-		// OOOOOOOOOOOOOOxxxxx �̰�.. �� ���� ����.			
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxxOOOOOOOOOOOOOO 이거나  (x:출력안함, O:출력함)
+		// OOOOOOOOOOOOOOxxxxx 이거.. 두 가지 경우다.			
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{				
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ �ǳ� �ڴ�.
+				// 투명색만큼 건너 뛴다.
 				//lpSurfaceTemp += transCount;
 				index += transCount;
 
-				// ����ص� �Ǵ� ��쿡�� ����Ѵ�.
+				// 출력해도 되는 경우에는 출력한다.
 				if (bPut)
 				{
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 					if (index > pRect->right)
 						break;
 
 					pDestTemp += transCount;
 
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					// 투명색 아닌 것을 조금 출력해야 할 경우
 					if (index+colorCount > pRect->right)
 					{							
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						memcpy(pDestTemp, pPixels, (pRect->right - index)<<1);
 						break;
 					}						
 
-					// ��� ���
+					// 모두 출력
 					memcpy(pDestTemp, pPixels, colorCount<<1);
 					pDestTemp += colorCount;
 				}				
-				// ����ϸ� �� �� ���(���� ���ʺκ�)���� ����ص� �Ǵ��� Ȯ���غ���.
+				// 출력하면 안 될 경우(줄의 왼쪽부분)에는 출력해도 되는지 확인해본다.
 				else
 				{
-					// ������������ ������ �Ѿ���Ƿ� ��� ���
+					// 투명색만으로 범위를 넘어갔으므로 모두 출력
 					if (index > pRect->left)
 					{	
 						pDestTemp += index - pRect->left;
@@ -862,16 +862,16 @@ CSprite::BltClip(WORD* pDest, WORD pitch, RECT* pRect)
 					{
 						dist = pRect->left - index;
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						memcpy(pDestTemp, pPixels+dist, (colorCount-dist)<<1);
 						pDestTemp += colorCount-dist;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						bPut = TRUE;
 					}
 				}				
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;		
 
 				index += colorCount;
@@ -885,7 +885,7 @@ CSprite::BltClip(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // Blt
 //----------------------------------------------------------------------
-// Clipping���� �ʴ´�.
+// Clipping하지 않는다.
 //----------------------------------------------------------------------
 void
 CSprite::Blt(WORD *pDest, WORD pitch)
@@ -910,17 +910,17 @@ CSprite::Blt(WORD *pDest, WORD pitch)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,�����,�����)�� �ݺ� ��		
+			// (투명수,색깔수,색깔들)의 반복 수		
 			count	= *pPixels++;		
- 			// �� �� ���
+ 			// 한 줄 출력
 			if (count > 0)
 			{	
 				j = count;
 				do {
-					pDestTemp += *pPixels++;			// ��������ŭ �ǳ� �ڴ�.
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+					pDestTemp += *pPixels++;			// 투명색만큼 건너 뛴다.
+					colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
 
 					//int colorCount2 = colorCount;
@@ -962,8 +962,8 @@ CSprite::Blt(WORD *pDest, WORD pitch)
 //----------------------------------------------------------------------
 // Blt ClipLeft
 //----------------------------------------------------------------------
-// ���� clipping.  
-// pRect->left���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
+// 왼쪽 clipping.  
+// pRect->left개의 점을 건너띈 다음부터 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
@@ -972,7 +972,7 @@ CSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -984,7 +984,7 @@ CSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -993,91 +993,91 @@ CSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						memcpy(pDestTemp, pPixels, colorCount<<1);
 						pDestTemp += colorCount;
 						pPixels += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = rectLeft - index;
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						memcpy(pDestTemp, pPixels+dist, (colorCount-dist)<<1);					
 						pDestTemp += colorCount-dist;
 						pPixels += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			// 이제부터는 계속 출력한다.		
 			//---------------------------------------------	
 			if (--j > 0)
 			{			
 				do 
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ �ǳ� �ڴ�.
+					// 투명색만큼 건너 뛴다.
 					pDestTemp += transCount;			
 					
-					// �������� �ƴѸ�ŭ ������ش�.
+					// 투명색이 아닌만큼 출력해준다.
 					memcpy(pDestTemp, pPixels, colorCount<<1);
 
-					// memory addr ����
+					// memory addr 증가
 					pDestTemp += colorCount;
 					pPixels += colorCount;			
 				
@@ -1092,8 +1092,8 @@ CSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // Blt ClipRight
 //----------------------------------------------------------------------
-// ������ clipping.  
-// pRect->right�� ������ ���� pDest�� ����Ѵ�.
+// 오른쪽 clipping.  
+// pRect->right개 까지의 점만 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
@@ -1102,7 +1102,7 @@ CSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -1119,59 +1119,59 @@ CSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		// 각 줄마다 Clipping을 해줘야 하는데...		
+		// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 		//---------------------------------------------
 		if (count > 0)		
 		{
 			j = count;
 			do 
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����
+				// 투명색만큼 index증가
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+				// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 				//---------------------------------------------
-				// ������ ������ �������� ���
+				// 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+colorCount > rectRight)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					// 투명색만으로 더 출력할 필요가 없을 때
 					if (index > rectRight)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					// 투명색 아닌 것을 조금 출력해야 할 경우
 					else
 					{
 						pDestTemp += transCount;
 					
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						memcpy(pDestTemp, pPixels, (rectRight - index)<<1);
 						break;
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				// 투명색만큼 건너띄고
 				pDestTemp += transCount;
 
-				// ���
+				// 출력
 				memcpy(pDestTemp, pPixels, colorCount<<1);
 				pDestTemp += colorCount;
 				pPixels += colorCount;			
@@ -1186,9 +1186,9 @@ CSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // Blt ClipWidth
 //----------------------------------------------------------------------
-// ���� clipping.  
-// pRect->left���� ���� �ǳʶ� �������� pDest�� ����ϴٰ�
-// pRect->Right������ ����Ѵ�.
+// 왼쪽 clipping.  
+// pRect->left개의 점을 건너띈 다음부터 pDest에 출력하다가
+// pRect->Right까지만 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
@@ -1197,7 +1197,7 @@ CSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -1209,7 +1209,7 @@ CSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -1219,48 +1219,48 @@ CSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{		
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// �̹� �ܰ�� ��� ���?
-						// ������ ���� �Ѿ�� ���..
+						// 이번 단계는 모두 출력?
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > rectRight)
 						{							
-							// ������������ ������ �� �Ѿ�� ���
+							// 투명색만으로 오른쪽 끝 넘어가는 경우
 							if (index > rectRight)
 							{
 							}
@@ -1275,24 +1275,24 @@ CSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 							break;
 						}
 
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						memcpy(pDestTemp, pPixels, colorCount<<1);
 						pDestTemp += colorCount;
 						pPixels += colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = rectLeft - index;
 
-						// ������ ���� �Ѿ�� ���..
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > rectRight)
 						{
 							memcpy(pDestTemp, pPixels+dist, (rectRight - rectLeft)<<1);
@@ -1301,69 +1301,69 @@ CSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 							break;
 						}		
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						memcpy(pDestTemp, pPixels+dist, (colorCount-dist)<<1);					
 						pDestTemp += colorCount-dist;
 						pPixels += colorCount;		
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.					
+						// 이제부터는 계속 출력한다.					
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 
 			
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			// 각 줄마다 Clipping을 해줘야 하는데...		
+			// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do 
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����
+					// 투명색만큼 index증가
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 					//---------------------------------------------
-					// ������ ������ �������� ���
+					// 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						// 투명색만으로 더 출력할 필요가 없을 때
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						// 투명색 아닌 것을 조금 출력해야 할 경우
 						else
 						{
 							pDestTemp += transCount;
 						
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							memcpy(pDestTemp, pPixels, (rectRight - index)<<1);
 							break;
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					// 투명색만큼 건너띄고
 					pDestTemp += transCount;
 
-					// ���
+					// 출력
 					memcpy(pDestTemp, pPixels, colorCount<<1);
 					pDestTemp += colorCount;
 					pPixels += colorCount;			
@@ -1380,7 +1380,7 @@ CSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // Blt Clip Height
 //----------------------------------------------------------------------
-// pRect->top, pRect->bottom��ŭ�� ����Ѵ�.
+// pRect->top, pRect->bottom만큼만 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
@@ -1401,19 +1401,19 @@ CSprite::BltClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		// (투명수,색깔수,색깔들)의 반복 수		
 		count	= *pPixels++;		
 
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{
-				pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+				pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+				colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-				// ������ �ƴ� ������ Surface�� ����Ѵ�.
+				// 투명이 아닌 색들을 Surface에 출력한다.
 				memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
 				
 				pDestTemp	+= colorCount;
@@ -1463,12 +1463,12 @@ CSprite::memcpyDarkerFilter(WORD* pDest, WORD* pSource, BYTE* pFilter, WORD pixe
 //----------------------------------------------------------------------
 // Alpha Copy
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ s_Value1������ ����� �Ѵ�.
+// source --> dest 로 pixels만큼 s_Value1값으로 출력을 한다.
 //
 // s_Value1 = 1~32
 //
 //----------------------------------------------------------------------
-// 5:6:5 ���� code�̴�.
+// 5:6:5 전용 code이다.
 //----------------------------------------------------------------------
 /*
 void	
@@ -1480,12 +1480,12 @@ CSprite::memcpyAlphaFilter(WORD* pDest, WORD* pSource, WORD pixels)
 	register int j;
 
 	// Alpha Channel Blending
-	// ������ ���
+	// 한점씩 찍기
 	for (j=0; j<pixels; j++)
 	{		
 		//if (s_IndexX > 0 && s_IndexX < m_pFilter->GetWidth())
 		{
-			// ���� ���
+			// 한점 찍기
 			sTemp = *pSource;
 			dTemp = *pDest;
 			sb = sTemp & 0x1F;
@@ -1518,7 +1518,7 @@ CSprite::memcpyAlphaFilter(WORD* pDest, WORD* pSource, WORD pixels)
 //----------------------------------------------------------------------
 // BltHalf
 //----------------------------------------------------------------------
-// Clipping���� �ʴ´�.
+// Clipping하지 않는다.
 //----------------------------------------------------------------------
 void
 CSprite::BltHalf(WORD *pDest, WORD pitch)
@@ -1543,19 +1543,19 @@ CSprite::BltHalf(WORD *pDest, WORD pitch)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,�����,�����)�� �ݺ� ��		
+			// (투명수,색깔수,색깔들)의 반복 수		
 			count	= *pPixels++;		
 
-			// �� �� ���
+			// 한 줄 출력
 			if (count > 0)
 			{
 				j = count;
 				do 
 				{		
-					pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+					pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+					colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					CSpriteSurface::memcpyHalf(pDestTemp, pPixels, colorCount);
 					
 					pDestTemp	+= colorCount;
@@ -1571,8 +1571,8 @@ CSprite::BltHalf(WORD *pDest, WORD pitch)
 //----------------------------------------------------------------------
 // BltHalf ClipLeft
 //----------------------------------------------------------------------
-// ���� clipping.  
-// pRect->left���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
+// 왼쪽 clipping.  
+// pRect->left개의 점을 건너띈 다음부터 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltHalfClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
@@ -1581,7 +1581,7 @@ CSprite::BltHalfClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -1593,7 +1593,7 @@ CSprite::BltHalfClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -1602,91 +1602,91 @@ CSprite::BltHalfClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{		
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						CSpriteSurface::memcpyHalf(pDestTemp, pPixels, colorCount);
 						pDestTemp += colorCount;
 						pPixels += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = rectLeft - index;
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						CSpriteSurface::memcpyHalf(pDestTemp, pPixels+dist, colorCount-dist);
 						pDestTemp += colorCount-dist;
 						pPixels += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			// 이제부터는 계속 출력한다.		
 			//---------------------------------------------		
 			if (--j > 0)
 			{
 				do 
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ �ǳ� �ڴ�.
+					// 투명색만큼 건너 뛴다.
 					pDestTemp += transCount;			
 					
-					// �������� �ƴѸ�ŭ ������ش�.
+					// 투명색이 아닌만큼 출력해준다.
 					CSpriteSurface::memcpyHalf(pDestTemp, pPixels, colorCount);
 
-					// memory addr ����
+					// memory addr 증가
 					pDestTemp += colorCount;
 					pPixels += colorCount;			
 				} while (--j);
@@ -1701,8 +1701,8 @@ CSprite::BltHalfClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // BltHalf ClipRight
 //----------------------------------------------------------------------
-// ������ clipping.  
-// pRect->right�� ������ ���� pDest�� ����Ѵ�.
+// 오른쪽 clipping.  
+// pRect->right개 까지의 점만 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltHalfClipRight(WORD* pDest, WORD pitch, RECT* pRect)
@@ -1711,7 +1711,7 @@ CSprite::BltHalfClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -1728,59 +1728,59 @@ CSprite::BltHalfClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		// 각 줄마다 Clipping을 해줘야 하는데...		
+		// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����
+				// 투명색만큼 index증가
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+				// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 				//---------------------------------------------
-				// ������ ������ �������� ���
+				// 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+colorCount > rectRight)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					// 투명색만으로 더 출력할 필요가 없을 때
 					if (index > rectRight)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					// 투명색 아닌 것을 조금 출력해야 할 경우
 					else
 					{
 						pDestTemp += transCount;
 					
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						CSpriteSurface::memcpyHalf(pDestTemp, pPixels, rectRight - index);
 						break;
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				// 투명색만큼 건너띄고
 				pDestTemp += transCount;
 
-				// ���
+				// 출력
 				CSpriteSurface::memcpyHalf(pDestTemp, pPixels, colorCount);
 				pDestTemp += colorCount;
 				pPixels += colorCount;			
@@ -1795,9 +1795,9 @@ CSprite::BltHalfClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // BltHalf ClipWidth
 //----------------------------------------------------------------------
-// ���� clipping.  
-// pRect->left���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
-// rectRight����..
+// 왼쪽 clipping.  
+// pRect->left개의 점을 건너띈 다음부터 pDest에 출력한다.
+// rectRight까지..
 //----------------------------------------------------------------------
 void
 CSprite::BltHalfClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
@@ -1806,7 +1806,7 @@ CSprite::BltHalfClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -1818,7 +1818,7 @@ CSprite::BltHalfClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -1828,48 +1828,48 @@ CSprite::BltHalfClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{		
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// �̹� �ܰ�� ��� ���?
-						// ������ ���� �Ѿ�� ���..
+						// 이번 단계는 모두 출력?
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > rectRight)
 						{							
-							// ������������ ������ �� �Ѿ�� ���
+							// 투명색만으로 오른쪽 끝 넘어가는 경우
 							if (index > rectRight)
 							{
 							}
@@ -1883,24 +1883,24 @@ CSprite::BltHalfClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 							break;
 						}
 
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						CSpriteSurface::memcpyHalf(pDestTemp, pPixels, colorCount);
 						pDestTemp += colorCount;
 						pPixels += colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = rectLeft - index;
 
-						// ������ ���� �Ѿ�� ���..
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > rectRight)
 						{
 							CSpriteSurface::memcpyHalf(pDestTemp, pPixels+dist, rectRight - rectLeft);
@@ -1909,69 +1909,69 @@ CSprite::BltHalfClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 							break;
 						}					
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						CSpriteSurface::memcpyHalf(pDestTemp, pPixels+dist, colorCount-dist);
 						pDestTemp += colorCount-dist;
 						pPixels += colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			// 각 줄마다 Clipping을 해줘야 하는데...		
+			// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do 
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����
+					// 투명색만큼 index증가
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 					//---------------------------------------------
-					// ������ ������ �������� ���
+					// 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						// 투명색만으로 더 출력할 필요가 없을 때
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						// 투명색 아닌 것을 조금 출력해야 할 경우
 						else
 						{
 							pDestTemp += transCount;
 						
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							CSpriteSurface::memcpyHalf(pDestTemp, pPixels, rectRight - index);
 							break;
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					// 투명색만큼 건너띄고
 					pDestTemp += transCount;
 
-					// ���
+					// 출력
 					CSpriteSurface::memcpyHalf(pDestTemp, pPixels, colorCount);
 					pDestTemp += colorCount;
 					pPixels += colorCount;			
@@ -1988,7 +1988,7 @@ CSprite::BltHalfClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // BltHalf Clip Height
 //----------------------------------------------------------------------
-// pRect->top, pRect->bottom��ŭ�� ����Ѵ�.
+// pRect->top, pRect->bottom만큼만 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltHalfClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
@@ -2009,19 +2009,19 @@ CSprite::BltHalfClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		// (투명수,색깔수,색깔들)의 반복 수		
 		count	= *pPixels++;		
 
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{
-				pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+				pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+				colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-				// ������ �ƴ� ������ Surface�� ����Ѵ�.
+				// 투명이 아닌 색들을 Surface에 출력한다.
 				CSpriteSurface::memcpyHalf(pDestTemp, pPixels, colorCount);
 				
 				pDestTemp	+= colorCount;
@@ -2038,12 +2038,12 @@ CSprite::BltHalfClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // BltAlpha
 //----------------------------------------------------------------------
-// Clipping���� �ʴ´�.
+// Clipping하지 않는다.
 //----------------------------------------------------------------------
 void
 CSprite::BltAlpha(WORD *pDest, WORD pitch, BYTE alpha)
 {
-	// alpha Depth ����
+	// alpha Depth 설정
 	CSpriteSurface::s_Value1 = alpha;
 	CSpriteSurface::s_Value2 = 32 - alpha;
 
@@ -2068,19 +2068,19 @@ CSprite::BltAlpha(WORD *pDest, WORD pitch, BYTE alpha)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,�����,�����)�� �ݺ� ��		
+			// (투명수,색깔수,색깔들)의 반복 수		
 			count	= *pPixels++;		
 
-			// �� �� ���
+			// 한 줄 출력
 			if (count > 0)
 			{
 				j = count;
 				do 
 				{
-					pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+					pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+					colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, colorCount);
 					
 					pDestTemp	+= colorCount;
@@ -2096,13 +2096,13 @@ CSprite::BltAlpha(WORD *pDest, WORD pitch, BYTE alpha)
 //----------------------------------------------------------------------
 // BltAlpha ClipLeft
 //----------------------------------------------------------------------
-// ���� clipping.  
-// pRect->left���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
+// 왼쪽 clipping.  
+// pRect->left개의 점을 건너띈 다음부터 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltAlphaClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha)
 {
-	// alpha Depth ����
+	// alpha Depth 설정
 	CSpriteSurface::s_Value1 = alpha;
 	CSpriteSurface::s_Value2 = 32 - alpha;
 
@@ -2110,7 +2110,7 @@ CSprite::BltAlphaClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -2122,7 +2122,7 @@ CSprite::BltAlphaClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha)
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -2131,91 +2131,91 @@ CSprite::BltAlphaClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, colorCount);
 						pDestTemp += colorCount;
 						pPixels += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = rectLeft - index;
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						CSpriteSurface::memcpyAlpha(pDestTemp, pPixels+dist, colorCount-dist);
 						pDestTemp += colorCount-dist;
 						pPixels += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);		
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			// 이제부터는 계속 출력한다.		
 			//---------------------------------------------	
 			if (--j > 0)			
 			{			
 				do 
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ �ǳ� �ڴ�.
+					// 투명색만큼 건너 뛴다.
 					pDestTemp += transCount;			
 					
-					// �������� �ƴѸ�ŭ ������ش�.
+					// 투명색이 아닌만큼 출력해준다.
 					CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, colorCount);
 
-					// memory addr ����
+					// memory addr 증가
 					pDestTemp += colorCount;
 					pPixels += colorCount;			
 				} while (--j);
@@ -2230,13 +2230,13 @@ CSprite::BltAlphaClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha)
 //----------------------------------------------------------------------
 // BltAlpha ClipRight
 //----------------------------------------------------------------------
-// ������ clipping.  
-// pRect->right�� ������ ���� pDest�� ����Ѵ�.
+// 오른쪽 clipping.  
+// pRect->right개 까지의 점만 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltAlphaClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha)
 {
-	// alpha Depth ����
+	// alpha Depth 설정
 	CSpriteSurface::s_Value1 = alpha;
 	CSpriteSurface::s_Value2 = 32 - alpha;
 		
@@ -2244,7 +2244,7 @@ CSprite::BltAlphaClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -2261,59 +2261,59 @@ CSprite::BltAlphaClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		// 각 줄마다 Clipping을 해줘야 하는데...		
+		// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{		
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����
+				// 투명색만큼 index증가
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+				// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 				//---------------------------------------------
-				// ������ ������ �������� ���
+				// 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+colorCount > rectRight)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					// 투명색만으로 더 출력할 필요가 없을 때
 					if (index > rectRight)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					// 투명색 아닌 것을 조금 출력해야 할 경우
 					else
 					{
 						pDestTemp += transCount;
 					
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, rectRight - index);
 						break;
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				// 투명색만큼 건너띄고
 				pDestTemp += transCount;
 
-				// ���
+				// 출력
 				CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, colorCount);
 				pDestTemp += colorCount;
 				pPixels += colorCount;			
@@ -2328,13 +2328,13 @@ CSprite::BltAlphaClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha)
 //----------------------------------------------------------------------
 // BltAlpha ClipWidth
 //----------------------------------------------------------------------
-// ���� clipping.  
-// pRect->left���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
+// 왼쪽 clipping.  
+// pRect->left개의 점을 건너띈 다음부터 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltAlphaClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha)
 {
-	// alpha Depth ����
+	// alpha Depth 설정
 	CSpriteSurface::s_Value1 = alpha;
 	CSpriteSurface::s_Value2 = 32 - alpha;
 
@@ -2342,7 +2342,7 @@ CSprite::BltAlphaClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -2354,7 +2354,7 @@ CSprite::BltAlphaClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha)
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -2364,48 +2364,48 @@ CSprite::BltAlphaClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// �̹� �ܰ�� ��� ���?
-						// ������ ���� �Ѿ�� ���..
+						// 이번 단계는 모두 출력?
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > rectRight)
 						{							
-							// ������������ ������ �� �Ѿ�� ���
+							// 투명색만으로 오른쪽 끝 넘어가는 경우
 							if (index > rectRight)
 							{
 							}
@@ -2420,24 +2420,24 @@ CSprite::BltAlphaClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha)
 							break;
 						}
 
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, colorCount);
 						pDestTemp += colorCount;
 						pPixels += colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = rectLeft - index;
 
-						// ������ ���� �Ѿ�� ���..
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > rectRight)
 						{
 							CSpriteSurface::memcpyAlpha(pDestTemp, pPixels+dist, rectRight - rectLeft);
@@ -2446,68 +2446,68 @@ CSprite::BltAlphaClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha)
 							break;
 						}		
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						CSpriteSurface::memcpyAlpha(pDestTemp, pPixels+dist, colorCount-dist);
 						pDestTemp += colorCount-dist;
 						pPixels += colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);		
 
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			// 각 줄마다 Clipping을 해줘야 하는데...		
+			// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do 
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����
+					// 투명색만큼 index증가
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 					//---------------------------------------------
-					// ������ ������ �������� ���
+					// 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						// 투명색만으로 더 출력할 필요가 없을 때
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						// 투명색 아닌 것을 조금 출력해야 할 경우
 						else
 						{
 							pDestTemp += transCount;
 						
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, rectRight - index);
 							break;
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					// 투명색만큼 건너띄고
 					pDestTemp += transCount;
 
-					// ���
+					// 출력
 					CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, colorCount);
 					pDestTemp += colorCount;
 					pPixels += colorCount;			
@@ -2524,12 +2524,12 @@ CSprite::BltAlphaClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha)
 //----------------------------------------------------------------------
 // BltAlpha Clip Height
 //----------------------------------------------------------------------
-// pRect->top, pRect->bottom��ŭ�� ����Ѵ�.
+// pRect->top, pRect->bottom만큼만 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltAlphaClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha)
 {
-	// alpha Depth ����
+	// alpha Depth 설정
 	CSpriteSurface::s_Value1 = alpha;
 	CSpriteSurface::s_Value2 = 32 - alpha;
 
@@ -2549,19 +2549,19 @@ CSprite::BltAlphaClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha)
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		// (투명수,색깔수,색깔들)의 반복 수		
 		count	= *pPixels++;		
 
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{
-				pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+				pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+				colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-				// ������ �ƴ� ������ Surface�� ����Ѵ�.
+				// 투명이 아닌 색들을 Surface에 출력한다.
 				CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, colorCount);
 				
 				pDestTemp	+= colorCount;
@@ -2577,12 +2577,12 @@ CSprite::BltAlphaClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha)
 //----------------------------------------------------------------------
 // BltColor
 //----------------------------------------------------------------------
-// Clipping���� �ʴ´�.
+// Clipping하지 않는다.
 //----------------------------------------------------------------------
 void
 CSprite::BltColor(WORD *pDest, WORD pitch, BYTE rgb)
 {
-	// rgb�� ����
+	// rgb값 설정
 	CSpriteSurface::s_Value1 = rgb;
 
 	int		count,			
@@ -2606,19 +2606,19 @@ CSprite::BltColor(WORD *pDest, WORD pitch, BYTE rgb)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,�����,�����)�� �ݺ� ��		
+			// (투명수,색깔수,색깔들)의 반복 수		
 			count	= *pPixels++;		
 
-			// �� �� ���
+			// 한 줄 출력
 			if (count > 0)
 			{
 				j = count;
 				do 
 				{						
-					pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+					pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+					colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					CSpriteSurface::memcpyColor(pDestTemp, pPixels, colorCount);
 					
 					pDestTemp	+= colorCount;
@@ -2634,20 +2634,20 @@ CSprite::BltColor(WORD *pDest, WORD pitch, BYTE rgb)
 //----------------------------------------------------------------------
 // BltColor ClipLeft
 //----------------------------------------------------------------------
-// ���� clipping.  
-// pRect->left���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
+// 왼쪽 clipping.  
+// pRect->left개의 점을 건너띈 다음부터 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltColorClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE rgb)
 {
-	// rgb�� ����
+	// rgb값 설정
 	CSpriteSurface::s_Value1 = rgb;
 
 	WORD	*pPixels,
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -2659,7 +2659,7 @@ CSprite::BltColorClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE rgb)
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -2668,92 +2668,92 @@ CSprite::BltColorClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE rgb)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						CSpriteSurface::memcpyColor(pDestTemp, pPixels, colorCount);
 						pDestTemp += colorCount;
 						pPixels += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = rectLeft - index;
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						CSpriteSurface::memcpyColor(pDestTemp, pPixels+dist, colorCount-dist);
 						pDestTemp += colorCount-dist;
 						pPixels += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			// 이제부터는 계속 출력한다.		
 			//---------------------------------------------		
 			if (--j > 0)
 			{
 				do 
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ �ǳ� �ڴ�.
+					// 투명색만큼 건너 뛴다.
 					pDestTemp += transCount;			
 					
-					// �������� �ƴѸ�ŭ ������ش�.
+					// 투명색이 아닌만큼 출력해준다.
 					CSpriteSurface::memcpyColor(pDestTemp, pPixels, colorCount);
 
-					// memory addr ����
+					// memory addr 증가
 					pDestTemp += colorCount;
 					pPixels += colorCount;			
 				} while (--j);
@@ -2768,20 +2768,20 @@ CSprite::BltColorClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE rgb)
 //----------------------------------------------------------------------
 // BltColor ClipRight
 //----------------------------------------------------------------------
-// ������ clipping.  
-// pRect->right�� ������ ���� pDest�� ����Ѵ�.
+// 오른쪽 clipping.  
+// pRect->right개 까지의 점만 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltColorClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE rgb)
 {
-	// rgb�� ����
+	// rgb값 설정
 	CSpriteSurface::s_Value1 = rgb;
 
 	WORD	*pPixels,
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -2798,59 +2798,59 @@ CSprite::BltColorClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE rgb)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		// 각 줄마다 Clipping을 해줘야 하는데...		
+		// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����
+				// 투명색만큼 index증가
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+				// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 				//---------------------------------------------
-				// ������ ������ �������� ���
+				// 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+colorCount > rectRight)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					// 투명색만으로 더 출력할 필요가 없을 때
 					if (index > rectRight)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					// 투명색 아닌 것을 조금 출력해야 할 경우
 					else
 					{
 						pDestTemp += transCount;
 					
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						CSpriteSurface::memcpyColor(pDestTemp, pPixels, rectRight - index);
 						break;
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				// 투명색만큼 건너띄고
 				pDestTemp += transCount;
 
-				// ���
+				// 출력
 				CSpriteSurface::memcpyColor(pDestTemp, pPixels, colorCount);
 				pDestTemp += colorCount;
 				pPixels += colorCount;			
@@ -2865,21 +2865,21 @@ CSprite::BltColorClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE rgb)
 //----------------------------------------------------------------------
 // BltColor ClipWidth
 //----------------------------------------------------------------------
-// ���� clipping.  
-// pRect->left���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
-// pRect->Right����..
+// 왼쪽 clipping.  
+// pRect->left개의 점을 건너띈 다음부터 pDest에 출력한다.
+// pRect->Right까지..
 //----------------------------------------------------------------------
 void
 CSprite::BltColorClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE rgb)
 {
-	// rgb�� ����
+	// rgb값 설정
 	CSpriteSurface::s_Value1 = rgb;
 
 	WORD	*pPixels,
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -2891,7 +2891,7 @@ CSprite::BltColorClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE rgb)
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -2901,48 +2901,48 @@ CSprite::BltColorClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE rgb)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// �̹� �ܰ�� ��� ���?
-						// ������ ���� �Ѿ�� ���..
+						// 이번 단계는 모두 출력?
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > rectRight)
 						{							
-							// ������������ ������ �� �Ѿ�� ���
+							// 투명색만으로 오른쪽 끝 넘어가는 경우
 							if (index > rectRight)
 							{
 							}
@@ -2956,24 +2956,24 @@ CSprite::BltColorClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE rgb)
 							break;
 						}
 
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						CSpriteSurface::memcpyColor(pDestTemp, pPixels, colorCount);
 						pDestTemp += colorCount;
 						pPixels += colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = rectLeft - index;
 
-						// ������ ���� �Ѿ�� ���..
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > rectRight)
 						{
 							CSpriteSurface::memcpyColor(pDestTemp, pPixels+dist, rectRight - rectLeft);
@@ -2982,68 +2982,68 @@ CSprite::BltColorClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE rgb)
 							break;
 						}		
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						CSpriteSurface::memcpyColor(pDestTemp, pPixels+dist, colorCount-dist);
 						pDestTemp += colorCount-dist;
 						pPixels += colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			// 각 줄마다 Clipping을 해줘야 하는데...		
+			// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����
+					// 투명색만큼 index증가
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 					//---------------------------------------------
-					// ������ ������ �������� ���
+					// 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						// 투명색만으로 더 출력할 필요가 없을 때
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						// 투명색 아닌 것을 조금 출력해야 할 경우
 						else
 						{
 							pDestTemp += transCount;
 						
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							CSpriteSurface::memcpyColor(pDestTemp, pPixels, rectRight - index);
 							break;
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					// 투명색만큼 건너띄고
 					pDestTemp += transCount;
 
-					// ���
+					// 출력
 					CSpriteSurface::memcpyColor(pDestTemp, pPixels, colorCount);
 					pDestTemp += colorCount;
 					pPixels += colorCount;			
@@ -3060,12 +3060,12 @@ CSprite::BltColorClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE rgb)
 //----------------------------------------------------------------------
 // BltColor Clip Height
 //----------------------------------------------------------------------
-// pRect->top, pRect->bottom��ŭ�� ����Ѵ�.
+// pRect->top, pRect->bottom만큼만 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltColorClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 {
-	// rgb�� ����
+	// rgb값 설정
 	CSpriteSurface::s_Value1 = rgb;
 
 	int		count,			
@@ -3084,19 +3084,19 @@ CSprite::BltColorClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		// (투명수,색깔수,색깔들)의 반복 수		
 		count	= *pPixels++;		
 
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{
-				pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+				pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+				colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-				// ������ �ƴ� ������ Surface�� ����Ѵ�.
+				// 투명이 아닌 색들을 Surface에 출력한다.
 				CSpriteSurface::memcpyColor(pDestTemp, pPixels, colorCount);
 				
 				pDestTemp	+= colorCount;
@@ -3111,12 +3111,12 @@ CSprite::BltColorClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 //----------------------------------------------------------------------
 // BltScale
 //----------------------------------------------------------------------
-// Clipping���� �ʴ´�.
+// Clipping하지 않는다.
 //----------------------------------------------------------------------
 void
 CSprite::BltScale(WORD *pDest, WORD pitch, BYTE scale)
 {
-	// scale�� ����
+	// scale값 설정
 	CSpriteSurface::s_Value1 = scale;
 
 	int		count,			
@@ -3134,20 +3134,20 @@ CSprite::BltScale(WORD *pDest, WORD pitch, BYTE scale)
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		// (투명수,색깔수,색깔들)의 반복 수		
 		count	= *pPixels++;		
 
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{
-				pDestTemp += (*pPixels * scale);		// ��������ŭ �ǳ� �ڴ�.
+				pDestTemp += (*pPixels * scale);		// 투명색만큼 건너 뛴다.
 				pPixels++;
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+				colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-				// ������ �ƴ� ������ Surface�� ����Ѵ�.
+				// 투명이 아닌 색들을 Surface에 출력한다.
 				CSpriteSurface::memcpyScale(pDestTemp, pitch, pPixels, colorCount);
 				
 				pDestTemp	+= colorCount*scale;
@@ -3162,20 +3162,20 @@ CSprite::BltScale(WORD *pDest, WORD pitch, BYTE scale)
 //----------------------------------------------------------------------
 // BltScale ClipLeft
 //----------------------------------------------------------------------
-// ���� clipping.  
-// pRect->left���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
+// 왼쪽 clipping.  
+// pRect->left개의 점을 건너띈 다음부터 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltScaleClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE scale)
 {
-	// scale�� ����
+	// scale값 설정
 	CSpriteSurface::s_Value1 = scale;
 
 	WORD	*pPixels,
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -3187,7 +3187,7 @@ CSprite::BltScaleClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE scale)
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -3196,91 +3196,91 @@ CSprite::BltScaleClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE scale)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += (index - rectLeft)*scale;
 
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						CSpriteSurface::memcpyScale(pDestTemp, pitch, pPixels, colorCount);
 						pDestTemp += (colorCount*scale);
 						pPixels += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = rectLeft - index;
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						CSpriteSurface::memcpyScale(pDestTemp, pitch, pPixels+dist, colorCount-dist);
 						pDestTemp += (colorCount-dist)*scale;
 						pPixels += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			// 이제부터는 계속 출력한다.		
 			//---------------------------------------------		
 			if (--j > 0)
 			{
 				do 
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ �ǳ� �ڴ�.
+					// 투명색만큼 건너 뛴다.
 					pDestTemp += transCount*scale;			
 					
-					// �������� �ƴѸ�ŭ ������ش�.
+					// 투명색이 아닌만큼 출력해준다.
 					CSpriteSurface::memcpyScale(pDestTemp, pitch, pPixels, colorCount);
 
-					// memory addr ����
+					// memory addr 증가
 					pDestTemp += colorCount*scale;
 					pPixels += colorCount;			
 				} while (--j);
@@ -3295,20 +3295,20 @@ CSprite::BltScaleClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE scale)
 //----------------------------------------------------------------------
 // BltScale ClipRight
 //----------------------------------------------------------------------
-// ������ clipping.  
-// pRect->right�� ������ ���� pDest�� ����Ѵ�.
+// 오른쪽 clipping.  
+// pRect->right개 까지의 점만 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltScaleClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE scale)
 {
-	// scale�� ����
+	// scale값 설정
 	CSpriteSurface::s_Value1 = scale;
 
 	WORD	*pPixels,
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -3325,59 +3325,59 @@ CSprite::BltScaleClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE scale)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		// 각 줄마다 Clipping을 해줘야 하는데...		
+		// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����
+				// 투명색만큼 index증가
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+				// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 				//---------------------------------------------
-				// ������ ������ �������� ���
+				// 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+colorCount > rectRight)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					// 투명색만으로 더 출력할 필요가 없을 때
 					if (index > rectRight)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					// 투명색 아닌 것을 조금 출력해야 할 경우
 					else
 					{
 						pDestTemp += transCount*scale;
 					
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						CSpriteSurface::memcpyScale(pDestTemp, pitch, pPixels, rectRight - index);
 						break;
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				// 투명색만큼 건너띄고
 				pDestTemp += transCount*scale;
 
-				// ���
+				// 출력
 				CSpriteSurface::memcpyScale(pDestTemp, pitch, pPixels, colorCount);
 				pDestTemp += colorCount*scale;
 				pPixels += colorCount;			
@@ -3392,21 +3392,21 @@ CSprite::BltScaleClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE scale)
 //----------------------------------------------------------------------
 // BltScale ClipWidth
 //----------------------------------------------------------------------
-// ���� clipping.  
-// pRect->left���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
-// pRect->Right����..
+// 왼쪽 clipping.  
+// pRect->left개의 점을 건너띈 다음부터 pDest에 출력한다.
+// pRect->Right까지..
 //----------------------------------------------------------------------
 void
 CSprite::BltScaleClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE scale)
 {
-	// scale�� ����
+	// scale값 설정
 	CSpriteSurface::s_Value1 = scale;
 
 	WORD	*pPixels,
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -3418,7 +3418,7 @@ CSprite::BltScaleClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE scale)
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -3428,48 +3428,48 @@ CSprite::BltScaleClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE scale)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += (index - rectLeft)*scale;
 
-						// �̹� �ܰ�� ��� ���?
-						// ������ ���� �Ѿ�� ���..
+						// 이번 단계는 모두 출력?
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > rectRight)
 						{							
-							// ������������ ������ �� �Ѿ�� ���
+							// 투명색만으로 오른쪽 끝 넘어가는 경우
 							if (index > rectRight)
 							{
 							}
@@ -3483,24 +3483,24 @@ CSprite::BltScaleClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE scale)
 							break;
 						}
 
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						CSpriteSurface::memcpyScale(pDestTemp, pitch, pPixels, colorCount);
 						pDestTemp += (colorCount*scale);
 						pPixels += colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = rectLeft - index;
 
-						// ������ ���� �Ѿ�� ���..
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > rectRight)
 						{
 							CSpriteSurface::memcpyScale(pDestTemp, pitch, pPixels+dist, rectRight - rectLeft);
@@ -3509,68 +3509,68 @@ CSprite::BltScaleClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE scale)
 							break;
 						}		
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						CSpriteSurface::memcpyScale(pDestTemp, pitch, pPixels+dist, colorCount-dist);
 						pDestTemp += (colorCount-dist)*scale;
 						pPixels += colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			// 각 줄마다 Clipping을 해줘야 하는데...		
+			// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do 
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����
+					// 투명색만큼 index증가
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 					//---------------------------------------------
-					// ������ ������ �������� ���
+					// 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						// 투명색만으로 더 출력할 필요가 없을 때
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						// 투명색 아닌 것을 조금 출력해야 할 경우
 						else
 						{
 							pDestTemp += transCount*scale;
 						
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							CSpriteSurface::memcpyScale(pDestTemp, pitch, pPixels, rectRight - index);
 							break;
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					// 투명색만큼 건너띄고
 					pDestTemp += transCount*scale;
 
-					// ���
+					// 출력
 					CSpriteSurface::memcpyScale(pDestTemp, pitch, pPixels, colorCount);
 					pDestTemp += colorCount*scale;
 					pPixels += colorCount;			
@@ -3587,12 +3587,12 @@ CSprite::BltScaleClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE scale)
 //----------------------------------------------------------------------
 // BltScale Clip Height
 //----------------------------------------------------------------------
-// pRect->top, pRect->bottom��ŭ�� ����Ѵ�.
+// pRect->top, pRect->bottom만큼만 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltScaleClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE scale)
 {
-	// scale�� ����
+	// scale값 설정
 	CSpriteSurface::s_Value1 = scale;
 
 	int		count,			
@@ -3611,20 +3611,20 @@ CSprite::BltScaleClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE scale)
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		// (투명수,색깔수,색깔들)의 반복 수		
 		count	= *pPixels++;		
 
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{
-				pDestTemp += *pPixels * scale;		// ��������ŭ �ǳ� �ڴ�.
+				pDestTemp += *pPixels * scale;		// 투명색만큼 건너 뛴다.
 				pPixels++;
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+				colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-				// ������ �ƴ� ������ Surface�� ����Ѵ�.
+				// 투명이 아닌 색들을 Surface에 출력한다.
 				CSpriteSurface::memcpyScale(pDestTemp, pitch, pPixels, colorCount);
 				
 				pDestTemp	+= colorCount*scale;
@@ -3640,12 +3640,12 @@ CSprite::BltScaleClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE scale)
 //----------------------------------------------------------------------
 // BltDarkness
 //----------------------------------------------------------------------
-// Clipping���� �ʴ´�.
+// Clipping하지 않는다.
 //----------------------------------------------------------------------
 void
 CSprite::BltDarkness(WORD *pDest, WORD pitch, BYTE DarkBits)
 {
-	// DarkBits�� ����
+	// DarkBits값 설정
 	CSpriteSurface::s_Value1 = DarkBits;
 
 	int		count,			
@@ -3669,19 +3669,19 @@ CSprite::BltDarkness(WORD *pDest, WORD pitch, BYTE DarkBits)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,�����,�����)�� �ݺ� ��		
+			// (투명수,색깔수,색깔들)의 반복 수		
 			count	= *pPixels++;		
 
-			// �� �� ���
+			// 한 줄 출력
 			if (count > 0)
 			{
 				j = count;
 				do 
 				{
-					pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+					pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+					colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 					
 					pDestTemp	+= colorCount;
@@ -3697,20 +3697,20 @@ CSprite::BltDarkness(WORD *pDest, WORD pitch, BYTE DarkBits)
 //----------------------------------------------------------------------
 // BltDarkness ClipLeft
 //----------------------------------------------------------------------
-// ���� clipping.  
-// pRect->left���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
+// 왼쪽 clipping.  
+// pRect->left개의 점을 건너띈 다음부터 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltDarknessClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE DarkBits)
 {
-	// DarkBits�� ����
+	// DarkBits값 설정
 	CSpriteSurface::s_Value1 = DarkBits;
 
 	WORD	*pPixels,
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -3722,7 +3722,7 @@ CSprite::BltDarknessClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE DarkBits
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -3731,91 +3731,91 @@ CSprite::BltDarknessClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE DarkBits
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 						pDestTemp += colorCount;
 						pPixels += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = rectLeft - index;
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						CSpriteSurface::memcpyDarkness(pDestTemp, pPixels+dist, colorCount-dist);
 						pDestTemp += colorCount-dist;
 						pPixels += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			// 이제부터는 계속 출력한다.		
 			//---------------------------------------------		
 			if (--j > 0)
 			{
 				do
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ �ǳ� �ڴ�.
+					// 투명색만큼 건너 뛴다.
 					pDestTemp += transCount;			
 					
-					// �������� �ƴѸ�ŭ ������ش�.
+					// 투명색이 아닌만큼 출력해준다.
 					CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 
-					// memory addr ����
+					// memory addr 증가
 					pDestTemp += colorCount;
 					pPixels += colorCount;			
 				} while (--j);
@@ -3830,20 +3830,20 @@ CSprite::BltDarknessClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE DarkBits
 //----------------------------------------------------------------------
 // BltDarkness ClipRight
 //----------------------------------------------------------------------
-// ������ clipping.  
-// pRect->right�� ������ ���� pDest�� ����Ѵ�.
+// 오른쪽 clipping.  
+// pRect->right개 까지의 점만 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltDarknessClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE DarkBits)
 {
-	// DarkBits�� ����
+	// DarkBits값 설정
 	CSpriteSurface::s_Value1 = DarkBits;
 
 	WORD	*pPixels,
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -3860,59 +3860,59 @@ CSprite::BltDarknessClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE DarkBit
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		// 각 줄마다 Clipping을 해줘야 하는데...		
+		// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����
+				// 투명색만큼 index증가
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+				// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 				//---------------------------------------------
-				// ������ ������ �������� ���
+				// 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+colorCount > rectRight)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					// 투명색만으로 더 출력할 필요가 없을 때
 					if (index > rectRight)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					// 투명색 아닌 것을 조금 출력해야 할 경우
 					else
 					{
 						pDestTemp += transCount;
 					
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, rectRight - index);
 						break;
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				// 투명색만큼 건너띄고
 				pDestTemp += transCount;
 
-				// ���
+				// 출력
 				CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 				pDestTemp += colorCount;
 				pPixels += colorCount;			
@@ -3927,21 +3927,21 @@ CSprite::BltDarknessClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE DarkBit
 //----------------------------------------------------------------------
 // BltDarkness ClipWidth
 //----------------------------------------------------------------------
-// ���� clipping.  
-// pRect->left���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
-// rectRight����..
+// 왼쪽 clipping.  
+// pRect->left개의 점을 건너띈 다음부터 pDest에 출력한다.
+// rectRight까지..
 //----------------------------------------------------------------------
 void
 CSprite::BltDarknessClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE DarkBits)
 {
-	// DarkBits�� ����
+	// DarkBits값 설정
 	CSpriteSurface::s_Value1 = DarkBits;
 
 	WORD	*pPixels,
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -3953,7 +3953,7 @@ CSprite::BltDarknessClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE DarkBit
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -3963,48 +3963,48 @@ CSprite::BltDarknessClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE DarkBit
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// �̹� �ܰ�� ��� ���?
-						// ������ ���� �Ѿ�� ���..
+						// 이번 단계는 모두 출력?
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > rectRight)
 						{							
-							// ������������ ������ �� �Ѿ�� ���
+							// 투명색만으로 오른쪽 끝 넘어가는 경우
 							if (index > rectRight)
 							{
 							}
@@ -4018,24 +4018,24 @@ CSprite::BltDarknessClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE DarkBit
 							break;
 						}
 
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 						pDestTemp += colorCount;
 						pPixels += colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = rectLeft - index;
 
-						// ������ ���� �Ѿ�� ���..
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > rectRight)
 						{
 							CSpriteSurface::memcpyDarkness(pDestTemp, pPixels+dist, rectRight - rectLeft);
@@ -4044,68 +4044,68 @@ CSprite::BltDarknessClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE DarkBit
 							break;
 						}		
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						CSpriteSurface::memcpyDarkness(pDestTemp, pPixels+dist, colorCount-dist);
 						pDestTemp += colorCount-dist;
 						pPixels += colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			// 각 줄마다 Clipping을 해줘야 하는데...		
+			// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����
+					// 투명색만큼 index증가
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 					//---------------------------------------------
-					// ������ ������ �������� ���
+					// 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						// 투명색만으로 더 출력할 필요가 없을 때
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						// 투명색 아닌 것을 조금 출력해야 할 경우
 						else
 						{
 							pDestTemp += transCount;
 						
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, rectRight - index);
 							break;
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					// 투명색만큼 건너띄고
 					pDestTemp += transCount;
 
-					// ���
+					// 출력
 					CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 					pDestTemp += colorCount;
 					pPixels += colorCount;			
@@ -4122,12 +4122,12 @@ CSprite::BltDarknessClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE DarkBit
 //----------------------------------------------------------------------
 // BltDarkness Clip Height
 //----------------------------------------------------------------------
-// pRect->top, pRect->bottom��ŭ�� ����Ѵ�.
+// pRect->top, pRect->bottom만큼만 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltDarknessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE DarkBits)
 {
-	// DarkBits�� ����
+	// DarkBits값 설정
 	CSpriteSurface::s_Value1 = DarkBits;
 
 	int		count,			
@@ -4146,19 +4146,19 @@ CSprite::BltDarknessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE DarkBi
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		// (투명수,색깔수,색깔들)의 반복 수		
 		count	= *pPixels++;		
 
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{				
-				pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+				pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+				colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-				// ������ �ƴ� ������ Surface�� ����Ѵ�.
+				// 투명이 아닌 색들을 Surface에 출력한다.
 				CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 				
 				pDestTemp	+= colorCount;
@@ -4173,12 +4173,12 @@ CSprite::BltDarknessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE DarkBi
 //----------------------------------------------------------------------
 // BltColorSet
 //----------------------------------------------------------------------
-// Clipping���� �ʴ´�.
+// Clipping하지 않는다.
 //----------------------------------------------------------------------
 void
 CSprite::BltColorSet(WORD *pDest, WORD pitch, WORD colorSet)
 {
-	// colorSet�� ����
+	// colorSet값 설정
 	CSpriteSurface::s_Value1 = colorSet;
 
 	int		count,			
@@ -4202,19 +4202,19 @@ CSprite::BltColorSet(WORD *pDest, WORD pitch, WORD colorSet)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,�����,�����)�� �ݺ� ��		
+			// (투명수,색깔수,색깔들)의 반복 수		
 			count	= *pPixels++;		
 
-			// �� �� ���
+			// 한 줄 출력
 			if (count > 0)
 			{
 				j = count;
 				do 
 				{
-					pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+					pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+					colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, colorCount);
 					
 					pDestTemp	+= colorCount;
@@ -4230,20 +4230,20 @@ CSprite::BltColorSet(WORD *pDest, WORD pitch, WORD colorSet)
 //----------------------------------------------------------------------
 // BltColorSet ClipLeft
 //----------------------------------------------------------------------
-// ���� clipping.  
-// pRect->left���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
+// 왼쪽 clipping.  
+// pRect->left개의 점을 건너띈 다음부터 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltColorSetClipLeft(WORD* pDest, WORD pitch, RECT* pRect, WORD colorSet)
 {
-	// colorSet�� ����
+	// colorSet값 설정
 	CSpriteSurface::s_Value1 = colorSet;
 
 	WORD	*pPixels,
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -4255,7 +4255,7 @@ CSprite::BltColorSetClipLeft(WORD* pDest, WORD pitch, RECT* pRect, WORD colorSet
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -4264,91 +4264,91 @@ CSprite::BltColorSetClipLeft(WORD* pDest, WORD pitch, RECT* pRect, WORD colorSet
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, colorCount);
 						pDestTemp += colorCount;
 						pPixels += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = rectLeft - index;
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels+dist, colorCount-dist);
 						pDestTemp += colorCount-dist;
 						pPixels += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			// 이제부터는 계속 출력한다.		
 			//---------------------------------------------		
 			if (--j > 0)
 			{
 				do
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ �ǳ� �ڴ�.
+					// 투명색만큼 건너 뛴다.
 					pDestTemp += transCount;			
 					
-					// �������� �ƴѸ�ŭ ������ش�.
+					// 투명색이 아닌만큼 출력해준다.
 					CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, colorCount);
 
-					// memory addr ����
+					// memory addr 증가
 					pDestTemp += colorCount;
 					pPixels += colorCount;			
 				} while (--j);
@@ -4363,20 +4363,20 @@ CSprite::BltColorSetClipLeft(WORD* pDest, WORD pitch, RECT* pRect, WORD colorSet
 //----------------------------------------------------------------------
 // BltColorSet ClipRight
 //----------------------------------------------------------------------
-// ������ clipping.  
-// pRect->right�� ������ ���� pDest�� ����Ѵ�.
+// 오른쪽 clipping.  
+// pRect->right개 까지의 점만 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltColorSetClipRight(WORD* pDest, WORD pitch, RECT* pRect, WORD colorSet)
 {
-	// colorSet�� ����
+	// colorSet값 설정
 	CSpriteSurface::s_Value1 = colorSet;
 
 	WORD	*pPixels,
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -4393,59 +4393,59 @@ CSprite::BltColorSetClipRight(WORD* pDest, WORD pitch, RECT* pRect, WORD colorSe
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		// 각 줄마다 Clipping을 해줘야 하는데...		
+		// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����
+				// 투명색만큼 index증가
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+				// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 				//---------------------------------------------
-				// ������ ������ �������� ���
+				// 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+colorCount > rectRight)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					// 투명색만으로 더 출력할 필요가 없을 때
 					if (index > rectRight)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					// 투명색 아닌 것을 조금 출력해야 할 경우
 					else
 					{
 						pDestTemp += transCount;
 					
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, rectRight - index);
 						break;
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				// 투명색만큼 건너띄고
 				pDestTemp += transCount;
 
-				// ���
+				// 출력
 				CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, colorCount);
 				pDestTemp += colorCount;
 				pPixels += colorCount;			
@@ -4460,21 +4460,21 @@ CSprite::BltColorSetClipRight(WORD* pDest, WORD pitch, RECT* pRect, WORD colorSe
 //----------------------------------------------------------------------
 // BltColorSet ClipWidth
 //----------------------------------------------------------------------
-// ���� clipping.  
-// pRect->left���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
-// rectRight����..
+// 왼쪽 clipping.  
+// pRect->left개의 점을 건너띈 다음부터 pDest에 출력한다.
+// rectRight까지..
 //----------------------------------------------------------------------
 void
 CSprite::BltColorSetClipWidth(WORD* pDest, WORD pitch, RECT* pRect, WORD colorSet)
 {
-	// colorSet�� ����
+	// colorSet값 설정
 	CSpriteSurface::s_Value1 = colorSet;
 
 	WORD	*pPixels,
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -4486,7 +4486,7 @@ CSprite::BltColorSetClipWidth(WORD* pDest, WORD pitch, RECT* pRect, WORD colorSe
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -4496,48 +4496,48 @@ CSprite::BltColorSetClipWidth(WORD* pDest, WORD pitch, RECT* pRect, WORD colorSe
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// �̹� �ܰ�� ��� ���?
-						// ������ ���� �Ѿ�� ���..
+						// 이번 단계는 모두 출력?
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > rectRight)
 						{							
-							// ������������ ������ �� �Ѿ�� ���
+							// 투명색만으로 오른쪽 끝 넘어가는 경우
 							if (index > rectRight)
 							{
 							}
@@ -4551,24 +4551,24 @@ CSprite::BltColorSetClipWidth(WORD* pDest, WORD pitch, RECT* pRect, WORD colorSe
 							break;
 						}
 
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, colorCount);
 						pDestTemp += colorCount;
 						pPixels += colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = rectLeft - index;
 
-						// ������ ���� �Ѿ�� ���..
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > rectRight)
 						{
 							CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels+dist, rectRight - rectLeft);
@@ -4577,68 +4577,68 @@ CSprite::BltColorSetClipWidth(WORD* pDest, WORD pitch, RECT* pRect, WORD colorSe
 							break;
 						}		
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels+dist, colorCount-dist);
 						pDestTemp += colorCount-dist;
 						pPixels += colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			// 각 줄마다 Clipping을 해줘야 하는데...		
+			// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����
+					// 투명색만큼 index증가
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 					//---------------------------------------------
-					// ������ ������ �������� ���
+					// 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						// 투명색만으로 더 출력할 필요가 없을 때
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						// 투명색 아닌 것을 조금 출력해야 할 경우
 						else
 						{
 							pDestTemp += transCount;
 						
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, rectRight - index);
 							break;
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					// 투명색만큼 건너띄고
 					pDestTemp += transCount;
 
-					// ���
+					// 출력
 					CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, colorCount);
 					pDestTemp += colorCount;
 					pPixels += colorCount;			
@@ -4655,12 +4655,12 @@ CSprite::BltColorSetClipWidth(WORD* pDest, WORD pitch, RECT* pRect, WORD colorSe
 //----------------------------------------------------------------------
 // BltColorSet Clip Height
 //----------------------------------------------------------------------
-// pRect->top, pRect->bottom��ŭ�� ����Ѵ�.
+// pRect->top, pRect->bottom만큼만 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltColorSetClipHeight(WORD *pDest, WORD pitch, RECT* pRect, WORD colorSet)
 {
-	// colorSet�� ����
+	// colorSet값 설정
 	CSpriteSurface::s_Value1 = colorSet;
 
 	int		count,			
@@ -4679,19 +4679,19 @@ CSprite::BltColorSetClipHeight(WORD *pDest, WORD pitch, RECT* pRect, WORD colorS
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		// (투명수,색깔수,색깔들)의 반복 수		
 		count	= *pPixels++;		
 
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{				
-				pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+				pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+				colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-				// ������ �ƴ� ������ Surface�� ����Ѵ�.
+				// 투명이 아닌 색들을 Surface에 출력한다.
 				CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, colorCount);
 				
 				pDestTemp	+= colorCount;
@@ -4706,7 +4706,7 @@ CSprite::BltColorSetClipHeight(WORD *pDest, WORD pitch, RECT* pRect, WORD colorS
 //----------------------------------------------------------------------
 // BltEffect
 //----------------------------------------------------------------------
-// Clipping���� �ʴ´�.
+// Clipping하지 않는다.
 //----------------------------------------------------------------------
 void
 CSprite::BltEffect(WORD *pDest, WORD pitch)
@@ -4731,19 +4731,19 @@ CSprite::BltEffect(WORD *pDest, WORD pitch)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,�����,�����)�� �ݺ� ��		
+			// (투명수,색깔수,색깔들)의 반복 수		
 			count	= *pPixels++;		
 
-			// �� �� ���
+			// 한 줄 출력
 			if (count > 0)
 			{
 				j = count;
 				do 
 				{
-					pDestTemp += *pPixels++;			// ��������ŭ �ǳ� �ڴ�.
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+					pDestTemp += *pPixels++;			// 투명색만큼 건너 뛴다.
+					colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					CSpriteSurface::memcpyEffect(pDestTemp, pPixels, colorCount);
 					
 					pDestTemp	+= colorCount;
@@ -4759,8 +4759,8 @@ CSprite::BltEffect(WORD *pDest, WORD pitch)
 //----------------------------------------------------------------------
 // BltEffect ClipLeft
 //----------------------------------------------------------------------
-// ���� clipping.  
-// pRect->left���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
+// 왼쪽 clipping.  
+// pRect->left개의 점을 건너띈 다음부터 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltEffectClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
@@ -4769,7 +4769,7 @@ CSprite::BltEffectClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -4781,7 +4781,7 @@ CSprite::BltEffectClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -4790,91 +4790,91 @@ CSprite::BltEffectClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						CSpriteSurface::memcpyEffect(pDestTemp, pPixels, colorCount);
 						pDestTemp += colorCount;
 						pPixels += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = rectLeft - index;
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						CSpriteSurface::memcpyEffect(pDestTemp, pPixels+dist, colorCount-dist);					
 						pDestTemp += colorCount-dist;
 						pPixels += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			// 이제부터는 계속 출력한다.		
 			//---------------------------------------------		
 			if (--j > 0)
 			{
 				do 
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ �ǳ� �ڴ�.
+					// 투명색만큼 건너 뛴다.
 					pDestTemp += transCount;			
 					
-					// �������� �ƴѸ�ŭ ������ش�.
+					// 투명색이 아닌만큼 출력해준다.
 					CSpriteSurface::memcpyEffect(pDestTemp, pPixels, colorCount);
 
-					// memory addr ����
+					// memory addr 증가
 					pDestTemp += colorCount;
 					pPixels += colorCount;			
 				} while (--j);
@@ -4889,8 +4889,8 @@ CSprite::BltEffectClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // BltEffect ClipRight
 //----------------------------------------------------------------------
-// ������ clipping.  
-// pRect->right�� ������ ���� pDest�� ����Ѵ�.
+// 오른쪽 clipping.  
+// pRect->right개 까지의 점만 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltEffectClipRight(WORD* pDest, WORD pitch, RECT* pRect)
@@ -4899,7 +4899,7 @@ CSprite::BltEffectClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -4916,59 +4916,59 @@ CSprite::BltEffectClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		// 각 줄마다 Clipping을 해줘야 하는데...		
+		// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����
+				// 투명색만큼 index증가
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+				// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 				//---------------------------------------------
-				// ������ ������ �������� ���
+				// 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+colorCount > rectRight)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					// 투명색만으로 더 출력할 필요가 없을 때
 					if (index > rectRight)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					// 투명색 아닌 것을 조금 출력해야 할 경우
 					else
 					{
 						pDestTemp += transCount;
 					
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						CSpriteSurface::memcpyEffect(pDestTemp, pPixels, rectRight - index);
 						break;
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				// 투명색만큼 건너띄고
 				pDestTemp += transCount;
 
-				// ���
+				// 출력
 				CSpriteSurface::memcpyEffect(pDestTemp, pPixels, colorCount);
 				pDestTemp += colorCount;
 				pPixels += colorCount;			
@@ -4983,9 +4983,9 @@ CSprite::BltEffectClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // BltEffect ClipWidth
 //----------------------------------------------------------------------
-// ���� clipping.  
-// pRect->left���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
-// rectRight����..
+// 왼쪽 clipping.  
+// pRect->left개의 점을 건너띈 다음부터 pDest에 출력한다.
+// rectRight까지..
 //----------------------------------------------------------------------
 void
 CSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
@@ -4994,7 +4994,7 @@ CSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -5006,7 +5006,7 @@ CSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -5016,48 +5016,48 @@ CSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// �̹� �ܰ�� ��� ���?
-						// ������ ���� �Ѿ�� ���..
+						// 이번 단계는 모두 출력?
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > rectRight)
 						{							
-							// ������������ ������ �� �Ѿ�� ���
+							// 투명색만으로 오른쪽 끝 넘어가는 경우
 							if (index > rectRight)
 							{
 							}
@@ -5071,24 +5071,24 @@ CSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 							break;
 						}
 
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						CSpriteSurface::memcpyEffect(pDestTemp, pPixels, colorCount);
 						pDestTemp += colorCount;
 						pPixels += colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = rectLeft - index;
 
-						// ������ ���� �Ѿ�� ���..
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > rectRight)
 						{
 							CSpriteSurface::memcpyEffect(pDestTemp, pPixels+dist, rectRight - rectLeft);
@@ -5097,68 +5097,68 @@ CSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 							break;
 						}		
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						CSpriteSurface::memcpyEffect(pDestTemp, pPixels+dist, colorCount-dist);					
 						pDestTemp += colorCount-dist;
 						pPixels += colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			// 각 줄마다 Clipping을 해줘야 하는데...		
+			// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do 
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����
+					// 투명색만큼 index증가
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 					//---------------------------------------------
-					// ������ ������ �������� ���
+					// 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						// 투명색만으로 더 출력할 필요가 없을 때
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						// 투명색 아닌 것을 조금 출력해야 할 경우
 						else
 						{
 							pDestTemp += transCount;
 						
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							CSpriteSurface::memcpyEffect(pDestTemp, pPixels, rectRight - index);
 							break;
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					// 투명색만큼 건너띄고
 					pDestTemp += transCount;
 
-					// ���
+					// 출력
 					CSpriteSurface::memcpyEffect(pDestTemp, pPixels, colorCount);
 					pDestTemp += colorCount;
 					pPixels += colorCount;			
@@ -5174,7 +5174,7 @@ CSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // BltEffect Clip Height
 //----------------------------------------------------------------------
-// pRect->top, pRect->bottom��ŭ�� ����Ѵ�.
+// pRect->top, pRect->bottom만큼만 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltEffectClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
@@ -5195,19 +5195,19 @@ CSprite::BltEffectClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		// (투명수,색깔수,색깔들)의 반복 수		
 		count	= *pPixels++;		
 
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{				
-				pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+				pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+				colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-				// ������ �ƴ� ������ Surface�� ����Ѵ�.
+				// 투명이 아닌 색들을 Surface에 출력한다.
 				CSpriteSurface::memcpyEffect(pDestTemp, pPixels, colorCount);
 				
 				pDestTemp	+= colorCount;
@@ -5223,7 +5223,7 @@ CSprite::BltEffectClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // BltAlphaFilter
 //----------------------------------------------------------------------
-// Clipping���� �ʴ´�.
+// Clipping하지 않는다.
 //----------------------------------------------------------------------
 /*
 void
@@ -5231,7 +5231,7 @@ CSprite::BltAlphaFilter(WORD *pDest, WORD pitch, CFilter* pFilter)
 {
 	m_pFilter = pFilter;
 
-	// ��¿� �̿��� Filter�� ���ǵǾ� ���� ���� ���
+	// 출력에 이용할 Filter가 정의되어 있지 않은 경우
 	if (m_pFilter==NULL)
 		return;
 
@@ -5251,7 +5251,7 @@ CSprite::BltAlphaFilter(WORD *pDest, WORD pitch, CFilter* pFilter)
 		
 
 		s_IndexY++;
-		// i��°���� Filter�� �о�´�.		
+		// i번째줄의 Filter를 읽어온다.		
 		//if (s_IndexY >= 0 && s_IndexY < m_pFilter->GetHeight())
 		{
 			s_pFilterLine	= m_pFilter->GetFilter(s_IndexY);
@@ -5261,23 +5261,23 @@ CSprite::BltAlphaFilter(WORD *pDest, WORD pitch, CFilter* pFilter)
 		}
 		
 
-		// (������,�����,�����)�� �ݺ� ��		
+		// (투명수,색깔수,색깔들)의 반복 수		
 		count	= *pPixels++;		
 	
 
 		s_bPutFilter = false;
 
-		// �� �� ���
+		// 한 줄 출력
 		for (register int j=0; j<count; j++)
 		{				
-			s_pFilterLine += *pPixels;		// filter�� ��������ŭ �ǳʶ��.			
+			s_pFilterLine += *pPixels;		// filter도 투명색만큼 건너띈다.			
 			s_IndexX			+= *pPixels;
 
-			pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-			colorCount = *pPixels++;		// ���� �ƴ� �� ��
+			pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+			colorCount = *pPixels++;		// 투명 아닌 색 수
 			
 			if	(s_IndexY >= 0 && s_IndexY < m_pFilter->GetHeight())
-				// Filter�� �̿��ؼ� ������ �ƴ� ������ Surface�� ����Ѵ�.
+				// Filter를 이용해서 투명이 아닌 색들을 Surface에 출력한다.
 				memcpyAlphaFilter(pDestTemp, pPixels, colorCount);
 			else
 				memcpy(pDestTemp, pPixels, colorCount<<1);
@@ -5296,7 +5296,7 @@ CSprite::BltAlphaFilter(WORD *pDest, WORD pitch, CFilter* pFilter)
 //----------------------------------------------------------------------
 // Blt AlphaFilter
 //----------------------------------------------------------------------
-// Sprite�� (x,y)�� pFilter�� ...
+// Sprite의 (x,y)에 pFilter를 ...
 //
 //----------------------------------------------------------------------
 void
@@ -5327,22 +5327,22 @@ CSprite::BltAlphaFilter(WORD *pDest, WORD pitch)
 			pDestTemp	= pDest;
 
 			//------------------------------------------
-			// Filter�� ������� �ʴ� ���
+			// Filter를 출력하지 않는 경우
 			//------------------------------------------
 			if (yIndex < 0 || yIndex >= s_pFilter->GetHeight())
 			{
-				// (������,�����,�����)�� �ݺ� ��		
+				// (투명수,색깔수,색깔들)의 반복 수		
 				count	= *pPixels++;		
- 				// �� �� ���
+ 				// 한 줄 출력
 				if (count > 0)
 				{
 					j = count;
 					do 
 					{			
-						pDestTemp += *pPixels++;			// ��������ŭ �ǳ� �ڴ�.
-						colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+						pDestTemp += *pPixels++;			// 투명색만큼 건너 뛴다.
+						colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
 
 						pDestTemp	+= colorCount;
@@ -5351,47 +5351,47 @@ CSprite::BltAlphaFilter(WORD *pDest, WORD pitch)
 				}
 			}
 			//------------------------------------------
-			// Filter�� ����ؾ� �ϴ� ���
+			// Filter를 출력해야 하는 경우
 			//------------------------------------------
 			else
 			{
-				// ����ҷ��� �ٿ� ���õ� Filter�� ��´�.
+				// 출력할려는 줄에 관련된 Filter를 얻는다.
 				pFilter = s_pFilter->GetFilter( yIndex );
 				pFilter += -s_X;
-				xIndex = -s_X;		// xIndex�� x�� �̻��� ��� ����ϸ� �ȴ�.
+				xIndex = -s_X;		// xIndex가 x를 이상인 경우 출력하면 된다.
 
-				// (������,�����,�����)�� �ݺ� ��		
+				// (투명수,색깔수,색깔들)의 반복 수		
 				count	= *pPixels++;		
- 				// �� �� ���
+ 				// 한 줄 출력
 				if (count > 0)
 				{
 					j = count;
 					do 
 					{				
-						pDestTemp	+= *pPixels;			// ��������ŭ �ǳ� �ڴ�.
+						pDestTemp	+= *pPixels;			// 투명색만큼 건너 뛴다.
 						xIndex		+= *pPixels;
 						pFilter		+= *pPixels;
 						pPixels ++;
-						colorCount = *pPixels++;			// ���� �ƴ� �� ��				
+						colorCount = *pPixels++;			// 투명 아닌 색 수				
 
 						//------------------------------------------
-						// Filter�� ����ؾ� �ϴ� ���
+						// Filter를 출력해야 하는 경우
 						//------------------------------------------
 						if (xIndex >= 0)
 						{			
 							dist  = s_pFilter->GetWidth() - xIndex;
 							if (dist > 0)
 							{						
-								// Filter�� �˳��� ���
+								// Filter가 넉넉한 경우
 								if (dist >= colorCount)
 								{
-									// ������ �ƴ� ������ Surface�� ����Ѵ�.
+									// 투명이 아닌 색들을 Surface에 출력한다.
 									memcpyAlphaFilter(pDestTemp, pPixels, pFilter, colorCount);
 								}
-								// Filter�� ������ ���
+								// Filter가 부족한 경우
 								else
 								{
-									// dist��ŭ�� Filter���
+									// dist만큼만 Filter출력
 									memcpyAlphaFilter(pDestTemp, pPixels, pFilter, dist);
 									memcpy((void*)(pDestTemp+dist), (void*)(pPixels+dist), (colorCount-dist)<<1);
 								}
@@ -5401,35 +5401,35 @@ CSprite::BltAlphaFilter(WORD *pDest, WORD pitch)
 								memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
 							}
 						}
-						// xIndex�� ����(-)�� ���
+						// xIndex가 음수(-)인 경우
 						else
 						{					
 							dist = s_pFilter->GetWidth() - xIndex ;
 
-							// �� ���� �ǳʼ�.. Filter�� ����ؾ� �ϴ� ���
+							// 몇 점을 건너서.. Filter를 출력해야 하는 경우
 							if (xIndex+colorCount > 0)
 							{							
-								// Filter�� ������ ���
+								// Filter가 부족한 경우
 								if (s_pFilter->GetWidth() < xIndex+colorCount)
 								{	
 									memcpy((void*)pDestTemp, (void*)pPixels, (-xIndex)<<1);
-									// Filter���
+									// Filter출력
 									memcpyAlphaFilter(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, s_pFilter->GetWidth());
 									
 									// - -;;
 									memcpy((void*)(pDestTemp+dist), (void*)(pPixels+dist), (colorCount-dist)<<1);
 								}
-								// Filter�� �˳��� ���
+								// Filter가 넉넉한 경우
 								else
 								{							
 									memcpy((void*)pDestTemp, (void*)pPixels, (-xIndex)<<1);
-									// dist��ŭ�� Filter���
+									// dist만큼만 Filter출력
 									memcpyAlphaFilter(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, colorCount+xIndex);
 								}						
 							}
 							else
 							{
-								// ������ �ƴ� ������ Surface�� ����Ѵ�.
+								// 투명이 아닌 색들을 Surface에 출력한다.
 								memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
 							}
 						}
@@ -5459,7 +5459,7 @@ CSprite::BltAlphaFilterClipLeft(WORD *pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -5477,7 +5477,7 @@ CSprite::BltAlphaFilterClipLeft(WORD *pDest, WORD pitch, RECT* pRect)
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -5487,96 +5487,96 @@ CSprite::BltAlphaFilterClipLeft(WORD *pDest, WORD pitch, RECT* pRect)
 		pDestTemp = pDest;	
 		
 		//------------------------------------------
-		// Filter�� ������� �ʴ� ���
+		// Filter를 출력하지 않는 경우
 		//------------------------------------------
 		if (yIndex < 0 || yIndex >= s_pFilter->GetHeight())
 		{
-			// (������,�����,�����)�� �ݺ� ��
+			// (투명수,색깔수,색깔들)의 반복 수
 			count = *pPixels++;		
 
-			// �� �� ���		
+			// 한 줄 출력		
 			index = 0;
 			
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...
-			// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+			// 각 줄마다 Clipping을 해줘야 하는데...
+			// xxxxOOOOOOOOOOOOOO인 경우이므로..
 			//---------------------------------------------
-			// xxxx�κб��� check���ִ� ��ƾ
+			// xxxx부분까지 check해주는 루틴
 			//---------------------------------------------
 			if (count > 0)
 			{
 				j = count;
 				do 
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����			
+					// 투명색만큼 index증가			
 					index += transCount;
 					
 				
 					//---------------------------------------------
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					if (index+colorCount > rectLeft)
 					{
 						//---------------------------------------------
-						// ������������ xxxx������ �Ѿ�� ���
+						// 투명색만으로 xxxx범위를 넘어갔을 경우
 						//---------------------------------------------
 						if (index > rectLeft)
 						{	
-							// �������κ� �ǳʶ�
+							// 투명색부분 건너띔
 							pDestTemp += index - rectLeft;
 
-							// �̹� �ܰ�� ��� ���
+							// 이번 단계는 모두 출력
 							memcpy(pDestTemp, pPixels, colorCount<<1);
 							pDestTemp += colorCount;
 							pPixels += colorCount;
 
-							// �������ʹ� ��� ����Ѵ�.
+							// 이제부터는 계속 출력한다.
 							break;
 						}
 						//---------------------------------------------
-						// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-						// xxxx������ �Ѿ�� �Ǵ� ���
+						// 투명색+투명아닌색의 일부까지 출력하면 
+						// xxxx범위를 넘어가게 되는 경우
 						//---------------------------------------------
 						else
 						{
 							dist = rectLeft - index;
 
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							memcpy(pDestTemp, pPixels+dist, (colorCount-dist)<<1);					
 							pDestTemp += colorCount-dist;
 							pPixels += colorCount;
 
-							// �������ʹ� ��� ����Ѵ�.
+							// 이제부터는 계속 출력한다.
 							break;
 						}
 					}					
 
-					// ������ �ƴ� ����ŭ index����				
+					// 투명이 아닌 색만큼 index증가				
 					pPixels += colorCount;
 					index += colorCount;
 				} while (--j);
 			
 
 				//---------------------------------------------
-				// �������ʹ� ��� ����Ѵ�.		
+				// 이제부터는 계속 출력한다.		
 				//---------------------------------------------		
 				if (--j > 0)
 				{
 					do 
 					{
-						transCount = *pPixels++;		// ������ ��			
-						colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+						transCount = *pPixels++;		// 투명색 수			
+						colorCount = *pPixels++;		// 투명 아닌 색 수			
 								
-						// ��������ŭ �ǳ� �ڴ�.
+						// 투명색만큼 건너 뛴다.
 						pDestTemp += transCount;			
 						
-						// �������� �ƴѸ�ŭ ������ش�.
+						// 투명색이 아닌만큼 출력해준다.
 						memcpy(pDestTemp, pPixels, colorCount<<1);
 
-						// memory addr ����
+						// memory addr 증가
 						pDestTemp += colorCount;
 						pPixels += colorCount;			
 					} while (--j);
@@ -5584,73 +5584,73 @@ CSprite::BltAlphaFilterClipLeft(WORD *pDest, WORD pitch, RECT* pRect)
 			}
 		}
 		//------------------------------------------
-		// Filter�� ����ؾ� �ϴ� ���
+		// Filter를 출력해야 하는 경우
 		//------------------------------------------
 		else
 		{
-			// ����ҷ��� �ٿ� ���õ� Filter�� ��´�.
+			// 출력할려는 줄에 관련된 Filter를 얻는다.
 			pFilter = s_pFilter->GetFilter( yIndex );
 			pFilter += -s_X;
 			xIndex = -s_X;
 
-			// (������,�����,�����)�� �ݺ� ��
+			// (투명수,색깔수,색깔들)의 반복 수
 			count = *pPixels++;		
 
-			// �� �� ���		
+			// 한 줄 출력		
 			index = 0;
 			
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...
-			// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+			// 각 줄마다 Clipping을 해줘야 하는데...
+			// xxxxOOOOOOOOOOOOOO인 경우이므로..
 			//---------------------------------------------
-			// xxxx�κб��� check���ִ� ��ƾ
+			// xxxx부분까지 check해주는 루틴
 			//---------------------------------------------
 			if (count > 0)
 			{
 				j = count;
 				do 
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��					
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수					
 							
-					// ��������ŭ index����			
+					// 투명색만큼 index증가			
 					index += transCount;				
 				
 					//---------------------------------------------
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					if (index+colorCount > rectLeft)
 					{
 						//---------------------------------------------
-						// ������������ xxxx������ �Ѿ�� ���
+						// 투명색만으로 xxxx범위를 넘어갔을 경우
 						//---------------------------------------------
 						if (index > rectLeft)
 						{	
-							// �������κ� �ǳʶ�
+							// 투명색부분 건너띔
 							pDestTemp += index - rectLeft;
 							xIndex += transCount;//index - rectLeft;
 							pFilter += transCount;//index - rectLeft;
 
-							// �̹� �ܰ�� ��� ���
+							// 이번 단계는 모두 출력
 							//memcpy(pDestTemp, pPixels, colorCount<<1);
 							//------------------------------------------
-							// Filter�� ����ؾ� �ϴ� ���
+							// Filter를 출력해야 하는 경우
 							//------------------------------------------
 							if (xIndex >= 0)
 							{			
 								dist2  = s_pFilter->GetWidth() - xIndex;
 								if (dist2 > 0)
 								{						
-									// Filter�� �˳��� ���
+									// Filter가 넉넉한 경우
 									if (dist2 >= colorCount)
 									{
-										// ������ �ƴ� ������ Surface�� ����Ѵ�.
+										// 투명이 아닌 색들을 Surface에 출력한다.
 										memcpyAlphaFilter(pDestTemp, pPixels, pFilter, colorCount);
 									}
-									// Filter�� ������ ���
+									// Filter가 부족한 경우
 									else
 									{
-										// dist2��ŭ�� Filter���
+										// dist2만큼만 Filter출력
 										memcpyAlphaFilter(pDestTemp, pPixels, pFilter, dist2);
 										memcpy((void*)(pDestTemp+dist2), (void*)(pPixels+dist2), (colorCount-dist2)<<1);
 									}
@@ -5660,35 +5660,35 @@ CSprite::BltAlphaFilterClipLeft(WORD *pDest, WORD pitch, RECT* pRect)
 									memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
 								}
 							}
-							// xIndex�� ����(-)�� ���
+							// xIndex가 음수(-)인 경우
 							else
 							{					
 								dist2 = s_pFilter->GetWidth() - xIndex ;
 
-								// �� ���� �ǳʼ�.. Filter�� ����ؾ� �ϴ� ���
+								// 몇 점을 건너서.. Filter를 출력해야 하는 경우
 								if (xIndex+colorCount > 0)
 								{							
-									// Filter�� ������ ���
+									// Filter가 부족한 경우
 									if (s_pFilter->GetWidth() < xIndex+colorCount)
 									{	
 										memcpy((void*)pDestTemp, (void*)pPixels, (-xIndex)<<1);
-										// Filter���
+										// Filter출력
 										memcpyAlphaFilter(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, s_pFilter->GetWidth());
 										
 										// - -;;
 										memcpy((void*)(pDestTemp+dist2), (void*)(pPixels+dist2), (colorCount-dist2)<<1);
 									}
-									// Filter�� �˳��� ���
+									// Filter가 넉넉한 경우
 									else
 									{							
 										memcpy((void*)pDestTemp, (void*)pPixels, (-xIndex)<<1);
-										// dist2��ŭ�� Filter���
+										// dist2만큼만 Filter출력
 										memcpyAlphaFilter(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, colorCount+xIndex);
 									}						
 								}
 								else
 								{
-									// ������ �ƴ� ������ Surface�� ����Ѵ�.
+									// 투명이 아닌 색들을 Surface에 출력한다.
 									memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
 								}
 							}
@@ -5698,12 +5698,12 @@ CSprite::BltAlphaFilterClipLeft(WORD *pDest, WORD pitch, RECT* pRect)
 							pFilter		+= colorCount;
 
 
-							// �������ʹ� ��� ����Ѵ�.
+							// 이제부터는 계속 출력한다.
 							break;
 						}
 						//---------------------------------------------
-						// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-						// xxxx������ �Ѿ�� �Ǵ� ���
+						// 투명색+투명아닌색의 일부까지 출력하면 
+						// xxxx범위를 넘어가게 되는 경우
 						//---------------------------------------------
 						else
 						{	
@@ -5712,29 +5712,29 @@ CSprite::BltAlphaFilterClipLeft(WORD *pDest, WORD pitch, RECT* pRect)
 							xIndex	+= transCount + dist;
 							pFilter	+= transCount + dist;
 
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							//memcpy(pDestTemp, pPixels+dist, (colorCount-dist)<<1);					
 							//pDestTemp += colorCount-dist;
 							//pPixels += colorCount;
 							
 							//------------------------------------------
-							// Filter�� ����ؾ� �ϴ� ���
+							// Filter를 출력해야 하는 경우
 							//------------------------------------------
 							if (xIndex >= 0)
 							{			
 								dist2  = s_pFilter->GetWidth() - xIndex;
 								if (dist2 > 0)
 								{						
-									// Filter�� �˳��� ���
+									// Filter가 넉넉한 경우
 									if (dist2 >= colorCount-dist)
 									{
-										// ������ �ƴ� ������ Surface�� ����Ѵ�.
+										// 투명이 아닌 색들을 Surface에 출력한다.
 										memcpyAlphaFilter(pDestTemp, pPixels+dist, pFilter, colorCount-dist);
 									}
-									// Filter�� ������ ���
+									// Filter가 부족한 경우
 									else
 									{
-										// dist2��ŭ�� Filter���
+										// dist2만큼만 Filter출력
 										memcpyAlphaFilter(pDestTemp, pPixels+dist, pFilter, dist2);
 										memcpy((void*)(pDestTemp+dist2), (void*)(pPixels+dist+dist2), (colorCount-dist - dist2)<<1);
 									}								
@@ -5744,35 +5744,35 @@ CSprite::BltAlphaFilterClipLeft(WORD *pDest, WORD pitch, RECT* pRect)
 									memcpy((void*)pDestTemp, (void*)(pPixels+dist), (colorCount-dist)<<1);
 								}							
 							}
-							// xIndex�� ����(-)�� ���
+							// xIndex가 음수(-)인 경우
 							else
 							{					
 								dist2 = s_pFilter->GetWidth() - xIndex ;
 
-								// �� ���� �ǳʼ�.. Filter�� ����ؾ� �ϴ� ���
+								// 몇 점을 건너서.. Filter를 출력해야 하는 경우
 								if (xIndex+colorCount-dist > 0)
 								{							
-									// Filter�� ������ ���
+									// Filter가 부족한 경우
 									if (s_pFilter->GetWidth() < xIndex+(colorCount-dist))
 									{	
 										memcpy((void*)pDestTemp, (void*)(pPixels+dist), (-xIndex)<<1);
-										// Filter���
+										// Filter출력
 										memcpyAlphaFilter(pDestTemp-xIndex, pPixels+dist-xIndex, pFilter-xIndex, s_pFilter->GetWidth());
 										
 										// - -;;
 										memcpy((void*)(pDestTemp+dist2), (void*)(pPixels+dist+dist2), (colorCount-dist - dist2)<<1);
 									}
-									// Filter�� �˳��� ���
+									// Filter가 넉넉한 경우
 									else
 									{							
 										memcpy((void*)pDestTemp, (void*)(pPixels+dist), (-xIndex)<<1);
-										// dist2��ŭ�� Filter���
+										// dist2만큼만 Filter출력
 										memcpyAlphaFilter(pDestTemp-xIndex, pPixels+dist-xIndex, pFilter-xIndex, (colorCount-dist)+xIndex);
 									}						
 								}
 								else
 								{
-									// ������ �ƴ� ������ Surface�� ����Ѵ�.
+									// 투명이 아닌 색들을 Surface에 출력한다.
 									memcpy((void*)pDestTemp, (void*)(pPixels+dist), (colorCount-dist)<<1);
 								}
 							}
@@ -5782,18 +5782,18 @@ CSprite::BltAlphaFilterClipLeft(WORD *pDest, WORD pitch, RECT* pRect)
 							xIndex	+= colorCount-dist;
 							pFilter += colorCount-dist;
 							
-							// �������ʹ� ��� ����Ѵ�.
+							// 이제부터는 계속 출력한다.
 							break;
 						}
 						
 							
 					}	
 					
-					// ������ �κ� ����
+					// 투명색 부분 증가
 					xIndex += transCount;
 					pFilter += transCount;
 
-					// ������ �ƴ� ����ŭ index����				
+					// 투명이 아닌 색만큼 index증가				
 					pPixels += colorCount;
 					index	+= colorCount;
 					xIndex	+= colorCount;
@@ -5802,38 +5802,38 @@ CSprite::BltAlphaFilterClipLeft(WORD *pDest, WORD pitch, RECT* pRect)
 			
 			
 				//---------------------------------------------
-				// �������ʹ� ��� ����Ѵ�.		
+				// 이제부터는 계속 출력한다.		
 				//---------------------------------------------		
 				if (--j > 0)
 				{
 					do
 					{
-						transCount = *pPixels++;		// ������ ��			
-						colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+						transCount = *pPixels++;		// 투명색 수			
+						colorCount = *pPixels++;		// 투명 아닌 색 수			
 								
-						// ��������ŭ �ǳ� �ڴ�.
+						// 투명색만큼 건너 뛴다.
 						pDestTemp	+= transCount;			
 						xIndex		+= transCount;
 						pFilter		+= transCount;
 
 						//------------------------------------------
-						// Filter�� ����ؾ� �ϴ� ���
+						// Filter를 출력해야 하는 경우
 						//------------------------------------------
 						if (xIndex >= 0)
 						{			
 							dist2  = s_pFilter->GetWidth() - xIndex;
 							if (dist2 > 0)
 							{						
-								// Filter�� �˳��� ���
+								// Filter가 넉넉한 경우
 								if (dist2 >= colorCount)
 								{
-									// ������ �ƴ� ������ Surface�� ����Ѵ�.
+									// 투명이 아닌 색들을 Surface에 출력한다.
 									memcpyAlphaFilter(pDestTemp, pPixels, pFilter, colorCount);
 								}
-								// Filter�� ������ ���
+								// Filter가 부족한 경우
 								else
 								{
-									// dist2��ŭ�� Filter���
+									// dist2만큼만 Filter출력
 									memcpyAlphaFilter(pDestTemp, pPixels, pFilter, dist2);
 									memcpy((void*)(pDestTemp+dist2), (void*)(pPixels+dist2), (colorCount-dist2)<<1);
 								}
@@ -5843,40 +5843,40 @@ CSprite::BltAlphaFilterClipLeft(WORD *pDest, WORD pitch, RECT* pRect)
 								memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
 							}
 						}
-						// xIndex�� ����(-)�� ���
+						// xIndex가 음수(-)인 경우
 						else
 						{					
 							dist2 = s_pFilter->GetWidth() - xIndex ;
 
-							// �� ���� �ǳʼ�.. Filter�� ����ؾ� �ϴ� ���
+							// 몇 점을 건너서.. Filter를 출력해야 하는 경우
 							if (xIndex+colorCount > 0)
 							{							
-								// Filter�� ������ ���
+								// Filter가 부족한 경우
 								if (s_pFilter->GetWidth() < xIndex+colorCount)
 								{	
 									memcpy((void*)pDestTemp, (void*)pPixels, (-xIndex)<<1);
-									// Filter���
+									// Filter출력
 									memcpyAlphaFilter(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, s_pFilter->GetWidth());
 									
 									// - -;;
 									memcpy((void*)(pDestTemp+dist2), (void*)(pPixels+dist2), (colorCount-dist2)<<1);
 								}
-								// Filter�� �˳��� ���
+								// Filter가 넉넉한 경우
 								else
 								{							
 									memcpy((void*)pDestTemp, (void*)pPixels, (-xIndex)<<1);
-									// dist2��ŭ�� Filter���
+									// dist2만큼만 Filter출력
 									memcpyAlphaFilter(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, colorCount+xIndex);
 								}						
 							}
 							else
 							{
-								// ������ �ƴ� ������ Surface�� ����Ѵ�.
+								// 투명이 아닌 색들을 Surface에 출력한다.
 								memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
 							}
 						}
 
-						// memory addr ����
+						// memory addr 증가
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;		
 						xIndex		+= colorCount;
@@ -5901,7 +5901,7 @@ CSprite::BltAlphaFilterClipRight(WORD *pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -5925,63 +5925,63 @@ CSprite::BltAlphaFilterClipRight(WORD *pDest, WORD pitch, RECT* pRect)
 		pDestTemp = pDest;	
 		
 		//------------------------------------------
-		// Filter�� ������� �ʴ� ���
+		// Filter를 출력하지 않는 경우
 		//------------------------------------------
 		if (yIndex < 0 || yIndex >= s_pFilter->GetHeight())
 		{
-			// (������,�����,�����)�� �ݺ� ��
+			// (투명수,색깔수,색깔들)의 반복 수
 			count = *pPixels++;		
 
-			// �� �� ���		
+			// 한 줄 출력		
 			index = 0;
 				
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			// 각 줄마다 Clipping을 해줘야 하는데...		
+			// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 			//---------------------------------------------
 			if (count > 0)
 			{
 				j = count;
 				do 
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����
+					// 투명색만큼 index증가
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 					//---------------------------------------------
-					// ������ ������ �������� ���
+					// 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						// 투명색만으로 더 출력할 필요가 없을 때
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						// 투명색 아닌 것을 조금 출력해야 할 경우
 						else
 						{
 							pDestTemp += transCount;
 						
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.						
+							// 투명이 아닌 색들을 Surface에 출력한다.						
 							memcpy((void*)pDestTemp, (void*)pPixels, (rectRight-index)<<1);
 							break;
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					// 투명색만큼 건너띄고
 					pDestTemp += transCount;
 
-					// ���
+					// 출력
 					memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
 					pDestTemp += colorCount;
 					pPixels += colorCount;			
@@ -5990,54 +5990,54 @@ CSprite::BltAlphaFilterClipRight(WORD *pDest, WORD pitch, RECT* pRect)
 			}
 		}
 		//------------------------------------------
-		// Filter�� ����ϴ� ���
+		// Filter를 출력하는 경우
 		//------------------------------------------
 		else
 		{
-			// ����ҷ��� �ٿ� ���õ� Filter�� ��´�.
+			// 출력할려는 줄에 관련된 Filter를 얻는다.
 			pFilter = s_pFilter->GetFilter( yIndex );
 			pFilter += -s_X;
 			xIndex = -s_X;		
 
-			// (������,�����,�����)�� �ݺ� ��
+			// (투명수,색깔수,색깔들)의 반복 수
 			count = *pPixels++;		
 
-			// �� �� ���		
+			// 한 줄 출력		
 			index = 0;
 				
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			// 각 줄마다 Clipping을 해줘야 하는데...		
+			// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 			//---------------------------------------------
 			if (count > 0)
 			{
 				j = count;
 				do 
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����
+					// 투명색만큼 index증가
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 					//---------------------------------------------
-					// ������ ������ �������� ���
+					// 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						// 투명색만으로 더 출력할 필요가 없을 때
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						// 투명색 아닌 것을 조금 출력해야 할 경우
 						else
 						{
 							pDestTemp	+= transCount;
@@ -6046,26 +6046,26 @@ CSprite::BltAlphaFilterClipRight(WORD *pDest, WORD pitch, RECT* pRect)
 
 							dist		= rectRight - index;
 						
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							//memcpy((void*)pDestTemp, (void*)pPixels, (rectRight - index)<<1);
 							//------------------------------------------
-							// Filter�� ����ؾ� �ϴ� ���
+							// Filter를 출력해야 하는 경우
 							//------------------------------------------
 							if (xIndex >= 0)
 							{	
 								dist2  = s_pFilter->GetWidth() - xIndex;
 								if (dist2 > 0)
 								{						
-									// Filter�� �˳��� ���
+									// Filter가 넉넉한 경우
 									if (dist2 >= dist)
 									{
-										// ������ �ƴ� ������ Surface�� ����Ѵ�.
+										// 투명이 아닌 색들을 Surface에 출력한다.
 										memcpyAlphaFilter(pDestTemp, pPixels, pFilter, dist);
 									}
-									// Filter�� ������ ���
+									// Filter가 부족한 경우
 									else
 									{
-										// dist2��ŭ�� Filter���
+										// dist2만큼만 Filter출력
 										memcpyAlphaFilter(pDestTemp, pPixels, pFilter, dist2);
 										memcpy((void*)(pDestTemp+dist2), (void*)(pPixels+dist2), (dist - dist2)<<1);
 									}
@@ -6075,19 +6075,19 @@ CSprite::BltAlphaFilterClipRight(WORD *pDest, WORD pitch, RECT* pRect)
 									memcpy((void*)pDestTemp, (void*)pPixels, dist<<1);
 								}
 							}
-							// xIndex�� ����(-)�� ���
+							// xIndex가 음수(-)인 경우
 							else
 							{					
 								dist2 = s_pFilter->GetWidth() - xIndex ;
 
-								// �� ���� �ǳʼ�.. Filter�� ����ؾ� �ϴ� ���
+								// 몇 점을 건너서.. Filter를 출력해야 하는 경우
 								if (xIndex + dist > 0)
 								{							
-									// Filter�� ������ ���
+									// Filter가 부족한 경우
 									if (s_pFilter->GetWidth() < xIndex+colorCount)
 									{	
 										memcpy((void*)pDestTemp, (void*)pPixels, (-xIndex)<<1);
-										// Filter���
+										// Filter출력
 										memcpyAlphaFilter(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, s_pFilter->GetWidth());
 										
 										// - -;;
@@ -6097,17 +6097,17 @@ CSprite::BltAlphaFilterClipRight(WORD *pDest, WORD pitch, RECT* pRect)
 											memcpy((void*)(pDestTemp+dist2), (void*)(pPixels+dist2), di<<1);
 										}
 									}
-									// Filter�� �˳��� ���
+									// Filter가 넉넉한 경우
 									else
 									{							
 										memcpy((void*)pDestTemp, (void*)pPixels, (-xIndex)<<1);
-										// dist2��ŭ�� Filter���
+										// dist2만큼만 Filter출력
 										memcpyAlphaFilter(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, dist + xIndex);
 									}						
 								}
 								else
 								{
-									// ������ �ƴ� ������ Surface�� ����Ѵ�.
+									// 투명이 아닌 색들을 Surface에 출력한다.
 									memcpy((void*)pDestTemp, (void*)pPixels, dist<<1);
 								}
 							}
@@ -6115,30 +6115,30 @@ CSprite::BltAlphaFilterClipRight(WORD *pDest, WORD pitch, RECT* pRect)
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					// 투명색만큼 건너띄고
 					pDestTemp	+= transCount;
 					xIndex		+= transCount;
 					pFilter		+= transCount;
 
-					// ���
+					// 출력
 					//------------------------------------------
-					// Filter�� ����ؾ� �ϴ� ���
+					// Filter를 출력해야 하는 경우
 					//------------------------------------------
 					if (xIndex >= 0)
 					{			
 						dist2  = s_pFilter->GetWidth() - xIndex;
 						if (dist2 > 0)
 						{						
-							// Filter�� �˳��� ���
+							// Filter가 넉넉한 경우
 							if (dist2 >= colorCount)
 							{
-								// ������ �ƴ� ������ Surface�� ����Ѵ�.
+								// 투명이 아닌 색들을 Surface에 출력한다.
 								memcpyAlphaFilter(pDestTemp, pPixels, pFilter, colorCount);
 							}
-							// Filter�� ������ ���
+							// Filter가 부족한 경우
 							else
 							{
-								// dist2��ŭ�� Filter���
+								// dist2만큼만 Filter출력
 								memcpyAlphaFilter(pDestTemp, pPixels, pFilter, dist2);
 								memcpy((void*)(pDestTemp+dist2), (void*)(pPixels+dist2), (colorCount-dist2)<<1);
 							}
@@ -6148,35 +6148,35 @@ CSprite::BltAlphaFilterClipRight(WORD *pDest, WORD pitch, RECT* pRect)
 							memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
 						}
 					}
-					// xIndex�� ����(-)�� ���
+					// xIndex가 음수(-)인 경우
 					else
 					{					
 						dist2 = s_pFilter->GetWidth() - xIndex ;
 
-						// �� ���� �ǳʼ�.. Filter�� ����ؾ� �ϴ� ���
+						// 몇 점을 건너서.. Filter를 출력해야 하는 경우
 						if (xIndex+colorCount > 0)
 						{							
-							// Filter�� ������ ���
+							// Filter가 부족한 경우
 							if (s_pFilter->GetWidth() < xIndex+colorCount)
 							{	
 								memcpy((void*)pDestTemp, (void*)pPixels, (-xIndex)<<1);
-								// Filter���
+								// Filter출력
 								memcpyAlphaFilter(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, s_pFilter->GetWidth());
 								
 								// - -;;
 								memcpy((void*)(pDestTemp+dist2), (void*)(pPixels+dist2), (colorCount-dist2)<<1);
 							}
-							// Filter�� �˳��� ���
+							// Filter가 넉넉한 경우
 							else
 							{							
 								memcpy((void*)pDestTemp, (void*)pPixels, (-xIndex)<<1);
-								// dist2��ŭ�� Filter���
+								// dist2만큼만 Filter출력
 								memcpyAlphaFilter(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, colorCount+xIndex);
 							}						
 						}
 						else
 						{
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
 						}
 					}
@@ -6202,8 +6202,8 @@ CSprite::BltAlphaFilterClipRight(WORD *pDest, WORD pitch, RECT* pRect)
 //
 // [BUG]
 //
-//   "�����κ�+����"�� �� ȭ��(800)�� �Ѿ ���..
-//   �� ���̿� Filter���� �����ؼ� ����Ҷ�.. ����..����.. - -;;
+//   "투명부분+색깔"이 한 화면(800)을 넘어갈 경우..
+//   그 사이에 Filter까지 포함해서 출력할때.. 복잡..복잡.. - -;;
 //
 //----------------------------------------------------------------------
 
@@ -6214,7 +6214,7 @@ CSprite::BltAlphaFilterClipWidth(WORD *pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -6232,7 +6232,7 @@ CSprite::BltAlphaFilterClipWidth(WORD *pDest, WORD pitch, RECT* pRect)
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -6243,52 +6243,52 @@ CSprite::BltAlphaFilterClipWidth(WORD *pDest, WORD pitch, RECT* pRect)
 		pDestTemp = pDest;	
 		
 		//------------------------------------------
-		// Filter�� ������� �ʴ� ���
+		// Filter를 출력하지 않는 경우
 		//------------------------------------------
 		if (yIndex < 0 || yIndex >= s_pFilter->GetHeight())
 		{
-			// (������,�����,�����)�� �ݺ� ��
+			// (투명수,색깔수,색깔들)의 반복 수
 			count = *pPixels++;		
 
-			// �� �� ���		
+			// 한 줄 출력		
 			index = 0;
 			
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...
-			// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+			// 각 줄마다 Clipping을 해줘야 하는데...
+			// xxxxOOOOOOOOOOOOOO인 경우이므로..
 			//---------------------------------------------
-			// xxxx�κб��� check���ִ� ��ƾ
+			// xxxx부분까지 check해주는 루틴
 			//---------------------------------------------
 			if (count > 0)
 			{
 				j = count;
 				do 
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����			
+					// 투명색만큼 index증가			
 					index += transCount;
 					
 				
 					//---------------------------------------------
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					if (index+colorCount > rectLeft)
 					{
 						//---------------------------------------------
-						// ������������ xxxx������ �Ѿ�� ���
+						// 투명색만으로 xxxx범위를 넘어갔을 경우
 						//---------------------------------------------
 						if (index > rectLeft)
 						{	
-							// �������κ� �ǳʶ�
+							// 투명색부분 건너띔
 							pDestTemp += index - rectLeft;
 
-							// �̹� �ܰ�� ��� ���?
-							// ������ ���� �Ѿ�� ���..
+							// 이번 단계는 모두 출력?
+							// 오른쪽 끝을 넘어가는 경우..
 							if (index+colorCount > rectRight)
 							{							
-								// ������������ ������ �� �Ѿ�� ���
+								// 투명색만으로 오른쪽 끝 넘어가는 경우
 								if (index > rectRight)
 								{
 								}
@@ -6303,24 +6303,24 @@ CSprite::BltAlphaFilterClipWidth(WORD *pDest, WORD pitch, RECT* pRect)
 								break;
 							}
 
-							// �̹� �ܰ�� ��� ���
+							// 이번 단계는 모두 출력
 							memcpy(pDestTemp, pPixels, colorCount<<1);
 							pDestTemp += colorCount;
 							pPixels += colorCount;
 							index += colorCount;
 
-							// �������ʹ� ��� ����Ѵ�.
+							// 이제부터는 계속 출력한다.
 							break;
 						}
 						//---------------------------------------------
-						// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-						// xxxx������ �Ѿ�� �Ǵ� ���
+						// 투명색+투명아닌색의 일부까지 출력하면 
+						// xxxx범위를 넘어가게 되는 경우
 						//---------------------------------------------
 						else
 						{
 							dist = rectLeft - index;
 
-							// ������ ���� �Ѿ�� ���..
+							// 오른쪽 끝을 넘어가는 경우..
 							if (index+colorCount > rectRight)
 							{
 								memcpy(pDestTemp, pPixels+dist, (rectRight - rectLeft)<<1);
@@ -6329,68 +6329,68 @@ CSprite::BltAlphaFilterClipWidth(WORD *pDest, WORD pitch, RECT* pRect)
 								break;
 							}		
 
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							memcpy(pDestTemp, pPixels+dist, (colorCount-dist)<<1);					
 							pDestTemp += colorCount-dist;
 							pPixels += colorCount;
 							index += colorCount;
 
-							// �������ʹ� ��� ����Ѵ�.
+							// 이제부터는 계속 출력한다.
 							break;
 						}
 					}					
 
-					// ������ �ƴ� ����ŭ index����				
+					// 투명이 아닌 색만큼 index증가				
 					pPixels += colorCount;
 					index += colorCount;
 				} while (--j);
 			
 				//---------------------------------------------
-				// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-				// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+				// 각 줄마다 Clipping을 해줘야 하는데...		
+				// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 				//---------------------------------------------
-				// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+				// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 				//---------------------------------------------
 				if (--j > 0)
 				{
 					do 
 					{
-						transCount = *pPixels++;		// ������ ��			
-						colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+						transCount = *pPixels++;		// 투명색 수			
+						colorCount = *pPixels++;		// 투명 아닌 색 수			
 								
-						// ��������ŭ index����
+						// 투명색만큼 index증가
 						index += transCount;
 						
-						// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-						// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+						// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+						// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-						// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+						// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 						//---------------------------------------------
-						// ������ ������ �������� ���
+						// 오른쪽 끝까지 도달했을 경우
 						//---------------------------------------------			
 						if (index+colorCount > rectRight)
 						{
-							// ������������ �� ����� �ʿ䰡 ���� ��
+							// 투명색만으로 더 출력할 필요가 없을 때
 							if (index > rectRight)
 							{
 								break;
 							}
-							// ������ �ƴ� ���� ���� ����ؾ� �� ���
+							// 투명색 아닌 것을 조금 출력해야 할 경우
 							else
 							{
 								pDestTemp += transCount;
 							
-								// ������ �ƴ� ������ Surface�� ����Ѵ�.						
+								// 투명이 아닌 색들을 Surface에 출력한다.						
 								memcpy((void*)pDestTemp, (void*)pPixels, (rectRight-index)<<1);
 								break;
 							}
 						}
 
-						// ��������ŭ �ǳʶ��
+						// 투명색만큼 건너띄고
 						pDestTemp += transCount;
 
-						// ���
+						// 출력
 						memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
 						pDestTemp += colorCount;
 						pPixels += colorCount;			
@@ -6400,79 +6400,79 @@ CSprite::BltAlphaFilterClipWidth(WORD *pDest, WORD pitch, RECT* pRect)
 			}
 		}
 		//------------------------------------------
-		// Filter�� ����ؾ� �ϴ� ���
+		// Filter를 출력해야 하는 경우
 		//------------------------------------------
 		else
 		{
-			// ����ҷ��� �ٿ� ���õ� Filter�� ��´�.
+			// 출력할려는 줄에 관련된 Filter를 얻는다.
 			pFilter = s_pFilter->GetFilter( yIndex );
 			pFilter += -s_X;
 			xIndex = -s_X;
 
-			// (������,�����,�����)�� �ݺ� ��
+			// (투명수,색깔수,색깔들)의 반복 수
 			count = *pPixels++;		
 
-			// �� �� ���		
+			// 한 줄 출력		
 			index = 0;
 			
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...
-			// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+			// 각 줄마다 Clipping을 해줘야 하는데...
+			// xxxxOOOOOOOOOOOOOO인 경우이므로..
 			//---------------------------------------------
-			// xxxx�κб��� check���ִ� ��ƾ
+			// xxxx부분까지 check해주는 루틴
 			//---------------------------------------------
 			if (count > 0)
 			{
 				j = count;
 				do 
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��					
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수					
 							
-					// ��������ŭ index����			
+					// 투명색만큼 index증가			
 					index += transCount;				
 				
 					//---------------------------------------------
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					if (index+colorCount > rectLeft)
 					{
 						//---------------------------------------------
-						// ������������ xxxx������ �Ѿ�� ���
+						// 투명색만으로 xxxx범위를 넘어갔을 경우
 						//---------------------------------------------
 						if (index > rectLeft)
 						{	
 							//---------------------------------------------
-							// �������� �Ѿ���� check�ؾ� �Ѵ�.
+							// 오른쪽을 넘어가는지 check해야 한다.
 							//---------------------------------------------
 							//if (index+colorCount)
 
 
-							// �������κ� �ǳʶ�
+							// 투명색부분 건너띔
 							pDestTemp += index - rectLeft;
 							xIndex += transCount;//index - rectLeft;
 							pFilter += transCount;//index - rectLeft;							
 
-							// �̹� �ܰ�� ��� ���
+							// 이번 단계는 모두 출력
 							//memcpy(pDestTemp, pPixels, colorCount<<1);
 							//------------------------------------------
-							// Filter�� ����ؾ� �ϴ� ���
+							// Filter를 출력해야 하는 경우
 							//------------------------------------------
 							if (xIndex >= 0)
 							{			
 								dist2  = s_pFilter->GetWidth() - xIndex;
 								if (dist2 > 0)
 								{						
-									// Filter�� �˳��� ���
+									// Filter가 넉넉한 경우
 									if (dist2 >= colorCount)
 									{
-										// ������ �ƴ� ������ Surface�� ����Ѵ�.
+										// 투명이 아닌 색들을 Surface에 출력한다.
 										memcpyAlphaFilter(pDestTemp, pPixels, pFilter, colorCount);
 									}
-									// Filter�� ������ ���
+									// Filter가 부족한 경우
 									else
 									{
-										// dist2��ŭ�� Filter���
+										// dist2만큼만 Filter출력
 										memcpyAlphaFilter(pDestTemp, pPixels, pFilter, dist2);
 										memcpy((void*)(pDestTemp+dist2), (void*)(pPixels+dist2), (colorCount-dist2)<<1);
 									}
@@ -6482,35 +6482,35 @@ CSprite::BltAlphaFilterClipWidth(WORD *pDest, WORD pitch, RECT* pRect)
 									memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
 								}
 							}
-							// xIndex�� ����(-)�� ���
+							// xIndex가 음수(-)인 경우
 							else
 							{					
 								dist2 = s_pFilter->GetWidth() - xIndex ;
 
-								// �� ���� �ǳʼ�.. Filter�� ����ؾ� �ϴ� ���
+								// 몇 점을 건너서.. Filter를 출력해야 하는 경우
 								if (xIndex+colorCount > 0)
 								{							
-									// Filter�� ������ ���
+									// Filter가 부족한 경우
 									if (s_pFilter->GetWidth() < xIndex+colorCount)
 									{	
 										memcpy((void*)pDestTemp, (void*)pPixels, (-xIndex)<<1);
-										// Filter���
+										// Filter출력
 										memcpyAlphaFilter(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, s_pFilter->GetWidth());
 										
 										// - -;;
 										memcpy((void*)(pDestTemp+dist2), (void*)(pPixels+dist2), (colorCount-dist2)<<1);
 									}
-									// Filter�� �˳��� ���
+									// Filter가 넉넉한 경우
 									else
 									{							
 										memcpy((void*)pDestTemp, (void*)pPixels, (-xIndex)<<1);
-										// dist2��ŭ�� Filter���
+										// dist2만큼만 Filter출력
 										memcpyAlphaFilter(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, colorCount+xIndex);
 									}						
 								}
 								else
 								{
-									// ������ �ƴ� ������ Surface�� ����Ѵ�.
+									// 투명이 아닌 색들을 Surface에 출력한다.
 									memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
 								}
 							}
@@ -6520,12 +6520,12 @@ CSprite::BltAlphaFilterClipWidth(WORD *pDest, WORD pitch, RECT* pRect)
 							pFilter		+= colorCount;
 							index		+= colorCount;
 
-							// �������ʹ� ��� ����Ѵ�.
+							// 이제부터는 계속 출력한다.
 							break;
 						}
 						//---------------------------------------------
-						// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-						// xxxx������ �Ѿ�� �Ǵ� ���
+						// 투명색+투명아닌색의 일부까지 출력하면 
+						// xxxx범위를 넘어가게 되는 경우
 						//---------------------------------------------
 						else
 						{	
@@ -6534,29 +6534,29 @@ CSprite::BltAlphaFilterClipWidth(WORD *pDest, WORD pitch, RECT* pRect)
 							xIndex	+= transCount + dist;
 							pFilter	+= transCount + dist;
 
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							//memcpy(pDestTemp, pPixels+dist, (colorCount-dist)<<1);					
 							//pDestTemp += colorCount-dist;
 							//pPixels += colorCount;
 							
 							//------------------------------------------
-							// Filter�� ����ؾ� �ϴ� ���
+							// Filter를 출력해야 하는 경우
 							//------------------------------------------
 							if (xIndex >= 0)
 							{			
 								dist2  = s_pFilter->GetWidth() - xIndex;
 								if (dist2 > 0)
 								{						
-									// Filter�� �˳��� ���
+									// Filter가 넉넉한 경우
 									if (dist2 >= colorCount-dist)
 									{
-										// ������ �ƴ� ������ Surface�� ����Ѵ�.
+										// 투명이 아닌 색들을 Surface에 출력한다.
 										memcpyAlphaFilter(pDestTemp, pPixels+dist, pFilter, colorCount-dist);
 									}
-									// Filter�� ������ ���
+									// Filter가 부족한 경우
 									else
 									{
-										// dist2��ŭ�� Filter���
+										// dist2만큼만 Filter출력
 										memcpyAlphaFilter(pDestTemp, pPixels+dist, pFilter, dist2);
 										memcpy((void*)(pDestTemp+dist2), (void*)(pPixels+dist+dist2), (colorCount-dist - dist2)<<1);
 									}								
@@ -6566,35 +6566,35 @@ CSprite::BltAlphaFilterClipWidth(WORD *pDest, WORD pitch, RECT* pRect)
 									memcpy((void*)pDestTemp, (void*)(pPixels+dist), (colorCount-dist)<<1);
 								}							
 							}
-							// xIndex�� ����(-)�� ���
+							// xIndex가 음수(-)인 경우
 							else
 							{					
 								dist2 = s_pFilter->GetWidth() - xIndex ;
 
-								// �� ���� �ǳʼ�.. Filter�� ����ؾ� �ϴ� ���
+								// 몇 점을 건너서.. Filter를 출력해야 하는 경우
 								if (xIndex+colorCount-dist > 0)
 								{							
-									// Filter�� ������ ���
+									// Filter가 부족한 경우
 									if (s_pFilter->GetWidth() < xIndex+(colorCount-dist))
 									{	
 										memcpy((void*)pDestTemp, (void*)(pPixels+dist), (-xIndex)<<1);
-										// Filter���
+										// Filter출력
 										memcpyAlphaFilter(pDestTemp-xIndex, pPixels+dist-xIndex, pFilter-xIndex, s_pFilter->GetWidth());
 										
 										// - -;;
 										memcpy((void*)(pDestTemp+dist2), (void*)(pPixels+dist+dist2), (colorCount-dist - dist2)<<1);
 									}
-									// Filter�� �˳��� ���
+									// Filter가 넉넉한 경우
 									else
 									{							
 										memcpy((void*)pDestTemp, (void*)(pPixels+dist), (-xIndex)<<1);
-										// dist2��ŭ�� Filter���
+										// dist2만큼만 Filter출력
 										memcpyAlphaFilter(pDestTemp-xIndex, pPixels+dist-xIndex, pFilter-xIndex, (colorCount-dist)+xIndex);
 									}						
 								}
 								else
 								{
-									// ������ �ƴ� ������ Surface�� ����Ѵ�.
+									// 투명이 아닌 색들을 Surface에 출력한다.
 									memcpy((void*)pDestTemp, (void*)(pPixels+dist), (colorCount-dist)<<1);
 								}
 							}
@@ -6605,16 +6605,16 @@ CSprite::BltAlphaFilterClipWidth(WORD *pDest, WORD pitch, RECT* pRect)
 							pFilter		+= colorCount-dist;
 							index		+= colorCount;
 							
-							// �������ʹ� ��� ����Ѵ�.
+							// 이제부터는 계속 출력한다.
 							break;
 						}
 					}	
 					
-					// ������ �κ� ����
+					// 투명색 부분 증가
 					xIndex += transCount;
 					pFilter += transCount;
 
-					// ������ �ƴ� ����ŭ index����				
+					// 투명이 아닌 색만큼 index증가				
 					pPixels += colorCount;
 					index	+= colorCount;
 					xIndex	+= colorCount;
@@ -6623,37 +6623,37 @@ CSprite::BltAlphaFilterClipWidth(WORD *pDest, WORD pitch, RECT* pRect)
 				
 			
 				//---------------------------------------------
-				// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-				// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+				// 각 줄마다 Clipping을 해줘야 하는데...		
+				// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 				//---------------------------------------------
-				// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+				// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 				//---------------------------------------------
 				if (--j > 0)
 				{
 					do 
 					{
-						transCount = *pPixels++;		// ������ ��			
-						colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+						transCount = *pPixels++;		// 투명색 수			
+						colorCount = *pPixels++;		// 투명 아닌 색 수			
 								
-						// ��������ŭ index����
+						// 투명색만큼 index증가
 						index += transCount;
 						
-						// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-						// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+						// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+						// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-						// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+						// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 						//---------------------------------------------
-						// ������ ������ �������� ���
+						// 오른쪽 끝까지 도달했을 경우
 						//---------------------------------------------			
 						if (index+colorCount > rectRight)
 						{
-							// ������������ �� ����� �ʿ䰡 ���� ��
+							// 투명색만으로 더 출력할 필요가 없을 때
 							if (index > rectRight)
 							{
 								break;
 							}
-							// ������ �ƴ� ���� ���� ����ؾ� �� ���
+							// 투명색 아닌 것을 조금 출력해야 할 경우
 							else
 							{
 								pDestTemp	+= transCount;
@@ -6662,26 +6662,26 @@ CSprite::BltAlphaFilterClipWidth(WORD *pDest, WORD pitch, RECT* pRect)
 
 								dist		= rectRight - index;
 							
-								// ������ �ƴ� ������ Surface�� ����Ѵ�.
+								// 투명이 아닌 색들을 Surface에 출력한다.
 								//memcpy((void*)pDestTemp, (void*)pPixels, (rectRight - index)<<1);
 								//------------------------------------------
-								// Filter�� ����ؾ� �ϴ� ���
+								// Filter를 출력해야 하는 경우
 								//------------------------------------------
 								if (xIndex >= 0)
 								{	
 									dist2  = s_pFilter->GetWidth() - xIndex;
 									if (dist2 > 0)
 									{						
-										// Filter�� �˳��� ���
+										// Filter가 넉넉한 경우
 										if (dist2 >= dist)
 										{
-											// ������ �ƴ� ������ Surface�� ����Ѵ�.
+											// 투명이 아닌 색들을 Surface에 출력한다.
 											memcpyAlphaFilter(pDestTemp, pPixels, pFilter, dist);
 										}
-										// Filter�� ������ ���
+										// Filter가 부족한 경우
 										else
 										{
-											// dist2��ŭ�� Filter���
+											// dist2만큼만 Filter출력
 											memcpyAlphaFilter(pDestTemp, pPixels, pFilter, dist2);
 											memcpy((void*)(pDestTemp+dist2), (void*)(pPixels+dist2), (dist - dist2)<<1);
 										}
@@ -6691,35 +6691,35 @@ CSprite::BltAlphaFilterClipWidth(WORD *pDest, WORD pitch, RECT* pRect)
 										memcpy((void*)pDestTemp, (void*)pPixels, dist<<1);
 									}
 								}
-								// xIndex�� ����(-)�� ���
+								// xIndex가 음수(-)인 경우
 								else
 								{					
 									dist2 = s_pFilter->GetWidth() - xIndex ;
 
-									// �� ���� �ǳʼ�.. Filter�� ����ؾ� �ϴ� ���
+									// 몇 점을 건너서.. Filter를 출력해야 하는 경우
 									if (xIndex + dist > 0)
 									{							
-										// Filter�� ������ ���
+										// Filter가 부족한 경우
 										if (s_pFilter->GetWidth() < xIndex+colorCount)
 										{	
 											memcpy((void*)pDestTemp, (void*)pPixels, (-xIndex)<<1);
-											// Filter���
+											// Filter출력
 											memcpyAlphaFilter(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, s_pFilter->GetWidth());
 											
 											// - -;;
 											memcpy((void*)(pDestTemp+dist2), (void*)(pPixels+dist2), (dist - dist2)<<1);
 										}
-										// Filter�� �˳��� ���
+										// Filter가 넉넉한 경우
 										else
 										{							
 											memcpy((void*)pDestTemp, (void*)pPixels, (-xIndex)<<1);
-											// dist2��ŭ�� Filter���
+											// dist2만큼만 Filter출력
 											memcpyAlphaFilter(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, dist + xIndex);
 										}						
 									}
 									else
 									{
-										// ������ �ƴ� ������ Surface�� ����Ѵ�.
+										// 투명이 아닌 색들을 Surface에 출력한다.
 										memcpy((void*)pDestTemp, (void*)pPixels, dist<<1);
 									}
 								}
@@ -6727,30 +6727,30 @@ CSprite::BltAlphaFilterClipWidth(WORD *pDest, WORD pitch, RECT* pRect)
 							}
 						}
 
-						// ��������ŭ �ǳʶ��
+						// 투명색만큼 건너띄고
 						pDestTemp	+= transCount;
 						xIndex		+= transCount;
 						pFilter		+= transCount;
 
-						// ���
+						// 출력
 						//------------------------------------------
-						// Filter�� ����ؾ� �ϴ� ���
+						// Filter를 출력해야 하는 경우
 						//------------------------------------------
 						if (xIndex >= 0)
 						{			
 							dist2  = s_pFilter->GetWidth() - xIndex;
 							if (dist2 > 0)
 							{						
-								// Filter�� �˳��� ���
+								// Filter가 넉넉한 경우
 								if (dist2 >= colorCount)
 								{
-									// ������ �ƴ� ������ Surface�� ����Ѵ�.
+									// 투명이 아닌 색들을 Surface에 출력한다.
 									memcpyAlphaFilter(pDestTemp, pPixels, pFilter, colorCount);
 								}
-								// Filter�� ������ ���
+								// Filter가 부족한 경우
 								else
 								{
-									// dist2��ŭ�� Filter���
+									// dist2만큼만 Filter출력
 									memcpyAlphaFilter(pDestTemp, pPixels, pFilter, dist2);
 									memcpy((void*)(pDestTemp+dist2), (void*)(pPixels+dist2), (colorCount-dist2)<<1);
 								}
@@ -6760,35 +6760,35 @@ CSprite::BltAlphaFilterClipWidth(WORD *pDest, WORD pitch, RECT* pRect)
 								memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
 							}
 						}
-						// xIndex�� ����(-)�� ���
+						// xIndex가 음수(-)인 경우
 						else
 						{					
 							dist2 = s_pFilter->GetWidth() - xIndex ;
 
-							// �� ���� �ǳʼ�.. Filter�� ����ؾ� �ϴ� ���
+							// 몇 점을 건너서.. Filter를 출력해야 하는 경우
 							if (xIndex+colorCount > 0)
 							{							
-								// Filter�� ������ ���
+								// Filter가 부족한 경우
 								if (s_pFilter->GetWidth() < xIndex+colorCount)
 								{	
 									memcpy((void*)pDestTemp, (void*)pPixels, (-xIndex)<<1);
-									// Filter���
+									// Filter출력
 									memcpyAlphaFilter(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, s_pFilter->GetWidth());
 									
 									// - -;;
 									memcpy((void*)(pDestTemp+dist2), (void*)(pPixels+dist2), (colorCount-dist2)<<1);
 								}
-								// Filter�� �˳��� ���
+								// Filter가 넉넉한 경우
 								else
 								{							
 									memcpy((void*)pDestTemp, (void*)pPixels, (-xIndex)<<1);
-									// dist2��ŭ�� Filter���
+									// dist2만큼만 Filter출력
 									memcpyAlphaFilter(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, colorCount+xIndex);
 								}						
 							}
 							else
 							{
-								// ������ �ƴ� ������ Surface�� ����Ѵ�.
+								// 투명이 아닌 색들을 Surface에 출력한다.
 								memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
 							}
 						}
@@ -6811,7 +6811,7 @@ CSprite::BltAlphaFilterClipWidth(WORD *pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // Blt AlphaFilter Clip Height
 //----------------------------------------------------------------------
-// pRect->top, pRect->bottom��ŭ�� ����Ѵ�.
+// pRect->top, pRect->bottom만큼만 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltAlphaFilterClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
@@ -6837,23 +6837,23 @@ CSprite::BltAlphaFilterClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 		pDestTemp	= pDest;
 
 		//------------------------------------------
-		// Filter�� ������� �ʴ� ���
+		// Filter를 출력하지 않는 경우
 		//------------------------------------------
 		if (yIndex < 0 || yIndex >= s_pFilter->GetHeight())
 		{
-			// (������,�����,�����)�� �ݺ� ��		
+			// (투명수,색깔수,색깔들)의 반복 수		
 			count	= *pPixels++;		
 
-			// �� �� ���
+			// 한 줄 출력
 			if (count > 0)
 			{
 				j = count;
 				do 
 				{				
-					pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+					pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+					colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
 					
 					pDestTemp	+= colorCount;
@@ -6862,47 +6862,47 @@ CSprite::BltAlphaFilterClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 			}
 		}
 		//------------------------------------------
-		// Filter�� ����ؾ� �ϴ� ���
+		// Filter를 출력해야 하는 경우
 		//------------------------------------------
 		else
 		{
-			// ����ҷ��� �ٿ� ���õ� Filter�� ��´�.
+			// 출력할려는 줄에 관련된 Filter를 얻는다.
 			pFilter = s_pFilter->GetFilter( yIndex );
 			pFilter += -s_X;
-			xIndex = -s_X;		// xIndex�� x�� �̻��� ��� ����ϸ� �ȴ�.
+			xIndex = -s_X;		// xIndex가 x를 이상인 경우 출력하면 된다.
 
-			// (������,�����,�����)�� �ݺ� ��		
+			// (투명수,색깔수,색깔들)의 반복 수		
 			count	= *pPixels++;		
- 			// �� �� ���
+ 			// 한 줄 출력
 			if (count > 0)
 			{
 				j = count;
 				do 
 				{
-					pDestTemp	+= *pPixels;			// ��������ŭ �ǳ� �ڴ�.
+					pDestTemp	+= *pPixels;			// 투명색만큼 건너 뛴다.
 					xIndex		+= *pPixels;
 					pFilter		+= *pPixels;
 					pPixels ++;
-					colorCount = *pPixels++;			// ���� �ƴ� �� ��				
+					colorCount = *pPixels++;			// 투명 아닌 색 수				
 
 					//------------------------------------------
-					// Filter�� ����ؾ� �ϴ� ���
+					// Filter를 출력해야 하는 경우
 					//------------------------------------------
 					if (xIndex >= 0)
 					{			
 						dist  = s_pFilter->GetWidth() - xIndex;
 						if (dist > 0)
 						{						
-							// Filter�� �˳��� ���
+							// Filter가 넉넉한 경우
 							if (dist >= colorCount)
 							{
-								// ������ �ƴ� ������ Surface�� ����Ѵ�.
+								// 투명이 아닌 색들을 Surface에 출력한다.
 								memcpyAlphaFilter(pDestTemp, pPixels, pFilter, colorCount);
 							}
-							// Filter�� ������ ���
+							// Filter가 부족한 경우
 							else
 							{
-								// dist��ŭ�� Filter���
+								// dist만큼만 Filter출력
 								memcpyAlphaFilter(pDestTemp, pPixels, pFilter, dist);
 								memcpy((void*)(pDestTemp+dist), (void*)(pPixels+dist), (colorCount-dist)<<1);
 							}
@@ -6912,35 +6912,35 @@ CSprite::BltAlphaFilterClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 							memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
 						}
 					}
-					// xIndex�� ����(-)�� ���
+					// xIndex가 음수(-)인 경우
 					else
 					{					
 						dist = s_pFilter->GetWidth() - xIndex ;
 
-						// �� ���� �ǳʼ�.. Filter�� ����ؾ� �ϴ� ���
+						// 몇 점을 건너서.. Filter를 출력해야 하는 경우
 						if (xIndex+colorCount > 0)
 						{							
-							// Filter�� ������ ���
+							// Filter가 부족한 경우
 							if (s_pFilter->GetWidth() < xIndex+colorCount)
 							{	
 								memcpy((void*)pDestTemp, (void*)pPixels, (-xIndex)<<1);
-								// Filter���
+								// Filter출력
 								memcpyAlphaFilter(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, s_pFilter->GetWidth());
 								
 								// - -;;
 								memcpy((void*)(pDestTemp+dist), (void*)(pPixels+dist), (colorCount-dist)<<1);
 							}
-							// Filter�� �˳��� ���
+							// Filter가 넉넉한 경우
 							else
 							{							
 								memcpy((void*)pDestTemp, (void*)pPixels, (-xIndex)<<1);
-								// dist��ŭ�� Filter���
+								// dist만큼만 Filter출력
 								memcpyAlphaFilter(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, colorCount+xIndex);
 							}						
 						}
 						else
 						{
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
 						}
 					}
@@ -6962,8 +6962,8 @@ CSprite::BltAlphaFilterClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // memcpy Filter
 //----------------------------------------------------------------------
-// pFilter�� �̿��ؼ� ����Ѵ�.
-// pFilter�� alpha ������ �̿��Ѵ�.
+// pFilter를 이용해서 출력한다.
+// pFilter를 alpha 값으로 이용한다.
 //----------------------------------------------------------------------
 void
 CSprite::memcpyAlphaFilter(WORD* pDest, WORD* pSource, BYTE* pFilter, WORD pixels)
@@ -6977,12 +6977,12 @@ CSprite::memcpyAlphaFilter(WORD* pDest, WORD* pSource, BYTE* pFilter, WORD pixel
 	//BYTE alpha;
 
 	// Alpha Channel Blending
-	// ������ ���
+	// 한점씩 찍기
 	while (j--)
 	{			
 		//alpha = *pFilter;		
 
-		// ���� ���
+		// 한점 찍기
 		/*
 		sTemp = *pSource;
 		dTemp = *pDest;
@@ -7027,13 +7027,13 @@ CSprite::memcpyAlphaFilter(WORD* pDest, WORD* pSource, BYTE* pFilter, WORD pixel
 //----------------------------------------------------------------------
 // Blt AlphaFilter Darkness
 //----------------------------------------------------------------------
-// Sprite�� (x,y)�� pFilter�� ...
+// Sprite의 (x,y)에 pFilter를 ...
 //
 //----------------------------------------------------------------------
 void
 CSprite::BltAlphaFilterDarkness(WORD *pDest, WORD pitch, BYTE DarkBits)
 {
-	// ��Ӱ� �ϴ� bit�� ����
+	// 어둡게 하는 bit값 설정
 	s_Value1 = DarkBits;
 	CSpriteSurface::s_Value1 = DarkBits;
 
@@ -7058,22 +7058,22 @@ CSprite::BltAlphaFilterDarkness(WORD *pDest, WORD pitch, BYTE DarkBits)
 		pDestTemp	= pDest;
 
 		//------------------------------------------
-		// Filter�� ������� �ʴ� ���
+		// Filter를 출력하지 않는 경우
 		//------------------------------------------
 		if (yIndex < 0 || yIndex >= s_pFilter->GetHeight())
 		{
-			// (������,�����,�����)�� �ݺ� ��		
+			// (투명수,색깔수,색깔들)의 반복 수		
 			count	= *pPixels++;		
- 			// �� �� ���
+ 			// 한 줄 출력
 			if (count > 0)
 			{
 				j = count;
 				do 
 				{
-					pDestTemp += *pPixels++;			// ��������ŭ �ǳ� �ڴ�.
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+					pDestTemp += *pPixels++;			// 투명색만큼 건너 뛴다.
+					colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 
 					pDestTemp	+= colorCount;
@@ -7082,47 +7082,47 @@ CSprite::BltAlphaFilterDarkness(WORD *pDest, WORD pitch, BYTE DarkBits)
 			}
 		}
 		//------------------------------------------
-		// Filter�� ����ؾ� �ϴ� ���
+		// Filter를 출력해야 하는 경우
 		//------------------------------------------
 		else
 		{
-			// ����ҷ��� �ٿ� ���õ� Filter�� ��´�.
+			// 출력할려는 줄에 관련된 Filter를 얻는다.
 			pFilter = s_pFilter->GetFilter( yIndex );
 			pFilter += -s_X;
-			xIndex = -s_X;		// xIndex�� x�� �̻��� ��� ����ϸ� �ȴ�.
+			xIndex = -s_X;		// xIndex가 x를 이상인 경우 출력하면 된다.
 
-			// (������,�����,�����)�� �ݺ� ��		
+			// (투명수,색깔수,색깔들)의 반복 수		
 			count	= *pPixels++;		
- 			// �� �� ���
+ 			// 한 줄 출력
 			if (count > 0)
 			{
 				j = count;
 				do 
 				{			
-					pDestTemp	+= *pPixels;			// ��������ŭ �ǳ� �ڴ�.
+					pDestTemp	+= *pPixels;			// 투명색만큼 건너 뛴다.
 					xIndex		+= *pPixels;
 					pFilter		+= *pPixels;
 					pPixels ++;
-					colorCount = *pPixels++;			// ���� �ƴ� �� ��				
+					colorCount = *pPixels++;			// 투명 아닌 색 수				
 
 					//------------------------------------------
-					// Filter�� ����ؾ� �ϴ� ���
+					// Filter를 출력해야 하는 경우
 					//------------------------------------------
 					if (xIndex >= 0)
 					{			
 						dist  = s_pFilter->GetWidth() - xIndex;
 						if (dist > 0)
 						{						
-							// Filter�� �˳��� ���
+							// Filter가 넉넉한 경우
 							if (dist >= colorCount)
 							{
-								// ������ �ƴ� ������ Surface�� ����Ѵ�.
+								// 투명이 아닌 색들을 Surface에 출력한다.
 								memcpyAlphaFilterDarkness(pDestTemp, pPixels, pFilter, colorCount);
 							}
-							// Filter�� ������ ���
+							// Filter가 부족한 경우
 							else
 							{
-								// dist��ŭ�� Filter���
+								// dist만큼만 Filter출력
 								memcpyAlphaFilterDarkness(pDestTemp, pPixels, pFilter, dist);
 								CSpriteSurface::memcpyDarkness(pDestTemp+dist, pPixels+dist, colorCount-dist);
 							}
@@ -7132,35 +7132,35 @@ CSprite::BltAlphaFilterDarkness(WORD *pDest, WORD pitch, BYTE DarkBits)
 							CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 						}
 					}
-					// xIndex�� ����(-)�� ���
+					// xIndex가 음수(-)인 경우
 					else
 					{					
 						dist = s_pFilter->GetWidth() - xIndex ;
 
-						// �� ���� �ǳʼ�.. Filter�� ����ؾ� �ϴ� ���
+						// 몇 점을 건너서.. Filter를 출력해야 하는 경우
 						if (xIndex+colorCount > 0)
 						{							
-							// Filter�� ������ ���
+							// Filter가 부족한 경우
 							if (s_pFilter->GetWidth() < xIndex+colorCount)
 							{	
 								CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, -xIndex);
-								// Filter���
+								// Filter출력
 								memcpyAlphaFilterDarkness(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, s_pFilter->GetWidth());
 								
 								// - -;;
 								CSpriteSurface::memcpyDarkness(pDestTemp+dist, pPixels+dist, colorCount-dist);
 							}
-							// Filter�� �˳��� ���
+							// Filter가 넉넉한 경우
 							else
 							{							
 								CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, -xIndex);
-								// dist��ŭ�� Filter���
+								// dist만큼만 Filter출력
 								memcpyAlphaFilterDarkness(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, colorCount+xIndex);
 							}						
 						}
 						else
 						{
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 						}
 					}
@@ -7185,7 +7185,7 @@ CSprite::BltAlphaFilterDarkness(WORD *pDest, WORD pitch, BYTE DarkBits)
 void		
 CSprite::BltAlphaFilterDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE DarkBits)
 {
-	// ��Ӱ� �ϴ� bit�� ����
+	// 어둡게 하는 bit값 설정
 	s_Value1 = DarkBits;
 	CSpriteSurface::s_Value1 = DarkBits;
 
@@ -7193,7 +7193,7 @@ CSprite::BltAlphaFilterDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BY
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -7211,7 +7211,7 @@ CSprite::BltAlphaFilterDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BY
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -7221,95 +7221,95 @@ CSprite::BltAlphaFilterDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BY
 		pDestTemp = pDest;	
 		
 		//------------------------------------------
-		// Filter�� ������� �ʴ� ���
+		// Filter를 출력하지 않는 경우
 		//------------------------------------------
 		if (yIndex < 0 || yIndex >= s_pFilter->GetHeight())
 		{
-			// (������,�����,�����)�� �ݺ� ��
+			// (투명수,색깔수,색깔들)의 반복 수
 			count = *pPixels++;		
 
-			// �� �� ���		
+			// 한 줄 출력		
 			index = 0;
 			
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...
-			// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+			// 각 줄마다 Clipping을 해줘야 하는데...
+			// xxxxOOOOOOOOOOOOOO인 경우이므로..
 			//---------------------------------------------
-			// xxxx�κб��� check���ִ� ��ƾ
+			// xxxx부분까지 check해주는 루틴
 			//---------------------------------------------
 			if (count > 0)
 			{
 				j = count;
 				do 
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����			
+					// 투명색만큼 index증가			
 					index += transCount;
 					
 				
 					//---------------------------------------------
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					if (index+colorCount > rectLeft)
 					{
 						//---------------------------------------------
-						// ������������ xxxx������ �Ѿ�� ���
+						// 투명색만으로 xxxx범위를 넘어갔을 경우
 						//---------------------------------------------
 						if (index > rectLeft)
 						{	
-							// �������κ� �ǳʶ�
+							// 투명색부분 건너띔
 							pDestTemp += index - rectLeft;
 
-							// �̹� �ܰ�� ��� ���
+							// 이번 단계는 모두 출력
 							CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 							pDestTemp += colorCount;
 							pPixels += colorCount;
 
-							// �������ʹ� ��� ����Ѵ�.
+							// 이제부터는 계속 출력한다.
 							break;
 						}
 						//---------------------------------------------
-						// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-						// xxxx������ �Ѿ�� �Ǵ� ���
+						// 투명색+투명아닌색의 일부까지 출력하면 
+						// xxxx범위를 넘어가게 되는 경우
 						//---------------------------------------------
 						else
 						{
 							dist = rectLeft - index;
 
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							CSpriteSurface::memcpyDarkness(pDestTemp, pPixels+dist, colorCount-dist);					
 							pDestTemp += colorCount-dist;
 							pPixels += colorCount;
 
-							// �������ʹ� ��� ����Ѵ�.
+							// 이제부터는 계속 출력한다.
 							break;
 						}
 					}					
 
-					// ������ �ƴ� ����ŭ index����				
+					// 투명이 아닌 색만큼 index증가				
 					pPixels += colorCount;
 					index += colorCount;
 				} while (--j);
 
 				//---------------------------------------------
-				// �������ʹ� ��� ����Ѵ�.		
+				// 이제부터는 계속 출력한다.		
 				//---------------------------------------------		
 				if (--j > 0)
 				{
 					do
 					{
-						transCount = *pPixels++;		// ������ ��			
-						colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+						transCount = *pPixels++;		// 투명색 수			
+						colorCount = *pPixels++;		// 투명 아닌 색 수			
 								
-						// ��������ŭ �ǳ� �ڴ�.
+						// 투명색만큼 건너 뛴다.
 						pDestTemp += transCount;			
 						
-						// �������� �ƴѸ�ŭ ������ش�.
+						// 투명색이 아닌만큼 출력해준다.
 						CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 
-						// memory addr ����
+						// memory addr 증가
 						pDestTemp += colorCount;
 						pPixels += colorCount;			
 					} while (--j);
@@ -7317,73 +7317,73 @@ CSprite::BltAlphaFilterDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BY
 			}
 		}
 		//------------------------------------------
-		// Filter�� ����ؾ� �ϴ� ���
+		// Filter를 출력해야 하는 경우
 		//------------------------------------------
 		else
 		{
-			// ����ҷ��� �ٿ� ���õ� Filter�� ��´�.
+			// 출력할려는 줄에 관련된 Filter를 얻는다.
 			pFilter = s_pFilter->GetFilter( yIndex );
 			pFilter += -s_X;
 			xIndex = -s_X;
 
-			// (������,�����,�����)�� �ݺ� ��
+			// (투명수,색깔수,색깔들)의 반복 수
 			count = *pPixels++;		
 
-			// �� �� ���		
+			// 한 줄 출력		
 			index = 0;
 			
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...
-			// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+			// 각 줄마다 Clipping을 해줘야 하는데...
+			// xxxxOOOOOOOOOOOOOO인 경우이므로..
 			//---------------------------------------------
-			// xxxx�κб��� check���ִ� ��ƾ
+			// xxxx부분까지 check해주는 루틴
 			//---------------------------------------------
 			if (count > 0)
 			{
 				j = count;
 				do 
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��					
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수					
 							
-					// ��������ŭ index����			
+					// 투명색만큼 index증가			
 					index += transCount;				
 				
 					//---------------------------------------------
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					if (index+colorCount > rectLeft)
 					{
 						//---------------------------------------------
-						// ������������ xxxx������ �Ѿ�� ���
+						// 투명색만으로 xxxx범위를 넘어갔을 경우
 						//---------------------------------------------
 						if (index > rectLeft)
 						{	
-							// �������κ� �ǳʶ�
+							// 투명색부분 건너띔
 							pDestTemp += index - rectLeft;
 							xIndex += transCount;//index - rectLeft;
 							pFilter += transCount;//index - rectLeft;
 
-							// �̹� �ܰ�� ��� ���
+							// 이번 단계는 모두 출력
 							//memcpy(pDestTemp, pPixels, colorCount<<1);
 							//------------------------------------------
-							// Filter�� ����ؾ� �ϴ� ���
+							// Filter를 출력해야 하는 경우
 							//------------------------------------------
 							if (xIndex >= 0)
 							{			
 								dist2  = s_pFilter->GetWidth() - xIndex;
 								if (dist2 > 0)
 								{						
-									// Filter�� �˳��� ���
+									// Filter가 넉넉한 경우
 									if (dist2 >= colorCount)
 									{
-										// ������ �ƴ� ������ Surface�� ����Ѵ�.
+										// 투명이 아닌 색들을 Surface에 출력한다.
 										memcpyAlphaFilterDarkness(pDestTemp, pPixels, pFilter, colorCount);
 									}
-									// Filter�� ������ ���
+									// Filter가 부족한 경우
 									else
 									{
-										// dist2��ŭ�� Filter���
+										// dist2만큼만 Filter출력
 										memcpyAlphaFilterDarkness(pDestTemp, pPixels, pFilter, dist2);
 										CSpriteSurface::memcpyDarkness(pDestTemp+dist2, pPixels+dist2, colorCount-dist2);
 									}
@@ -7393,35 +7393,35 @@ CSprite::BltAlphaFilterDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BY
 									CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 								}
 							}
-							// xIndex�� ����(-)�� ���
+							// xIndex가 음수(-)인 경우
 							else
 							{					
 								dist2 = s_pFilter->GetWidth() - xIndex ;
 
-								// �� ���� �ǳʼ�.. Filter�� ����ؾ� �ϴ� ���
+								// 몇 점을 건너서.. Filter를 출력해야 하는 경우
 								if (xIndex+colorCount > 0)
 								{							
-									// Filter�� ������ ���
+									// Filter가 부족한 경우
 									if (s_pFilter->GetWidth() < xIndex+colorCount)
 									{	
 										CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, -xIndex);
-										// Filter���
+										// Filter출력
 										memcpyAlphaFilterDarkness(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, s_pFilter->GetWidth());
 										
 										// - -;;
 										CSpriteSurface::memcpyDarkness(pDestTemp+dist2, pPixels+dist2, colorCount-dist2);
 									}
-									// Filter�� �˳��� ���
+									// Filter가 넉넉한 경우
 									else
 									{							
 										CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, -xIndex);
-										// dist2��ŭ�� Filter���
+										// dist2만큼만 Filter출력
 										memcpyAlphaFilterDarkness(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, colorCount+xIndex);
 									}						
 								}
 								else
 								{
-									// ������ �ƴ� ������ Surface�� ����Ѵ�.
+									// 투명이 아닌 색들을 Surface에 출력한다.
 									CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 								}
 							}
@@ -7431,12 +7431,12 @@ CSprite::BltAlphaFilterDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BY
 							pFilter		+= colorCount;
 
 
-							// �������ʹ� ��� ����Ѵ�.
+							// 이제부터는 계속 출력한다.
 							break;
 						}
 						//---------------------------------------------
-						// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-						// xxxx������ �Ѿ�� �Ǵ� ���
+						// 투명색+투명아닌색의 일부까지 출력하면 
+						// xxxx범위를 넘어가게 되는 경우
 						//---------------------------------------------
 						else
 						{	
@@ -7445,29 +7445,29 @@ CSprite::BltAlphaFilterDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BY
 							xIndex	+= transCount + dist;
 							pFilter	+= transCount + dist;
 
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							//memcpy(pDestTemp, pPixels+dist, (colorCount-dist)<<1);					
 							//pDestTemp += colorCount-dist;
 							//pPixels += colorCount;
 							
 							//------------------------------------------
-							// Filter�� ����ؾ� �ϴ� ���
+							// Filter를 출력해야 하는 경우
 							//------------------------------------------
 							if (xIndex >= 0)
 							{			
 								dist2  = s_pFilter->GetWidth() - xIndex;
 								if (dist2 > 0)
 								{						
-									// Filter�� �˳��� ���
+									// Filter가 넉넉한 경우
 									if (dist2 >= colorCount-dist)
 									{
-										// ������ �ƴ� ������ Surface�� ����Ѵ�.
+										// 투명이 아닌 색들을 Surface에 출력한다.
 										memcpyAlphaFilterDarkness(pDestTemp, pPixels+dist, pFilter, colorCount-dist);
 									}
-									// Filter�� ������ ���
+									// Filter가 부족한 경우
 									else
 									{
-										// dist2��ŭ�� Filter���
+										// dist2만큼만 Filter출력
 										memcpyAlphaFilterDarkness(pDestTemp, pPixels+dist, pFilter, dist2);
 										CSpriteSurface::memcpyDarkness(pDestTemp+dist2, pPixels+dist+dist2, colorCount-dist - dist2);
 									}								
@@ -7477,35 +7477,35 @@ CSprite::BltAlphaFilterDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BY
 									CSpriteSurface::memcpyDarkness(pDestTemp, pPixels+dist, colorCount-dist);
 								}							
 							}
-							// xIndex�� ����(-)�� ���
+							// xIndex가 음수(-)인 경우
 							else
 							{					
 								dist2 = s_pFilter->GetWidth() - xIndex ;
 
-								// �� ���� �ǳʼ�.. Filter�� ����ؾ� �ϴ� ���
+								// 몇 점을 건너서.. Filter를 출력해야 하는 경우
 								if (xIndex+colorCount-dist > 0)
 								{							
-									// Filter�� ������ ���
+									// Filter가 부족한 경우
 									if (s_pFilter->GetWidth() < xIndex+(colorCount-dist))
 									{	
 										CSpriteSurface::memcpyDarkness(pDestTemp, pPixels+dist, -xIndex);
-										// Filter���
+										// Filter출력
 										memcpyAlphaFilterDarkness(pDestTemp-xIndex, pPixels+dist-xIndex, pFilter-xIndex, s_pFilter->GetWidth());
 										
 										// - -;;
 										CSpriteSurface::memcpyDarkness(pDestTemp+dist2, pPixels+dist+dist2, colorCount-dist - dist2);
 									}
-									// Filter�� �˳��� ���
+									// Filter가 넉넉한 경우
 									else
 									{							
 										CSpriteSurface::memcpyDarkness(pDestTemp, pPixels+dist, -xIndex);
-										// dist2��ŭ�� Filter���
+										// dist2만큼만 Filter출력
 										memcpyAlphaFilterDarkness(pDestTemp-xIndex, pPixels+dist-xIndex, pFilter-xIndex, (colorCount-dist)+xIndex);
 									}						
 								}
 								else
 								{
-									// ������ �ƴ� ������ Surface�� ����Ѵ�.
+									// 투명이 아닌 색들을 Surface에 출력한다.
 									CSpriteSurface::memcpyDarkness(pDestTemp, pPixels+dist, colorCount-dist);
 								}
 							}
@@ -7515,18 +7515,18 @@ CSprite::BltAlphaFilterDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BY
 							xIndex	+= colorCount-dist;
 							pFilter += colorCount-dist;
 							
-							// �������ʹ� ��� ����Ѵ�.
+							// 이제부터는 계속 출력한다.
 							break;
 						}
 						
 							
 					}	
 					
-					// ������ �κ� ����
+					// 투명색 부분 증가
 					xIndex += transCount;
 					pFilter += transCount;
 
-					// ������ �ƴ� ����ŭ index����				
+					// 투명이 아닌 색만큼 index증가				
 					pPixels += colorCount;
 					index	+= colorCount;
 					xIndex	+= colorCount;
@@ -7534,38 +7534,38 @@ CSprite::BltAlphaFilterDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BY
 				} while (--j);
 			
 				//---------------------------------------------
-				// �������ʹ� ��� ����Ѵ�.		
+				// 이제부터는 계속 출력한다.		
 				//---------------------------------------------		
 				if (--j > 0)
 				{
 					do 
 					{
-						transCount = *pPixels++;		// ������ ��			
-						colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+						transCount = *pPixels++;		// 투명색 수			
+						colorCount = *pPixels++;		// 투명 아닌 색 수			
 								
-						// ��������ŭ �ǳ� �ڴ�.
+						// 투명색만큼 건너 뛴다.
 						pDestTemp	+= transCount;			
 						xIndex		+= transCount;
 						pFilter		+= transCount;
 
 						//------------------------------------------
-						// Filter�� ����ؾ� �ϴ� ���
+						// Filter를 출력해야 하는 경우
 						//------------------------------------------
 						if (xIndex >= 0)
 						{			
 							dist2  = s_pFilter->GetWidth() - xIndex;
 							if (dist2 > 0)
 							{						
-								// Filter�� �˳��� ���
+								// Filter가 넉넉한 경우
 								if (dist2 >= colorCount)
 								{
-									// ������ �ƴ� ������ Surface�� ����Ѵ�.
+									// 투명이 아닌 색들을 Surface에 출력한다.
 									memcpyAlphaFilterDarkness(pDestTemp, pPixels, pFilter, colorCount);
 								}
-								// Filter�� ������ ���
+								// Filter가 부족한 경우
 								else
 								{
-									// dist2��ŭ�� Filter���
+									// dist2만큼만 Filter출력
 									memcpyAlphaFilterDarkness(pDestTemp, pPixels, pFilter, dist2);
 									CSpriteSurface::memcpyDarkness(pDestTemp+dist2, pPixels+dist2, colorCount-dist2);
 								}
@@ -7575,40 +7575,40 @@ CSprite::BltAlphaFilterDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BY
 								CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 							}
 						}
-						// xIndex�� ����(-)�� ���
+						// xIndex가 음수(-)인 경우
 						else
 						{					
 							dist2 = s_pFilter->GetWidth() - xIndex ;
 
-							// �� ���� �ǳʼ�.. Filter�� ����ؾ� �ϴ� ���
+							// 몇 점을 건너서.. Filter를 출력해야 하는 경우
 							if (xIndex+colorCount > 0)
 							{							
-								// Filter�� ������ ���
+								// Filter가 부족한 경우
 								if (s_pFilter->GetWidth() < xIndex+colorCount)
 								{	
 									CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, -xIndex);
-									// Filter���
+									// Filter출력
 									memcpyAlphaFilterDarkness(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, s_pFilter->GetWidth());
 									
 									// - -;;
 									CSpriteSurface::memcpyDarkness(pDestTemp+dist2, pPixels+dist2, colorCount-dist2);
 								}
-								// Filter�� �˳��� ���
+								// Filter가 넉넉한 경우
 								else
 								{							
 									CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, -xIndex);
-									// dist2��ŭ�� Filter���
+									// dist2만큼만 Filter출력
 									memcpyAlphaFilterDarkness(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, colorCount+xIndex);
 								}						
 							}
 							else
 							{
-								// ������ �ƴ� ������ Surface�� ����Ѵ�.
+								// 투명이 아닌 색들을 Surface에 출력한다.
 								CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 							}
 						}
 
-						// memory addr ����
+						// memory addr 증가
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;		
 						xIndex		+= colorCount;
@@ -7629,7 +7629,7 @@ CSprite::BltAlphaFilterDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BY
 void		
 CSprite::BltAlphaFilterDarknessClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE DarkBits)
 {
-	// ��Ӱ� �ϴ� bit�� ����
+	// 어둡게 하는 bit값 설정
 	s_Value1 = DarkBits;
 	CSpriteSurface::s_Value1 = DarkBits;
 
@@ -7637,7 +7637,7 @@ CSprite::BltAlphaFilterDarknessClipRight(WORD *pDest, WORD pitch, RECT* pRect, B
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -7661,63 +7661,63 @@ CSprite::BltAlphaFilterDarknessClipRight(WORD *pDest, WORD pitch, RECT* pRect, B
 		pDestTemp = pDest;	
 		
 		//------------------------------------------
-		// Filter�� ������� �ʴ� ���
+		// Filter를 출력하지 않는 경우
 		//------------------------------------------
 		if (yIndex < 0 || yIndex >= s_pFilter->GetHeight())
 		{
-			// (������,�����,�����)�� �ݺ� ��
+			// (투명수,색깔수,색깔들)의 반복 수
 			count = *pPixels++;		
 
-			// �� �� ���		
+			// 한 줄 출력		
 			index = 0;
 				
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			// 각 줄마다 Clipping을 해줘야 하는데...		
+			// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 			//---------------------------------------------
 			if (count > 0)
 			{
 				j = count;
 				do 
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����
+					// 투명색만큼 index증가
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 					//---------------------------------------------
-					// ������ ������ �������� ���
+					// 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						// 투명색만으로 더 출력할 필요가 없을 때
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						// 투명색 아닌 것을 조금 출력해야 할 경우
 						else
 						{
 							pDestTemp += transCount;
 						
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.						
+							// 투명이 아닌 색들을 Surface에 출력한다.						
 							CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, rectRight-index);
 							break;
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					// 투명색만큼 건너띄고
 					pDestTemp += transCount;
 
-					// ���
+					// 출력
 					CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 					pDestTemp += colorCount;
 					pPixels += colorCount;			
@@ -7726,54 +7726,54 @@ CSprite::BltAlphaFilterDarknessClipRight(WORD *pDest, WORD pitch, RECT* pRect, B
 			}
 		}
 		//------------------------------------------
-		// Filter�� ����ϴ� ���
+		// Filter를 출력하는 경우
 		//------------------------------------------
 		else
 		{
-			// ����ҷ��� �ٿ� ���õ� Filter�� ��´�.
+			// 출력할려는 줄에 관련된 Filter를 얻는다.
 			pFilter = s_pFilter->GetFilter( yIndex );
 			pFilter += -s_X;
 			xIndex = -s_X;		
 
-			// (������,�����,�����)�� �ݺ� ��
+			// (투명수,색깔수,색깔들)의 반복 수
 			count = *pPixels++;		
 
-			// �� �� ���		
+			// 한 줄 출력		
 			index = 0;
 				
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			// 각 줄마다 Clipping을 해줘야 하는데...		
+			// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 			//---------------------------------------------
 			if (count > 0)
 			{
 				j = count;
 				do 
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����
+					// 투명색만큼 index증가
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 					//---------------------------------------------
-					// ������ ������ �������� ���
+					// 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						// 투명색만으로 더 출력할 필요가 없을 때
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						// 투명색 아닌 것을 조금 출력해야 할 경우
 						else
 						{
 							pDestTemp	+= transCount;
@@ -7782,26 +7782,26 @@ CSprite::BltAlphaFilterDarknessClipRight(WORD *pDest, WORD pitch, RECT* pRect, B
 
 							dist		= rectRight - index;
 						
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							//memcpy((void*)pDestTemp, (void*)pPixels, (rectRight - index)<<1);
 							//------------------------------------------
-							// Filter�� ����ؾ� �ϴ� ���
+							// Filter를 출력해야 하는 경우
 							//------------------------------------------
 							if (xIndex >= 0)
 							{	
 								dist2  = s_pFilter->GetWidth() - xIndex;
 								if (dist2 > 0)
 								{						
-									// Filter�� �˳��� ���
+									// Filter가 넉넉한 경우
 									if (dist2 >= dist)
 									{
-										// ������ �ƴ� ������ Surface�� ����Ѵ�.
+										// 투명이 아닌 색들을 Surface에 출력한다.
 										memcpyAlphaFilterDarkness(pDestTemp, pPixels, pFilter, dist);
 									}
-									// Filter�� ������ ���
+									// Filter가 부족한 경우
 									else
 									{
-										// dist2��ŭ�� Filter���
+										// dist2만큼만 Filter출력
 										memcpyAlphaFilterDarkness(pDestTemp, pPixels, pFilter, dist2);
 										CSpriteSurface::memcpyDarkness(pDestTemp+dist2, pPixels+dist2, dist - dist2);
 									}
@@ -7811,35 +7811,35 @@ CSprite::BltAlphaFilterDarknessClipRight(WORD *pDest, WORD pitch, RECT* pRect, B
 									CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, dist);
 								}
 							}
-							// xIndex�� ����(-)�� ���
+							// xIndex가 음수(-)인 경우
 							else
 							{					
 								dist2 = s_pFilter->GetWidth() - xIndex ;
 
-								// �� ���� �ǳʼ�.. Filter�� ����ؾ� �ϴ� ���
+								// 몇 점을 건너서.. Filter를 출력해야 하는 경우
 								if (xIndex + dist > 0)
 								{							
-									// Filter�� ������ ���
+									// Filter가 부족한 경우
 									if (s_pFilter->GetWidth() < xIndex+colorCount)
 									{	
 										CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, -xIndex);
-										// Filter���
+										// Filter출력
 										memcpyAlphaFilterDarkness(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, s_pFilter->GetWidth());
 										
 										// - -;;
 										CSpriteSurface::memcpyDarkness(pDestTemp+dist2, pPixels+dist2, dist - dist2);
 									}
-									// Filter�� �˳��� ���
+									// Filter가 넉넉한 경우
 									else
 									{							
 										CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, -xIndex);
-										// dist2��ŭ�� Filter���
+										// dist2만큼만 Filter출력
 										memcpyAlphaFilterDarkness(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, dist + xIndex);
 									}						
 								}
 								else
 								{
-									// ������ �ƴ� ������ Surface�� ����Ѵ�.
+									// 투명이 아닌 색들을 Surface에 출력한다.
 									CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, dist);
 								}
 							}
@@ -7847,30 +7847,30 @@ CSprite::BltAlphaFilterDarknessClipRight(WORD *pDest, WORD pitch, RECT* pRect, B
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					// 투명색만큼 건너띄고
 					pDestTemp	+= transCount;
 					xIndex		+= transCount;
 					pFilter		+= transCount;
 
-					// ���
+					// 출력
 					//------------------------------------------
-					// Filter�� ����ؾ� �ϴ� ���
+					// Filter를 출력해야 하는 경우
 					//------------------------------------------
 					if (xIndex >= 0)
 					{			
 						dist2  = s_pFilter->GetWidth() - xIndex;
 						if (dist2 > 0)
 						{						
-							// Filter�� �˳��� ���
+							// Filter가 넉넉한 경우
 							if (dist2 >= colorCount)
 							{
-								// ������ �ƴ� ������ Surface�� ����Ѵ�.
+								// 투명이 아닌 색들을 Surface에 출력한다.
 								memcpyAlphaFilterDarkness(pDestTemp, pPixels, pFilter, colorCount);
 							}
-							// Filter�� ������ ���
+							// Filter가 부족한 경우
 							else
 							{
-								// dist2��ŭ�� Filter���
+								// dist2만큼만 Filter출력
 								memcpyAlphaFilterDarkness(pDestTemp, pPixels, pFilter, dist2);
 								CSpriteSurface::memcpyDarkness(pDestTemp+dist2, pPixels+dist2, colorCount-dist2);
 							}
@@ -7880,35 +7880,35 @@ CSprite::BltAlphaFilterDarknessClipRight(WORD *pDest, WORD pitch, RECT* pRect, B
 							CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 						}
 					}
-					// xIndex�� ����(-)�� ���
+					// xIndex가 음수(-)인 경우
 					else
 					{					
 						dist2 = s_pFilter->GetWidth() - xIndex ;
 
-						// �� ���� �ǳʼ�.. Filter�� ����ؾ� �ϴ� ���
+						// 몇 점을 건너서.. Filter를 출력해야 하는 경우
 						if (xIndex+colorCount > 0)
 						{							
-							// Filter�� ������ ���
+							// Filter가 부족한 경우
 							if (s_pFilter->GetWidth() < xIndex+colorCount)
 							{	
 								CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, -xIndex);
-								// Filter���
+								// Filter출력
 								memcpyAlphaFilterDarkness(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, s_pFilter->GetWidth());
 								
 								// - -;;
 								CSpriteSurface::memcpyDarkness(pDestTemp+dist2, pPixels+dist2, colorCount-dist2);
 							}
-							// Filter�� �˳��� ���
+							// Filter가 넉넉한 경우
 							else
 							{							
 								CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, -xIndex);
-								// dist2��ŭ�� Filter���
+								// dist2만큼만 Filter출력
 								memcpyAlphaFilterDarkness(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, colorCount+xIndex);
 							}						
 						}
 						else
 						{
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 						}
 					}
@@ -7934,7 +7934,7 @@ CSprite::BltAlphaFilterDarknessClipRight(WORD *pDest, WORD pitch, RECT* pRect, B
 void		
 CSprite::BltAlphaFilterDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE DarkBits)
 {
-	// ��Ӱ� �ϴ� bit�� ����
+	// 어둡게 하는 bit값 설정
 	s_Value1 = DarkBits;
 	CSpriteSurface::s_Value1 = DarkBits;
 
@@ -7942,7 +7942,7 @@ CSprite::BltAlphaFilterDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, B
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -7960,7 +7960,7 @@ CSprite::BltAlphaFilterDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, B
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -7971,52 +7971,52 @@ CSprite::BltAlphaFilterDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, B
 		pDestTemp = pDest;	
 		
 		//------------------------------------------
-		// Filter�� ������� �ʴ� ���
+		// Filter를 출력하지 않는 경우
 		//------------------------------------------
 		if (yIndex < 0 || yIndex >= s_pFilter->GetHeight())
 		{
-			// (������,�����,�����)�� �ݺ� ��
+			// (투명수,색깔수,색깔들)의 반복 수
 			count = *pPixels++;		
 
-			// �� �� ���		
+			// 한 줄 출력		
 			index = 0;
 			
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...
-			// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+			// 각 줄마다 Clipping을 해줘야 하는데...
+			// xxxxOOOOOOOOOOOOOO인 경우이므로..
 			//---------------------------------------------
-			// xxxx�κб��� check���ִ� ��ƾ
+			// xxxx부분까지 check해주는 루틴
 			//---------------------------------------------
 			if (count > 0)
 			{
 				j = count;
 				do 
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����			
+					// 투명색만큼 index증가			
 					index += transCount;
 					
 				
 					//---------------------------------------------
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					if (index+colorCount > rectLeft)
 					{						
 						//---------------------------------------------
-						// ������������ xxxx������ �Ѿ�� ���
+						// 투명색만으로 xxxx범위를 넘어갔을 경우
 						//---------------------------------------------
 						if (index > rectLeft)
 						{	
-							// �������κ� �ǳʶ�
+							// 투명색부분 건너띔
 							pDestTemp += index - rectLeft;
 
-							// �̹� �ܰ�� ��� ���?
-							// ������ ���� �Ѿ�� ���..
+							// 이번 단계는 모두 출력?
+							// 오른쪽 끝을 넘어가는 경우..
 							if (index+colorCount > rectRight)
 							{							
-								// ������������ ������ �� �Ѿ�� ���
+								// 투명색만으로 오른쪽 끝 넘어가는 경우
 								if (index > rectRight)
 								{
 								}
@@ -8031,24 +8031,24 @@ CSprite::BltAlphaFilterDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, B
 								break;
 							}
 
-							// �̹� �ܰ�� ��� ���
+							// 이번 단계는 모두 출력
 							memcpy(pDestTemp, pPixels, colorCount<<1);
 							pDestTemp += colorCount;
 							pPixels += colorCount;
 							index += colorCount;
 
-							// �������ʹ� ��� ����Ѵ�.
+							// 이제부터는 계속 출력한다.
 							break;
 						}
 						//---------------------------------------------
-						// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-						// xxxx������ �Ѿ�� �Ǵ� ���
+						// 투명색+투명아닌색의 일부까지 출력하면 
+						// xxxx범위를 넘어가게 되는 경우
 						//---------------------------------------------
 						else
 						{
 							dist = rectLeft - index;
 
-							// ������ ���� �Ѿ�� ���..
+							// 오른쪽 끝을 넘어가는 경우..
 							if (index+colorCount > rectRight)
 							{
 								CSpriteSurface::memcpyDarkness(pDestTemp, pPixels+dist, rectRight - rectLeft);
@@ -8057,68 +8057,68 @@ CSprite::BltAlphaFilterDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, B
 								break;
 							}		
 
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							CSpriteSurface::memcpyDarkness(pDestTemp, pPixels+dist, colorCount-dist);
 							pDestTemp += colorCount-dist;
 							pPixels += colorCount;
 							index += colorCount;
 
-							// �������ʹ� ��� ����Ѵ�.
+							// 이제부터는 계속 출력한다.
 							break;
 						}
 					}					
 
-					// ������ �ƴ� ����ŭ index����				
+					// 투명이 아닌 색만큼 index증가				
 					pPixels += colorCount;
 					index += colorCount;
 				} while (--j);
 
 				//---------------------------------------------
-				// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-				// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+				// 각 줄마다 Clipping을 해줘야 하는데...		
+				// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 				//---------------------------------------------
-				// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+				// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 				//---------------------------------------------
 				if (--j > 0)
 				{
 					do
 					{
-						transCount = *pPixels++;		// ������ ��			
-						colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+						transCount = *pPixels++;		// 투명색 수			
+						colorCount = *pPixels++;		// 투명 아닌 색 수			
 								
-						// ��������ŭ index����
+						// 투명색만큼 index증가
 						index += transCount;
 						
-						// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-						// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+						// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+						// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-						// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+						// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 						//---------------------------------------------
-						// ������ ������ �������� ���
+						// 오른쪽 끝까지 도달했을 경우
 						//---------------------------------------------			
 						if (index+colorCount > rectRight)
 						{
-							// ������������ �� ����� �ʿ䰡 ���� ��
+							// 투명색만으로 더 출력할 필요가 없을 때
 							if (index > rectRight)
 							{
 								break;
 							}
-							// ������ �ƴ� ���� ���� ����ؾ� �� ���
+							// 투명색 아닌 것을 조금 출력해야 할 경우
 							else
 							{
 								pDestTemp += transCount;
 							
-								// ������ �ƴ� ������ Surface�� ����Ѵ�.						
+								// 투명이 아닌 색들을 Surface에 출력한다.						
 								CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, rectRight-index);
 								break;
 							}
 						}
 
-						// ��������ŭ �ǳʶ��
+						// 투명색만큼 건너띄고
 						pDestTemp += transCount;
 
-						// ���
+						// 출력
 						CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 						pDestTemp += colorCount;
 						pPixels += colorCount;			
@@ -8128,73 +8128,73 @@ CSprite::BltAlphaFilterDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, B
 			}
 		}
 		//------------------------------------------
-		// Filter�� ����ؾ� �ϴ� ���
+		// Filter를 출력해야 하는 경우
 		//------------------------------------------
 		else
 		{
-			// ����ҷ��� �ٿ� ���õ� Filter�� ��´�.
+			// 출력할려는 줄에 관련된 Filter를 얻는다.
 			pFilter = s_pFilter->GetFilter( yIndex );
 			pFilter += -s_X;
 			xIndex = -s_X;
 
-			// (������,�����,�����)�� �ݺ� ��
+			// (투명수,색깔수,색깔들)의 반복 수
 			count = *pPixels++;		
 
-			// �� �� ���		
+			// 한 줄 출력		
 			index = 0;
 			
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...
-			// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+			// 각 줄마다 Clipping을 해줘야 하는데...
+			// xxxxOOOOOOOOOOOOOO인 경우이므로..
 			//---------------------------------------------
-			// xxxx�κб��� check���ִ� ��ƾ
+			// xxxx부분까지 check해주는 루틴
 			//---------------------------------------------
 			if (count > 0)
 			{
 				j = count;
 				do 
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��					
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수					
 							
-					// ��������ŭ index����			
+					// 투명색만큼 index증가			
 					index += transCount;				
 				
 					//---------------------------------------------
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					if (index+colorCount > rectLeft)
 					{
 						//---------------------------------------------
-						// ������������ xxxx������ �Ѿ�� ���
+						// 투명색만으로 xxxx범위를 넘어갔을 경우
 						//---------------------------------------------
 						if (index > rectLeft)
 						{	
-							// �������κ� �ǳʶ�
+							// 투명색부분 건너띔
 							pDestTemp += index - rectLeft;
 							xIndex += transCount;//index - rectLeft;
 							pFilter += transCount;//index - rectLeft;
 
-							// �̹� �ܰ�� ��� ���
+							// 이번 단계는 모두 출력
 							//memcpy(pDestTemp, pPixels, colorCount<<1);
 							//------------------------------------------
-							// Filter�� ����ؾ� �ϴ� ���
+							// Filter를 출력해야 하는 경우
 							//------------------------------------------
 							if (xIndex >= 0)
 							{			
 								dist2  = s_pFilter->GetWidth() - xIndex;
 								if (dist2 > 0)
 								{						
-									// Filter�� �˳��� ���
+									// Filter가 넉넉한 경우
 									if (dist2 >= colorCount)
 									{
-										// ������ �ƴ� ������ Surface�� ����Ѵ�.
+										// 투명이 아닌 색들을 Surface에 출력한다.
 										memcpyAlphaFilterDarkness(pDestTemp, pPixels, pFilter, colorCount);
 									}
-									// Filter�� ������ ���
+									// Filter가 부족한 경우
 									else
 									{
-										// dist2��ŭ�� Filter���
+										// dist2만큼만 Filter출력
 										memcpyAlphaFilterDarkness(pDestTemp, pPixels, pFilter, dist2);
 										CSpriteSurface::memcpyDarkness(pDestTemp+dist2, pPixels+dist2, colorCount-dist2);
 									}
@@ -8204,35 +8204,35 @@ CSprite::BltAlphaFilterDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, B
 									CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 								}
 							}
-							// xIndex�� ����(-)�� ���
+							// xIndex가 음수(-)인 경우
 							else
 							{					
 								dist2 = s_pFilter->GetWidth() - xIndex ;
 
-								// �� ���� �ǳʼ�.. Filter�� ����ؾ� �ϴ� ���
+								// 몇 점을 건너서.. Filter를 출력해야 하는 경우
 								if (xIndex+colorCount > 0)
 								{							
-									// Filter�� ������ ���
+									// Filter가 부족한 경우
 									if (s_pFilter->GetWidth() < xIndex+colorCount)
 									{	
 										CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, -xIndex);
-										// Filter���
+										// Filter출력
 										memcpyAlphaFilterDarkness(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, s_pFilter->GetWidth());
 										
 										// - -;;
 										CSpriteSurface::memcpyDarkness(pDestTemp+dist2, pPixels+dist2, colorCount-dist2);
 									}
-									// Filter�� �˳��� ���
+									// Filter가 넉넉한 경우
 									else
 									{							
 										CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, -xIndex);
-										// dist2��ŭ�� Filter���
+										// dist2만큼만 Filter출력
 										memcpyAlphaFilterDarkness(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, colorCount+xIndex);
 									}						
 								}
 								else
 								{
-									// ������ �ƴ� ������ Surface�� ����Ѵ�.
+									// 투명이 아닌 색들을 Surface에 출력한다.
 									CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 								}
 							}
@@ -8242,12 +8242,12 @@ CSprite::BltAlphaFilterDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, B
 							pFilter		+= colorCount;
 							index		+= colorCount;
 
-							// �������ʹ� ��� ����Ѵ�.
+							// 이제부터는 계속 출력한다.
 							break;
 						}
 						//---------------------------------------------
-						// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-						// xxxx������ �Ѿ�� �Ǵ� ���
+						// 투명색+투명아닌색의 일부까지 출력하면 
+						// xxxx범위를 넘어가게 되는 경우
 						//---------------------------------------------
 						else
 						{	
@@ -8256,29 +8256,29 @@ CSprite::BltAlphaFilterDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, B
 							xIndex	+= transCount + dist;
 							pFilter	+= transCount + dist;
 
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							//memcpy(pDestTemp, pPixels+dist, (colorCount-dist)<<1);					
 							//pDestTemp += colorCount-dist;
 							//pPixels += colorCount;
 							
 							//------------------------------------------
-							// Filter�� ����ؾ� �ϴ� ���
+							// Filter를 출력해야 하는 경우
 							//------------------------------------------
 							if (xIndex >= 0)
 							{			
 								dist2  = s_pFilter->GetWidth() - xIndex;
 								if (dist2 > 0)
 								{						
-									// Filter�� �˳��� ���
+									// Filter가 넉넉한 경우
 									if (dist2 >= colorCount-dist)
 									{
-										// ������ �ƴ� ������ Surface�� ����Ѵ�.
+										// 투명이 아닌 색들을 Surface에 출력한다.
 										memcpyAlphaFilterDarkness(pDestTemp, pPixels+dist, pFilter, colorCount-dist);
 									}
-									// Filter�� ������ ���
+									// Filter가 부족한 경우
 									else
 									{
-										// dist2��ŭ�� Filter���
+										// dist2만큼만 Filter출력
 										memcpyAlphaFilterDarkness(pDestTemp, pPixels+dist, pFilter, dist2);
 										CSpriteSurface::memcpyDarkness(pDestTemp+dist2, pPixels+dist+dist2, colorCount-dist - dist2);
 									}								
@@ -8288,35 +8288,35 @@ CSprite::BltAlphaFilterDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, B
 									CSpriteSurface::memcpyDarkness(pDestTemp, pPixels+dist, colorCount-dist);
 								}							
 							}
-							// xIndex�� ����(-)�� ���
+							// xIndex가 음수(-)인 경우
 							else
 							{					
 								dist2 = s_pFilter->GetWidth() - xIndex ;
 
-								// �� ���� �ǳʼ�.. Filter�� ����ؾ� �ϴ� ���
+								// 몇 점을 건너서.. Filter를 출력해야 하는 경우
 								if (xIndex+colorCount-dist > 0)
 								{							
-									// Filter�� ������ ���
+									// Filter가 부족한 경우
 									if (s_pFilter->GetWidth() < xIndex+(colorCount-dist))
 									{	
 										CSpriteSurface::memcpyDarkness(pDestTemp, pPixels+dist, -xIndex);
-										// Filter���
+										// Filter출력
 										memcpyAlphaFilterDarkness(pDestTemp-xIndex, pPixels+dist-xIndex, pFilter-xIndex, s_pFilter->GetWidth());
 										
 										// - -;;
 										CSpriteSurface::memcpyDarkness(pDestTemp+dist2, pPixels+dist+dist2, colorCount-dist - dist2);
 									}
-									// Filter�� �˳��� ���
+									// Filter가 넉넉한 경우
 									else
 									{							
 										CSpriteSurface::memcpyDarkness(pDestTemp, pPixels+dist, -xIndex);
-										// dist2��ŭ�� Filter���
+										// dist2만큼만 Filter출력
 										memcpyAlphaFilterDarkness(pDestTemp-xIndex, pPixels+dist-xIndex, pFilter-xIndex, (colorCount-dist)+xIndex);
 									}						
 								}
 								else
 								{
-									// ������ �ƴ� ������ Surface�� ����Ѵ�.
+									// 투명이 아닌 색들을 Surface에 출력한다.
 									CSpriteSurface::memcpyDarkness(pDestTemp, pPixels+dist, colorCount-dist);
 								}
 							}
@@ -8327,16 +8327,16 @@ CSprite::BltAlphaFilterDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, B
 							pFilter		+= colorCount-dist;
 							index		+= colorCount;
 							
-							// �������ʹ� ��� ����Ѵ�.
+							// 이제부터는 계속 출력한다.
 							break;
 						}
 					}	
 					
-					// ������ �κ� ����
+					// 투명색 부분 증가
 					xIndex += transCount;
 					pFilter += transCount;
 
-					// ������ �ƴ� ����ŭ index����				
+					// 투명이 아닌 색만큼 index증가				
 					pPixels += colorCount;
 					index	+= colorCount;
 					xIndex	+= colorCount;
@@ -8344,37 +8344,37 @@ CSprite::BltAlphaFilterDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, B
 				} while (--j);
 			
 				//---------------------------------------------
-				// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-				// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+				// 각 줄마다 Clipping을 해줘야 하는데...		
+				// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 				//---------------------------------------------
-				// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+				// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 				//---------------------------------------------
 				if (--j > 0)
 				{
 					do
 					{
-						transCount = *pPixels++;		// ������ ��			
-						colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+						transCount = *pPixels++;		// 투명색 수			
+						colorCount = *pPixels++;		// 투명 아닌 색 수			
 								
-						// ��������ŭ index����
+						// 투명색만큼 index증가
 						index += transCount;
 						
-						// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-						// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+						// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+						// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-						// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+						// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 						//---------------------------------------------
-						// ������ ������ �������� ���
+						// 오른쪽 끝까지 도달했을 경우
 						//---------------------------------------------			
 						if (index+colorCount > rectRight)
 						{
-							// ������������ �� ����� �ʿ䰡 ���� ��
+							// 투명색만으로 더 출력할 필요가 없을 때
 							if (index > rectRight)
 							{
 								break;
 							}
-							// ������ �ƴ� ���� ���� ����ؾ� �� ���
+							// 투명색 아닌 것을 조금 출력해야 할 경우
 							else
 							{
 								pDestTemp	+= transCount;
@@ -8383,26 +8383,26 @@ CSprite::BltAlphaFilterDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, B
 
 								dist		= rectRight - index;
 							
-								// ������ �ƴ� ������ Surface�� ����Ѵ�.
+								// 투명이 아닌 색들을 Surface에 출력한다.
 								//memcpy((void*)pDestTemp, (void*)pPixels, (rectRight - index)<<1);
 								//------------------------------------------
-								// Filter�� ����ؾ� �ϴ� ���
+								// Filter를 출력해야 하는 경우
 								//------------------------------------------
 								if (xIndex >= 0)
 								{	
 									dist2  = s_pFilter->GetWidth() - xIndex;
 									if (dist2 > 0)
 									{						
-										// Filter�� �˳��� ���
+										// Filter가 넉넉한 경우
 										if (dist2 >= dist)
 										{
-											// ������ �ƴ� ������ Surface�� ����Ѵ�.
+											// 투명이 아닌 색들을 Surface에 출력한다.
 											memcpyAlphaFilterDarkness(pDestTemp, pPixels, pFilter, dist);
 										}
-										// Filter�� ������ ���
+										// Filter가 부족한 경우
 										else
 										{
-											// dist2��ŭ�� Filter���
+											// dist2만큼만 Filter출력
 											memcpyAlphaFilterDarkness(pDestTemp, pPixels, pFilter, dist2);
 											CSpriteSurface::memcpyDarkness(pDestTemp+dist2, pPixels+dist2, dist - dist2);
 										}
@@ -8412,35 +8412,35 @@ CSprite::BltAlphaFilterDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, B
 										CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, dist);
 									}
 								}
-								// xIndex�� ����(-)�� ���
+								// xIndex가 음수(-)인 경우
 								else
 								{					
 									dist2 = s_pFilter->GetWidth() - xIndex ;
 
-									// �� ���� �ǳʼ�.. Filter�� ����ؾ� �ϴ� ���
+									// 몇 점을 건너서.. Filter를 출력해야 하는 경우
 									if (xIndex + dist > 0)
 									{							
-										// Filter�� ������ ���
+										// Filter가 부족한 경우
 										if (s_pFilter->GetWidth() < xIndex+colorCount)
 										{	
 											CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, -xIndex);
-											// Filter���
+											// Filter출력
 											memcpyAlphaFilterDarkness(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, s_pFilter->GetWidth());
 											
 											// - -;;
 											CSpriteSurface::memcpyDarkness(pDestTemp+dist2, pPixels+dist2, dist - dist2);
 										}
-										// Filter�� �˳��� ���
+										// Filter가 넉넉한 경우
 										else
 										{							
 											CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, -xIndex);
-											// dist2��ŭ�� Filter���
+											// dist2만큼만 Filter출력
 											memcpyAlphaFilterDarkness(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, dist + xIndex);
 										}						
 									}
 									else
 									{
-										// ������ �ƴ� ������ Surface�� ����Ѵ�.
+										// 투명이 아닌 색들을 Surface에 출력한다.
 										CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, dist);
 									}
 								}
@@ -8448,30 +8448,30 @@ CSprite::BltAlphaFilterDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, B
 							}
 						}
 
-						// ��������ŭ �ǳʶ��
+						// 투명색만큼 건너띄고
 						pDestTemp	+= transCount;
 						xIndex		+= transCount;
 						pFilter		+= transCount;
 
-						// ���
+						// 출력
 						//------------------------------------------
-						// Filter�� ����ؾ� �ϴ� ���
+						// Filter를 출력해야 하는 경우
 						//------------------------------------------
 						if (xIndex >= 0)
 						{			
 							dist2  = s_pFilter->GetWidth() - xIndex;
 							if (dist2 > 0)
 							{						
-								// Filter�� �˳��� ���
+								// Filter가 넉넉한 경우
 								if (dist2 >= colorCount)
 								{
-									// ������ �ƴ� ������ Surface�� ����Ѵ�.
+									// 투명이 아닌 색들을 Surface에 출력한다.
 									memcpyAlphaFilterDarkness(pDestTemp, pPixels, pFilter, colorCount);
 								}
-								// Filter�� ������ ���
+								// Filter가 부족한 경우
 								else
 								{
-									// dist2��ŭ�� Filter���
+									// dist2만큼만 Filter출력
 									memcpyAlphaFilterDarkness(pDestTemp, pPixels, pFilter, dist2);
 									CSpriteSurface::memcpyDarkness(pDestTemp+dist2, pPixels+dist2, colorCount-dist2);
 								}
@@ -8481,35 +8481,35 @@ CSprite::BltAlphaFilterDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, B
 								CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 							}
 						}
-						// xIndex�� ����(-)�� ���
+						// xIndex가 음수(-)인 경우
 						else
 						{					
 							dist2 = s_pFilter->GetWidth() - xIndex ;
 
-							// �� ���� �ǳʼ�.. Filter�� ����ؾ� �ϴ� ���
+							// 몇 점을 건너서.. Filter를 출력해야 하는 경우
 							if (xIndex+colorCount > 0)
 							{							
-								// Filter�� ������ ���
+								// Filter가 부족한 경우
 								if (s_pFilter->GetWidth() < xIndex+colorCount)
 								{	
 									CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, -xIndex);
-									// Filter���
+									// Filter출력
 									memcpyAlphaFilterDarkness(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, s_pFilter->GetWidth());
 									
 									// - -;;
 									CSpriteSurface::memcpyDarkness(pDestTemp+dist2, pPixels+dist2, colorCount-dist2);
 								}
-								// Filter�� �˳��� ���
+								// Filter가 넉넉한 경우
 								else
 								{							
 									CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, -xIndex);
-									// dist2��ŭ�� Filter���
+									// dist2만큼만 Filter출력
 									memcpyAlphaFilterDarkness(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, colorCount+xIndex);
 								}						
 							}
 							else
 							{
-								// ������ �ƴ� ������ Surface�� ����Ѵ�.
+								// 투명이 아닌 색들을 Surface에 출력한다.
 								CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 							}
 						}
@@ -8532,12 +8532,12 @@ CSprite::BltAlphaFilterDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, B
 //----------------------------------------------------------------------
 // Blt AlphaFilter Darkness Clip Height
 //----------------------------------------------------------------------
-// pRect->top, pRect->bottom��ŭ�� ����Ѵ�.
+// pRect->top, pRect->bottom만큼만 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltAlphaFilterDarknessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE DarkBits)
 {
-	// ��Ӱ� �ϴ� bit�� ����
+	// 어둡게 하는 bit값 설정
 	s_Value1 = DarkBits;
 	CSpriteSurface::s_Value1 = DarkBits;
 
@@ -8562,23 +8562,23 @@ CSprite::BltAlphaFilterDarknessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, 
 		pDestTemp	= pDest;
 
 		//------------------------------------------
-		// Filter�� ������� �ʴ� ���
+		// Filter를 출력하지 않는 경우
 		//------------------------------------------
 		if (yIndex < 0 || yIndex >= s_pFilter->GetHeight())
 		{
-			// (������,�����,�����)�� �ݺ� ��		
+			// (투명수,색깔수,색깔들)의 반복 수		
 			count	= *pPixels++;		
 
-			// �� �� ���
+			// 한 줄 출력
 			if (count > 0)
 			{
 				j = count;
 				do 
 				{				
-					pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+					pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+					colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 					
 					pDestTemp	+= colorCount;
@@ -8587,47 +8587,47 @@ CSprite::BltAlphaFilterDarknessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, 
 			}
 		}
 		//------------------------------------------
-		// Filter�� ����ؾ� �ϴ� ���
+		// Filter를 출력해야 하는 경우
 		//------------------------------------------
 		else
 		{
-			// ����ҷ��� �ٿ� ���õ� Filter�� ��´�.
+			// 출력할려는 줄에 관련된 Filter를 얻는다.
 			pFilter = s_pFilter->GetFilter( yIndex );
 			pFilter += -s_X;
-			xIndex = -s_X;		// xIndex�� x�� �̻��� ��� ����ϸ� �ȴ�.
+			xIndex = -s_X;		// xIndex가 x를 이상인 경우 출력하면 된다.
 
-			// (������,�����,�����)�� �ݺ� ��		
+			// (투명수,색깔수,색깔들)의 반복 수		
 			count	= *pPixels++;		
- 			// �� �� ���
+ 			// 한 줄 출력
 			if (count > 0)
 			{
 				j = count;
 				do 
 				{
-					pDestTemp	+= *pPixels;			// ��������ŭ �ǳ� �ڴ�.
+					pDestTemp	+= *pPixels;			// 투명색만큼 건너 뛴다.
 					xIndex		+= *pPixels;
 					pFilter		+= *pPixels;
 					pPixels ++;
-					colorCount = *pPixels++;			// ���� �ƴ� �� ��				
+					colorCount = *pPixels++;			// 투명 아닌 색 수				
 
 					//------------------------------------------
-					// Filter�� ����ؾ� �ϴ� ���
+					// Filter를 출력해야 하는 경우
 					//------------------------------------------
 					if (xIndex >= 0)
 					{			
 						dist  = s_pFilter->GetWidth() - xIndex;
 						if (dist > 0)
 						{						
-							// Filter�� �˳��� ���
+							// Filter가 넉넉한 경우
 							if (dist >= colorCount)
 							{
-								// ������ �ƴ� ������ Surface�� ����Ѵ�.
+								// 투명이 아닌 색들을 Surface에 출력한다.
 								memcpyAlphaFilterDarkness(pDestTemp, pPixels, pFilter, colorCount);
 							}
-							// Filter�� ������ ���
+							// Filter가 부족한 경우
 							else
 							{
-								// dist��ŭ�� Filter���
+								// dist만큼만 Filter출력
 								memcpyAlphaFilterDarkness(pDestTemp, pPixels, pFilter, dist);
 								CSpriteSurface::memcpyDarkness(pDestTemp+dist, pPixels+dist, colorCount-dist);
 							}
@@ -8637,35 +8637,35 @@ CSprite::BltAlphaFilterDarknessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, 
 							CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 						}
 					}
-					// xIndex�� ����(-)�� ���
+					// xIndex가 음수(-)인 경우
 					else
 					{					
 						dist = s_pFilter->GetWidth() - xIndex ;
 
-						// �� ���� �ǳʼ�.. Filter�� ����ؾ� �ϴ� ���
+						// 몇 점을 건너서.. Filter를 출력해야 하는 경우
 						if (xIndex+colorCount > 0)
 						{							
-							// Filter�� ������ ���
+							// Filter가 부족한 경우
 							if (s_pFilter->GetWidth() < xIndex+colorCount)
 							{	
 								CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, -xIndex);
-								// Filter���
+								// Filter출력
 								memcpyAlphaFilterDarkness(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, s_pFilter->GetWidth());
 								
 								// - -;;
 								CSpriteSurface::memcpyDarkness(pDestTemp+dist, pPixels+dist, colorCount-dist);
 							}
-							// Filter�� �˳��� ���
+							// Filter가 넉넉한 경우
 							else
 							{							
 								CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, -xIndex);
-								// dist��ŭ�� Filter���
+								// dist만큼만 Filter출력
 								memcpyAlphaFilterDarkness(pDestTemp-xIndex, pPixels-xIndex, pFilter-xIndex, colorCount+xIndex);
 							}						
 						}
 						else
 						{
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 						}
 					}
@@ -8687,8 +8687,8 @@ CSprite::BltAlphaFilterDarknessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, 
 //----------------------------------------------------------------------
 // memcpy Filter Darkness
 //----------------------------------------------------------------------
-// pFilter�� �̿��ؼ� ����Ѵ�.
-// pFilter�� alpha ������ �̿��Ѵ�.
+// pFilter를 이용해서 출력한다.
+// pFilter를 alpha 값으로 이용한다.
 //----------------------------------------------------------------------
 void
 CSprite::memcpyAlphaFilterDarkness(WORD* pDest, WORD* pSource, BYTE* pFilter, WORD pixels)
@@ -8702,12 +8702,12 @@ CSprite::memcpyAlphaFilterDarkness(WORD* pDest, WORD* pSource, BYTE* pFilter, WO
 	BYTE alpha;
 
 	// Alpha Channel Blending
-	// ������ ���
+	// 한점씩 찍기
 	while (j--)
 	{			
 		alpha = *pFilter;		
 
-		// ���� ���
+		// 한점 찍기
 		///*
 		sTemp = *pSource;
 		dTemp = *pDest;
@@ -8744,7 +8744,7 @@ CSprite::memcpyAlphaFilterDarkness(WORD* pDest, WORD* pSource, BYTE* pFilter, WO
 //----------------------------------------------------------------------
 // BltDarkerFilter
 //----------------------------------------------------------------------
-// Clipping���� �ʴ´�.
+// Clipping하지 않는다.
 //----------------------------------------------------------------------
 void
 CSprite::BltDarkerFilter(WORD *pDest, WORD pitch)
@@ -8772,21 +8772,21 @@ CSprite::BltDarkerFilter(WORD *pDest, WORD pitch)
 			pFilter		= s_pFilter->GetFilter( i );
 			pDestTemp	= pDest;
 
-			// (������,�����,�����)�� �ݺ� ��		
+			// (투명수,색깔수,색깔들)의 반복 수		
 			count	= *pPixels++;		
 
-			// �� �� ���
+			// 한 줄 출력
 			if (count > 0)
 			{
 				j = count;
 				do 
 				{
-					pDestTemp	+= *pPixels;		// ��������ŭ �ǳ� �ڴ�.
+					pDestTemp	+= *pPixels;		// 투명색만큼 건너 뛴다.
 					pFilter		+= *pPixels;
 					pPixels++;
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+					colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					memcpyDarkerFilter(pDestTemp, pPixels, pFilter, colorCount);
 					
 					pDestTemp	+= colorCount;
@@ -8803,8 +8803,8 @@ CSprite::BltDarkerFilter(WORD *pDest, WORD pitch)
 //----------------------------------------------------------------------
 // BltDarkerFilter ClipLeft
 //----------------------------------------------------------------------
-// ���� clipping.  
-// pRect->left���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
+// 왼쪽 clipping.  
+// pRect->left개의 점을 건너띈 다음부터 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltDarkerFilterClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
@@ -8814,7 +8814,7 @@ CSprite::BltDarkerFilterClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 	BYTE	*pFilter;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -8826,7 +8826,7 @@ CSprite::BltDarkerFilterClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -8836,94 +8836,94 @@ CSprite::BltDarkerFilterClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 		pFilter		= s_pFilter->GetFilter( i );
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{
-				transCount = *pPixels++;		// ������ ��
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;			
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp	+= index - rectLeft;
 						pFilter		+= index - rectLeft;
 
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						memcpyDarkerFilter(pDestTemp, pPixels, pFilter, colorCount);
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;
 						pFilter		+= colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = rectLeft - index;
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						memcpyDarkerFilter(pDestTemp, pPixels+dist, pFilter+dist, colorCount-dist);
 						pDestTemp += colorCount-dist;
 						pPixels += colorCount;
 						pFilter	+= colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			// 이제부터는 계속 출력한다.		
 			//---------------------------------------------		
 			if (--j > 0)
 			{
 				do
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수
 							
-					// ��������ŭ �ǳ� �ڴ�.			
+					// 투명색만큼 건너 뛴다.			
 					pDestTemp	+= transCount;
 					pFilter		+= transCount;
 					
-					// �������� �ƴѸ�ŭ ������ش�.
+					// 투명색이 아닌만큼 출력해준다.
 					memcpyDarkerFilter(pDestTemp, pPixels, pFilter, colorCount);
 
-					// memory addr ����
+					// memory addr 증가
 					pDestTemp	+= colorCount;
 					pPixels		+= colorCount;	
 					pFilter		+= colorCount;
@@ -8939,8 +8939,8 @@ CSprite::BltDarkerFilterClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // BltDarkerFilter ClipRight
 //----------------------------------------------------------------------
-// ������ clipping.  
-// pRect->right�� ������ ���� pDest�� ����Ѵ�.
+// 오른쪽 clipping.  
+// pRect->right개 까지의 점만 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltDarkerFilterClipRight(WORD* pDest, WORD pitch, RECT* pRect)
@@ -8950,7 +8950,7 @@ CSprite::BltDarkerFilterClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 	BYTE	*pFilter;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -8968,61 +8968,61 @@ CSprite::BltDarkerFilterClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 		pFilter		= s_pFilter->GetFilter( i );
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		// 각 줄마다 Clipping을 해줘야 하는데...		
+		// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����
+				// 투명색만큼 index증가
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+				// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 				//---------------------------------------------
-				// ������ ������ �������� ���
+				// 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+colorCount > rectRight)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					// 투명색만으로 더 출력할 필요가 없을 때
 					if (index > rectRight)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					// 투명색 아닌 것을 조금 출력해야 할 경우
 					else
 					{
 						pDestTemp	+= transCount;
 						pFilter		+= transCount;
 					
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						memcpyDarkerFilter(pDestTemp, pPixels, pFilter, rectRight - index);
 						break;
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				// 투명색만큼 건너띄고
 				pDestTemp	+= transCount;
 				pFilter		+= transCount;
 
-				// ���
+				// 출력
 				memcpyDarkerFilter(pDestTemp, pPixels, pFilter, colorCount);
 				pDestTemp	+= colorCount;
 				pPixels		+= colorCount;
@@ -9038,8 +9038,8 @@ CSprite::BltDarkerFilterClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // BltDarkerFilter ClipWidth
 //----------------------------------------------------------------------
-// ���� clipping.  
-// pRect->left���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
+// 왼쪽 clipping.  
+// pRect->left개의 점을 건너띈 다음부터 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltDarkerFilterClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
@@ -9049,7 +9049,7 @@ CSprite::BltDarkerFilterClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 	BYTE	*pFilter;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -9061,7 +9061,7 @@ CSprite::BltDarkerFilterClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 	register int j;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -9072,49 +9072,49 @@ CSprite::BltDarkerFilterClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 		pFilter		= s_pFilter->GetFilter( i );
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{
-				transCount = *pPixels++;		// ������ ��			
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				colorCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;
 				
 			
 				//---------------------------------------------
-				// xxxx������ �Ѿ�� �Ǵ� ���
+				// xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp	+= index - rectLeft;
 						pFilter		+= index - rectLeft;
 
-						// �̹� �ܰ�� ��� ���?
-						// ������ ���� �Ѿ�� ���..
+						// 이번 단계는 모두 출력?
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > rectRight)
 						{							
-							// ������������ ������ �� �Ѿ�� ���
+							// 투명색만으로 오른쪽 끝 넘어가는 경우
 							if (index > rectRight)
 							{
 							}
@@ -9129,25 +9129,25 @@ CSprite::BltDarkerFilterClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 							break;
 						}
 
-						// �̹� �ܰ�� ��� ���
+						// 이번 단계는 모두 출력
 						memcpyDarkerFilter(pDestTemp, pPixels, pFilter, colorCount);
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;
 						pFilter		+= colorCount;
 						index		+= colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우
 					//---------------------------------------------
 					else
 					{
 						dist = rectLeft - index;
 
-						// ������ ���� �Ѿ�� ���..
+						// 오른쪽 끝을 넘어가는 경우..
 						if (index+colorCount > rectRight)
 						{
 							memcpyDarkerFilter(pDestTemp, pPixels+dist, pFilter+dist, rectRight - rectLeft);
@@ -9156,72 +9156,72 @@ CSprite::BltDarkerFilterClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 							break;
 						}		
 
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						memcpyDarkerFilter(pDestTemp, pPixels+dist, pFilter+dist, colorCount-dist);
 						pDestTemp	+= colorCount-dist;
 						pPixels		+= colorCount;
 						pFilter		+= colorCount;
 						index		+= colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}					
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				pFilter	+= colorCount;
 				index += colorCount;
 			} while (--j);
 
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			// 각 줄마다 Clipping을 해줘야 하는데...		
+			// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do
 				{
-					transCount = *pPixels++;		// ������ ��			
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					colorCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����
+					// 투명색만큼 index증가
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 					//---------------------------------------------
-					// ������ ������ �������� ���
+					// 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						// 투명색만으로 더 출력할 필요가 없을 때
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						// 투명색 아닌 것을 조금 출력해야 할 경우
 						else
 						{
 							pDestTemp	+= transCount;
 							pFilter		+= transCount;
 						
-							// ������ �ƴ� ������ Surface�� ����Ѵ�.
+							// 투명이 아닌 색들을 Surface에 출력한다.
 							memcpyDarkerFilter(pDestTemp, pPixels, pFilter, rectRight - index);
 							break;
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					// 투명색만큼 건너띄고
 					pDestTemp	+= transCount;
 					pFilter		+= transCount;
 
-					// ���
+					// 출력
 					memcpyDarkerFilter(pDestTemp, pPixels, pFilter, colorCount);
 					pDestTemp	+= colorCount;
 					pPixels		+= colorCount;			
@@ -9239,7 +9239,7 @@ CSprite::BltDarkerFilterClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // BltDarkerFilter Clip Height
 //----------------------------------------------------------------------
-// pRect->top, pRect->bottom��ŭ�� ����Ѵ�.
+// pRect->top, pRect->bottom만큼만 출력한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltDarkerFilterClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
@@ -9262,21 +9262,21 @@ CSprite::BltDarkerFilterClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 		pFilter		= s_pFilter->GetFilter( i );
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		// (투명수,색깔수,색깔들)의 반복 수		
 		count	= *pPixels++;		
 
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{
 			j = count;
 			do 
 			{				
-				pDestTemp	+= *pPixels;		// ��������ŭ �ǳ� �ڴ�.
+				pDestTemp	+= *pPixels;		// 투명색만큼 건너 뛴다.
 				pFilter		+= *pPixels;
 				pPixels++;
-				colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+				colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-				// ������ �ƴ� ������ Surface�� ����Ѵ�.
+				// 투명이 아닌 색들을 Surface에 출력한다.
 				memcpyDarkerFilter(pDestTemp, pPixels, pFilter, colorCount);
 				
 				pDestTemp	+= colorCount;
@@ -9292,12 +9292,12 @@ CSprite::BltDarkerFilterClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // BltAlpha4444NotTrans
 //----------------------------------------------------------------------
-// Clipping���� �ʴ´�.
+// Clipping하지 않는다.
 //----------------------------------------------------------------------
 void
 CSprite::BltAlpha4444NotTrans(WORD *pDest, WORD pitch, BYTE alpha)
 {
-	s_Value1 = alpha >> 1;	// 4 bit�̹Ƿ�
+	s_Value1 = alpha >> 1;	// 4 bit이므로
 
 	int		count,	
 			transCount,
@@ -9321,23 +9321,23 @@ CSprite::BltAlpha4444NotTrans(WORD *pDest, WORD pitch, BYTE alpha)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,�����,�����)�� �ݺ� ��		
+			// (투명수,색깔수,색깔들)의 반복 수		
 			count	= *pPixels++;		
 
-			// �� �� ���
+			// 한 줄 출력
 			if (count > 0)
 			{			
 				j = count;
 				do
 				{		
 					transCount = *pPixels++;					
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+					colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-					// 0�� ����Ѵ�.
+					// 0을 출력한다.
 					memset(pDestTemp, 0, transCount<<1);
-					pDestTemp += transCount;		// ��������ŭ �ǳ� �ڴ�.
+					pDestTemp += transCount;		// 투명색만큼 건너 뛴다.
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					memcpyAlpha4444(pDestTemp, pPixels, colorCount);
 					
 					pDestTemp	+= colorCount;
@@ -9355,12 +9355,12 @@ CSprite::BltAlpha4444NotTrans(WORD *pDest, WORD pitch, BYTE alpha)
 //----------------------------------------------------------------------
 // AlphaChannel Copy  4444
 //----------------------------------------------------------------------
-// Alpha�� : 1~32
+// Alpha값 : 1~32
 //----------------------------------------------------------------------
-// pSource�� ���� pDest�� ����� �ؾ��Ѵ�.
-// pSource�� ������ (alpha,���� �ϳ�)�� pixels��ŭ �ݺ��̴�.
+// pSource의 것을 pDest에 출력을 해야한다.
+// pSource의 구성은 (alpha,색깔 하나)의 pixels만큼 반복이다.
 //
-// A:R:G:B = 4:4:4:4 Texture�� ���� ���̴�.
+// A:R:G:B = 4:4:4:4 Texture를 위한 것이다.
 //----------------------------------------------------------------------
 void	
 CSprite::memcpyAlpha4444(WORD* pDest, WORD* pSource, WORD pixels)
@@ -9372,10 +9372,10 @@ CSprite::memcpyAlpha4444(WORD* pDest, WORD* pSource, WORD pixels)
 	register int i = pixels;
 
 	// Alpha Channel Blending
-	// ������ ���
+	// 한점씩 찍기
 	while (i--)
 	{	
-		// ���� ���
+		// 한점 찍기
 		sTemp = *pSource;
 	
 		sr = (sTemp >> ColorDraw::s_bSHIFT4_R);// & 0x0F;
@@ -9395,17 +9395,17 @@ CSprite::memcpyAlpha4444(WORD* pDest, WORD* pSource, WORD pixels)
 //----------------------------------------------------------------------
 // BltAlpha4444SmallNotTrans
 //----------------------------------------------------------------------
-// ����ؼ� ���.. 
-// Clipping���� �ʴ´�.
+// 축소해서 출력.. 
+// Clipping하지 않는다.
 //
-// alpha���� 50%(������)���� �Ѵ�.
+// alpha값은 50%(반투명)으로 한다.
 //----------------------------------------------------------------------
 void
 CSprite::BltAlpha4444SmallNotTrans(WORD *pDest, WORD pitch, BYTE alpha, BYTE shift)
 {
-	s_Value1 = alpha >> 1;	// 4 bit�̹Ƿ�
+	s_Value1 = alpha >> 1;	// 4 bit이므로
 	s_Value2 = shift;
-	// memcpy���� �ǳʶ�� ��
+	// memcpy에서 건너띄는 값
 	s_Value3 = 1 << shift;
 
 
@@ -9426,7 +9426,7 @@ CSprite::BltAlpha4444SmallNotTrans(WORD *pDest, WORD pitch, BYTE alpha, BYTE shi
 	if (rectBottom > 0)
 	{
 		i = rectBottom-1;
-		int stepY = 1 << shift;		// y�� �ǳʶ�� pixel��
+		int stepY = 1 << shift;		// y줄 건너띄는 pixel수
 		pDest = (WORD*)((BYTE*)pDest + (i>>shift)*pitch);
 
 		do
@@ -9434,27 +9434,27 @@ CSprite::BltAlpha4444SmallNotTrans(WORD *pDest, WORD pitch, BYTE alpha, BYTE shi
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,�����,�����)�� �ݺ� ��		
+			// (투명수,색깔수,색깔들)의 반복 수		
 			count	= *pPixels++;		
 
-			// �� �� ���
+			// 한 줄 출력
 			if (count > 0)
 			{			
 				j = count;
 				do
 				{		
 					transCount = *pPixels++;					
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��	
+					colorCount = *pPixels++;		// 투명 아닌 색 수	
 
-					// shift��ŭ �ٿ��� ���� ����Ѵ�.
+					// shift만큼 줄여진 값을 계산한다.
 					transCountShift = transCount >> shift;
 					colorCountShift = colorCount >> shift;
 
-					// 0�� ����Ѵ�.
+					// 0을 출력한다.
 					memset(pDestTemp, 0, transCountShift<<1);
-					pDestTemp += transCountShift;		// ��������ŭ �ǳ� �ڴ�.
+					pDestTemp += transCountShift;		// 투명색만큼 건너 뛴다.
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					memcpyAlpha4444Small(pDestTemp, pPixels, colorCount);
 					
 					pDestTemp	+= colorCountShift;
@@ -9474,16 +9474,16 @@ CSprite::BltAlpha4444SmallNotTrans(WORD *pDest, WORD pitch, BYTE alpha, BYTE shi
 //----------------------------------------------------------------------
 // Alpha Copy  4444 Small
 //----------------------------------------------------------------------
-// Alpha�� : 1~32
+// Alpha값 : 1~32
 //----------------------------------------------------------------------
-// pSource�� ���� pDest�� ����� �ؾ��Ѵ�.
-// pSource�� ������ (alpha,���� �ϳ�)�� pixels��ŭ �ݺ��̴�.
+// pSource의 것을 pDest에 출력을 해야한다.
+// pSource의 구성은 (alpha,색깔 하나)의 pixels만큼 반복이다.
 //
-// A:R:G:B = 4:4:4:4 Texture�� ���� ���̴�.
+// A:R:G:B = 4:4:4:4 Texture를 위한 것이다.
 //
-// s_Value1�� alpha��
-// s_Value2�� shift��
-// s_Value3�� �ǳʶ�� ��(�³�? ����� ��������. - -;;)
+// s_Value1은 alpha값
+// s_Value2는 shift값
+// s_Value3은 건너띄는 값(맞나? 기억이 가물가물. - -;;)
 //----------------------------------------------------------------------
 void	
 CSprite::memcpyAlpha4444Small(WORD* pDest, WORD* pSource, WORD pixels)
@@ -9494,11 +9494,11 @@ CSprite::memcpyAlpha4444Small(WORD* pDest, WORD* pSource, WORD pixels)
 
 	register int i = pixels >> s_Value2;
 
-	// �� ������ Alpha Blending
-	// ������ ���
+	// 한 값으로 Alpha Blending
+	// 한점씩 찍기
 	while (i--)
 	{	
-		// ���� ���
+		// 한점 찍기
 		sTemp = *pSource;
 	
 		sr = (sTemp >> ColorDraw::s_bSHIFT4_R);// & 0x0F;
@@ -9519,12 +9519,12 @@ CSprite::memcpyAlpha4444Small(WORD* pDest, WORD* pSource, WORD pixels)
 //----------------------------------------------------------------------
 // Blt1555NotTrans
 //----------------------------------------------------------------------
-// Clipping���� �ʴ´�.
+// Clipping하지 않는다.
 //----------------------------------------------------------------------
 void
 CSprite::Blt1555NotTrans(WORD *pDest, WORD pitch)
 {
-	//s_Value1 = alpha >> 4;	// 1 bit�̹Ƿ�
+	//s_Value1 = alpha >> 4;	// 1 bit이므로
 
 	int		count,	
 			transCount,
@@ -9548,23 +9548,23 @@ CSprite::Blt1555NotTrans(WORD *pDest, WORD pitch)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,�����,�����)�� �ݺ� ��		
+			// (투명수,색깔수,색깔들)의 반복 수		
 			count	= *pPixels++;		
 
-			// �� �� ���
+			// 한 줄 출력
 			if (count > 0)
 			{			
 				j = count;
 				do
 				{		
 					transCount = *pPixels++;					
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��				
+					colorCount = *pPixels++;		// 투명 아닌 색 수				
 
-					// 0�� ����Ѵ�.
+					// 0을 출력한다.
 					memset(pDestTemp, 0, transCount<<1);
-					pDestTemp += transCount;		// ��������ŭ �ǳ� �ڴ�.
+					pDestTemp += transCount;		// 투명색만큼 건너 뛴다.
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					memcpy1555(pDestTemp, pPixels, colorCount);
 					
 					pDestTemp	+= colorCount;
@@ -9582,12 +9582,12 @@ CSprite::Blt1555NotTrans(WORD *pDest, WORD pitch)
 //----------------------------------------------------------------------
 // AlphaChannel Copy  1555
 //----------------------------------------------------------------------
-// Alpha�� : �ǹ̾���.
+// Alpha값 : 의미없다.
 //----------------------------------------------------------------------
-// pSource�� ���� pDest�� ����� �ؾ��Ѵ�.
-// pSource�� ������ (alpha,���� �ϳ�)�� pixels��ŭ �ݺ��̴�.
+// pSource의 것을 pDest에 출력을 해야한다.
+// pSource의 구성은 (alpha,색깔 하나)의 pixels만큼 반복이다.
 //
-// A:R:G:B = 1:5:5:5 Texture�� ���� ���̴�.
+// A:R:G:B = 1:5:5:5 Texture를 위한 것이다.
 //----------------------------------------------------------------------
 void	
 CSprite::memcpy1555(WORD* pDest, WORD* pSource, WORD pixels)
@@ -9599,10 +9599,10 @@ CSprite::memcpy1555(WORD* pDest, WORD* pSource, WORD pixels)
 	register int i = pixels;
 
 	// Alpha Channel Blending
-	// ������ ���
+	// 한점씩 찍기
 	while (i--)
 	{	
-		// ���� ���
+		// 한점 찍기
 		sTemp = *pSource;
 	
 		sr = (sTemp >> ColorDraw::s_bSHIFT_R);// & 0x0F;
@@ -9622,17 +9622,17 @@ CSprite::memcpy1555(WORD* pDest, WORD* pSource, WORD pixels)
 //----------------------------------------------------------------------
 // Blt1555SmallNotTrans
 //----------------------------------------------------------------------
-// ����ؼ� ���.. 
-// Clipping���� �ʴ´�.
+// 축소해서 출력.. 
+// Clipping하지 않는다.
 //
-// alpha���� 50%(������)���� �Ѵ�.
+// alpha값은 50%(반투명)으로 한다.
 //----------------------------------------------------------------------
 void
 CSprite::Blt1555SmallNotTrans(WORD *pDest, WORD pitch, BYTE shift)
 {
-	//s_Value1 = alpha >> 4;	// 1 bit�̹Ƿ�
+	//s_Value1 = alpha >> 4;	// 1 bit이므로
 	s_Value2 = shift;
-	// memcpy���� �ǳʶ�� ��
+	// memcpy에서 건너띄는 값
 	s_Value3 = 1 << shift;
 
 
@@ -9653,7 +9653,7 @@ CSprite::Blt1555SmallNotTrans(WORD *pDest, WORD pitch, BYTE shift)
 	if (rectBottom > 0)
 	{
 		i = rectBottom-1;
-		int stepY = 1 << shift;		// y�� �ǳʶ�� pixel��
+		int stepY = 1 << shift;		// y줄 건너띄는 pixel수
 		pDest = (WORD*)((BYTE*)pDest + (i>>shift)*pitch);
 
 		do
@@ -9661,27 +9661,27 @@ CSprite::Blt1555SmallNotTrans(WORD *pDest, WORD pitch, BYTE shift)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,�����,�����)�� �ݺ� ��		
+			// (투명수,색깔수,색깔들)의 반복 수		
 			count	= *pPixels++;		
 
-			// �� �� ���
+			// 한 줄 출력
 			if (count > 0)
 			{			
 				j = count;
 				do
 				{		
 					transCount = *pPixels++;					
-					colorCount = *pPixels++;		// ���� �ƴ� �� ��	
+					colorCount = *pPixels++;		// 투명 아닌 색 수	
 
-					// shift��ŭ �ٿ��� ���� ����Ѵ�.
+					// shift만큼 줄여진 값을 계산한다.
 					transCountShift = transCount >> shift;
 					colorCountShift = colorCount >> shift;
 
-					// 0�� ����Ѵ�.
+					// 0을 출력한다.
 					memset(pDestTemp, 0, transCountShift<<1);
-					pDestTemp += transCountShift;		// ��������ŭ �ǳ� �ڴ�.
+					pDestTemp += transCountShift;		// 투명색만큼 건너 뛴다.
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					memcpy1555Small(pDestTemp, pPixels, colorCount);
 					
 					pDestTemp	+= colorCountShift;
@@ -9701,15 +9701,15 @@ CSprite::Blt1555SmallNotTrans(WORD *pDest, WORD pitch, BYTE shift)
 //----------------------------------------------------------------------
 // Alpha Copy  1555 Small
 //----------------------------------------------------------------------
-// Alpha�� : �ǹ̾��� - -;
+// Alpha값 : 의미없다 - -;
 //----------------------------------------------------------------------
-// pSource�� ���� pDest�� ����� �ؾ��Ѵ�.
-// pSource�� ������ (alpha,���� �ϳ�)�� pixels��ŭ �ݺ��̴�.
+// pSource의 것을 pDest에 출력을 해야한다.
+// pSource의 구성은 (alpha,색깔 하나)의 pixels만큼 반복이다.
 //
-// A:R:G:B = 1:5:5:5 Texture�� ���� ���̴�.
+// A:R:G:B = 1:5:5:5 Texture를 위한 것이다.
 //
-// s_Value2�� shift��
-// s_Value3�� �ǳʶ�� ��(�³�? ����� ��������. - -;;)
+// s_Value2는 shift값
+// s_Value3은 건너띄는 값(맞나? 기억이 가물가물. - -;;)
 //----------------------------------------------------------------------
 void	
 CSprite::memcpy1555Small(WORD* pDest, WORD* pSource, WORD pixels)
@@ -9720,10 +9720,10 @@ CSprite::memcpy1555Small(WORD* pDest, WORD* pSource, WORD pixels)
 
 	register int i = pixels >> s_Value2;
 
-	// ������ ���
+	// 한점씩 찍기
 	while (i--)
 	{	
-		// ���� ���
+		// 한점 찍기
 		sTemp = *pSource;
 	
 		sr = (sTemp >> ColorDraw::s_bSHIFT_R);// & 0x0F;
@@ -9745,15 +9745,15 @@ CSprite::GetFileSize()
 {
 	DWORD fileSize = 0;
 
-	// width�� height�� �����Ѵ�.
+	// width와 height를 저장한다.
 	fileSize += 2;
 	fileSize += 2;
 	
-	// NULL�̸� �������� �ʴ´�. ���̸� ����Ǵ� ���̴�.
+	// NULL이면 저장하지 않는다. 길이만 저장되는 것이다.
 	if (m_Pixels==NULL || m_Width==0 || m_Height==0)
 		return 0;
 	
-	// ���� �� �� ����
+	// 압축 된 것 저장
 	WORD index;	
 	
 	register int i;
@@ -9764,23 +9764,23 @@ CSprite::GetFileSize()
 	//--------------------------------
 	for (int i=0; i<m_Height; i++)
 	{
-		// �ݺ� ȸ���� 2 byte
+		// 반복 회수의 2 byte
 		int	count = m_Pixels[i][0], 
 			colorCount;
 		index	= 1;
 		
-		// �� line���� byte���� ��� �����ؾ��Ѵ�.
+		// 각 line마다 byte수를 세어서 저장해야한다.
 		for (j=0; j<count; j++)
 		{
 			//transCount = m_Pixels[i][index];
 			colorCount = m_Pixels[i][index+1];
 			
-			index+=2;	// �� count ��ŭ
+			index+=2;	// 두 count 만큼
 			
-			index += colorCount;	// ������ �ƴѰ͸�ŭ +				
+			index += colorCount;	// 투명색 아닌것만큼 +				
 		}
 		
-		// byte���� ���� data�� �����Ѵ�.
+		// byte수와 실제 data를 저장한다.
 		fileSize += 2;
 		fileSize += index<<1;
 	}

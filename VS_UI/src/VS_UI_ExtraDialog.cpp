@@ -27,30 +27,30 @@ extern RECT g_GameRect;
 Window* g_desc_dialog_window_id = NULL;
 /*
 
-char * C_VS_UI_EDIT_DIALOG::m_sz_question_msg[1] = {"�� ������            ���� ��ðڽ��ϱ�?"};
+char * C_VS_UI_EDIT_DIALOG::m_sz_question_msg[1] = {"이 아이템            개를 사시겠습니까?"};
 
-// �ּ�ó�� by sigi
-//char * C_VS_UI_MONEY_DIALOG::m_sz_question_msg[1] = {"���� �ݾ��� �Է��ϼ���."};
-//char * C_VS_UI_MONEY_DIALOG::m_sz_question_msg_for_storage[1] = {"������ �ݾ��� �Է��ϼ���."};
+// 주석처리 by sigi
+//char * C_VS_UI_MONEY_DIALOG::m_sz_question_msg[1] = {"버릴 금액을 입력하세요."};
+//char * C_VS_UI_MONEY_DIALOG::m_sz_question_msg_for_storage[1] = {"보관할 금액을 입력하세요."};
 
 char * C_VS_UI_MONEY_DIALOG::m_sz_question_msg[MAX_MONEY_DIALOG_TYPE][1] = {	// by sigi
-	{  "���� �ݾ��� �Է��ϼ���." } ,
-	{  "������ �ݾ��� �Է��ϼ���." } ,
-	{  "ã�� �ݾ��� �Է��ϼ���." } ,
-	{  "�ŷ��� �ݾ��� �Է��ϼ���." } ,
-	{  "���� �ݾ��� �Է��ϼ���." } ,
+	{  "버릴 금액을 입력하세요." } ,
+	{  "보관할 금액을 입력하세요." } ,
+	{  "찾을 금액을 입력하세요." } ,
+	{  "거래할 금액을 입력하세요." } ,
+	{  "빼낼 금액을 입력하세요." } ,
 };
 
 char * C_VS_UI_ASK_DIALOG::m_sz_question_msg[MAX_ASK_DIALOG_TYPE][2] = {	// by sigi
-	{  "�������� $%d�� ��ðڽ��ϱ�?"  },	
-	{  "%s �԰� �ŷ��ϰڽ��ϱ�?"  },
-	{  "%s ���� ������ ��ٸ��ϴ�." ,  "����Ͻ÷��� Cancel�� ��������."   },
-//	{  "�����Ͻ� ����� %s�Դϴ�.", "�����Ͻðڽ��ϱ�?" },					// by larosel
-	{  "%s ���� ����� %s�� ������ ��û�ϰ� �ֽ��ϴ�."  },
-	{  "%s ���� ����� %s�� ��û�ϼ̽��ϴ�."  },
-	{  "%s ���� ������ ��ٸ��ϴ�.",   "����Ͻ÷��� Cancel�� ��������."  },
-	{  "�˻� ����� ã�� �� �����ϴ�."  },
-	{  "�� �������� Enchant�Ͻðڽ��ϱ�?",   "����Ͻ÷��� Cancel�� ��������."  },
+	{  "보관함을 $%d에 사시겠습니까?"  },	
+	{  "%s 님과 거래하겠습니까?"  },
+	{  "%s 님의 응답을 기다립니다." ,  "취소하시려면 Cancel을 누르세요."   },
+//	{  "선택하신 무기는 %s입니다.", "결정하시겠습니까?" },					// by larosel
+	{  "%s 님이 당신의 %s에 가입을 요청하고 있습니다."  },
+	{  "%s 님이 당신을 %s에 초청하셨습니다."  },
+	{  "%s 님의 응답을 기다립니다.",   "취소하시려면 Cancel을 누르세요."  },
+	{  "검색 결과를 찾을 수 없습니다."  },
+	{  "이 아이템을 Enchant하시겠습니까?",   "취소하시려면 Cancel을 누르세요."  },
 };
 */
 //-----------------------------------------------------------------------------
@@ -113,7 +113,7 @@ int	C_VS_UI_EDIT_DIALOG::GetValue() const
 	g_Convert_DBCS_Ascii2SingleByte(m_lev_value.GetStringWide(), m_lev_value.Size(), p_temp);
 	if (p_temp == NULL)
 	{
-		// string�� ����.
+		// string이 없다.
 		cur_val = m_default_val;
 	}
 	else
@@ -143,7 +143,7 @@ void C_VS_UI_EDIT_DIALOG::Start()
 	m_bl_up_focused = false;
 	m_bl_down_focused = false;
 
-	char sz_temp[10];	// by sigi (������ 2���� - -;)
+	char sz_temp[10];	// by sigi (원래는 2였당 - -;)
 	wsprintf(sz_temp, "%d", m_default_val);
 	m_lev_value.AddString(sz_temp);
 
@@ -269,7 +269,7 @@ void	C_VS_UI_EDIT_DIALOG::ScrollButton(bool up)
 	g_Convert_DBCS_Ascii2SingleByte(m_lev_value.GetStringWide(), m_lev_value.Size(), p_temp);
 	if (p_temp == NULL)
 	{
-		// string�� ����. backspace�ϰ� ���� ��.
+		// string이 없다. backspace하고 했을 때.
 		cur_val = m_default_val;
 	}
 	else
@@ -299,7 +299,7 @@ void	C_VS_UI_EDIT_DIALOG::ScrollButton(bool up)
 //-----------------------------------------------------------------------------
 // C_VS_UI_EDIT_DIALOG::KeyboardControl
 //
-// �ٷ� ���� �Է��� �� �ְ� �Ѵ�.
+// 바로 숫자 입력할 수 있게 한다.
 //-----------------------------------------------------------------------------
 void	C_VS_UI_EDIT_DIALOG::KeyboardControl(UINT message, UINT key, long extra)
 {
@@ -377,9 +377,9 @@ void	C_VS_UI_MONEY_DIALOG::KeyboardControl(UINT message, UINT key, long extra)
 	// by sigi
 	switch (m_type)
 	{
-		// �����Կ� �ֱ�
+		// 보관함에 넣기
 		case MONEY_DEPOSIT :
-			// ���� ������ �ִ� ��ŭ�� ���� �� �ְ� �����Կ� ���� limit�̻��� ������ ����.
+			// 현재 가지고 있는 만큼만 넣을 수 있고 보관함에 돈의 limit이상은 넣을수 없다.
 			_MAX_MONEY =  min(g_pMoneyManager->GetMoney(), g_pStorage->GetMoneyManager()->GetMaxAddMoney());
 			break;
 
@@ -387,25 +387,25 @@ void	C_VS_UI_MONEY_DIALOG::KeyboardControl(UINT message, UINT key, long extra)
 			_MAX_MONEY = min(g_pMoneyManager->GetMoney(), g_pTradeManager->GetOtherMoneyManager()->GetMaxAddMoney());
 			break;
 
-		// ������
+		// 버리기
 		case MONEY_DROP : 
 				_MAX_MONEY = g_pMoneyManager->GetMoney();	
 			break;
 		
-		// �����Կ��� ������
+		// 보관함에서 꺼내기
 		case MONEY_WITHDRAW : 
-			// �����Կ� �ִ� ��ŭ�� ã�� �� �ְ� �κ��丮�� ���� limit�̻��� ������ ����.
+			// 보관함에 있는 만큼만 찾을 수 있고 인벤토리에 돈의 limit이상은 넣을수 없다.
 			_MAX_MONEY = min(g_pStorage->GetMoneyManager()->GetMoney(), g_pMoneyManager->GetMaxAddMoney());
 			break;
 
 		case MONEY_WITHDRAW_FROM_EXCHANGE:
 			_MAX_MONEY = g_pTradeManager->GetMyMoneyManager()->GetMoney();
 			break;
-		case MONEY_BRING_FEE :			// �� ���ݿ��� ������ �ִ� ���� ���� 20�� �ȳѴ´�...
+		case MONEY_BRING_FEE :			// 총 세금에서 가지고 있는 돈을 빼야 20억 안넘는다...
 			_MAX_MONEY = min(gC_vs_ui.GetTotalFee(),g_pMoneyManager->GetMaxAddMoney());
 			break;
 		case MODIFY_TAX:
-			_MAX_MONEY = 10; // ������ 10 ������
+			_MAX_MONEY = 10; // 세율은 10 까지만
 			break;
 		case MONEY_SELL_ITEM:
 			_MAX_MONEY = 2000000000;
@@ -514,7 +514,7 @@ int	C_VS_UI_MONEY_DIALOG::GetValue() const
 	g_Convert_DBCS_Ascii2SingleByte(m_lev_value.GetStringWide(), m_lev_value.Size(), p_temp);
 	if (p_temp == NULL)
 	{
-		// string�� ����.
+		// string이 없다.
 		cur_val = 0;
 	}
 	else
@@ -537,10 +537,10 @@ int	C_VS_UI_MONEY_DIALOG::GetValue() const
 //
 // 
 //-----------------------------------------------------------------------------
-C_VS_UI_MONEY_DIALOG::C_VS_UI_MONEY_DIALOG(int _x, int _y, int center_x, int center_y, void (*exec_fp)(C_VS_UI_DIALOG *, id_t), WORD dd_button, int digit_count, TYPE_MONEY_DIALOG type) :	// type �߰� by sigi
+C_VS_UI_MONEY_DIALOG::C_VS_UI_MONEY_DIALOG(int _x, int _y, int center_x, int center_y, void (*exec_fp)(C_VS_UI_DIALOG *, id_t), WORD dd_button, int digit_count, TYPE_MONEY_DIALOG type) :	// type 추가 by sigi
 							C_VS_UI_DIALOG(_x, _y, center_x, center_y, exec_fp, dd_button)
 {
-	/*	// �ּ�ó�� by sigi
+	/*	// 주석처리 by sigi
 	if (!gC_vs_ui.IsRunningStorage())
 		SetMessage(m_sz_question_msg, 1);//, SMO_NOFIT);
 	else
@@ -589,23 +589,23 @@ C_VS_UI_MONEY_DIALOG::~C_VS_UI_MONEY_DIALOG()
 
 void	C_VS_UI_ASK_DIALOG::InitString()
 {
-	/*	(*g_pGameStringTable)[UI_STRING_MESSAGE_ASK_DIALOG_BUY_STORAGE] = "�������� $%d�� ��ðڽ��ϱ�?";
-	(*g_pGameStringTable)[UI_STRING_MESSAGE_ASK_DIALOG_TRADE_OTHER_PLAYER]= "%s �԰� �ŷ��ϰڽ��ϱ�?";
-	(*g_pGameStringTable)[UI_STRING_MESSAGE_ASK_DIALOG_WAIT_OTHER_PLAYER]= "%s ���� ������ ��ٸ��ϴ�.";
-	(*g_pGameStringTable)[UI_STRING_MESSAGE_ASK_DIALOG_CANCEL]	="����Ͻ÷��� Cancel�� ��������.";
-	(*g_pGameStringTable)[UI_STRING_MESSAGE_ASK_DIALOG_REQUEST_JOIN]= "%s ���� ����� %s�� ������ ��û�ϰ� �ֽ��ϴ�.";
-	(*g_pGameStringTable)[UI_STRING_MESSAGE_ASK_DIALOG_INVITE]= "%s ���� ����� %s�� ��û�ϼ̽��ϴ�.";
-	(*g_pGameStringTable)[UI_STRING_MESSAGE_CANNOT_FIND_RESULT]= "�˻� ����� ã�� �� �����ϴ�." ;
-	(*g_pGameStringTable)[UI_STRING_MESSAGE_ENCHANT_CONFIRM]= "�� �������� Enchant�Ͻðڽ��ϱ�?";
+	/*	(*g_pGameStringTable)[UI_STRING_MESSAGE_ASK_DIALOG_BUY_STORAGE] = "보관함을 $%d에 사시겠습니까?";
+	(*g_pGameStringTable)[UI_STRING_MESSAGE_ASK_DIALOG_TRADE_OTHER_PLAYER]= "%s 님과 거래하겠습니까?";
+	(*g_pGameStringTable)[UI_STRING_MESSAGE_ASK_DIALOG_WAIT_OTHER_PLAYER]= "%s 님의 응답을 기다립니다.";
+	(*g_pGameStringTable)[UI_STRING_MESSAGE_ASK_DIALOG_CANCEL]	="취소하시려면 Cancel을 누르세요.";
+	(*g_pGameStringTable)[UI_STRING_MESSAGE_ASK_DIALOG_REQUEST_JOIN]= "%s 님이 당신의 %s에 가입을 요청하고 있습니다.";
+	(*g_pGameStringTable)[UI_STRING_MESSAGE_ASK_DIALOG_INVITE]= "%s 님이 당신을 %s에 초청하셨습니다.";
+	(*g_pGameStringTable)[UI_STRING_MESSAGE_CANNOT_FIND_RESULT]= "검색 결과를 찾을 수 없습니다." ;
+	(*g_pGameStringTable)[UI_STRING_MESSAGE_ENCHANT_CONFIRM]= "이 아이템을 Enchant하시겠습니까?";
 
-  {  "�������� $%d�� ��ðڽ��ϱ�?"  },	
-	{  "%s �԰� �ŷ��ϰڽ��ϱ�?"  },
-	{  "%s ���� ������ ��ٸ��ϴ�." ,  "����Ͻ÷��� Cancel�� ��������."   },
-	{  "%s ���� ����� %s�� ������ ��û�ϰ� �ֽ��ϴ�."  },
-	{  "%s ���� ����� %s�� ��û�ϼ̽��ϴ�."  },
-	{  "%s ���� ������ ��ٸ��ϴ�.",   "����Ͻ÷��� Cancel�� ��������."  },
-	{  "�˻� ����� ã�� �� �����ϴ�."  },
-	{  "�� �������� Enchant�Ͻðڽ��ϱ�?",   "����Ͻ÷��� Cancel�� ��������."  },
+  {  "보관함을 $%d에 사시겠습니까?"  },	
+	{  "%s 님과 거래하겠습니까?"  },
+	{  "%s 님의 응답을 기다립니다." ,  "취소하시려면 Cancel을 누르세요."   },
+	{  "%s 님이 당신의 %s에 가입을 요청하고 있습니다."  },
+	{  "%s 님이 당신을 %s에 초청하셨습니다."  },
+	{  "%s 님의 응답을 기다립니다.",   "취소하시려면 Cancel을 누르세요."  },
+	{  "검색 결과를 찾을 수 없습니다."  },
+	{  "이 아이템을 Enchant하시겠습니까?",   "취소하시려면 Cancel을 누르세요."  },
 */
 	//m_sz_question_msg
 	m_sz_question_msg[0][0]=(*g_pGameStringTable)[UI_STRING_MESSAGE_ASK_DIALOG_BUY_STORAGE].GetString();
@@ -706,7 +706,7 @@ C_VS_UI_ASK_DIALOG::C_VS_UI_ASK_DIALOG(int _x, int _y, int center_x, int center_
 
 	switch (type)
 	{	
-		// ���ڰ� �ϳ� ���� ���.. - -;
+		// 숫자가 하나 들어가는 경우.. - -;
 		case ASK_STORAGE_BUY :
 		{
 			m_sz_question_msg_temp[0] = new char [strlen(m_sz_question_msg[type][0])+20];
@@ -784,7 +784,7 @@ C_VS_UI_ASK_DIALOG::C_VS_UI_ASK_DIALOG(int _x, int _y, int center_x, int center_
 		{
 			switch(value)
 			{
-			case 0:		// �Ϲ� ������ ��þƮ
+			case 0:		// 일반 아이템 인첸트
 				m_sz_question_msg_temp[0] = new char [strlen(m_sz_question_msg[type][0])+1];
 				sprintf(m_sz_question_msg_temp[0], m_sz_question_msg[type][0]);
 				m_sz_question_msg_temp[1] = new char [strlen(m_sz_question_msg[type][1])+1];
@@ -793,26 +793,26 @@ C_VS_UI_ASK_DIALOG::C_VS_UI_ASK_DIALOG(int _x, int _y, int center_x, int center_
 				SetMessage(m_sz_question_msg_temp, 2, SMO_NOFIT);	
 				break;
 				
-			case 1:		// �� ��þƮ
+			case 1:		// 펫 인첸트
 				m_sz_question_msg_temp[0] = new char [strlen(m_sz_question_msg[type][0])+1];
 				sprintf(m_sz_question_msg_temp[0], m_sz_question_msg[type][0]);
 				
 				SetMessage(m_sz_question_msg_temp, 1, SMO_NOFIT);	
 				break;
 				
-			case 2:		// �� ��Ȱ
+			case 2:		// 펫 부활
 				m_sz_question_msg_temp[0] = new char [strlen(m_sz_question_msg[type][2])+1];
 				sprintf(m_sz_question_msg_temp[0], m_sz_question_msg[type][2]);
 				SetMessage(m_sz_question_msg_temp, 1, SMO_NOFIT);	
 				break;
 
-			case 3:		// �� ǻ��Ÿ��
+			case 3:		// 펫 퓨리타스
 				m_sz_question_msg_temp[0] = new char [strlen(m_sz_question_msg[type][3])+1];
 				sprintf(m_sz_question_msg_temp[0], m_sz_question_msg[type][3]);
 				SetMessage(m_sz_question_msg_temp, 1, SMO_NOFIT);	
 				break;
 
-			case 4:		// �� ����
+			case 4:		// 펫 변신
 				m_sz_question_msg_temp[0] = new char [strlen(m_sz_question_msg[type][4])+1];
 				sprintf(m_sz_question_msg_temp[0], m_sz_question_msg[type][4]);
 				SetMessage(m_sz_question_msg_temp, 1, SMO_NOFIT);	
@@ -955,7 +955,7 @@ bool C_VS_UI_ASK_DIALOG::MouseControl(UINT message, int _x, int _y)
 //-----------------------------------------------------------------------------
 // C_VS_UI_ASK_DIALOG::KeyboardControl
 //
-// �ٷ� ���� �Է��� �� �ְ� �Ѵ�.
+// 바로 숫자 입력할 수 있게 한다.
 //-----------------------------------------------------------------------------
 void	C_VS_UI_ASK_DIALOG::KeyboardControl(UINT message, UINT key, long extra)
 {
@@ -1018,16 +1018,16 @@ void C_VS_UI_NPC_DIALOG::InitNpcDlg(int sprite_num, const char* pname , bool IsS
 			12, 13, 22, 159, 160,
 			161, 19,
 			93, 92, 94, 219, 220,
-			253, 254, 255,//�񷹸�*2, ����ī
-			217,//���丮
-			250,251,252,//���������
-			296, //�߸�����
-			297, //���Ͻ�
-			362, 363, 364, 365, 366, //�󼾼� 4��+�����������
-			302, 303, 311,//Ʃ�丮�� �߰�
-			368, //������� NPC �긮�ݶ�ī�� Ŭ��
-			370, //��κ�Ÿ ���� ���̺�
-			427, 428, 429, 430,	// ����ȭ �� �׸��ǽ�, �κ󺤽���, ����, ī�������
+			253, 254, 255,//골레머*2, 레베카
+			217,//바토리
+			250,251,252,//헬기조종사
+			296, //야마모토
+			297, //데니스
+			362, 363, 364, 365, 366, //라센성 4명+블라드테페즈
+			302, 303, 311,//튜토리얼 추가
+			368, //리스토어 NPC 브리콜라카스 클론
+			370, //드로베타 옷팜 레이븐
+			427, 428, 429, 430,	// 유료화 존 그리피스, 로빈벡스터, 머피, 카르멘버만
 		};
 
 		const int g_npc_num[g_npc_size] = 
@@ -1041,16 +1041,16 @@ void C_VS_UI_NPC_DIALOG::InitNpcDlg(int sprite_num, const char* pname , bool IsS
 			31, 32, 33, 34, 35,
 			36, 37,
 			38, 39, 40, 41, 42,
-			48, 47, 49, //�񷹸�*2, ����ī
-			43,//���丮
-			44, 44, 44,//���������
-			45, //�߸�����
-			46, //���Ͻ�
-			50, 51, 52, 53, 54,//�󼾼� 4��+�����������
+			48, 47, 49, //골레머*2, 레베카
+			43,//바토리
+			44, 44, 44,//헬기조종사
+			45, //야마모토
+			46, //데니스
+			50, 51, 52, 53, 54,//라센성 4명+블라드테페즈
 			45, 46, 45,
-			39, //������� NPC �긮�ݶ�ī�� Ŭ��
-			35, //��κ�Ÿ ���� ���̺�
-			55, 56, 57, 58,	// ����ȭ �� �׸��ǽ�, �κ󺤽���, ����, ī�������
+			39, //리스토어 NPC 브리콜라카스 클론
+			35, //드로베타 옷팜 레이븐
+			55, 56, 57, 58,	// 유료화 존 그리피스, 로빈벡스터, 머피, 카르멘버만
 		};
 
 		m_id = sprite_num;
@@ -1071,7 +1071,7 @@ void C_VS_UI_NPC_DIALOG::InitNpcDlg(int sprite_num, const char* pname , bool IsS
 
 		if(m_iSprite != -1)
 		{
-			m_p_NPCFace.Init( 2 );		// �ӽ÷� 1���� loading.. - -;;
+			m_p_NPCFace.Init( 2 );		// 임시로 1개만 loading.. - -;;
 
 			bool re;
 			re = m_p_NPCFace.LoadFromFileData( 0, 0, SPK_NPCFACE, SPKI_NPCFACE );
@@ -1083,7 +1083,7 @@ void C_VS_UI_NPC_DIALOG::InitNpcDlg(int sprite_num, const char* pname , bool IsS
 			m_client_rect.w -= m_p_NPCFace[0].GetWidth();
 		}
 	}
-	// 2005, 1, 14, sobeit add start - npc �� ��� ItemDescription �̹����������ش�. - ����Ʈ ����...
+	// 2005, 1, 14, sobeit add start - npc 얼굴 대신 ItemDescription 이미지를보여준다. - 퀘스트 땜시...
 	else
 	{
 		if(sprite_num == 0)
@@ -1094,7 +1094,7 @@ void C_VS_UI_NPC_DIALOG::InitNpcDlg(int sprite_num, const char* pname , bool IsS
 		{
 			m_iSprite = sprite_num;
 
-			m_p_NPCFace.Init( 1 );		// �ӽ÷� 1���� loading.. - -;;
+			m_p_NPCFace.Init( 1 );		// 임시로 1개만 loading.. - -;;
 
 			bool re;
 			re = m_p_NPCFace.LoadFromFileData( 0, m_iSprite, SPK_ITEM, SPKI_ITEM );
@@ -1136,7 +1136,7 @@ bool C_VS_UI_NPC_DIALOG::MouseControl(UINT message, int _x, int _y)
 //-----------------------------------------------------------------------------
 // C_VS_UI_NPC_DIALOG::KeyboardControl
 //
-// �ٷ� ���� �Է��� �� �ְ� �Ѵ�.
+// 바로 숫자 입력할 수 있게 한다.
 //-----------------------------------------------------------------------------
 void	C_VS_UI_NPC_DIALOG::KeyboardControl(UINT message, UINT key, long extra)
 {
@@ -1467,12 +1467,12 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 			{
 				title_color = g_pClientConfig->COLOR_NAME_ITEM_RARE_OPTION;
 			} 
-			// add by Sonic 2006.10.28 ������ʾ������װ��Ϊ��ɫ
+			// add by Sonic 2006.10.28 增加显示三属性装备为红色
 			else if(p_item->GetItemOptionListCount() > 2)
 			{
 				title_color = g_pClientConfig->COLOR_NAME_VAMPIRE; //Red
 			}
-			// end by Sonic 2006.10.28 ������ʾ������װ��Ϊ��ɫ
+			// end by Sonic 2006.10.28 增加显示三属性装备为红色
 			else
 				title_color = RGB_YELLOW;						// Normal Item
 			pi = gpC_base->m_desc_msg_pi;
@@ -1509,12 +1509,12 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 			e_name+=" )";
 
 			wsprintf(sz_temp, "%s %s",h_name.c_str(),e_name.c_str());			
-			// �̸��� �ʹ� ��� �ٿ�����.	ReduceString2 �� ���ʿ� "..." ����ֱ�~ 	by sonee
+			// 이름이 너무 길면 줄여주자.	ReduceString2 는 뒤쪽에 "..." 찍어주기~ 	by sonee
 			ReduceString2(sz_temp,55);			
 			SetDescTitle(sz_temp);
 
 			// weight
-//			wsprintf(sz_temp, "\t���� : %d", p_item->GetWeight());
+//			wsprintf(sz_temp, "\t무게 : %d", p_item->GetWeight());
 //			temp_string = sz_temp;
 //			m_rep_string.push_back(temp_string);
 			
@@ -1561,7 +1561,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 			}
 			
 			// Damage
-			if (p_item->GetMaxDamage() != -1) // damage�� �ִ°�?
+			if (p_item->GetMaxDamage() != -1) // damage가 있는가?
 			{
 				wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_DAMAGE].GetString(), p_item->GetMinDamage(), p_item->GetMaxDamage());
 				temp_string = sz_temp;
@@ -1569,7 +1569,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 			}
 			
 			// critical hit
-			if (p_item->GetCriticalHit() != -1) // ũ��Ƽ����Ʈ�� �ִ°�?
+			if (p_item->GetCriticalHit() != -1) // 크리티컬히트가 있는가?
 			{
 				wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_CRITICALHIT].GetString(), p_item->GetCriticalHit());
 				temp_string = sz_temp;
@@ -1643,7 +1643,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 			// Pile size
 //			if (p_item->IsPileItem() == true)
 //			{
-//				wsprintf(sz_temp, "\t������ ���� : %d��", p_item->GetNumber());
+//				wsprintf(sz_temp, "\t아이템 개수 : %d개", p_item->GetNumber());
 //				temp_string = sz_temp;
 //				m_rep_string.push_back(temp_string);
 //			}
@@ -1655,21 +1655,21 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 				ITEMOPTION_INFO& optionInfo = (*g_pItemOptionTable)[option];
 				
 				char pPartName[20];
-				strcpy(pPartName, ITEMOPTION_INFO::ITEMOPTION_PARTNAME[optionInfo.Part]); // Option�� ����Ǵ� ��ġ�� �̸�
+				strcpy(pPartName, ITEMOPTION_INFO::ITEMOPTION_PARTNAME[optionInfo.Part]); // Option이 적용되는 수치의 이름
 				if(p_item->IsVampireItem() && strstr(pPartName,"MP") != NULL)
 					*strstr(pPartName,"MP") = 'H';
 
-				BYTE PlusPoint	= optionInfo.PlusPoint; // ����Ǵ� ��ġ
+				BYTE PlusPoint	= optionInfo.PlusPoint; // 적용되는 수치
 				
 				if (pPartName)
 				{
 					if(!strcmp(pPartName, "Durability"))
 					{
-						sprintf(sz_temp, "\t�ɼ� : %s +%d", pPartName, PlusPoint-100);
+						sprintf(sz_temp, "\t옵션 : %s +%d", pPartName, PlusPoint-100);
 						strcat(sz_temp, "%");
 					}
 					else
-						sprintf(sz_temp, "\t�ɼ� : %s +%d", pPartName, PlusPoint);
+						sprintf(sz_temp, "\t옵션 : %s +%d", pPartName, PlusPoint);
 					
 					temp_string = sz_temp;
 					m_rep_string.push_back(temp_string);
@@ -1691,7 +1691,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 					if(p_item->IsVampireItem() && strstr(pPartName,"MP") != NULL)
 						*strstr(pPartName,"MP") = 'H';
 					
-					BYTE PlusPoint	= optionInfo.PlusPoint; // ����Ǵ� ��ġ
+					BYTE PlusPoint	= optionInfo.PlusPoint; // 적용되는 수치
 					
 					if (pPartName)
 					{
@@ -1749,7 +1749,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 					if(p_item->IsVampireItem() && strstr(pPartName,"MP") != NULL)
 						*strstr(pPartName,"MP") = 'H';
 					
-					BYTE PlusPoint	= optionInfo.PlusPoint; // ����Ǵ� ��ġ
+					BYTE PlusPoint	= optionInfo.PlusPoint; // 적용되는 수치
 					
 					if (pPartName)
 					{
@@ -1800,7 +1800,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 				char sz_buf1 [50];
 				MItem* p_AddItem = (MItem*)void_ptr2;
 			
-				// �ھ����� ItemDescription.spk ������ �ε����� ������
+				// 코어잽의 ItemDescription.spk 에서의 인덱스를 얻어오자
 				std::string AddedFileName;
 				std::string temp_string;
 				AddedFileName += p_AddItem->GetEName();
@@ -1811,7 +1811,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 				temp_string = sz_buf1;
 
 				corezapID = atoi(temp_string.c_str()+1);
-				// �ھ����� ItemDescription.spk ������ �ε����� ������
+				// 코어잽의 ItemDescription.spk 에서의 인덱스를 얻어오자
 		
 				//corezapID = 
 				if(p_AddItem->GetItemClass() == ITEM_CLASS_CORE_ZAP && p_AddItem->GetItemType()>=0 && p_AddItem->GetItemType()<=3)
@@ -2015,7 +2015,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 			
 			CSpritePack *temp;
 			temp = new CSpritePack;
-			temp->Init( 1 );		// �ӽ÷� 1���� loading.. - -;;
+			temp->Init( 1 );		// 임시로 1개만 loading.. - -;;
 
 			int id = (int)(intptr_t)void_ptr;
 			int sprID = (*g_pSkillInfoTable)[id].GetSpriteID();
@@ -2126,7 +2126,7 @@ void C_VS_UI_DESC_DIALOG::Start()
 bool C_VS_UI_DESC_DIALOG::MouseControl(UINT message, int _x, int _y)
 {
 	Window::MouseControl(message, _x, _y);
-	_x-=x;_y-=y;//������ �̵��� ����
+	_x-=x;_y-=y;//윈도우 이동을 위한
 	bool re = m_pC_scroll_bar->MouseControl(message, _x, _y);
 	re &= m_pC_button_group->MouseControl(message, _x, _y);
 
@@ -2175,15 +2175,15 @@ bool C_VS_UI_DESC_DIALOG::MouseControl(UINT message, int _x, int _y)
 //-----------------------------------------------------------------------------
 // C_VS_UI_DESC_DIALOG::KeyboardControl
 //
-// �ٷ� ���� �Է��� �� �ְ� �Ѵ�.
+// 바로 숫자 입력할 수 있게 한다.
 //-----------------------------------------------------------------------------
 void	C_VS_UI_DESC_DIALOG::KeyboardControl(UINT message, UINT key, long extra)
 {
 	if (message == WM_KEYDOWN)
 		switch (key)
 		{
-			case VK_RETURN: // ok�� ����. !cancel�� �ݵ�� ok�� �Բ� �ִ�.
-			case VK_ESCAPE: // �ƹ��͵� ����.
+			case VK_RETURN: // ok로 간주. !cancel은 반드시 ok와 함께 있다.
+			case VK_ESCAPE: // 아무것도 안함.
 				Run(CLOSE_ID);
 				break;
 		}
@@ -2417,7 +2417,7 @@ C_VS_UI_FILE_DIALOG::~C_VS_UI_FILE_DIALOG()
 //-----------------------------------------------------------------------------
 // C_VS_UI_FILE_DIALOG::Start
 //
-// �������� ���� �˻� ����.	; �� ����
+// 여러개의 파일 검색 가능.	; 로 구분
 // ex> C_VS_UI_FILE_DIALOG::Start(".bmp;.jpg;.pcx;.tga;.gif"); by sonee
 //-----------------------------------------------------------------------------
 void C_VS_UI_FILE_DIALOG::Start(char *type)
@@ -2425,7 +2425,7 @@ void C_VS_UI_FILE_DIALOG::Start(char *type)
 	PI_Processor::Start();
 	m_pC_button_group->Init();
 
-	// type �� ����� ���� ������ �ִ��� �˻��Ѵ�.
+	// type 에 몇가지의 파일 종류가 있는지 검색한다.
 	int nType,i;
 
 	for(i=0,nType=1;i<strlen(type);i++)
@@ -2463,7 +2463,7 @@ void C_VS_UI_FILE_DIALOG::Start(char *type)
 	m_select_file_num.clear();
 
 
-	// ���� ���̾˷α׿� ���� ������
+	// 파일 다이알로그에 들어가는 아이콘
 	m_p_icon_spk=new C_SPRITE_PACK(SPK_FILE_DIALOG);
 
 
@@ -2472,12 +2472,12 @@ void C_VS_UI_FILE_DIALOG::Start(char *type)
 
 	if(mp_open_current_directory == NULL)
 	{
-		// System�� ������ ��� drive�� �д´�.
+		// System에 부착된 모든 drive를 읽는다.
 		DWORD drives = GetLogicalDrives();
 		
-		// �� bit�� �˻��Ͽ� �����ϴ� drive buffer�� �����.
+		// 각 bit를 검사하여 존재하는 drive buffer를 만든다.
 		DWORD index = 1;
-		char	find_drive_name = 'a'; // a, b, c, d ... �ҹ��ڷ�...
+		char	find_drive_name = 'a'; // a, b, c, d ... 소문자로...
 		char	find_drive_name_buf[sizeof(DWORD)*8];
 		memset(find_drive_name_buf, 0, sizeof(DWORD)*8);
 		
@@ -2517,7 +2517,7 @@ void C_VS_UI_FILE_DIALOG::Start(char *type)
 			mp_open_current_directory[i] = buf;
 		}
 		
-		// Window�� ��������鼭 directory�� �ʱ�ȭ ��Ų��.
+		// Window가 만들어지면서 directory를 초기화 시킨다.
 		char temp[MAX_PATH];
 		DWORD char_count = GetCurrentDirectory(MAX_PATH, temp);
 		assert(char_count > 0);
@@ -2549,7 +2549,7 @@ bool C_VS_UI_FILE_DIALOG::MouseControl(UINT message, int _x, int _y)
 	
 	Window::MouseControl(message, _x, _y);
 	_x-=x;
-	_y-=y;//������ �̵��� ����
+	_y-=y;//윈도우 이동을 위한
 	bool re = m_pC_button_group->MouseControl(message, _x, _y);
 	g_descriptor_manager.Unset();
 	re&=m_pC_scroll_bar->MouseControl(message, _x, _y);	
@@ -2612,7 +2612,7 @@ bool C_VS_UI_FILE_DIALOG::MouseControl(UINT message, int _x, int _y)
 				//if(message == M_LB_DOUBLECLICK && m_select != -1)
 				if( m_select == m_old_select && m_select != -1)			// Double Click Check
 				{
-					if(m_vs_file_list_attr[m_select] & FILE_ATTRIBUTE_DIRECTORY) // ���丮�� ��� �ش���丮�� �ű�
+					if(m_vs_file_list_attr[m_select] & FILE_ATTRIBUTE_DIRECTORY) // 디렉토리일 경우 해당디렉토리로 옮김
 					{
 						char name[200];
 						strcpy(name, mp_open_current_directory[mi_open_drive_index]);					
@@ -2627,14 +2627,14 @@ bool C_VS_UI_FILE_DIALOG::MouseControl(UINT message, int _x, int _y)
 						m_select = -1;
 						m_tempselect = -1;
 					}
-					else if(m_mode==MODE_PROFILE_SELECT)				// MODE_PROFILE_SELECT �� ���ϴ���Ŭ���� �����Ѵ�. 
+					else if(m_mode==MODE_PROFILE_SELECT)				// MODE_PROFILE_SELECT 는 파일더블클릭을 지원한다. 
 					{
 						Run(OK_ID);
 					}
 					
 					m_pC_scroll_bar->SetPosMax(m_vs_file_list.size()-12);				
 				}
-				if(m_select!=-1&&m_mode!=MODE_PROFILE_SELECT)	// ������ ��尡 �ƴϸ�
+				if(m_select!=-1&&m_mode!=MODE_PROFILE_SELECT)	// 프로필 모드가 아니면
 				{
 					if(!(m_vs_file_list_attr[m_select] & FILE_ATTRIBUTE_DIRECTORY))	
 					{
@@ -2653,13 +2653,13 @@ bool C_VS_UI_FILE_DIALOG::MouseControl(UINT message, int _x, int _y)
 						}						
 						m_select_file_num.insert(m_select_file_num.end(), m_select);
 					} 
-					else		// �׳� Ŭ���������
+					else		// 그냥 클릭했을경우
 					{
 						if(!g_GetCtrlPushState())	
 							m_select_file_num.clear();
 					}
 				}
-				//m_stay_openfolder=GetTickCount();			// ���̸����� ǥ�����ٶ� ���� Ÿ�̸�
+				//m_stay_openfolder=GetTickCount();			// 긴이름등을 표시해줄때 쓰는 타이머
 				Timer(true);
 				STAY_FOLDER=0xfffffffe;
 			}
@@ -2679,8 +2679,8 @@ bool C_VS_UI_FILE_DIALOG::MouseControl(UINT message, int _x, int _y)
 		break;
 
 	case M_MOVING:		
-		// ����̺� �ڽ��� ������ ��� ���콺�� ���� �������� 1���̻� �ش� ����̺꿡 ��ġ��������
-		// �̸��� ����� ��� Ǯ ������ ����Ͽ� �ش�.	
+		// 드라이브 박스가 열렸을 경우 마우스를 갖다 놓았을때 1초이상 해당 드라이브에 위치해있으면
+		// 이름이 압축된 경우 풀 네임을 출력하여 준다.	
 		m_flag_preview_image=true;
 		if( _y > 35 && _x > 30 && _y < 49 && _x < 340 )
 			STAY_FOLDER=0;
@@ -2762,7 +2762,7 @@ bool	C_VS_UI_FILE_DIALOG::Timer(bool reset)
 //-----------------------------------------------------------------------------
 // C_VS_UI_FILE_DIALOG::KeyboardControl
 //
-// �ٷ� ���� �Է��� �� �ְ� �Ѵ�.
+// 바로 숫자 입력할 수 있게 한다.
 //-----------------------------------------------------------------------------
 void	C_VS_UI_FILE_DIALOG::KeyboardControl(UINT message, UINT key, long extra)
 {	
@@ -2770,11 +2770,11 @@ void	C_VS_UI_FILE_DIALOG::KeyboardControl(UINT message, UINT key, long extra)
 	{
 		switch (key)
 		{		
-		case VK_RETURN: // ok�� ����. !cancel�� �ݵ�� ok�� �Բ� �ִ�.
+		case VK_RETURN: // ok로 간주. !cancel은 반드시 ok와 함께 있다.
 			Run(OK_ID);
 			break;
 
-		case VK_ESCAPE: // �ƹ��͵� ����.
+		case VK_ESCAPE: // 아무것도 안함.
 			Run(CANCEL_ID);
 			break;		
 		}
@@ -2784,8 +2784,8 @@ void	C_VS_UI_FILE_DIALOG::KeyboardControl(UINT message, UINT key, long extra)
 //-----------------------------------------------------------------------------
 // C_VS_UI_FILE_DIALOG::Show
 //
-// ���ڿ� ó���Լ��� �Լ������� �� �� �ҽ����뿪�� �� ��ϴ�.
-// �ӵ����� ���ٸ� ������ ���� �ʽ��ϴ�. 
+// 문자열 처리함수랑 함수명들이 좀 길어서 소스내용역시 좀 깁니다.
+// 속도에는 별다른 지장을 주지 않습니다. 
 //-----------------------------------------------------------------------------
 void	C_VS_UI_FILE_DIALOG::Show()
 {
@@ -2796,7 +2796,7 @@ void	C_VS_UI_FILE_DIALOG::Show()
 	int i,j;
 	// 600,133
 
-	// �̸�����
+	// 미리보기
 	//SetRect(&rect, x+w,y,x+w+55,y+77);
 	//DrawAlphaBox(&rect, 255, 255, 255, 20);
 	
@@ -2804,7 +2804,7 @@ void	C_VS_UI_FILE_DIALOG::Show()
 	gpC_global_resource->DrawDialog2(x, y, w, h, GetAttributes()->alpha);
 	
 	//----------------------------------------------------------------------------------------
-	// ���ÿ��� ǥ��
+	// 선택영역 표시
 	switch(m_mode)
 	{
 	case MODE_PROFILE_SELECT :
@@ -2833,7 +2833,7 @@ void	C_VS_UI_FILE_DIALOG::Show()
 		break;
 	}
 	//----------------------------------------------------------------------------------------
-	// ������ �κ� ���		
+	// 아이콘 부분 출력		
 	if(gpC_base->m_p_DDSurface_back->Lock())
 	{
 		for(int i = 0; i < m_scroll_max && i+m_pC_scroll_bar->GetScrollPos() < m_vs_file_list.size(); i++){
@@ -2843,14 +2843,14 @@ void	C_VS_UI_FILE_DIALOG::Show()
 		}
 		m_pC_button_group->Show();
 		//----------------------------------------------------------------------------------------
-		// ���� ���µ� ������ ���
+		// 현재 오픈된 폴더명 출력
 		m_p_icon_spk->BltLocked(x+m_string_x-19, y+37,OPENFOLDER_ID);
 		gpC_base->m_p_DDSurface_back->Unlock();
 	}
 
 	g_FL2_GetDC();	
-	// ���� �������� ���̰� ���� �߶��ش� 
-	// 38�� �̻� ���� �ʵ��� �Ѵ�. 
+	// 열린 폴더명의 길이가 길경우 잘라준다 
+	// 38자 이상 되지 않도록 한다. 
 	title+= mp_open_current_directory[mi_open_drive_index];
 	title.erase(strlen(mp_open_current_directory[mi_open_drive_index])-2,2);
 	for(i=0;i<m_filter.size();i++){title+=m_filter[i].c_str();title+=";";}
@@ -2861,7 +2861,7 @@ void	C_VS_UI_FILE_DIALOG::Show()
 	g_PrintColorStr(x+m_string_x, y+37, name, gpC_base->m_desc_menu_pi, RGB_WHITE);
 
 	//----------------------------------------------------------------------------------------
-	// Ÿ��Ʋ ���
+	// 타이틀 출력
 	if(m_mode==MODE_PROFILE_SELECT)	
 		strcpy(name,(*g_pGameStringTable)[UI_STRING_MESSAGE_FILE_DIALOG_SELECT_PROFILE_PICTURE].GetString());
 	else strcpy(name,(*g_pGameStringTable)[UI_STRING_MESSAGE_FILE_DIALOG_SELECT_FILE].GetString());
@@ -2875,8 +2875,8 @@ void	C_VS_UI_FILE_DIALOG::Show()
 	g_PrintColorStr(titleX, titleY, name,gpC_base->m_desc_menu_pi, RGB_WHITE);
 
 	for(int i = 0; i < m_scroll_max && i+m_pC_scroll_bar->GetScrollPos() < m_vs_file_list.size(); i++) {		
-		// �̸��� ���
-		// �����̸��� �ʹ� ��� ������ �ڸ���. 
+		// 이름들 출력
+		// 파일이름이 너무 길면 적당히 자른다. 
 		strcpy(name, m_vs_file_list[i+m_pC_scroll_bar->GetScrollPos()].c_str());
 		ReduceString(name,38);
 		if(name[0]=='\\')	p_name=&name[1];		else			p_name=&name[0];
@@ -2888,8 +2888,8 @@ void	C_VS_UI_FILE_DIALOG::Show()
 	m_pC_scroll_bar->Show(x, y);
 	
 	//----------------------------------------------------------------------------------------
-	// Drive List ���
-	//drive ���� open �Ǿ�������
+	// Drive List 출력
+	//drive 선택 open 되어있으면
 	if(m_bl_open_drive) {
 		SetRect(&rect, x+m_string_x-5,y+37+m_string_gap-3, x+m_string_x-5 + 350, y+37+m_string_gap-3+m_string_gap*mi_open_drive_count);
 		
@@ -2919,14 +2919,14 @@ void	C_VS_UI_FILE_DIALOG::Show()
 	}
 	
 	//----------------------------------------------------------------------------------------
-	// ���̸� �����ֱ�
+	// 긴이름 적어주기
 	dwNow=GetTickCount();
-	//if((dwNow-m_stay_openfolder)>=1000)			// 1�� �̻� ��ü��
+	//if((dwNow-m_stay_openfolder)>=1000)			// 1초 이상 지체시
 	if(Timer(false))
 	{
 		std::string title;
 		if(STAY_FOLDER==0)
-		{				// ���� ���� ����
+		{				// 현재 열린 폴더
 			title+=mp_open_current_directory[mi_open_drive_index];
 			title.erase(title.size()-2,2);
 			for(i=0;i<m_filter.size();i++) {title+=m_filter[i].c_str();	title+=';';}
@@ -2940,7 +2940,7 @@ void	C_VS_UI_FILE_DIALOG::Show()
 			}
 		}
 		else if(STAY_FOLDER!=-1&&m_bl_open_drive&&STAY_FOLDER!=0xfffffffe)	
-		{		// ����̺� ����Ʈ �� 			
+		{		// 드라이브 리스트 중 			
 			title+=mp_open_current_directory[STAY_FOLDER-1];
 			title.erase(title.size()-2,2);
 			for(i=0;i<m_filter.size();i++){title+=m_filter[i].c_str();	title+=';';}
@@ -2954,7 +2954,7 @@ void	C_VS_UI_FILE_DIALOG::Show()
 			}			
 		} 
 		else
-		{				// ���Ͽ��� ������ �������
+		{				// 파일에서 가만히 있을경우
 			if(m_tempselect != -1 && m_tempselect >= m_pC_scroll_bar->GetScrollPos() && m_tempselect < m_pC_scroll_bar->GetScrollPos()+m_scroll_max)
 			if(m_vs_file_list[m_tempselect].size()>38)	
 			{
@@ -2969,7 +2969,7 @@ void	C_VS_UI_FILE_DIALOG::Show()
 		}
 	}
 	//---------------------------------------------------------------------------------------------------
-	// �̸�����
+	// 미리보기
 	// 
 	if(m_tempselect != -1 && m_tempselect >= m_pC_scroll_bar->GetScrollPos() && m_tempselect < m_pC_scroll_bar->GetScrollPos()+m_scroll_max && m_flag_preview_image)	
 	{
@@ -3032,14 +3032,14 @@ bool	C_VS_UI_FILE_DIALOG::IsPixel(int _x, int _y)
 }
 
 //---------------------------------------------------------------------------
-// �����ݷ����� ���е� ���� �̾Ƴ���
-// GetFileNameInString �Լ��� ����ϰ� ���� ��ȯ�� ���� �ݵ�� delete ���ּ���.
+// 세미콜론으로 구분된 문자 뽑아내기
+// GetFileNameInString 함수를 사용하고 나서 반환된 값은 반드시 delete 해주세요.
 // usage>
 // char *name=GetFileNameInString(str,2);
 // MessageBox(NULL,name,name,MB_OK);
 // delete name;
 
-// �����̸����� ������ �� ����
+// 파일이름에서 파일의 총 갯수
 static int GetSizeFileInString(char *str)
 {
 	if(str==NULL||strlen(str)<=1)
@@ -3055,7 +3055,7 @@ static int GetSizeFileInString(char *str)
 	return nFile;
 }
 
-// �ش� ��ȣ�� ���� ���� ����
+// 해당 번호에 대한 파일 추출
 static const std::string GetFileNameInString(char *str,int n)
 {
 	if(str==NULL||strlen(str)<=1) return NULL;
@@ -3114,7 +3114,7 @@ void	C_VS_UI_FILE_DIALOG::Run(id_t id)
 	//	m_bl_open_drive = !m_bl_open_drive;
 	//	break;
 	case OK_ID :
-		// SendMessage �� �����̸��� �������� �Ѵ�.
+		// SendMessage 로 파일이름을 보내도록 한다.
 		//
 		if( m_mode == MODE_PROFILE_SELECT )
 		{
@@ -3131,7 +3131,7 @@ void	C_VS_UI_FILE_DIALOG::Run(id_t id)
 		{
 			if( m_select_file_num.size() > 0 )
 			{
-				// ������ ������ ���õ� ��쿡�� �����ݷ����� ������ �����Ѵ�.
+				// 파일이 여러개 선택된 경우에는 세미콜론으로 파일을 구분한다.
 				std::string multiple_filename;
 				
 				for( i = 0; i < m_select_file_num.size(); i++ )
@@ -3142,7 +3142,7 @@ void	C_VS_UI_FILE_DIALOG::Run(id_t id)
 				multiple_filename.erase(multiple_filename.end()-1, multiple_filename.end());	
 				gpC_base->SendMessage(UI_CLOSE_FILE_DIALOG, m_mode, 0, (void *) multiple_filename.c_str());
 				
-				// ������Ϸ��� ���� �ڵ��Դϴ�.
+				// 디버깅하려고 넣은 코드입니다.
 				//for(i=0;i<IsNumFileInString((char*)multiple_filename.c_str());i++)
 				//{
 				//	char *name=GetFileNameInString((char*)multiple_filename.c_str(),i);
@@ -3198,16 +3198,16 @@ void	C_VS_UI_FILE_DIALOG::Finish()
 - RefreshFileList
 -
 
-  `file �� ������ ���� ��� ��� �� Method�� �����ϸ� ��û�� �ӵ����ϰ� �Ͼ��.
-   ���� ������ �ʿ��� ��쿡�� �� Method�� �����Ѵ�.
+  `file 이 굉장히 많을 경우 계속 이 Method를 실행하면 엄청난 속도저하가 일어난다.
+   따라서 갱신이 필요할 경우에만 이 Method를 실행한다.
 
-  `GetCurrentDirectory()�� ���� dir�� refresh�Ѵ�.
+  `GetCurrentDirectory()로 얻은 dir을 refresh한다.
 -----------------------------------------------------------------------------*/
 void C_VS_UI_FILE_DIALOG::RefreshFileList(char *sz_dirname)
 {
 	HANDLE				hFind;
 	WIN32_FIND_DATA	fd;
-	BOOL					next_ok = true; // FindNextFile(hFind, &fd)�� BOOL�� ��ȯ�ϹǷ�...
+	BOOL					next_ok = true; // FindNextFile(hFind, &fd)이 BOOL을 반환하므로...
 	std::string			sz_filename;
 	int					n;
 
@@ -3225,7 +3225,7 @@ void C_VS_UI_FILE_DIALOG::RefreshFileList(char *sz_dirname)
 	hFind = FindFirstFile(sz_dirname, &fd);
 	while (hFind != INVALID_HANDLE_VALUE && next_ok)
 	{
-		// '\.'�� �����Ѵ�.
+		// '\.'은 생략한다.
 		//if ((fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && fd.cFileName == ".")
 		if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 			if (fd.cFileName[0] == '.' && 
@@ -3337,7 +3337,7 @@ void C_VS_UI_FILE_DIALOG::ChangeDir(char *sz_cur_dirname, char *sz_pathname)
 	{
 		//
 		// add dir name
-		// `directory name�� �߰��� �����Ѱ�? �׷��� �ʴٸ� �ƹ��ϵ� ���� �ʴ´�.
+		// `directory name의 추가가 가능한가? 그렇지 않다면 아무일도 하지 않는다.
 		//
 		if ((strlen(sz_pathname) + strlen(sz_cur_dirname) + 1 <= MAX_PATH) &&
 			 sz_cur_dirname[1] != '.') // '.' = current dir -.-
@@ -3364,7 +3364,7 @@ void C_VS_UI_FILE_DIALOG::ChangeDir(char *sz_cur_dirname, char *sz_pathname)
 
 /*-----------------------------------------------------------------------------
 - 
-- \.. �� �˻��Ѵ�.
+- \.. 를 검색한다.
 -----------------------------------------------------------------------------*/
 bool C_VS_UI_FILE_DIALOG::GetParentDir(char *sz_name)
 {

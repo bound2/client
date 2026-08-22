@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------
 // CTypeTable.h
 //----------------------------------------------------------------------
-//���� 326220963
+//행행 326220963
 #ifndef	__CTYPETABLE_H__
 #define	__CTYPETABLE_H__
 
@@ -11,7 +11,7 @@
 
 //----------------------------------------------------------------------
 //
-// Info�� ���� ���� Table
+// Info에 대한 정보 Table
 //
 //----------------------------------------------------------------------
 template <class Type>
@@ -77,8 +77,8 @@ class CTypeTable {
 		void			LoadFromFile(const char *filename);
 		bool			LoadFromFile_NickNameString(std::ifstream& file);
 	protected :		
-		int			m_Size;					// Type ���� ��
-		Type*		m_pTypeInfo;			// Type ����
+		int			m_Size;					// Type 종류 수
+		Type*		m_pTypeInfo;			// Type 정보
 
 };
 
@@ -114,14 +114,14 @@ template <class Type>
 void
 CTypeTable<Type>::Init(int size)
 {
-	// ������ ���� ��� 
+	// 개수가 없을 경우 
 	if (size==0) 
 		return;
 
-	// �ϴ� ����
+	// 일단 해제
 	Release();
 
-	// �޸� ���
+	// 메모리 잡기
 	m_Size = size;
 	
 	m_pTypeInfo = new Type [m_Size];	
@@ -137,7 +137,7 @@ CTypeTable<Type>::Release()
 {
 	if (m_pTypeInfo != NULL)
 	{
-		// ��� CSprite�� �����.
+		// 모든 CSprite를 지운다.
 		delete [] m_pTypeInfo;
 		m_pTypeInfo = NULL;
 		
@@ -152,17 +152,17 @@ template <class Type>
 void			
 CTypeTable<Type>::SaveToFile(std::ofstream& file)
 {
-	// size ����
+	// size 저장
 	file.write((const char*)&m_Size, 4);
 
-	// �ƹ� �͵� ���� ���
+	// 아무 것도 없는 경우
 	if (m_pTypeInfo==NULL)
 		return;
 
-	// ������ ���� ����
+	// 각각의 정보 저장
 	for (int i=0; i<m_Size; i++)
 	{
-		if (i==557)//ʯͷ����Ч��
+		if (i==557)//石头返回效果
 		{
 			i=i;
 		}
@@ -179,20 +179,20 @@ CTypeTable<Type>::LoadFromFile(std::ifstream& file)
 {
 	int numSize=0;
 
-	// size �о����
+	// size 읽어오기
 	file.read((char*)&numSize, 4);
 
-	// ���� �����ִ� �޸𸮿� �ٸ��� �ٽ� �޸𸮸� ��´�.
+	// 현재 잡혀있는 메모리와 다르면 다시 메모리를 잡는다.
 	if (m_Size != numSize)
 	{
-		// �޸� ����
+		// 메모리 해제
 		Release();
 
-		// �޸� ���
+		// 메모리 잡기
 		Init( numSize );
 	}
 
-	// file���� ������ ������ �о���δ�.
+	// file에서 각각의 정보를 읽어들인다.
 	for (int i=0; i<m_Size; i++)
 	{
 		if (i==700)
@@ -223,7 +223,7 @@ CTypeTable<Type>::SaveToFile(const char* lpszFilename)
 	SaveToFile(file);
 	file.close();
 }
-// 2004, 6, 18 sobeit add start - nick name - ���� ������ �� Ʋ���� �������� ����..^^:
+// 2004, 6, 18 sobeit add start - nick name - 파일 구조가 쩜 틀려서 전용으로 만듬..^^:
 //----------------------------------------------------------------------
 // Load From File
 //----------------------------------------------------------------------
@@ -233,16 +233,16 @@ CTypeTable<Type>::LoadFromFile_NickNameString(std::ifstream& file)
 {
 	int numSize;
 	WORD wIndex;
-	// size �о����
+	// size 읽어오기
 	file.read((char*)&numSize, 4);
 
-	// ���� �����ִ� �޸𸮿� �ٸ��� �ٽ� �޸𸮸� ��´�.
+	// 현재 잡혀있는 메모리와 다르면 다시 메모리를 잡는다.
 	if (m_Size != numSize)
 	{
-		// �޸� ����
+		// 메모리 해제
 		Release();
 
-		// �޸� ���
+		// 메모리 잡기
 		Init( numSize );
 	}
 	
@@ -256,5 +256,5 @@ CTypeTable<Type>::LoadFromFile_NickNameString(std::ifstream& file)
 	}
 	return true;
 }
-// 2004, 6, 18 sobeit add start - nick name - ���� ������ �� Ʋ���� �������� ����..^^:
+// 2004, 6, 18 sobeit add start - nick name - 파일 구조가 쩜 틀려서 전용으로 만듬..^^:
 #endif

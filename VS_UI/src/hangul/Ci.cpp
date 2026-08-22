@@ -30,8 +30,8 @@ void Timer_BlinkCursor()
 //-----------------------------------------------------------------------------
 // CI::RunCursorBlinker
 //
-// constructor�� �θ� Timer instance�� �����Ǿ����� ���� ���� �ֱ� ������ 
-// �ܺο��� ��������� �Ѵ�.
+// constructor에 두면 Timer instance가 생성되어있지 않을 수도 있기 때문에 
+// 외부에서 실행해줘야 한다.
 //-----------------------------------------------------------------------------
 void CI::RunCursorBlinker()
 {
@@ -88,7 +88,7 @@ CI_CHINESE::~CI_CHINESE()
 //-----------------------------------------------------------------------------
 // IsEngInput
 //
-// ���� �Է»��°� �����̸� true�� ��ȯ�Ѵ�.
+// 현재 입력상태가 영문이면 true를 반환한다.
 //-----------------------------------------------------------------------------
 bool CI::IsEngInput() const
 {
@@ -118,7 +118,7 @@ void CI::FinishImeRunning()
 //-----------------------------------------------------------------------------
 // ForceShowCursor
 //
-// ������ cursor�� ���̰� �Ѵ�.
+// 강제로 cursor를 보이게 한다.
 //-----------------------------------------------------------------------------
 void CI::ForceShowCursor() const
 {
@@ -152,7 +152,7 @@ bool CI::GetEndOfIME()
 //-----------------------------------------------------------------------------
 // Init
 //
-// �ܺο��� ���� �����ϴ�.
+// 외부에서 실행 가능하다.
 //-----------------------------------------------------------------------------
 void CI::Init()
 {
@@ -182,17 +182,17 @@ void	CI::ClearCurrentIMEComposition()
 //-----------------------------------------------------------------------------
 void CI_KOREAN::IME_MessageProcessor(UINT message, WPARAM wParam, LPARAM lParam)
 {
-	//pass �� ���̶��ڿ� �ƽ�Ű�� ���� 0xc05d ������ �޺κп� ������°� �ƽ�Ű �������� �ڵ尡 ����ͼ� '��D'�̷������� �ȴ�.
-	//�װ� �����ϱ����� endcomposition���Ŀ� ���� wm_char�ΰ��� �����ϰ� �ߴµ�
-	//�׷��� ���� e5�ڵ尡 ������ �ʴ´�.
+	//pass 는 윸이란뒤에 아스키가 오면 0xc05d 식으로 뒷부분에 날라오는게 아스키 범위내의 코드가 날라와서 '윸D'이런식으로 된다.
+	//그걸 방지하기위해 endcomposition이후에 오는 wm_char두개를 무시하게 했는데
+	//그러고 나니 e5코드가 들어오지 않는다.
 	static int pass = 0;
 	
-	//�̰� �V�� ������ end�Ȱ�ĥ���� ó��
+	//이건 웈기 식으로 end안거칠때의 처리
 	if(message == WM_CHAR && m_bl_ime_running)
 		return;
 
-	//�Ʒ����� e5�ڵ尡 �ִ°��� �̸� pass--�� ���ֹǷ� 0xe5�� Ȥ�ó�? ���� ���� ó������ �ʴ´�.
-	//lParam�� 1�ϰ�찡 ime���� ������ WM_CHAR�޼�����
+	//아래에서 e5코드가 있는경우는 미리 pass--를 해주므로 0xe5가 혹시나? 들어올 경우는 처리하지 않는다.
+	//lParam이 1일경우가 ime에서 나오는 WM_CHAR메세지다
 	if(pass > 0 && message == WM_CHAR && wParam != 0xe5 && lParam == 1)
 	{
 		pass--;
@@ -213,12 +213,12 @@ void CI_KOREAN::IME_MessageProcessor(UINT message, WPARAM wParam, LPARAM lParam)
 			m_bl_ime_running = false;
 			IME_EndComposition();
 
-			//����� ���ڰ� ������
+			//만들던 글자가 있으면
 			if(m_composing_char[0])
 			{
 				pass = 2;
 				
-				//������ ���� e5�ڵ�� wm_char�� ������ �����Ƿ� ���⼭ pass�� �ٿ��ش�
+				//위에서 말한 e5코드는 wm_char로 들어오지 않으므로 여기서 pass를 줄여준다
 				if((m_composing_char[0] & 0xff00) == 0xe500)
 					pass--;
 			}
@@ -226,7 +226,7 @@ void CI_KOREAN::IME_MessageProcessor(UINT message, WPARAM wParam, LPARAM lParam)
 
 		case WM_IME_COMPOSITION:
 			//
-			// wParam�� ������ byte ��ġ�� �ٲ�� ���������� ��µȴ�.
+			// wParam의 상하위 byte 위치를 바꿔야 정상적으로 출력된다.
 			//
 			m_composing_char[0] = (char_t)(wParam<<8);
 			m_composing_char[0] |= (char_t)((wParam>>8)&0x00FF);
@@ -253,7 +253,7 @@ void CI_CHINESE::IME_MessageProcessor(UINT message, WPARAM wParam, LPARAM lParam
 	int len;
 	if(wParam == 0xe5) return;
 	
-	//�̰� �V�� ������ end�Ȱ�ĥ���� ó��
+	//이건 웈기 식으로 end안거칠때의 처리
 	if(message == WM_CHAR && ImeRunning())
 		return;
 	

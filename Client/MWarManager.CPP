@@ -16,10 +16,10 @@ MWarManager *g_pWarManager = NULL;
 
 MWarManager::MWarManager()
 {
-//	// �ƴ��� ���� �� ���̵�.
-//	// �ƴ��� ���������� �ٸ� �� 4���� ������ ���� ����ȴ�.
-//	// �׷��Ƿ� WarInfo �� ���ö� �ƴ��� ���� �� ���̵� üũ�Ͽ� 4���� ���� �Ѱ��־�� �Ѵ�.
-//	// �� HardCoding ƽ������... -_-
+//	// 아담의 성지 존 아이디.
+//	// 아담의 성지에서는 다른 성 4개의 정보가 같이 적용된다.
+//	// 그러므로 WarInfo 를 얻어올때 아담의 성지 존 아이디를 체크하여 4개를 같이 넘겨주어야 한다.
+//	// 좀 HardCoding 틱하지만... -_-
 //
 //	HolyLandZone.clear();
 //
@@ -35,7 +35,7 @@ MWarManager::~MWarManager()
 	ClearWar();
 }
 
-// WarList �� ������ش�. ������ ������ left_time �� Update ���ش�.
+// WarList 를 등록해준다. 기존에 있으면 left_time 만 Update 해준다.
 void			MWarManager::SetWar(WarInfo *info)
 {
 	if(info == NULL)
@@ -43,11 +43,11 @@ void			MWarManager::SetWar(WarInfo *info)
 
 	std::vector<WAR_INFO>::iterator itr = g_pUserInformation->WarInfo.begin();
 
-	switch(info->getWarType())	// ������
+	switch(info->getWarType())	// 종족전
 	{
 	case WAR_RACE:
 		{
-			// ���� ������
+			// 편지 보내쟈
 			UI_RunNotice(6, info->getStartTime());
 			UI_DeleteNotice(5);
 			
@@ -64,7 +64,7 @@ void			MWarManager::SetWar(WarInfo *info)
 
 				while(itr != g_pUserInformation->WarInfo.end())
 				{
-					if(itr->zone_id == id && itr->war_type == WAR_RACE)		// ������ ������ ������Ʈ!
+					if(itr->zone_id == id && itr->war_type == WAR_RACE)		// 기존에 있으면 업데이트!
 					{
 						itr->left_time = pInfo->getRemainTime() + (timeGetTime()/1000);
 						bUpdate = true;
@@ -96,7 +96,7 @@ void			MWarManager::SetWar(WarInfo *info)
 					UI_RunBloodBibleStatus();
 					
 					//--------------------------------------------------
-					// Ȧ������ ���ʽ� RaceWar �����Ҷ� reset
+					// 홀리랜드 보너스 RaceWar 시작할때 reset
 					//--------------------------------------------------
 					for(int i = 0; i < HOLYLAND_BONUS_MAX; i++)
 					{
@@ -104,7 +104,7 @@ void			MWarManager::SetWar(WarInfo *info)
 					}
 					
 					//--------------------------------------------------
-					// ���� ��� ������ skill���� �ٽ� üũ�Ѵ�.
+					// 현재 사용 가능한 skill들을 다시 체크한다.
 					//--------------------------------------------------
 					g_pSkillAvailable->SetAvailableSkills();
 				}
@@ -126,7 +126,7 @@ void			MWarManager::SetWar(WarInfo *info)
 		
 			while(itr != g_pUserInformation->WarInfo.end())
 			{
-				if(itr->zone_id == pInfo->getCastleID() && itr->war_type == WAR_GUILD)		// ������ ������ ������Ʈ!
+				if(itr->zone_id == pInfo->getCastleID() && itr->war_type == WAR_GUILD)		// 기존에 있으면 업데이트!
 				{
 					itr->left_time = pInfo->getRemainTime() + (timeGetTime()/1000);
 					return;
@@ -164,7 +164,7 @@ void			MWarManager::SetWar(WarInfo *info)
 }
 
 
-// �ش� ���� ���� ������ �����ش�.
+// 해당 존의 전쟁 정보를 지워준다.
 void			MWarManager::RemoveWar(ZoneID_t id)
 {
 	WarInfoMapItr	itr = m_WarInfo.find(id);
@@ -347,7 +347,7 @@ bool			MWarManager::IsExist(ZoneID_t id)
 	return true;
 }
 
-//// �ƴ��� ���� �ʵ���ΰ�?
+//// 아담의 성지 필드맵인가?
 //bool			MWarManager::IsHolyLand(ZoneID_t id)
 //{
 //	list<ZoneID_t>::const_iterator itr = HolyLandZone.begin();

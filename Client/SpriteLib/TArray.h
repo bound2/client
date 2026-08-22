@@ -6,11 +6,11 @@
 //
 //----------------------------------------------------------------------
 //
-// Data Type��  Size Type�� Template�̴�.
+// Data Type과  Size Type이 Template이다.
 //
-// File I/O�� �Ϸ���  Data�� �Ǵ� class�� 
+// File I/O를 하려면  Data가 되는 class에 
 //      bool		SaveToFile(std::ofstream& file);
-//		bool		LoadFromFile(std::ifstream& file);  �� �����Ǿ�� �Ѵ�.
+//		bool		LoadFromFile(ifstream& file);  이 구현되어야 한다.
 //
 //----------------------------------------------------------------------
 
@@ -58,7 +58,7 @@ class TArray {
 		const DataType&	operator [] (SizeType n) const	{ return m_pData[n]; }
 		void		operator = (const TArray<DataType, SizeType>& array);
 		
-		// ���� Array�� �ٸ� array�� ���Ѵ�.
+		// 현재 Array에 다른 array를 더한다.
 		void		operator += (const TArray<DataType, SizeType>& array);
 
 
@@ -66,7 +66,7 @@ class TArray {
 		SizeType		m_Size;
 		DataType*		m_pData;
 
-		// sizeof(SizeType) �� ��
+		// sizeof(SizeType) 의 값
 		static BYTE		s_SIZEOF_SizeType;
 };
 
@@ -115,7 +115,7 @@ template <class DataType, class SizeType>
 void	
 TArray<DataType, SizeType>::Init(SizeType size)
 {
-	// �ϴ� ����
+	// 일단 해제
 	Release();
 
 	if (size==0) return;
@@ -143,8 +143,8 @@ TArray<DataType, SizeType>::Release()
 //----------------------------------------------------------------------
 // Add Array to *this
 //----------------------------------------------------------------------
-// �� Array�� �����ϴ� data�� ������ ���Ѹ�ŭ�� 
-// memory�� *this�� �ٽ� ��� copy~~
+// 두 Array에 존재하는 data의 개수를 더한만큼의 
+// memory를 *this에 다시 잡고 copy~~
 //----------------------------------------------------------------------
 template <class DataType, class SizeType>
 void
@@ -153,12 +153,12 @@ TArray<DataType, SizeType>::operator += (const TArray<DataType, SizeType>& array
 	SizeType newSize = m_Size + array.m_Size;
 
 	//------------------------------------------------
-	// �� Array�� ���� ������ŭ�� memory�� ��´�.
+	// 두 Array를 더한 개수만큼의 memory를 잡는다.
 	//------------------------------------------------
 	DataType*	pTempData = new DataType [newSize];
 
 	//------------------------------------------------
-	// temp�� *this�� copy
+	// temp에 *this를 copy
 	//------------------------------------------------
 	SizeType k=0;
 	SizeType i;  // Declare at function scope for both loops
@@ -171,7 +171,7 @@ TArray<DataType, SizeType>::operator += (const TArray<DataType, SizeType>& array
 	}
 
 	//------------------------------------------------
-	// temp�� FramePack�� copy
+	// temp에 FramePack을 copy
 	//------------------------------------------------
 	for (i=0; i<array.m_Size; i++)
 	{
@@ -181,12 +181,12 @@ TArray<DataType, SizeType>::operator += (const TArray<DataType, SizeType>& array
 	}
 
 	//------------------------------------------------
-	// memory�����Ѵ�.
+	// memory해제한다.
 	//------------------------------------------------
 	Release();
 
 	//------------------------------------------------
-	// *this�� temp�� ����Ű���� �Ѵ�.
+	// *this가 temp를 가리키도록 한다.
 	//------------------------------------------------
 	m_Size		= newSize;
 	m_pData		= pTempData;	
@@ -200,10 +200,10 @@ template <class DataType, class SizeType>
 bool
 TArray<DataType, SizeType>::SaveToFile(std::ofstream& file)
 {
-	// 0�̶� ������ �����Ѵ�.
+	// 0이라도 개수는 저장한다.
 	file.write((const char*)&m_Size, s_SIZEOF_SizeType);
 
-	// �ƹ��͵� ������..
+	// 아무것도 없으면..
 	if (m_pData==NULL || m_Size==0) 
 		return false;
 
@@ -220,12 +220,12 @@ template <class DataType, class SizeType>
 bool
 TArray<DataType, SizeType>::LoadFromFile(std::ifstream& file)
 {
-	// frame ����
+	// frame 개수
 	file.read((char*)&m_Size, s_SIZEOF_SizeType);
 
 	if (m_Size==0) return false;
 	
-	// memory���
+	// memory잡기
 	Init(m_Size);
 
 	for (SizeType i=0; i<m_Size; i++)
@@ -241,10 +241,10 @@ template <class DataType, class SizeType>
 void	
 TArray<DataType, SizeType>::operator = (const TArray<DataType, SizeType>& array)
 {
-	// frameArray�� �Ȱ��� �ؾ� �Ѵ�.
+	// frameArray와 똑같이 해야 한다.
 	Init( array.m_Size );
 
-	// ��� element�� copy�ؾ� �Ѵ�.
+	// 모든 element를 copy해야 한다.
 	for (SizeType i=0; i<m_Size; i++)
 	{
 		m_pData[i] = array.m_pData[i];

@@ -21,8 +21,8 @@
 //
 // Character inputer.
 //
-// Windows IME(Input Method Editor)�� ���� �Է¹��� ���ڸ� ó���Ѵ�.
-// DBCS(Double-Byte Character Set) ����̴�.
+// Windows IME(Input Method Editor)를 통해 입력받은 문자를 처리한다.
+// DBCS(Double-Byte Character Set) 기반이다.
 //-----------------------------------------------------------------------------
 class CI
 {
@@ -31,7 +31,7 @@ protected :
 	// m_bl_insert_mode
 	//
 	// insert or edit mode
-	// �������� ��ü���� �ٸ��� ���� �ʱ� ���ؼ� CI�� �����Ѵ�.
+	// 개별적인 객체마다 다르게 하지 않기 위해서 CI에 정의한다.
 	//
 	bool			m_bl_insert_mode; 
 
@@ -61,7 +61,7 @@ public:
 	bool	GetInsertModeState() const { return m_bl_insert_mode; }
 	void	ToggleInsertMode() { m_bl_insert_mode = !m_bl_insert_mode; }
 	bool	GetEndOfIME();
-	bool	ImeRunning() const { return m_bl_ime_running; } // IME�� ������?
+	bool	ImeRunning() const { return m_bl_ime_running; } // IME가 실행중?
 	bool	GetCursorBlink() const;
 	void	ForceShowCursor() const;
 	void	FinishImeRunning();

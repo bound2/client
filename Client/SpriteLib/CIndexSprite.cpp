@@ -25,7 +25,7 @@ WORD	CIndexSprite::s_Colorkey = 0;
 int		CIndexSprite::s_IndexValue[MAX_COLORSET_USE];
 
 //-----------------------------------------------------------------------------
-// Blt Color���� �⺻������ ����� ColorSet
+// Blt Color에서 기본색으로 사용할 ColorSet
 //-----------------------------------------------------------------------------
 const int defaultGradationColor = 384;
 
@@ -69,19 +69,19 @@ CIndexSprite::SetColorSet()
 	/*
 	static BYTE rgbPoint[MAX_COLORSET_SEED][3] = 
 	{
-		//                     �⺻��  :  ����,����,��ο�,
-		{ 16, 16, 16 },		// ���	
-		{ 31, 0, 0 },		// ����	
-		{ 31, 16, 0 },		// ��Ȳ	
-		{ 31, 31, 0 },		// ���	
-		{ 0, 31, 16 },		// ����	
-		{ 0, 31, 0 },		// �ʷ�	
-		{ 0, 0, 31 },		// �Ķ�	
-		{ 31, 0, 31 },		// ����	
-		{ 0, 31, 31 },		// �ϴ�	
-		{ 16, 0, 31 },		// ����	
-		{ 16, 16, 31 },		// £�� �ϴ�
-		{ 31, 16, 16 }		// ���		
+		//                     기본색  :  밝음,보통,어두움,
+		{ 16, 16, 16 },		// 흰색	
+		{ 31, 0, 0 },		// 빨강	
+		{ 31, 16, 0 },		// 주황	
+		{ 31, 31, 0 },		// 노랑	
+		{ 0, 31, 16 },		// 연두	
+		{ 0, 31, 0 },		// 초록	
+		{ 0, 0, 31 },		// 파랑	
+		{ 31, 0, 31 },		// 보라	
+		{ 0, 31, 31 },		// 하늘	
+		{ 16, 0, 31 },		// 남색	
+		{ 16, 16, 31 },		// 짙은 하늘
+		{ 31, 16, 16 }		// 살색		
 	};
 	*/
 
@@ -117,18 +117,18 @@ CIndexSprite::SetColorSet()
 		{ 31, 32, 31 },
 		{ 31, 63, 16 },
 
-		{ 16, 32, 16 }, // ȸ�� (gray) - G = 2x R/B for neutral gray
-		{ 24, 48, 24 }, // ���� ȸ�� (light gray) - G = 2x R/B
-		{ 8, 16, 8 },   // ��ο� ȸ�� (dark gray) - G = 2x R/B
+		{ 16, 16, 16 }, // 회색
+		{ 24, 24, 24 }, // 밝은 회색
+		{ 8, 8, 8 }, // 어두운 회색		
 
-		{ 30, 48, 18 }, // ��� (skin tone) - G is 6-bit
-		{ 25, 30, 11 },	// ���� (brown) - G is 6-bit
+		{ 30, 24, 18 }, // 살색
+		{ 25, 15, 11 },	// 갈색		
 		{ 21, 24, 11 },				// G is 6-bit
-		{ 19, 30, 13 }, // ������ (another skin tone) - G is 6-bit
+		{ 19, 15, 13 }, // 고동색				
 
-		{ 21, 36, 11 }, // ���� ��� - G is 6-bit
+		{ 21, 18, 11 }, // 연한 살색		
 
-		{ 22, 32, 9 } // ��� - G is 6-bit
+		{ 22, 16, 9 } // 살색		
 	};
 
 		
@@ -148,7 +148,7 @@ CIndexSprite::SetColorSet()
 		// MAX_COLORGRADATION_HALF ~ 1
 		for (j=MAX_COLORGRADATION_HALF; j>=1; j--)
 		{
-			// ù�ٸ�
+			// 첫줄만
 			if (j==MAX_COLORGRADATION_HALF)
 			{
 				GetIndexColor(ColorSet[set], j,
@@ -209,7 +209,7 @@ CIndexSprite::SetColorSet()
 	}
 	
 	//----------------------------------------------------------------------
-	// GradationValue��
+	// GradationValue와
 	//----------------------------------------------------------------------
 	for (j=0; j<MAX_COLORGRADATION; j++)
 	{
@@ -218,7 +218,7 @@ CIndexSprite::SetColorSet()
 	}
 
 	//----------------------------------------------------------------------
-	// Darkness���� �����Ѵ�.
+	// Darkness색을 결정한다.
 	//----------------------------------------------------------------------
 	for (int i=0; i<MAX_COLORSET; i++)
 	{
@@ -227,7 +227,7 @@ CIndexSprite::SetColorSet()
 			color = ColorSet[i][j];
 			//GradationValue[j] = ColorDraw::Red(color) + ColorDraw::Green(color) + ColorDraw::Blue(color);
 
-			// Darkness�� ���� ����
+			// Darkness를 위한 색값
 			for (k=0; k<MAX_DARKBIT; k++)
 			{	
 				r = ((color >> ColorDraw::s_bSHIFT_R) >> k) << ColorDraw::s_bSHIFT_R;
@@ -247,7 +247,7 @@ CIndexSprite::SetColorSet()
 	}
 
 	//----------------------------------------------------------------------
-	// ���� �׽�Ʈ..
+	// 색깔 테스트..
 	//----------------------------------------------------------------------
 	/*
 	int colorSet = MAX_COLORSET-1;
@@ -274,7 +274,7 @@ CIndexSprite::SaveIndexTableToFile(std::ofstream& file)
 	int db = MAX_DARKBIT;
 
 	//----------------------------------------------------------------------
-	// ������ ���ڵ�..
+	// 검증용 숫자들..
 	//----------------------------------------------------------------------
 	file.write((const char*)&cg, 4);
 	file.write((const char*)&cs, 4);
@@ -327,7 +327,7 @@ CIndexSprite::LoadIndexTableFromFile(std::ifstream& file)
 	int cg, cs, db;
 
 	//----------------------------------------------------------------------
-	// ������ ���ڵ�..
+	// 검증용 숫자들..
 	//----------------------------------------------------------------------
 	file.read((char*)&cg, 4);
 	file.read((char*)&cs, 4);
@@ -377,7 +377,7 @@ CIndexSprite::LoadIndexTableFromFile(std::ifstream& file)
 }
 
 //----------------------------------------------------------------------
-// ��¿� ����� ColorSet�� �����Ѵ�.
+// 출력에 사용할 ColorSet을 선택한다.
 //----------------------------------------------------------------------
 void	
 CIndexSprite::SetUsingColorSet(int set1, int set2)
@@ -387,7 +387,7 @@ CIndexSprite::SetUsingColorSet(int set1, int set2)
 }
 
 //----------------------------------------------------------------------
-// ��¿� ����� ColorSet�� �����Ѵ�.
+// 출력에 사용할 ColorSet을 선택한다.
 //----------------------------------------------------------------------
 void
 CIndexSprite::SetUsingColorSetOnly(BYTE setNumber, int colorSet)
@@ -397,8 +397,8 @@ CIndexSprite::SetUsingColorSetOnly(BYTE setNumber, int colorSet)
 
 
 //----------------------------------------------------------------------
-// (r0,g0,b0) ~ (r1,g1,b1) ������ step������ŭ�� ���ڸ�
-// pColor�� �־��ش�.
+// (r0,g0,b0) ~ (r1,g1,b1) 사이의 step개수만큼의 숫자를
+// pColor에 넣어준다.
 //----------------------------------------------------------------------
 void
 CIndexSprite::GetIndexColor(WORD* pColor, int step, 
@@ -462,7 +462,7 @@ CIndexSprite::~CIndexSprite()
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// m_Pixels�� memory�� �����Ѵ�.
+// m_Pixels의 memory를 해제한다.
 //----------------------------------------------------------------------
 void	
 CIndexSprite::Release()
@@ -496,26 +496,26 @@ CIndexSprite::Release()
 void
 CIndexSprite::operator = (const CIndexSprite& Sprite)
 {
-	// �޸� ����
+	// 메모리 해제
 	Release();
 
 	
-	// NULL�̸� �������� �ʴ´�.
+	// NULL이면 저장하지 않는다.
 	if (Sprite.m_Pixels==NULL || Sprite.m_Width==0 || Sprite.m_Height==0)
 		return;
 
-	// ũ�� ����
+	// 크기 설정
 	m_Width = Sprite.m_Width;
 	m_Height = Sprite.m_Height;
 	
-	// ���� �� �� ����
+	// 압축 된 것 저장
 	int index;	
 	register int i;
 	register int j;
 
 	int colorCount, transPair, indexCount;
 
-	// �޸� ���
+	// 메모리 잡기
 	m_Pixels = new WORD* [m_Height];
 
 	//--------------------------------
@@ -523,33 +523,33 @@ CIndexSprite::operator = (const CIndexSprite& Sprite)
 	//--------------------------------
 	for (int i=0; i<m_Height; i++)
 	{
-		// �ݺ� ȸ���� 2 byte
+		// 반복 회수의 2 byte
 		transPair = Sprite.m_Pixels[i][0];
 				
 		index	= 1;
 
-		// �� line���� byte���� ��� �����ؾ��Ѵ�.
+		// 각 line마다 byte수를 세어서 저장해야한다.
 		for (j=0; j<transPair; j++)
 		{			
 			// transCount = m_Pixels[i][index];
-			index++;	// ���� ��
-			indexCount = Sprite.m_Pixels[i][index++];	// indexPair ��
+			index++;	// 투명 수
+			indexCount = Sprite.m_Pixels[i][index++];	// indexPair 수
 
-			index += indexCount;		// index���� ���� ���� �� ��ŭ
+			index += indexCount;		// index색에 대한 정보 수 만큼
 
-			// Normal�� ��
+			// Normal색 수
 			colorCount = Sprite.m_Pixels[i][index++];
 
-			// Normal�� ����ŭ ����
+			// Normal색 수만큼 증가
 			index	+= colorCount;
 		}
 
-		// �޸� ���
+		// 메모리 잡기
 		m_Pixels[i] = new WORD [index];
 		memcpy(m_Pixels[i], Sprite.m_Pixels[i], index<<1);
 	}
 
-	// ���� �Ϸ�
+	// 복사 완료
 	m_bInit = true;
 }
 
@@ -557,14 +557,14 @@ CIndexSprite::operator = (const CIndexSprite& Sprite)
 //-----------------------------------------------------------------------------
 // Get IndexColor
 //-----------------------------------------------------------------------------
-// ������ gradation�� ���ؼ�
-// color���� �����ϴ� ������ index��(���� ���� �ƴ� index��ȣ)�� ã���ش�.
+// 정해진 gradation에 의해서
+// color색에 대응하는 적절한 index색(실제 색이 아닌 index번호)을 찾아준다.
 //-----------------------------------------------------------------------------
 BYTE
 CIndexSprite::GetIndexColor(WORD color)
 {
 	//-------------------------------------------------------
-	// Gradition��
+	// Gradition값
 	//-------------------------------------------------------
 	WORD spriteGradation = ColorDraw::Red(color) 
 						+ ColorDraw::Green(color) 
@@ -576,19 +576,19 @@ CIndexSprite::GetIndexColor(WORD color)
 //-----------------------------------------------------------------------------
 // GetColorToGradation
 //-----------------------------------------------------------------------------
-// color(0~93)���� gradation(0~MAX_GRADATION)������ �ٲ۴�.
+// color(0~93)값을 gradation(0~MAX_GRADATION)값으로 바꾼다.
 //-----------------------------------------------------------------------------
 BYTE
 CIndexSprite::GetColorToGradation(BYTE spriteGradation)
 {
-	// 5:6:5���� code
+	// 5:6:5전용 code
 	//WORD spriteGradation = (color >> 11) + ((color >> 6) & 0x1F) + (color & 0x1F);
-	// 5:5:5���� code
+	// 5:5:5전용 code
 	//WORD spriteGradation = (color >> 10) + ((color >> 5) & 0x1F) + (color & 0x1F);
 
 	//-------------------------------------------------------
-	// spriteGradation���� ���� �����
-	// GradationValue�� ã�ƾ� �Ѵ�.
+	// spriteGradation값과 가장 가까운 
+	// GradationValue를 찾아야 한다.
 	//-------------------------------------------------------
 	int g;
 	for (g=0; g<MAX_COLORGRADATION; g++)
@@ -599,17 +599,17 @@ CIndexSprite::GetColorToGradation(BYTE spriteGradation)
 		}
 	}
 
-	// ���� ���� ������ ���
+	// 제일 끝의 색깔인 경우
 	if (g==0 || g==MAX_COLORGRADATION-1)
 	{
 		return g;
 	}
 
-	// ��� ����
+	// 가운데 색깔
 	WORD value1 = GradationValue[g-1] - spriteGradation;
 	WORD value2 = spriteGradation - GradationValue[g-1];
 
-	// ���� ���� �����Ѵ�.
+	// 적은 값을 선택한다.
 	if (value1 < value2)
 	{
 		return g-1;
@@ -619,31 +619,31 @@ CIndexSprite::GetColorToGradation(BYTE spriteGradation)
 		return g;
 	}
 
-	// ���� ����.. ??
+	// 같은 경우는.. ??	
 	return g-1;
 }
 
 //-----------------------------------------------------------------------------
 // Set Pixel
 //-----------------------------------------------------------------------------
-// pixel����(pSource)��
-// �� ���� index ������ ������ 
-// IndexSprite�� �����Ѵ�.
+// pixel정보(pSource)와
+// 두 개의 index 정보를 가지고 
+// IndexSprite를 생성한다.
 //
-// �켱 ColorInfo�� IndexInfo�� �����ϰ�..
-// GenerateFromIndex�� ȣ���Ѵ�..
+// 우선 ColorInfo와 IndexInfo를 생성하고..
+// GenerateFromIndex를 호출한다..
 //
-// ȿ���� �� ���������� -_-; ����ȭ�ϱ� ������. reuse���.. 
-// ������ ���� �����߿��� ���� ���� �����ϱ�.. ����.. -_-;;;; 
+// 효율은 좀 떨어지지만 -_-; 최적화하기 귀찮다. reuse라고.. 
+// 어차피 게임 실행중에는 쓰일 일이 없으니깐.. 음하.. -_-;;;; 
 //-----------------------------------------------------------------------------
 void		
 CIndexSprite::SetPixel(WORD* pSource, WORD sourcePitch, 
-							 WORD* pIndex1, WORD indexPitch1,	// ù��° index
-							 WORD* pIndex2, WORD indexPitch2,	// �ι�° index
+							 WORD* pIndex1, WORD indexPitch1,	// 첫번째 index
+							 WORD* pIndex2, WORD indexPitch2,	// 두번째 index
 							 WORD width, WORD height)
 {
 	//--------------------------------------------------
-	// ���̰� 0�϶�..
+	// 길이가 0일때..
 	//--------------------------------------------------
 	if (width==0 || height==0)
 	{
@@ -652,13 +652,13 @@ CIndexSprite::SetPixel(WORD* pSource, WORD sourcePitch,
 	}
 
 	WORD	*pSourceTemp, *pIndexTemp1, *pIndexTemp2;
-	WORD	transIndex1=0, transIndex2=0;	// default �������� 0��(����)
+	WORD	transIndex1=0, transIndex2=0;	// default 투명색은 0번(검정)
 
 	//--------------------------------------------------
-	// Index������ �ִ� surface�� �������� �����Ѵ�.
+	// Index정보가 있는 surface의 투명색을 결정한다.
 	//--------------------------------------------------
-	// pSource�� �������� �ִ� ��ġ��
-	// pIndex1, pIndex2������ �������̴�.
+	// pSource의 투명색이 있는 위치가
+	// pIndex1, pIndex2에서도 투명색이다.
 	//--------------------------------------------------
 	WORD	*pSourceTemp2;
 	pSourceTemp = pSource;
@@ -669,10 +669,10 @@ CIndexSprite::SetPixel(WORD* pSource, WORD sourcePitch,
 
 		for (register int j=0; j<width; j++)
 		{
-			// ������
+			// 투명색
 			if (*pSourceTemp2==s_Colorkey)
 			{
-				// pIndex1�� pIndex2���� ���� �������� �����Ѵ�.
+				// pIndex1과 pIndex2에서 각각 투명색을 결정한다.
 				if (pIndex1!=NULL)
 				{
 					transIndex1 = *(WORD*)((BYTE*)pIndex1 + i*indexPitch1 + (j<<1));
@@ -695,7 +695,7 @@ CIndexSprite::SetPixel(WORD* pSource, WORD sourcePitch,
 	
 
 	//--------------------------------------------------
-	// ���� ������ ���� �޸� ���
+	// 정보 생성을 위한 메모리 잡기
 	//--------------------------------------------------
 	WORD** ppColor, **ppIndex;
 
@@ -714,7 +714,7 @@ CIndexSprite::SetPixel(WORD* pSource, WORD sourcePitch,
 		ppIndex[i] = new WORD [width];
 
 		//--------------------------------------------------
-		// ù ��
+		// 첫 점
 		//--------------------------------------------------
 		pSourceTemp = pSource;
 
@@ -729,45 +729,45 @@ CIndexSprite::SetPixel(WORD* pSource, WORD sourcePitch,
 		}
 
 		//--------------------------------------------------
-		// �� ���� üũ..
+		// 줄 단위 체크..
 		//--------------------------------------------------
 		for (register int j=0; j<width; j++)
 		{
 			//--------------------------------------------------
-			// �������̶��..
+			// 투명색이라면..
 			//--------------------------------------------------
 			if (*pSourceTemp==s_Colorkey)
 			{
 				ppIndex[i][j] = INDEX_TRANS;
 			}
 			//--------------------------------------------------
-			// ���� Index�������� üũ�ϰ�, 
-			// �ƴϸ�, ���� ���� ����̴�.
+			// 먼저 Index색인지를 체크하고, 
+			// 아니면, 실제 색인 경우이다.
 			//--------------------------------------------------
 			else
 			{
 				//--------------------------------------------------
-				// index1�� �ִ� ������ üũ�ؾ� �Ѵ�.
+				// index1이 있는 것인지 체크해야 한다.
 				//--------------------------------------------------
 				if (pIndex1!=NULL && *pIndexTemp1!=transIndex1)
 				{
 					ppIndex[i][j] = GetIndexColor( *pSourceTemp );	// (0<<8) | gradation;
 				}
 				//--------------------------------------------------
-				// index2�� �ִ� ������ üũ�ؾ� �Ѵ�.
+				// index2가 있는 것인지 체크해야 한다.
 				//--------------------------------------------------
 				else if (pIndex2!=NULL && *pIndexTemp2!=transIndex2)
 				{
 					ppIndex[i][j] = (1<<8) | GetIndexColor( *pSourceTemp );
 				}
 				//--------------------------------------------------
-				// �� �� ���� ��� = ���� ��
+				// 둘 다 없는 경우 = 실제 색
 				//--------------------------------------------------
 				else
 				{
 					ppIndex[i][j] = INDEX_NULL;
 
-					// ���� ���� �����Ѵ�.
+					// 실제 색을 저장한다.
 					ppColor[i][j] = *pSourceTemp;
 				}				
 			}
@@ -775,7 +775,7 @@ CIndexSprite::SetPixel(WORD* pSource, WORD sourcePitch,
 			pSourceTemp++;
 
 			//--------------------------------------------------
-			// ���� ��
+			// 다음 점
 			//--------------------------------------------------
 			if (pIndex1!=NULL)
 			{
@@ -789,7 +789,7 @@ CIndexSprite::SetPixel(WORD* pSource, WORD sourcePitch,
 		}
 
 		//--------------------------------------------------
-		// ���� ��
+		// 다음 줄
 		//--------------------------------------------------
 		pSource = (WORD*)((BYTE*)pSource + sourcePitch);
 
@@ -806,8 +806,8 @@ CIndexSprite::SetPixel(WORD* pSource, WORD sourcePitch,
 
 
 	//--------------------------------------------------
-	// ppColor�� ppIndex�� �ϼ��Ǿ����Ƿ�.. 
-	// IndexSprite����!
+	// ppColor와 ppIndex가 완성되었으므로.. 
+	// IndexSprite생성!
 	//--------------------------------------------------
 	GenerateFromIndex(ppColor, width, height, ppIndex);
 
@@ -830,78 +830,78 @@ CIndexSprite::SetPixel(WORD* pSource, WORD sourcePitch,
 // Generate Index 2
 //-----------------------------------------------------------------------------
 // 
-// ppColor���� width*height��ŭ�� ���� �о Sprite�� ����µ�..
-// ������ ���൵ �ؾ��ϰ�...
-// Index Array�� ������ �����ؾ��Ѵ�.
+// ppColor에서 width*height만큼의 점을 읽어서 Sprite를 만드는데..
+// 투명색 압축도 해야하고...
+// Index Array의 정보도 참조해야한다.
 //
 //-----------------------------------------------------------------------------
-// - ���������� ������ ������ ����Ѵ�.
-// - IndexSet�� Gradation���򺰷� ����(?)�Ѵ�. (ȿ���� ���� ���� �� �ϴ�)
+// - 내부적으로 투명색 압축을 사용한다.
+// - IndexSet의 Gradation색깔별로 압축(?)한다. (효율은 높지 않을 듯 하다)
 //
 //
-// [ �� ���� ���� ]
+// [ 한 줄의 정보 ]
 //
-// (����Pair�ݺ���) 
-//    ( (��������, Index����, 
-//                 (indexSet��ȣ, gradation��ȣ), 
-//                 (indexSet��ȣ, gradation��ȣ), 
+// (투명Pair반복수) 
+//    ( (투명색수, Index색수, 
+//                 (indexSet번호, gradation번호), 
+//                 (indexSet번호, gradation번호), 
 //                              .     
 //                              .     
 //                              .     
-//    ( (��������, Index����, 
-//                 (indexSet��ȣ, gradation��ȣ), 
-//                 (indexSet��ȣ, gradation��ȣ), 
+//    ( (투명색수, Index색수, 
+//                 (indexSet번호, gradation번호), 
+//                 (indexSet번호, gradation번호), 
 //                              .     
 //                              .     
 //                              .     
-//        �����Ȼ����, �����Ȼ����)
+//        고정된색깔수, 고정된색깔들)
 //    )
 //
-// WORD : �������� 
-// WORD : ��Pair�ݺ���
-// WORD : index����
-// WORD : indexSet��ȣ | gradation��ȣ --> BYTE | BYTE
-// WORD : �����Ȼ����
-// WORD*: �����Ȼ����
+// WORD : 투명색수 
+// WORD : 색Pair반복수
+// WORD : index색수
+// WORD : indexSet번호 | gradation번호 --> BYTE | BYTE
+// WORD : 고정된색깔수
+// WORD*: 고정된색깔들
 //
-// �������� Gradation Index���� ������ ���� �����Ѵ�.
+// 투명색과 Gradation Index값과 색깔값을 같이 저장한다.
 //-----------------------------------------------------------------------------
-// ppIndex���� �� 2byte�� 
-// ((IndexSet��ȣ<<8) | Gradation��ȣ)�� ����Ǿ� �־�� �Ѵ�.
+// ppIndex에는 각 2byte에 
+// ((IndexSet번호<<8) | Gradation번호)가 저장되어 있어야 한다.
 //-----------------------------------------------------------------------------
-// Index�� �˻��ϸ鼭.. 
-// �������� ���� ������ counter����..
-// �ƴϸ�.. IndexSet���� ���� Gradation���� ����..
+// Index를 검색하면서.. 
+// 투명색인 경우는 투명색 counter증가..
+// 아니면.. IndexSet별로 같은 Gradation끼리 압축..
 //-----------------------------------------------------------------------------
 void			
 CIndexSprite::GenerateFromIndex(WORD** ppColor,
 								WORD width, WORD height,
 								WORD** ppIndex)
 {
-	// memory����
+	// memory해제
 	Release();
 
 	m_Width = width;
 	m_Height = height;
 
-	// �ϴ� memory�� ������ ��Ƶд�.	
+	// 일단 memory를 적당히 잡아둔다.	
 	WORD*	data = new WORD[m_Width*8+10];
 
-	int	index;				// data�� index�� ���
+	int	index;				// data의 index로 사용
 			
-	int	transPairCount,					// ����Pair ����
-			transColorCount,				// ������ ����			
-			indexColorCount,				// Index�� ����
-			normalColorCount;				// NormalColor ����
+	int	transPairCount,					// 투명Pair 개수
+			transColorCount,				// 투명색 개수			
+			indexColorCount,				// Index색 개수
+			normalColorCount;				// NormalColor 개수
 
-	int	indexColorCountPosition,		// IndexColor���� ���� ��ġ
-			normalColorCountPosition;		// NormalColor���� ���� ��ġ
+	int	indexColorCountPosition,		// IndexColor개수 저장 위치
+			normalColorCountPosition;		// NormalColor개수 저장 위치
 
 	enum	COLORTYPE { COLORTYPE_TRANS, COLORTYPE_INDEX, COLORTYPE_NORMAL }
-			lastColorType;			// �ֱٿ� �˻��� ���� ����
+			lastColorType;			// 최근에 검사한 색의 종류
 								
 
-	// height�� ��ŭ memory���
+	// height줄 만큼 memory잡기
 	m_Pixels = new WORD* [height];
 
 
@@ -919,25 +919,25 @@ CIndexSprite::GenerateFromIndex(WORD** ppColor,
 		lastColorType = COLORTYPE_TRANS;
 
 		//------------------------------------------------------------
-		// �� line�� ���ؼ� ����~
+		// 각 line에 대해서 압축~
 		//------------------------------------------------------------
 		for (register int  j=0; j<width; j++)
 		{
 			//--------------------------------------------------
-			// Index�� �������� ���
+			// Index가 투명색인 경우
 			//--------------------------------------------------
 			if ((ppIndex[i][j] & 0xFF)==INDEX_TRANS)
 			{
 				//--------------------------------------------------
-				// �ֱٿ� �˻��Ѱ� index���̾��ٸ�,
+				// 최근에 검사한게 index색이었다면,
 				//--------------------------------------------------
 				if (lastColorType == COLORTYPE_INDEX)
 				{
-					// ���� index������ �����ؾ��Ѵ�.
+					// 이전 index색수를 저장해야한다.
 					data[indexColorCountPosition] = indexColorCount;
 
-					// ' (��������,��Pair�ݺ���, (��Pair��....)) '�� �� set�� �������� �ǹ��ϹǷ�
-					// normal�� ���� 0�����ؼ� �����Ѵ�.
+					// ' (투명색수,색Pair반복수, (색Pair들....)) '의 한 set가 끝났음을 의미하므로
+					// normal색 수는 0으로해서 저장한다.
 					transPairCount++;
 					
 					data[index++] = 0;					
@@ -946,11 +946,11 @@ CIndexSprite::GenerateFromIndex(WORD** ppColor,
 					lastColorType = COLORTYPE_TRANS;
 				}
 				//--------------------------------------------------
-				// �ֱٿ� �˻��Ѱ� normal���̾��ٸ�
+				// 최근에 검사한게 normal색이었다면
 				//--------------------------------------------------
 				else if (lastColorType == COLORTYPE_NORMAL)
 				{
-					// ' (��������,indexPair�ݺ���, (index�ݺ�), ��������)) '�� �� set�� �������� �ǹ��ϹǷ�
+					// ' (투명색수,indexPair반복수, (index반복), 고정색들)) '의 한 set가 끝났음을 의미하므로
 					transPairCount++;
 					
 					data[normalColorCountPosition] = normalColorCount;
@@ -964,70 +964,70 @@ CIndexSprite::GenerateFromIndex(WORD** ppColor,
 				transColorCount++;				
 			}		
 			//--------------------------------------------------				
-			// Index ���� ���...
+			// Index 색인 경우...
 			//--------------------------------------------------
 			else if ((ppIndex[i][j] & 0xFF)!=INDEX_NULL)
 			{
 				//--------------------------------------------------
-				// ������ ���� �������̾��ٸ�..
+				// 이전의 것이 투명색이었다면..
 				//--------------------------------------------------
 				if (lastColorType == COLORTYPE_TRANS)
 				{						
-					data[index++] = transColorCount;		// ���� byte�� �������� �ִ´�.
+					data[index++] = transColorCount;		// 상위 byte에 투명수를 넣는다.
 					transColorCount = 0;
 					
-					// ���ο� index�� ���� ���� �ʱ�ȭ..
-					// index���� ������ ������ ��ġ
+					// 새로운 index색 값에 대한 초기화..
+					// index색의 개수를 저장할 위치
 					indexColorCountPosition = index++;
 					indexColorCount	= 0;
 					
 					lastColorType = COLORTYPE_INDEX;
 				}
 				//--------------------------------------------------
-				// ������ ���� �������ʴ� ���� ���
+				// 이전에 것이 변하지않는 색인 경우
 				//--------------------------------------------------
 				else if (lastColorType == COLORTYPE_NORMAL)
 				{
-					// ������ �ʴ� �� ��
-					// ' (��������,indexPair�ݺ���, (index�ݺ�), ��������)) '�� �� set�� �������� �ǹ��ϹǷ�
+					// 변하지 않는 색 끝
+					// ' (투명색수,indexPair반복수, (index반복), 고정색들)) '의 한 set가 끝났음을 의미하므로
 					transPairCount++;
 					
 					data[normalColorCountPosition] = normalColorCount;
 					normalColorCount = 0;
 
-					// ������ ����.. - -;
+					// 투명색 없다.. - -;
 					data[index++] = 0;
 
-					// index���� ������ ������ ��ġ
+					// index색의 개수를 저장할 위치
 					indexColorCountPosition = index++;
 					indexColorCount	= 0;					
 
 					lastColorType = COLORTYPE_INDEX;						
 				}	
 				
-				// index�� ���� ����
+				// index색 개수 증가
 				indexColorCount++;
 
-				// index�� ����				
+				// index색 저장				
 				data[index++]	= ppIndex[i][j];
 			}
 			//--------------------------------------------------				
-			// ������ �ʴ� ���� ��� (INDEX_NULL)
+			// 변하지 않는 색인 경우 (INDEX_NULL)
 			//--------------------------------------------------
 			else //if ((ppIndex[i][j] & 0xFF)==INDEX_NULL)
 			{	
 				//--------------------------------------------------
-				// ���� ������ �������̸�..
+				// 이전 색깔이 투명색이면..
 				//--------------------------------------------------
 				if (lastColorType == COLORTYPE_TRANS)
 				{
 					data[index++] = transColorCount;
 					transColorCount = 0;
 						
-					// indexCount�� ����.
+					// indexCount는 없다.
 					data[index++] = 0;	
 						
-					// ��������� �������Ƿ� �ʱ�ȭ.
+					// 정상색깔이 나왔으므로 초기화.
 					normalColorCountPosition = index++;
 					normalColorCount = 0;
 
@@ -1035,62 +1035,62 @@ CIndexSprite::GenerateFromIndex(WORD** ppColor,
 				}
 				else
 				//--------------------------------------------------
-				// ���� ������ index���̸�..
+				// 이전 색깔이 index색이면..
 				//--------------------------------------------------
 				if (lastColorType == COLORTYPE_INDEX)
 				{
-					// ���� index������ �����ؾ��Ѵ�.
+					// 이전 index색수를 저장해야한다.
 					data[indexColorCountPosition] = indexColorCount;
 						
-					// ��������� �������Ƿ� �ʱ�ȭ.
+					// 정상색깔이 나왔으므로 초기화.
 					normalColorCountPosition = index++;
 					normalColorCount = 0;
 
 					lastColorType = COLORTYPE_NORMAL;						
 				}
 
-				data[index++] = ppColor[i][j];	// ���� ������ �����Ѵ�.
+				data[index++] = ppColor[i][j];	// 실제 색깔을 저장한다.
 				normalColorCount++;
 			}
 		}
 		
 		//--------------------------------------------------
-		// �� ���� ������ ���� �������ΰ�?
+		// 한 줄의 마지막 점이 투명색인가?
 		//--------------------------------------------------
 		if (lastColorType == COLORTYPE_TRANS)
 		{
-			// �������̸� ���ٸ� ó���� �����൵ �ɰ� ����.
+			// 투명색이면 별다른 처리를 안해줘도 될거 같다.
 		}	
 		//--------------------------------------------------
-		// ������ ���� index���� ��� - indexPair����..
+		// 마지막 점이 index색인 경우 - indexPair정리..
 		//--------------------------------------------------
 		else if (lastColorType == COLORTYPE_INDEX)
 		{		
-			// ���� index������ �����ؾ��Ѵ�.
+			// 이전 index색수를 저장해야한다.
 			data[indexColorCountPosition] = indexColorCount;
 
-			// normal���� ����.
+			// normal색은 없다.
 			data[index++] = 0;
 
-			// ' (��������,indexPair�ݺ���, (index�ݺ�), ��������)) '�� �� set�� �������� �ǹ��ϹǷ�
+			// ' (투명색수,indexPair반복수, (index반복), 고정색들)) '의 한 set가 끝났음을 의미하므로
 			transPairCount++;			
 		}
 		//--------------------------------------------------
-		// ������ ���� normal���� ���
+		// 마지막 점이 normal색인 경우
 		//--------------------------------------------------
 		else 
 		{
-			// ' (��������,indexPair�ݺ���, (index�ݺ�), ��������)) '�� �� set�� �������� �ǹ��ϹǷ�
+			// ' (투명색수,indexPair반복수, (index반복), 고정색들)) '의 한 set가 끝났음을 의미하므로
 			data[normalColorCountPosition] = normalColorCount;	
 
 			transPairCount++;		
 		}
 
-		// memory�� ��´�.
+		// memory를 잡는다.
 		m_Pixels[i] = new WORD [index+1];
 
-		// m_Pixels[i]�� ���������Ƿ� data�� ��ü�Ѵ�.
-		// m_Pixels[i][0]���� count�� �־�� �Ѵ�.
+		// m_Pixels[i]를 압축했으므로 data로 대체한다.
+		// m_Pixels[i][0]에는 count를 넣어야 한다.
 		m_Pixels[i][0] = transPairCount;
 		memcpy(m_Pixels[i]+1, data, index<<1);
 
@@ -1133,49 +1133,49 @@ CIndexSprite::GenerateFromIndex(WORD** ppColor,
 // Generate Index (Old version)
 //-----------------------------------------------------------------------------
 // 
-// ppColor���� width*height��ŭ�� ���� �о Sprite�� ����µ�..
-// ������ ���൵ �ؾ��ϰ�...
-// Index Array�� ������ �����ؾ��Ѵ�.
+// ppColor에서 width*height만큼의 점을 읽어서 Sprite를 만드는데..
+// 투명색 압축도 해야하고...
+// Index Array의 정보도 참조해야한다.
 //
 //-----------------------------------------------------------------------------
-// - ���������� ������ ������ ����Ѵ�.
-// - IndexSet�� Gradation���򺰷� ����(?)�Ѵ�. (ȿ���� ���� ���� �� �ϴ�)
+// - 내부적으로 투명색 압축을 사용한다.
+// - IndexSet의 Gradation색깔별로 압축(?)한다. (효율은 높지 않을 듯 하다)
 //
 //
-// [ �� ���� ���� ]
+// [ 한 줄의 정보 ]
 //
-// (����Pair�ݺ���) 
-//    ( (��������, IndexPair�ݺ���, 
-//                 (index����, indexSet��ȣ, gradation��ȣ), 
-//                 (index����, indexSet��ȣ, gradation��ȣ), 
+// (투명Pair반복수) 
+//    ( (투명색수, IndexPair반복수, 
+//                 (index색수, indexSet번호, gradation번호), 
+//                 (index색수, indexSet번호, gradation번호), 
 //                              .     
 //                              .     
 //                              .     
-//        �����Ȼ����, �����Ȼ����)
-//       (��������, IndexPair�ݺ���, 
-//                 (index����, indexSet��ȣ, gradation��ȣ), 
-//                 (index����, indexSet��ȣ, gradation��ȣ), 
+//        고정된색깔수, 고정된색깔들)
+//       (투명색수, IndexPair반복수, 
+//                 (index색수, indexSet번호, gradation번호), 
+//                 (index색수, indexSet번호, gradation번호), 
 //                              .     
 //                              .     
 //                              .     
-//        �����Ȼ����, �����Ȼ����)
+//        고정된색깔수, 고정된색깔들)
 //    )
 //
-// WORD : �������� 
-// WORD : ��Pair�ݺ���
-// WORD : index����
-// WORD : indexSet��ȣ | gradation��ȣ --> BYTE | BYTE
-// WORD : �����Ȼ����
-// WORD*: �����Ȼ����
+// WORD : 투명색수 
+// WORD : 색Pair반복수
+// WORD : index색수
+// WORD : indexSet번호 | gradation번호 --> BYTE | BYTE
+// WORD : 고정된색깔수
+// WORD*: 고정된색깔들
 //
-// �������� Gradation Index���� ������ ���� �����Ѵ�.
+// 투명색과 Gradation Index값과 색깔값을 같이 저장한다.
 //-----------------------------------------------------------------------------
-// ppIndex���� �� 2byte�� 
-// ((IndexSet��ȣ<<8) | Gradation��ȣ)�� ����Ǿ� �־�� �Ѵ�.
+// ppIndex에는 각 2byte에 
+// ((IndexSet번호<<8) | Gradation번호)가 저장되어 있어야 한다.
 //-----------------------------------------------------------------------------
-// Index�� �˻��ϸ鼭.. 
-// �������� ���� ������ counter����..
-// �ƴϸ�.. IndexSet���� ���� Gradation���� ����..
+// Index를 검색하면서.. 
+// 투명색인 경우는 투명색 counter증가..
+// 아니면.. IndexSet별로 같은 Gradation끼리 압축..
 //-----------------------------------------------------------------------------
 /*
 void			
@@ -1183,35 +1183,35 @@ CIndexSprite::GenerateFromIndex(WORD** ppColor,
 								WORD width, WORD height,
 								WORD** ppIndex)
 {
-	// memory����
+	// memory해제
 	Release();
 
 	m_Width = width;
 	m_Height = height;
 
-	// �ϴ� memory�� ������ ��Ƶд�.	
+	// 일단 memory를 적당히 잡아둔다.	
 	WORD*	data = new WORD[m_Width*8];
 
-	WORD	index;				// data�� index�� ���
+	WORD	index;				// data의 index로 사용
 			
-	WORD	transPairCount,					// ����Pair ����
-			transColorCount,				// ������ ����
-			indexColorPairCount,			// IndexPair����
-			indexColorCount,				// Index�� ����
-			normalColorCount;				// NormalColor ����
+	WORD	transPairCount,					// 투명Pair 개수
+			transColorCount,				// 투명색 개수
+			indexColorPairCount,			// IndexPair개수
+			indexColorCount,				// Index색 개수
+			normalColorCount;				// NormalColor 개수
 
-	WORD	indexColorPairCountPosition,	// IndexPair���� ���� ��ġ
-			indexColorCountPosition,		// IndexColor���� ���� ��ġ
-			normalColorCountPosition;		// NormalColor���� ���� ��ġ
+	WORD	indexColorPairCountPosition,	// IndexPair개수 저장 위치
+			indexColorCountPosition,		// IndexColor개수 저장 위치
+			normalColorCountPosition;		// NormalColor개수 저장 위치
 
 	enum	COLORTYPE { COLORTYPE_TRANS, COLORTYPE_INDEX, COLORTYPE_NORMAL }
-			lastColorType;			// �ֱٿ� �˻��� ���� ����
+			lastColorType;			// 최근에 검사한 색의 종류
 								
-	BYTE	lastIndexSet;		// �ֱٿ� �˻��� IndexSet
-	BYTE	lastIndexColor;		// �ֱٿ� �˻��� IndexGradation
+	BYTE	lastIndexSet;		// 최근에 검사한 IndexSet
+	BYTE	lastIndexColor;		// 최근에 검사한 IndexGradation
 
 
-	// height�� ��ŭ memory���
+	// height줄 만큼 memory잡기
 	m_Pixels = new WORD* [height];
 
 
@@ -1227,32 +1227,32 @@ CIndexSprite::GenerateFromIndex(WORD** ppColor,
 		lastColorType = COLORTYPE_TRANS;
 
 		//------------------------------------------------------------
-		// �� line�� ���ؼ� ����~
+		// 각 line에 대해서 압축~
 		//------------------------------------------------------------
 		for (register int  j=0; j<width; j++)
 		{
 			//--------------------------------------------------
-			// Index�� �������� ���
+			// Index가 투명색인 경우
 			//--------------------------------------------------
 			if ((ppIndex[i][j] & 0xFF)==INDEX_TRANS)
 			{
 				//--------------------------------------------------
-				// �ֱٿ� �˻��Ѱ� index���̾��ٸ�,
+				// 최근에 검사한게 index색이었다면,
 				//--------------------------------------------------
 				if (lastColorType == COLORTYPE_INDEX)
 				{
-					// ���� index������ �����ؾ��Ѵ�.
+					// 이전 index색수를 저장해야한다.
 					data[indexColorCountPosition] = indexColorCount;
 
-					// indexPair���� �ϳ� ����
+					// indexPair개수 하나 증가
 					indexColorPairCount++;
 
-					// indexPair�� ��� �������Ƿ�.. �����ؾ��Ѵ�.
+					// indexPair가 모두 끝났으므로.. 저장해야한다.
 					data[indexColorPairCountPosition] = indexColorPairCount;
 					indexColorPairCount = 0;
 
-					// ' (��������,��Pair�ݺ���, (��Pair��....)) '�� �� set�� �������� �ǹ��ϹǷ�
-					// normal�� ���� 0�����ؼ� �����Ѵ�.
+					// ' (투명색수,색Pair반복수, (색Pair들....)) '의 한 set가 끝났음을 의미하므로
+					// normal색 수는 0으로해서 저장한다.
 					transPairCount++;
 					
 					data[index++] = 0;					
@@ -1261,11 +1261,11 @@ CIndexSprite::GenerateFromIndex(WORD** ppColor,
 					lastColorType = COLORTYPE_TRANS;
 				}
 				//--------------------------------------------------
-				// �ֱٿ� �˻��Ѱ� normal���̾��ٸ�
+				// 최근에 검사한게 normal색이었다면
 				//--------------------------------------------------
 				else if (lastColorType == COLORTYPE_NORMAL)
 				{
-					// ' (��������,indexPair�ݺ���, (index�ݺ�), ��������)) '�� �� set�� �������� �ǹ��ϹǷ�
+					// ' (투명색수,indexPair반복수, (index반복), 고정색들)) '의 한 set가 끝났음을 의미하므로
 					transPairCount++;
 					
 					data[normalColorCountPosition] = normalColorCount;
@@ -1279,124 +1279,124 @@ CIndexSprite::GenerateFromIndex(WORD** ppColor,
 				transColorCount++;				
 			}		
 			//--------------------------------------------------				
-			// Index ���� ���...
+			// Index 색인 경우...
 			//--------------------------------------------------
 			else if ((ppIndex[i][j] & 0xFF)!=INDEX_NULL)
 			{
 				//--------------------------------------------------
-				// ������ ���� �������̾��ٸ�..
+				// 이전의 것이 투명색이었다면..
 				//--------------------------------------------------
 				if (lastColorType == COLORTYPE_TRANS)
 				{						
-					data[index++] = transColorCount;		// ���� byte�� �������� �ִ´�.
+					data[index++] = transColorCount;		// 상위 byte에 투명수를 넣는다.
 					transColorCount = 0;
 					
-					// ������ [IndexPair����]�� ���� ��ġ�� ���
+					// 다음에 [IndexPair개수]를 넣을 위치를 기억
 					indexColorPairCountPosition = index++;
-					indexColorPairCount = 0;		// index����
+					indexColorPairCount = 0;		// index색수
 
-					// ���ο� index�� ���� ���� �ʱ�ȭ..
-					// index���� ������ ������ ��ġ
+					// 새로운 index색 값에 대한 초기화..
+					// index색의 개수를 저장할 위치
 					indexColorCountPosition = index++;
 					indexColorCount	= 1;
 
-					// index���� ó�� �����Ƿ�.. �ʱ�ȭ..
+					// index색이 처음 나오므로.. 초기화..
 					lastIndexSet	= (ppIndex[i][j]>>8) & 0xFF;
 					lastIndexColor	= ppIndex[i][j] & 0xFF;	
 
-					// ����
+					// 저장
 					data[index++]	= (lastIndexSet<<8) | lastIndexColor;
 					
 					lastColorType = COLORTYPE_INDEX;
 				}
 				//--------------------------------------------------
-				// ������ ���� �������ʴ� ���� ���
+				// 이전에 것이 변하지않는 색인 경우
 				//--------------------------------------------------
 				else if (lastColorType == COLORTYPE_NORMAL)
 				{
-					// ������ �ʴ� �� ��
-					// ' (��������,indexPair�ݺ���, (index�ݺ�), ��������)) '�� �� set�� �������� �ǹ��ϹǷ�
+					// 변하지 않는 색 끝
+					// ' (투명색수,indexPair반복수, (index반복), 고정색들)) '의 한 set가 끝났음을 의미하므로
 					transPairCount++;
 					
 					data[normalColorCountPosition] = normalColorCount;
 					normalColorCount = 0;
 
-					// ������ ����.. - -;
+					// 투명색 없다.. - -;
 					data[index++] = 0;
 
-					// ������ [IndexPair����]�� ���� ��ġ�� ���
+					// 다음에 [IndexPair개수]를 넣을 위치를 기억
 					indexColorPairCountPosition = index++;
-					indexColorPairCount = 0;		// index����
+					indexColorPairCount = 0;		// index색수
 
-					// index���� ������ ������ ��ġ
+					// index색의 개수를 저장할 위치
 					indexColorCountPosition = index++;
 					indexColorCount	= 1;
 
-					// index���� ó�� �����Ƿ�.. �ʱ�ȭ..
+					// index색이 처음 나오므로.. 초기화..
 					lastIndexSet	= (ppIndex[i][j]>>8) & 0xFF;
 					lastIndexColor	= ppIndex[i][j] & 0xFF;
 
-					// ����
+					// 저장
 					data[index++]	= (lastIndexSet<<8) | lastIndexColor;
 
 					lastColorType = COLORTYPE_INDEX;						
 				}	
 				//--------------------------------------------------
-				// ������ ���� index���� ���
+				// 이전에 것이 index색인 경우
 				//--------------------------------------------------
 				else 			
 				{
 					//--------------------------------------------------
-					// ���� index���̶� Set���� Gradation���� ���� ���
+					// 이전 index색이랑 Set값과 Gradation값이 같은 경우
 					//--------------------------------------------------
 					if (lastIndexSet == ((ppIndex[i][j]>>8) & 0xFF)
 						&& lastIndexColor == (ppIndex[i][j] & 0xFF))
 					{
-						// ���� index���̹Ƿ� count����
+						// 같은 index색이므로 count증가
 						indexColorCount++;
 					}
 					//--------------------------------------------------
-					// �ٸ� index���� ��Ÿ����.
+					// 다른 index색이 나타난다.
 					//--------------------------------------------------
 					else
 					{	
-						// ���� index������ �����ؾ��Ѵ�.
+						// 이전 index색수를 저장해야한다.
 						data[indexColorCountPosition] = indexColorCount;						
 
-						// indexPair���� �ϳ� ����
+						// indexPair개수 하나 증가
 						indexColorPairCount++;
 
-						// ���ο� index�� ���� ���� �ʱ�ȭ..
-						// index���� ������ ������ ��ġ
+						// 새로운 index색 값에 대한 초기화..
+						// index색의 개수를 저장할 위치
 						indexColorCountPosition = index++;
 						indexColorCount	= 1;
 
-						// index���� ó�� �����Ƿ�.. �ʱ�ȭ..
+						// index색이 처음 나오므로.. 초기화..
 						lastIndexSet	= (ppIndex[i][j]>>8) & 0xFF;
 						lastIndexColor	= ppIndex[i][j] & 0xFF;	
 
-						// ����
+						// 저장
 						data[index++]	= (lastIndexSet<<8) | lastIndexColor;
 					}							
 				}
 			}
 			//--------------------------------------------------				
-			// ������ �ʴ� ���� ��� (INDEX_NULL)
+			// 변하지 않는 색인 경우 (INDEX_NULL)
 			//--------------------------------------------------
 			else //if ((ppIndex[i][j] & 0xFF)==INDEX_NULL)
 			{	
 				//--------------------------------------------------
-				// ���� ������ �������̸�..
+				// 이전 색깔이 투명색이면..
 				//--------------------------------------------------
 				if (lastColorType == COLORTYPE_TRANS)
 				{
 					data[index++] = transColorCount;
 					transColorCount = 0;
 						
-					// indexPair�� ����.
+					// indexPair는 없다.
 					data[index++] = 0;	
 						
-					// ��������� �������Ƿ� �ʱ�ȭ.
+					// 정상색깔이 나왔으므로 초기화.
 					normalColorCountPosition = index++;
 					normalColorCount = 0;
 
@@ -1404,77 +1404,77 @@ CIndexSprite::GenerateFromIndex(WORD** ppColor,
 				}
 				else
 				//--------------------------------------------------
-				// ���� ������ index���̸�..
+				// 이전 색깔이 index색이면..
 				//--------------------------------------------------
 				if (lastColorType == COLORTYPE_INDEX)
 				{
-					// ���� index������ �����ؾ��Ѵ�.
+					// 이전 index색수를 저장해야한다.
 					data[indexColorCountPosition] = indexColorCount;
 
-					// indexPair���� �ϳ� ����
+					// indexPair개수 하나 증가
 					indexColorPairCount++;
 
-					// indexPair�� ��� �������Ƿ�.. �����ؾ��Ѵ�.
+					// indexPair가 모두 끝났으므로.. 저장해야한다.
 					data[indexColorPairCountPosition] = indexColorPairCount;
 					indexColorPairCount = 0;
 
 						
-					// ��������� �������Ƿ� �ʱ�ȭ.
+					// 정상색깔이 나왔으므로 초기화.
 					normalColorCountPosition = index++;
 					normalColorCount = 0;
 
 					lastColorType = COLORTYPE_NORMAL;						
 				}
 
-				data[index++] = ppColor[i][j];	// ���� ������ �����Ѵ�.
+				data[index++] = ppColor[i][j];	// 실제 색깔을 저장한다.
 				normalColorCount++;
 			}
 		}
 		
 		//--------------------------------------------------
-		// �� ���� ������ ���� �������ΰ�?
+		// 한 줄의 마지막 점이 투명색인가?
 		//--------------------------------------------------
 		if (lastColorType == COLORTYPE_TRANS)
 		{
-			// �������̸� ���ٸ� ó���� �����൵ �ɰ� ����.
+			// 투명색이면 별다른 처리를 안해줘도 될거 같다.
 		}	
 		//--------------------------------------------------
-		// ������ ���� index���� ��� - indexPair����..
+		// 마지막 점이 index색인 경우 - indexPair정리..
 		//--------------------------------------------------
 		else if (lastColorType == COLORTYPE_INDEX)
 		{		
-			// ���� index������ �����ؾ��Ѵ�.
+			// 이전 index색수를 저장해야한다.
 			data[indexColorCountPosition] = indexColorCount;
 
-			// indexPair���� �ϳ� ����
+			// indexPair개수 하나 증가
 			indexColorPairCount++;
 
-			// indexPair�� ��� �������Ƿ�.. �����ؾ��Ѵ�.
+			// indexPair가 모두 끝났으므로.. 저장해야한다.
 			data[indexColorPairCountPosition] = indexColorPairCount;
 			indexColorPairCount = 0;
 
-			// normal���� ����.
+			// normal색은 없다.
 			data[index++] = 0;
 
-			// ' (��������,indexPair�ݺ���, (index�ݺ�), ��������)) '�� �� set�� �������� �ǹ��ϹǷ�
+			// ' (투명색수,indexPair반복수, (index반복), 고정색들)) '의 한 set가 끝났음을 의미하므로
 			transPairCount++;			
 		}
 		//--------------------------------------------------
-		// ������ ���� normal���� ���
+		// 마지막 점이 normal색인 경우
 		//--------------------------------------------------
 		else 
 		{
-			// ' (��������,indexPair�ݺ���, (index�ݺ�), ��������)) '�� �� set�� �������� �ǹ��ϹǷ�
+			// ' (투명색수,indexPair반복수, (index반복), 고정색들)) '의 한 set가 끝났음을 의미하므로
 			data[normalColorCountPosition] = normalColorCount;	
 
 			transPairCount++;		
 		}
 
-		// memory�� ��´�.
+		// memory를 잡는다.
 		m_Pixels[i] = new WORD [index+1];
 
-		// m_Pixels[i]�� ���������Ƿ� data�� ��ü�Ѵ�.
-		// m_Pixels[i][0]���� count�� �־�� �Ѵ�.
+		// m_Pixels[i]를 압축했으므로 data로 대체한다.
+		// m_Pixels[i][0]에는 count를 넣어야 한다.
 		m_Pixels[i][0] = transPairCount;
 		memcpy(m_Pixels[i]+1, data, index<<1);
 
@@ -1515,8 +1515,8 @@ CIndexSprite::GenerateFromIndex(WORD** ppColor,
 //-----------------------------------------------------------------------------
 // Get IndexInfo
 //-----------------------------------------------------------------------------
-// ���� ����� m_Pixels�� ������ IndexInfo�� �����ؾ� �Ѵ�.
-// ppIndex���� ��� INDEX_TRANS���� �� �ִٰ� �����Ѵ�.
+// 현재 저장된 m_Pixels의 값으로 IndexInfo를 생성해야 한다.
+// ppIndex에는 모두 INDEX_TRANS값이 들어가 있다고 가정한다.
 //-----------------------------------------------------------------------------
 void			
 CIndexSprite::GetIndexInfo(WORD**& ppIndex)
@@ -1541,18 +1541,18 @@ CIndexSprite::GetIndexInfo(WORD**& ppIndex)
 		pPixels	= m_Pixels[i];
 		pDest	= ppIndex[i];
 
-		// (������,Index�ݺ�,�����)�� �ݺ� ��		
+		// (투명수,Index반복,색깔들)의 반복 수		
 		transPair	= *pPixels++;
 		
- 		// �� �� ���
+ 		// 한 줄 출력
 		if (transPair > 0)
 		{
 			j = transPair;
 			do {		
-				pDest += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-				indexCount = *pPixels++;		// Index�ݺ� ��
+				pDest += *pPixels++;	// 투명색만큼 건너 뛴다.
+				indexCount = *pPixels++;		// Index반복 수
 
-				// indexCount����ŭ index������ ����Ѵ�.
+				// indexCount수만큼 index색들을 출력한다.
 				if (indexCount > 0)
 				{
 					k = indexCount;
@@ -1568,10 +1568,10 @@ CIndexSprite::GetIndexInfo(WORD**& ppIndex)
 					} while (--k);
 				}
 
-				// Normal ���� ��
+				// Normal 색깔 수
 				colorCount = *pPixels++;
 				
-				// Normal ���� ����ŭ INDEX_NULL�� ���.
+				// Normal 색깔 수만큼 INDEX_NULL을 출력.
 				for (l=0; l<colorCount; l++)
 				{					
 					*pDest++ = (INDEXSET_NULL<<8) | INDEX_NULL;
@@ -1586,29 +1586,29 @@ CIndexSprite::GetIndexInfo(WORD**& ppIndex)
 //----------------------------------------------------------------------
 // Is ColorPixel ?
 //----------------------------------------------------------------------
-// Sprite�ȿ��� (x,y)�� ������ �ִ°�?(�������� �ƴ� ���)
+// Sprite안에서 (x,y)는 색깔이 있는가?(투명색이 아닌 경우)
 //----------------------------------------------------------------------
 bool		
 CIndexSprite::IsColorPixel(short x, short y)
 {
-	// �ʱ�ȭ �� ���
+	// 초기화 된 경우
 	if (m_bInit)
 	{	
-		// Sprite�� ������ ����� false
+		// Sprite의 영역을 벗어나면 false
 		if (x<0 || y<0 || x>=m_Width || y>=m_Height)
 			return false;
 
-		// y��° ��
+		// y번째 줄
 		WORD	*pPixels = m_Pixels[y];
 
-		// y��° ���� �ݺ� ��
+		// y번째 줄의 반복 수
 		int	count = *pPixels++;
 
 		int	index = 0;
 
-		//    ( (��������, Index����, 
-		//                 (indexSet��ȣ, gradation��ȣ), 
-		//                 (indexSet��ȣ, gradation��ȣ), 
+		//    ( (투명색수, Index색수, 
+		//                 (indexSet번호, gradation번호), 
+		//                 (indexSet번호, gradation번호), 
 
 		register int i;
 
@@ -1618,31 +1618,31 @@ CIndexSprite::IsColorPixel(short x, short y)
 			do {
 				index += *pPixels++;
 
-				// �������������� ���� ���
+				// 투명색까지보다 적은 경우
 				if (x < index)
 				{
 					return false;
 				}
 
-				// index������ŭ ����		
+				// index색수만큼 증가		
 				index += *pPixels;
 
-				// index�� ������ŭ ����.
+				// index색 정보만큼 증가.
 				pPixels += *pPixels;
 
 				pPixels++;
 
 
-				// ������ �������ŭ ����
+				// 고정된 색깔수만큼 증가
 				index += *pPixels;
 
-				// ������ ������ŭ ����.
+				// 고정색 정보만큼 증가.
 				pPixels += *pPixels;
 
 				pPixels++;
 
 
-				// index+�������������� ���� ���
+				// index+고정색까지보다 적은 경우
 				if (x < index)
 				{
 					return true;
@@ -1657,29 +1657,29 @@ CIndexSprite::IsColorPixel(short x, short y)
 //----------------------------------------------------------------------
 // Get Pixel ?
 //----------------------------------------------------------------------
-// Sprite�ȿ��� (x,y)�� ������ ��´�.(�������� �ƴ� ���)
+// Sprite안에서 (x,y)는 색깔을 얻는다.(투명색이 아닌 경우)
 //----------------------------------------------------------------------
 WORD		
 CIndexSprite::GetPixel(int x, int y) const
 {
-	// �ʱ�ȭ �� ���
+	// 초기화 된 경우
 	if (m_bInit)
 	{	
-		// Sprite�� ������ ����� false
+		// Sprite의 영역을 벗어나면 false
 		if (x<0 || y<0 || x>=m_Width || y>=m_Height)
 			return 0;
 
-		// y��° ��
+		// y번째 줄
 		WORD	*pPixels = m_Pixels[y];
 
-		// y��° ���� �ݺ� ��
+		// y번째 줄의 반복 수
 		int	count = *pPixels++;
 
 		int	index = 0;
 
-		//    ( (��������, Index����, 
-		//                 (indexSet��ȣ, gradation��ȣ), 
-		//                 (indexSet��ȣ, gradation��ȣ), 
+		//    ( (투명색수, Index색수, 
+		//                 (indexSet번호, gradation번호), 
+		//                 (indexSet번호, gradation번호), 
 
 		register int i;
 
@@ -1689,36 +1689,36 @@ CIndexSprite::GetPixel(int x, int y) const
 			do {
 				index += *pPixels++;
 
-				// �������������� ���� ���
+				// 투명색까지보다 적은 경우
 				if (x < index)
 				{
 					return 0;
 				}
 
-				// index������ŭ ����		
+				// index색수만큼 증가		
 				index += *pPixels;
 
-				// index�� ������ŭ ����.
+				// index색 정보만큼 증가.
 				pPixels += *pPixels;
 
 				pPixels++;
 
 
-				// ������ �������ŭ ����
+				// 고정된 색깔수만큼 증가
 				index += *pPixels;
 
-				// ������ ������ŭ ����.
+				// 고정색 정보만큼 증가.
 				pPixels += *pPixels;
 
 				pPixels++;
 
 
-				// index+�������������� ���� ���
+				// index+고정색까지보다 적은 경우
 				if (x < index)
 				{
 					// [ TEST CODE ]
-					// ���� �ϼ��Ȱ� �ƴϴ�.
-					// ������ IndexColor�� �����ؼ� ���� �Ѱ���� �Ѵ�?
+					// 아직 완성된게 아니다.
+					// 현재의 IndexColor를 참조해서 색을 넘겨줘야 한다?
 					return pPixels[x-index];
 				}
 			} while (--i);
@@ -1734,11 +1734,11 @@ CIndexSprite::GetPixel(int x, int y) const
 // s_Value1 - Main Color
 // s_Value2 - Sub Color
 //-----------------------------------------------------------------------------
-//    ( (��������, Index����, 
-//                 (indexSet��ȣ, gradation��ȣ), 
-//                 (indexSet��ȣ, gradation��ȣ), 
+//    ( (투명색수, Index색수, 
+//                 (indexSet번호, gradation번호), 
+//                 (indexSet번호, gradation번호), 
 //-----------------------------------------------------------------------------
-// Clipping���� �ʴ´�.
+// Clipping하지 않는다.
 //-----------------------------------------------------------------------------
 void
 CIndexSprite::Blt(WORD *pDest, WORD pitch)
@@ -1770,20 +1770,20 @@ CIndexSprite::Blt(WORD *pDest, WORD pitch)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,Index��,�����)�� �ݺ� ��		
+			// (투명수,Index색,색깔들)의 반복 수		
 			transPair	= *pPixels++;
 			
- 			// �� �� ���		
+ 			// 한 줄 출력		
 			if (transPair > 0)
 			{
 				j = transPair;
 				do
 				{
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	// 투명색만큼 건너 뛴다.
+					indexCount = *pPixels++;	// Index반복 수
 
-					// indexCount����ŭ index������ ����Ѵ�.
-					// �� �� ���		
+					// indexCount수만큼 index색들을 출력한다.
+					// 한 줄 출력		
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -1793,13 +1793,13 @@ CIndexSprite::Blt(WORD *pDest, WORD pitch)
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 							
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.
+							// s_IndexValue와 관련된 색을 선택해서 출력한다.
 							*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 							pDestTemp ++;
 						} while (--k);
 					}
 
-					// Normal ���� ��
+					// Normal 색깔 수
 					colorCount = *pPixels++;
 					
 					memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
@@ -1820,12 +1820,12 @@ CIndexSprite::Blt(WORD *pDest, WORD pitch)
 // s_Value1 - Main Color
 // s_Value2 - Sub Color
 //-----------------------------------------------------------------------------
-//    ( (��������, Index����, 
-//                 (indexSet��ȣ, gradation��ȣ), 
-//                 (indexSet��ȣ, gradation��ȣ), 
+//    ( (투명색수, Index색수, 
+//                 (indexSet번호, gradation번호), 
+//                 (indexSet번호, gradation번호), 
 //-----------------------------------------------------------------------------
-// ���� clipping.  
-// rectLeft���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
+// 왼쪽 clipping.  
+// rectLeft개의 점을 건너띈 다음부터 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CIndexSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
@@ -1834,7 +1834,7 @@ CIndexSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -1853,51 +1853,51 @@ CIndexSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 	int rectLeft = pRect->left;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	for (int i=pRect->top; i<rectBottom; i++)
 	{
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------		
 		if (count > 0)
 		{
 			j = count;
 			do
 			{
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				indexCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;			
 			
 				//---------------------------------------------
-				// index�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				// index색까지하면 xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+indexCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// index�� ��� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						// index색 모두 출력
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -1907,13 +1907,13 @@ CIndexSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						// Normal 색 모두 출력
 						colorCount = *pPixels++;
 						
 						memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
@@ -1921,22 +1921,22 @@ CIndexSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;					
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���, index�Ϻ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우, index일부 출력
 					//---------------------------------------------
 					else
 					{					
-						dist = rectLeft - index;		// ���ʿ��� skip�Ǵ� ���� ��
+						dist = rectLeft - index;		// 왼쪽에서 skip되는 점들 수
 						
 						pPixels += dist;
 						indexCount -= dist;
 						
-						// index�� �Ϻ� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						// index색 일부 출력
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -1946,13 +1946,13 @@ CIndexSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						// Normal 색 모두 출력
 						colorCount = *pPixels++;
 						
 						memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
@@ -1960,55 +1960,55 @@ CIndexSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}		
 
 				
-				// index������ŭ index����
+				// index색수만큼 index증가
 				index += indexCount;
 
-				// index����ŭ skip
+				// index색깔만큼 skip
 				pPixels += indexCount;
 
-				// normal ���� ��
+				// normal 색깔 수
 				colorCount = *pPixels++;			
 				
 				//---------------------------------------------
-				// index�������ؼ��� xxxx������ �� �Ѿ��..
-				// normal�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				// index색까지해서는 xxxx범위를 안 넘어가고..
+				// normal색까지하면 xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					dist = rectLeft - index;				
 					colorCount2 = colorCount - dist;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					memcpy(pDestTemp, pPixels+dist, colorCount2<<1);					
 					pDestTemp += colorCount2;
 					pPixels += colorCount;
 
-					// �������ʹ� ��� ����Ѵ�.
+					// 이제부터는 계속 출력한다.
 					break;			
 				}		
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			// 이제부터는 계속 출력한다.		
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do {
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	// 투명색만큼 건너 뛴다.
+					indexCount = *pPixels++;	// Index반복 수
 
-					// indexCount����ŭ index������ ����Ѵ�.
+					// indexCount수만큼 index색들을 출력한다.
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -2018,13 +2018,13 @@ CIndexSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 							*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 							pDestTemp ++;
 						} while (--k);
 					}
 
-					// Normal ���� ��
+					// Normal 색깔 수
 					colorCount = *pPixels++;
 					
 					memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
@@ -2044,8 +2044,8 @@ CIndexSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // Blt ClipRight
 //----------------------------------------------------------------------
-// ������ clipping.  
-// rectRight�� ������ ���� pDest�� ����Ѵ�.
+// 오른쪽 clipping.  
+// rectRight개 까지의 점만 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CIndexSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
@@ -2054,7 +2054,7 @@ CIndexSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -2076,52 +2076,52 @@ CIndexSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		// 각 줄마다 Clipping을 해줘야 하는데...		
+		// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				indexCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����
+				// 투명색만큼 index증가
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+				// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 				//---------------------------------------------
-				// index������ ������ ������ �������� ���
+				// index색까지 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+indexCount > rectRight)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					// 투명색만으로 더 출력할 필요가 없을 때
 					if (index > rectRight)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					// 투명색 아닌 것을 조금 출력해야 할 경우
 					else
 					{
 						pDestTemp += transCount;
 
-						// ���������� skip�Ǵ� ������ ���ش�.
+						// 오른쪽으로 skip되는 점들을 빼준다.
 						indexCount = rectRight - index;
 
-						// indexCount����ŭ index������ ����Ѵ�.
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -2130,7 +2130,7 @@ CIndexSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
@@ -2140,13 +2140,13 @@ CIndexSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				// 투명색만큼 건너띄고
 				pDestTemp += transCount;
 
 				//-------------------------
-				// index�� ��� ���
+				// index색 모두 출력
 				//-------------------------
-				// indexCount����ŭ index������ ����Ѵ�.
+				// indexCount수만큼 index색들을 출력한다.
 				if (indexCount > 0)
 				{
 					k = indexCount;
@@ -2155,30 +2155,30 @@ CIndexSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 						colorGradation	= (*pPixels & 0xFF);			// gradation
 						pPixels++;
 
-						// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+						// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 						*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 						pDestTemp ++;
 					} while (--k);
 				}		
-				// ����� indexCount��ŭ index����
+				// 출력한 indexCount만큼 index증가
 				index += indexCount;
 				
 
-				// Normal ���� ��
+				// Normal 색깔 수
 				colorCount = *pPixels++;
 
 				//---------------------------------------------
-				// normal������ ������ ������ �������� ���
+				// normal색까지 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+colorCount > rectRight)
 				{
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					memcpy(pDestTemp, pPixels, (rectRight - index)<<1);
 					break;			
 				}			
 				
 				//--------------------
-				// normal�� ��� ���
+				// normal색 모두 출력
 				//--------------------
 				memcpy(pDestTemp, pPixels, colorCount<<1);
 
@@ -2198,13 +2198,13 @@ CIndexSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 // s_Value1 - Main Color
 // s_Value2 - Sub Color
 //-----------------------------------------------------------------------------
-//    ( (��������, Index����, 
-//                 (indexSet��ȣ, gradation��ȣ), 
-//                 (indexSet��ȣ, gradation��ȣ), 
+//    ( (투명색수, Index색수, 
+//                 (indexSet번호, gradation번호), 
+//                 (indexSet번호, gradation번호), 
 //-----------------------------------------------------------------------------
-// ���� clipping.  
-// rectLeft���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
-// rectRight����..
+// 왼쪽 clipping.  
+// rectLeft개의 점을 건너띈 다음부터 pDest에 출력한다.
+// rectRight까지..
 //----------------------------------------------------------------------
 void
 CIndexSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
@@ -2213,7 +2213,7 @@ CIndexSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -2230,7 +2230,7 @@ CIndexSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 	int colorSet, colorGradation;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -2240,43 +2240,43 @@ CIndexSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {		
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				indexCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;			
 			
 				//---------------------------------------------
-				// index�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				// index색까지하면 xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+indexCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// index�� ��� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						// index색 모두 출력
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -2285,13 +2285,13 @@ CIndexSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						// Normal 색 모두 출력
 						colorCount = *pPixels++;
 						
 						memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
@@ -2299,22 +2299,22 @@ CIndexSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;					
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���, index�Ϻ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우, index일부 출력
 					//---------------------------------------------
 					else
 					{					
-						dist = rectLeft - index;		// ���ʿ��� skip�Ǵ� ���� ��
+						dist = rectLeft - index;		// 왼쪽에서 skip되는 점들 수
 						
 						pPixels += dist;
 						indexCount -= dist;
 						
-						// index�� �Ϻ� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						// index색 일부 출력
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -2323,13 +2323,13 @@ CIndexSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						// Normal 색 모두 출력
 						colorCount = *pPixels++;
 						
 						memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
@@ -2338,85 +2338,85 @@ CIndexSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 						pPixels		+= colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}		
 
 				
-				// index������ŭ index����
+				// index색수만큼 index증가
 				index += indexCount;
 
-				// index����ŭ skip
+				// index색깔만큼 skip
 				pPixels += indexCount;
 
-				// normal ���� ��
+				// normal 색깔 수
 				colorCount = *pPixels++;			
 				
 				//---------------------------------------------
-				// index�������ؼ��� xxxx������ �� �Ѿ��..
-				// normal�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				// index색까지해서는 xxxx범위를 안 넘어가고..
+				// normal색까지하면 xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					dist = rectLeft - index;				
 					colorCount2 = colorCount - dist;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					memcpy(pDestTemp, pPixels+dist, colorCount2<<1);					
 					pDestTemp += colorCount2;
 					pPixels += colorCount;
 					index += colorCount;
 
-					// �������ʹ� ��� ����Ѵ�.
+					// 이제부터는 계속 출력한다.
 					break;			
 				}		
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			// 각 줄마다 Clipping을 해줘야 하는데...		
+			// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 			//---------------------------------------------
 			if (--j > 0)		
 			{
 				do {
-					transCount = *pPixels++;		// ������ ��			
-					indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					indexCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����
+					// 투명색만큼 index증가
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 					//---------------------------------------------
-					// index������ ������ ������ �������� ���
+					// index색까지 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+indexCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						// 투명색만으로 더 출력할 필요가 없을 때
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						// 투명색 아닌 것을 조금 출력해야 할 경우
 						else
 						{
 							pDestTemp += transCount;
 
-							// ���������� skip�Ǵ� ������ ���ش�.
+							// 오른쪽으로 skip되는 점들을 빼준다.
 							indexCount = rectRight - index;
 
-							// indexCount����ŭ index������ ����Ѵ�.
+							// indexCount수만큼 index색들을 출력한다.
 							if (indexCount > 0)
 							{
 								k = indexCount;
@@ -2425,7 +2425,7 @@ CIndexSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 									colorGradation	= (*pPixels & 0xFF);			// gradation
 									pPixels++;
 
-									// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+									// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 									*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 									pDestTemp ++;
 								} while (--k);
@@ -2435,13 +2435,13 @@ CIndexSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					// 투명색만큼 건너띄고
 					pDestTemp += transCount;
 
 					//-------------------------
-					// index�� ��� ���
+					// index색 모두 출력
 					//-------------------------
-					// indexCount����ŭ index������ ����Ѵ�.
+					// indexCount수만큼 index색들을 출력한다.
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -2450,30 +2450,30 @@ CIndexSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 							*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 							pDestTemp ++;
 						} while (--k);
 					}		
-					// ����� indexCount��ŭ index����
+					// 출력한 indexCount만큼 index증가
 					index += indexCount;
 					
 
-					// Normal ���� ��
+					// Normal 색깔 수
 					colorCount = *pPixels++;
 
 					//---------------------------------------------
-					// normal������ ������ ������ �������� ���
+					// normal색까지 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						memcpy(pDestTemp, pPixels, (rectRight - index)<<1);
 						break;			
 					}			
 					
 					//--------------------
-					// normal�� ��� ���
+					// normal색 모두 출력
 					//--------------------
 					memcpy(pDestTemp, pPixels, colorCount<<1);
 
@@ -2492,7 +2492,7 @@ CIndexSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // Blt Clip Height
 //----------------------------------------------------------------------
-// pRect->top, rectBottom��ŭ�� ����Ѵ�.
+// pRect->top, rectBottom만큼만 출력한다.
 //----------------------------------------------------------------------
 void
 CIndexSprite::BltClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
@@ -2516,18 +2516,18 @@ CIndexSprite::BltClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		// (투명수,색깔수,색깔들)의 반복 수		
 		count	= *pPixels++;		
 
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{
 			j = count;
 			do {		
-				pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-				indexCount = *pPixels++;	// Index�ݺ� ��
+				pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+				indexCount = *pPixels++;	// Index반복 수
 
-				// indexCount����ŭ index������ ����Ѵ�.
+				// indexCount수만큼 index색들을 출력한다.
 				if (indexCount > 0)
 				{
 					k = indexCount;
@@ -2536,13 +2536,13 @@ CIndexSprite::BltClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 						colorGradation	= (*pPixels & 0xFF);			// gradation
 						pPixels++;
 
-						// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+						// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 						*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 						pDestTemp ++;
 					} while (--k);
 				}
 
-				// Normal ���� ��
+				// Normal 색깔 수
 				colorCount = *pPixels++;
 				
 				memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
@@ -2590,18 +2590,18 @@ CIndexSprite::BltDarkness(WORD *pDest, WORD pitch, BYTE DarkBits)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,Index��,�����)�� �ݺ� ��		
+			// (투명수,Index색,색깔들)의 반복 수		
 			transPair	= *pPixels++;
 			
- 			// �� �� ���
+ 			// 한 줄 출력
 			if (transPair > 0)
 			{
 				j = transPair;
 				do {
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	// 투명색만큼 건너 뛴다.
+					indexCount = *pPixels++;	// Index반복 수
 
-					// indexCount����ŭ index������ ����Ѵ�.
+					// indexCount수만큼 index색들을 출력한다.
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -2610,13 +2610,13 @@ CIndexSprite::BltDarkness(WORD *pDest, WORD pitch, BYTE DarkBits)
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 							*pDestTemp		= ColorSetDarkness[DarkBits][s_IndexValue[colorSet]][colorGradation];
 							pDestTemp ++;
 						} while (--k);
 					}
 
-					// Normal ���� ��
+					// Normal 색깔 수
 					colorCount = *pPixels++;
 					
 					CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
@@ -2643,7 +2643,7 @@ CIndexSprite::BltDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE Dar
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -2660,7 +2660,7 @@ CIndexSprite::BltDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE Dar
 	int colorSet, colorGradation;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -2669,43 +2669,43 @@ CIndexSprite::BltDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE Dar
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {		
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				indexCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;			
 			
 				//---------------------------------------------
-				// index�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				// index색까지하면 xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+indexCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// index�� ��� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						// index색 모두 출력
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -2714,13 +2714,13 @@ CIndexSprite::BltDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE Dar
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= ColorSetDarkness[DarkBits][s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						// Normal 색 모두 출력
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
@@ -2728,22 +2728,22 @@ CIndexSprite::BltDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE Dar
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;					
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���, index�Ϻ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우, index일부 출력
 					//---------------------------------------------
 					else
 					{					
-						dist = rectLeft - index;		// ���ʿ��� skip�Ǵ� ���� ��
+						dist = rectLeft - index;		// 왼쪽에서 skip되는 점들 수
 						
 						pPixels += dist;
 						indexCount -= dist;
 						
-						// index�� �Ϻ� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						// index색 일부 출력
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -2752,13 +2752,13 @@ CIndexSprite::BltDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE Dar
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= ColorSetDarkness[DarkBits][s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						// Normal 색 모두 출력
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
@@ -2766,55 +2766,55 @@ CIndexSprite::BltDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE Dar
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}		
 
 				
-				// index������ŭ index����
+				// index색수만큼 index증가
 				index += indexCount;
 
-				// index����ŭ skip
+				// index색깔만큼 skip
 				pPixels += indexCount;
 
-				// normal ���� ��
+				// normal 색깔 수
 				colorCount = *pPixels++;			
 				
 				//---------------------------------------------
-				// index�������ؼ��� xxxx������ �� �Ѿ��..
-				// normal�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				// index색까지해서는 xxxx범위를 안 넘어가고..
+				// normal색까지하면 xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					dist = rectLeft - index;				
 					colorCount2 = colorCount - dist;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					CSpriteSurface::memcpyDarkness(pDestTemp, pPixels+dist, colorCount2);
 					pDestTemp += colorCount2;
 					pPixels += colorCount;
 
-					// �������ʹ� ��� ����Ѵ�.
+					// 이제부터는 계속 출력한다.
 					break;			
 				}		
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			// 이제부터는 계속 출력한다.		
 			//---------------------------------------------	
 			if (--j > 0)
 			{
 				do {		
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	// 투명색만큼 건너 뛴다.
+					indexCount = *pPixels++;	// Index반복 수
 
-					// indexCount����ŭ index������ ����Ѵ�.
+					// indexCount수만큼 index색들을 출력한다.
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -2823,13 +2823,13 @@ CIndexSprite::BltDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE Dar
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 							*pDestTemp		= ColorSetDarkness[DarkBits][s_IndexValue[colorSet]][colorGradation];
 							pDestTemp ++;
 						} while (--k);
 					}
 
-					// Normal ���� ��
+					// Normal 색깔 수
 					colorCount = *pPixels++;
 					
 					CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
@@ -2856,7 +2856,7 @@ CIndexSprite::BltDarknessClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -2877,52 +2877,52 @@ CIndexSprite::BltDarknessClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		// 각 줄마다 Clipping을 해줘야 하는데...		
+		// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				indexCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����
+				// 투명색만큼 index증가
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+				// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 				//---------------------------------------------
-				// index������ ������ ������ �������� ���
+				// index색까지 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+indexCount > rectRight)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					// 투명색만으로 더 출력할 필요가 없을 때
 					if (index > rectRight)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					// 투명색 아닌 것을 조금 출력해야 할 경우
 					else
 					{
 						pDestTemp += transCount;
 
-						// ���������� skip�Ǵ� ������ ���ش�.
+						// 오른쪽으로 skip되는 점들을 빼준다.
 						indexCount = rectRight - index;
 
-						// indexCount����ŭ index������ ����Ѵ�.
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -2931,7 +2931,7 @@ CIndexSprite::BltDarknessClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= ColorSetDarkness[DarkBits][s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
@@ -2941,13 +2941,13 @@ CIndexSprite::BltDarknessClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				// 투명색만큼 건너띄고
 				pDestTemp += transCount;
 
 				//-------------------------
-				// index�� ��� ���
+				// index색 모두 출력
 				//-------------------------
-				// indexCount����ŭ index������ ����Ѵ�.
+				// indexCount수만큼 index색들을 출력한다.
 				if (indexCount > 0)
 				{
 					k = indexCount;
@@ -2956,30 +2956,30 @@ CIndexSprite::BltDarknessClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 						colorGradation	= (*pPixels & 0xFF);			// gradation
 						pPixels++;
 
-						// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+						// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 						*pDestTemp		= ColorSetDarkness[DarkBits][s_IndexValue[colorSet]][colorGradation];
 						pDestTemp ++;
 					} while (--k);
 				}		
-				// ����� indexCount��ŭ index����
+				// 출력한 indexCount만큼 index증가
 				index += indexCount;
 				
 
-				// Normal ���� ��
+				// Normal 색깔 수
 				colorCount = *pPixels++;
 
 				//---------------------------------------------
-				// normal������ ������ ������ �������� ���
+				// normal색까지 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+colorCount > rectRight)
 				{
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, rectRight - index);
 					break;			
 				}			
 				
 				//--------------------
-				// normal�� ��� ���
+				// normal색 모두 출력
 				//--------------------
 				CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 
@@ -3005,7 +3005,7 @@ CIndexSprite::BltDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -3022,7 +3022,7 @@ CIndexSprite::BltDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 	int colorSet, colorGradation;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -3032,43 +3032,43 @@ CIndexSprite::BltDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				indexCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;			
 			
 				//---------------------------------------------
-				// index�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				// index색까지하면 xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+indexCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// index�� ��� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						// index색 모두 출력
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -3077,13 +3077,13 @@ CIndexSprite::BltDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= ColorSetDarkness[DarkBits][s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						// Normal 색 모두 출력
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
@@ -3091,22 +3091,22 @@ CIndexSprite::BltDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;					
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���, index�Ϻ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우, index일부 출력
 					//---------------------------------------------
 					else
 					{					
-						dist = rectLeft - index;		// ���ʿ��� skip�Ǵ� ���� ��
+						dist = rectLeft - index;		// 왼쪽에서 skip되는 점들 수
 						
 						pPixels += dist;
 						indexCount -= dist;
 						
-						// index�� �Ϻ� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						// index색 일부 출력
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -3115,13 +3115,13 @@ CIndexSprite::BltDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= ColorSetDarkness[DarkBits][s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						// Normal 색 모두 출력
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
@@ -3130,85 +3130,85 @@ CIndexSprite::BltDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 						pPixels		+= colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}		
 
 				
-				// index������ŭ index����
+				// index색수만큼 index증가
 				index += indexCount;
 
-				// index����ŭ skip
+				// index색깔만큼 skip
 				pPixels += indexCount;
 
-				// normal ���� ��
+				// normal 색깔 수
 				colorCount = *pPixels++;			
 				
 				//---------------------------------------------
-				// index�������ؼ��� xxxx������ �� �Ѿ��..
-				// normal�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				// index색까지해서는 xxxx범위를 안 넘어가고..
+				// normal색까지하면 xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					dist = rectLeft - index;				
 					colorCount2 = colorCount - dist;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					CSpriteSurface::memcpyDarkness(pDestTemp, pPixels+dist, colorCount2);
 					pDestTemp += colorCount2;
 					pPixels += colorCount;
 					index += colorCount;
 
-					// �������ʹ� ��� ����Ѵ�.
+					// 이제부터는 계속 출력한다.
 					break;			
 				}		
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			// 각 줄마다 Clipping을 해줘야 하는데...		
+			// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do {
-					transCount = *pPixels++;		// ������ ��			
-					indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					indexCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����
+					// 투명색만큼 index증가
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 					//---------------------------------------------
-					// index������ ������ ������ �������� ���
+					// index색까지 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+indexCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						// 투명색만으로 더 출력할 필요가 없을 때
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						// 투명색 아닌 것을 조금 출력해야 할 경우
 						else
 						{
 							pDestTemp += transCount;
 
-							// ���������� skip�Ǵ� ������ ���ش�.
+							// 오른쪽으로 skip되는 점들을 빼준다.
 							indexCount = rectRight - index;
 
-							// indexCount����ŭ index������ ����Ѵ�.
+							// indexCount수만큼 index색들을 출력한다.
 							if (indexCount > 0)
 							{
 								k = indexCount;
@@ -3217,7 +3217,7 @@ CIndexSprite::BltDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 									colorGradation	= (*pPixels & 0xFF);			// gradation
 									pPixels++;
 
-									// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+									// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 									*pDestTemp		= ColorSetDarkness[DarkBits][s_IndexValue[colorSet]][colorGradation];
 									pDestTemp ++;
 								} while (--k);
@@ -3227,13 +3227,13 @@ CIndexSprite::BltDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					// 투명색만큼 건너띄고
 					pDestTemp += transCount;
 
 					//-------------------------
-					// index�� ��� ���
+					// index색 모두 출력
 					//-------------------------
-					// indexCount����ŭ index������ ����Ѵ�.
+					// indexCount수만큼 index색들을 출력한다.
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -3242,30 +3242,30 @@ CIndexSprite::BltDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 							*pDestTemp		= ColorSetDarkness[DarkBits][s_IndexValue[colorSet]][colorGradation];
 							pDestTemp ++;
 						} while (--k);
 					}
-					// ����� indexCount��ŭ index����
+					// 출력한 indexCount만큼 index증가
 					index += indexCount;
 					
 
-					// Normal ���� ��
+					// Normal 색깔 수
 					colorCount = *pPixels++;
 
 					//---------------------------------------------
-					// normal������ ������ ������ �������� ���
+					// normal색까지 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, rectRight - index);
 						break;			
 					}			
 					
 					//--------------------
-					// normal�� ��� ���
+					// normal색 모두 출력
 					//--------------------
 					CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 
@@ -3307,18 +3307,18 @@ CIndexSprite::BltDarknessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE D
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		// (투명수,색깔수,색깔들)의 반복 수		
 		count	= *pPixels++;		
 
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{
 			j = count;
 			do {
-				pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-				indexCount = *pPixels++;	// Index�ݺ� ��
+				pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+				indexCount = *pPixels++;	// Index반복 수
 
-				// indexCount����ŭ index������ ����Ѵ�.
+				// indexCount수만큼 index색들을 출력한다.
 				if (indexCount > 0)
 				{
 					k = indexCount;
@@ -3327,13 +3327,13 @@ CIndexSprite::BltDarknessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE D
 						colorGradation	= (*pPixels & 0xFF);			// gradation
 						pPixels++;
 
-						// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+						// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 						*pDestTemp		= ColorSetDarkness[DarkBits][s_IndexValue[colorSet]][colorGradation];
 						pDestTemp ++;
 					} while (--k);
 				}
 
-				// Normal ���� ��
+				// Normal 색깔 수
 				colorCount = *pPixels++;
 				
 				CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
@@ -3380,18 +3380,18 @@ CIndexSprite::BltAlpha(WORD *pDest, WORD pitch, BYTE alpha)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,Index��,�����)�� �ݺ� ��		
+			// (투명수,Index색,색깔들)의 반복 수		
 			transPair	= *pPixels++;
 			
- 			// �� �� ���
+ 			// 한 줄 출력
 			if (transPair > 0)
 			{
 				j = transPair;
 				do {				
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	// 투명색만큼 건너 뛴다.
+					indexCount = *pPixels++;	// Index반복 수
 
-					// indexCount����ŭ index������ ����Ѵ�.
+					// indexCount수만큼 index색들을 출력한다.
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -3400,13 +3400,13 @@ CIndexSprite::BltAlpha(WORD *pDest, WORD pitch, BYTE alpha)
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 							*pDestTemp		= CSpriteSurface::memcpyAlpha1Pixel(*pDestTemp, ColorSet[s_IndexValue[colorSet]][colorGradation]);
 							pDestTemp ++;
 						} while (--k);
 					}
 
-					// Normal ���� ��
+					// Normal 색깔 수
 					colorCount = *pPixels++;
 					
 					CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, colorCount);
@@ -3434,7 +3434,7 @@ CIndexSprite::BltAlphaClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -3451,7 +3451,7 @@ CIndexSprite::BltAlphaClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha)
 	int colorSet, colorGradation;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -3460,43 +3460,43 @@ CIndexSprite::BltAlphaClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				indexCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;			
 			
 				//---------------------------------------------
-				// index�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				// index색까지하면 xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+indexCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// index�� ��� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						// index색 모두 출력
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -3505,13 +3505,13 @@ CIndexSprite::BltAlphaClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha)
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= CSpriteSurface::memcpyAlpha1Pixel(*pDestTemp, ColorSet[s_IndexValue[colorSet]][colorGradation]);
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						// Normal 색 모두 출력
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, colorCount);
@@ -3519,22 +3519,22 @@ CIndexSprite::BltAlphaClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha)
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;					
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���, index�Ϻ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우, index일부 출력
 					//---------------------------------------------
 					else
 					{					
-						dist = rectLeft - index;		// ���ʿ��� skip�Ǵ� ���� ��
+						dist = rectLeft - index;		// 왼쪽에서 skip되는 점들 수
 						
 						pPixels += dist;
 						indexCount -= dist;
 						
-						// index�� �Ϻ� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						// index색 일부 출력
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -3543,13 +3543,13 @@ CIndexSprite::BltAlphaClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha)
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= CSpriteSurface::memcpyAlpha1Pixel(*pDestTemp, ColorSet[s_IndexValue[colorSet]][colorGradation]);
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						// Normal 색 모두 출력
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, colorCount);
@@ -3557,54 +3557,54 @@ CIndexSprite::BltAlphaClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha)
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}		
 
 				
-				// index������ŭ index����
+				// index색수만큼 index증가
 				index += indexCount;
 
-				// index����ŭ skip
+				// index색깔만큼 skip
 				pPixels += indexCount;
 
-				// normal ���� ��
+				// normal 색깔 수
 				colorCount = *pPixels++;			
 				
 				//---------------------------------------------
-				// index�������ؼ��� xxxx������ �� �Ѿ��..
-				// normal�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				// index색까지해서는 xxxx범위를 안 넘어가고..
+				// normal색까지하면 xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					dist = rectLeft - index;				
 					colorCount2 = colorCount - dist;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					CSpriteSurface::memcpyAlpha(pDestTemp, pPixels+dist, colorCount2);
 					pDestTemp += colorCount2;
 					pPixels += colorCount;
 
-					// �������ʹ� ��� ����Ѵ�.
+					// 이제부터는 계속 출력한다.
 					break;			
 				}		
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);		
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			// 이제부터는 계속 출력한다.		
 			//---------------------------------------------		
 			if (--j > 0)
 			{
 				do {
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	// 투명색만큼 건너 뛴다.
+					indexCount = *pPixels++;	// Index반복 수
 
-					// indexCount����ŭ index������ ����Ѵ�.
+					// indexCount수만큼 index색들을 출력한다.
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -3613,13 +3613,13 @@ CIndexSprite::BltAlphaClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha)
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 							*pDestTemp		= CSpriteSurface::memcpyAlpha1Pixel(*pDestTemp, ColorSet[s_IndexValue[colorSet]][colorGradation]);
 							pDestTemp ++;
 						} while (--k);
 					}
 
-					// Normal ���� ��
+					// Normal 색깔 수
 					colorCount = *pPixels++;
 					
 					CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, colorCount);
@@ -3646,7 +3646,7 @@ CIndexSprite::BltAlphaClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -3667,52 +3667,52 @@ CIndexSprite::BltAlphaClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		// 각 줄마다 Clipping을 해줘야 하는데...		
+		// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 		//---------------------------------------------		
 		if (count > 0)
 		{
 			j = count;
 			do {
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				indexCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����
+				// 투명색만큼 index증가
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+				// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 				//---------------------------------------------
-				// index������ ������ ������ �������� ���
+				// index색까지 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+indexCount > rectRight)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					// 투명색만으로 더 출력할 필요가 없을 때
 					if (index > rectRight)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					// 투명색 아닌 것을 조금 출력해야 할 경우
 					else
 					{
 						pDestTemp += transCount;
 
-						// ���������� skip�Ǵ� ������ ���ش�.
+						// 오른쪽으로 skip되는 점들을 빼준다.
 						indexCount = rectRight - index;
 
-						// indexCount����ŭ index������ ����Ѵ�.
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -3721,7 +3721,7 @@ CIndexSprite::BltAlphaClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= CSpriteSurface::memcpyAlpha1Pixel(*pDestTemp, ColorSet[s_IndexValue[colorSet]][colorGradation]);
 								pDestTemp ++;
 							} while (--k);
@@ -3731,13 +3731,13 @@ CIndexSprite::BltAlphaClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				// 투명색만큼 건너띄고
 				pDestTemp += transCount;
 
 				//-------------------------
-				// index�� ��� ���
+				// index색 모두 출력
 				//-------------------------
-				// indexCount����ŭ index������ ����Ѵ�.
+				// indexCount수만큼 index색들을 출력한다.
 				if (indexCount > 0)
 				{
 					k = indexCount;
@@ -3746,30 +3746,30 @@ CIndexSprite::BltAlphaClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 						colorGradation	= (*pPixels & 0xFF);			// gradation
 						pPixels++;
 
-						// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+						// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 						*pDestTemp		= CSpriteSurface::memcpyAlpha1Pixel(*pDestTemp, ColorSet[s_IndexValue[colorSet]][colorGradation]);
 						pDestTemp ++;
 					} while (--k);
 				}		
-				// ����� indexCount��ŭ index����
+				// 출력한 indexCount만큼 index증가
 				index += indexCount;
 				
 
-				// Normal ���� ��
+				// Normal 색깔 수
 				colorCount = *pPixels++;
 
 				//---------------------------------------------
-				// normal������ ������ ������ �������� ���
+				// normal색까지 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+colorCount > rectRight)
 				{
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, rectRight - index);
 					break;			
 				}			
 				
 				//--------------------
-				// normal�� ��� ���
+				// normal색 모두 출력
 				//--------------------
 				CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, colorCount);
 
@@ -3795,7 +3795,7 @@ CIndexSprite::BltAlphaClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -3812,7 +3812,7 @@ CIndexSprite::BltAlphaClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 	int colorSet, colorGradation;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -3822,43 +3822,43 @@ CIndexSprite::BltAlphaClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				indexCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;			
 			
 				//---------------------------------------------
-				// index�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				// index색까지하면 xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+indexCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// index�� ��� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						// index색 모두 출력
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -3867,13 +3867,13 @@ CIndexSprite::BltAlphaClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= CSpriteSurface::memcpyAlpha1Pixel(*pDestTemp, ColorSet[s_IndexValue[colorSet]][colorGradation]);
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						// Normal 색 모두 출력
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, colorCount);
@@ -3881,22 +3881,22 @@ CIndexSprite::BltAlphaClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;					
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���, index�Ϻ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우, index일부 출력
 					//---------------------------------------------
 					else
 					{					
-						dist = rectLeft - index;		// ���ʿ��� skip�Ǵ� ���� ��
+						dist = rectLeft - index;		// 왼쪽에서 skip되는 점들 수
 						
 						pPixels += dist;
 						indexCount -= dist;
 						
-						// index�� �Ϻ� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						// index색 일부 출력
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -3905,13 +3905,13 @@ CIndexSprite::BltAlphaClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= CSpriteSurface::memcpyAlpha1Pixel(*pDestTemp, ColorSet[s_IndexValue[colorSet]][colorGradation]);
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						// Normal 색 모두 출력
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, colorCount);
@@ -3920,84 +3920,84 @@ CIndexSprite::BltAlphaClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 						pPixels		+= colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}		
 
 				
-				// index������ŭ index����
+				// index색수만큼 index증가
 				index += indexCount;
 
-				// index����ŭ skip
+				// index색깔만큼 skip
 				pPixels += indexCount;
 
-				// normal ���� ��
+				// normal 색깔 수
 				colorCount = *pPixels++;			
 				
 				//---------------------------------------------
-				// index�������ؼ��� xxxx������ �� �Ѿ��..
-				// normal�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				// index색까지해서는 xxxx범위를 안 넘어가고..
+				// normal색까지하면 xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					dist = rectLeft - index;				
 					colorCount2 = colorCount - dist;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					CSpriteSurface::memcpyAlpha(pDestTemp, pPixels+dist, colorCount2);
 					pDestTemp += colorCount2;
 					pPixels += colorCount;
 					index += colorCount;
 
-					// �������ʹ� ��� ����Ѵ�.
+					// 이제부터는 계속 출력한다.
 					break;			
 				}		
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			// 각 줄마다 Clipping을 해줘야 하는데...		
+			// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do {
-					transCount = *pPixels++;		// ������ ��			
-					indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					indexCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����
+					// 투명색만큼 index증가
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 					//---------------------------------------------
-					// index������ ������ ������ �������� ���
+					// index색까지 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+indexCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						// 투명색만으로 더 출력할 필요가 없을 때
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						// 투명색 아닌 것을 조금 출력해야 할 경우
 						else
 						{
 							pDestTemp += transCount;
 
-							// ���������� skip�Ǵ� ������ ���ش�.
+							// 오른쪽으로 skip되는 점들을 빼준다.
 							indexCount = rectRight - index;
 
-							// indexCount����ŭ index������ ����Ѵ�.
+							// indexCount수만큼 index색들을 출력한다.
 							if (indexCount > 0)
 							{
 								k = indexCount;
@@ -4006,7 +4006,7 @@ CIndexSprite::BltAlphaClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 									colorGradation	= (*pPixels & 0xFF);			// gradation
 									pPixels++;
 
-									// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+									// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 									*pDestTemp		= CSpriteSurface::memcpyAlpha1Pixel(*pDestTemp, ColorSet[s_IndexValue[colorSet]][colorGradation]);
 									pDestTemp ++;
 								} while (--k);
@@ -4016,13 +4016,13 @@ CIndexSprite::BltAlphaClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					// 투명색만큼 건너띄고
 					pDestTemp += transCount;
 
 					//-------------------------
-					// index�� ��� ���
+					// index색 모두 출력
 					//-------------------------
-					// indexCount����ŭ index������ ����Ѵ�.
+					// indexCount수만큼 index색들을 출력한다.
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -4031,30 +4031,30 @@ CIndexSprite::BltAlphaClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 							*pDestTemp		= CSpriteSurface::memcpyAlpha1Pixel(*pDestTemp, ColorSet[s_IndexValue[colorSet]][colorGradation]);
 							pDestTemp ++;
 						} while (--k);
 					}		
-					// ����� indexCount��ŭ index����
+					// 출력한 indexCount만큼 index증가
 					index += indexCount;
 					
 
-					// Normal ���� ��
+					// Normal 색깔 수
 					colorCount = *pPixels++;
 
 					//---------------------------------------------
-					// normal������ ������ ������ �������� ���
+					// normal색까지 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, rectRight - index);
 						break;			
 					}			
 					
 					//--------------------
-					// normal�� ��� ���
+					// normal색 모두 출력
 					//--------------------
 					CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, colorCount);
 
@@ -4096,18 +4096,18 @@ CIndexSprite::BltAlphaClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE alph
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		// (투명수,색깔수,색깔들)의 반복 수		
 		count	= *pPixels++;		
 
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{
 			j = count;
 			do {						
-				pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-				indexCount = *pPixels++;	// Index�ݺ� ��
+				pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+				indexCount = *pPixels++;	// Index반복 수
 
-				// indexCount����ŭ index������ ����Ѵ�.
+				// indexCount수만큼 index색들을 출력한다.
 				if (indexCount > 0)
 				{
 					k = indexCount;
@@ -4116,13 +4116,13 @@ CIndexSprite::BltAlphaClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE alph
 						colorGradation	= (*pPixels & 0xFF);			// gradation
 						pPixels++;
 
-						// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+						// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 						*pDestTemp		= CSpriteSurface::memcpyAlpha1Pixel(*pDestTemp, ColorSet[s_IndexValue[colorSet]][colorGradation]);
 						pDestTemp ++;
 					} while (--k);
 				}
 
-				// Normal ���� ��
+				// Normal 색깔 수
 				colorCount = *pPixels++;
 				
 				CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, colorCount);
@@ -4142,7 +4142,7 @@ CIndexSprite::BltAlphaClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE alph
 //----------------------------------------------------------------------
 // BltWave
 //----------------------------------------------------------------------
-// Clipping���� �ʴ´�.
+// Clipping하지 않는다.
 //----------------------------------------------------------------------
 /*
 void
@@ -4175,20 +4175,20 @@ CIndexSprite::BltWave(WORD *pDest, WORD pitch)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,Index��,�����)�� �ݺ� ��		
+			// (투명수,Index색,색깔들)의 반복 수		
 			transPair	= *pPixels++;
 			
- 			// �� �� ���		
+ 			// 한 줄 출력		
 			if (transPair > 0)
 			{
 				j = transPair;
 				do
 				{
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	// 투명색만큼 건너 뛴다.
+					indexCount = *pPixels++;	// Index반복 수
 
-					// indexCount����ŭ index������ ����Ѵ�.
-					// �� �� ���		
+					// indexCount수만큼 index색들을 출력한다.
+					// 한 줄 출력		
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -4198,7 +4198,7 @@ CIndexSprite::BltWave(WORD *pDest, WORD pitch)
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 							//*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 
 							WORD color = GradationValue[s_IndexValue[colorSet]][colorGradation];//*pPixels;							
@@ -4211,7 +4211,7 @@ CIndexSprite::BltWave(WORD *pDest, WORD pitch)
 						} while (--k);
 					}
 
-					// Normal ���� ��
+					// Normal 색깔 수
 					colorCount = *pPixels++;
 					
 					//memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
@@ -4277,18 +4277,18 @@ CIndexSprite::BltColor(WORD *pDest, WORD pitch, BYTE rgb)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,Index��,�����)�� �ݺ� ��		
+			// (투명수,Index색,색깔들)의 반복 수		
 			transPair	= *pPixels++;
 			
- 			// �� �� ���
+ 			// 한 줄 출력
 			if (transPair > 0)
 			{
 				j = transPair;
 				do {
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	// 투명색만큼 건너 뛴다.
+					indexCount = *pPixels++;	// Index반복 수
 
-					// indexCount����ŭ index������ ����Ѵ�.
+					// indexCount수만큼 index색들을 출력한다.
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -4298,14 +4298,14 @@ CIndexSprite::BltColor(WORD *pDest, WORD pitch, BYTE rgb)
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 							*pDestTemp		= ColorSet[defaultGradationColor][colorGradation]
 												& ColorDraw::s_wMASK_RGB[rgb];
 							pDestTemp ++;
 						} while (--k);
 					}
 
-					// Normal ���� ��
+					// Normal 색깔 수
 					colorCount = *pPixels++;
 					
 					CSpriteSurface::memcpyColor(pDestTemp, pPixels, colorCount);					
@@ -4332,7 +4332,7 @@ CIndexSprite::BltColorClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -4349,7 +4349,7 @@ CIndexSprite::BltColorClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 	int colorSet, colorGradation;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -4358,43 +4358,43 @@ CIndexSprite::BltColorClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {		
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				indexCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;			
 			
 				//---------------------------------------------
-				// index�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				// index색까지하면 xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+indexCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// index�� ��� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						// index색 모두 출력
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -4403,14 +4403,14 @@ CIndexSprite::BltColorClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= ColorSet[defaultGradationColor][colorGradation]
 												& ColorDraw::s_wMASK_RGB[rgb];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						// Normal 색 모두 출력
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyColor(pDestTemp, pPixels, colorCount);
@@ -4418,22 +4418,22 @@ CIndexSprite::BltColorClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;					
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���, index�Ϻ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우, index일부 출력
 					//---------------------------------------------
 					else
 					{					
-						dist = rectLeft - index;		// ���ʿ��� skip�Ǵ� ���� ��
+						dist = rectLeft - index;		// 왼쪽에서 skip되는 점들 수
 						
 						pPixels += dist;
 						indexCount -= dist;
 						
-						// index�� �Ϻ� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						// index색 일부 출력
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -4442,14 +4442,14 @@ CIndexSprite::BltColorClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= ColorSet[defaultGradationColor][colorGradation]
 												& ColorDraw::s_wMASK_RGB[rgb];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						// Normal 색 모두 출력
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyColor(pDestTemp, pPixels, colorCount);
@@ -4457,55 +4457,55 @@ CIndexSprite::BltColorClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}		
 
 				
-				// index������ŭ index����
+				// index색수만큼 index증가
 				index += indexCount;
 
-				// index����ŭ skip
+				// index색깔만큼 skip
 				pPixels += indexCount;
 
-				// normal ���� ��
+				// normal 색깔 수
 				colorCount = *pPixels++;			
 				
 				//---------------------------------------------
-				// index�������ؼ��� xxxx������ �� �Ѿ��..
-				// normal�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				// index색까지해서는 xxxx범위를 안 넘어가고..
+				// normal색까지하면 xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					dist = rectLeft - index;				
 					colorCount2 = colorCount - dist;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					CSpriteSurface::memcpyColor(pDestTemp, pPixels+dist, colorCount2);
 					pDestTemp += colorCount2;
 					pPixels += colorCount;
 
-					// �������ʹ� ��� ����Ѵ�.
+					// 이제부터는 계속 출력한다.
 					break;			
 				}		
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			// 이제부터는 계속 출력한다.		
 			//---------------------------------------------	
 			if (--j > 0)
 			{
 				do {		
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	// 투명색만큼 건너 뛴다.
+					indexCount = *pPixels++;	// Index반복 수
 
-					// indexCount����ŭ index������ ����Ѵ�.
+					// indexCount수만큼 index색들을 출력한다.
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -4514,14 +4514,14 @@ CIndexSprite::BltColorClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 							*pDestTemp		= ColorSet[defaultGradationColor][colorGradation]
 												& ColorDraw::s_wMASK_RGB[rgb];
 							pDestTemp ++;
 						} while (--k);
 					}
 
-					// Normal ���� ��
+					// Normal 색깔 수
 					colorCount = *pPixels++;
 					
 					CSpriteSurface::memcpyColor(pDestTemp, pPixels, colorCount);
@@ -4542,14 +4542,14 @@ CIndexSprite::BltColorClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 void		
 CIndexSprite::BltColorClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 {
-	// rgb�� ����
+	// rgb값 설정
 	CSpriteSurface::s_Value1 = rgb;
 
 	WORD	*pPixels,
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -4570,52 +4570,52 @@ CIndexSprite::BltColorClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		// 각 줄마다 Clipping을 해줘야 하는데...		
+		// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				indexCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����
+				// 투명색만큼 index증가
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+				// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 				//---------------------------------------------
-				// index������ ������ ������ �������� ���
+				// index색까지 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+indexCount > rectRight)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					// 투명색만으로 더 출력할 필요가 없을 때
 					if (index > rectRight)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					// 투명색 아닌 것을 조금 출력해야 할 경우
 					else
 					{
 						pDestTemp += transCount;
 
-						// ���������� skip�Ǵ� ������ ���ش�.
+						// 오른쪽으로 skip되는 점들을 빼준다.
 						indexCount = rectRight - index;
 
-						// indexCount����ŭ index������ ����Ѵ�.
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -4624,7 +4624,7 @@ CIndexSprite::BltColorClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= ColorSet[defaultGradationColor][colorGradation]
 												& ColorDraw::s_wMASK_RGB[rgb];
 								pDestTemp ++;
@@ -4635,13 +4635,13 @@ CIndexSprite::BltColorClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				// 투명색만큼 건너띄고
 				pDestTemp += transCount;
 
 				//-------------------------
-				// index�� ��� ���
+				// index색 모두 출력
 				//-------------------------
-				// indexCount����ŭ index������ ����Ѵ�.
+				// indexCount수만큼 index색들을 출력한다.
 				if (indexCount > 0)
 				{
 					k = indexCount;
@@ -4650,31 +4650,31 @@ CIndexSprite::BltColorClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 						colorGradation	= (*pPixels & 0xFF);			// gradation
 						pPixels++;
 
-						// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+						// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 						*pDestTemp		= ColorSet[defaultGradationColor][colorGradation]
 												& ColorDraw::s_wMASK_RGB[rgb];
 						pDestTemp ++;
 					} while (--k);
 				}		
-				// ����� indexCount��ŭ index����
+				// 출력한 indexCount만큼 index증가
 				index += indexCount;
 				
 
-				// Normal ���� ��
+				// Normal 색깔 수
 				colorCount = *pPixels++;
 
 				//---------------------------------------------
-				// normal������ ������ ������ �������� ���
+				// normal색까지 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+colorCount > rectRight)
 				{
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					CSpriteSurface::memcpyColor(pDestTemp, pPixels, rectRight - index);
 					break;			
 				}			
 				
 				//--------------------
-				// normal�� ��� ���
+				// normal색 모두 출력
 				//--------------------
 				CSpriteSurface::memcpyColor(pDestTemp, pPixels, colorCount);
 
@@ -4694,14 +4694,14 @@ CIndexSprite::BltColorClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 void		
 CIndexSprite::BltColorClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 {
-	// rgb�� ����
+	// rgb값 설정
 	CSpriteSurface::s_Value1 = rgb;
 
 	WORD	*pPixels,
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -4718,7 +4718,7 @@ CIndexSprite::BltColorClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 	int colorSet, colorGradation;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -4728,43 +4728,43 @@ CIndexSprite::BltColorClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				indexCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;			
 			
 				//---------------------------------------------
-				// index�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				// index색까지하면 xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+indexCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// index�� ��� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						// index색 모두 출력
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -4773,14 +4773,14 @@ CIndexSprite::BltColorClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= ColorSet[defaultGradationColor][colorGradation]
 												& ColorDraw::s_wMASK_RGB[rgb];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						// Normal 색 모두 출력
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyColor(pDestTemp, pPixels, colorCount);
@@ -4788,22 +4788,22 @@ CIndexSprite::BltColorClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;					
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���, index�Ϻ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우, index일부 출력
 					//---------------------------------------------
 					else
 					{					
-						dist = rectLeft - index;		// ���ʿ��� skip�Ǵ� ���� ��
+						dist = rectLeft - index;		// 왼쪽에서 skip되는 점들 수
 						
 						pPixels += dist;
 						indexCount -= dist;
 						
-						// index�� �Ϻ� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						// index색 일부 출력
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -4812,14 +4812,14 @@ CIndexSprite::BltColorClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= ColorSet[defaultGradationColor][colorGradation]
 												& ColorDraw::s_wMASK_RGB[rgb];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						// Normal 색 모두 출력
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyColor(pDestTemp, pPixels, colorCount);
@@ -4828,85 +4828,85 @@ CIndexSprite::BltColorClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 						pPixels		+= colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}		
 
 				
-				// index������ŭ index����
+				// index색수만큼 index증가
 				index += indexCount;
 
-				// index����ŭ skip
+				// index색깔만큼 skip
 				pPixels += indexCount;
 
-				// normal ���� ��
+				// normal 색깔 수
 				colorCount = *pPixels++;			
 				
 				//---------------------------------------------
-				// index�������ؼ��� xxxx������ �� �Ѿ��..
-				// normal�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				// index색까지해서는 xxxx범위를 안 넘어가고..
+				// normal색까지하면 xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					dist = rectLeft - index;				
 					colorCount2 = colorCount - dist;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					CSpriteSurface::memcpyColor(pDestTemp, pPixels+dist, colorCount2);
 					pDestTemp += colorCount2;
 					pPixels += colorCount;
 					index += colorCount;
 
-					// �������ʹ� ��� ����Ѵ�.
+					// 이제부터는 계속 출력한다.
 					break;			
 				}		
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			// 각 줄마다 Clipping을 해줘야 하는데...		
+			// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do {
-					transCount = *pPixels++;		// ������ ��			
-					indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					indexCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����
+					// 투명색만큼 index증가
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 					//---------------------------------------------
-					// index������ ������ ������ �������� ���
+					// index색까지 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+indexCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						// 투명색만으로 더 출력할 필요가 없을 때
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						// 투명색 아닌 것을 조금 출력해야 할 경우
 						else
 						{
 							pDestTemp += transCount;
 
-							// ���������� skip�Ǵ� ������ ���ش�.
+							// 오른쪽으로 skip되는 점들을 빼준다.
 							indexCount = rectRight - index;
 
-							// indexCount����ŭ index������ ����Ѵ�.
+							// indexCount수만큼 index색들을 출력한다.
 							if (indexCount > 0)
 							{
 								k = indexCount;
@@ -4915,7 +4915,7 @@ CIndexSprite::BltColorClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 									colorGradation	= (*pPixels & 0xFF);			// gradation
 									pPixels++;
 
-									// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+									// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 									*pDestTemp		= ColorSet[defaultGradationColor][colorGradation]
 												& ColorDraw::s_wMASK_RGB[rgb];
 									pDestTemp ++;
@@ -4926,13 +4926,13 @@ CIndexSprite::BltColorClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					// 투명색만큼 건너띄고
 					pDestTemp += transCount;
 
 					//-------------------------
-					// index�� ��� ���
+					// index색 모두 출력
 					//-------------------------
-					// indexCount����ŭ index������ ����Ѵ�.
+					// indexCount수만큼 index색들을 출력한다.
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -4941,31 +4941,31 @@ CIndexSprite::BltColorClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 							*pDestTemp		= ColorSet[defaultGradationColor][colorGradation]
 												& ColorDraw::s_wMASK_RGB[rgb];
 							pDestTemp ++;
 						} while (--k);
 					}
-					// ����� indexCount��ŭ index����
+					// 출력한 indexCount만큼 index증가
 					index += indexCount;
 					
 
-					// Normal ���� ��
+					// Normal 색깔 수
 					colorCount = *pPixels++;
 
 					//---------------------------------------------
-					// normal������ ������ ������ �������� ���
+					// normal색까지 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						CSpriteSurface::memcpyColor(pDestTemp, pPixels, rectRight - index);
 						break;			
 					}			
 					
 					//--------------------
-					// normal�� ��� ���
+					// normal색 모두 출력
 					//--------------------
 					CSpriteSurface::memcpyColor(pDestTemp, pPixels, colorCount);
 
@@ -4986,7 +4986,7 @@ CIndexSprite::BltColorClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 void		
 CIndexSprite::BltColorClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 {
-	// rgb�� ����
+	// rgb값 설정
 	CSpriteSurface::s_Value1 = rgb;
 
 	int	count,
@@ -5008,18 +5008,18 @@ CIndexSprite::BltColorClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		// (투명수,색깔수,색깔들)의 반복 수		
 		count	= *pPixels++;		
 
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{
 			j = count;
 			do {
-				pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-				indexCount = *pPixels++;	// Index�ݺ� ��
+				pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+				indexCount = *pPixels++;	// Index반복 수
 
-				// indexCount����ŭ index������ ����Ѵ�.
+				// indexCount수만큼 index색들을 출력한다.
 				if (indexCount > 0)
 				{
 					k = indexCount;
@@ -5028,14 +5028,14 @@ CIndexSprite::BltColorClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 						colorGradation	= (*pPixels & 0xFF);			// gradation
 						pPixels++;
 
-						// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+						// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 						*pDestTemp		= ColorSet[defaultGradationColor][colorGradation]
 												& ColorDraw::s_wMASK_RGB[rgb];
 						pDestTemp ++;
 					} while (--k);
 				}
 
-				// Normal ���� ��
+				// Normal 색깔 수
 				colorCount = *pPixels++;
 				
 				CSpriteSurface::memcpyColor(pDestTemp, pPixels, colorCount);
@@ -5083,18 +5083,18 @@ CIndexSprite::BltColorSet(WORD *pDest, WORD pitch, WORD colorSet)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,Index��,�����)�� �ݺ� ��		
+			// (투명수,Index색,색깔들)의 반복 수		
 			transPair	= *pPixels++;
 			
- 			// �� �� ���
+ 			// 한 줄 출력
 			if (transPair > 0)
 			{
 				j = transPair;
 				do {
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	// 투명색만큼 건너 뛴다.
+					indexCount = *pPixels++;	// Index반복 수
 
-					// indexCount����ŭ index������ ����Ѵ�.
+					// indexCount수만큼 index색들을 출력한다.
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -5104,14 +5104,14 @@ CIndexSprite::BltColorSet(WORD *pDest, WORD pitch, WORD colorSet)
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 							*pDestTemp		= ColorSet[colorSet][colorGradation];
 												//& ColorDraw::s_wMASK_RGB[colorSet];
 							pDestTemp ++;
 						} while (--k);
 					}
 
-					// Normal ���� ��
+					// Normal 색깔 수
 					colorCount = *pPixels++;
 					
 					CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, colorCount);					
@@ -5138,7 +5138,7 @@ CIndexSprite::BltColorSetClipLeft(WORD *pDest, WORD pitch, RECT* pRect, WORD col
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -5156,7 +5156,7 @@ CIndexSprite::BltColorSetClipLeft(WORD *pDest, WORD pitch, RECT* pRect, WORD col
 		colorGradation;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -5165,43 +5165,43 @@ CIndexSprite::BltColorSetClipLeft(WORD *pDest, WORD pitch, RECT* pRect, WORD col
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {		
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				indexCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;			
 			
 				//---------------------------------------------
-				// index�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				// index색까지하면 xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+indexCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// index�� ��� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						// index색 모두 출력
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -5210,14 +5210,14 @@ CIndexSprite::BltColorSetClipLeft(WORD *pDest, WORD pitch, RECT* pRect, WORD col
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= ColorSet[colorSet][colorGradation];
 												//& ColorDraw::s_wMASK_RGB[colorSet];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						// Normal 색 모두 출력
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, colorCount);
@@ -5225,22 +5225,22 @@ CIndexSprite::BltColorSetClipLeft(WORD *pDest, WORD pitch, RECT* pRect, WORD col
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;					
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���, index�Ϻ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우, index일부 출력
 					//---------------------------------------------
 					else
 					{					
-						dist = rectLeft - index;		// ���ʿ��� skip�Ǵ� ���� ��
+						dist = rectLeft - index;		// 왼쪽에서 skip되는 점들 수
 						
 						pPixels += dist;
 						indexCount -= dist;
 						
-						// index�� �Ϻ� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						// index색 일부 출력
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -5249,14 +5249,14 @@ CIndexSprite::BltColorSetClipLeft(WORD *pDest, WORD pitch, RECT* pRect, WORD col
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= ColorSet[colorSet][colorGradation];
 												//& ColorDraw::s_wMASK_RGB[colorSet];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						// Normal 색 모두 출력
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, colorCount);
@@ -5264,55 +5264,55 @@ CIndexSprite::BltColorSetClipLeft(WORD *pDest, WORD pitch, RECT* pRect, WORD col
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}		
 
 				
-				// index������ŭ index����
+				// index색수만큼 index증가
 				index += indexCount;
 
-				// index����ŭ skip
+				// index색깔만큼 skip
 				pPixels += indexCount;
 
-				// normal ���� ��
+				// normal 색깔 수
 				colorCount = *pPixels++;			
 				
 				//---------------------------------------------
-				// index�������ؼ��� xxxx������ �� �Ѿ��..
-				// normal�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				// index색까지해서는 xxxx범위를 안 넘어가고..
+				// normal색까지하면 xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					dist = rectLeft - index;				
 					colorCount2 = colorCount - dist;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels+dist, colorCount2);
 					pDestTemp += colorCount2;
 					pPixels += colorCount;
 
-					// �������ʹ� ��� ����Ѵ�.
+					// 이제부터는 계속 출력한다.
 					break;			
 				}		
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			// 이제부터는 계속 출력한다.		
 			//---------------------------------------------	
 			if (--j > 0)
 			{
 				do {		
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	// 투명색만큼 건너 뛴다.
+					indexCount = *pPixels++;	// Index반복 수
 
-					// indexCount����ŭ index������ ����Ѵ�.
+					// indexCount수만큼 index색들을 출력한다.
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -5321,14 +5321,14 @@ CIndexSprite::BltColorSetClipLeft(WORD *pDest, WORD pitch, RECT* pRect, WORD col
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 							*pDestTemp		= ColorSet[colorSet][colorGradation];
 												//& ColorDraw::s_wMASK_RGB[colorSet];
 							pDestTemp ++;
 						} while (--k);
 					}
 
-					// Normal ���� ��
+					// Normal 색깔 수
 					colorCount = *pPixels++;
 					
 					CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, colorCount);
@@ -5349,14 +5349,14 @@ CIndexSprite::BltColorSetClipLeft(WORD *pDest, WORD pitch, RECT* pRect, WORD col
 void		
 CIndexSprite::BltColorSetClipRight(WORD *pDest, WORD pitch, RECT* pRect, WORD colorSet)
 {
-	// colorSet�� ����
+	// colorSet값 설정
 	CSpriteSurface::s_Value1 = colorSet;
 
 	WORD	*pPixels,
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -5378,52 +5378,52 @@ CIndexSprite::BltColorSetClipRight(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		// 각 줄마다 Clipping을 해줘야 하는데...		
+		// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				indexCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����
+				// 투명색만큼 index증가
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+				// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 				//---------------------------------------------
-				// index������ ������ ������ �������� ���
+				// index색까지 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+indexCount > rectRight)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					// 투명색만으로 더 출력할 필요가 없을 때
 					if (index > rectRight)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					// 투명색 아닌 것을 조금 출력해야 할 경우
 					else
 					{
 						pDestTemp += transCount;
 
-						// ���������� skip�Ǵ� ������ ���ش�.
+						// 오른쪽으로 skip되는 점들을 빼준다.
 						indexCount = rectRight - index;
 
-						// indexCount����ŭ index������ ����Ѵ�.
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -5432,7 +5432,7 @@ CIndexSprite::BltColorSetClipRight(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= ColorSet[colorSet][colorGradation];
 												//& ColorDraw::s_wMASK_RGB[colorSet];
 								pDestTemp ++;
@@ -5443,13 +5443,13 @@ CIndexSprite::BltColorSetClipRight(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				// 투명색만큼 건너띄고
 				pDestTemp += transCount;
 
 				//-------------------------
-				// index�� ��� ���
+				// index색 모두 출력
 				//-------------------------
-				// indexCount����ŭ index������ ����Ѵ�.
+				// indexCount수만큼 index색들을 출력한다.
 				if (indexCount > 0)
 				{
 					k = indexCount;
@@ -5458,31 +5458,31 @@ CIndexSprite::BltColorSetClipRight(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 						colorGradation	= (*pPixels & 0xFF);			// gradation
 						pPixels++;
 
-						// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+						// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 						*pDestTemp		= ColorSet[colorSet][colorGradation];
 												//& ColorDraw::s_wMASK_RGB[colorSet];
 						pDestTemp ++;
 					} while (--k);
 				}		
-				// ����� indexCount��ŭ index����
+				// 출력한 indexCount만큼 index증가
 				index += indexCount;
 				
 
-				// Normal ���� ��
+				// Normal 색깔 수
 				colorCount = *pPixels++;
 
 				//---------------------------------------------
-				// normal������ ������ ������ �������� ���
+				// normal색까지 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+colorCount > rectRight)
 				{
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, rectRight - index);
 					break;			
 				}			
 				
 				//--------------------
-				// normal�� ��� ���
+				// normal색 모두 출력
 				//--------------------
 				CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, colorCount);
 
@@ -5502,14 +5502,14 @@ CIndexSprite::BltColorSetClipRight(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 void		
 CIndexSprite::BltColorSetClipWidth(WORD *pDest, WORD pitch, RECT* pRect, WORD colorSet)
 {
-	// colorSet�� ����
+	// colorSet값 설정
 	CSpriteSurface::s_Value1 = colorSet;
 
 	WORD	*pPixels,
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -5527,7 +5527,7 @@ CIndexSprite::BltColorSetClipWidth(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 		colorGradation;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -5537,43 +5537,43 @@ CIndexSprite::BltColorSetClipWidth(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				indexCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;			
 			
 				//---------------------------------------------
-				// index�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				// index색까지하면 xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+indexCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// index�� ��� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						// index색 모두 출력
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -5582,14 +5582,14 @@ CIndexSprite::BltColorSetClipWidth(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= ColorSet[colorSet][colorGradation];
 												//& ColorDraw::s_wMASK_RGB[colorSet];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						// Normal 색 모두 출력
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, colorCount);
@@ -5597,22 +5597,22 @@ CIndexSprite::BltColorSetClipWidth(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;					
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���, index�Ϻ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우, index일부 출력
 					//---------------------------------------------
 					else
 					{					
-						dist = rectLeft - index;		// ���ʿ��� skip�Ǵ� ���� ��
+						dist = rectLeft - index;		// 왼쪽에서 skip되는 점들 수
 						
 						pPixels += dist;
 						indexCount -= dist;
 						
-						// index�� �Ϻ� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						// index색 일부 출력
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -5621,14 +5621,14 @@ CIndexSprite::BltColorSetClipWidth(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= ColorSet[colorSet][colorGradation];
 												//& ColorDraw::s_wMASK_RGB[colorSet];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						// Normal 색 모두 출력
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, colorCount);
@@ -5637,85 +5637,85 @@ CIndexSprite::BltColorSetClipWidth(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 						pPixels		+= colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}		
 
 				
-				// index������ŭ index����
+				// index색수만큼 index증가
 				index += indexCount;
 
-				// index����ŭ skip
+				// index색깔만큼 skip
 				pPixels += indexCount;
 
-				// normal ���� ��
+				// normal 색깔 수
 				colorCount = *pPixels++;			
 				
 				//---------------------------------------------
-				// index�������ؼ��� xxxx������ �� �Ѿ��..
-				// normal�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				// index색까지해서는 xxxx범위를 안 넘어가고..
+				// normal색까지하면 xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					dist = rectLeft - index;				
 					colorCount2 = colorCount - dist;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels+dist, colorCount2);
 					pDestTemp += colorCount2;
 					pPixels += colorCount;
 					index += colorCount;
 
-					// �������ʹ� ��� ����Ѵ�.
+					// 이제부터는 계속 출력한다.
 					break;			
 				}		
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			// 각 줄마다 Clipping을 해줘야 하는데...		
+			// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do {
-					transCount = *pPixels++;		// ������ ��			
-					indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					indexCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����
+					// 투명색만큼 index증가
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 					//---------------------------------------------
-					// index������ ������ ������ �������� ���
+					// index색까지 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+indexCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						// 투명색만으로 더 출력할 필요가 없을 때
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						// 투명색 아닌 것을 조금 출력해야 할 경우
 						else
 						{
 							pDestTemp += transCount;
 
-							// ���������� skip�Ǵ� ������ ���ش�.
+							// 오른쪽으로 skip되는 점들을 빼준다.
 							indexCount = rectRight - index;
 
-							// indexCount����ŭ index������ ����Ѵ�.
+							// indexCount수만큼 index색들을 출력한다.
 							if (indexCount > 0)
 							{
 								k = indexCount;
@@ -5724,7 +5724,7 @@ CIndexSprite::BltColorSetClipWidth(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 									colorGradation	= (*pPixels & 0xFF);			// gradation
 									pPixels++;
 
-									// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+									// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 									*pDestTemp		= ColorSet[colorSet][colorGradation];
 												//& ColorDraw::s_wMASK_RGB[colorSet];
 									pDestTemp ++;
@@ -5735,13 +5735,13 @@ CIndexSprite::BltColorSetClipWidth(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					// 투명색만큼 건너띄고
 					pDestTemp += transCount;
 
 					//-------------------------
-					// index�� ��� ���
+					// index색 모두 출력
 					//-------------------------
-					// indexCount����ŭ index������ ����Ѵ�.
+					// indexCount수만큼 index색들을 출력한다.
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -5750,31 +5750,31 @@ CIndexSprite::BltColorSetClipWidth(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 							*pDestTemp		= ColorSet[colorSet][colorGradation];
 												//& ColorDraw::s_wMASK_RGB[colorSet];
 							pDestTemp ++;
 						} while (--k);
 					}
-					// ����� indexCount��ŭ index����
+					// 출력한 indexCount만큼 index증가
 					index += indexCount;
 					
 
-					// Normal ���� ��
+					// Normal 색깔 수
 					colorCount = *pPixels++;
 
 					//---------------------------------------------
-					// normal������ ������ ������ �������� ���
+					// normal색까지 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, rectRight - index);
 						break;			
 					}			
 					
 					//--------------------
-					// normal�� ��� ���
+					// normal색 모두 출력
 					//--------------------
 					CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, colorCount);
 
@@ -5795,7 +5795,7 @@ CIndexSprite::BltColorSetClipWidth(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 void		
 CIndexSprite::BltColorSetClipHeight(WORD *pDest, WORD pitch, RECT* pRect, WORD colorSet)
 {
-	// colorSet�� ����
+	// colorSet값 설정
 	CSpriteSurface::s_Value1 = colorSet;
 
 	int	count,
@@ -5819,18 +5819,18 @@ CIndexSprite::BltColorSetClipHeight(WORD *pDest, WORD pitch, RECT* pRect, WORD c
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		// (투명수,색깔수,색깔들)의 반복 수		
 		count	= *pPixels++;		
 
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{
 			j = count;
 			do {
-				pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-				indexCount = *pPixels++;	// Index�ݺ� ��
+				pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+				indexCount = *pPixels++;	// Index반복 수
 
-				// indexCount����ŭ index������ ����Ѵ�.
+				// indexCount수만큼 index색들을 출력한다.
 				if (indexCount > 0)
 				{
 					k = indexCount;
@@ -5839,14 +5839,14 @@ CIndexSprite::BltColorSetClipHeight(WORD *pDest, WORD pitch, RECT* pRect, WORD c
 						colorGradation	= (*pPixels & 0xFF);			// gradation
 						pPixels++;
 
-						// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+						// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 						*pDestTemp		= ColorSet[colorSet][colorGradation];
 												//& ColorDraw::s_wMASK_RGB[colorSet];
 						pDestTemp ++;
 					} while (--k);
 				}
 
-				// Normal ���� ��
+				// Normal 색깔 수
 				colorCount = *pPixels++;
 				
 				CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, colorCount);
@@ -5867,11 +5867,11 @@ CIndexSprite::BltColorSetClipHeight(WORD *pDest, WORD pitch, RECT* pRect, WORD c
 // s_Value1 - Main Color
 // s_Value2 - Sub Color
 //-----------------------------------------------------------------------------
-//    ( (��������, Index����, 
-//                 (indexSet��ȣ, gradation��ȣ), 
-//                 (indexSet��ȣ, gradation��ȣ), 
+//    ( (투명색수, Index색수, 
+//                 (indexSet번호, gradation번호), 
+//                 (indexSet번호, gradation번호), 
 //-----------------------------------------------------------------------------
-// Clipping���� �ʴ´�.
+// Clipping하지 않는다.
 //-----------------------------------------------------------------------------
 void
 CIndexSprite::BltEffect(WORD *pDest, WORD pitch)
@@ -5903,28 +5903,28 @@ CIndexSprite::BltEffect(WORD *pDest, WORD pitch)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,Index��,�����)�� �ݺ� ��		
+			// (투명수,Index색,색깔들)의 반복 수		
 			transPair	= *pPixels++;
 			
- 			// �� �� ���		
+ 			// 한 줄 출력		
 			if (transPair > 0)
 			{
 				j = transPair;
 				do
 				{
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	// 투명색만큼 건너 뛴다.
+					indexCount = *pPixels++;	// Index반복 수
 
 					if (indexCount > 0)
 					{
-						// indexCount����ŭ index������ ����Ѵ�.
+						// indexCount수만큼 index색들을 출력한다.
 						memcpyEffect( pDestTemp, pPixels, indexCount );
 
 						pDestTemp += indexCount;
 						pPixels += indexCount;
 					}
 
-					// Normal ���� ��
+					// Normal 색깔 수
 					colorCount = *pPixels++;
 					
 					if (colorCount > 0)
@@ -5948,12 +5948,12 @@ CIndexSprite::BltEffect(WORD *pDest, WORD pitch)
 // s_Value1 - Main Color
 // s_Value2 - Sub Color
 //-----------------------------------------------------------------------------
-//    ( (��������, Index����, 
-//                 (indexSet��ȣ, gradation��ȣ), 
-//                 (indexSet��ȣ, gradation��ȣ), 
+//    ( (투명색수, Index색수, 
+//                 (indexSet번호, gradation번호), 
+//                 (indexSet번호, gradation번호), 
 //-----------------------------------------------------------------------------
-// ���� clipping.  
-// rectLeft���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
+// 왼쪽 clipping.  
+// rectLeft개의 점을 건너띈 다음부터 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CIndexSprite::BltEffectClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
@@ -5962,7 +5962,7 @@ CIndexSprite::BltEffectClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -5981,50 +5981,50 @@ CIndexSprite::BltEffectClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 	int rectLeft = pRect->left;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	for (int i=pRect->top; i<rectBottom; i++)
 	{
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------		
 		if (count > 0)
 		{
 			j = count;
 			do
 			{
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				indexCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;			
 			
 				//---------------------------------------------
-				// index�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				// index색까지하면 xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+indexCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// indexCount����ŭ index������ ����Ѵ�.
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							memcpyEffect( pDestTemp, pPixels, indexCount );
@@ -6034,7 +6034,7 @@ CIndexSprite::BltEffectClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 						}
 
 
-						// Normal �� ��� ���
+						// Normal 색 모두 출력
 						colorCount = *pPixels++;
 						
 						if (colorCount > 0)
@@ -6045,21 +6045,21 @@ CIndexSprite::BltEffectClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 							pPixels		+= colorCount;					
 						}
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���, index�Ϻ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우, index일부 출력
 					//---------------------------------------------
 					else
 					{					
-						dist = rectLeft - index;		// ���ʿ��� skip�Ǵ� ���� ��
+						dist = rectLeft - index;		// 왼쪽에서 skip되는 점들 수
 						
 						pPixels += dist;
 						indexCount -= dist;
 						
-						// indexCount����ŭ index������ ����Ѵ�.
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							memcpyEffect( pDestTemp, pPixels, indexCount );
@@ -6069,7 +6069,7 @@ CIndexSprite::BltEffectClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 						}
 
 
-						// Normal �� ��� ���
+						// Normal 색 모두 출력
 						colorCount = *pPixels++;
 						
 						if (colorCount > 0)
@@ -6080,31 +6080,31 @@ CIndexSprite::BltEffectClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 							pPixels		+= colorCount;
 						}
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}		
 
 				
-				// index������ŭ index����
+				// index색수만큼 index증가
 				index += indexCount;
 
-				// index����ŭ skip
+				// index색깔만큼 skip
 				pPixels += indexCount;
 
-				// normal ���� ��
+				// normal 색깔 수
 				colorCount = *pPixels++;			
 				
 				//---------------------------------------------
-				// index�������ؼ��� xxxx������ �� �Ѿ��..
-				// normal�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				// index색까지해서는 xxxx범위를 안 넘어가고..
+				// normal색까지하면 xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					dist = rectLeft - index;				
 					colorCount2 = colorCount - dist;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					if (colorCount2 > 0)
 					{
 						CSpriteSurface::memcpyEffect(pDestTemp, pPixels+dist, colorCount2);
@@ -6112,26 +6112,26 @@ CIndexSprite::BltEffectClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 						pPixels += colorCount;
 					}
 
-					// �������ʹ� ��� ����Ѵ�.
+					// 이제부터는 계속 출력한다.
 					break;			
 				}		
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			// 이제부터는 계속 출력한다.		
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do {
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	// 투명색만큼 건너 뛴다.
+					indexCount = *pPixels++;	// Index반복 수
 
-					// indexCount����ŭ index������ ����Ѵ�.
+					// indexCount수만큼 index색들을 출력한다.
 					if (indexCount > 0)
 					{
 						memcpyEffect( pDestTemp, pPixels, indexCount );
@@ -6140,7 +6140,7 @@ CIndexSprite::BltEffectClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 						pPixels += indexCount;
 					}
 
-					// Normal ���� ��
+					// Normal 색깔 수
 					colorCount = *pPixels++;
 					
 					if (colorCount > 0)
@@ -6163,8 +6163,8 @@ CIndexSprite::BltEffectClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // BltEffect ClipRight
 //----------------------------------------------------------------------
-// ������ clipping.  
-// rectRight�� ������ ���� pDest�� ����Ѵ�.
+// 오른쪽 clipping.  
+// rectRight개 까지의 점만 pDest에 출력한다.
 //----------------------------------------------------------------------
 void
 CIndexSprite::BltEffectClipRight(WORD* pDest, WORD pitch, RECT* pRect)
@@ -6173,7 +6173,7 @@ CIndexSprite::BltEffectClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -6195,52 +6195,52 @@ CIndexSprite::BltEffectClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		// 각 줄마다 Clipping을 해줘야 하는데...		
+		// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				indexCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����
+				// 투명색만큼 index증가
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+				// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 				//---------------------------------------------
-				// index������ ������ ������ �������� ���
+				// index색까지 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+indexCount > rectRight)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					// 투명색만으로 더 출력할 필요가 없을 때
 					if (index > rectRight)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					// 투명색 아닌 것을 조금 출력해야 할 경우
 					else
 					{
 						pDestTemp += transCount;
 
-						// ���������� skip�Ǵ� ������ ���ش�.
+						// 오른쪽으로 skip되는 점들을 빼준다.
 						indexCount = rectRight - index;
 
-						// indexCount����ŭ index������ ����Ѵ�.
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							memcpyEffect( pDestTemp, pPixels, indexCount );
@@ -6254,13 +6254,13 @@ CIndexSprite::BltEffectClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				// 투명색만큼 건너띄고
 				pDestTemp += transCount;
 
 				//-------------------------
-				// index�� ��� ���
+				// index색 모두 출력
 				//-------------------------
-				// indexCount����ŭ index������ ����Ѵ�.
+				// indexCount수만큼 index색들을 출력한다.
 				if (indexCount > 0)
 				{
 					memcpyEffect( pDestTemp, pPixels, indexCount );
@@ -6269,19 +6269,19 @@ CIndexSprite::BltEffectClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 					pPixels += indexCount;
 				}
 
-				// ����� indexCount��ŭ index����
+				// 출력한 indexCount만큼 index증가
 				index += indexCount;
 				
 
-				// Normal ���� ��
+				// Normal 색깔 수
 				colorCount = *pPixels++;
 
 				//---------------------------------------------
-				// normal������ ������ ������ �������� ���
+				// normal색까지 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+colorCount > rectRight)
 				{
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					int tempCount = rectRight - index;
 					if (tempCount > 0)
 					{
@@ -6291,7 +6291,7 @@ CIndexSprite::BltEffectClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 				}			
 				
 				//--------------------
-				// normal�� ��� ���
+				// normal색 모두 출력
 				//--------------------
 				if (colorCount > 0)
 				{
@@ -6314,13 +6314,13 @@ CIndexSprite::BltEffectClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 // s_Value1 - Main Color
 // s_Value2 - Sub Color
 //-----------------------------------------------------------------------------
-//    ( (��������, Index����, 
-//                 (indexSet��ȣ, gradation��ȣ), 
-//                 (indexSet��ȣ, gradation��ȣ), 
+//    ( (투명색수, Index색수, 
+//                 (indexSet번호, gradation번호), 
+//                 (indexSet번호, gradation번호), 
 //-----------------------------------------------------------------------------
-// ���� clipping.  
-// rectLeft���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
-// rectRight����..
+// 왼쪽 clipping.  
+// rectLeft개의 점을 건너띈 다음부터 pDest에 출력한다.
+// rectRight까지..
 //----------------------------------------------------------------------
 void
 CIndexSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
@@ -6329,7 +6329,7 @@ CIndexSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -6346,7 +6346,7 @@ CIndexSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 	//int colorSet, colorGradation;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -6356,42 +6356,42 @@ CIndexSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {		
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				indexCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;			
 			
 				//---------------------------------------------
-				// index�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				// index색까지하면 xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+indexCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// indexCount����ŭ index������ ����Ѵ�.
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							memcpyEffect( pDestTemp, pPixels, indexCount );
@@ -6401,7 +6401,7 @@ CIndexSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 						}
 
 
-						// Normal �� ��� ���
+						// Normal 색 모두 출력
 						colorCount = *pPixels++;
 						
 						if (colorCount > 0)
@@ -6412,21 +6412,21 @@ CIndexSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 							pPixels		+= colorCount;					
 						}
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���, index�Ϻ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우, index일부 출력
 					//---------------------------------------------
 					else
 					{					
-						dist = rectLeft - index;		// ���ʿ��� skip�Ǵ� ���� ��
+						dist = rectLeft - index;		// 왼쪽에서 skip되는 점들 수
 						
 						pPixels += dist;
 						indexCount -= dist;
 						
-						// indexCount����ŭ index������ ����Ѵ�.
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							memcpyEffect( pDestTemp, pPixels, indexCount );
@@ -6435,7 +6435,7 @@ CIndexSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 							pPixels += indexCount;
 						}
 
-						// Normal �� ��� ���
+						// Normal 색 모두 출력
 						colorCount = *pPixels++;
 						
 						if (colorCount > 0)
@@ -6447,31 +6447,31 @@ CIndexSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 							index += colorCount;
 						}
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}		
 
 				
-				// index������ŭ index����
+				// index색수만큼 index증가
 				index += indexCount;
 
-				// index����ŭ skip
+				// index색깔만큼 skip
 				pPixels += indexCount;
 
-				// normal ���� ��
+				// normal 색깔 수
 				colorCount = *pPixels++;			
 				
 				//---------------------------------------------
-				// index�������ؼ��� xxxx������ �� �Ѿ��..
-				// normal�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				// index색까지해서는 xxxx범위를 안 넘어가고..
+				// normal색까지하면 xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					dist = rectLeft - index;				
 					colorCount2 = colorCount - dist;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					if (colorCount2 > 0)
 					{
 						CSpriteSurface::memcpyEffect(pDestTemp, pPixels+dist, colorCount2);
@@ -6480,55 +6480,55 @@ CIndexSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 					pPixels += colorCount;
 					index += colorCount;					
 
-					// �������ʹ� ��� ����Ѵ�.
+					// 이제부터는 계속 출력한다.
 					break;			
 				}		
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			// 각 줄마다 Clipping을 해줘야 하는데...		
+			// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 			//---------------------------------------------
 			if (--j > 0)		
 			{
 				do {
-					transCount = *pPixels++;		// ������ ��			
-					indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					indexCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����
+					// 투명색만큼 index증가
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 					//---------------------------------------------
-					// index������ ������ ������ �������� ���
+					// index색까지 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+indexCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						// 투명색만으로 더 출력할 필요가 없을 때
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						// 투명색 아닌 것을 조금 출력해야 할 경우
 						else
 						{
 							pDestTemp += transCount;
 
-							// ���������� skip�Ǵ� ������ ���ش�.
+							// 오른쪽으로 skip되는 점들을 빼준다.
 							indexCount = rectRight - index;
 
-							// indexCount����ŭ index������ ����Ѵ�.
+							// indexCount수만큼 index색들을 출력한다.
 							if (indexCount > 0)
 							{
 								memcpyEffect( pDestTemp, pPixels, indexCount );
@@ -6542,13 +6542,13 @@ CIndexSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					// 투명색만큼 건너띄고
 					pDestTemp += transCount;
 
 					//-------------------------
-					// index�� ��� ���
+					// index색 모두 출력
 					//-------------------------
-					// indexCount����ŭ index������ ����Ѵ�.
+					// indexCount수만큼 index색들을 출력한다.
 					if (indexCount > 0)
 					{
 						memcpyEffect( pDestTemp, pPixels, indexCount );
@@ -6557,19 +6557,19 @@ CIndexSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 						pPixels += indexCount;
 					}
 
-					// ����� indexCount��ŭ index����
+					// 출력한 indexCount만큼 index증가
 					index += indexCount;
 					
 
-					// Normal ���� ��
+					// Normal 색깔 수
 					colorCount = *pPixels++;
 
 					//---------------------------------------------
-					// normal������ ������ ������ �������� ���
+					// normal색까지 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						int tempCount = rectRight - index;
 						if (tempCount > 0)
 						{
@@ -6579,7 +6579,7 @@ CIndexSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 					}			
 					
 					//--------------------
-					// normal�� ��� ���
+					// normal색 모두 출력
 					//--------------------
 					if (colorCount > 0)
 					{
@@ -6601,7 +6601,7 @@ CIndexSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // BltEffect Clip Height
 //----------------------------------------------------------------------
-// pRect->top, rectBottom��ŭ�� ����Ѵ�.
+// pRect->top, rectBottom만큼만 출력한다.
 //----------------------------------------------------------------------
 void
 CIndexSprite::BltEffectClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
@@ -6625,18 +6625,18 @@ CIndexSprite::BltEffectClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		// (투명수,색깔수,색깔들)의 반복 수		
 		count	= *pPixels++;		
 
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{
 			j = count;
 			do {		
-				pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-				indexCount = *pPixels++;	// Index�ݺ� ��
+				pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+				indexCount = *pPixels++;	// Index반복 수
 
-				// indexCount����ŭ index������ ����Ѵ�.
+				// indexCount수만큼 index색들을 출력한다.
 				if (indexCount > 0)
 				{
 					memcpyEffect( pDestTemp, pPixels, indexCount );
@@ -6645,7 +6645,7 @@ CIndexSprite::BltEffectClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 					pPixels += indexCount;
 				}
 
-				// Normal ���� ��
+				// Normal 색깔 수
 				colorCount = *pPixels++;
 				
 				if (colorCount > 0)
@@ -6743,7 +6743,7 @@ CIndexSprite::memcpyEffectSimpleOutline(WORD* pDest, WORD* pSource, WORD pixels)
 {
 	int colorSet, colorGradation;
 
-	// ù ��
+	// 첫 점
 	colorSet		= (*pSource >> 8) & 0xFF;						
 	colorGradation	= *pSource & 0xFF;			// gradation
 	*pDest			= ColorSet[s_IndexValue[colorSet]][colorGradation];
@@ -6753,7 +6753,7 @@ CIndexSprite::memcpyEffectSimpleOutline(WORD* pDest, WORD* pSource, WORD pixels)
 	pDest += pixels_1;
 	pSource += pixels_1;
 	
-	// �� ��
+	// 끝 점
 	colorSet		= (*pSource >> 8) & 0xFF;						
 	colorGradation	= *pSource & 0xFF;			// gradation
 	//*pDest			= ColorSet[s_IndexValue[colorSet]][colorGradation];
@@ -6771,12 +6771,12 @@ CIndexSprite::memcpyEffectWipeOut(WORD* pDest, WORD* pSource, WORD pixels)
 	int drawPixels = (pixels - skipPixels)>>1;
 	int drawPixels2 = pixels - drawPixels - skipPixels;
 	
-	// [1] drawPixels��ŭ ����ϰ�..
-	// [2] skipPixels ��ŭ �ǳʶ��
-	// [3] drawPixels2��ŭ ���
+	// [1] drawPixels만큼 출력하고..
+	// [2] skipPixels 만큼 건너띄고
+	// [3] drawPixels2만큼 출력
 	
 	//------------------------------------------------------------	
-	// drawPixels��ŭ ���
+	// drawPixels만큼 출력
 	//------------------------------------------------------------		
 	if (drawPixels > 0)
 	{
@@ -6786,20 +6786,20 @@ CIndexSprite::memcpyEffectWipeOut(WORD* pDest, WORD* pSource, WORD pixels)
 			colorGradation	= *pSource & 0xFF;			// gradation
 			pSource++;
 
-			// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+			// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 			*pDest		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 			pDest ++;
 		} while (--drawPixels);
 	}
 
 	//------------------------------------------------------------	
-	// skipPixels��ŭ �ǳʶ�
+	// skipPixels만큼 건너띔
 	//------------------------------------------------------------	
 	pDest += skipPixels;
 	pSource += skipPixels;
 
 	//------------------------------------------------------------	
-	// drawPixels2��ŭ ���
+	// drawPixels2만큼 출력
 	//------------------------------------------------------------	
 	if (drawPixels2 > 0)
 	{
@@ -6809,7 +6809,7 @@ CIndexSprite::memcpyEffectWipeOut(WORD* pDest, WORD* pSource, WORD pixels)
 			colorGradation	= *pSource & 0xFF;			// gradation
 			pSource++;
 
-			// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+			// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 			*pDest		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 			pDest ++;
 		} while (--drawPixels2);
@@ -6822,24 +6822,24 @@ CIndexSprite::memcpyEffectWipeOut(WORD* pDest, WORD* pSource, WORD pixels)
 //----------------------------------------------------------------------
 // memcpy EffectNet
 //----------------------------------------------------------------------
-// �׹���
+// 그물망
 //----------------------------------------------------------------------
 void		
 CIndexSprite::memcpyEffectNet(WORD* pDest, WORD* pSource, WORD pixels)
 {
-	// �����(1) + �ǳʶ����(s_Value1)
+	// 찍는점(1) + 건너띄는점(s_Value1)
 	register int i = pixels;
 	int skipPixels = 1 + CSpriteSurface::s_Value1;
 
 	int colorSet, colorGradation;	
 	
-	// ���� ��� , skipPixels��ŭ �ǳʶ��
+	// 한점 찍고 , skipPixels만큼 건너띄기
 	do
 	{
 		colorSet		= (*pSource >> 8) & 0xFF;						
 		colorGradation	= *pSource & 0xFF;			// gradation
 		
-		// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+		// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 		*pDest		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 
 		pSource += skipPixels;
@@ -6930,18 +6930,18 @@ CIndexSprite::BltBrightness(WORD *pDest, WORD pitch, BYTE DarkBits)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,Index��,�����)�� �ݺ� ��		
+			// (투명수,Index색,색깔들)의 반복 수		
 			transPair	= *pPixels++;
 			
- 			// �� �� ���
+ 			// 한 줄 출력
 			if (transPair > 0)
 			{
 				j = transPair;
 				do {
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	// 투명색만큼 건너 뛴다.
+					indexCount = *pPixels++;	// Index반복 수
 
-					// indexCount����ŭ index������ ����Ѵ�.
+					// indexCount수만큼 index색들을 출력한다.
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -6950,14 +6950,14 @@ CIndexSprite::BltBrightness(WORD *pDest, WORD pitch, BYTE DarkBits)
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 							*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 							pDestTemp ++;
 						} while (--k);
 						
 					}
 
-					// Normal ���� ��
+					// Normal 색깔 수
 					colorCount = *pPixels++;
 					
 					CSpriteSurface::memcpyBrightness(pDestTemp, pPixels, colorCount);					
@@ -6984,7 +6984,7 @@ CIndexSprite::BltBrightnessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE D
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -7001,7 +7001,7 @@ CIndexSprite::BltBrightnessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE D
 	int colorSet, colorGradation;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -7010,43 +7010,43 @@ CIndexSprite::BltBrightnessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE D
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {		
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				indexCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;			
 			
 				//---------------------------------------------
-				// index�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				// index색까지하면 xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+indexCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// index�� ��� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						// index색 모두 출력
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -7055,13 +7055,13 @@ CIndexSprite::BltBrightnessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE D
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						// Normal 색 모두 출력
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyBrightness(pDestTemp, pPixels, colorCount);
@@ -7069,22 +7069,22 @@ CIndexSprite::BltBrightnessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE D
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;					
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���, index�Ϻ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우, index일부 출력
 					//---------------------------------------------
 					else
 					{					
-						dist = rectLeft - index;		// ���ʿ��� skip�Ǵ� ���� ��
+						dist = rectLeft - index;		// 왼쪽에서 skip되는 점들 수
 						
 						pPixels += dist;
 						indexCount -= dist;
 						
-						// index�� �Ϻ� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						// index색 일부 출력
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -7093,13 +7093,13 @@ CIndexSprite::BltBrightnessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE D
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						// Normal 색 모두 출력
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyBrightness(pDestTemp, pPixels, colorCount);
@@ -7107,55 +7107,55 @@ CIndexSprite::BltBrightnessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE D
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}		
 
 				
-				// index������ŭ index����
+				// index색수만큼 index증가
 				index += indexCount;
 
-				// index����ŭ skip
+				// index색깔만큼 skip
 				pPixels += indexCount;
 
-				// normal ���� ��
+				// normal 색깔 수
 				colorCount = *pPixels++;			
 				
 				//---------------------------------------------
-				// index�������ؼ��� xxxx������ �� �Ѿ��..
-				// normal�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				// index색까지해서는 xxxx범위를 안 넘어가고..
+				// normal색까지하면 xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					dist = rectLeft - index;				
 					colorCount2 = colorCount - dist;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					CSpriteSurface::memcpyBrightness(pDestTemp, pPixels+dist, colorCount2);
 					pDestTemp += colorCount2;
 					pPixels += colorCount;
 
-					// �������ʹ� ��� ����Ѵ�.
+					// 이제부터는 계속 출력한다.
 					break;			
 				}		
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			// 이제부터는 계속 출력한다.		
 			//---------------------------------------------	
 			if (--j > 0)
 			{
 				do {		
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	// 투명색만큼 건너 뛴다.
+					indexCount = *pPixels++;	// Index반복 수
 
-					// indexCount����ŭ index������ ����Ѵ�.
+					// indexCount수만큼 index색들을 출력한다.
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -7164,13 +7164,13 @@ CIndexSprite::BltBrightnessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE D
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 							*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 							pDestTemp ++;
 						} while (--k);
 					}
 
-					// Normal ���� ��
+					// Normal 색깔 수
 					colorCount = *pPixels++;
 					
 					CSpriteSurface::memcpyBrightness(pDestTemp, pPixels, colorCount);
@@ -7197,7 +7197,7 @@ CIndexSprite::BltBrightnessClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -7218,52 +7218,52 @@ CIndexSprite::BltBrightnessClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		// 각 줄마다 Clipping을 해줘야 하는데...		
+		// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				indexCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����
+				// 투명색만큼 index증가
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+				// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 				//---------------------------------------------
-				// index������ ������ ������ �������� ���
+				// index색까지 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+indexCount > rectRight)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					// 투명색만으로 더 출력할 필요가 없을 때
 					if (index > rectRight)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					// 투명색 아닌 것을 조금 출력해야 할 경우
 					else
 					{
 						pDestTemp += transCount;
 
-						// ���������� skip�Ǵ� ������ ���ش�.
+						// 오른쪽으로 skip되는 점들을 빼준다.
 						indexCount = rectRight - index;
 
-						// indexCount����ŭ index������ ����Ѵ�.
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -7272,7 +7272,7 @@ CIndexSprite::BltBrightnessClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
@@ -7282,13 +7282,13 @@ CIndexSprite::BltBrightnessClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				// 투명색만큼 건너띄고
 				pDestTemp += transCount;
 
 				//-------------------------
-				// index�� ��� ���
+				// index색 모두 출력
 				//-------------------------
-				// indexCount����ŭ index������ ����Ѵ�.
+				// indexCount수만큼 index색들을 출력한다.
 				if (indexCount > 0)
 				{
 					k = indexCount;
@@ -7297,30 +7297,30 @@ CIndexSprite::BltBrightnessClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 						colorGradation	= (*pPixels & 0xFF);			// gradation
 						pPixels++;
 
-						// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+						// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 						*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 						pDestTemp ++;
 					} while (--k);
 				}		
-				// ����� indexCount��ŭ index����
+				// 출력한 indexCount만큼 index증가
 				index += indexCount;
 				
 
-				// Normal ���� ��
+				// Normal 색깔 수
 				colorCount = *pPixels++;
 
 				//---------------------------------------------
-				// normal������ ������ ������ �������� ���
+				// normal색까지 오른쪽 끝까지 도달했을 경우
 				//---------------------------------------------			
 				if (index+colorCount > rectRight)
 				{
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					CSpriteSurface::memcpyBrightness(pDestTemp, pPixels, rectRight - index);
 					break;			
 				}			
 				
 				//--------------------
-				// normal�� ��� ���
+				// normal색 모두 출력
 				//--------------------
 				CSpriteSurface::memcpyBrightness(pDestTemp, pPixels, colorCount);
 
@@ -7346,7 +7346,7 @@ CIndexSprite::BltBrightnessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	// pRect만큼의 점을 출력한다.
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -7363,7 +7363,7 @@ CIndexSprite::BltBrightnessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 	int colorSet, colorGradation;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	// 출력해야하는 모든 줄에 대해서..
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -7373,43 +7373,43 @@ CIndexSprite::BltBrightnessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		// (투명수,색깔수,색깔들)의 반복 수
 		count = *pPixels++;		
 
-		// �� �� ���		
+		// 한 줄 출력		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		// 각 줄마다 Clipping을 해줘야 하는데...
+		// xxxxOOOOOOOOOOOOOO인 경우이므로..
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		// xxxx부분까지 check해주는 루틴
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		// 투명색 수			
+				indexCount = *pPixels++;		// 투명 아닌 색 수			
 						
-				// ��������ŭ index����			
+				// 투명색만큼 index증가			
 				index += transCount;			
 			
 				//---------------------------------------------
-				// index�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				// index색까지하면 xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+indexCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					// 투명색만으로 xxxx범위를 넘어갔을 경우
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						// 투명색부분 건너띔
 						pDestTemp += index - rectLeft;
 
-						// index�� ��� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						// index색 모두 출력
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -7418,13 +7418,13 @@ CIndexSprite::BltBrightnessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						// Normal 색 모두 출력
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyBrightness(pDestTemp, pPixels, colorCount);
@@ -7432,22 +7432,22 @@ CIndexSprite::BltBrightnessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;					
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���, index�Ϻ� ���
+					// 투명색+투명아닌색의 일부까지 출력하면 
+					// xxxx범위를 넘어가게 되는 경우, index일부 출력
 					//---------------------------------------------
 					else
 					{					
-						dist = rectLeft - index;		// ���ʿ��� skip�Ǵ� ���� ��
+						dist = rectLeft - index;		// 왼쪽에서 skip되는 점들 수
 						
 						pPixels += dist;
 						indexCount -= dist;
 						
-						// index�� �Ϻ� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						// index색 일부 출력
+						// indexCount수만큼 index색들을 출력한다.
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -7456,13 +7456,13 @@ CIndexSprite::BltBrightnessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 								*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						// Normal 색 모두 출력
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyBrightness(pDestTemp, pPixels, colorCount);
@@ -7471,85 +7471,85 @@ CIndexSprite::BltBrightnessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 						pPixels		+= colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						// 이제부터는 계속 출력한다.
 						break;
 					}
 				}		
 
 				
-				// index������ŭ index����
+				// index색수만큼 index증가
 				index += indexCount;
 
-				// index����ŭ skip
+				// index색깔만큼 skip
 				pPixels += indexCount;
 
-				// normal ���� ��
+				// normal 색깔 수
 				colorCount = *pPixels++;			
 				
 				//---------------------------------------------
-				// index�������ؼ��� xxxx������ �� �Ѿ��..
-				// normal�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				// index색까지해서는 xxxx범위를 안 넘어가고..
+				// normal색까지하면 xxxx범위를 넘어가게 되는 경우
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					dist = rectLeft - index;				
 					colorCount2 = colorCount - dist;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					// 투명이 아닌 색들을 Surface에 출력한다.
 					CSpriteSurface::memcpyBrightness(pDestTemp, pPixels+dist, colorCount2);
 					pDestTemp += colorCount2;
 					pPixels += colorCount;
 					index += colorCount;
 
-					// �������ʹ� ��� ����Ѵ�.
+					// 이제부터는 계속 출력한다.
 					break;			
 				}		
 
-				// ������ �ƴ� ����ŭ index����				
+				// 투명이 아닌 색만큼 index증가				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			// 각 줄마다 Clipping을 해줘야 하는데...		
+			// OOOOOOOOOOOOOOxxxxx 이런 경우이다.
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			// OOOOOOOOOOOOOO까지만 출력해주면 된다.
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do {
-					transCount = *pPixels++;		// ������ ��			
-					indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		// 투명색 수			
+					indexCount = *pPixels++;		// 투명 아닌 색 수			
 							
-					// ��������ŭ index����
+					// 투명색만큼 index증가
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					// 출력하고 있다가 오른쪽부분부터 출력하지 말아야 할 경우가 있다.
+					// 현재 출력하는 줄은 모두 출력한 것이므로 break해야 한다.
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					// 투명색까지 출력하는것만으로 더 이상 출력할 필요가 없을 경우
 
 					//---------------------------------------------
-					// index������ ������ ������ �������� ���
+					// index색까지 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+indexCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						// 투명색만으로 더 출력할 필요가 없을 때
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						// 투명색 아닌 것을 조금 출력해야 할 경우
 						else
 						{
 							pDestTemp += transCount;
 
-							// ���������� skip�Ǵ� ������ ���ش�.
+							// 오른쪽으로 skip되는 점들을 빼준다.
 							indexCount = rectRight - index;
 
-							// indexCount����ŭ index������ ����Ѵ�.
+							// indexCount수만큼 index색들을 출력한다.
 							if (indexCount > 0)
 							{
 								k = indexCount;
@@ -7558,7 +7558,7 @@ CIndexSprite::BltBrightnessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 									colorGradation	= (*pPixels & 0xFF);			// gradation
 									pPixels++;
 
-									// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+									// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 									*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 									pDestTemp ++;
 								} while (--k);
@@ -7568,13 +7568,13 @@ CIndexSprite::BltBrightnessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					// 투명색만큼 건너띄고
 					pDestTemp += transCount;
 
 					//-------------------------
-					// index�� ��� ���
+					// index색 모두 출력
 					//-------------------------
-					// indexCount����ŭ index������ ����Ѵ�.
+					// indexCount수만큼 index색들을 출력한다.
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -7583,30 +7583,30 @@ CIndexSprite::BltBrightnessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 							*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 							pDestTemp ++;
 						} while (--k);
 					}
-					// ����� indexCount��ŭ index����
+					// 출력한 indexCount만큼 index증가
 					index += indexCount;
 					
 
-					// Normal ���� ��
+					// Normal 색깔 수
 					colorCount = *pPixels++;
 
 					//---------------------------------------------
-					// normal������ ������ ������ �������� ���
+					// normal색까지 오른쪽 끝까지 도달했을 경우
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						// 투명이 아닌 색들을 Surface에 출력한다.
 						CSpriteSurface::memcpyBrightness(pDestTemp, pPixels, rectRight - index);
 						break;			
 					}			
 					
 					//--------------------
-					// normal�� ��� ���
+					// normal색 모두 출력
 					//--------------------
 					CSpriteSurface::memcpyBrightness(pDestTemp, pPixels, colorCount);
 
@@ -7648,18 +7648,18 @@ CIndexSprite::BltBrightnessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		// (투명수,색깔수,색깔들)의 반복 수		
 		count	= *pPixels++;		
 
-		// �� �� ���
+		// 한 줄 출력
 		if (count > 0)
 		{
 			j = count;
 			do {
-				pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-				indexCount = *pPixels++;	// Index�ݺ� ��
+				pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
+				indexCount = *pPixels++;	// Index반복 수
 
-				// indexCount����ŭ index������ ����Ѵ�.
+				// indexCount수만큼 index색들을 출력한다.
 				if (indexCount > 0)
 				{
 					k = indexCount;
@@ -7668,13 +7668,13 @@ CIndexSprite::BltBrightnessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE
 						colorGradation	= (*pPixels & 0xFF);			// gradation
 						pPixels++;
 
-						// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+						// s_IndexValue와 관련된 색을 선택해서 출력한다.				
 						*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 						pDestTemp ++;
 					} while (--k);
 				}
 
-				// Normal ���� ��
+				// Normal 색깔 수
 				colorCount = *pPixels++;
 				
 				CSpriteSurface::memcpyBrightness(pDestTemp, pPixels, colorCount);

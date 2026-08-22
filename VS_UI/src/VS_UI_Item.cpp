@@ -25,8 +25,8 @@ int				g_item_list_size = 0;
 //
 // gpC_item
 //
-// C_VS_UI_ITEM::C_VS_UI_ITEM()���� ���� object��
-// ����ϹǷ� C_VS_UI_ITEM�� C_VS_UI::Init()���� �Ҵ��Ѵ�.
+// C_VS_UI_ITEM::C_VS_UI_ITEM()에서 전역 object를
+// 사용하므로 C_VS_UI_ITEM은 C_VS_UI::Init()에서 할당한다.
 //
 C_VS_UI_ITEM *	gpC_item;
 
@@ -50,13 +50,13 @@ C_VS_UI_ITEM *	gpC_item;
 
 /*-----------------------------------------------------------------------------
 - Blt
-- Item�� ����Ѵ�.
+- Item을 출력한다.
 -----------------------------------------------------------------------------*/
 void C_VS_UI_ITEM::Blt(POINT &point, SPRITE_ID id)
 {
 //	if (p_sprite == NULL)
 //	{
-//		// Item�� "����"�� ǥ���ϱ� ���ؼ� �� Sprite�� ����Ѵ�.
+//		// Item이 "없음"을 표시하기 위해서 이 Sprite를 출력한다.
 //		m_pC_axs_spk->Blt(point);
 //		return;
 //	}
@@ -100,17 +100,17 @@ void C_VS_UI_ITEM::BltOutline(int x, int y, int color, SPRITE_ID id)
 //#endif
 	//if (p_sprite == NULL)
 	//{
-	//	// Item�� "����"�� ǥ���ϱ� ���ؼ� �� Sprite�� ����Ѵ�.
+	//	// Item이 "없음"을 표시하기 위해서 이 Sprite를 출력한다.
 	//	m_pC_axs_spk->BltOutline(x, y, color);
 	//	return;
 	//}
 	if(id >= m_item_ispk.GetSize() || id < 0)
 		return;
 
-	// focus�� ���� �ܰ����� �׸���.
-	CSpriteOutlineManager	outline_o; // �ܰ������ ��ü.
+	// focus된 것은 외곽선을 그린다.
+	CSpriteOutlineManager	outline_o; // 외곽선출력 객체.
 
-	// �ܰ������ ��ü �߰�.
+	// 외곽선출력 객체 추가.
 	outline_o.Add(x, y, &m_item_ispk[id]);
 	outline_o.Generate();
 
@@ -140,7 +140,7 @@ void C_VS_UI_ITEM::BltOutlineOnly(int x, int y, int color, SPRITE_ID id)
 //#endif
 	//if (p_sprite == NULL)
 	//{
-	//	// Item�� "����"�� ǥ���ϱ� ���ؼ� �� Sprite�� ����Ѵ�.
+	//	// Item이 "없음"을 표시하기 위해서 이 Sprite를 출력한다.
 	//	m_pC_axs_spk->BltOutline(x, y, color);
 	//	return;
 	//}
@@ -148,10 +148,10 @@ void C_VS_UI_ITEM::BltOutlineOnly(int x, int y, int color, SPRITE_ID id)
 	if(id >= m_item_ispk.GetSize() || id < 0)
 		return;
 
-	// focus�� ���� �ܰ����� �׸���.
-	CSpriteOutlineManager	outline_o; // �ܰ������ ��ü.
+	// focus된 것은 외곽선을 그린다.
+	CSpriteOutlineManager	outline_o; // 외곽선출력 객체.
 
-	// �ܰ������ ��ü �߰�.
+	// 외곽선출력 객체 추가.
 	outline_o.Add(x, y, &m_item_ispk[id]);
 	outline_o.Generate();
 
@@ -235,14 +235,14 @@ C_VS_UI_ITEM::C_VS_UI_ITEM()
 	g_pItemOptionTable->LoadFromFile( file );
 	file.close();
 
-	// ���ƾ� ���߿� ������ earring�鰡�� �ؿ� �ִ� -1 ����
+	// 으아악 나중에 서버에 earring들가면 밑에 있는 -1 뺄것
 	int i = 0;// MAX_ITEM_CLASS;
 	for (i=0; i<MAX_ITEM_CLASS; i++)
 		g_item_list_size += (*g_pItemTable)[i].GetSize();
 
 //	int n = 0;
 	extern int g_ui_item_max;
-	// edit by Coffee 2007-6-15 13:41  ����UI���Գ��������Ʒ����
+	// edit by Coffee 2007-6-15 13:41  修正UI测试程序读了物品错误
 	//for (i=0; i<MAX_ITEM_CLASS; i++)
 	for (i=0; i<MAX_ITEM_CLASS; i++)
 	// edit end by Coffee 2007-6-15 13:42
@@ -325,7 +325,7 @@ C_VS_UI_ITEM::~C_VS_UI_ITEM()
 //-----------------------------------------------------------------------------
 // BltColor
 //
-// rgb �� �ϳ������� blt�Ѵ�.
+// rgb 중 하나만으로 blt한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_ITEM::BltColor(int x, int y, SPRITE_ID id, int rgb)
 {
@@ -340,7 +340,7 @@ void C_VS_UI_ITEM::BltColor(int x, int y, SPRITE_ID id, int rgb)
 
 //	if (p_sprite == NULL)
 //	{
-//		// Item�� "����"�� ǥ���ϱ� ���ؼ� �� Sprite�� ����Ѵ�.
+//		// Item이 "없음"을 표시하기 위해서 이 Sprite를 출력한다.
 //		m_pC_axs_spk->Blt(point);
 //		return;
 //	}
@@ -359,7 +359,7 @@ void C_VS_UI_ITEM::BltColor(int x, int y, SPRITE_ID id, int rgb)
 //-----------------------------------------------------------------------------
 // BltDarkness
 //
-// rgb �� �ϳ������� blt�Ѵ�.
+// rgb 중 하나만으로 blt한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_ITEM::BltDarkness(int x, int y, SPRITE_ID id, int dark)
 {
@@ -374,7 +374,7 @@ void C_VS_UI_ITEM::BltDarkness(int x, int y, SPRITE_ID id, int dark)
 
 //	if (p_sprite == NULL)
 //	{
-//		// Item�� "����"�� ǥ���ϱ� ���ؼ� �� Sprite�� ����Ѵ�.
+//		// Item이 "없음"을 표시하기 위해서 이 Sprite를 출력한다.
 //		m_pC_axs_spk->Blt(point);
 //		return;
 //	}
@@ -393,7 +393,7 @@ void C_VS_UI_ITEM::BltDarkness(int x, int y, SPRITE_ID id, int dark)
 //-----------------------------------------------------------------------------
 // BltColorSet
 //
-// ColorSet�� �����Ͽ� ���
+// ColorSet을 적용하여 출력
 //-----------------------------------------------------------------------------
 void C_VS_UI_ITEM::BltColorSet(int x, int y, SPRITE_ID id, int color_set)
 {
@@ -420,13 +420,13 @@ void C_VS_UI_ITEM::BltColorSet(int x, int y, SPRITE_ID id, int color_set)
 
 /*-----------------------------------------------------------------------------
 - BltLocked
-- Item�� ����Ѵ�.
+- Item을 출력한다.
 -----------------------------------------------------------------------------*/
 void C_VS_UI_ITEM::BltLocked(POINT &point, SPRITE_ID id)
 {
 //	if (p_sprite == NULL)
 //	{
-//		// Item�� "����"�� ǥ���ϱ� ���ؼ� �� Sprite�� ����Ѵ�.
+//		// Item이 "없음"을 표시하기 위해서 이 Sprite를 출력한다.
 //		m_pC_axs_spk->Blt(point);
 //		return;
 //	}
@@ -466,7 +466,7 @@ void C_VS_UI_ITEM::BltLockedOutline(int x, int y, int color, SPRITE_ID id)
 //#endif
 	//if (p_sprite == NULL)
 	//{
-	//	// Item�� "����"�� ǥ���ϱ� ���ؼ� �� Sprite�� ����Ѵ�.
+	//	// Item이 "없음"을 표시하기 위해서 이 Sprite를 출력한다.
 	//	m_pC_axs_spk->BltLockedOutline(x, y, color);
 	//	return;
 	//}
@@ -474,10 +474,10 @@ void C_VS_UI_ITEM::BltLockedOutline(int x, int y, int color, SPRITE_ID id)
 	if(id >= m_item_ispk.GetSize() || id < 0)
 		return;
 
-	// focus�� ���� �ܰ����� �׸���.
-	CSpriteOutlineManager	outline_o; // �ܰ������ ��ü.
+	// focus된 것은 외곽선을 그린다.
+	CSpriteOutlineManager	outline_o; // 외곽선출력 객체.
 
-	// �ܰ������ ��ü �߰�.
+	// 외곽선출력 객체 추가.
 	outline_o.Add(x, y, &m_item_ispk[id]);
 	outline_o.Generate();
 
@@ -502,7 +502,7 @@ void C_VS_UI_ITEM::BltLockedOutlineOnly(int x, int y, int color, SPRITE_ID id)
 //#endif
 	//if (p_sprite == NULL)
 	//{
-	//	// Item�� "����"�� ǥ���ϱ� ���ؼ� �� Sprite�� ����Ѵ�.
+	//	// Item이 "없음"을 표시하기 위해서 이 Sprite를 출력한다.
 	//	m_pC_axs_spk->BltOutline(x, y, color);
 	//	return;
 	//}
@@ -510,10 +510,10 @@ void C_VS_UI_ITEM::BltLockedOutlineOnly(int x, int y, int color, SPRITE_ID id)
 	if(id >= m_item_ispk.GetSize() || id < 0)
 		return;
 
-	// focus�� ���� �ܰ����� �׸���.
-	CSpriteOutlineManager	outline_o; // �ܰ������ ��ü.
+	// focus된 것은 외곽선을 그린다.
+	CSpriteOutlineManager	outline_o; // 외곽선출력 객체.
 
-	// �ܰ������ ��ü �߰�.
+	// 외곽선출력 객체 추가.
 	outline_o.Add(x, y, &m_item_ispk[id]);
 	outline_o.Generate();
 
@@ -528,7 +528,7 @@ void C_VS_UI_ITEM::BltLockedOutlineOnly(int x, int y, int color, SPRITE_ID id)
 //-----------------------------------------------------------------------------
 // BltLockedColor
 //
-// rgb �� �ϳ������� blt�Ѵ�.
+// rgb 중 하나만으로 blt한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_ITEM::BltLockedColor(int x, int y, SPRITE_ID id, int rgb)
 {
@@ -546,7 +546,7 @@ void C_VS_UI_ITEM::BltLockedColor(int x, int y, SPRITE_ID id, int rgb)
 
 //	if (p_sprite == NULL)
 //	{
-//		// Item�� "����"�� ǥ���ϱ� ���ؼ� �� Sprite�� ����Ѵ�.
+//		// Item이 "없음"을 표시하기 위해서 이 Sprite를 출력한다.
 //		m_pC_axs_spk->Blt(point);
 //		return;
 //	}
@@ -557,7 +557,7 @@ void C_VS_UI_ITEM::BltLockedColor(int x, int y, SPRITE_ID id, int rgb)
 //-----------------------------------------------------------------------------
 // BltLockedDarkness
 //
-// rgb �� �ϳ������� blt�Ѵ�.
+// rgb 중 하나만으로 blt한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_ITEM::BltLockedDarkness(int x, int y, SPRITE_ID id, int dark)
 {
@@ -575,7 +575,7 @@ void C_VS_UI_ITEM::BltLockedDarkness(int x, int y, SPRITE_ID id, int dark)
 
 //	if (p_sprite == NULL)
 //	{
-//		// Item�� "����"�� ǥ���ϱ� ���ؼ� �� Sprite�� ����Ѵ�.
+//		// Item이 "없음"을 표시하기 위해서 이 Sprite를 출력한다.
 //		m_pC_axs_spk->Blt(point);
 //		return;
 //	}
@@ -586,7 +586,7 @@ void C_VS_UI_ITEM::BltLockedDarkness(int x, int y, SPRITE_ID id, int dark)
 //-----------------------------------------------------------------------------
 // BltColorSet
 //
-// ColorSet�� �����Ͽ� ���
+// ColorSet을 적용하여 출력
 //-----------------------------------------------------------------------------
 void C_VS_UI_ITEM::BltLockedColorSet(int x, int y, SPRITE_ID id, int color_set)
 {

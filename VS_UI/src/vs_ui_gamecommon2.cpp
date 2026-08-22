@@ -228,10 +228,10 @@ void g_StartOustersDownSkill( int _x, int _y , int PriceRaito)
 	char szBuffer[256];
 	char szCost[100];
 
-	// 1�������Ҵ�ȸ������Ʈ * ���ҷ��� * (ĳ���ͷ���)^1.3 * 200
+	// 1레벨감소당회수포인트 * 감소레벨 * (캐릭터레벨)^1.3 * 200
 	int DownPrice = int ( float((*g_pSkillInfoTable)[g_CurrentSkillID].LevelUpPoint) * pow(g_char_slot_ingame.level, 1.3 ) * 200.0f   ) * PriceRaito;
 	if(0 == DownPrice)
-		DownPrice = 1000000; // �鸸��
+		DownPrice = 1000000; // 백만원
 	wsprintf(szCost,"%d", DownPrice);
 	
 	std::string sstr = szCost;
@@ -263,7 +263,7 @@ void g_StartOustersDownSkill( int _x, int _y , int PriceRaito)
 //------------------------------------------------------------------------------
 // C_VS_UI_ITEM_LIST
 //
-// �˾�â�� ����.
+// 팝업창을 띄운다.
 //------------------------------------------------------------------------------
 C_VS_UI_ITEM_LIST::C_VS_UI_ITEM_LIST()
 {	
@@ -449,13 +449,13 @@ void	C_VS_UI_ITEM_LIST::Show()
 			TitleColor = g_pClientConfig->COLOR_NAME_ITEM_RARE_OPTION;
 			ShadowColor = 0;//RGB(0,0,31<<3);
 		}
-		// add by Sonic 2006.10.28 ������ʾ������װ��Ϊ��ɫ
+		// add by Sonic 2006.10.28 增加显示三属性装备为红色
 		else if(pItem->GetItemOptionListCount() > 2)
 		{
 			TitleColor = g_pClientConfig->COLOR_NAME_VAMPIRE; //Red
 			ShadowColor = g_pClientConfig->COLOR_NAME_VAMPIRE; //Red
 		}
-		// end by Sonic 2006.10.28 ������ʾ������װ��Ϊ��ɫ
+		// end by Sonic 2006.10.28 增加显示三属性装备为红色
 		else
 		if ( pItem->IsEmptyItemOptionList() )
 		{
@@ -520,13 +520,13 @@ void	C_VS_UI_ITEM_LIST::Show()
 			TitleColor = g_pClientConfig->COLOR_NAME_ITEM_RARE_OPTION;
 			ShadowColor = 0;//RGB(0,0,31<<3);
 		}
-		// add by Sonic 2006.10.28 ������ʾ������װ��Ϊ��ɫ
+		// add by Sonic 2006.10.28 增加显示三属性装备为红色
 		else if(pCurrentFocusItem->GetItemOptionListCount() > 2)
 		{
 			TitleColor = g_pClientConfig->COLOR_NAME_VAMPIRE; //Red
 			ShadowColor = g_pClientConfig->COLOR_NAME_VAMPIRE; //Red
 		}
-		// end by Sonic 2006.10.28 ������ʾ������װ��Ϊ��ɫ
+		// end by Sonic 2006.10.28 增加显示三属性装备为红色
 		else
 		if ( pCurrentFocusItem->IsEmptyItemOptionList() )
 		{
@@ -597,7 +597,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 		}
 		int vx;
 		// Damage
-		if (pCurrentFocusItem->GetMaxDamage() != -1) // damage�� �ִ°�?
+		if (pCurrentFocusItem->GetMaxDamage() != -1) // damage가 있는가?
 		{
 			vx = g_PrintColorStr(strX, strY, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DAMAGE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
 			sprintf(sz_buf, "%d~%d", pCurrentFocusItem->GetMinDamage(), pCurrentFocusItem->GetMaxDamage());				
@@ -605,7 +605,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 			strY += line_gap;
 		}			
 		// critical hit
-		if (pCurrentFocusItem->GetCriticalHit() != -1)//ũ��Ʈ�� ��Ʈ�� �ִ°�?
+		if (pCurrentFocusItem->GetCriticalHit() != -1)//크리트컬 히트가 있는가?
 		{
 			vx = g_PrintColorStr(strX, strY, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_CRITICALHIT].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
 			sprintf(sz_buf, "%d", pCurrentFocusItem->GetCriticalHit());
@@ -744,7 +744,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 					if(pCurrentFocusItem->IsVampireItem() && strstr(pPartName,"MP") != NULL)
 						*strstr(pPartName,"MP") = 'H';
 					
-					BYTE PlusPoint	= optionInfo.PlusPoint; // ����Ǵ� ��ġ
+					BYTE PlusPoint	= optionInfo.PlusPoint; // 적용되는 수치
 					
 					if (pPartName)
 					{
@@ -788,7 +788,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 					if(pCurrentFocusItem->IsVampireItem() && strstr(pPartName,"MP") != NULL)
 						*strstr(pPartName,"MP") = 'H';
 					
-					BYTE PlusPoint	= optionInfo.PlusPoint; // ����Ǵ� ��ġ
+					BYTE PlusPoint	= optionInfo.PlusPoint; // 적용되는 수치
 					
 					if (pPartName)
 					{
@@ -1133,7 +1133,7 @@ bool	C_VS_UI_ITEM_LIST::DeleteItem( DWORD ID )
 //------------------------------------------------------------------------------
 // C_VS_UI_IMAGE_NOTICE
 //
-// �˾�â�� ����.
+// 팝업창을 띄운다.
 //------------------------------------------------------------------------------
 
 C_VS_UI_IMAGE_NOTICE::C_VS_UI_IMAGE_NOTICE()
@@ -1403,7 +1403,7 @@ C_VS_UI_BULLETIN_BOARD::C_VS_UI_BULLETIN_BOARD(const MItem *pItem)
 	AttrTopmost(true);
 	AttrKeyboardControl(true);
 	
-	//�����ư
+	//공통버튼
 	m_pC_button_group = new ButtonGroup(this);
 	
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(169, 116, m_pC_back_spk->GetWidth(BUTTON_OK), 
@@ -1516,7 +1516,7 @@ void	C_VS_UI_BULLETIN_BOARD::WindowEventReceiver(id_t event)
 //-----------------------------------------------------------------------------
 void	C_VS_UI_BULLETIN_BOARD::Run(id_t id)
 {
-	// ��ư�� ��Ȱ�������̸� ����!
+	// 버튼이 비활성상태이면 리턴!
 	if(status == true) return;
 
 	switch (id)
@@ -1565,7 +1565,7 @@ void	C_VS_UI_BULLETIN_BOARD::Run(id_t id)
 			}
 			else
 			{
-				// ���׸��� �ֽ��ϴ�.
+				// 빈항목이 있습니다.
 				gpC_base->SendMessage(UI_USE_XMAS_TREE, (int)(intptr_t)m_pItem, 1, NULL);
 			}
 		}
@@ -2119,7 +2119,7 @@ C_VS_UI_MIXING_FORGE::C_VS_UI_MIXING_FORGE( FORGE_CLASS forge_class, FORGE_TYPE 
 	AttrTopmost(true);
 	//AttrKeyboardControl(true);
 	
-	//�����ư
+	//공통버튼
 	m_pC_button_group = new ButtonGroup(this);
 	
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(26, 123, m_pC_back_spk->GetWidth(BUTTON_OK), 
@@ -2308,7 +2308,7 @@ bool	C_VS_UI_MIXING_FORGE::MouseControl(UINT message, int _x, int _y)
 
 				if (loop == ITEM_REF_POINT_COUNT)
 				{
-					// item�� grid ������ ������� ������ ������ ��ġ��Ų��.
+					// item이 grid 영역에 어느정도 들어오면 안으로 위치시킨다.
 					const MItem * p_pickup_item = gpC_mouse_pointer->GetPickUpItem();
 					int a, b;
 					switch (i)
@@ -2406,7 +2406,7 @@ void	C_VS_UI_MIXING_FORGE::Show()
 	m_pC_button_group->ShowDescription();
 	SHOW_WINDOW_ATTR;
 
-	//���� �����͵��� ����ص״ٰ� �Ѳ����� ��´�.
+	//글자 찍을것들을 기억해뒀다가 한꺼번에 찍는다.
 	std::vector<RECT>	vNumRect;
 	std::vector<int>	vNum;
 	
@@ -2438,7 +2438,7 @@ void	C_VS_UI_MIXING_FORGE::Show()
 		{
 			const MItem * p_item = g_pInventory->Get();
 
-			// p_item�� NULL�� �ݵ�� �ƴϴ�. �ֳ��ϸ� �����ϴ� �͸� Get()�ϱ� �����̴�.
+			// p_item은 NULL이 반드시 아니다. 왜냐하면 존재하는 것만 Get()하기 때문이다.
 			assert(p_item);
 
 			// frame id -> sprite id
@@ -2450,12 +2450,12 @@ void	C_VS_UI_MIXING_FORGE::Show()
 			int print_y = item_y + p_item->GetGridHeight()*C_VS_UI_INVENTORY::GRID_UNIT_PIXEL_Y - 12;
 			int print_x = item_x + p_item->GetGridWidth()*C_VS_UI_INVENTORY::GRID_UNIT_PIXEL_X-1;
 
-			// Item�� �����ִ� ���� ǥ��
+			// Item이 놓여있는 영역 표시
 			for (int j = 0; j < p_item->GetGridHeight(); j++)
 				for (int i = 0; i < p_item->GetGridWidth(); i++)
 				{
 					//------------------------------------------------------------
-					// ��ȯ�ҷ��� �������� ���
+					// 교환할려는 아이템인 경우
 					//------------------------------------------------------------
 					if( m_v_check[check_index] )//if (p_item->IsTrade())
 					{
@@ -2491,7 +2491,7 @@ void	C_VS_UI_MIXING_FORGE::Show()
 					CIndexSprite::SetUsingColorSet(const_cast<MItem *>(p_item)->GetItemOptionColorSet(), 0);
 
 				//------------------------------------------------------------
-				// ��ȯ�ҷ��� �������� ���
+				// 교환할려는 아이템인 경우
 				//------------------------------------------------------------
 				if( m_v_check[check_index] )
 				{
@@ -2506,7 +2506,7 @@ void	C_VS_UI_MIXING_FORGE::Show()
 					}
 				}
 				//------------------------------------------------------------
-				// ��ȯ�ҷ��� �������� �ƴ� ���
+				// 교환할려는 아이템이 아닌 경우
 				//------------------------------------------------------------
 				else
 				{
@@ -2514,7 +2514,7 @@ void	C_VS_UI_MIXING_FORGE::Show()
 				}
 			}
 
-			//������ ���� ���� alphabox ���ڴ� ���� �ʴ´� ������ �״ٰ� ���߿� ���Ƽ� �Ѳ����� ��´�
+			//아이템 개수 찍을 alphabox 숫자는 찍지 않는다 저장해 뒀다가 나중에 몰아서 한꺼번에 찍는다
 			if(p_item->IsPileItem() || p_item->IsChargeItem())
 			{
 				RECT rt;
@@ -2638,11 +2638,11 @@ bool	C_VS_UI_MIXING_FORGE::IsPixel(int _x, int _y)
 //-----------------------------------------------------------------------------
 // C_VS_UI_MIXING_FORGE::Check
 //
-// ��ȯ�ҷ��� item�� üũ�Ѵ�. 
-// �̹� üũ�Ǿ��ִٸ�.. ����Ѵ�.
+// 교환할려는 item을 체크한다. 
+// 이미 체크되어있다면.. 취소한다.
 //
-// grid_start_x, grid_start_y�� igrid �������̴�. �̰��� �����Ͽ� item
-// (x, y)�� ���Ѵ�.
+// grid_start_x, grid_start_y는 igrid 시작점이다. 이것을 참조하여 item
+// (x, y)를 구한다.
 //-----------------------------------------------------------------------------
 bool C_VS_UI_MIXING_FORGE::Check(int grid_start_x, int grid_start_y)
 {
@@ -2695,7 +2695,7 @@ bool C_VS_UI_MIXING_FORGE::Check(int grid_start_x, int grid_start_y)
 			msg = UI_STRING_MESSAGE_CANNOT_MIXING_GRADE_VALUE;
 		/*********************************************************
 
-			TO DO : ���� �ɼ� üũ�� �� �ʿ� �� �� ���⿡ �߰�
+			TO DO : 추후 옵션 체크가 더 필요 할 땐 여기에 추가
 			
 		**********************************************************/
 //		else if(p_item->GetItemClass() == ITEM_CLASS_OUSTERS_WRISTLET)
@@ -2732,7 +2732,7 @@ bool C_VS_UI_MIXING_FORGE::Check(int grid_start_x, int grid_start_y)
 //		}
 //		//2004,04,27 sobeit check grade add end
 //		else if(p_item->GetItemClass() != ITEM_CLASS_OUSTERS_STONE)
-//		{// �ƿ콺���� ���ɼ��� �ƴ� �� �ɼ� üũ 
+//		{// 아우스터즈 정령석이 아닐 때 옵션 체크 
 //			if( !IsCorrectType( p_item->GetItemType() , p_item->GetItemClass()))
 //				msg = UI_STRING_MESSAGE_CANNOT_MIXING_ITEM_TYPE;
 //			else		
@@ -2746,10 +2746,10 @@ bool C_VS_UI_MIXING_FORGE::Check(int grid_start_x, int grid_start_y)
 //
 //		}
 //		else if(p_item->GetItemClass() == ITEM_CLASS_OUSTERS_STONE)
-//		{	// �ƿ콺���� ���ɼ� �� ��
-//			// 0~4 �� ���ɼ�
-//			// 5~9 �� ���ɼ�
-//			// 10~14 ���� ���ɼ�
+//		{	// 아우스터즈 정령석 일 때
+//			// 0~4 불 정령석
+//			// 5~9 물 정령석
+//			// 10~14 대지 정령석
 //			int nType1 = -1; int nType2 = -1;
 //			if(m_p_select_item[0] == NULL && m_p_select_item[1] != NULL)
 //			{
@@ -2791,7 +2791,7 @@ bool C_VS_UI_MIXING_FORGE::Check(int grid_start_x, int grid_start_y)
 #endif
 	if( m_p_select_item[0] == NULL && m_p_select_item[1] == NULL )
 	{
-		// �ͽ̰����� ����, ����,�Ƹ�,�Ǽ��� �´��� üũ
+		// 믹싱가능한 조건, 웨폰,아머,악세에 맞는지 체크
 		if (p_item != NULL &&
 			p_item->IsUniqueItem() == false &&
 			p_item->GetItemOptionListCount() == 1 &&
@@ -2809,15 +2809,15 @@ bool C_VS_UI_MIXING_FORGE::Check(int grid_start_x, int grid_start_y)
 	else
 	if( m_p_select_item[0] == NULL && m_p_select_item[1] != NULL )
 	{
-		// ���� �������̸� Check Off
+		// 같은 아이템이면 Check Off
 		if( p_item == m_p_select_item[1] )
 		{
 			m_p_select_item[1] = NULL;
 			b_check = true;
 		}
 		else
-		// ù��° �����۰� �����迭����, �ͽ̰����� �������� �˻�
-		// ���� �迭, �ٸ� �ɼ�, ����������� �ʵ�
+		// 첫번째 아이템과 같은계열인지, 믹싱가능한 조건인지 검사
+		// 같은 계열, 다른 옵션, 레어아이템은 않됨
 		if( p_item != NULL &&			
 			p_item->GetItemClass() == m_p_select_item[1]->GetItemClass() &&
 			p_item->GetItemType()  == m_p_select_item[1]->GetItemType() &&
@@ -2836,15 +2836,15 @@ bool C_VS_UI_MIXING_FORGE::Check(int grid_start_x, int grid_start_y)
 	else
 	if( m_p_select_item[0] != NULL && m_p_select_item[1] == NULL )
 	{
-		// ���� �������̸� Check Off
+		// 같은 아이템이면 Check Off
 		if( p_item == m_p_select_item[0] )
 		{
 			m_p_select_item[0] = NULL;
 			b_check = true;
 		}
 		else
-		// ù��° �����۰� �����迭����, �ͽ̰����� �������� �˻�
-		// ���� �迭, �ٸ� �ɼ�, ����������� �ʵ�
+		// 첫번째 아이템과 같은계열인지, 믹싱가능한 조건인지 검사
+		// 같은 계열, 다른 옵션, 레어아이템은 않됨
 		if( p_item != NULL &&			
 			p_item->GetItemClass() == m_p_select_item[0]->GetItemClass() &&
 			p_item->GetItemType() == m_p_select_item[0]->GetItemType() &&
@@ -3186,7 +3186,7 @@ bool C_VS_UI_MIXING_FORGE::IsCorrectOption(MItem *p_item1, MItem *p_item2)
 //--------------------------------------------------------------------------------------
 // C_VS_UI_REMOVE_OPTION
 // 
-// ��������� �ɼ��� ����� ������.
+// 레어아이템 옵션을 지우는 아이템.
 //--------------------------------------------------------------------------------------
 C_VS_UI_REMOVE_OPTION::C_VS_UI_REMOVE_OPTION(const MItem * pItem, const MItem *pCurItem)
 {		
@@ -3211,7 +3211,7 @@ C_VS_UI_REMOVE_OPTION::C_VS_UI_REMOVE_OPTION(const MItem * pItem, const MItem *p
 
 	if(m_pMouseItem->GetItemClass() == ITEM_CLASS_MIXING_ITEM && m_pMouseItem->GetItemType() == 18)
 		m_IsBokjory = true;
-	//�����ư
+	//공통버튼
 	m_pC_button_group = new ButtonGroup(this);
 	
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(ok_x, ok_y, 
@@ -3531,14 +3531,14 @@ void	C_VS_UI_REMOVE_OPTION::CheckOption()
 }
 
 
-// ���� ��� �ִ� ���������� ������ �������� �ɼ��� ������ �� �ִ��� �Ǻ��Ѵ�.
+// 현재 들고 있는 아이템으로 선택한 아이템의 옵션을 삭제할 수 있는지 판별한다.
 bool
 C_VS_UI_REMOVE_OPTION::IsCanRemoveOption_Puritas(const MItem* pItem, const MItem* pTItem)
 {
 	if( pItem == NULL || pTItem == NULL ||
 		pTItem->IsQuestItem() || pTItem->IsUniqueItem() || 
 		
-		pItem->GetItemClass() == ITEM_CLASS_MIXING_ITEM && pItem->GetItemType() != 18 &&pTItem->GetItemClass() != ITEM_CLASS_PET_ITEM && pTItem->GetItemOptionListCount() != 2 || // �Ϲ������� 2�ɼ��� �ϳ��� ���� �Ѵ�.
+		pItem->GetItemClass() == ITEM_CLASS_MIXING_ITEM && pItem->GetItemType() != 18 &&pTItem->GetItemClass() != ITEM_CLASS_PET_ITEM && pTItem->GetItemOptionListCount() != 2 || // 일반적으로 2옵션중 하나를 삭제 한다.
 		pItem->GetItemClass() == ITEM_CLASS_MIXING_ITEM && pItem->GetItemType() == 18 &&pTItem->GetItemClass() != ITEM_CLASS_PET_ITEM && pTItem->GetItemOptionListCount() != 1||
 		!(
 		pItem->GetItemClass() == ITEM_CLASS_MIXING_ITEM && 
@@ -3566,7 +3566,7 @@ C_VS_UI_REMOVE_OPTION::IsCanRemoveOption_Puritas(const MItem* pItem, const MItem
 	else if(pItem->GetItemType() >= 15 && pItem->GetItemType() <= 17
 		|| pItem->GetItemType() == 24)
 		RemoveItemClass = CLASS_ACCESSORY;
-	else if(pItem->GetItemType() == 18) // ������
+	else if(pItem->GetItemType() == 18) // 복조리
 		RemoveItemClass = CLASS_ALL;
 	else return false;
 
@@ -3623,7 +3623,7 @@ C_VS_UI_REMOVE_OPTION::IsCanRemoveOption_Puritas(const MItem* pItem, const MItem
 	default :
 		return false;
 	}	
-	// ������� ������ Ŭ������ �����Ǿ���. ������ Ÿ����-_- �����ϸ� �ȴ�.
+	// 여기까지 아이템 클래스는 검증되었다. 아이템 타입을-_- 검증하면 된다.
 	
 	enum {TYPE_A,TYPE_B,TYPE_C, TYPE_D};
 	int RemoveItemType = TYPE_A + (pItem->GetItemType() - 9) %3;
@@ -3816,7 +3816,7 @@ C_VS_UI_OUSTERS_SKILL_INFO::C_VS_UI_OUSTERS_SKILL_INFO(int skillID, int window_x
 
 	SetSkillID(skillID);
 	
-	//�����ư
+	//공통버튼
 	m_pC_button_group = new ButtonGroup(this);
 
 	int close_x = w-45, close_y = h-40;
@@ -3824,7 +3824,7 @@ C_VS_UI_OUSTERS_SKILL_INFO::C_VS_UI_OUSTERS_SKILL_INFO(int skillID, int window_x
 	int alpha_x = 30, alpha_y = h-40;
 	int learn_x = w-140, learn_y = h-43;
 
-	//�����ư
+	//공통버튼
 	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(close_x, close_y, gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_BUTTON_X), gpC_global_resource->m_pC_assemble_box_button_spk->GetHeight(C_GLOBAL_RESOURCE::AB_BUTTON_X), CLOSE_ID, this,C_GLOBAL_RESOURCE::AB_BUTTON_X));
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(help_x, help_y, gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_BUTTON_QUESTION), gpC_global_resource->m_pC_assemble_box_button_spk->GetHeight(C_GLOBAL_RESOURCE::AB_BUTTON_QUESTION), HELP_ID, this, C_GLOBAL_RESOURCE::AB_BUTTON_QUESTION));
@@ -4536,14 +4536,14 @@ C_VS_UI_HORN::C_VS_UI_HORN(int currentZoneID)
 		Set(800/2-m_SPK.GetWidth(MAIN_WINDOW)/2, 600/2-m_SPK.GetHeight(MAIN_WINDOW)/2, m_SPK.GetWidth(MAIN_WINDOW), m_SPK.GetHeight(MAIN_WINDOW));
 	}
 
-	//�����ư
+	//공통버튼
 //	m_pC_button_group = new ButtonGroup(this);
 
 	int close_x = 217, close_y = 242;
 	int up_x = 114, up_y = 51;
 	int down_x = 114, down_y = 198;
 
-	//�����ư
+	//공통버튼
 	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(up_x, up_y, m_SPK.GetWidth(UD_BUTTON), m_SPK.GetHeight(UD_BUTTON), UP_ID, this,UD_BUTTON));
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(down_x, down_y, m_SPK.GetWidth(UD_BUTTON), m_SPK.GetHeight(UD_BUTTON), DOWN_ID, this,UD_BUTTON));
@@ -4677,7 +4677,7 @@ void	C_VS_UI_HORN::Show()
 		gpC_base->m_p_DDSurface_back->Unlock();
 	}
 	
-	// ���� �� ������ 
+	// 없는 맵 가리기 
 	num = 0;	itr = portalList.begin();
 	while(itr != endItr)
 	{
@@ -4975,7 +4975,7 @@ C_VS_UI_MAILBOX::C_VS_UI_MAILBOX()
 
 	m_listCount = 10;
 	m_overcnt = NULL;
-	//�����ư
+	//공통버튼
 //	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group = NULL;
 	m_pC_scroll_bar = NULL;
@@ -5023,7 +5023,7 @@ void	C_VS_UI_MAILBOX::Start(TAB_ID tab_id)
 		break;
 	}
 
-	//�����ư
+	//공통버튼
 	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(m_ptTab.x, m_ptTab.y, 62, 18, MAILTAB_ID, this, 0));
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(m_ptTab.x+62, m_ptTab.y, 57, 18, HELPTAB_ID, this, 0));
@@ -5087,7 +5087,7 @@ void	C_VS_UI_MAILBOX::Show()
 	}
 	else
 	{
-		// ����Ʈ ��¿�
+		// 리스트 출력용
 		if(gpC_base->m_p_DDSurface_back->Lock())
 		{
 			gpC_global_resource->DrawDialogLocked(x+10, y, w, h, GetAttributes()->alpha);
@@ -5130,7 +5130,7 @@ void	C_VS_UI_MAILBOX::Show()
 			m_SPK.BltLocked(x+title_x, y+title_y, titleSpriteID);
 			m_SPK.BltLocked(x+m_ptTab.x, y+m_ptTab.y, tabSpriteID);
 
-			// �ȿ� ���� ����Ʈ ���
+			// 안에 내부 리스트 출력
 			m_rtContents.x = w/2-m_SPK.GetWidth(contentsSpriteID)/2;
 			m_rtContents.y = 80;
 			m_rtContents.w = m_SPK.GetWidth(contentsSpriteID);
@@ -5164,7 +5164,7 @@ void	C_VS_UI_MAILBOX::Show()
 			gpC_base->m_p_DDSurface_back->Unlock();
 		}
 		
-		// ���� ����Ʈ ���� ���
+		// 내부 리스트 내용 출력
 		g_FL2_GetDC();
 
 		const int sender_x = 80, title_x = 145, line_plus = 4, date_x = 450;
@@ -5228,7 +5228,7 @@ bool	C_VS_UI_MAILBOX::MouseControl(UINT message, int _x, int _y)
 		{
 			m_focusContents = (_y-(m_rtContents.y+m_rtContents.h))/m_rtContents.h;
 
-			// ������ �Ѿ�� -1
+			// 범위를 넘어가면 -1
 			int indexSize = 0;
 			for(int mailIndex = 0; mailIndex < m_mail[m_currentTab].size(); mailIndex++)
 			{
@@ -5418,7 +5418,7 @@ void	C_VS_UI_MAILBOX::AddHelpMail(DWORD id, bool open)
 	MAILVECTOR_TYPE::iterator itr = m_mail[TAB_HELP_ID].begin();
 	MAILVECTOR_TYPE::iterator endItr = m_mail[TAB_HELP_ID].end();
 
-	// ���� ������ ���� �׳� ����..
+	// 같은 메일이 있음 그냥 리턴..
 	while(itr != endItr)
 	{
 		if(itr->id == id)
@@ -5432,31 +5432,31 @@ void	C_VS_UI_MAILBOX::AddHelpMail(DWORD id, bool open)
 	const MHelpMessage& message = MHelpMessageManager::Instance().getMessage(id);
 
 	
-	// ���� üũ
+	// 조건 체크
 	switch(g_eRaceInterface)
 	{
-		case RACE_SLAYER: // �ɷ�ġ ������ üũ
+		case RACE_SLAYER: // 능력치 합으로 체크
 			if(message.m_iAttrLow[RACE_SLAYER] != -1)
 			{
 				int Attr_sum = g_char_slot_ingame.STR_CUR + g_char_slot_ingame.DEX_CUR + g_char_slot_ingame.INT_CUR;
 				if(Attr_sum < message.m_iAttrLow[RACE_SLAYER] || Attr_sum > message.m_iAttrLow[RACE_SLAYER])
 					return;
 			}
-//			if(message.m_iLevelLow[RACE_SLAYER] != -1) // ������ üũ
+//			if(message.m_iLevelLow[RACE_SLAYER] != -1) // 레벨로 체크
 //			{
 //				int Lead_Lev = max(g_char_slot_ingame.DOMAIN_SWORD, max(g_char_slot_ingame.DOMAIN_BLADE, max(g_char_slot_ingame.DOMAIN_GUN, max(g_char_slot_ingame.DOMAIN_HEAL, g_char_slot_ingame.DOMAIN_ENCHANT))));
 //				if(Lead_Lev < message.m_iAttrLow[RACE_SLAYER] || Lead_Lev > message.m_iLevelMax[RACE_SLAYER])
 //					return;
 //			}
 			break;
-		case RACE_VAMPIRE: // ������ üũ
+		case RACE_VAMPIRE: // 레벨로 체크
 			if(message.m_iLevelLow[RACE_VAMPIRE] != -1)
 			{
 				if(g_char_slot_ingame.level < message.m_iLevelLow[RACE_VAMPIRE] || g_char_slot_ingame.level > message.m_iLevelMax[RACE_VAMPIRE])
 					return;
 			}
 			break;
-		case RACE_OUSTERS: // ������ üũ
+		case RACE_OUSTERS: // 레벨로 체크
 			if(message.m_iLevelLow[RACE_OUSTERS] != -1)
 			{
 				if(g_char_slot_ingame.level < message.m_iLevelLow[RACE_OUSTERS] || g_char_slot_ingame.level > message.m_iLevelMax[RACE_OUSTERS])
@@ -5471,7 +5471,7 @@ void	C_VS_UI_MAILBOX::AddHelpMail(DWORD id, bool open)
 	
 	if(nSender<0 || nSender >= nMaxSenderSize)
 	{
-		// ���� ��� �Է� ���߰ų�..���� �̻� �� �� 
+		// 보낸 사람 입력 안했거나..값이 이상 할 때 
 		strSender = "";  
 	}
 	else
@@ -5501,7 +5501,7 @@ void	C_VS_UI_MAILBOX::AddHelpMail(DWORD id, bool open)
 		mail.contents = message.m_strDetail[g_eRaceInterface];
 		break;
 	}
-	if(!mail.title.GetLength()) //������ ������...����..
+	if(!mail.title.GetLength()) //제목이 없으면...리턴..
 		return;
 	mail.show = true;
 	mail.mark = false;
@@ -5535,9 +5535,9 @@ void	C_VS_UI_MAILBOX::AddMail(TAB_ID tab_id, DWORD id, SIZE windowSize, const ch
 	std::string dateString;
 	sprintf(szTemp, "%d", date/100);
 	
-	// �տ� �⵵�� ���� 03 �̷������� ���� �տ� 0�� ���µ� ����Ҷ� 03�� �̷��� ������ �ϹǷ� �⵵�� ���ڸ����� �տ� 0�� �ٿ��ش�.
+	// 앞에 년도가 오면 03 이런식으로 오면 앞에 0이 없는데 출력할땐 03년 이렇게 찍어줘야 하므로 년도가 한자리수면 앞에 0을 붙여준다.
 //	if(date < 10000000)
-//		// �⵵�� ���ڸ��϶�
+//		// 년도가 한자리일때
 //	{
 //		dateString = "0";
 //	}
@@ -5557,7 +5557,7 @@ void	C_VS_UI_MAILBOX::AddMail(TAB_ID tab_id, DWORD id, SIZE windowSize, const ch
 	{
 		if(itr->id == id)
 		{
-			// ��¥�� �޶�
+			// 날짜가 달라
 			if(strcmp(itr->date.GetString(), dateString.c_str()) != 0)
 			{
 				itr->date = dateString.c_str();
@@ -5599,9 +5599,9 @@ void	C_VS_UI_MAILBOX::AddMail(TAB_ID tab_id, DWORD id, SIZE windowSize, const ch
 //	std::string dateString;
 //	sprintf(szTemp, "%d", date/100);
 //	
-//	// �տ� �⵵�� ���� 03 �̷������� ���� �տ� 0�� ���µ� ����Ҷ� 03�� �̷��� ������ �ϹǷ� �⵵�� ���ڸ����� �տ� 0�� �ٿ��ش�.
+//	// 앞에 년도가 오면 03 이런식으로 오면 앞에 0이 없는데 출력할땐 03년 이렇게 찍어줘야 하므로 년도가 한자리수면 앞에 0을 붙여준다.
 ////	if(date < 10000000)
-////		// �⵵�� ���ڸ��϶�
+////		// 년도가 한자리일때
 ////	{
 ////		dateString = "0";
 ////	}
@@ -5621,7 +5621,7 @@ void	C_VS_UI_MAILBOX::AddMail(TAB_ID tab_id, DWORD id, SIZE windowSize, const ch
 //	{
 //		if(itr->id == id)
 //		{
-//			// ��¥�� �޶�
+//			// 날짜가 달라
 //			if(strcmp(itr->date.GetString(), dateString.c_str()) != 0)
 //			{
 //				itr->date = dateString.c_str();
@@ -5736,7 +5736,7 @@ void	C_VS_UI_MAILBOX::ReadMail(TAB_ID tabID, DWORD id)
 	MAILVECTOR_TYPE::iterator itr = m_mail[tabID].begin();
 	MAILVECTOR_TYPE::iterator endItr = m_mail[tabID].end();
 
-	//by csm ���� �о�帰 id �� �ܺο��� �ʿ��ؼ� 
+	//by csm 현제 읽어드린 id 가 외부에서 필요해서 
 	SetCurId(id);
 	DIALOG_MENU d_menu[] = {	{(*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_JOIN_ACCEPT].GetString(), 0},
 								{(*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_JOIN_DENY].GetString(), 1},
@@ -5761,11 +5761,11 @@ void	C_VS_UI_MAILBOX::ReadMail(TAB_ID tabID, DWORD id)
 
 			if(itr->contents.GetLength() == 0)
 			{
-				// �޼��� ������
+				// 메세지 보내자
 			}
 			else
 			{
-				if(tabID == TAB_HELP_ID) //HelPMessage ���
+				if(tabID == TAB_HELP_ID) //HelPMessage 경우
 				{
 					//gC_vs_ui.RunHelpDesc(m_mail[tabID][id].contents ,m_mail[tabID][id].title , id);
 					gC_vs_ui.RunHelpDesc((itr)->contents,(itr)->title, id);
@@ -5861,7 +5861,7 @@ bool C_VS_UI_MAILBOX::C_VS_UI_MAIL::LoadFromFile(std::ifstream &file)
 	contents.LoadFromFile(file);
 	date.LoadFromFile(file);
 	file.read((char *)&windowSize, sizeof(SIZE));
-	if(id == 9) // ���Ͽ� ��忡 ���ѰŸ� �ε��ʴ´�.
+	if(id == 9) // 유니온 길드에 관한거면 로딩않는다.
 		return false;
 	return true;
 }
@@ -5973,14 +5973,14 @@ C_VS_UI_FINDING_MINE::C_VS_UI_FINDING_MINE()
 
 // 	m_SPK.Open(SPK_HORN);
 	
-	//�����ư
+	//공통버튼
 	m_pC_button_group = new ButtonGroup(this);
 
 	int close_x = 217, close_y = 242;
 	int start_x = 30, start_y = BLOCK_START_Y-41;
 ;
 
-	//�����ư
+	//공통버튼
 	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(start_x, start_y, 26, 26, START_ID, this, 0));
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(BLOCK_START_X, BLOCK_START_X, 42, 26, LEVEL0_ID, this, 0));
@@ -6099,7 +6099,7 @@ void	C_VS_UI_FINDING_MINE::Finish()
 
 void	C_VS_UI_FINDING_MINE::Show()
 {
-	// �⺻ ��� �����
+	// 기본 배경 만들기
 	RECT rect = {x, y, x+w, y+h};
 	gpC_base->m_p_DDSurface_back->FillRect(&rect, GRAY);
 
@@ -6445,9 +6445,9 @@ void	C_VS_UI_FINDING_MINE::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 	{
 		char szGameLevel[GAMELEVEL_MAX][16] = 
 		{
-			"�ʱ�",
-			"�߱�",
-			"����",
+			"초급",
+			"중급",
+			"고급",
 		};
 
 		g_PrintColorStr(smile_x+5, smile_y+6, szGameLevel[p_button->GetID()-LEVEL0_ID], gpC_base->m_item_name_pi, BLACK);
@@ -6505,7 +6505,7 @@ void C_VS_UI_FINDING_MINE::DrawRect(RECT &rect, int depth, WORD color, WORD colo
 {
 	RECT drawRect = {rect.left, rect.top, rect.right, rect.bottom};
 	
-	// �ٱ� �׵θ�
+	// 바깥 테두리
 	drawRect.bottom = drawRect.top+depth;
 	gpC_base->m_p_DDSurface_back->FillRect(&drawRect, color);
 	
@@ -6526,7 +6526,7 @@ void C_VS_UI_FINDING_MINE::DrawRect(RECT &rect, int depth, WORD color, WORD colo
 
 	for(int i = 0; i < depth; i++)
 	{
-		// ���
+		// 우상
 		drawRect.left = rect.right-i-1;
 		drawRect.top = rect.top+i;
 		drawRect.right = drawRect.left+1;
@@ -6539,7 +6539,7 @@ void C_VS_UI_FINDING_MINE::DrawRect(RECT &rect, int depth, WORD color, WORD colo
 		drawRect.bottom = drawRect.top+1;
 		gpC_base->m_p_DDSurface_back->FillRect(&drawRect, color);
 
-		// ����
+		// 좌하
 		drawRect.left = rect.left+i;
 		drawRect.top = rect.bottom-i-1;
 		drawRect.right = drawRect.left+1;
@@ -6576,19 +6576,19 @@ void	C_VS_UI_FINDING_MINE::ClearBlockFocus(int x, int y, int w, int h)
 void	C_VS_UI_FINDING_MINE::OpenBlock(int x, int y, bool bCenter)
 {
 
-	// ������ ������� return
+	// 범위를 벗어났으면 return
 	if(x < 0 || y < 0 || x >= m_boardSize.cx || y >= m_boardSize.cy)
 		return;
 
-	// �����غ����̳� �������ΰ�찡 �ƴϸ� return
+	// 게임준비중이나 게임중인경우가 아니면 return
 	if(m_status == GAMESTATUS_DIE || m_status == GAMESTATUS_CLEAR)
 	{
 		return;
 	}
 	
-	if(bCenter)	// ��� ��ư ��������
+	if(bCenter)	// 가운데 버튼 눌렀을때
 	{
-		// ���� ���°� �ƴϸ� return
+		// 열린 상태가 아니면 return
 		if(m_Blocks[y*m_boardSize.cx+x].status != BLOCKSTATUS_OPEN)
 			return;
 
@@ -6602,11 +6602,11 @@ void	C_VS_UI_FINDING_MINE::OpenBlock(int x, int y, bool bCenter)
 			}
 		}
 
-		// ������ ��� ������ num�� Ʋ���� return
+		// 주위의 깃발 갯수와 num이 틀리면 return
 		if(flagSum != m_Blocks[y*m_boardSize.cx+x].num)
 			return;
 
-		// ���� 8���� ����
+		// 주위 8개를 연다
 		OpenBlock(x-1, y-1);
 		OpenBlock(x, y-1);
 		OpenBlock(x+1, y-1);
@@ -6617,9 +6617,9 @@ void	C_VS_UI_FINDING_MINE::OpenBlock(int x, int y, bool bCenter)
 		OpenBlock(x+1, y+1);
 
 	}
-	else	// ���ʹ�ư ��������
+	else	// 왼쪽버튼 눌렀을때
 	{
-		// �̹� �����ְų� ��� ���¸� return
+		// 이미 열려있거나 깃발 상태면 return
 		if(m_Blocks[y*m_boardSize.cx+x].status == BLOCKSTATUS_OPEN || m_Blocks[y*m_boardSize.cx+x].status == BLOCKSTATUS_FLAG)
 			return;
 
@@ -6629,16 +6629,16 @@ void	C_VS_UI_FINDING_MINE::OpenBlock(int x, int y, bool bCenter)
 			m_startTime = timeGetTime();
 		}
 
-		// ����
+		// 연다
 		m_Blocks[y*m_boardSize.cx+x].status = BLOCKSTATUS_OPEN;
 		
-		// ���ڰ� ������ ���̴���
+		// 지뢰가 있으면 다이다이
 		if(m_Blocks[y*m_boardSize.cx+x].num == -1)
 		{
 			m_status = GAMESTATUS_DIE;
 			m_startTime = timeGetTime()-m_startTime;
 		}
-		else if(m_Blocks[y*m_boardSize.cx+x].num == 0)	// ���ڰ� ������ ���� ���ϵ��� ����
+		else if(m_Blocks[y*m_boardSize.cx+x].num == 0)	// 숫자가 없으면 주위 블록들을 연다
 		{
 			OpenBlock(x-1, y-1);
 			OpenBlock(x, y-1);
@@ -6677,7 +6677,7 @@ void	C_VS_UI_FINDING_MINE::DrawBlock(int x, int y, BLOCK_STRUCT &block)
 	switch(block.status)
 	{
 	case BLOCKSTATUS_CLOSE:
-		if(m_status == GAMESTATUS_DIE && block.num == -1)	// ���ڱ׸���
+		if(m_status == GAMESTATUS_DIE && block.num == -1)	// 지뢰그리기
 		{
 			gpC_base->m_p_DDSurface_back->HLine(rect.left, rect.top, rect.right-rect.left, DARKGRAY);
 			gpC_base->m_p_DDSurface_back->VLine(rect.left, rect.top, rect.bottom-rect.top, DARKGRAY);
@@ -6711,7 +6711,7 @@ void	C_VS_UI_FINDING_MINE::DrawBlock(int x, int y, BLOCK_STRUCT &block)
 		break;
 		
 	case BLOCKSTATUS_QUESTION:
-		if(m_status == GAMESTATUS_DIE && block.num == -1)	// ���ڱ׸���
+		if(m_status == GAMESTATUS_DIE && block.num == -1)	// 지뢰그리기
 		{
 			gpC_base->m_p_DDSurface_back->HLine(rect.left, rect.top, rect.right-rect.left, DARKGRAY);
 			gpC_base->m_p_DDSurface_back->VLine(rect.left, rect.top, rect.bottom-rect.top, DARKGRAY);
@@ -6751,7 +6751,7 @@ void	C_VS_UI_FINDING_MINE::DrawBlock(int x, int y, BLOCK_STRUCT &block)
 		gpC_base->m_p_DDSurface_back->HLine(rect.left, rect.top, rect.right-rect.left, DARKGRAY);
 		gpC_base->m_p_DDSurface_back->VLine(rect.left, rect.top, rect.bottom-rect.top, DARKGRAY);
 		
-		if(block.num == -1)	// ���ڱ׸���
+		if(block.num == -1)	// 지뢰그리기
 		{
 			RECT fillRect = {rect.left+1, rect.top+1, rect.right, rect.bottom };
 			gpC_base->m_p_DDSurface_back->FillRect(&fillRect, RED);
@@ -6862,7 +6862,7 @@ void C_VS_UI_FINDING_MINE::DrawNumbers(int x, int y, int number)
 
 void C_VS_UI_FINDING_MINE::DrawNumber(int x, int y, BYTE flag)
 {
-	// �� ���� 
+	// 젤 위에 
 	if(flag & 0x40)
 	{
 		gpC_base->m_p_DDSurface_back->HLine(x+2, y+1, 9, LIGHTRED);
@@ -6882,7 +6882,7 @@ void C_VS_UI_FINDING_MINE::DrawNumber(int x, int y, BYTE flag)
 		gpC_base->m_p_DDSurface_back->HLine(x+7, y+3, 1, DARKRED);
 	}
 
-	// ���� ����
+	// 위에 왼쪽
 	if(flag & 0x20)
 	{
 		gpC_base->m_p_DDSurface_back->VLine(x+1, y+2, 9, LIGHTRED);
@@ -6905,7 +6905,7 @@ void C_VS_UI_FINDING_MINE::DrawNumber(int x, int y, BYTE flag)
 		gpC_base->m_p_DDSurface_back->VLine(x+3, y+8, 1, DARKRED);
 	}
 
-	// ���� ������
+	// 위에 오른쪽
 	if(flag & 0x10)
 	{
 		gpC_base->m_p_DDSurface_back->VLine(x+11, y+2, 9, LIGHTRED);
@@ -6928,7 +6928,7 @@ void C_VS_UI_FINDING_MINE::DrawNumber(int x, int y, BYTE flag)
 		gpC_base->m_p_DDSurface_back->VLine(x+9, y+8, 1, DARKRED);
 	}
 
-	// ���
+	// 가운데
 	if(flag & 0x08)
 	{
 		gpC_base->m_p_DDSurface_back->HLine(x+3, y+10, 7, LIGHTRED);
@@ -6949,7 +6949,7 @@ void C_VS_UI_FINDING_MINE::DrawNumber(int x, int y, BYTE flag)
 		gpC_base->m_p_DDSurface_back->HLine(x+8, y+12, 1, DARKRED);
 	}
 
-	// �Ʒ� ����
+	// 아래 왼쪽
 	if(flag & 0x04)
 	{
 		gpC_base->m_p_DDSurface_back->VLine(x+1, y+12, 9, LIGHTRED);
@@ -6972,7 +6972,7 @@ void C_VS_UI_FINDING_MINE::DrawNumber(int x, int y, BYTE flag)
 		gpC_base->m_p_DDSurface_back->VLine(x+3, y+18, 1, DARKRED);
 	}
 	
-	// �Ʒ� ������
+	// 아래 오른쪽
 	if(flag & 0x02)
 	{
 		gpC_base->m_p_DDSurface_back->VLine(x+11, y+12, 9, LIGHTRED);
@@ -6995,7 +6995,7 @@ void C_VS_UI_FINDING_MINE::DrawNumber(int x, int y, BYTE flag)
 		gpC_base->m_p_DDSurface_back->VLine(x+9, y+18, 1, DARKRED);
 	}
 
-	// �� �̷�
+	// 젤 이래
 	if(flag & 0x01)
 	{
 		gpC_base->m_p_DDSurface_back->HLine(x+2, y+21, 9, LIGHTRED);
@@ -7114,7 +7114,7 @@ void	C_VS_UI_ARROW_TILE::Show()
 
 		if(GetMapSize() > 0 )
 		{
-			// ���带 �׸��� 		
+			// 보드를 그린다 		
 			int index=0;
 			for(int tx=0;tx<GetMapSize();tx++)
 			{
@@ -7186,18 +7186,18 @@ void	C_VS_UI_ARROW_TILE::Show()
 				break;
 			}
 			m_SPK.BltLocked(startX+ArrowSizeX*GetMapSize()+m_SPK.GetWidth(SPK_GOAL)-2, startY+ArrowSizeY*GetMapSize(),SPK_IN_BOX_BOTTOM);
-			if( m_Player.X == -1 && m_Player.Y == 0 )		// �÷��̾ ���� �غ����̸�
+			if( m_Player.X == -1 && m_Player.Y == 0 )		// 플레이어가 시작 준비중이면
 			{
 				m_SPK.BltLocked( startX + ( m_SPK.GetWidth(SPK_START)/2 - m_SPK.GetWidth(myspr+2)/2) ,
 					startY + (m_SPK.GetHeight(SPK_START)/2 - m_SPK.GetHeight(myspr+2)/2), myspr+2 );
 			} else
-			if( m_Player.X == GetMapSize() && m_Player.Y == GetMapSize() -1 )		// �÷��̾ ��ǥ ������ �������� ���
+			if( m_Player.X == GetMapSize() && m_Player.Y == GetMapSize() -1 )		// 플래이어가 목표 지점에 도달했을 경우
 			{
 				m_SPK.BltLocked( startX + m_SPK.GetWidth(SPK_GOAL)+GetMapSize() * ArrowSizeX + m_SPK.GetWidth(SPK_START) + (m_SPK.GetWidth(SPK_GOAL)/2 - m_SPK.GetWidth(myspr+2)/2) ,
 					startY + (GetMapSize() -1) * ArrowSizeY + (m_SPK.GetHeight(SPK_GOAL)/2 - m_SPK.GetHeight(myspr+2)/2), myspr+2 );
 				m_Player.Status = PLAYER_STATUS_FINISH;
 			} else
-			{												// �Ϲ� �������̸�
+			{												// 일반 게임중이면
 				if( m_Player.Status != PLAYER_STATUS_FINISH )
 				{
 					int sprid = myspr + GetDirection(&m_Player);
@@ -7259,7 +7259,7 @@ void	C_VS_UI_ARROW_TILE::Show()
 //		wsprintf(szTemp,"%d.%d",m_MyBestScore/100, (m_MyBestScore%100) );
 //		g_PrintColorStrOut(x+440,y+53,szTemp, gpC_base->m_item_name_pi, RGB_WHITE, RGB_BLACK);
 
-		// �ð� ǥ��		
+		// 시간 표시		
 		if( m_Player.Status != PLAYER_STATUS_READY )
 		{
 			if( m_Player.Status == PLAYER_STATUS_DIE || m_Player.Status == PLAYER_STATUS_FINISH )
@@ -7275,7 +7275,7 @@ void	C_VS_UI_ARROW_TILE::Show()
 			}
 		}
 
-		// �ְ� ���ǥ��		
+		// 최고 기록표시		
 		wsprintf(szTemp, "%s Best Score : %s %d.%d",g_pUserInformation->WorldName.GetString(),
 			m_topName.c_str(), m_topScore/100, (m_topScore%100));
 		g_PrintColorStrOut(x+120, y+20, szTemp,gpC_base->m_item_name_pi, RGB_WHITE,RGB_BLACK);
@@ -7443,7 +7443,7 @@ void	C_VS_UI_ARROW_TILE::ProcessGameMain()
 		m_Stage = GAME_STAGE(m_Stage+1);
 		if(m_Stage == STAGE_END )
 		{
-			// ����
+			// 종료
 //			gpC_base->SendMessage(UI_CLEAR_STAGE,MAKELONG(WORD(m_Stage-STAGE_5X5),0), m_Player.EndTime-m_Player.StartTime);
 			m_Stage = GAME_STAGE(m_Stage);
 
@@ -7476,12 +7476,12 @@ void	C_VS_UI_ARROW_TILE::ProcessTile()
 
 void	C_VS_UI_ARROW_TILE::ProcessTimeExpired()
 {
-	// ���� �ð������� ����.
+	// 현재 시간제한은 없다.
 }
 
 void	C_VS_UI_ARROW_TILE::ProcessRotation()
 {
-	// ȸ���κ� ó��.
+	// 회전부분 처리.
 }
 
 void	C_VS_UI_ARROW_TILE::ProcessCharacter()
@@ -7499,7 +7499,7 @@ void	C_VS_UI_ARROW_TILE::ProcessCharacter()
 		
 		if( m_Player.X == Monster->X && m_Player.Y == Monster->Y )
 		{
-			// ���� ��ġ�� ������ ����
+			// 같은 위치에 있으면 죽음
 			
 			SetDie();
 		}
@@ -7529,7 +7529,7 @@ void	C_VS_UI_ARROW_TILE::ProcessCharacter()
 	if( m_Player.X == 0 && m_Player.bCanRotation == false && GetDirection(&m_Player) == DIRECTION_LEFT 
 		&&	m_Player.Status != PLAYER_STATUS_READY)
 	{
-		// ĳ���� ����
+		// 캐릭터 죽음
 		SetDie();
 	}
 	else if ( m_Player.Y == 0 && m_Player.bCanRotation == false && GetDirection(&m_Player) == DIRECTION_UP 
@@ -7549,15 +7549,15 @@ void	C_VS_UI_ARROW_TILE::ProcessCharacter()
 	}
 }
 
-void	C_VS_UI_ARROW_TILE::ActionMove()					// Move ��ư Ŭ����
+void	C_VS_UI_ARROW_TILE::ActionMove()					// Move 버튼 클릭시
 {
 	if( m_Player.Status == PLAYER_STATUS_DIE || !m_bCanStart)
 		return;
 	
-	// ������̸�
+	// 출발점이면
 	if( m_Player.X == -1 && m_Player.Y == 0 || m_Player.Status == PLAYER_STATUS_READY)
 	{
-		// ����
+		// 시작
 		m_Player.X = 0;
 		m_Player.Y = 0;
 		m_Player.bCanRotation = true;
@@ -7566,7 +7566,7 @@ void	C_VS_UI_ARROW_TILE::ActionMove()					// Move ��ư Ŭ����
 	} 
 	else if( m_Player.X == GetMapSize() -1 && m_Player.Y == GetMapSize() -1 && GetDirection(&m_Player) == DIRECTION_RIGHT ) 
 	{
-		// �������̸�
+		// 끝지점이면
 		m_Player.EndTime = timeGetTime();
 		m_Player.X ++;
 	} 
@@ -7653,7 +7653,7 @@ void	C_VS_UI_ARROW_TILE::ActionMove()					// Move ��ư Ŭ����
 	}
 }
 
-void	C_VS_UI_ARROW_TILE::ActionRotation(BYTE Direction)					// 0�� ���� 1�� ������
+void	C_VS_UI_ARROW_TILE::ActionRotation(BYTE Direction)					// 0은 왼쪽 1은 오른쪽
 {
 	if( m_Stage == STAGE_NONE || m_Stage == STAGE_END || !m_Player.bCanRotation || m_Player.Status == PLAYER_STATUS_DIE)
 		return;
@@ -7669,7 +7669,7 @@ void	C_VS_UI_ARROW_TILE::ActionRotation(BYTE Direction)					// 0�� ���
 		break;
 	}
 
-	// ���� �밡�� ȸ��
+	// 으아 노가다 회전
 	if( Value != 0 )
 	{
 		for(int i=0;i<GetMapSize()*GetMapSize();i++)
@@ -7680,7 +7680,7 @@ void	C_VS_UI_ARROW_TILE::ActionRotation(BYTE Direction)					// 0�� ���
 				m_Tile[i].Direction -= MAX_DIRECTION;
 			if(m_Tile[i].Direction < 0 )
 				m_Tile[i].Direction += MAX_DIRECTION;
-			if( temp < m_Tile[i].Direction )	// ���������� ���� ���
+			if( temp < m_Tile[i].Direction )	// 오른쪽으로 도는 경우
 			{
 				m_Tile[i].RemainRotationAngle = 3;
 				m_Tile[i].AniFrame[2] = SPK_ARROW_UP+(temp*4) +1;
@@ -7688,7 +7688,7 @@ void	C_VS_UI_ARROW_TILE::ActionRotation(BYTE Direction)					// 0�� ���
 				m_Tile[i].AniFrame[0] = SPK_ARROW_UP+(temp*4) +3;
 			} else
 			{
-				// �������� ���� ���
+				// 왼쪽으로 도는 경우
 				if( temp == DIRECTION_RIGHT )
 				{
 					m_Tile[i].RemainRotationAngle = 3;
@@ -7710,7 +7710,7 @@ void	C_VS_UI_ARROW_TILE::ActionRotation(BYTE Direction)					// 0�� ���
 
 void	C_VS_UI_ARROW_TILE::MoveMonster()
 {
-	// ���Ͱ� ������ �ð� -_- ��� �ʿ� ���µ� ��
+	// 몬스터가 움직인 시간 -_- 사실 필요 없는데 ㅋ
 	m_TimeMoveMonster = timeGetTime();
 	
 	std::list<S_CHARACTER*>::const_iterator itr = m_MonsterList.begin();
@@ -7750,7 +7750,7 @@ bool	C_VS_UI_ARROW_TILE::MoveRIGHT(S_CHARACTER *Character)
 	{
 		Character->X ++;
 
-		// �ⱸ���� �Ǻ��Ѵ�.
+		// 출구인지 판별한다.
 		if(Character->Y == GetMapSize() - 1 && Character->X == GetMapSize() && Character->PlayerType == PLAYER_USER )
 		{
 			m_Player.Status = PLAYER_STATUS_FINISH;
@@ -8026,7 +8026,7 @@ bool	C_VS_UI_ARROW_TILE::TimerMonsterMove(DWORD len)
 
 bool	C_VS_UI_ARROW_TILE::IsExistMonster(short id, int x, int y )
 {
-	// ���ͳ����� �浹�ϴ°� �������-_- ��
+	// 몬스터끼리만 충돌하는걸 막을라고-_- ㅋ
 	if( id == 0 )
 		return false;
 	
@@ -8663,7 +8663,7 @@ void C_VS_UI_CRAZY_MINE::ActionDoubleClick(int x, int y)
 
 			if ( m_MineBoard[x][y].isMine )
 			{
-				/// �ٿ���
+				/// 꾸에엑
 				m_bDead = true;
 				g_StartGameOverMessage(-1,-1);
 //				gpC_base->SendMessage(UI_REQUEST_FORCE_DIE, 11);
@@ -8674,7 +8674,7 @@ void C_VS_UI_CRAZY_MINE::ActionDoubleClick(int x, int y)
 		}
 	}
 
-	m_LatestClickTime = GetTickCount() - 5000;				// -_- 5�������� �س��´�~
+	m_LatestClickTime = GetTickCount() - 5000;				// -_- 5초전으로 해놓는당~
 
 	CheckSuccess();
 }
@@ -8734,7 +8734,7 @@ C_VS_UI_QUEST_INVENTORY::C_VS_UI_QUEST_INVENTORY(const MItem* pItem)
 	Set(80, g_GameRect.bottom/2 - m_SPK.GetHeight(INVENTORY_WINDOW)/2, m_SPK.GetWidth(INVENTORY_WINDOW), m_SPK.GetHeight(INVENTORY_WINDOW));
 	
 	
-	//�����ư
+	//공통버튼
 	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(help_button_offset_x, help_button_offset_y, gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_BUTTON_QUESTION), gpC_global_resource->m_pC_assemble_box_button_spk->GetHeight(C_GLOBAL_RESOURCE::AB_BUTTON_QUESTION), HELP_ID, this, C_GLOBAL_RESOURCE::AB_BUTTON_QUESTION));
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(close_button_offset_x, close_button_offset_y, gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_BUTTON_X), gpC_global_resource->m_pC_assemble_box_button_spk->GetHeight(C_GLOBAL_RESOURCE::AB_BUTTON_X), CLOSE_ID, this, C_GLOBAL_RESOURCE::AB_BUTTON_X));	
@@ -8834,7 +8834,7 @@ void	C_VS_UI_QUEST_INVENTORY::WindowEventReceiver(id_t event)
 //-----------------------------------------------------------------------------
 void	C_VS_UI_QUEST_INVENTORY::Run(id_t id)
 {
-	// ��ư�� ��Ȱ�������̸� ����!
+	// 버튼이 비활성상태이면 리턴!
 	switch (id)
 	{
 	case OK_ID:		
@@ -9024,14 +9024,14 @@ void	C_VS_UI_QUEST_INVENTORY::DropToQuestInventory( const MItem* pItem)
 	if(! CanDropToInventory( pItem ) || m_CurMousePos < 0 || m_CurMousePos >= 60)
 		return;
 
-	// �������� ���� �� �ִ�.
+	// 아이템을 넣을 수 있다.
 
 	gpC_base->SendMessage(UI_ADD_ITEM_TO_CODE_SHEET, MAKELONG(m_CurMousePos/10,m_CurMousePos%10), pItem->GetItemType() - minType ,(void*) m_pCodeSheet );
 }
 
 bool	C_VS_UI_QUEST_INVENTORY::CanDropToInventory(const MItem* pItem)
 {
-	// �� üũ�غ���.
+	// 자 체크해보자.
 	const int minType = 22;
 	
 	int InvenX = m_CurMousePos%10;
@@ -9044,31 +9044,31 @@ bool	C_VS_UI_QUEST_INVENTORY::CanDropToInventory(const MItem* pItem)
 	if( InvenX < 0 || InvenX >= 10 || InvenY < 0 || InvenY >= 6 )
 		return false;
 
-	// 4���� ������ üũ�ؾ� �Ѵ�. ���� ������ Ÿ���� ������ ��ȿ!
+	// 4개의 방향을 체크해야 한다. 같은 아이템 타입이 있으면 무효!
 	bool	bCanDrop = true;
 
 	if( m_Inventory[InvenY*10+InvenX] != -1 )
 		return false;
 
-	// ���� -_-
+	// 왼쪽 -_-
 	if( InvenX > 0 )
 	{
 		 if( m_Inventory[InvenY*10+InvenX-1] == ItemType )
 			 bCanDrop = false;
 	}
-	// ������ -_-
+	// 오른쪽 -_-
 	if( InvenX < 9 )
 	{
 		if( m_Inventory[InvenY*10+InvenX+1] == ItemType )
 			 bCanDrop = false;		
 	}
-	// ���� -_-
+	// 위쪽 -_-
 	if( InvenY > 0 )
 	{
 		if( m_Inventory[(InvenY-1)*10+InvenX] == ItemType )
 			 bCanDrop = false;		
 	}
-	// �Ʒ��� -_-
+	// 아래쪽 -_-
 	if( InvenY < 5 )
 	{
 		if( m_Inventory[(InvenY+1)*10+InvenX] == ItemType )
@@ -9094,7 +9094,7 @@ C_VS_UI_STATUS_CTF::C_VS_UI_STATUS_CTF()
 	
 	g_RegisterWindow(this);
 	
-	//�����ư
+	//공통버튼
 	m_pC_button_group = new ButtonGroup(this);
 	
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(248, 7, m_pC_spk.GetWidth(HELP_BUTTON), 
@@ -9353,7 +9353,7 @@ void	C_VS_UI_STATUS_CTF::Show()
 		if( m_num_flag[0] == m_num_flag[1] && m_num_flag[1] == m_num_flag[2] )
 			topscore = -1;
 		
-		// �����ð� ���
+		// 남은시간 출력
 		char szBuffer[64],min[5],sec[5];
 		DWORD RemainTime = m_finish_time - timeGetTime();
 		if( (RemainTime/1000)/60/60 > 3 )
@@ -9683,7 +9683,7 @@ C_VS_UI_PET_INFO::C_VS_UI_PET_INFO(PETINFO *petInfo)
 		m_IsWolverine = true;
 	else
 		m_IsWolverine = false;
-	// add by coffee 2006-12-21  ����ʥ����������
+	// add by coffee 2006-12-21  增加圣诞宠物名称
 	//if (m_PetInfo.ITEM_TYPE==6)
 	//{
 	//	m_PetInfo.NAME="¹";
@@ -9748,7 +9748,7 @@ C_VS_UI_PET_INFO::C_VS_UI_PET_INFO(PETINFO *petInfo)
 
 	AttrPin(true);
 	
-	//�����ư
+	//공통버튼
 	m_pC_button_group = new ButtonGroup(this);
 	
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(223, h-19, m_pC_spk.GetWidth(CLOSE_BUTTON), m_pC_spk.GetHeight(CLOSE_BUTTON), CLOSE_ID, this, CLOSE_BUTTON));
@@ -9797,12 +9797,12 @@ C_VS_UI_PET_INFO::~C_VS_UI_PET_INFO()
 void	C_VS_UI_PET_INFO::ShowButtonDescription(C_VS_UI_EVENT_BUTTON * p_button)
 {	
 	const char* description_msg[6] = {
-		(*g_pGameStringTable)[UI_STRING_MESSAGE_CLOSE_PET_INFO].GetString(), //"�ֿϵ��� ����â�� �ݽ��ϴ�.";
-		(*g_pGameStringTable)[UI_STRING_MESSAGE_CAN_ENCHANT_PET].GetString(), //"2�� �ɷ��� �ο��� �� �ֽ��ϴ�.";
-		(*g_pGameStringTable)[UI_STRING_MESSAGE_CANNOT_ENCHANT_PET].GetString(), //"������ 2�� �ɷ��� �ο��� �� �����ϴ�."
-		(*g_pGameStringTable)[UI_STRING_MESSAGE_CAN_3RD_ENCHANT_PET].GetString(),	//"3�� �ɷ��� �ο��� �� �ֽ��ϴ�.";	
-		(*g_pGameStringTable)[UI_STRING_MESSAGE_CANNOT_3RD_ENCHANT_PET].GetString(),	//"������ 3�� �ɷ��� �ο��� �� �����ϴ�."
-		(*g_pGameStringTable)[UI_STRING_MESSAGE_CHANGE_PET_NICKNAME].GetString()	//] = "���� �г����� �����մϴ�.";
+		(*g_pGameStringTable)[UI_STRING_MESSAGE_CLOSE_PET_INFO].GetString(), //"애완동물 정보창을 닫습니다.";
+		(*g_pGameStringTable)[UI_STRING_MESSAGE_CAN_ENCHANT_PET].GetString(), //"2차 능력을 부여할 수 있습니다.";
+		(*g_pGameStringTable)[UI_STRING_MESSAGE_CANNOT_ENCHANT_PET].GetString(), //"아직은 2차 능력을 부여할 수 없습니다."
+		(*g_pGameStringTable)[UI_STRING_MESSAGE_CAN_3RD_ENCHANT_PET].GetString(),	//"3차 능력을 부여할 수 있습니다.";	
+		(*g_pGameStringTable)[UI_STRING_MESSAGE_CANNOT_3RD_ENCHANT_PET].GetString(),	//"아직은 3차 능력을 부여할 수 없습니다."
+		(*g_pGameStringTable)[UI_STRING_MESSAGE_CHANGE_PET_NICKNAME].GetString()	//] = "펫의 닉네임을 변경합니다.";
 	};
 	
 	switch( p_button->GetID() )
@@ -9827,7 +9827,7 @@ void	C_VS_UI_PET_INFO::ShowButtonDescription(C_VS_UI_EVENT_BUTTON * p_button)
 			{
 				if(!m_PetInfo.ATTACK)
 				{ 
-					if(m_PetInfo.CUT_HEAD && m_PetInfo.ITEM_TYPE >2) // 2�� �길 3���ɷ�(���� or ����)�� �ִ�
+					if(m_PetInfo.CUT_HEAD && m_PetInfo.ITEM_TYPE >2) // 2차 펫만 3차능력(공격 or 흡영)이 있다
 						g_descriptor_manager.Set(DID_INFO, x+p_button->x, y+p_button->y, (void *)description_msg[4],0,0);
 					else
 						g_descriptor_manager.Set(DID_INFO, x+p_button->x, y+p_button->y, (void *)description_msg[2],0,0);
@@ -9939,7 +9939,7 @@ bool	C_VS_UI_PET_INFO::MouseControl(UINT message, int _x, int _y)
 			
 			std::string tempStr;
 
-			// ���� ����ġ
+			// 남은 경험치
 			if( Exp.IsInRect( _x, _y ) && m_PetInfo.LEVEL < 50 )
 			{
 				sprintf( sztemp, "%d", m_PetInfo.LEVEL );
@@ -10048,7 +10048,7 @@ void	C_VS_UI_PET_INFO::Show()
 	}
 
 	int hpday_y = y+166, hptime_y = y+180, hp_x = x+117;
-	// hptime �� �д����� ������ �ִ´�.
+	// hptime 은 분단위로 가지고 있는다.
 	int hptime = m_PetInfo.HP%(60*24), hpday = m_PetInfo.HP/(60*24);
 
 
@@ -10057,13 +10057,13 @@ void	C_VS_UI_PET_INFO::Show()
 	{
 		m_pC_spk.BltLocked(x+m_MainWindowPosition.x, y+m_MainWindowPosition.y, MAIN_WINDOW);
 
-		// pet ��
+		// pet 얼굴
 		int PetFaceLevel = max(0,m_PetInfo.LEVEL/10 -1);
 		int PetType  = max( 0, (m_PetInfo.ITEM_TYPE-2));
 		int faceSpriteID = max(0, PetFaceLevel+(PetType*5));
 		m_pC_pet_face.BltLocked(x+48, y+68, faceSpriteID);
 
-		// pet ����
+		// pet 먹이
 		TYPE_FRAMEID frame_id = (*g_pItemTable)[ITEM_CLASS_PET_FOOD][m_PetInfo.FOODTYPE].InventoryFrameID;
 		int item_x = x+73-gpC_item->GetWidth(frame_id)/2, item_y = y+173-gpC_item->GetHeight(frame_id)/2;
 		gpC_item->BltLocked(item_x, item_y, frame_id);
@@ -10074,7 +10074,7 @@ void	C_VS_UI_PET_INFO::Show()
 
 		if(hpday > 0 && hpday <= 30)
 		{
-			Rect rect(0, 0, m_pC_spk.GetWidth(HP_DAY_BAR)*hpday/30, m_pC_spk.GetHeight(HP_DAY_BAR));	// 30�� �ƽ�
+			Rect rect(0, 0, m_pC_spk.GetWidth(HP_DAY_BAR)*hpday/30, m_pC_spk.GetHeight(HP_DAY_BAR));	// 30일 맥스
 			m_pC_spk.BltLockedClip(hp_x+1, hpday_y+1, rect, HP_DAY_BAR);
 		}
 
@@ -10094,7 +10094,7 @@ void	C_VS_UI_PET_INFO::Show()
 	{
 		COLORREF fontColor = RGB(255, 255, 120);
 		
-		// �� �̸�
+		// 펫 이름
 		const int name_x = x+130, name_y = y+25;
 		std::string petName;
 //		if(m_PetInfo.NICK_NAME.size())
@@ -10106,24 +10106,24 @@ void	C_VS_UI_PET_INFO::Show()
 		if(!m_IsWolverine && m_PetInfo.NICK_NAME.size())
 			g_PrintColorStr(x +50, name_y+ 202, m_PetInfo.NICK_NAME.c_str(), gpC_base->m_char_chat_pi, RGB_YELLOW);
 
-		// �Ӽ�
-		// ���� enchant level�� ��Ӽ����� ����Ѵ�
-		// enchant level �� ��þƮ�ʹ� �ƹ� ���� ������ ����� ChargeItem�� Charge���� ���� �� ����
-		// ��� �������� Enchant Level�� ������ ������ Number�� �����Ѵ�. �׷��� ���� �����ۿ���
-		// GetEnchantLevel�� �ص� �ƹ��͵� �ȳ��´�.
-		// �װ� ���� �����۸��̰� ���� �׳� EnchantLevel �״�� ����
-		// �� �Ӽ� ��ġ�� Silver���� ����. 
+		// 속성
+		// 펫은 enchant level을 펫속성으로 출력한다
+		// enchant level 은 인첸트와는 아무 관련 없으며 사실은 ChargeItem의 Charge수를 받을 때 쓴다
+		// 사실 받을때는 Enchant Level로 받지만 저장은 Number에 저장한다. 그래서 차지 아이템에서
+		// GetEnchantLevel을 해도 아무것도 안나온다.
+		// 그건 차지 아이템만이고 펫은 그냥 EnchantLevel 그대로 쓴다
+		// 펫 속성 수치는 Silver값을 쓴다. 
 
 		int px;
 
 		char sz_buf[512];
 
-		// ����
+		// 레벨
 		sprintf(sz_buf, "%d", m_PetInfo.LEVEL);
 		int level_x = x+230-g_GetStringWidth(sz_buf, gpC_base->m_char_chat_large_pi.hfont)/2, level_y = y+23;
 		g_PrintColorStr(level_x, level_y, sz_buf, gpC_base->m_char_chat_large_pi, RGB_YELLOW);
 
-		// �� �Ӽ�
+		// 펫 속성
 		px = g_PrintColorStr(hp_x, str_y[0], (*g_pGameStringTable)[UI_STRING_MESSAGE_PET_ATTR].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
 		if(m_PetInfo.ATTR_VALUE > 0)
 		{
@@ -10135,7 +10135,7 @@ void	C_VS_UI_PET_INFO::Show()
 			g_PrintColorStr(px, str_y[0], (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NOT_EXIST].GetString(), gpC_base->m_chatting_pi, RGB_WHITE);
 		}
 
-		// �ɼ�
+		// 옵션
 		px = g_PrintColorStr(hp_x, str_y[1], (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_OPTION].GetString(), gpC_base->m_chatting_pi, ITEM_DESC_RGB);
 		if(m_PetInfo.OPTION >= 0)
 		{
@@ -10151,7 +10151,7 @@ void	C_VS_UI_PET_INFO::Show()
 					*strstr(pPartName,"MP") = 'E';
 			}
 			
-			BYTE PlusPoint	= optionInfo.PlusPoint; // ����Ǵ� ��ġ
+			BYTE PlusPoint	= optionInfo.PlusPoint; // 적용되는 수치
 			
 			if (pPartName)
 			{
@@ -10178,19 +10178,19 @@ void	C_VS_UI_PET_INFO::Show()
 		{
 			g_PrintColorStr(px, str_y[1], (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NOT_EXIST].GetString(), gpC_base->m_chatting_pi, RGB_WHITE);
 		}
-		// 2���ɷ�
+		// 2차능력
 		if(m_PetInfo.CUT_HEAD)
 			g_PrintColorStr(hp_x, str_y[2], (*g_pGameStringTable)[UI_STRING_MESSAGE_PET_CAN_CUT_HEAD].GetString(), gpC_base->m_chatting_pi, RGB_YELLOW);
 		else
 			g_PrintColorStr(hp_x, str_y[2], (*g_pGameStringTable)[UI_STRING_MESSAGE_PET_CANNOT_CUT_HEAD].GetString(), gpC_base->m_chatting_pi, RGB_RED);
 
-		// ����ġ
+		// 경험치
 		g_PrintColorStr(hp_x, str_y[3], (*g_pGameStringTable)[UI_STRING_MESSAGE_LEFT_EXP].GetString(), gpC_base->m_chatting_pi, ITEM_DESC_RGB);
 
-		// ����ġ ��ġ
+		// 경험치 수치
 		g_PrintColorStr(hp_x, str_y[4], g_GetNumberString(m_PetInfo.EXP_REMAIN).c_str(), gpC_base->m_chatting_pi, RGB_WHITE);
 
-		// ���� ���̾�
+		// 남은 먹이양
 		g_PrintColorStr(hp_x, hpday_y-15, (*g_pGameStringTable)[UI_STRING_MESSAGE_PET_DESC_DURABILITY_2].GetString(), gpC_base->m_chatting_pi, ITEM_DESC_RGB);
 		
 		// hp
@@ -10295,8 +10295,8 @@ C_VS_UI_HELPDESC::C_VS_UI_HELPDESC(const char *detail,const char *title,DWORD id
 	int window_w = 500, window_h = 450;
 	Set(g_GameRect.right/2-window_w/2, g_GameRect.bottom/2-window_h/2, window_w, window_h);
 	int close_x = w-95, close_y = h-50;
-//	m_SPK.Open(HELP_MESSAGE_DESC); // ���� ���� �޼��� �̹����� �����Ѵ�.
-//	m_SPK.Open(SPK_BULLETIN_BOARD);// �ӽÿ� �̹��� 
+//	m_SPK.Open(HELP_MESSAGE_DESC); // 실제 헬프 메세지 이미지가 들어가야한다.
+//	m_SPK.Open(SPK_BULLETIN_BOARD);// 임시용 이미지 
 	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(close_x, close_y, gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_BUTTON_CLOSE), gpC_global_resource->m_pC_assemble_box_button_spk->GetHeight(C_GLOBAL_RESOURCE::AB_BUTTON_CLOSE), CLOSE_ID, this, C_GLOBAL_RESOURCE::AB_BUTTON_CLOSE));
 	m_pC_scroll_bar = new C_VS_UI_SCROLL_BAR(0, Rect(w-25,50,-1,window_h-140));
@@ -10354,7 +10354,7 @@ void C_VS_UI_HELPDESC::Run(id_t id)
 	{
 	case CLOSE_ID:
 		Finish();
-		// 2004, 5, 6 - sobeit add start - �������̽� ���� ���� �� �ʺ��� ����� ���� �߰� ^^
+		// 2004, 5, 6 - sobeit add start - 인터페이스 도움말 닫은 후 초보자 사냥터 도움말 뜨게 ^^
 		if( HELP_EVENT_INTERFACE == m_helpindex )
 			gC_vs_ui.AddHelpMail(HELP_EVENT_BEGINNER_ZONE);
 		// 2004, 5, 6 - sobeit add end
@@ -10377,7 +10377,7 @@ void C_VS_UI_HELPDESC::Show()
 	std::string content  = m_title;
 	
 	char buf[1024];
-	sprintf(buf, "���� : %s", content.c_str());
+	sprintf(buf, "제목 : %s", content.c_str());
 	g_PrintColorStr(x+30, y+10, buf , gpC_base->m_dialog_msg_pi, RGB_GOLD);
 	
 	int NullSizex,NullSizey;
@@ -10409,43 +10409,43 @@ void C_VS_UI_HELPDESC::Show()
 		istag = strstr(str.c_str(), "<");
 		isfont =  strstr(str.c_str(),"#");
 
-		if(istag)  // ù��° ���ڿ��� '<'�ΰ��
+		if(istag)  // 첫번째 문자열이 '<'인경우
 		{
 			tagstr = str ;
-			if(isfont)// ��ũ�� "#"�� �������
+			if(isfont)// 태크에 "#"이 있을경우
 			{
 				tempappend = findkey(tagstr.c_str(),"a");
 				tempcolor = findkey(tagstr.c_str(),"color");
 			}
-			else // �±׿� "<" �� ���ԵǾ��������
+			else // 태그에 "<" 이 포함되어있을경우
 			{
 				
-				tempspk = findkey( tagstr.c_str(), "file" );     					 // spk ���� ���´�.
-				tempPos = findkey( tagstr.c_str(), "pos" );							 // pos ���� ���´�
+				tempspk = findkey( tagstr.c_str(), "file" );     					 // spk 값을 얻어온다.
+				tempPos = findkey( tagstr.c_str(), "pos" );							 // pos 값을 얻어온다
 				tempspk += ".jpg";
 				
 				CDirectDrawSurface *pSurface = GetJpgFileLoading(tempspk);
-				m_width = pSurface->GetWidth();										// ������ spk ��m_midth �� ���´�
+				m_width = pSurface->GetWidth();										// 선택한 spk 의m_midth 를 얻어온다
 				m_height = pSurface->GetHeight();		
 				
-				NullSizex = (m_width/(char_width));									// �̹����� �ʿ�� ���� ���
+				NullSizex = (m_width/(char_width));									// 이미지에 필요란 공백 계산
 				NullSizey = (m_height/(char_height+5))+1;	
-				// �̹����� �ʿ��� ������ ���
+				// 이미지에 필요한 라인을 계산
 				DrawImg(m_width, m_height, tempspk.c_str(), tempPos.c_str() , max(imgcnt,line));
 				imgcnt+=NullSizey;		
-				// Memdc ��..pasing �� �����͸� �����ͼ� ��ο� �Ѵ�.
+				// Memdc 로..pasing 한 데이터를 가져와서 드로우 한다.
 			}
 		}
 		else 
 		{
-			// ���� ���õ� ������ ������?
+			// 만약 선택된 색갈이 있으면?
 			color = RGB_WHITE;
 			if(!tempcolor.empty())
 			{
 				_stscanf(tempcolor.c_str(),_T("%x"),&color);
 			}
 			
-			if(strcmp(tempappend.c_str(),"y") == 0) // ��Ʈ ��ũ �������� �̾���Ѵ�
+			if(strcmp(tempappend.c_str(),"y") == 0) // 폰트 태크 다음줄을 이어쓰기한다
 			{
 				line --;
 				if(line < 0) line = 0;
@@ -10525,42 +10525,42 @@ void C_VS_UI_HELPDESC::Show()
 		istag = strstr(str.c_str(), "<");
 		isfont =  strstr(str.c_str(),"#");
 
-		if(istag)  // ù��° ���ڿ��� '<'�ΰ��
+		if(istag)  // 첫번째 문자열이 '<'인경우
 		{
 			tagstr = str ;
-			if(isfont)// ��ũ�� "#"�� �������
+			if(isfont)// 태크에 "#"이 있을경우
 			{
 				tempappend = findkey(tagstr.c_str(),"a");
 				tempcolor = findkey(tagstr.c_str(),"color");
 			}
-			else // �±׿� "<" �� ���ԵǾ��������
+			else // 태그에 "<" 이 포함되어있을경우
 			{
-//				tempspk = findkey( tagstr.c_str(), "file" );     					 // spk ���� ���´�.
-//				tempPos = findkey( tagstr.c_str(), "pos" );							 // pos ���� ���´�
+//				tempspk = findkey( tagstr.c_str(), "file" );     					 // spk 값을 얻어온다.
+//				tempPos = findkey( tagstr.c_str(), "pos" );							 // pos 값을 얻어온다
 //				tempspk += ".jpg";
 //				
 //				CDirectDrawSurface *pSurface = GetJpgFileLoading(tempspk);
-//				m_width = pSurface->GetWidth();										// ������ spk ��m_midth �� ���´�
+//				m_width = pSurface->GetWidth();										// 선택한 spk 의m_midth 를 얻어온다
 //				m_height = pSurface->GetHeight();		
 //				
-//				NullSizex = (m_width/(char_width-1));									// �̹����� �ʿ�� ���� ���
+//				NullSizex = (m_width/(char_width-1));									// 이미지에 필요란 공백 계산
 //				NullSizey = (m_height/(char_height+5))+1;	
-				// �̹����� �ʿ��� ������ ���
+				// 이미지에 필요한 라인을 계산
 //				DrawImg(m_width, m_height, tempspk.c_str(), tempPos.c_str() , max(imgcnt,line));
 //				imgcnt+=NullSizey;		
-				// Memdc ��..pasing �� �����͸� �����ͼ� ��ο� �Ѵ�.	
+				// Memdc 로..pasing 한 데이터를 가져와서 드로우 한다.	
 			}
 		}
 		else 
 		{
-			// ���� ���õ� ������ ������?
+			// 만약 선택된 색갈이 있으면?
 			color = RGB_WHITE;
 			if(!tempcolor.empty())
 			{
 				_stscanf(tempcolor.c_str(),_T("%x"),&color);
 			}
 			
-			if(strcmp(tempappend.c_str(),"y") == 0) // ��Ʈ ��ũ �������� �̾���Ѵ�
+			if(strcmp(tempappend.c_str(),"y") == 0) // 폰트 태크 다음줄을 이어쓰기한다
 			{
 				line --;
 				if(line < 0) line = 0;
@@ -10599,31 +10599,31 @@ void C_VS_UI_HELPDESC::Show()
 		istag = strstr(str.c_str(), "<");
 		isfont =  strstr(str.c_str(),"#");
 		
-		if(istag)  // ù��° ���ڿ��� '<'�ΰ��
+		if(istag)  // 첫번째 문자열이 '<'인경우
 		{
 			tagstr = str ;
-			if(isfont)// ��ũ�� "#"�� �������
+			if(isfont)// 태크에 "#"이 있을경우
 			{
 				tempappend = findkey(tagstr.c_str(),"a");
 				tempcolor = findkey(tagstr.c_str(),"color");
 			}
-			else // �±׿� "<" �� ���ԵǾ��������
+			else // 태그에 "<" 이 포함되어있을경우
 			{
 				
-				tempspk = findkey( tagstr.c_str(), "file" );     					 // spk ���� ���´�.
-				tempPos = findkey( tagstr.c_str(), "pos" );							 // pos ���� ���´�
+				tempspk = findkey( tagstr.c_str(), "file" );     					 // spk 값을 얻어온다.
+				tempPos = findkey( tagstr.c_str(), "pos" );							 // pos 값을 얻어온다
 				tempspk += ".jpg";
 				
 				CDirectDrawSurface *pSurface = GetJpgFileLoading(tempspk);
-				m_width = pSurface->GetWidth();										// ������ spk ��m_midth �� ���´�
+				m_width = pSurface->GetWidth();										// 선택한 spk 의m_midth 를 얻어온다
 				m_height = pSurface->GetHeight();		
 				
-				NullSizex = (m_width/(char_width-1));									// �̹����� �ʿ�� ���� ���
+				NullSizex = (m_width/(char_width-1));									// 이미지에 필요란 공백 계산
 				NullSizey = (m_height/(char_height+5))+1;	
-				// �̹����� �ʿ��� ������ ���
+				// 이미지에 필요한 라인을 계산
 				DrawImg(m_width, m_height, tempspk.c_str(), tempPos.c_str() , max(imgcnt,line));
 				imgcnt+=NullSizey;		
-				// Memdc ��..pasing �� �����͸� �����ͼ� ��ο� �Ѵ�.
+				// Memdc 로..pasing 한 데이터를 가져와서 드로우 한다.
 			}
 		}
 		else 
@@ -10634,7 +10634,7 @@ void C_VS_UI_HELPDESC::Show()
 				_stscanf(tempcolor.c_str(),_T("%x"),&color);
 			}
 			
-			if(strcmp(tempappend.c_str(),"y") == 0) // ��Ʈ ��ũ �������� �̾���Ѵ�
+			if(strcmp(tempappend.c_str(),"y") == 0) // 폰트 태크 다음줄을 이어쓰기한다
 			{
 				line --;
 				if(line < 0) line = 0;
@@ -10671,44 +10671,44 @@ void C_VS_UI_HELPDESC::Show()
 void  C_VS_UI_HELPDESC::DrawImg(int m_width, int m_height ,const char * filename,const char * pos, int linecnt)
 {
 
-	int Pagewidth = 500;										// ���� �����信 ��µ� x ������
-	int Pageheight = 500;										// ���� �����信 ��µ� y ������
-	int blankwidth = 35;										// left ���� ������
-	int blankheight = 7;										// top ���� ������
+	int Pagewidth = 500;										// 현제 프리뷰에 출력될 x 싸이즈
+	int Pageheight = 500;										// 현제 프리뷰에 출력될 y 싸이즈
+	int blankwidth = 35;										// left 여백 싸이즈
+	int blankheight = 7;										// top 여백 싸이즈
 	int imagelinesize = 20;
 	
 	Rect rect;
-	if(strcmp("L",pos) == 0)			// ���������ϰ��
+	if(strcmp("L",pos) == 0)			// 왼쪽정열일경우
 	{
 		rect.x = blankheight+20;        
 		rect.y = (linecnt*imagelinesize)+blankwidth-15;
 	}
 	
-	if(strcmp("R",pos) == 0)			// �����������ϰ��,
+	if(strcmp("R",pos) == 0)			// 오른쪽정열일경우,
 	{
 		rect.x = Pagewidth-m_width-30 ; 
 		rect.y =(linecnt*imagelinesize) +blankwidth-15;
 	}
 
-	if(strcmp("LT",pos) == 0)			// ,���� ��ü 
+	if(strcmp("LT",pos) == 0)			// ,왼쪽 전체 
 	{
 		rect.x = blankheight+20;        
 		rect.y = (linecnt*imagelinesize)+blankwidth-15;
 	}
 
-	if( strcmp("RT",pos)  == 0)		 //  ��������ü 
+	if( strcmp("RT",pos)  == 0)		 //  오른쪽전체 
 	{
 		rect.x = Pagewidth-m_width+blankheight -40; 
 		rect.y  =(linecnt*imagelinesize) +blankwidth-15;
 	}
 	
-	if(strcmp("C",pos) == 0)		// �����ϰ�� 
+	if(strcmp("C",pos) == 0)		// 센터일경우 
 	{
 		rect.x = (Pagewidth-m_width)/2;  
 		rect.y = (linecnt*imagelinesize)+blankwidth+15;
 	}
 	Rect rectimg(0,0, m_width, m_height);
-	// Ŭ���� ó�� 	
+	// 클리핑 처리 	
 	int top = rect.y - (m_pC_scroll_bar->GetScrollPos()*imagelinesize);
 
 	POINT p = { x + rect.x,  20 + y +top };
@@ -11009,8 +11009,8 @@ void C_VS_UI_HELPDESC::LoadCustomstr(char * customstrfilename)
 	
 	while(file.getline(sztemp,1024))
 	{
-		int len = strlen(sztemp);				    	// �Ѷ����� ���̸� ���Ѵ�.
-		for(int i = len ; i >= 0; i--)					// ������������ �������� /r,/n �� ������ �����ֱ� ���ؼ�
+		int len = strlen(sztemp);				    	// 한라인의 길이를 구한다.
+		for(int i = len ; i >= 0; i--)					// 마지막라인의 마지막에 /r,/n 의 공백을 지워주기 위해서
 		{
 			if(sztemp[i] =='\r' || sztemp[i] =='\n')
 			{
@@ -11032,14 +11032,14 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 	char sztemp[MAXBUFFER];
 	int  m_width,m_height;
 	std::string szParsingData;
-	std::string tempstr;												// ��Ʈ���� �����ϴ� �Լ�
-	std::string tempspk;												// spk ����
-	std::string tempPos;												// �̹��� ��ġ 
-	std::string tempindex;												// spk ���ؽ�
-	std::string tempappend;												// �̾��
-	char *pCur = NULL;													// �Ѷ����� �о����� �����ϴ� ����
-	const char *istag = NULL;													//��ũ�� �ִ��� �˻��ϴ� ����
-	const char *isfont = NULL;												//��ũ�� �ִ��� �˻��ϴ� ����
+	std::string tempstr;												// 스트링을 저장하는 함수
+	std::string tempspk;												// spk 변수
+	std::string tempPos;												// 이미지 위치 
+	std::string tempindex;												// spk 인텍스
+	std::string tempappend;												// 이어쓰기
+	char *pCur = NULL;													// 한라인을 읽어드려서 저장하는 변수
+	char *istag = NULL;													//태크가 있는지 검사하는 변수
+	char *isfont = NULL;												//태크가 있는지 검사하는 변수
 	
 	int NullSizex = 0,NullSizey = 0;
 	
@@ -11055,7 +11055,7 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 //	std::string  content = 	message.m_strDetail[g_eRaceInterface];
 	std::string content  = m_detail;
 	
-	content +="\r\n";		// �������� ���α��� �˻縦 �ϱ����ؼ� 
+	content +="\r\n";		// 마지막에 라인까지 검사를 하기위해서 
 	while(pCur != NULL || ((cur= content.find("\r\n")) != -1))
 	{
 		if(pCur == NULL)
@@ -11068,24 +11068,24 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 //			}
 		}
 		tempstr = sztemp;
-		istag = strstr(tempstr.c_str(),"<");  //�̹��� �±��ϰ��
-		isfont = strstr(tempstr.c_str(),"#"); // �ؽ�Ʈ �±�
+		istag = strstr(tempstr.c_str(),"<");  //이미지 태그일경우
+		isfont = strstr(tempstr.c_str(),"#"); // 텍스트 태그
 
 		int  num =0;
 		int start = 0;
 		int index = 0;
 		char* pch = NULL;
-		std::string digit,custom;										// Ŀ���� ��Ʈ�� ���� ����
-		pch = strchr(sztemp, '%');										// '%' �� ã�Ƽ� �װ��� ��ġ�� �����Ѵ�.
-		szParsingData = sztemp;											// �Ѷ����� �о�ͼ� szpasingdata �� �����Ѵ�.
+		std::string digit,custom;										// 커스톰 스트링 저장 변수
+		pch = strchr(sztemp, '%');										// '%' 를 찾아서 그곳의 위치를 리턴한다.
+		szParsingData = sztemp;											// 한라인을 읽어와서 szpasingdata 에 저장한다.
 		
-		while (pch!=NULL)												// '%' �� ������ ���� while ����
+		while (pch!=NULL)												// '%' 가 없을때 까지 while 동작
 		{
-			num = pch-(sztemp+start);									// % �������������� ���̸� ���Ѵ�/
-			custom = "%";												// customstr "%" ���� �ʱ�ȭ���ش�
+			num = pch-(sztemp+start);									// % 나오기전까지의 길이를 구한다/
+			custom = "%";												// customstr "%" 으로 초기화해준다
 			int cnt = 0;
-			start += (num+1);											///%���������������� ���̸� ��Ӵ����ش�.
-			while(sztemp[start+cnt] >= '0' && sztemp[start+cnt] <= '9') // ������ ���ڰ� �ƴҶ� ���� �����ش�/
+			start += (num+1);											///%가나오기전까지의 길이를 계속더해준다.
+			while(sztemp[start+cnt] >= '0' && sztemp[start+cnt] <= '9') // 다음에 숫자가 아닐때 까지 더해준다/
 			{
 				digit += sztemp[start+cnt];		
 				custom += sztemp[start+cnt];
@@ -11094,7 +11094,7 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 			
 			if(custom_strting.size() > 0)
 			{
-				if(num >= 0)									// �̻������� empty �� �̻��Ѱ��� ���ͼ� ��¿�� ���� size �� ó���ߵ� �Ѥ�
+				if(num >= 0)									// 이상하지만 empty 가 이상한값이 나와서 어쩔수 없이 size 로 처리했따 ㅡㅡ
 				{
 					if(custom_strting[num].size() < 2048)
 					{						
@@ -11120,14 +11120,14 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 /*		int  num =0;
 		int start = 0;
 		int index = 0;
-		szParsingData = sztemp;											// �Ѷ����� �о�ͼ� szpasingdata �� �����Ѵ�.
+		szParsingData = sztemp;											// 한라인을 읽어와서 szpasingdata 에 저장한다.
 		int pos;
 
-		while( ( pos = szParsingData.find( "%" ) ) != -1 )				// '%' �� ���������� ���ڿ��� ã�Ƴ���
+		while( ( pos = szParsingData.find( "%" ) ) != -1 )				// '%' 가 없을떄까지 문자열을 찾아낸다
 		{
 			int cnt = 1;
 			strcpy(sztemp ,szParsingData.c_str());
-			while(sztemp[pos+cnt] >= '0' && sztemp[pos+cnt] <= '9') // ������ ���ڰ� �ƴҶ� ���� �����ش�/
+			while(sztemp[pos+cnt] >= '0' && sztemp[pos+cnt] <= '9') // 다음에 숫자가 아닐때 까지 더해준다/
 			cnt++;
 			char digit[100];
 			memset( digit, 0, 100 );
@@ -11135,7 +11135,7 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 			int num = atoi(digit);			
 			if(custom_strting.size() > 0)
 			{
-				if(num >= 0)									// �̻������� empty �� �̻��Ѱ��� ���ͼ� ��¿�� ���� size �� ó���ߵ� �Ѥ�
+				if(num >= 0)									// 이상하지만 empty 가 이상한값이 나와서 어쩔수 없이 size 로 처리했따 ㅡㅡ
 				{
 					if(custom_strting[num].size() < 2048)
 					{						
@@ -11151,9 +11151,9 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 			}
 		}
 */
-		strcpy(sztemp,szParsingData.c_str());       // Ŀ���� ��Ʈ���� ����ȹ��ڿ�//
-		int len = strlen(sztemp);					// �Ѷ����� ���̸� ���Ѵ�.
-		for(int  i = len ; i >= 0; i--)					// ������������ �������� /r,/n �� ������ �����ֱ� ���ؼ�
+		strcpy(sztemp,szParsingData.c_str());       // 커스톰 스트링이 적용된문자열//
+		int len = strlen(sztemp);					// 한라인의 길이를 구한다.
+		for(int  i = len ; i >= 0; i--)					// 마지막라인의 마지막에 /r,/n 의 공백을 지워주기 위해서
 		{
 			if(sztemp[i] =='\r' || sztemp[i] =='\n')
 			{
@@ -11162,27 +11162,27 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 			}
 		}
 
-		if(istag)// �±��ϰ��
+		if(istag)// 태그일경우
 		{
-			if(isfont) // ��Ʈ(����) �±� �ϰ��
+			if(isfont) // 폰트(색상) 태그 일경우
 			{
 				parsing_data.push_back(tempstr.c_str());
-				tempappend = findkey(tempstr.c_str(),"a"); // ����� ������ �̾���Ѵ�
+				tempappend = findkey(tempstr.c_str(),"a"); // 적용된 색상을 이어쓰기한다
 				linecnt = 1;
 			}
-			else // �̹��� ����±��ϰ��
+			else // 이미지 출력태그일경우
 			{
-				while(NullSizey > 0)						// �̰��� �̹����� ysize ���� �ؽ�Ʈ�� ������
-				{											// ���� ysize ��ŭ ��������� �־��ش�
+				while(NullSizey > 0)						// 이곳은 이미지의 ysize 보다 텍스트가 작을떄
+				{											// 남은 ysize 만큼 공백라인을 넣어준다
 					NullSizey--;
 					parsing_data.push_back(" ");
 					if(NullSizey == 0) break;
 				}
 
-				parsing_data.push_back(tempstr.c_str());        // �̰��� �±� ��ü ������ �����Ѵ�
-				tempspk = findkey( tempstr.c_str(), "file" );    // �±װ��� ��������Ʈ ���� ã��
-				tempPos = findkey( tempstr.c_str(), "pos" );	// �±��� �̹��� ��ġ�� ����
-				//tempindex = findkey( tempstr.c_str(), "index" ); // spk �� �ε����� ã�´�
+				parsing_data.push_back(tempstr.c_str());        // 이곳은 태그 전체 라인을 저장한다
+				tempspk = findkey( tempstr.c_str(), "file" );    // 태그값의 스프라이트 네임 찾기
+				tempPos = findkey( tempstr.c_str(), "pos" );	// 태그의 이미지 위치를 추출
+				//tempindex = findkey( tempstr.c_str(), "index" ); // spk 의 인덱스를 찾는다
 				tempstr = "";
 			
 //				CJpeg jpg;
@@ -11195,13 +11195,13 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 //				jpg.Open(file_path.c_str());
 				
 				CDirectDrawSurface *pJpgSurface = GetJpgFileLoading( tempspk );
-				m_width = pJpgSurface->GetWidth();										// ������ spk ��m_midth �� ���´�
+				m_width = pJpgSurface->GetWidth();										// 선택한 spk 의m_midth 를 얻어온다
 				m_height = pJpgSurface->GetHeight();	
-			//	m_width = m_SPK.GetWidth(atoi(tempindex.c_str()));										// ������ spk ��m_midth �� ���´�
-			//	m_height = m_SPK.GetHeight(atoi(tempindex.c_str()));									// ������ spk ��m_heigh �� ���´�
+			//	m_width = m_SPK.GetWidth(atoi(tempindex.c_str()));										// 선택한 spk 의m_midth 를 얻어온다
+			//	m_height = m_SPK.GetHeight(atoi(tempindex.c_str()));									// 선택한 spk 의m_heigh 를 얻어온다
 				
-				NullSizex = (m_width/(char_width-1));									// �̹����� �ʿ�� ���� ���
-				NullSizey = (m_height/(char_height+5))+1;								// �̹����� �ʿ��� ������ ���
+				NullSizex = (m_width/(char_width-1));									// 이미지에 필요란 공백 계산
+				NullSizey = (m_height/(char_height+5))+1;								// 이미지에 필요한 라인을 계산
 //				jpg.Release();
 				
 			}
@@ -11209,7 +11209,7 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 		else 
 		{
 			tempstr = "";
-			if(strcmp(tempPos.c_str(),"L") == 0) // ���ʿ� �̹����� �ִ°��:�켱�տ� sizex �� ������ ������ ���ٿ� ������ �ִ� ���̸� �����Ѵ�
+			if(strcmp(tempPos.c_str(),"L") == 0) // 왼쪽에 이미지가 있는경우:우선앞에 sizex 의 공백을 넣은뒤 한줄에 찍을수 있는 길이를 제한한다
 			{
 				if(strcmp(tempappend.c_str(),"y") == 0 )
 				{
@@ -11226,13 +11226,13 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 				}
 			}
 
-			if(strcmp(tempPos.c_str(),"R") == 0) //�����ʿ� �̹����� �ִ°��:���ٿ� �������ִ� ���̸� ����
+			if(strcmp(tempPos.c_str(),"R") == 0) //오른쪽에 이미지가 있는경우:한줄에 찍을수있는 길이를 제한
 			{
 				count = limitlinecnt -NullSizex;
 			}
 
 			if(strcmp(tempPos.c_str(),"C") == 0 || strcmp(tempPos.c_str(),"RT") == 0 || strcmp(tempPos.c_str(),"LT") == 0)
-			{ // �߰� , ���� ��ü����, ������ ��ü ���� : size y ��ŭ�� ����������־��ش�
+			{ // 중간 , 왼쪽 전체차지, 오른쪽 전체 차지 : size y 만큼만 공백라인을넣어준다
 				while(NullSizey > 0)
 				{
 					NullSizey--;
@@ -11240,7 +11240,7 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 				}
 			}
 
-			if(strcmp(tempappend.c_str(),"y") == 0 ) // ����� ����?�ƴϳ�?
+			if(strcmp(tempappend.c_str(),"y") == 0 ) // 어펜드 모드냐?아니냐?
 			{
 				count = count - appendtemp;
 				while(appendtemp > 0)
@@ -11255,35 +11255,35 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 				NullSizey++;
 			}
 
-			if(NullSizey > 0)						// �̹��� �� �ִٸ� yszie �� �����������
+			if(NullSizey > 0)						// 이미지 가 있다면 yszie 가 남아있을경우
 			{
-				NullSizex = (m_width/(char_width-1)); // ������ �־ �پ��  Nullsizex ũ�⸦ �������ش�
+				NullSizex = (m_width/(char_width-1)); // 공백을 넣어서 줄어든  Nullsizex 크기를 셋팅해준다
 			}
 			else
 			{
-				tempPos = "";					 // �̹����� ysize �� ��������� ������ pos �±׸� Ŭ���� ���ش�
+				tempPos = "";					 // 이미지의 ysize 의 공백라인이 끝나면 pos 태그를 클리어 해준다
 			}
 
-			if(pCur == NULL) // pCur �� ���������
+			if(pCur == NULL) // pCur 가 비어있을때
 			{
-				pCur = sztemp;  // pCur ��.. �Ѷ����о�帰 ���ڿ��� �����Ѵ�.
+				pCur = sztemp;  // pCur 에.. 한라인읽어드린 문자열을 저장한다.
 			}
 			
-			size_t linecount = strlen(pCur); // linecount �� �Ѷ����� �ѹ��ڿ� ���̸� �����Ѵ�
-			size_t cutCount = count;         // �ѱ� 2byte �߰��� ������ ������ �������ؼ� ����ϴ� ����
-			if(linecount < count)			//  ���ڿ��� count ���� �������
+			size_t linecount = strlen(pCur); // linecount 에 한라인의 총문자열 길이를 저장한다
+			size_t cutCount = count;         // 한글 2byte 중간에 깨지는 현상을 막기위해서 사용하는 변수
+			if(linecount < count)			//  문자열이 count 보다 작은경우
 			{
-				tempstr += pCur;			// �ش繮�ڿ��� �����Ѵ�
-				count -= linecount;			// count �� �������ڿ������� ���� �����;� ������ ���������� ���ڿ����̸� ���ش�
+				tempstr += pCur;			// 해당문자열을 저장한다
+				count -= linecount;			// count 는 다음문자열까지의 값을 가져와야 함으로 현제까지의 문자열길이를 뺴준다
 				pCur = NULL;		
 				count = limitlinecnt;
 			}
 			else
 			{
 				char szbuf[MAXBUFFER];    
-				if(g_PossibleStringCut(pCur, static_cast<int>(cutCount)) == false) // ���������ڿ��� �����ؼ� �ѱ��ϰ�� 
+				if(g_PossibleStringCut(pCur, static_cast<int>(cutCount)) == false) // 마지막문자열을 조사해서 한글일경우 
 				{
-					cutCount--;  // ���ڿ��� ���ڸ� �ϳ� �ٿ��ش�
+					cutCount--;  // 문자열의 숫자를 하나 줄여준다
 				}
 				memcpy(szbuf, pCur, cutCount);
 				szbuf[cutCount] = '\0';
@@ -11292,14 +11292,14 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 				count = limitlinecnt;
 			}
 			
-			appendtemp = tempstr.length(); // appen ����϶� �����ٿ� ���ʿ� ������ ��Ű���ؼ�
+			appendtemp = tempstr.length(); // appen 모드일때 다음줄에 앞쪽에 공백을 넣키위해서
 			parsing_data.push_back(tempstr.c_str());
-			NullSizey--; // �̹����� ������� �������� push_back �� ������ ���� ���پ� ���ش�.
+			NullSizey--; // 이미지가 있을경우 한줄한줄 push_back 에 넣을떄 마다 한줄씩 뺴준다.
 			tempstr = "";
 		}
 	}
-	while(NullSizey > 0)						// �̰��� �̹����� ysize ���� �ؽ�Ʈ�� ������
-	{											// ���� ysize ��ŭ ��������� �־��ش�
+	while(NullSizey > 0)						// 이곳은 이미지의 ysize 보다 텍스트가 작을떄
+	{											// 남은 ysize 만큼 공백라인을 넣어준다
 		NullSizey--;
 		parsing_data.push_back(" ");
 		if(NullSizey == 0) break;
@@ -11323,7 +11323,7 @@ char* C_VS_UI_HELPDESC::findkey(const char* tagstr ,char* keyword)
 	if(s == NULL )
 		return NULL;
 	
-	static char Buffer[512];  // ������ static  ���� �ؾ��Ѵ� �޸� ħ���� �������ؼ� (�߿��ϴ�)
+	static char Buffer[512];  // 변수를 static  으로 해야한다 메모리 침범을 막기위해서 (중요하다)
 	memset( Buffer, 0, 512 );
 	
 	const char *start = strstr( s, "'" );
@@ -11897,7 +11897,7 @@ bool	C_VS_UI_SMS_MESSAGE::MouseControl(UINT message, int _x, int _y)
 	if(m_SubWindow == true && m_sub_rect.IsInRect(_x, _y))
 	{
 		gpC_mouse_pointer->SetCursorDefault();
-		// sub window �ȿ� ������ sub scroll
+		// sub window 안에 있으면 sub scroll
 		re &= m_pC_sub_scroll_bar->MouseControl(message, _x-m_sub_rect.x, _y-m_sub_rect.y);
 		switch(message)
 		{
@@ -11906,13 +11906,13 @@ bool	C_VS_UI_SMS_MESSAGE::MouseControl(UINT message, int _x, int _y)
 			{
 				m_sub_selected.x = (_x - m_sub_rect.x-MARK_X)/14;
 				m_sub_selected.y = (_y - m_sub_rect.y-MARK_Y)/14+m_pC_sub_scroll_bar->GetScrollPos();
-				// 2004, 5, 10 sobeit add start - Ŭ�� ��ġ ����
+				// 2004, 5, 10 sobeit add start - 클릭 위치 보정
 				if(RACE_OUSTERS == g_eRaceInterface)
 				{
 					m_sub_selected.x -= 1;
 					m_sub_selected.y -= 1;
 				}
-				// 2004, 5, 10 sobeit add end - Ŭ�� ��ġ ����
+				// 2004, 5, 10 sobeit add end - 클릭 위치 보정
 				if(m_sub_selected.x < 0 || m_sub_selected.x > 8 || m_sub_selected.y < 0 || m_sub_selected.y >= MARK_MAX)
 					m_sub_selected.x = -1;
 				if(m_sub_selected.x != -1 )
@@ -13042,7 +13042,7 @@ void	C_VS_UI_SMS_RECORD::Run(id_t id)
 //------------------------------------------------------------------------------
 // C_VS_UI_NAMING
 //
-// ���̹� ����Ʈ
+// 네이밍 리스트
 //------------------------------------------------------------------------------
 C_VS_UI_NAMING::C_VS_UI_NAMING(std::vector<C_VS_UI_NicknameInfo*> &_NamingList)
 {	
@@ -13094,7 +13094,7 @@ C_VS_UI_NAMING::C_VS_UI_NAMING(std::vector<C_VS_UI_NicknameInfo*> &_NamingList)
 	int pin_x = w-24-20, pin_y = h-19;
 	int alpha_x = 6, alpha_y = h-21;
 
-	//�����ư
+	//공통버튼
 	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(close_x, close_y, 
 		gpC_global_resource->m_pC_info_spk->GetWidth(C_GLOBAL_RESOURCE::BUTTON_CLOSE), 
@@ -13404,9 +13404,9 @@ void	C_VS_UI_NAMING::ShowButtonDescription(C_VS_UI_EVENT_BUTTON *p_button)
 		(*g_pGameStringTable)[UI_STRING_MESSAGE_SHOW_NO_ALPHA_WINDOW].GetString(),
 		(*g_pGameStringTable)[UI_STRING_MESSAGE_AUTO_HIDE_OFF].GetString(),
 		(*g_pGameStringTable)[UI_STRING_MESSAGE_AUTO_HIDE_ON].GetString(),
-		(*g_pGameStringTable)[UI_STRING_MESSAGE_CHANGE_PLAYER_NICKNAME].GetString(),// = "Ŀ���� �г����� �����մϴ�.";
-		(*g_pGameStringTable)[UI_STRING_MESSAGE_SELECT_PLAYER_NICKNAME].GetString(),// = "���õ� �г������� �����մϴ�.";
-		(*g_pGameStringTable)[UI_STRING_MESSAGE_SHOW_HELP].GetString(),// = "������ ���ϴ�..";
+		(*g_pGameStringTable)[UI_STRING_MESSAGE_CHANGE_PLAYER_NICKNAME].GetString(),// = "커스텀 닉네임을 변경합니다.";
+		(*g_pGameStringTable)[UI_STRING_MESSAGE_SELECT_PLAYER_NICKNAME].GetString(),// = "선택된 닉네임으로 변경합니다.";
+		(*g_pGameStringTable)[UI_STRING_MESSAGE_SHOW_HELP].GetString(),// = "도움말을 봅니다..";
 	};
 	switch(p_button->GetID())
 	{
@@ -13534,7 +13534,7 @@ void	C_VS_UI_NAMING::Change_Custom_Naming(int nID, char* szName)
 //------------------------------------------------------------------------------
 // C_VS_UI_NAMING_CHANGE
 //
-// ���̹� ����Ʈ ü����
+// 네이밍 리스트 체인지
 //------------------------------------------------------------------------------
 C_VS_UI_NAMING_CHANGE::C_VS_UI_NAMING_CHANGE(MItem* pItem, char* szCustom)
 {	
@@ -13584,7 +13584,7 @@ C_VS_UI_NAMING_CHANGE::C_VS_UI_NAMING_CHANGE(MItem* pItem, char* szCustom)
 	int close_x = w-24, close_y = h-22;		
 	int select_x = w-120, select_y = h-45;		
 
-	//�����ư
+	//공통버튼
 	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(close_x, close_y, 
 		gpC_global_resource->m_pC_info_spk->GetWidth(C_GLOBAL_RESOURCE::BUTTON_CLOSE), 
@@ -13778,9 +13778,9 @@ void	C_VS_UI_NAMING_CHANGE::ShowButtonDescription(C_VS_UI_EVENT_BUTTON *p_button
 	const static char* help_info_button_string[4]=
 	{
 		(*g_pGameStringTable)[UI_STRING_MESSAGE_CLOSE_WINDOW].GetString(),
-		(*g_pGameStringTable)[UI_STRING_MESSAGE_CHANGE_PLAYER_NICKNAME].GetString(),// = "���� ���� �г����� �����մϴ�.";.";
-		(*g_pGameStringTable)[UI_STRING_MESSAGE_ADD_PLAYER_NICKNAME].GetString(),// = "�г����� �߰� �մϴ�".";
-		(*g_pGameStringTable)[UI_STRING_MESSAGE_CHANGE_PET_NICKNAME].GetString(),// = "���� �г����� �����մϴ�.".";
+		(*g_pGameStringTable)[UI_STRING_MESSAGE_CHANGE_PLAYER_NICKNAME].GetString(),// = "유저 자유 닉네임을 변경합니다.";.";
+		(*g_pGameStringTable)[UI_STRING_MESSAGE_ADD_PLAYER_NICKNAME].GetString(),// = "닉네임을 추가 합니다".";
+		(*g_pGameStringTable)[UI_STRING_MESSAGE_CHANGE_PET_NICKNAME].GetString(),// = "펫의 닉네임을 변경합니다.".";
 		
 
 	};
@@ -13792,9 +13792,9 @@ void	C_VS_UI_NAMING_CHANGE::ShowButtonDescription(C_VS_UI_EVENT_BUTTON *p_button
 	case CHANGE_ID:
 		if(m_PenItem)
 		{
-			if(m_PenItem->GetItemType() == 22 || m_PenItem->GetItemType() == 25) // �������̹� ���� ��
+			if(m_PenItem->GetItemType() == 22 || m_PenItem->GetItemType() == 25) // 유저네이밍 수정 펜
 				g_descriptor_manager.Set(DID_INFO, p_button->x+x, p_button->y+y, (void *)help_info_button_string[1],0,0);
-			else if(m_PenItem->GetItemType() == 23)// �� ���̹� ���� ��
+			else if(m_PenItem->GetItemType() == 23)// 펫 네이밍 수정 펜
 				g_descriptor_manager.Set(DID_INFO, p_button->x+x, p_button->y+y, (void *)help_info_button_string[3],0,0);
 			else if(m_PenItem->GetItemType() == 24)
 				g_descriptor_manager.Set(DID_INFO, p_button->x+x, p_button->y+y, (void *)help_info_button_string[2],0,0);
@@ -13906,8 +13906,8 @@ C_VS_UI_QUEST_MANAGER::C_VS_UI_QUEST_MANAGER()
 //	struct _GMissionInfo{
 //		std::string		szMissionTitle;
 //		BYTE			bStatus;
-//		BYTE			bCondition;	// ��� ���ǿ� �ִ°� 0 : Happen, 1 : Complete, 2 : Fail, 3 : Reward
-//		WORD			bIndex;		// �ش� ������ ���° element�ΰ�
+//		BYTE			bCondition;	// 어느 조건에 있는가 0 : Happen, 1 : Complete, 2 : Fail, 3 : Reward
+//		WORD			bIndex;		// 해당 조건의 몇번째 element인가
 //	};
 
 		
@@ -13977,7 +13977,7 @@ C_VS_UI_QUEST_MANAGER::C_VS_UI_QUEST_MANAGER()
 	for(int TempCount = 0; TempCount< 13 ; TempCount++)
 	{
 		//----------------------------------------------------
-		// Item ���� --> �߰�
+		// Item 생성 --> 추가
 		//----------------------------------------------------
 		pItem = MItem::NewItem( ITEM_CLASS_GQUEST_ITEM );
 	//	pItem->SetID( 0 );
@@ -14010,10 +14010,10 @@ C_VS_UI_QUEST_MANAGER::~C_VS_UI_QUEST_MANAGER()
 	
 }
 
-// �ʿ��Ҷ����� �ε� �ؼ� ����...�ѹ� �ε��س��� ����..������..
-// �ϴ� ÷�� �ε��س��� ��~�� ����� �ڵ�^^;
-// ���� �غ��� �׶� �׶� �ε��ϴ°� ������ �ؼ� ����..����
-// ó�� ����Ʈ ���� �� �⺻ tree�� ��� ������ �ְ� �߰��߰� modify�Ҷ� �׶� �׶� �о� �´�.
+// 필요할때마다 로드 해서 쓸지...한번 로드해놓고 쓸지..고민중..
+// 일단 첨에 로드해놓고 쭈~욱 쓰기로 코딩^^;
+// 생각 해보니 그때 그때 로딩하는게 좋을듯 해서 수정..ㅋㅋ
+// 처음 리스트 받을 땐 기본 tree를 계속 가지고 있고 중간중간 modify할땐 그때 그때 읽어 온다.
 bool	C_VS_UI_QUEST_MANAGER::LoadQuestXML()
 {
 	m_Quest_XML_file.SetRAR(RPK_TUTORIAL_ETC, RPK_PASSWORD);
@@ -14022,7 +14022,7 @@ bool	C_VS_UI_QUEST_MANAGER::LoadQuestXML()
 
 	XMLParser	parser;
 
-	// quest xml�� vector�� ����� �ؼ���..-_-;
+	// quest xml은 vector만 쓰기로 해서뤼..-_-;
 	parser.parse( (char *)m_Quest_XML_file.GetFilePointer(), &m_Quest_XML_Tree, true);
 
 	m_Quest_XML_file.Release();
@@ -14040,7 +14040,7 @@ void	C_VS_UI_QUEST_MANAGER::ReleaseQuestXML()
 {
 	m_Quest_XML_Tree.Release();
 }
-// ����Ʈ ����/���� ��Ŷ ����
+// 퀘스트 수락/포기 패킷 보냄
 void	C_VS_UI_QUEST_MANAGER::SendQuestIntention(bool bIntention)
 {
 	if(bIntention)
@@ -14052,7 +14052,7 @@ void	C_VS_UI_QUEST_MANAGER::SendQuestIntention(bool bIntention)
 		gpC_base->SendMessage(UI_GQUEST_GIVEUP, m_SelectedQuestID);
 	}
 }
-// detail, mission ������ �����Ѵ�.
+// detail, mission 윈도를 갱신한다.
 void	C_VS_UI_QUEST_MANAGER::SetSubWindowInfo(DWORD qID, bool bOpenSubWindows)
 {
 	if(bOpenSubWindows)
@@ -14085,7 +14085,7 @@ void	C_VS_UI_QUEST_MANAGER::SetSubWindowInfo(DWORD qID, bool bOpenSubWindows)
 		}
 	}
 }
-// Item ������ �����Ѵ�.
+// Item 윈도를 갱신한다.
 void	C_VS_UI_QUEST_MANAGER::UpdateQuestItemInfo(std::vector<MItem*>& vItem)
 {
 	ClearQuestItem();
@@ -14116,29 +14116,29 @@ void	C_VS_UI_QUEST_MANAGER::DeleteQuestItem(int nSlot)
 	}
 	
 }
-// ����Ʈ ����Ʈ�� ������ �߰�(ó�� �ε��� ����´�)
+// 퀘스트 리스트에 무조건 추가(처음 로딩시 날라온다)
 bool	C_VS_UI_QUEST_MANAGER::SetQuestManagerInfo(void* pVoid)
 {
 	_GQuestInfo * TempInfo = (_GQuestInfo*)pVoid;
 	if(NULL != TempInfo)
 	{
-		// string update �� �߰� - ����Ʈ ����Ʈ�� id�� ã�´�..����÷���.-_-;;;
+		// string update 후 추가 - 퀘스트 리스트는 id로 찾는다..복잡시럽네.-_-;;;
 		const XMLTree *pElement = m_Quest_XML_Tree.GetChildByAttr( TempInfo->dwQuestID , "id");
 		if(NULL != pElement)
 		{
 			if( TempInfo->bStatus == C_VS_UI_QUEST_LIST::CAN_ACCEPT ||
-				TempInfo->bStatus == C_VS_UI_QUEST_LIST::CAN_REPLAY ) // ���� ���� �̸�
+				TempInfo->bStatus == C_VS_UI_QUEST_LIST::CAN_REPLAY ) // 수행 가능 이면
 			{
 				RunQuestIcon();
 
-				// ���డ���̰� �ڵ� ���� ���� �϶�
+				// 수행가능이고 자동 수행 시작 일때
 				const XMLAttribute* _TempAttr = pElement->GetAttribute("autostart");
 				if(_TempAttr != NULL)
 				{
-					if(_TempAttr->ToInt()>0) // �ڵ� �����̸�
+					if(_TempAttr->ToInt()>0) // 자동 수행이면
 					{
 						m_SelectedQuestID = TempInfo->dwQuestID;
-						gC_vs_ui.SendQuestIntention(true); // �����ϰڴ� ��Ŷ�� ������.
+						gC_vs_ui.SendQuestIntention(true); // 수행하겠단 패킷을 보낸다.
 					}
 				}
 			}
@@ -14152,12 +14152,12 @@ bool	C_VS_UI_QUEST_MANAGER::SetQuestManagerInfo(void* pVoid)
 				const XMLTree * TempMissionElement = GetMissionElement(pElement,TempMission->bCondition);
 				if( NULL != TempMissionElement)
 				{
-					// �̼� ����Ʈ�� "index"�� ã�´�..����÷���.-_-;;;
+					// 미션 리스트는 "index"로 찾는다..복잡시럽네.-_-;;;
 					const XMLTree *pChildElement2 = TempMissionElement->GetChildByAttr(TempMission->bIndex, "index");
 					if(NULL != pChildElement2)
 					{
 						TempMission->szMissionTitle =  (char*)pChildElement2->GetText().c_str();
-						if(0 == stricmp(pChildElement2->GetName().c_str(),"Time")) // �ð� ������ �ִ� �̼��̸�
+						if(0 == stricmp(pChildElement2->GetName().c_str(),"Time")) // 시간 제한이 있는 미션이면
 						{
 							TempMission->dwTimeLimit = timeGetTime();
 						}
@@ -14166,7 +14166,7 @@ bool	C_VS_UI_QUEST_MANAGER::SetQuestManagerInfo(void* pVoid)
 				}
 				//TempMission->szMissionTitle = GetMissionTitle(pElement, TempMission->bIndex, TempMission->bCondition);
 				
-				// modify start- condition�� fail(2)�϶� �����̸� ���з�, ���и� �������� �����޶�� �ؼ� ����..��..
+				// modify start- condition이 fail(2)일때 성공이면 실패로, 실패면 성공으로 보여달라고 해서 수정..헐..
 				if(TempMission->bCondition == 2)
 				{
 					if(TempMission->bStatus == 2)
@@ -14188,7 +14188,7 @@ bool	C_VS_UI_QUEST_MANAGER::SetQuestManagerInfo(void* pVoid)
 	}
 	return false;
 }
-// ������ �ִ� ����Ʈ�� ����, ������ �߰�(���� �߰��� ����´�)
+// 기존에 있는 퀘스트면 갱신, 없으면 추가(게임 중간에 날라온다)
 bool	C_VS_UI_QUEST_MANAGER::ModifyQuestManagerInfo(void* pVoid, int nType)
 {
 	if(LoadQuestXML() == false)
@@ -14215,13 +14215,13 @@ bool	C_VS_UI_QUEST_MANAGER::ModifyQuestManagerInfo(void* pVoid, int nType)
 			}
 		}
 
-		SetSubWindowInfo(TempInfo->dwQuestID , false); // ���� �����츦 ���� ������ ���� â�� ���� �ʴ´�.
+		SetSubWindowInfo(TempInfo->dwQuestID , false); // 서브 윈도우를 갱신 하지만 굳이 창을 열진 않는다.
 		ReleaseQuestXML();
 		return true;
 	}
 	return false;
 }
-// ������ qid�� ������ ���� �����͸� QInfo�� �ٲ۴�.
+// 기존의 qid가 있으면 기존 포인터를 QInfo로 바꾼다.
 bool	C_VS_UI_QUEST_MANAGER::UpdateQuestInfo(_GQuestInfo *QInfo, int nType)
 {
 	if(NULL != QInfo)
@@ -14232,21 +14232,21 @@ bool	C_VS_UI_QUEST_MANAGER::UpdateQuestInfo(_GQuestInfo *QInfo, int nType)
 			_GQuestInfo* TempInfo = (*itr);
 			if(TempInfo->dwQuestID == QInfo->dwQuestID)
 			{
-				// ����Ʈ ����Ʈ�� id�� ã�´�..����÷���.-_-;;;
+				// 퀘스트 리스트는 id로 찾는다..복잡시럽네.-_-;;;
 				const XMLTree *pElement = m_Quest_XML_Tree.GetChildByAttr( TempInfo->dwQuestID , "id");
 				if(pElement != NULL)
 				{
 					if( TempInfo->bStatus == C_VS_UI_QUEST_LIST::CAN_ACCEPT ||
-						TempInfo->bStatus == C_VS_UI_QUEST_LIST::CAN_REPLAY ) // ���� ���� �̸�
+						TempInfo->bStatus == C_VS_UI_QUEST_LIST::CAN_REPLAY ) // 수행 가능 이면
 					{
-						// ���డ���̰� �ڵ� ���� ���� �϶�
+						// 수행가능이고 자동 수행 시작 일때
 						const XMLAttribute* _TempAttr = pElement->GetAttribute("autostart");
 						if(_TempAttr != NULL)
 						{
-							if(_TempAttr->ToInt()>0) // �ڵ� �����̸�
+							if(_TempAttr->ToInt()>0) // 자동 수행이면
 							{
 								m_SelectedQuestID = TempInfo->dwQuestID;
-								gC_vs_ui.SendQuestIntention(true); // �����ϰڴ� ��Ŷ�� ������.
+								gC_vs_ui.SendQuestIntention(true); // 수행하겠단 패킷을 보낸다.
 							}
 						}
 					}
@@ -14260,12 +14260,12 @@ bool	C_VS_UI_QUEST_MANAGER::UpdateQuestInfo(_GQuestInfo *QInfo, int nType)
 						const XMLTree * TempMissionElement = GetMissionElement(pElement,TempMission->bCondition);
 						if( NULL != TempMissionElement)
 						{
-							// �̼� ����Ʈ�� "index"�� ã�´�..����÷���.-_-;;;
+							// 미션 리스트는 "index"로 찾는다..복잡시럽네.-_-;;;
 							const XMLTree *pChildElement2 = TempMissionElement->GetChildByAttr(TempMission->bIndex, "index");
 							if(NULL != pChildElement2)
 							{
 								TempMission->szMissionTitle =  (char*)pChildElement2->GetText().c_str();
-								if(0 == stricmp(pChildElement2->GetName().c_str(),"Time")) // �ð� ������ �ִ� �̼��̸�
+								if(0 == stricmp(pChildElement2->GetName().c_str(),"Time")) // 시간 제한이 있는 미션이면
 								{
 									TempMission->dwTimeLimit = timeGetTime();
 								}
@@ -14274,7 +14274,7 @@ bool	C_VS_UI_QUEST_MANAGER::UpdateQuestInfo(_GQuestInfo *QInfo, int nType)
 						}
 						//TempMission->szMissionTitle = GetMissionTitle(pElement, TempMission->bIndex, TempMission->bCondition);
 
-						// modify start- condition�� fail(2)�϶� �����̸� ���з�, ���и� �������� �����޶�� �ؼ� ����..��..
+						// modify start- condition이 fail(2)일때 성공이면 실패로, 실패면 성공으로 보여달라고 해서 수정..헐..
 						if(TempMission->bCondition == 2)
 						{
 							if(TempMission->bStatus == 2)
@@ -14288,7 +14288,7 @@ bool	C_VS_UI_QUEST_MANAGER::UpdateQuestInfo(_GQuestInfo *QInfo, int nType)
 						
 					(*itr) = QInfo;
 
-					if(nType == 0||nType == 1) // 0: ���� or 1:���� �϶� - ������ �߰�..-_-;
+					if(nType == 0||nType == 1) // 0: 성공 or 1:실패 일때 - 급조된 추가..-_-;
 					{
 						RunQuestFail_or_Sucess(pElement, nType);
 					}
@@ -14301,7 +14301,7 @@ bool	C_VS_UI_QUEST_MANAGER::UpdateQuestInfo(_GQuestInfo *QInfo, int nType)
 	}
 	return false;
 }
-// xml���� ����Ʈ�� title�� �����´�
+// xml에서 퀘스트의 title을 가져온다
 char*	C_VS_UI_QUEST_MANAGER::GetQuestTitle(const XMLTree *pElement)
 {
 	char* TempTitle = "";
@@ -14314,7 +14314,7 @@ char*	C_VS_UI_QUEST_MANAGER::GetQuestTitle(const XMLTree *pElement)
 	}
 	return TempTitle;
 }
-// xml���� ����Ʈ�� description�� �����´�
+// xml에서 퀘스트의 description을 가져온다
 char*	C_VS_UI_QUEST_MANAGER::GetQuestDescription(const XMLTree *pElement)
 {
 	char* TempTitle = "";
@@ -14327,7 +14327,7 @@ char*	C_VS_UI_QUEST_MANAGER::GetQuestDescription(const XMLTree *pElement)
 	}
 	return TempTitle;
 }
-// xml���� ����Ʈ ���� �̼� Ÿ��Ʋ�� �����´�.
+// xml에서 퀘스트 내의 미션 타이틀을 가져온다.
 char*	C_VS_UI_QUEST_MANAGER::GetMissionTitle(const XMLTree *pElement, WORD Index, BYTE Condition)
 {
 	char* TempTitle = "";
@@ -14343,7 +14343,7 @@ char*	C_VS_UI_QUEST_MANAGER::GetMissionTitle(const XMLTree *pElement, WORD Index
 		const XMLTree *pChildElement = pElement->GetChild( szConditonType[ min(3, Condition)] );
 		if(NULL != pChildElement)
 		{
-			// �̼� ����Ʈ�� "index"�� ã�´�..����÷���.-_-;;;
+			// 미션 리스트는 "index"로 찾는다..복잡시럽네.-_-;;;
 			const XMLTree *pChildElement2 = pChildElement->GetChildByAttr(Index, "index");
 			if(NULL != pChildElement2)
 				return (char*)pChildElement2->GetText().c_str();
@@ -14351,7 +14351,7 @@ char*	C_VS_UI_QUEST_MANAGER::GetMissionTitle(const XMLTree *pElement, WORD Index
 	}
 	return TempTitle;
 }
-// xml���� ����Ʈ ���� �̼� Ÿ��Ʋ�� �����´�.
+// xml에서 퀘스트 내의 미션 타이틀을 가져온다.
 const XMLTree *	C_VS_UI_QUEST_MANAGER::GetMissionElement(const XMLTree *pElement, BYTE Condition)
 {
 	if(NULL != pElement)
@@ -14370,7 +14370,7 @@ const XMLTree *	C_VS_UI_QUEST_MANAGER::GetMissionElement(const XMLTree *pElement
 	}
 	return NULL;
 }
-// ����Ʈ ����Ʈ�� ����
+// 퀘스트 리스트를 해제
 void	C_VS_UI_QUEST_MANAGER::ClearQuestInfo()
 {
 	std::vector<_GQuestInfo*>::iterator itr = m_QuestListInfo.begin();
@@ -14382,7 +14382,7 @@ void	C_VS_UI_QUEST_MANAGER::ClearQuestInfo()
 	}
 	m_QuestListInfo.clear();
 }
-// ����Ʈ �������� ����
+// 퀘스트 아이템을 해제
 void	C_VS_UI_QUEST_MANAGER::ClearQuestItem()
 {
 	std::vector<MItem*>::iterator itr = m_QuestItemInfo.begin();
@@ -14406,7 +14406,7 @@ void	C_VS_UI_QUEST_MANAGER::ClearExcuteElement()
 	}
 	m_QuestExcutElement.clear();
 }
-// sub �����찡 ���ִ��� �˻�
+// sub 윈도우가 떠있는지 검사
 bool	C_VS_UI_QUEST_MANAGER::IsAnyWindowOpened() const
 {
 	if( IsRunningQuestList()
@@ -14417,12 +14417,12 @@ bool	C_VS_UI_QUEST_MANAGER::IsAnyWindowOpened() const
 
 	return false;
 }
-// ���� ���� ��ü�� �ݾҴ� ������ �Ѵ�.
+// 서브 윈도 전체를 닫았다 열었다 한다.
 void	C_VS_UI_QUEST_MANAGER::ToggleWindow() 
 {
-	if(IsAnyWindowOpened()) // �� ����Ʈ ������ �������� �ݴ´�
+	if(IsAnyWindowOpened()) // 한 퀘스트 윈도라도 열렸으면 닫는다
 		CloseAllWinow();
-	else // ������ �ϳ��� ������ �� �����ش� ����
+	else // 열린게 하나도 없으면 다 열어준다 ㅎㅎ
 	{
 		//RunAllWinow();
 		RunQuestList();
@@ -14587,7 +14587,7 @@ void	C_VS_UI_QUEST_MANAGER::CloseQuestIcon(int JustClose)
 	
 	DeleteNew(m_Ui_Quest_Icon);
 	
-	if(JustClose>0) // �ٸ� â�� �����ش�
+	if(JustClose>0) // 다른 창을 열어준다
 	{
 		RunQuestList();
 		if(IsRunningQuestList())
@@ -14608,12 +14608,12 @@ void	C_VS_UI_QUEST_MANAGER::CloseQuestIcon(int JustClose)
 //	if(IsAllWindowClosed())
 //		gpC_base->SendMessage(UI_CLOSE_QUEST_MANAGER);
 }
-// ����,������ npc dialog�� ����. nType == 0 : ����, nType == 1 : ����
+// 실패,성공시 npc dialog를 띄운다. nType == 0 : 성공, nType == 1 : 실패
 void	C_VS_UI_QUEST_MANAGER::RunQuestFail_or_Sucess(const XMLTree *pElement, int nType)
 {
 	if(pElement != NULL)
 	{
-		// ������ string ���� ã�´�..-_-
+		// 다음엔 string 으로 찾는다..-_-
 		const static char * szFail_or_Sucess[2] = {
 													"CompleteMessage",
 													"FailMessage",
@@ -14662,7 +14662,7 @@ void	C_VS_UI_QUEST_MANAGER::RunQuestFail_or_Sucess(const XMLTree *pElement, int 
 			gC_vs_ui.SetQuestNpcDialog((void*)TempDialog);
 		}
 		
-		if(nType == 0) // ������ ��� ���� �̺�Ʈ�� ������� �Ѵٸ�
+		if(nType == 0) // 성공일 경우 엔딩 이벤트를 보여줘야 한다면
 		{
 			const XMLAttribute* _TempAttr = pElement->GetAttribute("ending");
 			if(NULL != _TempAttr)
@@ -14676,7 +14676,7 @@ void	C_VS_UI_QUEST_MANAGER::RunQuestFail_or_Sucess(const XMLTree *pElement, int 
 
 void	C_VS_UI_QUEST_MANAGER::PushGQuestExcuteElement(DWORD qID, BYTE bCondition, WORD wIndex)
 {
-	if(0 == m_QuestExcutElement.size()) // ���ΰ� ������ �ٷ� ����
+	if(0 == m_QuestExcutElement.size()) // 쌓인게 없으면 바로 실행
 	{
 		RunGQuestExcuteElement(qID, bCondition, wIndex);
 	}
@@ -14689,7 +14689,7 @@ void	C_VS_UI_QUEST_MANAGER::PushGQuestExcuteElement(DWORD qID, BYTE bCondition, 
 }
 void	C_VS_UI_QUEST_MANAGER::RunNextGQuestExcuteElement()
 {
-	if(m_QuestExcutElement.size()) // �ϴ� ������ üũ
+	if(m_QuestExcutElement.size()) // 일단 사이즈 체크
 	{
 		std::vector<_GQuestExcuteElement*>::iterator itr = m_QuestExcutElement.begin();
 		C_VS_UI_QUEST_MANAGER::_GQuestExcuteElement * TempRun = NULL;
@@ -14714,17 +14714,17 @@ void	C_VS_UI_QUEST_MANAGER::RunNextGQuestExcuteElement()
 		}
 	}
 }
-// npc dialog Ȯ�� Ŭ�� �Ŀ� Ŭ���̾�Ʈ���� ���� ó���� �ൿ�� �ִ��� üũ...�ϵ��ڵ���.
+// npc dialog 확인 클릭 후에 클라이언트에서 따로 처리할 행동이 있는지 체크...하드코딩임.
 void	C_VS_UI_QUEST_MANAGER::RunGQuestExcuteElementAction(DWORD qID, BYTE bCondition, WORD wIndex)
 {
 	if(LoadQuestXML() == false)
 		return ;
 	
-	// ����Ʈ ����Ʈ�� id�� ã�´�..����÷���.-_-;;;
+	// 퀘스트 리스트는 id로 찾는다..복잡시럽네.-_-;;;
 	const XMLTree *pElement = m_Quest_XML_Tree.GetChildByAttr( qID , "id");
 	if(pElement != NULL)
 	{
-		// ������ string ���� ã�´�..-_-
+		// 다음엔 string 으로 찾는다..-_-
 		const static char * szConditonType[4] = {	"Happen",
 													"Complete",
 													"Fail",
@@ -14742,7 +14742,7 @@ void	C_VS_UI_QUEST_MANAGER::RunGQuestExcuteElementAction(DWORD qID, BYTE bCondit
 				if(NULL != _TempAttr)
 				{
 					const char* TempAction = _TempAttr->ToString();
-					if(0 == strcmp(TempAction, "dead")) // g_pPlayer �״� ����
+					if(0 == strcmp(TempAction, "dead")) // g_pPlayer 죽는 동작
 					{
 						int TargetZoneID = 0;
 						const XMLAttribute* _TempAttr2 = pElement3->GetAttribute("warp");
@@ -14750,7 +14750,7 @@ void	C_VS_UI_QUEST_MANAGER::RunGQuestExcuteElementAction(DWORD qID, BYTE bCondit
 						{
 							TargetZoneID = _TempAttr2->ToInt();
 						}
-						// 1 : �״� �������� ����..-_-;
+						// 1 : 죽는 동작으로 하자..-_-;
 						gpC_base->SendMessage(UI_GQUEST_SET_ACTION, 1, TargetZoneID ); 
 					}
 				}
@@ -14759,17 +14759,17 @@ void	C_VS_UI_QUEST_MANAGER::RunGQuestExcuteElementAction(DWORD qID, BYTE bCondit
 	}
 	ReleaseQuestXML();
 }
-// GCExcuteElement ���� ���� �� npc dialog�� ����.
+// GCExcuteElement 날라 왔을 때 npc dialog를 띄운다.
 void	C_VS_UI_QUEST_MANAGER::RunGQuestExcuteElement(DWORD qID, BYTE bCondition, WORD wIndex)
 {
 	if(LoadQuestXML() == false)
 		return ;
 	
-	// ����Ʈ ����Ʈ�� id�� ã�´�..����÷���.-_-;;;
+	// 퀘스트 리스트는 id로 찾는다..복잡시럽네.-_-;;;
 	const XMLTree *pElement = m_Quest_XML_Tree.GetChildByAttr( qID , "id");
 	if(pElement != NULL)
 	{
-		// ������ string ���� ã�´�..-_-
+		// 다음엔 string 으로 찾는다..-_-
 		const static char * szConditonType[4] = {	"Happen",
 													"Complete",
 													"Fail",
@@ -14871,7 +14871,7 @@ C_VS_UI_QUEST_LIST::C_VS_UI_QUEST_LIST(C_SPRITE_PACK* spr)
 	int close_x = w-20, close_y = h-152 +m_OustersOffset;		
 	int alpha_x = 6, alpha_y = h-154 +m_OustersOffset;
 		
-	//�����ư
+	//공통버튼
 	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(pin_x, pin_y, 
 		gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_BUTTON_PUSHPIN), 
@@ -14894,12 +14894,12 @@ C_VS_UI_QUEST_LIST::C_VS_UI_QUEST_LIST(C_SPRITE_PACK* spr)
 //
 //	C_VS_UI_QUEST_MANAGER::_GQuestInfo* Test1 = new C_VS_UI_QUEST_MANAGER::_GQuestInfo;
 //	Test1->bStatus = CAN_ACCEPT;
-//	Test1->szQuestTitle = "���������������������������������Ͽ�����";
+//	Test1->szQuestTitle = "일일일일일일일일일일일일일일일일일우헤헤";
 //	Test1->dwQuestID = 1;
 //	m_QuestListInfo[0].push_back(Test1);
 //	C_VS_UI_QUEST_MANAGER::_GQuestInfo* Test2 = new C_VS_UI_QUEST_MANAGER::_GQuestInfo;
 //	Test2->bStatus = DOING;
-//	Test2->szQuestTitle = "���������������������������������̿�����";
+//	Test2->szQuestTitle = "이이이이이이이이이이이이이이이이이우헤헤";
 //	Test2->dwQuestID = 2;
 //	m_QuestListInfo[1].push_back(Test2);
 //	m_pC_scroll_bar->SetPosMax(1);
@@ -14988,13 +14988,13 @@ void	C_VS_UI_QUEST_LIST::Show()
 
 		const static char* szQuestStatus[7]=
 		{
-			(*g_pGameStringTable)[UI_STRING_GQUEST_CAN_NOT].GetString(),// = "����Ұ�";
-			(*g_pGameStringTable)[UI_STRING_GQUEST_CAN_ACCEPT].GetString(),// = "���డ��";
-			(*g_pGameStringTable)[UI_STRING_GQUEST_DOING].GetString(),// = "������";
-			(*g_pGameStringTable)[UI_STRING_GQUEST_SUCCESS].GetString(),// = "����";
-			(*g_pGameStringTable)[UI_STRING_GQUEST_COMPLETE].GetString(),// = "�Ϸ�";
-			(*g_pGameStringTable)[UI_STRING_GQUEST_FAIL].GetString(),// = "����";
-			(*g_pGameStringTable)[UI_STRING_GQUEST_CAN_REPLAY].GetString(),// = "����డ";
+			(*g_pGameStringTable)[UI_STRING_GQUEST_CAN_NOT].GetString(),// = "수행불가";
+			(*g_pGameStringTable)[UI_STRING_GQUEST_CAN_ACCEPT].GetString(),// = "수행가능";
+			(*g_pGameStringTable)[UI_STRING_GQUEST_DOING].GetString(),// = "수행중";
+			(*g_pGameStringTable)[UI_STRING_GQUEST_SUCCESS].GetString(),// = "성공";
+			(*g_pGameStringTable)[UI_STRING_GQUEST_COMPLETE].GetString(),// = "완료";
+			(*g_pGameStringTable)[UI_STRING_GQUEST_FAIL].GetString(),// = "실패";
+			(*g_pGameStringTable)[UI_STRING_GQUEST_CAN_REPLAY].GetString(),// = "재수행가";
 		};
 		for(int i =ScrPos; i< m_QuestListInfo[m_TabID].size(); i++)
 		{
@@ -15262,7 +15262,7 @@ void	C_VS_UI_QUEST_LIST::Process()
 	m_pC_button_group->Process();
 	ProcessHide();
 }
-// ����Ʈ ����Ʈ�� �޾� �������� �Ͱ� �Ϸ�Ȱ͵� ���� ����Ʈ�� �����.
+// 퀘스트 리스트를 받아 진행중인 것과 완료된것들 따로 리스트로 만든다.
 void	C_VS_UI_QUEST_LIST::SetQuestListInfo(void* pVoid)
 {
 	if(m_QuestListInfo[0].size())
@@ -15295,19 +15295,19 @@ void	C_VS_UI_QUEST_LIST::SetQuestListInfo(void* pVoid)
 		C_VS_UI_QUEST_MANAGER::_GQuestInfo * TempInfo = (*itr);
 		if(TempInfo->bStatus == CAN_ACCEPT
 	     ||TempInfo->bStatus == DOING
-		 ||TempInfo->bStatus == SUCCESS ) // ������ ����Ʈ�� �߰�
+		 ||TempInfo->bStatus == SUCCESS ) // 수행중 리스트로 추가
 		 m_QuestListInfo[0].push_back(TempInfo);
 		else if(  TempInfo->bStatus == COMPLETE
 				||TempInfo->bStatus == FAIL
-				||TempInfo->bStatus == CAN_REPLAY ) // �Ϸ� ����Ʈ�� �߰�
+				||TempInfo->bStatus == CAN_REPLAY ) // 완료 리스트로 추가
 		m_QuestListInfo[1].push_back(TempInfo);
 
 		itr++;
 	}
 
-	if(m_TabID == 0) // ���� ��
+	if(m_TabID == 0) // 진행 탭
 		m_pC_scroll_bar->SetPosMax(m_QuestListInfo[0].size());
-	else if(m_TabID == 1) // �Ϸ� ��
+	else if(m_TabID == 1) // 완료 탭
 		m_pC_scroll_bar->SetPosMax(m_QuestListInfo[1].size());
 }
 //-----------------------------------------------------------------------------
@@ -15351,7 +15351,7 @@ C_VS_UI_QUEST_DETAIL::C_VS_UI_QUEST_DETAIL(C_SPRITE_PACK* spr)
 	int alpha_x = 6, alpha_y = h-154+m_OustersOffset;
 	int accept_x = w-80, accept_y = h-36+m_OustersOffset;
 		
-	//�����ư
+	//공통버튼
 	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(pin_x, pin_y, 
 		gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_BUTTON_PUSHPIN), 
@@ -15373,7 +15373,7 @@ C_VS_UI_QUEST_DETAIL::C_VS_UI_QUEST_DETAIL(C_SPRITE_PACK* spr)
 		m_pImage_Spk->GetHeight(C_VS_UI_QUEST_MANAGER::BUTTON_ACCEPT),
 		ACCEPT_ID, this, C_VS_UI_QUEST_MANAGER::BUTTON_ACCEPT));
 #ifndef _LIB
-//	char* TempStr = "���̻�����ĥ�ȱ������̻�����ĥ�ȱ���";
+//	char* TempStr = "일이삼사오육칠팔구십일이삼사오육칠팔구십";
 //	if(LoadDescFromString(TempStr, 44, 4, false)==true)
 //	{
 //		SetDesc(8, 50+m_OustersOffset, RGB_GRAY, gpC_base->m_chatting_pi);
@@ -15573,7 +15573,7 @@ void	C_VS_UI_QUEST_DETAIL::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 	}else
 	if(p_button->GetID() == ACCEPT_ID)
 	{
-		if(m_IsAbleRunQuest == 1)//����
+		if(m_IsAbleRunQuest == 1)//수행
 		{
 			if(p_button->GetFocusState())
 			{
@@ -15587,7 +15587,7 @@ void	C_VS_UI_QUEST_DETAIL::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 				m_pImage_Spk->BltLocked(x+p_button->x, y+p_button->y, C_VS_UI_QUEST_MANAGER::BUTTON_ACCEPT);
 			}
 		}
-		else if(m_IsAbleRunQuest == 2) // ����
+		else if(m_IsAbleRunQuest == 2) // 포기
 		{
 			if(p_button->GetFocusState())
 			{
@@ -15707,7 +15707,7 @@ void	C_VS_UI_QUEST_DETAIL::Process()
 	m_pC_button_group->Process();
 	ProcessHide();
 }
-// ����Ʈ�� Ÿ��Ʋ�� ��ũ��Ʈ, �׸��� ���డ�� ���¸� ���� �Ѵ�.
+// 퀘스트의 타이틀과 스크립트, 그리고 수행가능 상태를 세팅 한다.
 void	C_VS_UI_QUEST_DETAIL::SetQuestDetailInfo(char* szTitle, char* szDescription, int Status)
 {
 	if(szDescription != NULL && strlen(szDescription)>0)
@@ -15725,7 +15725,7 @@ void	C_VS_UI_QUEST_DETAIL::SetQuestDetailInfo(char* szTitle, char* szDescription
 	}
 	if(szTitle != NULL&& strlen(szTitle)>0)
 		m_szTitle = szTitle;
-	// status�� C_VS_UI_QUEST_LIST�� QUEST_LIST_STATUS �̴�.
+	// status는 C_VS_UI_QUEST_LIST의 QUEST_LIST_STATUS 이다.
 	if( Status == 1 || Status == 6)
 		m_IsAbleRunQuest = 1; // accept
 	else if( Status == 2 || Status == 3)
@@ -15773,7 +15773,7 @@ C_VS_UI_QUEST_MISSION::C_VS_UI_QUEST_MISSION(C_SPRITE_PACK* spr)
 	int close_x = w-20, close_y = h-152+m_OustersOffset;		
 	int alpha_x = 6, alpha_y = h-154 +m_OustersOffset;
 		
-	//�����ư
+	//공통버튼
 	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(pin_x, pin_y, 
 		gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_BUTTON_PUSHPIN), 
@@ -15792,12 +15792,12 @@ C_VS_UI_QUEST_MISSION::C_VS_UI_QUEST_MISSION(C_SPRITE_PACK* spr)
 
 #ifndef _LIB
 	C_VS_UI_QUEST_MANAGER::_GMissionInfo *TempInfo = new C_VS_UI_QUEST_MANAGER::_GMissionInfo ;
-	TempInfo->szMissionTitle = "���̻�����ĥ��%s:%d";
+	TempInfo->szMissionTitle = "일이삼사오육칠팔%s:%d";
 	TempInfo->bStatus = CURRENT;
 	TempInfo->dwTimeLimit = timeGetTime() + (60000);
 	m_QuestMissionInfo.push_back(TempInfo);
 	C_VS_UI_QUEST_MANAGER::_GMissionInfo *TempInfo2 = new C_VS_UI_QUEST_MANAGER::_GMissionInfo ;
-	TempInfo2->szMissionTitle = "�ٺ��� ���϶�";
+	TempInfo2->szMissionTitle = "바보를 구하라";
 	TempInfo2->bStatus = SUCCESS;
 	m_QuestMissionInfo.push_back(TempInfo2);
 
@@ -15876,10 +15876,10 @@ void	C_VS_UI_QUEST_MISSION::Show()
 	{
 		const static char* szQuestStatus[4]=
 		{
-			(*g_pGameStringTable)[UI_STRING_GQUEST_CAN_NOT].GetString(),// = "����Ұ�";
-			(*g_pGameStringTable)[UI_STRING_GQUEST_DOING].GetString(),// = "������";
-			(*g_pGameStringTable)[UI_STRING_GQUEST_COMPLETE].GetString(),// = "�Ϸ�";
-			(*g_pGameStringTable)[UI_STRING_GQUEST_FAIL].GetString(),// = "����";
+			(*g_pGameStringTable)[UI_STRING_GQUEST_CAN_NOT].GetString(),// = "수행불가";
+			(*g_pGameStringTable)[UI_STRING_GQUEST_DOING].GetString(),// = "수행중";
+			(*g_pGameStringTable)[UI_STRING_GQUEST_COMPLETE].GetString(),// = "완료";
+			(*g_pGameStringTable)[UI_STRING_GQUEST_FAIL].GetString(),// = "실패";
 		};
 		char szString[512];
 		char szString2[512];
@@ -15902,7 +15902,7 @@ void	C_VS_UI_QUEST_MISSION::Show()
 						TempValue = 0;
 					}
 
-					if(TempInfo->bStatus == SUCCESS || TempInfo->bStatus == FAIL) // ���� Ȥ�� ���� �϶�
+					if(TempInfo->bStatus == SUCCESS || TempInfo->bStatus == FAIL) // 성공 혹은 실패 일때
 					{
 						TempInfo->dwTimeLimit = 0;
 						TempInfo->m_NumArg = 0;
@@ -15922,7 +15922,7 @@ void	C_VS_UI_QUEST_MISSION::Show()
 					ReduceString2(szString2,36);
 				}
 				g_PrintColorStr(x+7, y+42 + (i-ScrPos)*17, szString2, gpC_base->m_chatting_pi, RGB_WHITE);
-				if(TempInfo->bStatus != 1 && TempInfo->bStatus<3) // ������..�̰� �������� ����� �ؼ�.����
+				if(TempInfo->bStatus != 1 && TempInfo->bStatus<3) // 수행중..이건 보여주지 말라고 해서.ㅎㅎ
 				{
 					sprintf(szString,"%s", szQuestStatus[TempInfo->bStatus]);
 					g_PrintColorStr(x+235, y+42 + (i-ScrPos)*17, szString, gpC_base->m_chatting_pi, RGB_YELLOW);
@@ -16152,7 +16152,7 @@ void	C_VS_UI_QUEST_MISSION::Process()
 	m_pC_button_group->Process();
 	ProcessHide();
 }
-// ����Ʈ �̼� ������ �����Ѵ�.
+// 퀘스트 미션 정보를 세팅한다.
 void	C_VS_UI_QUEST_MISSION::SetQuestMissionInfo(std::vector<C_VS_UI_QUEST_MANAGER::_GMissionInfo*>& Info)
 {
 	m_QuestMissionInfo = Info;
@@ -16172,7 +16172,7 @@ void	C_VS_UI_QUEST_MISSION::SetQuestMissionInfo(std::vector<C_VS_UI_QUEST_MANAGE
 //	while(itr != TempInfo->end())
 //	{
 //		C_VS_UI_QUEST_MANAGER::_GMissionInfo * TempInfo = (*itr);
-//		if(TempInfo->bStatus != HIDE) // �������� ����
+//		if(TempInfo->bStatus != HIDE) // 보여주지 않음
 //			m_QuestMissionInfo.push_back(TempInfo);
 //		
 //		itr++;
@@ -16219,7 +16219,7 @@ C_VS_UI_QUEST_ITEM::C_VS_UI_QUEST_ITEM(C_SPRITE_PACK* spr)
 	int close_x = w-20, close_y = h-252+m_OustersOffset;		
 	int alpha_x = 24, alpha_y = h-254+m_OustersOffset;
 		
-	//�����ư
+	//공통버튼
 	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(pin_x, pin_y, 
 		gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_BUTTON_PUSHPIN), 
@@ -16242,7 +16242,7 @@ C_VS_UI_QUEST_ITEM::C_VS_UI_QUEST_ITEM(C_SPRITE_PACK* spr)
 //	MItem*		pItem;
 //
 //	//----------------------------------------------------
-//	// Item ���� --> �߰�
+//	// Item 생성 --> 추가
 //	//----------------------------------------------------
 //	pItem = MItem::NewItem( ITEM_CLASS_POTION );
 //	pItem->SetID( 0 );
@@ -16253,7 +16253,7 @@ C_VS_UI_QUEST_ITEM::C_VS_UI_QUEST_ITEM(C_SPRITE_PACK* spr)
 //	m_QuestItemInfo.push_back(pItem);
 //
 //	//----------------------------------------------------
-//	// Item ���� --> �߰�
+//	// Item 생성 --> 추가
 //	//----------------------------------------------------
 //	pItem = MItem::NewItem( ITEM_CLASS_RING );
 //	pItem->SetID( 1 );
@@ -16263,7 +16263,7 @@ C_VS_UI_QUEST_ITEM::C_VS_UI_QUEST_ITEM(C_SPRITE_PACK* spr)
 //	m_QuestItemInfo.push_back(pItem);
 //	
 //	//----------------------------------------------------
-//	// Item ���� --> �߰�
+//	// Item 생성 --> 추가
 //	//----------------------------------------------------
 //	pItem = MItem::NewItem( ITEM_CLASS_RING );
 //	pItem->SetID( 2 );
@@ -16273,7 +16273,7 @@ C_VS_UI_QUEST_ITEM::C_VS_UI_QUEST_ITEM(C_SPRITE_PACK* spr)
 //	m_QuestItemInfo.push_back(pItem);
 //
 //	//----------------------------------------------------
-//	// Item ���� --> �߰�
+//	// Item 생성 --> 추가
 //	//----------------------------------------------------
 //	pItem = MItem::NewItem( ITEM_CLASS_RING );
 //	pItem->SetID( 3 );
@@ -16283,7 +16283,7 @@ C_VS_UI_QUEST_ITEM::C_VS_UI_QUEST_ITEM(C_SPRITE_PACK* spr)
 //	m_QuestItemInfo.push_back(pItem);
 //
 //	//----------------------------------------------------
-//	// Item ���� --> �߰�
+//	// Item 생성 --> 추가
 //	//----------------------------------------------------
 //	pItem = MItem::NewItem( ITEM_CLASS_RING );
 //	pItem->SetID( 4 );
@@ -16378,13 +16378,13 @@ void	C_VS_UI_QUEST_ITEM::Show()
 				
 				int item_x = x+5 + ((i-ScrPos*2)/2)*SLOT_WIDTH;
 				
-				// �ٴۿ� ���̰� �Ѵ�.
+				// 바닦에 놓이게 한다.
 				int item_y = y+ 124 + ((i&0x01)*SLOT_HEIGHT) -gpC_item->GetHeight(frame_id)-4 + m_OustersOffset;
 				
-				// item�� center�� �����.
+				// item을 center에 맞춘다.
 				item_x += SLOT_WIDTH/2-gpC_item->GetWidth(frame_id)/2;
 				
-				// identify�� �������� ���.. by sigi
+				// identify된 아이템인 경우.. by sigi
 				if (p_item->IsIdentified())
 				{
 					if(p_item->IsQuestItem())
@@ -16397,7 +16397,7 @@ void	C_VS_UI_QUEST_ITEM::Show()
 				}
 				else
 				{
-					// identify �� �� ���� ������ ���
+					// identify 안 된 경우는 무조건 흰색
 					CIndexSprite::SetUsingColorSet(378, 378);
 				}
 								
@@ -16451,7 +16451,7 @@ void	C_VS_UI_QUEST_ITEM::Show()
 					}
 				}
 
-//				// ������ ����ǥ��
+//				// 아이템 개수표시
 //				if(p_item->IsPileItem() || p_item->IsChargeItem())
 //				{
 //					RECT rt;
@@ -16947,7 +16947,7 @@ C_VS_UI_RANGER_CHAT::C_VS_UI_RANGER_CHAT()
 	int pin_x = 580, pin_y = h-22;
 	int alpha_x = 600, alpha_y = h-22;
 		
-	//�����ư
+	//공통버튼
 	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(pin_x, pin_y, 
 		gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_BUTTON_PUSHPIN), 
@@ -16961,7 +16961,7 @@ C_VS_UI_RANGER_CHAT::C_VS_UI_RANGER_CHAT()
 
 	
 #ifndef _LIB
-	m_Str = "a�����ٶ󸶹� �������īŸ���ϰ����ٶ󸶹ٻ������īŸ���ϰ����ٶ󸶹ٻ������īŸ���ϰ����ٶ󸶹ٻ��";
+	m_Str = "a가나다라마바 사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아";
 #endif
 }
 
@@ -17139,7 +17139,7 @@ void	C_VS_UI_RANGER_CHAT::Process()
 //------------------------------------------------------------------------------
 // C_VS_UI_PERSNALSHOP_MESSAGE
 //
-// ���λ����� ���� �޼��� 
+// 개인상점에 광고 메세지 
 //------------------------------------------------------------------------------
 C_VS_UI_PERSNALSHOP_MESSAGE::C_VS_UI_PERSNALSHOP_MESSAGE()
 {	
@@ -17253,7 +17253,7 @@ void	C_VS_UI_PERSNALSHOP_MESSAGE::Show()
 			
 			char *sz_string2 = sz_string;
 			
-			while(*sz_string2 == ' ')		// ���� ��������
+			while(*sz_string2 == ' ')		// 앞의 공백제거
 			{
 				sz_string2++;
 				next++;
@@ -17266,7 +17266,7 @@ void	C_VS_UI_PERSNALSHOP_MESSAGE::Show()
 			sz_string2[cut_pos] = NULL;
 			
 			char *return_char = NULL;
-			if((return_char = strchr(sz_string2, '\n')) != NULL)	// return ó��
+			if((return_char = strchr(sz_string2, '\n')) != NULL)	// return 처리
 			{
 				cut_pos = return_char - sz_string2+1;
 				sz_string2[cut_pos-1] = NULL;
@@ -17452,7 +17452,7 @@ void	C_VS_UI_PERSNALSHOP_MESSAGE::Process()
 //------------------------------------------------------------------------------
 // C_VS_UI_POWER_JJANG
 //
-// �Ŀ�¯ -_-
+// 파워짱 -_-
 //------------------------------------------------------------------------------
 C_VS_UI_POWER_JJANG::C_VS_UI_POWER_JJANG()
 {	
@@ -17501,7 +17501,7 @@ C_VS_UI_POWER_JJANG::C_VS_UI_POWER_JJANG()
 	int pin_x = w-24-20, pin_y = h-19;
 	int alpha_x = 6, alpha_y = h-21;
 	int phone_x = w - 85, phone_y = h - 267;
-	//�����ư
+	//공통버튼
 	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(close_x, close_y, 
 		gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_BUTTON_CLOSE), 
@@ -17598,37 +17598,37 @@ void	C_VS_UI_POWER_JJANG::Show()
 
 	gpC_global_resource->DrawDialog(x, y, w, h, GetAttributes()->alpha);
 	
-	RECT rect2 = { x+20, y+190, x+215, y+310 }; // ������ ĭ
+	RECT rect2 = { x+20, y+190, x+215, y+310 }; // 아이템 칸
 	Rect rt2(rect2.left, rect2.top, rect2.right - rect2.left, rect2.bottom - rect2.top );
 	//gpC_base->m_p_DDSurface_back->FillRect(&rect2, 0);
 	gpC_global_resource->DrawOutBox(rt2);
 	
-	SetRect(&rect2, x+70, y+90, x+158, y+118 ); // �ڵ��� ĭ
+	SetRect(&rect2, x+70, y+90, x+158, y+118 ); // 핸드펀 칸
 	rt2.Set(rect2.left, rect2.top, rect2.right - rect2.left, rect2.bottom - rect2.top );
-//	RECT rect2 = { x+70, y+90, x+158, y+118 }; // �ڵ��� ĭ
+//	RECT rect2 = { x+70, y+90, x+158, y+118 }; // 핸드펀 칸
 //	Rect rt2(rect2.left, rect2.top, rect2.right - rect2.left, rect2.bottom - rect2.top );
 	gpC_base->m_p_DDSurface_back->FillRect(&rect2, 0);
 	gpC_global_resource->DrawOutBox(rt2);
 
-	SetRect(&rect2, x+20, y+65, x+230, y+125 ); //���� �ܰ�
+	SetRect(&rect2, x+20, y+65, x+230, y+125 ); //핸펀 외곽
 	rt2.Set(rect2.left, rect2.top, rect2.right - rect2.left, rect2.bottom - rect2.top );
 	gpC_global_resource->DrawOutBox(rt2);
 
-	SetRect(&rect2, x+168, y+128, x+222, y+152 ); // ���� ����Ʈ ĭ
-	rt2.Set(rect2.left, rect2.top, rect2.right - rect2.left, rect2.bottom - rect2.top );
-	gpC_base->m_p_DDSurface_back->FillRect(&rect2, 0);
-	gpC_global_resource->DrawOutBox(rt2);
-
-	SetRect(&rect2, x+20, y+125, x+230, y+155 ); // ���� ����Ʈ �ܰ�
-	rt2.Set(rect2.left, rect2.top, rect2.right - rect2.left, rect2.bottom - rect2.top );
-	gpC_global_resource->DrawOutBox(rt2);
-
-	SetRect(&rect2, x+168, y+158, x+222, y+182 ); // �׺� ����  ����Ʈ ĭ
+	SetRect(&rect2, x+168, y+128, x+222, y+152 ); // 누적 포인트 칸
 	rt2.Set(rect2.left, rect2.top, rect2.right - rect2.left, rect2.bottom - rect2.top );
 	gpC_base->m_p_DDSurface_back->FillRect(&rect2, 0);
 	gpC_global_resource->DrawOutBox(rt2);
 
-	SetRect(&rect2, x+20, y+155, x+230, y+185 ); // �׺� ���� ����Ʈ �ܰ�
+	SetRect(&rect2, x+20, y+125, x+230, y+155 ); // 누적 포인트 외곽
+	rt2.Set(rect2.left, rect2.top, rect2.right - rect2.left, rect2.bottom - rect2.top );
+	gpC_global_resource->DrawOutBox(rt2);
+
+	SetRect(&rect2, x+168, y+158, x+222, y+182 ); // 겜블 가능  포인트 칸
+	rt2.Set(rect2.left, rect2.top, rect2.right - rect2.left, rect2.bottom - rect2.top );
+	gpC_base->m_p_DDSurface_back->FillRect(&rect2, 0);
+	gpC_global_resource->DrawOutBox(rt2);
+
+	SetRect(&rect2, x+20, y+155, x+230, y+185 ); // 겜블 가능 포인트 외곽
 	rt2.Set(rect2.left, rect2.top, rect2.right - rect2.left, rect2.bottom - rect2.top );
 	gpC_global_resource->DrawOutBox(rt2);
 	
@@ -17674,13 +17674,13 @@ void	C_VS_UI_POWER_JJANG::Show()
 		}
 		BYTE TempPos = m_OutLinePositon%3;
 
-		SetRect(&rect2, x+29, y+197 + (TempPos)*35, x+205, y+230 + (TempPos)*35 ); // �׺� ���� ����Ʈ �ܰ�
+		SetRect(&rect2, x+29, y+197 + (TempPos)*35, x+205, y+230 + (TempPos)*35 ); // 겜블 가능 포인트 외곽
 		gpC_base->m_p_DDSurface_back->DrawRect(&rect2, YELLOW);
 	}
 	else if(m_SelectPos>=ScrPos && m_SelectPos <= ScrPos+2)
 	{
 		int TempPos = m_SelectPos - ScrPos;/*min(2, max(0, (m_SelectPos - ScrPos)));*/
-		SetRect(&rect2, x+29, y+197 + (TempPos)*35, x+205, y+230 + (TempPos)*35 ); // �׺� ���� ����Ʈ �ܰ�
+		SetRect(&rect2, x+29, y+197 + (TempPos)*35, x+205, y+230 + (TempPos)*35 ); // 겜블 가능 포인트 외곽
 		gpC_base->m_p_DDSurface_back->DrawRect(&rect2, YELLOW);
 	}
 
@@ -17887,8 +17887,8 @@ void	C_VS_UI_POWER_JJANG::ShowButtonDescription(C_VS_UI_EVENT_BUTTON *p_button)
 		(*g_pGameStringTable)[UI_STRING_MESSAGE_CLOSE_WINDOW].GetString(),
 		(*g_pGameStringTable)[UI_STRING_MESSAGE_SHOW_ALPHA_WINDOW].GetString(),
 		(*g_pGameStringTable)[UI_STRING_MESSAGE_SHOW_NO_ALPHA_WINDOW].GetString(),
-		(*g_pGameStringTable)[UI_STRING_POWER_JJANG_GET_POINT_HELP].GetString(),//] = "�Ŀ�¯ ����Ʈ�� �����ɴϴ�.";
-		(*g_pGameStringTable)[UI_STRING_POWER_JJANG_EXCHANGE_HELP].GetString(),//] = "�Ŀ�¯ ����Ʈ�� �������� ��ȯ�մϴ�.";
+		(*g_pGameStringTable)[UI_STRING_POWER_JJANG_GET_POINT_HELP].GetString(),//] = "파워짱 포인트를 가져옵니다.";
+		(*g_pGameStringTable)[UI_STRING_POWER_JJANG_EXCHANGE_HELP].GetString(),//] = "파워짱 포인트로 아이템을 교환합니다.";
 	};
 	switch(p_button->GetID())
 	{
@@ -17983,7 +17983,7 @@ void	C_VS_UI_POWER_JJANG::SetItemList()
 {
 	ReleaseItemList();
 
-	// ����..Ŭ���� ����� ����Ÿ..
+	// 에융..클래스 만들기 구찬타..
 	BYTE MaxItem = 0;
 	std::string convertedPath = ConvertGamePath("data\\info\\PowerjjangItem.inf");
 	ifstream file(convertedPath.c_str(), ios::binary);
@@ -18026,7 +18026,7 @@ void	C_VS_UI_POWER_JJANG::PowerjjangGambleResult(BYTE bItemCode)
 	}
 }
 
-#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 //-----------------------------------------------------------------------------
 // C_VS_UI_INVENTORY_SUB::C_VS_UI_INVENTORY_SUB
 //
@@ -18346,9 +18346,9 @@ void C_VS_UI_INVENTORY_SUB::Run(id_t id)
 //-----------------------------------------------------------------------------
 // C_VS_UI_INVENTORY_SUB::AnyMatchWindowPixel
 //
-// Window image�� pixel�� (x, y) �� ���̶� ��ġ�ϸ� true�� �ƴϸ� false�� ��ȯ�Ѵ�.
+// Window image의 pixel이 (x, y) 한 점이라도 일치하면 true를 아니면 false를 반환한다.
 //
-// Item�� ��� ���� ������ 'item ��������Ʈ'�� ���� �����Ѵ�.
+// Item을 들고 있을 때에는 'item 참조포인트'에 따라 진행한다.
 //-----------------------------------------------------------------------------
 bool C_VS_UI_INVENTORY_SUB::AnyMatchWindowPixel(int _x, int _y) const
 {
@@ -18534,7 +18534,7 @@ void C_VS_UI_INVENTORY_SUB::Show()
 			MItem * p_item = m_MultiPackItem->Get();
 			
 			
-			// p_item�� NULL�� �ݵ�� �ƴϴ�. �ֳ��ϸ� �����ϴ� �͸� Get()�ϱ� �����̴�.
+			// p_item은 NULL이 반드시 아니다. 왜냐하면 존재하는 것만 Get()하기 때문이다.
 			assert(p_item);
 
 			// frame id -> sprite id
@@ -18570,7 +18570,7 @@ void C_VS_UI_INVENTORY_SUB::Show()
 					break;
 				}				
 				
-				// Item�� �����ִ� ���� ǥ��
+				// Item이 놓여있는 영역 표시
 				for (int j = 0; j < p_item->GetGridHeight(); j++)
 				{
 					for (int i = 0; i < p_item->GetGridWidth(); i++)
@@ -18722,7 +18722,7 @@ void C_VS_UI_INVENTORY_SUB::Show()
 			
 		}
 		//
-		// Item�� ��� ������ grid ��ġ�� �̸� �� �� �ֵ��� �Ѵ�.
+		// Item을 들고 있으면 grid 위치를 미리 알 수 있도록 한다.
 		//
 		if (gpC_mouse_pointer->GetPickUpItem() && 
 			m_focus_grid_x != NOT_SELECTED && 
@@ -18758,7 +18758,7 @@ void C_VS_UI_INVENTORY_SUB::Show()
 		gpC_base->m_p_DDSurface_back->Unlock();
 	}
 	//
-	// ������ ���� ǥ��
+	// 아이템 개수 표시
 	//
 	int len = 0;
 	RECT rect[60];
@@ -18771,9 +18771,9 @@ void C_VS_UI_INVENTORY_SUB::Show()
 		
 		const MItem * p_item = m_MultiPackItem->Get();
 		
-		// p_item�� NULL�� �ݵ�� �ƴϴ�. �ֳ��ϸ� �����ϴ� �͸� Get()�ϱ� �����̴�.
+		// p_item은 NULL이 반드시 아니다. 왜냐하면 존재하는 것만 Get()하기 때문이다.
 		
-				// ������ ����ǥ��
+				// 아이템 개수표시
 
 		if( p_item == NULL )
 		{			
@@ -18890,7 +18890,7 @@ bool C_VS_UI_INVENTORY_SUB::MouseControl(UINT message, int _x, int _y)
 				
 				if (loop == ITEM_REF_POINT_COUNT)
 				{
-					// item�� grid ������ ������� ������ ������ ��ġ��Ų��.
+					// item이 grid 영역에 어느정도 들어오면 안으로 위치시킨다.
 					const MItem * p_pickup_item = gpC_mouse_pointer->GetPickUpItem();
 					int a, b;
 					switch (i)
@@ -18945,7 +18945,7 @@ bool C_VS_UI_INVENTORY_SUB::MouseControl(UINT message, int _x, int _y)
 	case M_LEFTBUTTON_DOWN:
 	case M_LB_DOUBLECLICK:
 
-			if(gC_vs_ui.inventory_mode != 1 && !gC_vs_ui.IsRunningExchange())// ���λ��� ���¸�� �̰ų� ��ȯâ�� �� ���� ��
+			if(gC_vs_ui.inventory_mode != 1 && !gC_vs_ui.IsRunningExchange())// 개인상점 오픈모드 이거나 교환창이 떠 있을 때
 			{
 				if (gpC_mouse_pointer->GetPickUpItem() == NULL && re && m_MultiPackItem->GetItem(m_focus_grid_x, m_focus_grid_y) == NULL)
 					//TestGridRect(_x, _y) == false && re)
@@ -18956,7 +18956,7 @@ bool C_VS_UI_INVENTORY_SUB::MouseControl(UINT message, int _x, int _y)
 				}
 				
 				//
-				// Item�� ������ ���´�.
+				// Item을 집던가 놓는다.
 				//
 				{
 					bool ret = Click(m_grid_rect.x, m_grid_rect.y);
@@ -18972,7 +18972,7 @@ bool C_VS_UI_INVENTORY_SUB::MouseControl(UINT message, int _x, int _y)
 		break;
 		
 	case M_RIGHTBUTTON_DOWN:
-		// ���� ���� ���, �ŷ� �� �ƴҶ�, ���콺�� �������� ������
+		// 개인 상점 모드, 거래 중 아닐때, 마우스에 아이템이 없을때
 		if(gC_vs_ui.inventory_mode != 1 && !gC_vs_ui.IsRunningExchange() && NULL == gpC_mouse_pointer->GetPickUpItem()) 
 		{
 			const MItem* p_cur_item = m_MultiPackItem->GetItem(m_focus_grid_x, m_focus_grid_y);
@@ -18998,7 +18998,7 @@ bool C_VS_UI_INVENTORY_SUB::MouseControl(UINT message, int _x, int _y)
 				}
 			}
 			else 
-			if(p_cur_item->GetItemClass() == ITEM_CLASS_PET_ITEM && p_cur_item->GetItemType() >2) // 2�� �� ��ȯ������ �̸�
+			if(p_cur_item->GetItemClass() == ITEM_CLASS_PET_ITEM && p_cur_item->GetItemType() >2) // 2차 펫 소환아이템 이면
 			{
 				switch(g_eRaceInterface)
 				{
@@ -19012,7 +19012,7 @@ bool C_VS_UI_INVENTORY_SUB::MouseControl(UINT message, int _x, int _y)
 //							g_char_slot_ingame.DOMAIN_ENCHANT	< 40 &&
 //							g_char_slot_ingame.DOMAIN_GUN		< 40 &&
 //							g_char_slot_ingame.DOMAIN_HEAL		< 40 &&
-//							g_char_slot_ingame.DOMAIN_SWORD) // �� 40 ���ϴ� �� ����.
+//							g_char_slot_ingame.DOMAIN_SWORD) // 렙 40 이하는 못 쓴다.
 							{
 								gpC_base->SendMessage(UI_MESSAGE_BOX, UI_STRING_MESSAGE_CANNOT_SUMMON_2ND_PET, 0, 	NULL);
 								return true;
@@ -19047,7 +19047,7 @@ bool C_VS_UI_INVENTORY_SUB::MouseControl(UINT message, int _x, int _y)
 //-----------------------------------------------------------------------------
 // C_VS_UI_INVENTORY_SUB::ResetRect
 //
-// ��ü Grid rect�� �����Ѵ�. �̰��� Inventory�� �̵��� ���� ������ ����� �Ѵ�.
+// 전체 Grid rect를 설정한다. 이것은 Inventory의 이동이 있을 때마다 해줘야 한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_INVENTORY_SUB::ResetRect()
 {
@@ -19060,13 +19060,13 @@ void C_VS_UI_INVENTORY_SUB::ResetRect()
 //-----------------------------------------------------------------------------
 // C_VS_UI_INVENTORY_SUB::Click
 //
-// ���� Item�� ��� ������ ������ ��ü�ϰ�, ��� ���� ������ Inventory�� �ִ�
-// ���� ���´�.
+// 현재 Item을 들고 있으면 놓던가 교체하고, 들고 있지 않으면 Inventory에 있는
+// 것을 집는다.
 //
-// ���� �ߴٸ� true��, �׷��������� false�� ��ȯ�Ѵ�.
+// 뭔가 했다면 true를, 그렇지않으면 false를 반환한다.
 //
-// grid_start_x, grid_start_y�� inventory grid �������̴�. �̰��� �����Ͽ� item
-// (x, y)�� ���Ѵ�.
+// grid_start_x, grid_start_y는 inventory grid 시작점이다. 이것을 참조하여 item
+// (x, y)를 구한다.
 //-----------------------------------------------------------------------------
 bool C_VS_UI_INVENTORY_SUB::Click(int grid_start_x, int grid_start_y)
 {
@@ -19082,26 +19082,26 @@ bool C_VS_UI_INVENTORY_SUB::Click(int grid_start_x, int grid_start_y)
 	const MItem* pMouseItem = gpC_mouse_pointer->GetPickUpItem();
 	
 	 
-	if (pMouseItem) // ��� �ִ°�?
+	if (pMouseItem) // 들고 있는가?
 	{
-//		if(pMouseItem->GetItemClass() == ITEM_CLASS_PET_ITEM ) // ��� �㿡 ����]
+//		if(pMouseItem->GetItemClass() == ITEM_CLASS_PET_ITEM ) // 요건 담에 삭제]
 //			return false;
-		// �߰��� �� ���� ���
-		// ������ �������� ��Ƽ�ѿ� �߰��� �� ����. by bezz
+		// 추가될 수 없는 경우
+		// 다음의 아이템은 멀티팩에 추가할 수 없다. by bezz
 		ITEM_CLASS ItemClass = pMouseItem->GetItemClass();
 		TYPE_ITEMTYPE ItemType = pMouseItem->GetItemType();
-		if ( ( ItemClass == ITEM_CLASS_RELIC )								// ����
-			|| ( ItemClass == ITEM_CLASS_BLOOD_BIBLE )						// ���� ����
-			|| ( ItemClass == ITEM_CLASS_CASTLE_SYMBOL )					// �� ��¡
-			|| ( ItemClass == ITEM_CLASS_WAR_ITEM )							// ���� ������/ �巡�� ����
-			|| ( ItemClass == ITEM_CLASS_EVENT_ITEM && ItemType == 27 )		// ���
+		if ( ( ItemClass == ITEM_CLASS_RELIC )								// 성물
+			|| ( ItemClass == ITEM_CLASS_BLOOD_BIBLE )						// 피의 성서
+			|| ( ItemClass == ITEM_CLASS_CASTLE_SYMBOL )					// 성 상징
+			|| ( ItemClass == ITEM_CLASS_WAR_ITEM )							// 전쟁 아이템/ 드래곤 아이
+			|| ( ItemClass == ITEM_CLASS_EVENT_ITEM && ItemType == 27 )		// 깃발
 
 			// sjheon 2004.04.28 add
-			|| ( ItemClass == ITEM_CLASS_EVENT_ETC && ItemType == 18 )		// �йи� ����
-			|| ( ItemClass == ITEM_CLASS_EVENT_ITEM && (ItemType >= 32 && ItemType <= 36) )		// ǳ�� �Ӹ��� 
+			|| ( ItemClass == ITEM_CLASS_EVENT_ETC && ItemType == 18 )		// 패밀리 코인
+			|| ( ItemClass == ITEM_CLASS_EVENT_ITEM && (ItemType >= 32 && ItemType <= 36) )		// 풍선 머리띠 
 			// sjheon 2004.04.28 add
 							
-			|| ( ItemClass == ITEM_CLASS_SWEEPER ) )						// ������
+			|| ( ItemClass == ITEM_CLASS_SWEEPER ) )						// 스위퍼
 		{
 			return false;
 		}
@@ -19111,9 +19111,9 @@ bool C_VS_UI_INVENTORY_SUB::Click(int grid_start_x, int grid_start_y)
 
 		MItem* p_old_item  = NULL;
 			
-		if (m_MultiPackItem->CanReplaceItem(gpC_mouse_pointer->GetPickUpItem(),		// �߰��� item
-			m_focus_grid_x, m_focus_grid_y,	// �߰��� ��ġ 
-			p_old_item))								// �����ִ� item
+		if (m_MultiPackItem->CanReplaceItem(gpC_mouse_pointer->GetPickUpItem(),		// 추가할 item
+			m_focus_grid_x, m_focus_grid_y,	// 추가할 위치 
+			p_old_item))								// 원래있던 item
 		{
 			
 			gpC_base->SendMessage(UI_ITEM_DROP_TO_INVENTORY_SUB, 
@@ -19129,10 +19129,10 @@ bool C_VS_UI_INVENTORY_SUB::Click(int grid_start_x, int grid_start_y)
 	}
 	else
 	{
-		// ���´�.
+		// 집는다.
 		MItem * p_item = m_MultiPackItem->GetItem(m_focus_grid_x, m_focus_grid_y);
 		
-		if (p_item != NULL) // Item�� �ִ�.
+		if (p_item != NULL) // Item이 있다.
 		{
 			int number = p_item->GetNumber();
 			
@@ -19164,26 +19164,26 @@ bool C_VS_UI_INVENTORY_SUB::Click(int grid_start_x, int grid_start_y)
 					{
 						const MItem* p_cur_item = g_pInventory->GetItem(point.x, point.y);
 						
-						// �ѿ� źâ�� ����� �Ͱ� ���� ���� insert item�̴�.
-						// ��ġ�� ������ ��ġ�Ұ�쿡�� �߰��Ѵ�.
+						// 총에 탄창을 끼우는 것과 같은 것이 insert item이다.
+						// 위치가 완전히 일치할경우에만 추가한다.
 						if (p_item->IsInsertToItem( p_cur_item ) && p_cur_item->GetGridX() == point.x && p_cur_item->GetGridY() == point.y)
 						{
-							// ������ �ִ� item�� �߰��� �� �ִ� ���
+							// 이전에 있던 item에 추가될 수 있는 경우
 							
-							// ��� Item�� ��� �ִ�(�߰��� Item)�� Client���� �˾ƾ� �Ѵ�.
-							// ��� �ִ� Item�� Client���� access�� �� �����Ƿ� ��� Item�� ������.
+							// 대상 Item과 들고 있는(추가할 Item)을 Client에서 알아야 한다.
+							// 들고 있는 Item은 Client에서 access할 수 있으므로 대상 Item을 보낸다.
 							gpC_base->SendMessage(UI_ITEM_INSERT_FROM_INVENTORY,
 								point.x, point.y,
-								(void *)p_cur_item); // ��� Item
+								(void *)p_cur_item); // 대상 Item
 						}
 						else
 						{	
-							// �߰��� �� ���� ���
+							// 추가될 수 없는 경우
 							MItem* p_old_item  = NULL;
 							
-							if (g_pInventory->CanReplaceItem((MItem *)p_item,		// �߰��� item
-								point.x, point.y,	// �߰��� ��ġ 
-								p_old_item))								// �����ִ� item
+							if (g_pInventory->CanReplaceItem((MItem *)p_item,		// 추가할 item
+								point.x, point.y,	// 추가할 위치 
+								p_old_item))								// 원래있던 item
 							{
 								
 								gpC_base->SendMessage(UI_ITEM_DROP_TO_INVENTORY, 

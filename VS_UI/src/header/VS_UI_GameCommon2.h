@@ -255,7 +255,7 @@ public:
 	// Action
 	//-----------------------------------------------------------------------
 	void	ActionMove();
-	void	ActionRotation(BYTE Direction);					// 0�� ���� 1�� ������
+	void	ActionRotation(BYTE Direction);					// 0은 왼쪽 1은 오른쪽
 
 	//-----------------------------------------------------------------------
 	// Process
@@ -824,7 +824,7 @@ struct PETINFO
 	std::string NAME;
 	bool ATTACK;
 	std::string NICK_NAME;
-	bool ChangeAbleNickName; // �������� �ƴ���..
+	bool ChangeAbleNickName; // 내펫인지 아닌지..
 };
 
 //-----------------------------------------------------------------------------
@@ -902,13 +902,13 @@ public :
 //-----------------------------------------------------------------------------
 // C_VS_UI_HELPDESC
 //
-// Desc : ���� �޼��� Ŭ���� 
+// Desc : 헬프 메세지 클래스 
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 // C_VS_UI_HELPDESC
 //
-// Desc : ���� �޼��� Ŭ���� 
+// Desc : 헬프 메세지 클래스 
 //-----------------------------------------------------------------------------
 
 class C_VS_UI_HELPDESC: public Window, public Exec , public ButtonVisual 
@@ -1051,7 +1051,7 @@ private:
 	std::string			m_szMyNum, m_szSMSMessage;
 	std::list<std::string>	m_szOtherNum;
 public:
-	C_VS_UI_SMS_MESSAGE(); // team_name�� member�� ��쿡��
+	C_VS_UI_SMS_MESSAGE(); // team_name은 member인 경우에만
 	~C_VS_UI_SMS_MESSAGE();
 
 	void	Process();
@@ -1133,7 +1133,7 @@ public:
 		std::string	CustomName;
 		std::string	Number;
 	};
-	C_VS_UI_SMS_LIST(); // team_name�� member�� ��쿡��
+	C_VS_UI_SMS_LIST(); // team_name은 member인 경우에만
 	~C_VS_UI_SMS_LIST();
 
 	void	Process();
@@ -1208,7 +1208,7 @@ private:
 
 	std::string			m_szNum, m_szName, m_szID;
 public:
-	C_VS_UI_SMS_RECORD(); // team_name�� member�� ��쿡��
+	C_VS_UI_SMS_RECORD(); // team_name은 member인 경우에만
 	~C_VS_UI_SMS_RECORD();
 
 	void	Process();
@@ -1232,12 +1232,12 @@ class C_VS_UI_NicknameInfo
 public:
 	enum
 	{
-		NICK_NONE = 0,		// �г��� ����
-		NICK_BUILT_IN,		// �Ϲ������� �ڵ����� �־����� �г��� (�ε���)
-		NICK_QUEST,			// ����Ʈ Ŭ������ �� �޴� �г��� (�ε���)
-		NICK_FORCED,		// ������ �ٿ��� �г��� (�ε���)
-		NICK_CUSTOM_FORCED,	// ������ �ٿ��� �г��� (��Ʈ��)
-		NICK_CUSTOM,		// ������ �����Ӱ� ���� �г��� (��Ʈ��)
+		NICK_NONE = 0,		// 닉네임 없음
+		NICK_BUILT_IN,		// 일반적으로 자동으로 주어지는 닉네임 (인덱스)
+		NICK_QUEST,			// 퀘스트 클리어한 뒤 받는 닉네임 (인덱스)
+		NICK_FORCED,		// 강제로 붙여진 닉네임 (인덱스)
+		NICK_CUSTOM_FORCED,	// 강제로 붙여진 닉네임 (스트링)
+		NICK_CUSTOM,		// 유저가 자유롭게 넣은 닉네임 (스트링)
 	};
 
 	WORD	getNicknameID() const { return m_NicknameID; }
@@ -1255,7 +1255,7 @@ private:
 	WORD	m_NicknameID;
 	BYTE	m_NicknameType;
 	std::string	m_Nickname;
-	WORD	m_NicknameIndex;	// ��Ʈ�� �Ǵ� �ε��� �ϳ��� ���ȴ�.
+	WORD	m_NicknameIndex;	// 스트링 또는 인덱스 하나만 사용된다.
 };
 class C_VS_UI_NAMING : public Window, public Exec, public ButtonVisual
 {
@@ -1269,10 +1269,10 @@ private :
 
 	enum INFO_SPK
 	{
-		NICKNAME_STR = 0,	// �г���
-		NICKNAME_LIST_STR,	// �г��� ����Ʈ
-		PETNAME_STR,		// ���̸�
-		ADD_NICKNAME_STR,	// �߰� �г���
+		NICKNAME_STR = 0,	// 닉네임
+		NICKNAME_LIST_STR,	// 닉네임 리스트
+		PETNAME_STR,		// 펫이름
+		ADD_NICKNAME_STR,	// 추가 닉네임
 	};
 	enum EXEC_ID
 	{
@@ -1332,10 +1332,10 @@ private :
 	C_SPRITE_PACK		m_pC_spk;
 	enum INFO_SPK
 	{
-		NICKNAME_STR = 0,	// �г���
-		NICKNAME_LIST_STR,	// �г��� ����Ʈ
-		PETNAME_STR,		// ���̸�
-		ADD_NICKNAME_STR,	// �߰� �г���
+		NICKNAME_STR = 0,	// 닉네임
+		NICKNAME_LIST_STR,	// 닉네임 리스트
+		PETNAME_STR,		// 펫이름
+		ADD_NICKNAME_STR,	// 추가 닉네임
 	};
 	enum EXEC_ID
 	{
@@ -1371,7 +1371,7 @@ public :
 //-----------------------------------------------------------------------------
 // class C_VS_UI_QUEST_MANAGER
 //
-// ����Ʈ ui ���� �̹����� ����Ʈ ������ ó�� ����..
+// 퀘스트 ui 관련 이미지와 퀘스트 정보를 처리 하자..
 //-----------------------------------------------------------------------------
 class	C_VS_UI_QUEST_LIST;
 class	C_VS_UI_QUEST_DETAIL;
@@ -1380,7 +1380,7 @@ class	C_VS_UI_QUEST_ITEM;
 class	C_VS_UI_QUEST_ICON;
 
 /* 
-����Ʈ ���� npcâ�� ����..
+퀘스트 관련 npc창을 띄운다..
 */
 class C_VS_UI_QUEST_NPC_DIALOG 
 {
@@ -1401,9 +1401,9 @@ public:
 		std::string		m_StrArg;
 		DWORD			m_NumArg;
 		BYTE			bStatus;
-		BYTE			bCondition;	// ��� ���ǿ� �ִ°� 0 : Happen, 1 : Complete, 2 : Fail, 3 : Reward
-		WORD			bIndex;		// �ش� ������ ���° element�ΰ�
-		DWORD			dwTimeLimit;// �ð� ���� ����Ʈ�� ��� ó�� ���� �ð� ���� 
+		BYTE			bCondition;	// 어느 조건에 있는가 0 : Happen, 1 : Complete, 2 : Fail, 3 : Reward
+		WORD			bIndex;		// 해당 조건의 몇번째 element인가
+		DWORD			dwTimeLimit;// 시간 제한 퀘스트일 경우 처음 남음 시간 세팅 
 	};
 	struct _GQuestInfo{
 		DWORD			dwQuestID;
@@ -1432,9 +1432,9 @@ private:
 	XMLTree						m_Quest_XML_Tree;
 
 	DWORD						m_SelectedQuestID;
-	std::vector<_GQuestInfo*>	m_QuestListInfo; // ����Ʈ ���� ����Ʈ
-	std::vector<MItem*>			m_QuestItemInfo; // ����Ʈ ������ ����Ʈ
-	std::vector<_GQuestExcuteElement*>	m_QuestExcutElement; // ����Ʈ ExcuteElement ����Ʈ
+	std::vector<_GQuestInfo*>	m_QuestListInfo; // 퀘스트 정보 리스트
+	std::vector<MItem*>			m_QuestItemInfo; // 퀘스트 아이템 리스트
+	std::vector<_GQuestExcuteElement*>	m_QuestExcutElement; // 퀘스트 ExcuteElement 리스트
 	
 	bool						UpdateQuestInfo(_GQuestInfo *QInfo, int nType = -1);
 	char*						GetQuestTitle(const XMLTree *pElement);
@@ -1444,25 +1444,25 @@ private:
 public:
 	enum INFO_SPK
 	{
-		INVENTORY_SLOT,			// �κ��丮 ���� �޹��
-		TAB_BUTTON_PROCESS,		// �ǹ�ư - ����
-		TAB_BUTTON_COMPLETE,	// �ǹ�ư - �Ϸ�
-		BUTTON_ACCEPT,			// ���� ��ư
-		BUTTON_ACCEPT_HILIGHT,	// ���� ��ư ���̶���Ʈ
-		BUTTON_ACCEPT_PUSH,		// ���� ��ư Ǫ��
-		BUTTON_GIVEUP,			// ���� ��ư
-		BUTTON_GIVEUP_HILIGHT,	// ���� ��ư ���̶���Ʈ
-		BUTTON_GIVEUP_PUSH,		// ���� ��ư Ǫ��
-		QUEST_LIST_SUBJECT,		// ����,����
-		QUEST_MISSION_SUBJECT,	// �ӹ�,����
-		QUEST_TITLE_BG,			// ����Ʈ ��� �� ���
-		QUEST_TABLE_BG,			// ����Ʈ ��� �� ���
-		QUEST_DETAIL_BG,		// ����Ʈ �� �� ���
+		INVENTORY_SLOT,			// 인벤토리 슬롯 뒷배경
+		TAB_BUTTON_PROCESS,		// 탭버튼 - 진행
+		TAB_BUTTON_COMPLETE,	// 탭버튼 - 완료
+		BUTTON_ACCEPT,			// 수락 버튼
+		BUTTON_ACCEPT_HILIGHT,	// 수락 버튼 하이라이트
+		BUTTON_ACCEPT_PUSH,		// 수락 버튼 푸쉬
+		BUTTON_GIVEUP,			// 포기 버튼
+		BUTTON_GIVEUP_HILIGHT,	// 포기 버튼 하이라이트
+		BUTTON_GIVEUP_PUSH,		// 포기 버튼 푸쉬
+		QUEST_LIST_SUBJECT,		// 제목,상태
+		QUEST_MISSION_SUBJECT,	// 임무,상태
+		QUEST_TITLE_BG,			// 퀘스트 목록 뒷 배경
+		QUEST_TABLE_BG,			// 퀘스트 목록 뒷 배경
+		QUEST_DETAIL_BG,		// 퀘스트 상세 뒷 배경
 
-		QUEST_LIST_TITLE,		// ����Ʈ ��� Ÿ��Ʋ
-		QUEST_DETAIL_TITLE,		// ����Ʈ ���� Ÿ��Ʋ
-		QUEST_MISSION_TITLE,	// ����Ʈ �ӹ� Ÿ��Ʋ
-		QUEST_ITEM_TITLE,		// ����Ʈ ������ Ÿ��Ʋ
+		QUEST_LIST_TITLE,		// 퀘스트 목록 타이틀
+		QUEST_DETAIL_TITLE,		// 퀘스트 세부 타이틀
+		QUEST_MISSION_TITLE,	// 퀘스트 임무 타이틀
+		QUEST_ITEM_TITLE,		// 퀘스트 아이템 타이틀
 
 	};
 	
@@ -1535,13 +1535,13 @@ class C_VS_UI_QUEST_LIST : public Window, public Exec, public ButtonVisual/*, pu
 public:
 	enum QUEST_LIST_STATUS
 	{
-		CANNOT = 0,		// ���� �Ұ���
-		CAN_ACCEPT,		// ���డ��
-		DOING,			// ������
-		SUCCESS,		// ���� (���� ������� ����)
-		COMPLETE,		// �Ϸ� (�������, ����� �Ұ���)
-		FAIL,			// ���� (����� �Ұ���)
-		CAN_REPLAY,		// ����� ����
+		CANNOT = 0,		// 아직 불가능
+		CAN_ACCEPT,		// 수행가능
+		DOING,			// 수행중
+		SUCCESS,		// 성공 (아직 보상받지 않음)
+		COMPLETE,		// 완료 (보상받음, 재수행 불가능)
+		FAIL,			// 실패 (재수행 불가능)
+		CAN_REPLAY,		// 재수행 가능
 	};
 
 private:
@@ -1559,13 +1559,13 @@ private:
 	C_VS_UI_SCROLL_BAR			*m_pC_scroll_bar;	
 	int							m_SelectPos;
 	int							m_SelectContents;
-	BYTE						m_TabID; // ���/�Ϸ� �� ����
+	BYTE						m_TabID; // 목록/완료 탭 선택
 	bool						m_bl_focus;
 
-	int							m_OustersOffset;// �ƿ콺���� �ȼ� ����
+	int							m_OustersOffset;// 아우스터즈 픽셀 보정
 
-	std::vector<C_VS_UI_QUEST_MANAGER::_GQuestInfo*>		m_QuestListInfo[2];		// 0 : ���డ��, ������,���� �϶� ����Ʈ ����Ʈ
-															// 1 : �Ϸ�, ����, ����� ���� �϶� ����Ʈ ����Ʈ
+	std::vector<C_VS_UI_QUEST_MANAGER::_GQuestInfo*>		m_QuestListInfo[2];		// 0 : 수행가능, 수행중,성공 일때 퀘스트 리스트
+															// 1 : 완료, 실패, 재수행 가능 일때 퀘스트 리스트
 
 public:
 
@@ -1607,9 +1607,9 @@ private:
 	C_VS_UI_SCROLL_BAR			*m_pC_scroll_bar;	
 	int							m_SelectPos;
 	bool						m_bl_focus;
-	int							m_OustersOffset;// �ƿ콺���� �ȼ� ����
+	int							m_OustersOffset;// 아우스터즈 픽셀 보정
 
-	int							m_IsAbleRunQuest ; // 0 : disable 1 : ���� 2 : ����
+	int							m_IsAbleRunQuest ; // 0 : disable 1 : 수행 2 : 포기
 	std::string					m_szTitle;
 public:
 	C_VS_UI_QUEST_DETAIL(C_SPRITE_PACK*	spr);
@@ -1639,10 +1639,10 @@ class C_VS_UI_QUEST_MISSION :  public Window, public Exec, public ButtonVisual/*
 public:
 	enum QUEST_MISSION_STATUS
 	{
-		HIDE = 0,			// �������� ����
-		CURRENT,			// ���� �ؾ� �Ǵ� �̼� (������)
-		SUCCESS,			// �̹� ������ �̼�
-		FAIL,				// ����
+		HIDE = 0,			// 보여주지 않음
+		CURRENT,			// 지금 해야 되는 미션 (수행중)
+		SUCCESS,			// 이미 성공한 미션
+		FAIL,				// 실패
 	};
 
 private:
@@ -1659,7 +1659,7 @@ private:
 	C_VS_UI_SCROLL_BAR			*m_pC_scroll_bar;	
 	int							m_SelectPos;
 	bool						m_bl_focus;
-	int							m_OustersOffset;// �ƿ콺���� �ȼ� ����
+	int							m_OustersOffset;// 아우스터즈 픽셀 보정
 
 	std::vector<C_VS_UI_QUEST_MANAGER::_GMissionInfo*> m_QuestMissionInfo;
 public:
@@ -1708,7 +1708,7 @@ private:
 	C_VS_UI_SCROLL_BAR			*m_pC_scroll_bar;	
 	int							m_SelectPos;
 	bool						m_bl_focus;
-	int							m_OustersOffset;// �ƿ콺���� �ȼ� ����
+	int							m_OustersOffset;// 아우스터즈 픽셀 보정
 
 	std::vector<MItem*>			m_QuestItemInfo;
 
@@ -1861,19 +1861,19 @@ private :
 	enum INFO_SPK
 	{
 		JJANG_MAIN,
-		JJANG_BUTTON_EXCHANGE,			// ��ȯ ��ư
-		JJANG_BUTTON_EXCHANGE_HILIGHT,	// ��ȯ ��ư ���̶���Ʈ
-		JJANG_BUTTON_EXCHANGE_PUSH,		// ��ȯ ��ư Ǫ��
+		JJANG_BUTTON_EXCHANGE,			// 교환 버튼
+		JJANG_BUTTON_EXCHANGE_HILIGHT,	// 교환 버튼 하이라이트
+		JJANG_BUTTON_EXCHANGE_PUSH,		// 교환 버튼 푸쉬
 	};
 	enum ITEM_CODE
 	{
-		CANDY = 0,				// ���� 1�� 
-		RESURRECTION_SCROLL,	// ��Ȱ ��ũ�� 1��
-		ELIXIR_SCROLL,			// ������ ��ũ�� 1��
-		MEGAPHONE,				// Ȯ���� 30��
-		NAMING_PEN,				// ���̹� �� 1��
-		SIGNPOST,				// �˸��� 6�ð�
-		BLACK_RICE_CAKE_SOUP	// ���� ���� 1��
+		CANDY = 0,				// 사탕 1개 
+		RESURRECTION_SCROLL,	// 부활 스크롤 1개
+		ELIXIR_SCROLL,			// 엘릭서 스크롤 1개
+		MEGAPHONE,				// 확성기 30분
+		NAMING_PEN,				// 네이밍 펜 1개
+		SIGNPOST,				// 알림판 6시간
+		BLACK_RICE_CAKE_SOUP	// 검은 떡국 1개
 	};
 	enum EXEC_ID
 	{
@@ -1899,7 +1899,7 @@ private :
 	int					m_SelectPos;
 	LineEditorVisual	m_EditPhoneNumber;
 	std::string			m_szMyPhoneNumber;
-	WORD				m_AvailablePoint; // �׺� ���� ����Ʈ
+	WORD				m_AvailablePoint; // 겜블 가능 포인트
 
 	int					m_GambleMode;
 	DWORD				m_dwSpeed;
@@ -1934,7 +1934,7 @@ public :
 	void	PowerjjangGambleResult(BYTE bItemCode);
 };
 
-#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 
 
 //-----------------------------------------------------------------------------
@@ -1942,10 +1942,10 @@ public :
 //
 // slayer/vampire inventory base class.
 //
-// - slayer/vampire inventory ������ interface�� �����Ѵ�. 
-// - slayer���� vampire�� �ٲ�ų� �Ǵ� �� �ݴ��� ��, ��ü�� ������Ͽ�
-//   inventory�� �ʱ�ȭ������, inventory�� item�� �״�� �����ȴ�. interface�󿡼���
-//   inventory�� item�� �����ϰ� ���� �ʴ�. �׷��� �� class�� base�� �ϴ� ���̴�.
+// - slayer/vampire inventory 공통의 interface를 정의한다. 
+// - slayer에서 vampire로 바뀌거나 또는 그 반대일 때, 객체를 재생성하여
+//   inventory는 초기화되지만, inventory의 item은 그대로 유지된다. interface상에서의
+//   inventory는 item을 저장하고 있지 않다. 그래서 이 class를 base로 하는 것이다.
 //-----------------------------------------------------------------------------
 class C_VS_UI_INVENTORY_SUB : public Window, public Exec, public ButtonVisual
 {
@@ -1968,7 +1968,7 @@ protected:
 		INVENTORY_ITEMBACK_ALPHA,
 		INVENTORY_WINDOW_2X4,
 		INVENTORY_WINDOW_2X4_ALPHA,
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 		INVENTORY_WINDOW_4X6,
 		INVENTORY_WINDOW_4X6_ALPHA,
 	#endif
@@ -1984,7 +1984,7 @@ protected:
 	enum 
 	{ 
 		TYPE_2X4 = 0,
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 		TYPE_4X6 = 1,
 	#endif
 		
@@ -1997,18 +1997,18 @@ protected:
 
 	BYTE					m_SubInventoryType;
 	
-	Rect					m_grid_rect; // ��ü Grid rect.
+	Rect					m_grid_rect; // 전체 Grid rect.
 
 	int						m_focus_grid_x, m_focus_grid_y;
 
-	// ��ӹ޴� class���� �ݵ�� set����� �Ѵ�.
+	// 상속받는 class에서 반드시 set해줘야 한다.
 	int							m_grid_start_offset_x, m_grid_start_offset_y;
 
 	int						m_MainWindowSpk;
 	int						n_nType;
 
 
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 		MSubInventory*			m_MultiPackItem;
 	#endif
 
@@ -2034,7 +2034,7 @@ public:
 	C_VS_UI_INVENTORY_SUB(MItem* pItem);
 	virtual ~C_VS_UI_INVENTORY_SUB();
 
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 		MItem*	GetSubInventoryItem() { return m_MultiPackItem; }
 	#endif
 

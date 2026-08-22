@@ -49,7 +49,7 @@ int C_VS_UI_SLAYER_GEAR::m_slot_image[SLOT_SIZE] = {
 //-----------------------------------------------------------------------------
 // Click
 //
-// ���������� true��, �׷��������� false�� ��ȯ�Ѵ�.
+// 뭔가했으면 true를, 그렇지않으면 false를 반환한다.
 //-----------------------------------------------------------------------------
 bool C_VS_UI_SLAYER_QUICKITEM::Click()
 {
@@ -61,21 +61,21 @@ bool C_VS_UI_SLAYER_QUICKITEM::Click()
 
 	int item_x, item_y;
 
-	if (gpC_mouse_pointer->GetPickUpItem()) // ��� �ִ°�?
+	if (gpC_mouse_pointer->GetPickUpItem()) // 들고 있는가?
 	{
 		const MItem* p_cur_item = g_pQuickSlot->GetItem(m_focus_slot);
 
-		// �ѿ� źâ�� ����� �Ͱ� ���� ���� insert item�̴�.
+		// 총에 탄창을 끼우는 것과 같은 것이 insert item이다.
 		if (gpC_mouse_pointer->GetPickUpItem()->IsInsertToItem( p_cur_item ))
 		{
-			// ������ �ִ� item�� �߰��� �� �ִ� ���
+			// 이전에 있던 item에 추가될 수 있는 경우
 
-			// ��� Item�� ��� �ִ�(�߰��� Item)�� Client���� �˾ƾ� �Ѵ�.
-			// ��� �ִ� Item�� Client���� access�� �� �����Ƿ� ��� Item�� ������.
+			// 대상 Item과 들고 있는(추가할 Item)을 Client에서 알아야 한다.
+			// 들고 있는 Item은 Client에서 access할 수 있으므로 대상 Item을 보낸다.
 			gpC_base->SendMessage(UI_ITEM_INSERT_FROM_QUICKSLOT,
 																  m_focus_slot,
 																  0,
-																  (void *)p_cur_item); // ��� Item
+																  (void *)p_cur_item); // 대상 Item
 			return true;
 		}
 		else
@@ -98,10 +98,10 @@ bool C_VS_UI_SLAYER_QUICKITEM::Click()
 	}
 	else
 	{
-		// ���´�.
+		// 집는다.
 		const MItem * p_item = g_pQuickSlot->GetItem(m_focus_slot);
 
-		if (p_item != NULL) // Item�� �ִ�.
+		if (p_item != NULL) // Item이 있다.
 		{
 			if(m_bl_width)
 			{
@@ -120,7 +120,7 @@ bool C_VS_UI_SLAYER_QUICKITEM::Click()
 																  m_focus_slot, 
 																  MAKEDWORD(item_x, item_y), 
 																  (MItem *)p_item);
-			// SHIFT������ Ŭ�������� ������ �ڵ� �̵� ó�� -> �κ��丮
+			// SHIFT누르고 클릭했을때 아이템 자동 이동 처리 -> 인벤토리
 			if(g_pSDLInput->KeyDown(DIK_LSHIFT))
 			{
 				POINT point;
@@ -128,26 +128,26 @@ bool C_VS_UI_SLAYER_QUICKITEM::Click()
 				{
 					const MItem* p_cur_item = g_pInventory->GetItem(point.x, point.y);
 					
-					// �ѿ� źâ�� ����� �Ͱ� ���� ���� insert item�̴�.
-					// ��ġ�� ������ ��ġ�Ұ�쿡�� �߰��Ѵ�.
+					// 총에 탄창을 끼우는 것과 같은 것이 insert item이다.
+					// 위치가 완전히 일치할경우에만 추가한다.
 					if (p_item->IsInsertToItem( p_cur_item ) && p_cur_item->GetGridX() == point.x && p_cur_item->GetGridY() == point.y)
 					{
-						// ������ �ִ� item�� �߰��� �� �ִ� ���
+						// 이전에 있던 item에 추가될 수 있는 경우
 						
-						// ��� Item�� ��� �ִ�(�߰��� Item)�� Client���� �˾ƾ� �Ѵ�.
-						// ��� �ִ� Item�� Client���� access�� �� �����Ƿ� ��� Item�� ������.
+						// 대상 Item과 들고 있는(추가할 Item)을 Client에서 알아야 한다.
+						// 들고 있는 Item은 Client에서 access할 수 있으므로 대상 Item을 보낸다.
 						gpC_base->SendMessage(UI_ITEM_INSERT_FROM_INVENTORY,
 							point.x, point.y,
-							(void *)p_cur_item); // ��� Item
+							(void *)p_cur_item); // 대상 Item
 					}
 					else
 					{	
-						// �߰��� �� ���� ���
+						// 추가될 수 없는 경우
 						MItem* p_old_item  = NULL;
 						
-						if (g_pInventory->CanReplaceItem((MItem *)p_item,		// �߰��� item
-							point.x, point.y,	// �߰��� ��ġ 
-							p_old_item))								// �����ִ� item
+						if (g_pInventory->CanReplaceItem((MItem *)p_item,		// 추가할 item
+							point.x, point.y,	// 추가할 위치 
+							p_old_item))								// 원래있던 item
 						{
 							
 							gpC_base->SendMessage(UI_ITEM_DROP_TO_INVENTORY, 
@@ -189,7 +189,7 @@ void C_VS_UI_SLAYER_QUICKITEM::Use(int slot, bool bFunctionKey)
 	{
 		const MItem * p_item = g_pQuickSlot->GetItem(slot);
 
-		if (p_item) // Item�� �ִ�.
+		if (p_item) // Item이 있다.
 		{
 			gpC_base->SendMessage(UI_ITEM_USE_QUICKSLOT,
 									  slot,
@@ -211,8 +211,8 @@ C_VS_UI_SLAYER_QUICKITEM::C_VS_UI_SLAYER_QUICKITEM()
 
 	m_image_spk.Open(SPK_SLAYER_QUICKITEM);
 
-	// ���̴� ó�� no belt�� ����̴�. belt�� �����ϸ� �ٲ��.
-	// ���̴� �����ϴ�.
+	// 넓이는 처음 no belt일 경우이다. belt를 착용하면 바뀐다.
+	// 높이는 일정하다.
 	Set(0, 434, m_image_spk.GetWidth(END_EDGE), m_image_spk.GetHeight(END_EDGE));
 
 	m_pC_button_group = new ButtonGroup(this);
@@ -287,11 +287,11 @@ void	C_VS_UI_SLAYER_QUICKITEM::Close()
 //-----------------------------------------------------------------------------
 // ResetSize
 //
-// belt�� ��ü�ϰ����� size�� �缳���ؾ� �Ѵ�.
+// belt를 교체하고나서 size를 재설정해야 한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_SLAYER_QUICKITEM::ResetSize()
 {
-	// ���ƾƾ� �ϵ��ڵ�!!
+	// 으아아아 하드코딩!!
 	int slot_size = m_image_spk.GetWidth(SLOT);
 	if(m_bl_width)
 	{
@@ -551,7 +551,7 @@ bool C_VS_UI_SLAYER_QUICKITEM::MouseControl(UINT message, int _x, int _y)
 			case M_LEFTBUTTON_DOWN:
 			case M_LB_DOUBLECLICK:
 				//
-				// Item�� ������ ���´�.
+				// Item을 집던가 놓는다.
 				//
 				{
 					ret |= Click();
@@ -563,7 +563,7 @@ bool C_VS_UI_SLAYER_QUICKITEM::MouseControl(UINT message, int _x, int _y)
 
 			case M_RIGHTBUTTON_DOWN:
 				//
-				// Item�� ����Ѵ�.
+				// Item을 사용한다.
 				//
 				Use(m_focus_slot);
 				break;
@@ -687,7 +687,7 @@ void	C_VS_UI_SLAYER_QUICKITEM::ShowButtonDescription(C_VS_UI_EVENT_BUTTON * p_bu
 
 void	C_VS_UI_SLAYER_QUICKITEM::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 {	
-	// ���ο�
+	// 가로용
 	if(m_bl_width)
 	{
 		if(x+w >= g_GameRect.right)
@@ -745,7 +745,7 @@ void	C_VS_UI_SLAYER_QUICKITEM::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 			}
 		}
 	}
-	// ���ο�
+	// 세로용
 	else
 	{
 		if(y > 0)
@@ -826,7 +826,7 @@ void C_VS_UI_SLAYER_QUICKITEM::Show()
 	RECT rect[8];
 	int num[8];
 
-	// �ƾ� ���� �ϵ��ڵ�-_- ���� �����-_-;;
+	// 아씽 졸라 하드코딩-_- 졸라 허덥해-_-;;
 	if (gpC_base->m_p_DDSurface_back->Lock())
 	{
 		bool bl_statch = false;
@@ -843,13 +843,13 @@ void C_VS_UI_SLAYER_QUICKITEM::Show()
 				if(x+w >= g_GameRect.right)
 				{
 					bl_statch = true;
-					if(Moving() && m_bl_resize)	// �հ� ���� ����� �������ε�-_-;; �̷� �ϵ� �ڵ��� �ϸ� �ȵǴµ�-_-;;
+					if(Moving() && m_bl_resize)	// 먼가 좋은 방법이 있을터인데-_-;; 이런 하드 코딩은 하면 안되는데-_-;;
 						temp_x += (m_image_spk.GetWidth(START_EDGE) - m_image_spk.GetWidth(STATCH_EDGE));
 					m_image_spk.BltLocked(temp_x, temp_y, START_EDGE_EXTEND);
 					temp_x += m_image_spk.GetWidth(START_EDGE_EXTEND);
-					if(Moving() && m_bl_resize)	// �հ� ���� ����� �������ε�-_-;; �̷� �ϵ� �ڵ��� �ϸ� �ȵǴµ�-_-;;
+					if(Moving() && m_bl_resize)	// 먼가 좋은 방법이 있을터인데-_-;; 이런 하드 코딩은 하면 안되는데-_-;;
 						x += (m_image_spk.GetWidth(START_EDGE) - m_image_spk.GetWidth(STATCH_EDGE));
-					if(Moving() && m_bl_resize)	// �հ� ���� ����� �������ε�-_-;; �̷� �ϵ� �ڵ��� �ϸ� �ȵǴµ�-_-;;
+					if(Moving() && m_bl_resize)	// 먼가 좋은 방법이 있을터인데-_-;; 이런 하드 코딩은 하면 안되는데-_-;;
 						x -= (m_image_spk.GetWidth(START_EDGE) - m_image_spk.GetWidth(STATCH_EDGE));
 				}
 				else
@@ -870,7 +870,7 @@ void C_VS_UI_SLAYER_QUICKITEM::Show()
 			}
 			else
 			{
-				if(Moving() && m_bl_resize)	// �հ� ���� ����� �������ε�-_-;; �̷� �ϵ� �ڵ��� �ϸ� �ȵǴµ�-_-;;
+				if(Moving() && m_bl_resize)	// 먼가 좋은 방법이 있을터인데-_-;; 이런 하드 코딩은 하면 안되는데-_-;;
 				{
 					temp_y += (m_image_spk.GetHeight(START_EDGE+ROTATED_OFFSET) - m_image_spk.GetHeight(STATCH_EDGE+ROTATED_OFFSET));
 					m_image_spk.BltLocked(temp_x, temp_y, START_EDGE_EXTEND+ROTATED_OFFSET);
@@ -935,7 +935,7 @@ void C_VS_UI_SLAYER_QUICKITEM::Show()
 			
 			if (p_item != NULL)
 			{
-				// ������ ���
+				// 아이템 출력
 				TYPE_FRAMEID frame_id = p_item->GetInventoryFrameID();
 				
 				int _x;
@@ -962,7 +962,7 @@ void C_VS_UI_SLAYER_QUICKITEM::Show()
 					gpC_item->BltLocked(_x, _y, frame_id);
 				}
 				
-				// ����ǥ�� AlphaBox�� ���, ���ڴ� �ڿ��� ��´�
+				// 개수표시 AlphaBox만 찍고, 숫자는 뒤에서 찍는다
 				if(p_item->IsPileItem())
 				{
 					int depth, number;
@@ -989,7 +989,7 @@ void C_VS_UI_SLAYER_QUICKITEM::Show()
 				
 			}
 			else
-				// ���� ��ġ �̸� �� �� �ֵ��� �Ѵ�.
+				// 놓는 위치 미리 알 수 있도록 한다.
 				if (gpC_mouse_pointer->GetPickUpItem() && 
 					m_focus_slot == i)
 				{
@@ -1112,7 +1112,7 @@ void C_VS_UI_SLAYER_QUICKITEM::Show()
 			point.y = y+m_p_slot_x[m_focus_slot];
 		}
 
-		// ������ �ڽ� ���..
+		// 검은색 박스 출력..
 //		if (gpC_base->m_p_DDSurface_back->Lock())
 		{
 			RECT rect;
@@ -1228,7 +1228,7 @@ C_VS_UI_SLAYER::C_VS_UI_SLAYER():C_VS_UI_TRIBE()
 	tab_x += m_pC_sys_button_spk->GetWidth(TAB_GUILD);
 //	m_pC_common_button_group->Add( new C_VS_UI_EVENT_BUTTON(tab_x, tab_y, m_pC_sys_button_spk->GetWidth(TAB_MSG), m_pC_sys_button_spk->GetHeight(TAB_MSG), TAB_MSG_ID, this, TAB_MSG) );
 //	tab_x += m_pC_sys_button_spk->GetWidth(TAB_MSG);
-	// 2004, 12, 2, sobeit add start - ���
+	// 2004, 12, 2, sobeit add start - 기능
 	m_pC_common_button_group->Add( new C_VS_UI_EVENT_BUTTON(tab_x, tab_y, m_pC_sys_button_spk->GetWidth(TAB_GUILD), m_pC_sys_button_spk->GetHeight(TAB_UTIL), TAB_UTIL_ID, this, TAB_UTIL) );
 	tab_x += m_pC_sys_button_spk->GetWidth(TAB_UTIL);
 	// 2004, 12, 2, sobeit add end
@@ -1254,7 +1254,7 @@ C_VS_UI_SLAYER::C_VS_UI_SLAYER():C_VS_UI_TRIBE()
 	m_pC_menu_button_group->Add( new C_VS_UI_EVENT_BUTTON(button_x+button_x_gap*2, button_y+button_y_gap, m_pC_sys_button_spk->GetWidth(BUTTON_MAIL), m_pC_sys_button_spk->GetHeight(BUTTON_MAIL), MAIL_ID, this, BUTTON_MAIL) );
 //	m_pC_menu_button_group->Add( new C_VS_UI_EVENT_BUTTON(button_x+button_x_gap*1, button_y+button_y_gap, m_pC_sys_button_spk->GetWidth(BUTTON_QUEST), m_pC_sys_button_spk->GetHeight(BUTTON_QUEST), QUEST_ID, this, BUTTON_QUEST) );
 
-	// sms ��ư 
+	// sms 버튼 
 //	if(false == g_pUserInformation->IsNetmarble)
 //add by zdj 2005.5.17
 	// add by Coffee 2006.11.26
@@ -1265,18 +1265,18 @@ C_VS_UI_SLAYER::C_VS_UI_SLAYER():C_VS_UI_TRIBE()
 	// guild buttons
 	m_pC_guild_button_group->Add( new C_VS_UI_EVENT_BUTTON(button_x+button_x_gap*0, button_y+button_y_gap*0, m_pC_sys_button_spk->GetWidth(BUTTON_TEAM_INFO), m_pC_sys_button_spk->GetHeight(BUTTON_TEAM_INFO), TEAM_INFO_ID, this, BUTTON_TEAM_INFO) );
 	m_pC_guild_button_group->Add( new C_VS_UI_EVENT_BUTTON(button_x+button_x_gap*1, button_y+button_y_gap*0, m_pC_sys_button_spk->GetWidth(BUTTON_TEAM_MEMBER_LIST), m_pC_sys_button_spk->GetHeight(BUTTON_TEAM_MEMBER_LIST), TEAM_MEMBER_LIST_ID, this, BUTTON_TEAM_MEMBER_LIST) );
-	// 2004, 10, 12, sobeit add start - ��� ���� ������
-//	if(false == g_pUserInformation->IsNetmarble) // 2005, 1, 12, sobeit modify - �ݸ��� ��� ���� ��
+	// 2004, 10, 12, sobeit add start - 길드 명령 아이콘
+//	if(false == g_pUserInformation->IsNetmarble) // 2005, 1, 12, sobeit modify - 넷마블 길드 연합 들어감
 	{
 		m_pC_guild_button_group->Add( new C_VS_UI_EVENT_BUTTON(button_x+button_x_gap*0, button_y+button_y_gap*1, m_pC_sys_button_spk->GetWidth(BUTTON_GUILD_LIST), m_pC_sys_button_spk->GetHeight(BUTTON_GUILD_LIST), TEAM_LIST_ID, this, BUTTON_GUILD_LIST) );
 		m_pC_guild_button_group->Add( new C_VS_UI_EVENT_BUTTON(button_x+button_x_gap*1, button_y+button_y_gap*1, m_pC_sys_button_spk->GetWidth(BUTTON_WAIT_GUILD_LIST), m_pC_sys_button_spk->GetHeight(BUTTON_WAIT_GUILD_LIST), TEAM_WAIT_LIST_ID, this, BUTTON_WAIT_GUILD_LIST) );
 		m_pC_guild_button_group->Add( new C_VS_UI_EVENT_BUTTON(button_x+button_x_gap*2, button_y+button_y_gap*1, m_pC_sys_button_spk->GetWidth(BUTTON_UNION), m_pC_sys_button_spk->GetHeight(BUTTON_UNION), TEAM_UNION_ID, this, BUTTON_UNION) );
 	}
-	// 2004, 10, 12, sobeit add end - ��� ���� ������
+	// 2004, 10, 12, sobeit add end - 길드 명령 아이콘
 
-	// 2004, 12, 2, sobeit add start - ���
+	// 2004, 12, 2, sobeit add start - 기능
 	m_pC_util_button_group->Add( new C_VS_UI_EVENT_BUTTON(button_x+button_x_gap*0, button_y, m_pC_sys_button_spk->GetWidth(BUTTON_STORE), m_pC_sys_button_spk->GetHeight(BUTTON_STORE), UTIL_STORE_ID, this, BUTTON_STORE) );
-	if(false == g_pUserInformation->IsNetmarble && false == g_pUserInformation->IsTestServer) // ������
+	if(false == g_pUserInformation->IsNetmarble && false == g_pUserInformation->IsTestServer) // 본섭만
 	{
 //add by zdj 2005.5.16
 // add by Coffee 2006.11.26
@@ -1369,7 +1369,7 @@ void	C_VS_UI_SLAYER::OpenGear(bool bl_set_load)
 //-----------------------------------------------------------------------------
 // DoCommonActionBeforeEventOccured
 //
-// C_VS_UI_TRIBE::DoCommonActionBeforeEventOccured() ���� ����.
+// C_VS_UI_TRIBE::DoCommonActionBeforeEventOccured() 설명 참조.
 //-----------------------------------------------------------------------------
 void C_VS_UI_SLAYER::DoCommonActionBeforeEventOccured()
 {
@@ -1379,9 +1379,9 @@ void C_VS_UI_SLAYER::DoCommonActionBeforeEventOccured()
 //-----------------------------------------------------------------------------
 // DoCommonActionAfterEventOccured
 //
-// C_VS_UI_TRIBE::DoCommonActionAfterEventOccured() ���� ����.
+// C_VS_UI_TRIBE::DoCommonActionAfterEventOccured() 설명 참조.
 //
-// ��� Window�� �ݴ´�.
+// 모든 Window를 닫는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_SLAYER::DoCommonActionAfterEventOccured()
 {
@@ -1492,7 +1492,7 @@ bool C_VS_UI_SLAYER::IsRunningQuickItemSlot()
 //-----------------------------------------------------------------------------
 // MouseControl
 //
-// Item�� ��� ���� ��� Window �̵��̳� Main interface���� �Է��� �� �� ����.
+// Item을 들고 있을 경우 Window 이동이나 Main interface로의 입력을 할 수 없다.
 //-----------------------------------------------------------------------------
 /*bool C_VS_UI_SLAYER::MouseControl(UINT message, int _x, int _y)
 {
@@ -1504,7 +1504,7 @@ bool C_VS_UI_SLAYER::IsRunningQuickItemSlot()
 	//
 //	int i;
 
-	if (gpC_mouse_pointer->GetPickUpItem() == NULL) // Item�� ��� ������ �Է��� �� ����.
+	if (gpC_mouse_pointer->GetPickUpItem() == NULL) // Item을 들고 있으면 입력할 수 없다.
 	{
 //		if (m_pC_pds->GetPDS() == NO_PDS_MENU)// || m_pC_pds->PCSOnline() == true)
 		if(m_bl_mark && m_pC_main_spk->IsPixel(_x-m_mark_x, _y-m_mark_y, MARK_WINDOW))
@@ -1597,16 +1597,16 @@ void C_VS_UI_SLAYER::Show()
 		hour = atoi(sz_temp);
 		
 		const int icon_x = 88, icon_y = 29-2;	//modify by viva : icon_y
-		if(hour >= 8 && hour < 16)	// ���̴�
+		if(hour >= 8 && hour < 16)	// 낮이다
 			m_pC_main_spk->BltLocked(x+icon_x, y+icon_y, ICON_SUN);
-		else if(hour >= 20 || hour < 4)	// ���̴�
+		else if(hour >= 20 || hour < 4)	// 밤이다
 			m_pC_main_spk->BltLocked(x+icon_x+3, y+icon_y, ICON_MOON);
-		else	// ���� ��ü�� �ñ�-_- �ñ�-_-?;;
+		else	// 낮밤 교체의 시기-_- 시기-_-?;;
 		{
-			if(hour >=4 && hour < 8)	// �ضߴ� �ð�
+			if(hour >=4 && hour < 8)	// 해뜨는 시간
 			{
 				int time = (hour-4)*60+min;
-				// �ض� ���̶� ����� �޶� ������-_-;
+				// 해랑 달이랑 사이즈가 달라서 귀찮네-_-;
 				Rect rect(0, 0, m_pC_main_spk->GetWidth(ICON_MOON), m_pC_main_spk->GetHeight(ICON_MOON)*(240-time)/240);
 				rect.y = m_pC_main_spk->GetHeight(ICON_MOON)-rect.h;
 				m_pC_main_spk->BltLockedClip(x+icon_x+3, y+icon_y-rect.y, rect, ICON_MOON);
@@ -1615,10 +1615,10 @@ void C_VS_UI_SLAYER::Show()
 				rect.y = 0;
 				m_pC_main_spk->BltLockedClip(x+icon_x, y+icon_y+m_pC_main_spk->GetHeight(ICON_SUN)-rect.h, rect, ICON_SUN);
 			}
-			else						// �ƴϸ� ������ �ð��̰���-_-
+			else						// 아니면 해지는 시간이겠지-_-
 			{
 				int time = (hour-16)*60+min;
-				// �ض� ���̶� ����� �޶� ������-_-;
+				// 해랑 달이랑 사이즈가 달라서 귀찮네-_-;
 				Rect rect(0, 0, m_pC_main_spk->GetWidth(ICON_SUN), m_pC_main_spk->GetHeight(ICON_SUN)*(240-time)/240);
 				rect.y = m_pC_main_spk->GetHeight(ICON_SUN)-rect.h;
 				m_pC_main_spk->BltLockedClip(x+icon_x, y+icon_y-rect.y, rect, ICON_SUN);
@@ -1641,7 +1641,7 @@ void C_VS_UI_SLAYER::Show()
 			break;
 			
 		case TAB_EXP_ID:
-			// EXP �� ��ư�� ����
+			// EXP 는 버튼이 없다
 			{//modify by viva : bar_y
 				const int bar_x = 98, bar_y = 74-3, str_x = 27, num_x = 76, bar_gap = 12;
 				char sz_temp[10];
@@ -1719,7 +1719,7 @@ void C_VS_UI_SLAYER::Show()
 						const int domain_level = (*g_pSkillManager)[domain[i]].GetDomainLevel();
 						const int exp_remain = (*g_pSkillManager)[domain[i]].GetDomainExpRemain();
 						const int goal_exp = (*g_pSkillManager)[domain[i]].GetExpInfo(domain_level).GoalExp;
-						//������ ����ġ ��
+						//도메인 경험치 바
 						m_pC_main_spk->BltLocked(x+bar_x, y+bar_y+bar_gap*(3+i), EXP_BACK);
 						rect.Set(0, 0, m_pC_main_spk->GetWidth(EXP_BAR)*(goal_exp - exp_remain)/(goal_exp), m_pC_main_spk->GetHeight(EXP_BAR));
 						m_pC_main_spk->BltLockedClip(x+bar_x+3, y+bar_y+bar_gap*(3+i)+3, rect, EXP_BAR);
@@ -1812,7 +1812,7 @@ void C_VS_UI_SLAYER::Start()
 	m_pC_effect_status->Start();
 	m_pC_minimap->Start();
 
-	// add by Coffee 2007-3-6 ���������ͼ
+	// add by Coffee 2007-3-6 添加世界地图
 //	m_pC_worldmap->Start();
 	// end 
 
@@ -1853,7 +1853,7 @@ C_VS_UI_SLAYER_PORTAL::C_VS_UI_SLAYER_PORTAL()
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(x + m_close_x, y + m_close_y, m_etc_spk.GetWidth(CLOSE), m_etc_spk.GetHeight(CLOSE), CLOSE, this, CLOSE));
 
 
-	// ���� ��
+	// 현재 맵
 	MAP_SPK_INDEX map_convert[MAP_MAX] = { ESLANIAN, LIMBO, DROBETA, RODIN, TIMORE, PERONA };
 
 	int map = gC_vs_ui.GetZoneID()/10-1;
@@ -1865,10 +1865,10 @@ C_VS_UI_SLAYER_PORTAL::C_VS_UI_SLAYER_PORTAL()
 //#define __FLAG_SET_MODE
 #ifdef  __FLAG_SET_MODE
 
-	// FLAG ����
+	// FLAG 세팅
 	PORTAL_FLAG temp_flag;
 
-	// ������
+	// 링보성
 	temp_flag.zone_id = 21;
 	temp_flag.x = 292;
 	temp_flag.y = 27;
@@ -1926,7 +1926,7 @@ C_VS_UI_SLAYER_PORTAL::C_VS_UI_SLAYER_PORTAL()
 	m_flag[LIMBO].push_back(temp_flag);
 
 
-	// ������Ͼ�
+	// 에슬라니안
 	temp_flag.zone_id = 11;
 	temp_flag.x = 206;
 	temp_flag.y = 41;
@@ -1984,7 +1984,7 @@ C_VS_UI_SLAYER_PORTAL::C_VS_UI_SLAYER_PORTAL()
 	m_flag[ESLANIAN].push_back(temp_flag);
 
 
-	// �ε��
+	// 로딘산
 	temp_flag.zone_id = 41;
 	temp_flag.x = 287;
 	temp_flag.y = 44;
@@ -2042,7 +2042,7 @@ C_VS_UI_SLAYER_PORTAL::C_VS_UI_SLAYER_PORTAL()
 	m_flag[RODIN].push_back(temp_flag);
 
 
-	// ��κ�Ÿ
+	// 드로베타
 	temp_flag.zone_id = 31;
 	temp_flag.x = 198;
 	temp_flag.y = 29;
@@ -2099,7 +2099,7 @@ C_VS_UI_SLAYER_PORTAL::C_VS_UI_SLAYER_PORTAL()
 	temp_flag.portal_y = 117;
 	m_flag[DROBETA].push_back(temp_flag);
 
-	// Ƽ��
+	// 티모르
 	temp_flag.zone_id = 51;
 	temp_flag.x = 201;
 	temp_flag.y = 36;
@@ -2156,7 +2156,7 @@ C_VS_UI_SLAYER_PORTAL::C_VS_UI_SLAYER_PORTAL()
 	temp_flag.portal_y = 237;
 	m_flag[TIMORE].push_back(temp_flag);
 
-	// ��γ�
+	// 페로나
 	temp_flag.zone_id = 61;
 	temp_flag.x = 141;
 	temp_flag.y = 44;
@@ -2358,7 +2358,7 @@ void C_VS_UI_SLAYER_PORTAL::ShowButtonDescription(C_VS_UI_EVENT_BUTTON * p_butto
 		(*g_pGameStringTable)[UI_STRING_MESSAGE_CANCEL].GetString(),		
 	};
 
-	// �ݸ�����
+	// 넷마블용
 	int map_max = MAP_MAX;
 //	if(g_pUserInformation->IsNetmarble)
 //		map_max = 4;
@@ -2587,7 +2587,7 @@ int		C_VS_UI_SLAYER_PORTAL::GetNext(int map, bool bLeft)
 //-----------------------------------------------------------------------------
 void	C_VS_UI_SLAYER_PORTAL::Run(id_t id)
 {
-	// �ݸ�����
+	// 넷마블용
 	int map_max = MAP_MAX;
 //	if(g_pUserInformation->IsNetmarble)
 //		map_max = 4;

@@ -11,7 +11,7 @@
 #include "ClientConfig.h"
 #include "../../basic/timer2.h"
 
-//#include "ExperienceTable.h"	//char_info���ﶧ �����
+//#include "ExperienceTable.h"	//char_info지울때 지울것
 #include "MGuildMarkManager.h"
 #include "KeyAccelerator.h"
 #include "UserInformation.h"
@@ -44,7 +44,7 @@ static inline int char_t_wcscmp(const char_t* s1, const wchar_t* s2) {
     return (*s2) ? -1 : (*s1 ? 1 : 0);
 }
 
-#define LOGIN_ID_X 59 // ��밪
+#define LOGIN_ID_X 59 // 상대값
 #define LOGIN_ID_Y 49
 #define LOGIN_PASSWORD_X 59
 #define LOGIN_PASSWORD_Y 89
@@ -134,10 +134,10 @@ const int TITLE_X = 400, TITLE_Y = 50;
 #define HEART_Y				180
 int g_heart_rect[] = {250, 430, 610};
 
-namespace					// 2003.9.29		by sonee ������ �Ⱦ��� ���� 
+namespace					// 2003.9.29		by sonee 딴데선 안쓴다 ㅎㅎ 
 {
-	int			g_vs_ui_title_only_premium_x = 380;			// �����̾� ���� ������ ��ġ
-};	int			g_vs_ui_title_only_premium_y = 127;			// �����̾� ���� ������ ��ġ
+	int			g_vs_ui_title_only_premium_x = 380;			// 프리미엄 정보 찍히는 위치
+};	int			g_vs_ui_title_only_premium_y = 127;			// 프리미엄 정보 찍히는 위치
 
 int C_VS_UI_NEWCHAR::m_hair_color_array[COLOR_LIST_X][COLOR_LIST_Y] = {
 	/*
@@ -150,7 +150,7 @@ int C_VS_UI_NEWCHAR::m_hair_color_array[COLOR_LIST_X][COLOR_LIST_Y] = {
 	{45, 135, 300}, 
 	{315, 330, 345},
 	*/
-	// ���� �ٲ����.. by sigi
+	// 색깔 바꼈어요.. by sigi
 	{ 57, 70, 86 },
 	{ 101, 115, 130 },
 	{ 145, 159, 174 },
@@ -186,7 +186,7 @@ int ga_blink_color_table[INTERFACE_BLINK_VALUE_MAX] = {
 	LIGHT_BLUE, LIGHT_BLUE, WHITE, WHITE
 };
 
-// ! m_item_search_sequence ������ ���ƾ� �Ѵ�.
+// ! m_item_search_sequence 순서가 같아야 한다.
 /*
 S_RECT C_VS_UI_NEWUSER::m_item_rect[ISS_COUNT] = {
 	{237, 145, 141, 22}, // ISS_ID
@@ -210,7 +210,7 @@ C_VS_UI_NEWUSER::ITEM_SEARCH_SEQUENCE	C_VS_UI_NEWUSER::m_item_search_sequence[IS
 	ISS_STATE,
 	ISS_SSN,
 	ISS_ADDRESS,
-	ISS_WOO, // ������ȣ
+	ISS_WOO, // 우편번호
 	ISS_PHONE,
 	ISS_HOMEPAGE,
 	ISS_EMAIL,
@@ -283,7 +283,7 @@ bool C_VS_UI_CHAR_APPEARANCE::IsPixel(int _x, int _y)
 /*-----------------------------------------------------------------------------
 - Show
 -
-  `(m_focused_x, m_focused_y)�� focus�� ǥ�ø� �Ѵ�.
+  `(m_focused_x, m_focused_y)에 focus된 표시를 한다.
 -----------------------------------------------------------------------------*/
 /*
 void C_VS_UI_CHAR_APPEARANCE::Show()
@@ -315,7 +315,7 @@ void C_VS_UI_CHAR_APPEARANCE::Show()
 		gpC_base->m_p_DDSurface_back->Unlock();
 	}
 
-	// color ǥ ������ ����...-.-
+	// color 표 다음에 찍어야...-.-
 	m_pC_appearance_spk->Blt(x, y);
 
 	// show face
@@ -539,11 +539,11 @@ void C_VS_UI_CHAR_APPEARANCE::Process()
 //-----------------------------------------------------------------------------
 void C_VS_UI_CHAR_DELETE::SendCharacterDeleteToClient()
 {
-	// static���� �ϰ� �ܺο��� string�� delete���ش�.
+	// static으로 하고 외부에서 string은 delete해준다.
 
 	static DELETE_CHARACTER S_delete_char;
 
-	// �ݸ�����
+	// 넷마블용
 	if(!g_pUserInformation->IsNetmarble)
 	{
 		g_Convert_DBCS_Ascii2SingleByte(m_lev_ssn_part1.GetStringWide(), m_lev_ssn_part1.Size(), S_delete_char.sz_part1);
@@ -567,7 +567,7 @@ C_VS_UI_CHAR_DELETE::C_VS_UI_CHAR_DELETE()
 	AttrTopmost(true);
 	AttrKeyboardControl(true);
 
-	// �ݸ�����
+	// 넷마블용
 	int w_h = 207;
 	if(g_pUserInformation->IsNetmarble)
 		w_h = 127;
@@ -735,7 +735,7 @@ void C_VS_UI_CHAR_DELETE::Show()
 	g_FL2_GetDC();
 	g_PrintColorStr(x+w/2-g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_DELETE_CONFIRM].GetString(), gpC_base->m_char_name_pi.hfont)/2, 
 		y+30, (*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_DELETE_CONFIRM].GetString(), gpC_base->m_char_name_pi, RGB_WHITE);
-	// �ݸ�����
+	// 넷마블용
 	if(!g_pUserInformation->IsNetmarble)
 	{
 		g_PrintColorStr(x+w/2-g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_RE_INPUT_CORRECT_SSN].GetString(), gpC_base->m_char_name_pi.hfont)/2, 
@@ -756,7 +756,7 @@ void C_VS_UI_CHAR_DELETE::Show()
 
 	if(gpC_base->m_p_DDSurface_back->Lock())
 	{
-		// �ݸ�����
+		// 넷마블용
 		if(!g_pUserInformation->IsNetmarble)
 		{
 			if( gC_ci->IsChinese() )
@@ -776,7 +776,7 @@ void C_VS_UI_CHAR_DELETE::Show()
 		gpC_base->m_p_DDSurface_back->Unlock();
 	}
 
-	// �ݸ�����
+	// 넷마블용
 	if(!g_pUserInformation->IsNetmarble)
 		Window::ShowWidget();
 
@@ -793,9 +793,9 @@ void C_VS_UI_CHAR_DELETE::Run(id_t id)
 	switch (id)
 	{
 		case DELETE_OK:
-			// �ݸ�����
+			// 넷마블용
 			{
-				// ����� �Է��Ͽ��°�?
+				// 제대로 입력하였는가?
 				if (
 					 ( ( gC_ci->IsKorean()&& (	m_lev_ssn_part1.Size() == SSN_PART1_CHAR_COUNT &&
 					 m_lev_ssn_part2.Size() == SSN_PART2_CHAR_COUNT ) ) ||
@@ -891,7 +891,7 @@ void C_VS_UI_CHAR_DELETE::KeyboardControl(UINT message, UINT key, long extra)
 //-----------------------------------------------------------------------------
 // RollDice
 //
-// �ֻ����� ������ point�� ���Ѵ�.
+// 주사위를 던져서 point를 정한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_NEWCHAR::RollDice(bool load)
 {
@@ -925,7 +925,7 @@ void C_VS_UI_NEWCHAR::RollDice(bool load)
 				a = rand()%3;
 				b = rand()%3;
 				
-				c = s[a]; s[a] = s[b]; s[b] = c;//���ҽ���-_-;
+				c = s[a]; s[a] = s[b]; s[b] = c;//스왑스왑-_-;
 			}
 			
 			m_p_slot->STR_PURE = s[0];
@@ -974,7 +974,7 @@ void C_VS_UI_NEWCHAR::RollDice(bool load)
 	m_p_slot->HP = m_p_slot->STR_PURE*2;
 	m_p_slot->MP = m_p_slot->INT_PURE*2;
 
-	m_p_slot->HP_MAX = 20*2; // �̰� ... const int�� �ϴϱ� SetEnergy()���� �� ���� ���ߴ�!
+	m_p_slot->HP_MAX = 20*2; // 이걸 ... const int로 하니까 SetEnergy()에서 이 값이 변했다!
 	m_p_slot->MP_MAX = 20*2;
 
 //	SetEnergy(m_p_slot->HP, m_p_slot->HP_MAX, m_p_slot->hp_percent, m_p_slot->hp_cur_line);
@@ -989,9 +989,9 @@ void C_VS_UI_NEWCHAR::RollDice(bool load)
 void C_VS_UI_NEWCHAR::SendNewCharacterToClient()
 {
 	//
-	// !�ܺο� sz_name�� delete�ϸ� �ȵȴ�.
+	// !외부에 sz_name을 delete하면 안된다.
 	//
-	static NEW_CHARACTER S_new_character; // �ݵ�� static����..
+	static NEW_CHARACTER S_new_character; // 반드시 static으로..
 
 //	DeleteNew(m_p_slot->sz_name);
 
@@ -1155,7 +1155,7 @@ C_VS_UI_NEWCHAR::C_VS_UI_NEWCHAR()
 	//check button
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(pSkin->GetPoint( skinnum ).x,pSkin->GetPoint( skinnum ).y,m_image_spk.GetWidth(CHECK_BUTTON), m_image_spk.GetHeight(CHECK_BUTTON), CHECK_ID, this, CHECK_BUTTON));skinnum++;
 
-	//�ƿ콺���� +, - ��ư
+	//아우스터즈 +, - 버튼
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(pSkin->GetPoint( skinnum ).x,pSkin->GetPoint( skinnum ).y,m_image_spk.GetWidth(PLUS_BUTTON), m_image_spk.GetHeight(PLUS_BUTTON), STR_PLUS_ID, this, PLUS_BUTTON));skinnum++;
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(pSkin->GetPoint( skinnum ).x,pSkin->GetPoint( skinnum ).y,m_image_spk.GetWidth(MINUS_BUTTON), m_image_spk.GetHeight(MINUS_BUTTON), STR_MINUS_ID, this, MINUS_BUTTON));skinnum++;
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(pSkin->GetPoint( skinnum ).x,pSkin->GetPoint( skinnum ).y,m_image_spk.GetWidth(PLUS_BUTTON), m_image_spk.GetHeight(PLUS_BUTTON), DEX_PLUS_ID, this, PLUS_BUTTON));skinnum++;
@@ -1286,7 +1286,7 @@ C_VS_UI_NEWCHAR::C_VS_UI_NEWCHAR()
 //	m_p_hp_buf = new WORD[m_hp_width*m_hp_height];
 //	m_p_mp_buf = new WORD[m_mp_width*m_mp_height];
 
-	// energy cylinder�� plain buffer�� blt�Ѵ�.
+	// energy cylinder를 plain buffer에 blt한다.
 //	m_pC_etc.BltOffscreen(0, 0, HP);
 
 	// blt from offscreen
@@ -1304,7 +1304,7 @@ C_VS_UI_NEWCHAR::C_VS_UI_NEWCHAR()
 //		gpC_base->m_DDSurface_offscreen.Unlock();
 //	}
 //
-//	// energy cylinder�� plain buffer�� blt�Ѵ�.
+//	// energy cylinder를 plain buffer에 blt한다.
 //	m_pC_etc.BltOffscreen(0, 0, MP);
 //
 //	// blt from offscreen
@@ -1394,8 +1394,8 @@ void C_VS_UI_NEWCHAR::UnacquireMouseFocus()
 //-----------------------------------------------------------------------------
 // ChangeColor
 //
-// (x, y) ��ġ�� color table color�� color�� change�Ѵ�.
-// �ٲ����� true�� ��ȯ�Ѵ�.
+// (x, y) 위치의 color table color로 color를 change한다.
+// 바꿨으면 true를 반환한다.
 //-----------------------------------------------------------------------------
 bool C_VS_UI_NEWCHAR::ChangeColor(int _x, int _y)
 {
@@ -1424,7 +1424,7 @@ bool C_VS_UI_NEWCHAR::ChangeColor(int _x, int _y)
 //-----------------------------------------------------------------------------
 // GetPoint
 //
-// color array���� colorset�� point�� ��ȯ�Ѵ�.
+// color array에서 colorset의 point를 반환한다.
 //-----------------------------------------------------------------------------
 Point C_VS_UI_NEWCHAR::GetPoint(int colorset, bool bl_skin_color)
 {
@@ -1460,7 +1460,7 @@ Point C_VS_UI_NEWCHAR::GetPoint(int colorset, bool bl_skin_color)
 //-----------------------------------------------------------------------------
 // GetColor
 //
-// color array���� (x, y)�� color set���� color�� ���ؼ� ��ȯ�Ѵ�.
+// color array에서 (x, y)의 color set으로 color를 구해서 반환한다.
 //-----------------------------------------------------------------------------
 int C_VS_UI_NEWCHAR::GetColor(int _x, int _y, bool bl_skin_color)
 {
@@ -1478,7 +1478,7 @@ int C_VS_UI_NEWCHAR::GetColor(int _x, int _y, bool bl_skin_color)
 //-----------------------------------------------------------------------------
 // ResetFaceList
 //
-// selected_face�� �� ������ �Ѵ�.
+// selected_face를 맨 앞으로 한다.
 //-----------------------------------------------------------------------------
 //void C_VS_UI_NEWCHAR::ResetFaceList(int * p_face_list, int selected_face)
 //{
@@ -1623,7 +1623,7 @@ void C_VS_UI_NEWCHAR::SetCharacterToThisSlot(int slot, S_SLOT * p_slot)
 { 
 	assert(p_slot->bl_set == false);
 	
-	//assert(p_slot->sz_name == NULL); // 2000.12.15. ; ���� ����. �ߺ��� ID�� ��쿡�� NULL�� �ƴϴ�.
+	//assert(p_slot->sz_name == NULL); // 2000.12.15. ; 하지 말것. 중복된 ID일 경우에는 NULL이 아니다.
 
 	m_p_slot = p_slot; 
 	m_selected_slot = slot;
@@ -1680,10 +1680,10 @@ void C_VS_UI_NEWCHAR::SetCharacterToThisSlot(int slot, S_SLOT * p_slot)
 	m_p_slot->woman_info.right = W_NO_WEAR;//M_BLADE;
 	m_p_slot->woman_info.left = W_NO_WEAR;//M_DRAGON_SHIELD;
 
-	// default color�� �ٲ����.. by sigi
+	// default color도 바꼈어요.. by sigi
 	
 
-	// ������ �������� ���õǵ��� ����.		2002.11  by sonee
+	// 생성시 랜덤으로 선택되도록 수정.		2002.11  by sonee
 //	m_p_slot->hair_color = m_hair_color_array[rand()%COLOR_LIST_X][rand()%COLOR_LIST_Y];
 //	m_p_slot->skin_color = m_skin_color_array[rand()%COLOR_LIST_X][rand()%COLOR_LIST_Y];
 
@@ -1732,7 +1732,7 @@ void C_VS_UI_NEWCHAR::KeyboardControl(UINT message, UINT key, long extra)
 	//
 	// character Name
 	//
-	// Ư������, ����, ù���� ���ڸ� ���´�.
+	// 특수문자, 공백, 첫문자 숫자를 막는다.
 	//
 	if (message == WM_CHAR)
 	{
@@ -1781,12 +1781,12 @@ void C_VS_UI_NEWCHAR::KeyboardControl(UINT message, UINT key, long extra)
 		// part
 		switch (position)
 		{
-			case 0: // ���� ����
+			case 0: // 투구 없음
 				m_p_slot->man_info.helmet = M_NO_WEAR;
 				m_p_slot->woman_info.helmet = W_NO_WEAR;
 				break;
 
-			case 1: // ����
+			case 1: // 투구
 				if (bl_old)
 				{
 					m_p_slot->man_info.helmet = M_OLD_HELMET;
@@ -1799,7 +1799,7 @@ void C_VS_UI_NEWCHAR::KeyboardControl(UINT message, UINT key, long extra)
 				}
 				break;
 
-			case 2: // ���� 
+			case 2: // 상의 
 				if (bl_old)
 				{
 					m_p_slot->man_info.coat = M_OLD_COAT;
@@ -1812,7 +1812,7 @@ void C_VS_UI_NEWCHAR::KeyboardControl(UINT message, UINT key, long extra)
 				}
 				break;
 
-			case 3: // ����
+			case 3: // 하의
 				if (bl_old)
 				{
 					m_p_slot->man_info.trouser = M_OLD_TROUSER;
@@ -1840,7 +1840,7 @@ void C_VS_UI_NEWCHAR::KeyboardControl(UINT message, UINT key, long extra)
 //	switch (m_man_face_list[0])
 //	{
 //		case 0:
-//			// face�� hair�� �� ���̴�.
+//			// face와 hair는 한 쌍이다.
 //			m_p_slot->man_info.face	= M_FACE1;
 //			m_p_slot->man_info.hair = M_HAIR1;
 //			break;
@@ -1859,7 +1859,7 @@ void C_VS_UI_NEWCHAR::KeyboardControl(UINT message, UINT key, long extra)
 //	switch (m_woman_face_list[0])
 //	{
 //		case 0:
-//			// face�� hair�� �� ���̴�.
+//			// face와 hair는 한 쌍이다.
 //			m_p_slot->woman_info.face = W_FACE1;
 //			m_p_slot->woman_info.hair = W_HAIR1;
 //			break;
@@ -2267,7 +2267,7 @@ bool C_VS_UI_NEWCHAR::MouseControl(UINT message, int _x, int _y)
 //		float t = n;
 //		float r = f - t;
 //		if (r > 0.)
-//			n += 1; // �ݿø�.
+//			n += 1; // 반올림.
 //
 //		if (percent < 100 && n >= TOTAL_ENERGY_LINE)
 //			n = TOTAL_ENERGY_LINE - 1;
@@ -2344,17 +2344,17 @@ bool C_VS_UI_NEWCHAR::MouseControl(UINT message, int _x, int _y)
 //-----------------------------------------------------------------------------
 // ShowCharacter
 //
-// (x, y)�� ��/�� ĳ���� �ϳ��� ����Ѵ�. ���� ��� �ϳ��� null�� �Ǿ� �ϴ�.
+// (x, y)에 남/여 캐릭터 하나를 출력한다. 따라서 어느 하나는 null로 되야 하다.
 //
-// ��κ� : i1
-// �ʺκ� : i2
+// 살부분 : i1
+// 옷부분 : i2
 //-----------------------------------------------------------------------------
 void	C_VS_UI_NEWCHAR::ShowCharacter(int _x, int _y, S_SLOT * p_slot, int index, int enable, int dark)
 {
 	//
-	// ��¼���
+	// 출력순서
 	//
-	// ���� -> ���� -> �Ӹ�ī�� -> ���� -> ���������� -> �޼�����
+	// 바지 -> 상의 -> 머리카락 -> 투구 -> 오른손장착 -> 왼손장착
 	//
 	if (gpC_base->m_p_DDSurface_back->Lock())
 	{
@@ -2568,7 +2568,7 @@ void C_VS_UI_NEWCHAR::Show()
 	
 
 /*
-	// ���ڿ� ��� 
+	// 문자열 출력 
 	if (gpC_base->m_p_DDSurface_back->Lock())
 	{
 		S_SURFACEINFO	surfaceinfo;
@@ -2698,7 +2698,7 @@ void C_VS_UI_NEWCHAR::Show()
 //-----------------------------------------------------------------------------
 // NewCharacterCreateOk
 //
-// �̹� slot�� �����Ǿ� �����Ƿ�, ���������� bl_set = true�� ���ش�.
+// 이미 slot이 설정되어 있으므로, 마지막으로 bl_set = true만 해준다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_CHAR_MANAGER::NewCharacterCreateOk()
 {
@@ -2773,7 +2773,7 @@ void C_VS_UI_CHAR_MANAGER::SetCharacter(int slot, S_SLOT &S_slot)
 			m_slot[slot].sz_guild_name = S_slot.sz_guild_name;
 		}
 
-		// HP/MP�� ����ϱ� ���� �ʿ��� ������ ���⼭ �����ȴ�.
+		// HP/MP를 출력하기 위해 필요한 값들은 여기서 설정된다.
 //		m_pC_newchar->SetEnergy(m_slot[slot].HP, m_slot[slot].HP_MAX, m_slot[slot].hp_percent, m_slot[slot].hp_cur_line);
 //		m_pC_newchar->SetEnergy(m_slot[slot].MP, m_slot[slot].MP_MAX, m_slot[slot].mp_percent, m_slot[slot].mp_cur_line);
 
@@ -2928,11 +2928,11 @@ C_VS_UI_CHAR_MANAGER::C_VS_UI_CHAR_MANAGER()
 		m_common_spk.Open(SPK_COMMON_1024);
 	else
 		m_common_spk.Open(SPK_COMMON);
-	m_title1_spk.Open(SPK_TITLE_BACK);//��ȡ��ͼ
+	m_title1_spk.Open(SPK_TITLE_BACK);//读取底图
 	// end by sonic
 	m_image_spk.Open(SPK_CHAR_MANAGER);
 
-	// �ݸ����� �ƴѰ��
+	// 넷마블이 아닌경우
 	if(g_pUserInformation!=NULL)
 	{
 		if(!g_pUserInformation->bChinese)
@@ -2967,8 +2967,8 @@ C_VS_UI_CHAR_MANAGER::C_VS_UI_CHAR_MANAGER()
 		m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(x+g_heart_rect[i]+119, y+HEART_Y+36, m_image_spk.GetWidth(DELETE_BUTTON), m_image_spk.GetHeight(DELETE_BUTTON), DELETE_1_ID+i, this, DELETE_BUTTON));
 
 	//
-	// character ani timer�� char manager object�� �����Ǹ� ��� �۵��Ѵ�.
-	// �� character�� ó�� frame index�� �ٸ����ν� �ڿ��������� �����Ѵ�.
+	// character ani timer는 char manager object가 생성되면 계속 작동한다.
+	// 각 character의 처음 frame index를 다름으로써 자연스러움을 구현한다.
 	//
 	g_char_update_tid = gC_timer2.Add(ANI_MILLISEC, _Timer_CharUpdate);
 	gC_timer2.Continue(g_char_update_tid);
@@ -2999,7 +2999,7 @@ C_VS_UI_CHAR_MANAGER::~C_VS_UI_CHAR_MANAGER()
 {
 	g_UnregisterWindow(this);
 
-	// !Window�� ���� delete�ؾ� �Ѵ�.
+	// !Window를 먿저 delete해야 한다.
 	DeleteNew(m_pC_biling);
 	DeleteNew(m_pC_char_delete);
 	DeleteNew(m_pC_newchar);
@@ -3043,7 +3043,7 @@ C_VS_UI_CHAR_MANAGER::~C_VS_UI_CHAR_MANAGER()
 //-----------------------------------------------------------------------------
 // C_VS_UI_CHAR_MANAGER::SelectSlot
 //
-// select�Ǿ����� true�� ��ȯ�Ѵ�.
+// select되었으면 true를 반환한다.
 //-----------------------------------------------------------------------------
 bool C_VS_UI_CHAR_MANAGER::SelectSlot(int n)
 {
@@ -3112,7 +3112,7 @@ void C_VS_UI_CHAR_MANAGER::Run(id_t id)
 	{
 		case CREATE_ID:
 			//
-			// �ڵ����� left���� ������� ����ִ� slot�� ��ĳ���� �����.
+			// 자동으로 left부터 순서대로 비어있는 slot에 새캐릭을 만든다.
 			//
 
 			// search empty slot
@@ -3123,7 +3123,7 @@ void C_VS_UI_CHAR_MANAGER::Run(id_t id)
 					m_select_heart_temp = i;
 					m_pC_newchar->Start();
 					m_pC_newchar->SetCharacterToThisSlot(i, &m_slot[i]);
-					m_pC_newchar->RollDice(); // Start()�� ������ �ȵȴ�. - SetCharacterToThisSlot()�� �� �ڿ� �ϱ� ����.
+					m_pC_newchar->RollDice(); // Start()에 넣으면 안된다. - SetCharacterToThisSlot()를 그 뒤에 하기 때문.
 					Finish();
 					return;
 				}
@@ -3135,7 +3135,7 @@ void C_VS_UI_CHAR_MANAGER::Run(id_t id)
 //		case CHARINFO:
 //			if (m_slot[m_select_heart].bl_set == true)
 //			{
-//				//assert(m_pC_char_info == NULL); // ��������. WindowManager���� cancel push state�ϸ� �� �� �����.
+//				//assert(m_pC_char_info == NULL); // 하지말것. WindowManager에서 cancel push state하면 두 번 실행됨.
 //				if (m_pC_char_info != NULL)
 //				{
 //					DeleteNew(m_pC_char_info);
@@ -3158,7 +3158,7 @@ void C_VS_UI_CHAR_MANAGER::Run(id_t id)
 //			break;
 
 		case NEXT_ID:
-			// ��� slot�� ��� �ִ°�?
+			// 모든 slot이 비어 있는가?
 			if (m_slot[SLOT_LEFT].bl_set == false &&
 				 m_slot[SLOT_CENTER].bl_set == false &&
 				 m_slot[SLOT_RIGHT].bl_set == false)
@@ -3175,7 +3175,7 @@ void C_VS_UI_CHAR_MANAGER::Run(id_t id)
 
 		case BACK_ID:
 			//Finish();
-			gpC_base->SendMessage(UI_CHARACTER_MANAGER_FINISHED); // Finish()�� ���� ����.
+			gpC_base->SendMessage(UI_CHARACTER_MANAGER_FINISHED); // Finish()에 두지 말것.
 			break;
 
 		case DELETE_1_ID:
@@ -3537,7 +3537,7 @@ void C_VS_UI_CHAR_MANAGER::Show()
 					
 					std::string sstr;
 					
-					// ���ڻ��̿� ,�ֱ�
+					// 숫자사이에 ,넣기
 					wsprintf(str, "%d", m_p_slot->FAME);
 					sstr = str;
 					for(unsigned int i = 3; i <= 13; i += 4)
@@ -3557,7 +3557,7 @@ void C_VS_UI_CHAR_MANAGER::Show()
 							py+=16;
 						}
 						
-						// ��� ����ġ 
+						// 계급 경험치 
 						//px = g_PrintColorStr(29,py,(*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_GRADE_EXP].GetString(),gpC_base->m_chatting_pi, RGB(160,160,160));
 						//char tempstr[100];
 						//wsprintf(tempstr,"%d",m_p_slot->GRADE_EXP);
@@ -3590,7 +3590,7 @@ void C_VS_UI_CHAR_MANAGER::Show()
 						py+=16;
 					}			
 					
-					// ��� ����ġ 
+					// 계급 경험치 
 					//px = g_PrintColorStr(29,py,(*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_GRADE_EXP].GetString(),gpC_base->m_chatting_pi, RGB(160,160,160));
 					//char tempstr[100];
 					//wsprintf(tempstr,"%d",m_p_slot->GRADE_EXP);
@@ -3729,7 +3729,7 @@ C_VS_UI_SERVER_SELECT::C_VS_UI_SERVER_SELECT()
 	m_server_select = -1;
 	m_scroll = 0;
 
-	//���� ����Ʈ �����ġ
+	//서버 리스트 출력위치
 	m_server_x = 338;
 	m_server_y = 202;
 
@@ -3741,14 +3741,14 @@ C_VS_UI_SERVER_SELECT::C_VS_UI_SERVER_SELECT()
 	//m_title1_spk.BltLocked(0,0);
 	if(g_MyFull)
 	{
-		m_title1_spk.Open(SPK_TITLE_BACK);//��ȡ��ͼ
+		m_title1_spk.Open(SPK_TITLE_BACK);//读取底图
 		m_common_spk.Open(SPK_COMMON_1024);
 		m_image_spk.Open(SPK_SERVER_SELECT);
 		Set(0, 0, 1024, 768);
 	}
 	else
 	{
-		m_title1_spk.Open(SPK_TITLE_BACK);//��ȡ��ͼ
+		m_title1_spk.Open(SPK_TITLE_BACK);//读取底图
 		m_common_spk.Open(SPK_COMMON);
 		m_image_spk.Open(SPK_SERVER_SELECT);
 		Set(0, 0, 800, 600);
@@ -3778,7 +3778,7 @@ C_VS_UI_SERVER_SELECT::~C_VS_UI_SERVER_SELECT()
 {
 	g_UnregisterWindow(this);
 
-	// !Window�� ���� delete�ؾ� �Ѵ�.
+	// !Window를 먿저 delete해야 한다.
 	DeleteNew(m_pC_button_group);
 }
 
@@ -4056,7 +4056,7 @@ void C_VS_UI_SERVER_SELECT::Show()
 		}
 		//	int i;
 		
-		if(m_server_name.size() > 12)	// scroll tag ǥ��
+		if(m_server_name.size() > 12)	// scroll tag 표시
 		{
 			if(m_bl_scrolling)
 				m_image_spk.BltLocked(SCROLL_X, min(max(gpC_mouse_pointer->GetY(), SCROLL_Y+m_image_spk.GetHeight(SCROLL_TAG)/2), SCROLL_Y+SCROLL_HEIGHT+m_image_spk.GetHeight(SCROLL_TAG)/2)-m_image_spk.GetHeight(SCROLL_TAG)/2, SCROLL_TAG_HILIGHTED);
@@ -4079,7 +4079,7 @@ void C_VS_UI_SERVER_SELECT::Show()
 	}
 
 	char server_status_string[30];
-	//��������Ʈ ǥ��
+	//서버리스트 표시
 	g_FL2_GetDC();
 	for(int i = 0; i < min(m_server_name.size(), 12); i++)
 	{
@@ -4231,7 +4231,7 @@ C_VS_UI_LOGIN::C_VS_UI_LOGIN()
 
 	// LineEditorVisual setting...
 	m_lev_id.SetPosition(x+LOGIN_ID_X, y+LOGIN_ID_Y);
-	/******** Edit By Sonic 2006.9.25 �޸��������볤��Ϊ13λ********/
+	/******** Edit By Sonic 2006.9.25 修改密码输入长度为13位********/
 	//m_lev_id.SetByteLimit(10);
 	m_lev_id.SetByteLimit(13);
 	/******** End By Sonic 2006.9.25 ********/
@@ -4248,7 +4248,7 @@ C_VS_UI_LOGIN::C_VS_UI_LOGIN()
 //-----------------------------------------------------------------------------
 // ReadySend
 //
-// ��������ʰ� �Է��� �� �Ǿ����� true�� ��ȯ�ϰ� �׷��� ������ false�� ��ȯ�Ѵ�.
+// 비어있지않고 입력이 다 되었으면 true를 반환하고 그렇지 않으면 false를 반환한다.
 //-----------------------------------------------------------------------------
 bool C_VS_UI_LOGIN::ReadySend()
 {
@@ -4544,14 +4544,14 @@ bool C_VS_UI_LOGIN::MouseControl(UINT message, int _x, int _y)
 //-----------------------------------------------------------------------------
 // NextFocus
 //
-// ID or Password �� �� ��� �ϳ��� �Է��� ���� �����ٸ�, ������ �װ����� �̵��Ѵ�.
+// ID or Password 둘 중 어느 하나가 입력이 전혀 없었다면, 다음의 그곳으로 이동한다.
 //
-// `����ִ� ���� ������ true�� ��ȯ�Ѵ�.
+// `비어있는 곳이 없으면 true를 반환한다.
 //-----------------------------------------------------------------------------
 /*
 bool C_VS_UI_LOGIN::NextFocus()
 {
-	// gC_font ���ο��� tab�� �ƹ��͵� �ƴϴ�.
+	// gC_font 내부에서 tab은 아무것도 아니다.
 	gC_font.ForceShowCursor();
 
 	if (m_e_ip == ID)
@@ -4573,7 +4573,7 @@ bool C_VS_UI_LOGIN::NextFocus()
 		gC_font.SetInputLine(m_string_line_ID.c_str());
 	}
 
-	// no empty? - �������� �˻��Ѵ�.
+	// no empty? - 마지막에 검사한다.
 	if (m_string_line_ID.length() > 0 && m_string_line_PASSWORD.length() > 0)
 		return true;
 
@@ -4583,7 +4583,7 @@ bool C_VS_UI_LOGIN::NextFocus()
 //-----------------------------------------------------------------------------
 // SendLoginToClient
 //
-// ID/Password�� Client�� ������.
+// ID/Password를 Client로 보낸다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_LOGIN::SendLoginToClient()
 {
@@ -4600,7 +4600,7 @@ void C_VS_UI_LOGIN::SendLoginToClient()
 	}
 */
 	//
-	// �ݵ�� static���� �ϰ� member�� login check�� ������ delete ���ش�.
+	// 반드시 static으로 하고 member를 login check가 끝나고 delete 해준다.
 	//
 	static LOGIN S_login;
 	S_login.sz_id = (char*)malloc(128);
@@ -4619,7 +4619,7 @@ void C_VS_UI_LOGIN::SendLoginToClient()
 
 /*-----------------------------------------------------------------------------
 - KeyboardControl
-- Log-In ID�� Password�� �Է¹޴´�.
+- Log-In ID와 Password를 입력받는다.
 -----------------------------------------------------------------------------*/
 void C_VS_UI_LOGIN::KeyboardControl(UINT message, UINT key, long extra)
 {
@@ -4701,7 +4701,7 @@ void C_VS_UI_LOGIN::KeyboardControl(UINT message, UINT key, long extra)
 	{
 		case WM_KEYDOWN:
 			//
-			// input position ����.
+			// input position 변경.
 			//
 			if (key == VK_TAB)
 			{
@@ -4721,7 +4721,7 @@ void C_VS_UI_LOGIN::KeyboardControl(UINT message, UINT key, long extra)
 			}
 			else if (key == VK_RETURN) // ok
 			{
-				//if (focus_end) // ��� �ִ� ���� ������ send!
+				//if (focus_end) // 비어 있는 곳이 없으면 send!
 				//{
 
 				if (ReadySend() == true)
@@ -4761,7 +4761,7 @@ void C_VS_UI_LOGIN::Show()
 		gpC_base->m_p_DDSurface_back->Unlock();
 	}
 /*
-	// login ���ڿ� ���.
+	// login 문자열 출력.
 	if (gpC_base->m_p_DDSurface_back->Lock())
 	{
 		S_SURFACEINFO	surfaceinfo;
@@ -4769,7 +4769,7 @@ void C_VS_UI_LOGIN::Show()
 
 		gpC_base->SelectFont(FONT_SLAYER);
 
-		// cursor�� ���� �Է� line���� �ְ� �ؾ� �Ѵ�.
+		// cursor는 현재 입력 line에만 있게 해야 한다.
 		if (m_e_ip == ID)
 			gC_font.Update(&surfaceinfo, x+LOGIN_ID_X, y+LOGIN_ID_Y, WHITE);
 		else
@@ -4870,15 +4870,15 @@ C_VS_UI_TITLE::C_VS_UI_TITLE()
 /*	m_pC_dialog = new C_VS_UI_DIALOG(50, 20, 6, 2, A);//, DIALOG_OK);//|DIALOG_CANCEL);
 
 	DIALOG_MENU d_menu[] = {
-		{"��� & asldkfsldjald", 0},
-		{"�ȱ� / 26387638127638263", 1},
-		{"������", DIALOG_EXECID_EXIT},
+		{"사기 & asldkfsldjald", 0},
+		{"팔기 / 26387638127638263", 1},
+		{"끝내기", DIALOG_EXECID_EXIT},
 	};
 	m_pC_dialog->SetMenu(d_menu, 3);
 
 	static char * pp_dmsg[] = {
-		"�ȳ��ϼ���? ���� ���¶���մϴ�.",
-		"��? ��, �� ���� �̸��̱���^^��..",
+		"안녕하세요? 저는 진태라고합니다.",
+		"네? 아, 참 좋은 이름이군요^^헤..",
 		"m_pC_newuser = new C_VS_UI_NEWUSER;",
 		" ",
 		"m_title_spk.Open(SPK_TITLE);",
@@ -4914,7 +4914,7 @@ C_VS_UI_TITLE::C_VS_UI_TITLE()
 
 //	gbl_option_running = false;	
 //	m_pC_option = NULL;
-// add by Sonic 2006.9.26�ж��Ƿ�Ϊ1024ģʽ
+// add by Sonic 2006.9.26判断是否为1024模式
 	if(g_MyFull)
 		m_title_spk.Open(SPK_TITLE_1024);
 	else
@@ -4945,7 +4945,7 @@ C_VS_UI_TITLE::C_VS_UI_TITLE()
 	m_pC_button_group = new ButtonGroup(this);
 	if(g_MyFull)
 	{
-		//��½���水ť��ʾ
+		//登陆界面按钮显示
 		m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(x+888, y+544, m_title_menu_default.GetWidth(CONNECT_HILIGHT), m_title_menu_default.GetHeight(CONNECT_HILIGHT), CONNECT, this,CONNECT_HILIGHT));
 		m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(x+888, y+592, m_title_menu_default.GetWidth(OPTION_HILIGHT), m_title_menu_default.GetHeight(OPTION_HILIGHT), OPTION, this,OPTION_HILIGHT));
 		m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(x+888, y+640, m_title_menu_default.GetWidth(CREDIT_HILIGHT), m_title_menu_default.GetHeight(CREDIT_HILIGHT), CREDIT, this,CREDIT_HILIGHT));
@@ -4984,10 +4984,10 @@ C_VS_UI_TITLE::~C_VS_UI_TITLE()
 #endif
 
 	//
-	// !���� child Window���� delete�ؾ� �Ѵ�.
+	// !먼저 child Window들을 delete해야 한다.
 	//
-	// �׷��� ���� ������ child Window�� ���ŵ� ���� �̹� C_VS_UI_TITLE::IsPIxel()��
-	// �� �� ���� ����(m_title_spk�� delete�� ����)�̱� �����̴�.
+	// 그렇게 하지 않으면 child Window이 제거될 때는 이미 C_VS_UI_TITLE::IsPIxel()을
+	// 할 수 없는 상태(m_title_spk가 delete된 이후)이기 때문이다.
 	//
 	DeleteNew(m_pC_login);
 	DeleteNew(m_pC_char_manager);
@@ -5027,7 +5027,7 @@ C_VS_UI_TITLE::~C_VS_UI_TITLE()
 //-----------------------------------------------------------------------------
 // RunTitleOption
 //
-// ��ȯ�Ұųİ� ���´�.
+// 교환할거냐고 묻는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_TITLE::RunOption()
 {
@@ -5051,7 +5051,7 @@ void C_VS_UI_TITLE::RunOption()
 //-----------------------------------------------------------------------------
 // CloseTitleOption
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+// 이미 finish된 상태이면 아무것도 하지 않는다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_TITLE::CloseOption()
 {
@@ -5159,7 +5159,7 @@ void C_VS_UI_TITLE::Process()
 //-----------------------------------------------------------------------------
 // Start
 //
-// Title�� ������Ѵ�. �׷��� Title �����޴��� ��� �����ؾ� �Ѵ�.
+// Title을 재시작한다. 그래서 Title 하위메뉴를 모두 종료해야 한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_TITLE::Start()
 {
@@ -5198,8 +5198,8 @@ void C_VS_UI_TITLE::Start()
 //-----------------------------------------------------------------------------
 // Finish
 //
-// Title/Login/Characters ... ��� Window�� ������ ���̹Ƿ� ��� �ϳ��� Finish�Ǿ
-// �ٸ� �͵� Finish�Ǹ� �ȵȴ�.
+// Title/Login/Characters ... 모든 Window가 독립된 것이므로 어느 하나가 Finish되어서
+// 다른 것도 Finish되면 안된다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_TITLE::Finish()
 {
@@ -5266,8 +5266,8 @@ void C_VS_UI_TITLE::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 //-----------------------------------------------------------------------------
 // Show
 //
-// [����] ���� descriptor�� Title���� ����Ϸ���, �װ��� Show()�� ���⼭ �����Ѵ�.
-//			 �̰��� Game class���� �ִ�. C_VS_UI::Show()���� ������ �ȵȴ�.
+// [참고] 만약 descriptor를 Title에서 사용하려면, 그것의 Show()를 여기서 실행한다.
+//			 이것은 Game class에도 있다. C_VS_UI::Show()에다 놓으면 안된다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_TITLE::Show()
 {
@@ -5352,7 +5352,7 @@ void C_VS_UI_TITLE::Show()
 			else
 				//add by zdj
 //				sprintf(sz_temp, "%s : %1.2f", (*g_pGameStringTable)[UI_STRING_MESSAGE_CLIENT_VERSION].GetString(),(float)g_pUserInformation->GameVersion/100+3);
-				sprintf(sz_temp,"%s","  ����������Ѫ���顷 V2.20");
+				sprintf(sz_temp,"%s","  天炼续《铁血迷情》 V2.20");
 			//modify by viva for Notice
 			//g_PrintColorStr(g_GameRect.right- 50 -g_GetStringWidth(sz_temp, gpC_base->m_info_pi.hfont), g_GameRect.bottom -30, sz_temp, gpC_base->m_info_pi, RGB_WHITE);
 			//end
@@ -5430,7 +5430,7 @@ void C_VS_UI_TITLE::KeyboardControl(UINT message, UINT key, long extra)
 		return;
 	}
 
-	// ���� IME toggle�Ǿ� ���� ��츦 ����Ͽ� scan code�� �Ѵ�.
+	// 만약 IME toggle되어 있을 경우를 대비하여 scan code로 한다.
 
 	id_t id = INVALID_ID;
 	if (message == WM_KEYDOWN) 
@@ -5475,7 +5475,7 @@ void C_VS_UI_TITLE::Run(id_t id)
 	switch (id)
 	{
 		case CONNECT:
-			// �ݸ�����
+			// 넷마블용
 //			m_pC_login->Start();
 			gpC_base->SendMessage(UI_RUN_CONNECT);
 			break;
@@ -5682,13 +5682,13 @@ C_VS_UI_OPTION::C_VS_UI_OPTION(bool IsTitle)
 	const InterfaceInformation* pSkin = &g_pSkinManager->Get( SkinManager::OPTION );
 	m_pC_button_group = new ButtonGroup(this);
 
-	// �ϴ� ����Ʈ��� ��ư
+	// 하단 디폴트등등 버튼
 //	int default_button_x = 174, default_button_y = 282, load_button_x = 246, save_button_x = 303;
 //	m_pC_button_group->Add( new C_VS_UI_EVENT_BUTTON(default_button_x, default_button_y, m_pC_etc_spk->GetWidth(DEFAULT_BUTTON_HILIGHTED), m_pC_etc_spk->GetHeight(DEFAULT_BUTTON_HILIGHTED), DEFAULT_ID, this, DEFAULT_BUTTON_HILIGHTED) );
 //	m_pC_button_group->Add( new C_VS_UI_EVENT_BUTTON(load_button_x, default_button_y, m_pC_etc_spk->GetWidth(LOAD_BUTTON_HILIGHTED), m_pC_etc_spk->GetHeight(LOAD_BUTTON_HILIGHTED), LOAD_ID, this, LOAD_BUTTON_HILIGHTED) );
 //	m_pC_button_group->Add( new C_VS_UI_EVENT_BUTTON(save_button_x, default_button_y, m_pC_etc_spk->GetWidth(SAVE_BUTTON_HILIGHTED), m_pC_etc_spk->GetHeight(SAVE_BUTTON_HILIGHTED), SAVE_ID, this, SAVE_BUTTON_HILIGHTED) );
 
-	// close��ư
+	// close버튼
 	//int close_button_x = pSkin->GetPoint(0).x, close_button_y = pSkin->GetPoint(0).y;
 	int i = 0;
 	
@@ -5702,7 +5702,7 @@ C_VS_UI_OPTION::C_VS_UI_OPTION(bool IsTitle)
 
 		m_pC_button_group->Add( new C_VS_UI_EVENT_BUTTON(pSkin->GetPoint(0).x,pSkin->GetPoint(0).y, m_pC_etc_spk->GetWidth(BUTTON_CLOSE), m_pC_etc_spk->GetHeight(BUTTON_CLOSE), CLOSE_ID, this, BUTTON_CLOSE) );
 
-		// tab��ư
+		// tab버튼
 		//int tab_control_x = 116, tab_y = 20, tab_graphic_x = 170, tab_sound_x = 224, tab_game_x = 278;
 		m_pC_button_group->Add( new C_VS_UI_EVENT_BUTTON(pSkin->GetPoint(1).x, pSkin->GetPoint(1).y, m_pC_main_spk->GetWidth(TAB_CONTROL), m_pC_main_spk->GetHeight(TAB_CONTROL), CONTROL_ID, this, TAB_CONTROL) );
 		m_pC_button_group->Add( new C_VS_UI_EVENT_BUTTON(pSkin->GetPoint(2).x, pSkin->GetPoint(2).y, m_pC_main_spk->GetWidth(TAB_GRAPHIC), m_pC_main_spk->GetHeight(TAB_GRAPHIC), GRAPHIC_ID, this, TAB_GRAPHIC) );
@@ -5712,7 +5712,7 @@ C_VS_UI_OPTION::C_VS_UI_OPTION(bool IsTitle)
 		m_check_x = pSkin->GetPoint(5).x, m_check_y = pSkin->GetPoint(5).y, m_check_gap = 20;
 
 		
-		// control_tab ��ư��
+		// control_tab 버튼들
 	//	int list_button_x = 341, list_button_y = 54;
 		m_pC_control_button_group = new ButtonGroup(this);
 		m_pC_control_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x+10, m_check_y, m_pC_etc_spk->GetWidth(RADIO_BACK_DISABLE), m_pC_etc_spk->GetHeight(RADIO_BACK_DISABLE), CHECK_NORMAL_CHAT, this, RADIO_BACK_DISABLE) );
@@ -5721,16 +5721,16 @@ C_VS_UI_OPTION::C_VS_UI_OPTION(bool IsTitle)
 		for(i = 0; i < CHECK_CONTROL_MAX; i++)
 			m_pC_control_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x, m_check_y+m_check_gap*(8+i), m_pC_etc_spk->GetWidth(CHECK_BACK_DISABLE), m_pC_etc_spk->GetHeight(CHECK_BACK_DISABLE), CHECK_CONTROL_TAB+i+2, this, CHECK_BACK_DISABLE) );
 
-		// graphic_tab ��ư��
+		// graphic_tab 버튼들
 		m_pC_graphic_button_group = new ButtonGroup(this);
 		for(i = 0; i < CHECK_GRAPHIC_MAX; i++)
 			m_pC_graphic_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x, m_check_y+m_check_gap*i, m_pC_etc_spk->GetWidth(CHECK_BACK_DISABLE), m_pC_etc_spk->GetHeight(CHECK_BACK_DISABLE), CHECK_GRAPHIC_TAB+i, this, CHECK_BACK_DISABLE) );
-		// sound_tab ��ư��
+		// sound_tab 버튼들
 		m_pC_sound_button_group = new ButtonGroup(this);
 		for(i = 0; i < CHECK_SOUND_MAX; i++)
 			m_pC_sound_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x, m_check_y+m_check_gap*i, m_pC_etc_spk->GetWidth(CHECK_BACK_DISABLE), m_pC_etc_spk->GetHeight(CHECK_BACK_DISABLE), CHECK_SOUND_TAB+i, this, CHECK_BACK_DISABLE) );
 
-		// game_tab ��ư��
+		// game_tab 버튼들
 		m_pC_game_button_group = new ButtonGroup(this);
 		for(i = 0; i < CHECK_GAME_MAX; i++)
 			m_pC_game_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x, m_check_y+m_check_gap*i, m_pC_etc_spk->GetWidth(CHECK_BACK_DISABLE), m_pC_etc_spk->GetHeight(CHECK_BACK_DISABLE), CHECK_GAME_TAB+i, this, CHECK_BACK_DISABLE) );
@@ -5758,7 +5758,7 @@ C_VS_UI_OPTION::C_VS_UI_OPTION(bool IsTitle)
 		m_check_x = 50, m_check_y = 60 , m_check_gap = 20;
 
 		
-	// control_tab ��ư��
+	// control_tab 버튼들
 	//	int list_button_x = 341, list_button_y = 54;
 		m_pC_control_button_group = new ButtonGroup(this);
 		m_pC_control_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x+10, m_check_y, m_pC_main_spk->GetWidth(TITLE_RADIO_BACK), m_pC_main_spk->GetHeight(TITLE_RADIO_BACK), CHECK_NORMAL_CHAT, this, TITLE_RADIO_BACK) );
@@ -5767,15 +5767,15 @@ C_VS_UI_OPTION::C_VS_UI_OPTION(bool IsTitle)
 		for(i = 0; i < CHECK_CONTROL_MAX; i++)
 			m_pC_control_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x, m_check_y+m_check_gap*(8+i), m_pC_main_spk->GetWidth(TITLE_CHECK_BACK), m_pC_main_spk->GetHeight(TITLE_CHECK_BACK), CHECK_CONTROL_TAB+i+2, this, TITLE_CHECK_BACK) );
 
-		// graphic_tab ��ư��
+		// graphic_tab 버튼들
 		m_pC_graphic_button_group = new ButtonGroup(this);
 		for(i = 0; i < CHECK_GRAPHIC_MAX; i++)
 			m_pC_graphic_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x, m_check_y+m_check_gap*i, m_pC_main_spk->GetWidth(TITLE_CHECK_BACK), m_pC_main_spk->GetHeight(TITLE_CHECK_BACK), CHECK_GRAPHIC_TAB+i, this, TITLE_CHECK_BACK) );
-		// sound_tab ��ư��
+		// sound_tab 버튼들
 		m_pC_sound_button_group = new ButtonGroup(this);
 		for(i = 0; i < CHECK_SOUND_MAX; i++)
 			m_pC_sound_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x, m_check_y+m_check_gap*i, m_pC_main_spk->GetWidth(TITLE_CHECK_BACK), m_pC_main_spk->GetHeight(TITLE_CHECK_BACK), CHECK_SOUND_TAB+i, this, TITLE_CHECK_BACK) );
-		// game_tab ��ư��
+		// game_tab 버튼들
 		m_pC_game_button_group = new ButtonGroup(this);
 		for(i = 0; i < CHECK_GAME_MAX; i++)
 			m_pC_game_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x, m_check_y+m_check_gap*i, m_pC_main_spk->GetWidth(TITLE_CHECK_BACK), m_pC_main_spk->GetHeight(TITLE_CHECK_BACK), CHECK_GAME_TAB+i, this, TITLE_CHECK_BACK) );
@@ -5832,7 +5832,7 @@ C_VS_UI_OPTION::~C_VS_UI_OPTION()
 void	C_VS_UI_OPTION::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 {
 	
-	//üũ&���� ��ư��
+	//체크&라디오 버튼들
 	if(false == m_IsTitle)
 	{
 		if(p_button->m_image_index == CHECK_BACK_DISABLE || p_button->m_image_index == RADIO_BACK_DISABLE)
@@ -5859,7 +5859,7 @@ void	C_VS_UI_OPTION::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 					m_pC_etc_spk->BltLocked(x+m_vampire_plus_x+radio_plus_x+p_button->x+2, y+m_vampire_plus_y+radio_plus_y+p_button->y+2, p_button->m_image_index+2);
 			}
 		}
-		//tab��ư��
+		//tab버튼들
 		else if(p_button->GetID() == CONTROL_ID || p_button->GetID() == GRAPHIC_ID || p_button->GetID() == SOUND_ID || p_button->GetID() == GAME_ID)
 		{
 			if(p_button->GetFocusState())
@@ -5875,7 +5875,7 @@ void	C_VS_UI_OPTION::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 				}
 			}
 		}
-		//Close��ư
+		//Close버튼
 		else if(p_button->GetID() == CLOSE_ID)
 		{
 			if(p_button->GetFocusState())
@@ -5894,7 +5894,7 @@ void	C_VS_UI_OPTION::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 			}
 
 		}
-		//Hotkey List��ư
+		//Hotkey List버튼
 		else if(p_button->GetID() == LIST_ID)
 		{
 			if(p_button->GetFocusState())
@@ -5962,7 +5962,7 @@ void	C_VS_UI_OPTION::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 //					m_pC_etc_spk->BltLocked(x+m_vampire_plus_x+radio_plus_x+p_button->x+2, y+m_vampire_plus_y+radio_plus_y+p_button->y+2, p_button->m_image_index+2);
 			}
 		}
-		//tab��ư��
+		//tab버튼들
 		else if(p_button->GetID() == CONTROL_ID || p_button->GetID() == GRAPHIC_ID || p_button->GetID() == SOUND_ID || p_button->GetID() == GAME_ID)
 		{
 			if(p_button->GetFocusState())
@@ -5977,7 +5977,7 @@ void	C_VS_UI_OPTION::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 				}
 			}
 		}
-		//Close��ư
+		//Close버튼
 		else if(p_button->GetID() == CLOSE_ID)
 		{
 			if(p_button->GetFocusState())
@@ -5988,7 +5988,7 @@ void	C_VS_UI_OPTION::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 					m_pC_main_spk->BltLocked(x+p_button->x+1, y+p_button->y, TITLE_BUTTON_EXIT_HILIGHT);
 			}
 		}
-		//Hotkey List��ư
+		//Hotkey List버튼
 		else if(p_button->GetID() == LIST_ID)
 		{
 			if(p_button->GetFocusState())
@@ -6087,22 +6087,22 @@ void C_VS_UI_OPTION::Start()
 //			m_pC_etc_spk = new C_SPRITE_PACK(SPK_OPTION);
 //		}
 //	}
-	// �ݸ����ϰ�쿡�� g_pUserInformation �� bNetmarbleGoreLevel �� �������.
-	// false �� ��찡 teenversion.
+	// 넷마블일경우에는 g_pUserInformation 의 bNetmarbleGoreLevel 를 사용하자.
+	// false 일 경우가 teenversion.
 	
 	if(!gC_vs_ui.IsGameMode())
 	{
-		// �޴����� �ݸ��� ƾ�����̸� ���� ������ Disable �׷��� ������ �ɼǿ� ������.
+		// 메뉴에서 넷마블 틴버젼이면 강제 설정후 Disable 그렇지 않으면 옵션에 따른다.
 		if(!g_pUserInformation->bNetmarbleGoreLevel&&g_pUserInformation->IsNetmarble)
 			m_check[CHECK_TEEN_VERSION] = CHECK_CHECK_DISABLE;			
 		else
 			m_check[CHECK_TEEN_VERSION] = g_pUserOption->UseTeenVersion?CHECK_CHECK:CHECK_NOT;
 	} else		
 	{
-		// �ݸ��� ƾ�����̸� ���� ����. �׷��� ������ �ɼǿ� ������.
+		// 넷마블 틴버젼이면 강제 설정. 그렇지 않으면 옵션에 따른다.
 		if(!g_pUserInformation->bNetmarbleGoreLevel&&g_pUserInformation->IsNetmarble)
 		{
-			// �����̸�
+			// 겜중이면
 			m_check[CHECK_TEEN_VERSION] = g_pUserInformation->bNetmarbleGoreLevel ? CHECK_DISABLE : CHECK_CHECK_DISABLE ;
 
 		} else
@@ -6661,7 +6661,7 @@ bool C_VS_UI_OPTION::MouseControl(UINT message, int _x, int _y)
 -----------------------------------------------------------------------------*/
 void C_VS_UI_OPTION::KeyboardControl(UINT message, UINT key, long extra)
 {
-	// ���� IME toggle�Ǿ� ���� ��츦 ����Ͽ� scan code�� �Ѵ�.
+	// 만약 IME toggle되어 있을 경우를 대비하여 scan code로 한다.
 
 	if (message == WM_KEYUP)
 	{	
@@ -7101,7 +7101,7 @@ void C_VS_UI_OPTION::Show()
 		{
 			const char* check_string[CHECK_SOUND_MAX] =
 			{
-//				"���� �Ҹ� ���",
+//				"기합 소리 듣기",
 				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_SOUND_VOLUME].GetString(),
 				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_MUSIC_VOLUME].GetString(),
 			};
@@ -7155,15 +7155,15 @@ void C_VS_UI_OPTION::Show()
 				(*g_pGameStringTable)[UI_STRING_MESSAGE_GAMEMONEY_WITH_HANGUL].GetString(),				
 				
 //				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_NOT_SEND_MY_INFO].GetString(),
-/*				"�ʺ��ڿ� ���� ����",
-				"���۸� ���� �ʱ�",
-//				"���� ���ϰ� �ϱ�",
-//				"��Ƽ �ʴ� �ź�",
-//				"��Ƽ ���� ��û �ź�",
-				"���̵��� �� ���� �̹��� �ҷ�����",
-				"ä�� ��� ������� ����",
-				"ƾ�������� ����",
-				"�ӼӸ� ������ ä��â ����",*/
+/*				"초보자용 도움말 보기",
+				"나쁜말 듣지 않기",
+//				"종족 변하게 하기",
+//				"파티 초대 거부",
+//				"파티 가입 신청 거부",
+				"맵이동할 때 몬스터 이미지 불러오기",
+				"채팅 모두 흰색으로 보기",
+				"틴버젼으로 보기",
+				"귓속말 왔을때 채팅창 띄우기",*/
 			};
 			
 			g_FL2_GetDC();
@@ -7306,7 +7306,7 @@ C_VS_UI_GO_BILING_PAGE::C_VS_UI_GO_BILING_PAGE(BILING_MSG_LIST msg)
 	AttrKeyboardControl(true);
 	m_biling_mode = msg;
 
-	// �ݸ�����
+	// 넷마블용
 	int w_w = 350;
 	int w_h = 200;
 
@@ -7460,7 +7460,7 @@ void C_VS_UI_GO_BILING_PAGE::Show()
 		
 		char *sz_string2 = sz_string;
 		
-		while(*sz_string2 == ' ')		// ���� ��������
+		while(*sz_string2 == ' ')		// 앞의 공백제거
 		{
 			sz_string2++;
 			next++;
@@ -7473,7 +7473,7 @@ void C_VS_UI_GO_BILING_PAGE::Show()
 		sz_string2[cut_pos] = NULL;
 		
 		char *return_char = NULL;
-		if((return_char = strchr(sz_string2, '\n')) != NULL)	// return ó��
+		if((return_char = strchr(sz_string2, '\n')) != NULL)	// return 처리
 		{
 			cut_pos = return_char - sz_string2+1;
 			sz_string2[cut_pos-1] = NULL;

@@ -28,7 +28,7 @@ public:
 	bool		IsLoading() const	{ return m_bLoading; }
 	
 	//---------------------------------------------------------
-	// m_pData�� memory�� Release�Ѵ�.		
+	// m_pData의 memory를 Release한다.		
 	//---------------------------------------------------------
 	void		Release();
 	
@@ -64,15 +64,15 @@ public:
 	virtual WORD	GetPixel(short x, short y, MPalette &pal) = 0;
 	
 protected:
-	WORD			m_Width;		// ���� pixel��
-	WORD			m_Height;		// ���� pixel��		
-	DWORD			m_Size;			// ��������Ʈ�� size
+	WORD			m_Width;		// 가로 pixel수
+	WORD			m_Height;		// 세로 pixel수		
+	DWORD			m_Size;			// 스프라이트의 size
 	
 	BYTE**			m_pPixels;		// pixels point array
 	BYTE*			m_pData;			// data
 	
-	bool			m_bInit;		// data�� �ִ°�?
-	bool			m_bLoading;		// Loading���ΰ�?
+	bool			m_bInit;		// data가 있는가?
+	bool			m_bLoading;		// Loading중인가?
 	
 	static BYTE		s_Colorkey;
 	

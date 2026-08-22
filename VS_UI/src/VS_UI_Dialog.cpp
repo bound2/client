@@ -105,8 +105,8 @@ void C_VS_UI_DIALOG::UnacquireMouseFocus()
 //-----------------------------------------------------------------------------
 C_VS_UI_DIALOG::C_VS_UI_DIALOG(int _x, int _y, int width, int height, void (*exec_fp)(C_VS_UI_DIALOG *, id_t), WORD dd_button)
 {
-	if(width < 10)width = (width+2)*81;		//���� �ڵ�� ȣȯ
-	if(height < 10 && height!=-1)height = (height+2)*81;	//���� �ڵ�� ȣȯ
+	if(width < 10)width = (width+2)*81;		//기존 코드와 호환
+	if(height < 10 && height!=-1)height = (height+2)*81;	//기존 코드와 호환
 
 	m_bOkOnly = false;
 	m_TempValue1 = 0;
@@ -165,8 +165,8 @@ C_VS_UI_DIALOG::C_VS_UI_DIALOG(int _x, int _y, int width, int height, void (*exe
 	else
 		y = _y;
 
-	// x��ǥ ����
-	// ȭ������� �Ѿ�� ����...
+	// x좌표 보정
+	// 화면밖으로 넘어가면 땡김...
 	if (Right() >= g_GameRect.right)
 		x = g_GameRect.right - w;
 	if (x < 0)
@@ -190,7 +190,7 @@ C_VS_UI_DIALOG::C_VS_UI_DIALOG(int _x, int _y, int width, int height, void (*exe
 	}
 
 	// set Client rect
-	// Window�� Move���� ���� ������ �����Ѵ�.
+	// Window는 Move되지 않을 것임을 가정한다.
 	const int _EXTRA = 30;//2;
 	m_client_rect.x = x+DECORATE_GAP+_EXTRA;
 	m_client_rect.w = w-DECORATE_GAP*2-_EXTRA*2;
@@ -207,7 +207,7 @@ C_VS_UI_DIALOG::C_VS_UI_DIALOG(int _x, int _y, int width, int height, void (*exe
 	{
 		m_pC_button_group->Add(	new C_VS_UI_EVENT_BUTTON(DIALOG_BUTTON_POS(BS_OK), DIALOG_BUTTON_Y, DIALOG_BUTTON_WIDTH, DIALOG_BUTTON_HEIGHT, DIALOG_EXECID_OK, this, C_GLOBAL_RESOURCE::AB_BUTTON_OK));
 		//m_pC_button_group->Add(	new C_VS_UI_EVENT_BUTTON(150, DIALOG_BUTTON_Y, DIALOG_BUTTON_WIDTH, DIALOG_BUTTON_HEIGHT, DIALOG_EXECID_OK, this, C_GLOBAL_RESOURCE::AB_BUTTON_OK));
-		// �� ��ư �� �ִ� ���
+		// 두 버튼 다 있는 경우
 		if (m_ddb & DIALOG_CANCEL)
 		{
 			m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(DIALOG_BUTTON_POS(BS_CANCEL), DIALOG_BUTTON_Y, DIALOG_BUTTON_WIDTH, DIALOG_BUTTON_HEIGHT, DIALOG_EXECID_CANCEL, this, C_GLOBAL_RESOURCE::AB_BUTTON_CANCEL));
@@ -216,7 +216,7 @@ C_VS_UI_DIALOG::C_VS_UI_DIALOG(int _x, int _y, int width, int height, void (*exe
 	}
 	else
 	{
-		// cancel�� �ִ� ���
+		// cancel만 있는 경우
 		if (m_ddb & DIALOG_CANCEL && h != -1)
 		{
 			m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(DIALOG_BUTTON_POS(BS_OK), DIALOG_BUTTON_Y, DIALOG_BUTTON_WIDTH, DIALOG_BUTTON_HEIGHT, DIALOG_EXECID_CANCEL, this, C_GLOBAL_RESOURCE::AB_BUTTON_CANCEL));
@@ -275,7 +275,7 @@ void	C_VS_UI_DIALOG::CancelPushState()
 //-----------------------------------------------------------------------------
 // GetButtonGap
 //
-// button�� �ֳľ��ĸ� �����Ͽ� button height gap�� ��ȯ�Ѵ�.
+// button이 있냐없냐를 결정하여 button height gap을 반환한다.
 //-----------------------------------------------------------------------------
 int C_VS_UI_DIALOG::GetButtonGap() const
 {
@@ -309,8 +309,8 @@ void C_VS_UI_DIALOG::Run(id_t id)
 
 		case DIALOG_EXECID_OK:
 #ifdef _LIB
-			if(true == g_pUserInformation->IsAutoLogIn) // �� �ڵ� �α� �� ��� 
-				gpC_base->SendMessage(UI_TERMINATION, 0, 0); // ��尡 ���� �޴� �� ��
+			if(true == g_pUserInformation->IsAutoLogIn) // 웹 자동 로긴 일 경우 
+				gpC_base->SendMessage(UI_TERMINATION, 0, 0); // 모드가 메인 메뉴 일 때
 #endif
 			Finish();
 			break;
@@ -328,7 +328,7 @@ void C_VS_UI_DIALOG::Run(id_t id)
 //		// change scroll tag position
 //		double proportion = Proportion(m_scrollbar.GetPercentToScroll(), PERCENTAGE, m_remained_track);
 //
-//		// �Ҽ� ù°�ڸ� �ݿø�.
+//		// 소수 첫째자리 반올림.
 //		proportion += 0.5;
 //		m_tag_rect.y = m_tag_up_limit+(int)floor(proportion);
 //	}
@@ -357,12 +357,12 @@ void C_VS_UI_DIALOG::KeyboardControl(UINT message, UINT key, long extra)
 	{
 		switch (key)
 		{
-			case VK_RETURN: // ok�� ����. !cancel�� �ݵ�� ok�� �Բ� �ִ�.
+			case VK_RETURN: // ok로 간주. !cancel은 반드시 ok와 함께 있다.
 				if (m_ddb & DIALOG_OK)
 					Run(DIALOG_EXECID_OK);
 				break;
 
-			case VK_ESCAPE: // �ƹ��͵� ����.
+			case VK_ESCAPE: // 아무것도 안함.
 				if(true == m_bOkOnly)
 					Run(DIALOG_EXECID_OK);
 				else
@@ -489,7 +489,7 @@ void C_VS_UI_DIALOG::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 {
 	int i;
 
-	// Menu button�� �׳� Button�� �ٸ��� ó��. 
+	// Menu button과 그냥 Button을 다르게 처리. 
 	if (p_button->GetID() == DIALOG_EXECID_OK ||
 		 p_button->GetID() == DIALOG_EXECID_CANCEL ||
 		 p_button->GetID() == DIALOG_EXECID_FRIEND_BLACK
@@ -529,7 +529,7 @@ void C_VS_UI_DIALOG::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 			TextSystem::TextStyle menuStyle = textService.GetDefaultStyle();
 			menuStyle.align = TextSystem::TextAlign::Left;
 			
-			// �޴� �̵��� ���� ��ư ��ǥ ���� ��
+			// 메뉴 이동에 따른 버튼 좌표 보정 값
 			int y_skip_line=0;
 			if(m_pC_menu_scroll_bar!=NULL)
 			{
@@ -537,7 +537,7 @@ void C_VS_UI_DIALOG::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 				if(p_button->m_image_index>0&&m_button_y_list!=NULL&&GetScrollPos()>0)
 					y_skip_line=m_button_y_list[GetScrollPos()]-m_temp_menu_rect_y;
 			}
-			y_skip_line+=m_menu_y_size;			// m_menu_y_size �� �޴�Rect ũ�Ⱑ ����Ǿ����� ������ ���̴�.
+			y_skip_line+=m_menu_y_size;			// m_menu_y_size 는 메뉴Rect 크기가 변경되었을때 보정할 값이다.
 
 
 			if (p_button->GetFocusState())
@@ -637,7 +637,7 @@ void C_VS_UI_DIALOG::Show()
 //	Rect rect;
 //	rect.Set(0, 0, w-2, h-2);
 //
-//	// alpha�� ���õǾ� ������ ������â���� ��� :)
+//	// alpha가 세팅되어 있으면 반투명창으로 출력 :)
 //	if(GetAttributes()->alpha)
 //	{
 //		RECT alpha_rect;
@@ -671,7 +671,7 @@ void C_VS_UI_DIALOG::Show()
 //	gpC_global_resource->m_pC_assemble_box_spk->BltLocked(_x, _y, C_GLOBAL_RESOURCE::AB_RIGHTDOWN);
 //
 //	// center
-//	// !�� block�� ũ�Ⱑ �ٸ� �� �ִ�.
+//	// !각 block의 크기가 다를 수 있다.
 //	_y = y+gpC_global_resource->m_pC_assemble_box_spk->GetHeight(C_GLOBAL_RESOURCE::AB_LEFTUP);
 //	for (j=0; j < m_center_y; j++)
 //	{
@@ -841,7 +841,7 @@ void C_VS_UI_DIALOG::Start()
 //-----------------------------------------------------------------------------
 // StartByPinMode
 //
-// pin mode�� Start�Ѵ�.
+// pin mode로 Start한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_DIALOG::StartByPinMode()
 {
@@ -867,18 +867,18 @@ void C_VS_UI_DIALOG::Finish()
 // SetMessage
 //
 // - Message rect = (Client rect - Menu rect - Button rect)
-// - height�� ������ ���ϸ� ��µ��� ���� ���̴�. => ������������.
+// - height를 구하지 못하면 출력되지 않을 것이다. => 아직구현안함.
 //
 // parameter format>
 //							char * pp_msg[] = {"line1", "line2", ...} // global or local static
 //							SetMessage(pp_msg, line_x);
 //
-// 2002�� 7�� 23�� �߰����� -by sonee
-// ������ SetMessage �� �״�� �����ϵ�, m_flag_menu �� �ξ�, �޴��� �����ÿ��� ��ũ�� �ڵ�ó���� �ǵ���
-// �����Ͽ���.
-// �ݵ�� SetMenu �� �̷������ SetMessage �� �ؾ� �޴��� ��ũ���� ����� ���� �� �� �ִ�.
-// ���� �Ϲ� ���̾˷α׿��� ������ ����� �ּ�ó���� ----[Fix] �κ��� �ּ�ó���� �������ֵ��� �Ѵ�.
-// �������׿����� �̺κи� ����Ǿ���.
+// 2002년 7월 23일 추가사항 -by sonee
+// 기존의 SetMessage 는 그대로 유지하되, m_flag_menu 를 두어, 메뉴가 있을시에만 스크롤 자동처리가 되도록
+// 수정하였다.
+// 반드시 SetMenu 가 이루어진후 SetMessage 를 해야 메뉴의 스크롤이 제대로 적용 될 수 있다.
+// 만약 일반 다이알로그에서 문제가 생길시 주석처리된 ----[Fix] 부분을 주석처리를 해제해주도록 한다.
+// 수정사항에서는 이부분만 변경되었다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_DIALOG::SetMessage(char ** sz_msg, UINT line_count, SETMESSAGE_MODE_OPTION mode)
 {
@@ -916,7 +916,7 @@ void C_VS_UI_DIALOG::SetMessage(char ** sz_msg, UINT line_count, SETMESSAGE_MODE
 	const int _EXTRA = 30;//2;
 	if(h == -1)
 	{
-		h = m_line_count*m_message_str_height;		// Rect �� ���̴� �޽���â�� ���̷� ���Ѵ�. 
+		h = m_line_count*m_message_str_height;		// Rect 의 높이는 메시지창의 길이로 정한다. 
 		if(m_menu_count > 0)
 			h += 14 + m_menu_rect.h;
 
@@ -957,7 +957,7 @@ void C_VS_UI_DIALOG::SetMessage(char ** sz_msg, UINT line_count, SETMESSAGE_MODE
 				(m_menu_str_height-TEXT_EXTRA_HGAP)*height,
 				m_p_menu[i].exec_id, 
 				this, 
-				i)); // m_p_menu�� string�� �����ϱ� ���ؼ� index�� �ִ´�.
+				i)); // m_p_menu의 string을 참조하기 위해서 index를 넣는다.
 		}
 	}
 
@@ -965,9 +965,9 @@ void C_VS_UI_DIALOG::SetMessage(char ** sz_msg, UINT line_count, SETMESSAGE_MODE
 	m_msg_rect.w = m_client_rect.w;
 	m_msg_rect.y = m_client_rect.y;	
 	
-	// 2002�� 7�� 23�� ���� �κ�.
-	// �޴��� ������ ���� ���̾˷α��� ������ ���� ������ ��´�.
-	// �׷��� �������� ������ �� �״�� ���.
+	// 2002년 7월 23일 수정 부분.
+	// 메뉴가 있으면 현재 다이알로그의 높이의 반을 기준을 잡는다.
+	// 그렇지 않은경우는 기존의 값 그대로 사용.
 	
 	if(m_flag_menu)
 	{
@@ -983,9 +983,9 @@ void C_VS_UI_DIALOG::SetMessage(char ** sz_msg, UINT line_count, SETMESSAGE_MODE
 	// set print line count
 	m_print_line_count = (m_msg_rect.h)/m_message_str_height;//+MSG_EXTRA_HGAP
 	
-	if(m_pC_menu_scroll_bar==NULL&&m_flag_menu)		// �Ʒ��� �޴��ǿ� ��ũ�ѹٰ� ������ �ʾ������
+	if(m_pC_menu_scroll_bar==NULL&&m_flag_menu)		// 아래쪽 메뉴판에 스크롤바가 생기지 않았을경우
 	{
-		// ���̸� �÷��ش�.
+		// 길이를 늘려준다.
 		m_msg_rect.h=m_client_rect.h-m_menu_rect.h-28;
 		m_print_line_count = (m_msg_rect.h)/m_message_str_height;
 	}
@@ -1018,13 +1018,13 @@ void C_VS_UI_DIALOG::SetMessage(char ** sz_msg, UINT line_count, SETMESSAGE_MODE
 		m_pC_msg_scroll_bar = new C_VS_UI_SCROLL_BAR(m_line_count-m_print_line_count+1, 
 			Rect(m_msg_rect.w, m_msg_rect.y-m_client_rect.y+10, -1, m_msg_rect.h-30));
 	} else
-	if(m_flag_menu)				// �޴��� ���� ���
+	if(m_flag_menu)				// 메뉴가 있을 경우
 	{
-		// ������ ���� ������ ��ũ�ѹٰ� ���� ��� �޴�rect �� ���� �����ش�.
+		// 위쪽이 좁기 때문에 스크롤바가 있을 경우 메뉴rect 를 위로 넓혀준다.
 		if(m_pC_menu_scroll_bar!=NULL)
 		{
-			// linelen �� ������ �����ؼ� �޽����� h ũ���̴�.
-			// m_client.h/2-linelen �� �󿵿��̸�, �޴��� ���� �ø� �� �ִ� �����̴�.
+			// linelen 은 경계라인 포함해서 메시지의 h 크기이다.
+			// m_client.h/2-linelen 은 빈영역이며, 메뉴를 끌어 올릴 수 있는 길이이다.
 			int linelen=(m_line_count+1)*m_message_str_height;
 			
 			m_msg_rect.y=m_client_rect.y;
@@ -1039,8 +1039,8 @@ void C_VS_UI_DIALOG::SetMessage(char ** sz_msg, UINT line_count, SETMESSAGE_MODE
 			
 			int len_menu=m_button_y_list[m_menu_count]-m_temp_menu_rect_y;
 			
-			// ���̸� �ø�������, ��ư���� ��� ����� �� ����������, â�� �°� ���ġ�ϰ�,
-			// ��ũ���� �������� �ʴ´�. 
+			// 길이를 늘리고나서, 버튼들을 모두 출력할 수 있을때에는, 창에 맞게 재배치하고,
+			// 스크롤을 생성하지 않는다. 
 			if(len_menu<m_menu_rect.h)
 			{
 				len_menu=m_menu_rect.h-len_menu;
@@ -1057,14 +1057,14 @@ void C_VS_UI_DIALOG::SetMessage(char ** sz_msg, UINT line_count, SETMESSAGE_MODE
 //-----------------------------------------------------------------------------
 // SetMenu
 //
-// - Client rect���� Menu rect������ Ȯ������ ���ϸ� ��µ��� ���� ���̴�.
-// - �� �� �̻� ������ �� ����.
-// - menu_only�� true�̸� dialog center�� ���߰� false�̸� message ������ ����
-//   rect �ϴܿ� ��ġ��Ų��.
+// - Client rect에서 Menu rect공간을 확보하지 못하면 출력되지 않을 것이다.
+// - 두 번 이상 설정할 수 없다.
+// - menu_only가 true이면 dialog center에 맞추고 false이면 message 공간을 위해
+//   rect 하단에 위치시킨다.
 // 
-// 2002�� 7�� 23�� ��������				-by sonee
-// - Menu Rect ������ Ȯ������ ���Ͽ������ �ڵ� ��ũ�ѹٰ� ������, �޽��� rect
-//  �� ���Ͽ� �ڵ����� ������ Ȯ���Ѵ�.
+// 2002년 7월 23일 수정사항				-by sonee
+// - Menu Rect 공간을 확보하지 못하였을경우 자동 스크롤바가 붙으며, 메시지 rect
+//  와 비교하여 자동으로 공간을 확보한다.
 //-----------------------------------------------------------------------------
 void C_VS_UI_DIALOG::SetMenu(const DIALOG_MENU * p_dialog_menu, UINT menu_count, bool menu_only)
 {
@@ -1104,10 +1104,10 @@ void C_VS_UI_DIALOG::SetMenu(const DIALOG_MENU * p_dialog_menu, UINT menu_count,
 	}
 
 	//
-	// ! SetMessage()�� ���ؼ� Message�� ���� ������ �� ������, �װ��� �������� �ʴ´�.
-	// �׷��ϱ� VS_UI_Dialog class�� �ùٸ� �����, SetMenu()�� ���� ���� �� SetMessage()��
-	// ���ִ� ���̴�. Menu rect�� ������ Client rect�� �ϴܿ��� ��� Menu�� ��ġ�� �� �ִ�
-	// rect�� �����ȴ�. �׷��� ���� Client rect�� Message �������� �Ǵ� ���̴�.
+	// ! SetMessage()에 의해서 Message가 먼저 설정될 수 있지만, 그것을 고려하지 않는다.
+	// 그러니까 VS_UI_Dialog class의 올바른 사용은, SetMenu()를 먼저 해준 후 SetMessage()를
+	// 해주는 것이다. Menu rect는 무조건 Client rect의 하단에서 모든 Menu를 배치할 수 있는
+	// rect로 설정된다. 그래서 남은 Client rect가 Message 영역으로 되는 것이다.
 	//
 	//	m_menu_str_height;
 
@@ -1176,7 +1176,7 @@ void C_VS_UI_DIALOG::SetMenu(const DIALOG_MENU * p_dialog_menu, UINT menu_count,
 				(m_menu_str_height-TEXT_EXTRA_HGAP)*height,
 				m_p_menu[i].exec_id, 
 				this, 
-				i)); // m_p_menu�� string�� �����ϱ� ���ؼ� index�� �ִ´�. �̰��� imageindex �� ����ȴ�.			
+				i)); // m_p_menu의 string을 참조하기 위해서 index를 넣는다. 이값은 imageindex 에 저장된다.			
 		}
 		m_button_y_list[i]=m_menu_rect.y+plus;		
 	
@@ -1202,7 +1202,7 @@ int C_VS_UI_DIALOG::GetScrollPos()
 	{
 		now_len=m_button_y_list[i]-m_temp_menu_rect_y;
 		// |-----+-----|
-		//    +- �̰�� 
+		//    +- 이경우 
 		if(NowPos>=now_len&&NowPos<now_len+(m_button_y_list[i+1]-m_button_y_list[i])/2)
 		{
 			m_pC_menu_scroll_bar->SetScrollPos(m_button_y_list[i]-m_temp_menu_rect_y);
@@ -1221,7 +1221,7 @@ int C_VS_UI_DIALOG::GetScrollPos()
 // --------------------------------------------------------------------------------------
 //  C_VS_UI_DIALOG::ProcessMenuScrollBar();
 //  
-//  Pixel ���� ��ũ���� �ϱ� ������, ������ ��ũ�ѹٸ� ����ϸ鼭 ������ ����.
+//  Pixel 별로 스크롤을 하기 때문에, 기존에 스크롤바를 사용하면서 수정을 가함.
 
 void C_VS_UI_DIALOG::ProcessMenuScrollBar()
 {
@@ -1244,12 +1244,12 @@ void C_VS_UI_DIALOG::ProcessMenuScrollBar()
 		{
 			half=(m_button_y_list[i+1]-m_button_y_list[i])>>1;
 
-			// ��ũ���� �Ʒ��� �ϴ°��
+			// 스크롤을 아래로 하는경우
 			if(NowPos>m_button_y_list[i]-m_temp_menu_rect_y&&NowPos<m_button_y_list[i+1]-m_temp_menu_rect_y-half)
 			{				
 				NowPos=m_button_y_list[i+1]-m_temp_menu_rect_y;
 
-				// �� ȭ�鿡 ����� �Ǵ°�� PosMax �� �ٽ� �������ش�.
+				// 한 화면에 출력이 되는경우 PosMax 를 다시 세팅해준다.
 				if(!(m_button_y_list[m_menu_count]-m_temp_menu_rect_y<NowPos+m_menu_rect.h))
 					m_pC_menu_scroll_bar->SetScrollPos(NowPos);
 				else
@@ -1261,7 +1261,7 @@ void C_VS_UI_DIALOG::ProcessMenuScrollBar()
 		if(i>0)
 		{
 			half=(m_button_y_list[i]-m_button_y_list[i-1])>>1;
-			// ��ũ���� ���� �ϴ� ���
+			// 스크롤을 위로 하는 경우
 			if(NowPos<m_button_y_list[i]-m_temp_menu_rect_y&&NowPos>m_button_y_list[i-1]-m_temp_menu_rect_y+half)
 			{
 				NowPos=m_button_y_list[i-1]-m_temp_menu_rect_y;
