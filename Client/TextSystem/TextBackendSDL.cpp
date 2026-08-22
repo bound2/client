@@ -92,8 +92,28 @@ public:
 			"Data/Font/NotoSans-Regular.ttf",
 			"Data/Font/DejaVuSans.ttf",
 			"Data/Font/Hiragino Sans GB.ttc",
+#ifdef _WIN32
+			// None of the paths above ever ship in Data/Font (no font is
+			// bundled with the game data at all - see SPRITELIB_BACKEND_README
+			// / the macOS-only /System/Library/Fonts fallbacks below), so on
+			// Windows every AcquireFont() call fell through all of them and
+			// failed: TextService::m_initialized stayed false forever, and
+			// EnsureInitialized() (called at the top of DrawLine/MeasureText/
+			// etc.) made every text call a silent no-op - no game text drew
+			// anywhere, not just in this dialog. Fall back to fonts that
+			// ship with every Windows install; Malgun Gothic has broad
+			// Hangul+CJK+Latin coverage (this client's text mixes Korean
+			// dev strings and Chinese game-string-table data), Microsoft
+			// YaHei covers Simplified Chinese specifically, Arial is the
+			// last-resort Latin-only fallback.
+			"C:\\Windows\\Fonts\\malgun.ttf",
+			"C:\\Windows\\Fonts\\msyh.ttc",
+			"C:\\Windows\\Fonts\\simsun.ttc",
+			"C:\\Windows\\Fonts\\arial.ttf",
+#else
 			"/System/Library/Fonts/Helvetica.ttc",
 			"/System/Library/Fonts/Hiragino Sans GB.ttc",
+#endif
 			NULL
 		};
 
