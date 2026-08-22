@@ -11038,8 +11038,8 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 	std::string tempindex;												// spk 인텍스
 	std::string tempappend;												// 이어쓰기
 	char *pCur = NULL;													// 한라인을 읽어드려서 저장하는 변수
-	char *istag = NULL;													//태크가 있는지 검사하는 변수
-	char *isfont = NULL;												//태크가 있는지 검사하는 변수
+	const char *istag = NULL;													//태크가 있는지 검사하는 변수
+	const char *isfont = NULL;												//태크가 있는지 검사하는 변수
 	
 	int NullSizex = 0,NullSizey = 0;
 	
