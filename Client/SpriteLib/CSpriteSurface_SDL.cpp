@@ -429,8 +429,7 @@ void CSpriteSurface::UnlockSDL()
 
 bool CSpriteSurface::IsLock()
 {
-	/* Stub: Surface is never in locked state in SDL backend */
-	return false;
+	return m_lock_count > 0;
 }
 
 /* ============================================================================
