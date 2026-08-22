@@ -61,7 +61,7 @@ struct S_BLOOD_BIBLE_DESCRIPTION
 //#define _SHOW_WINDOW_ATTR
 
 //
-// SHOW_WINDOW_ATTR�� �� Window�� Window���¸� ����ϱ� ���� ���̴�. Window�� ������ϱ� ����
+// SHOW_WINDOW_ATTR은 각 Window에 Window상태를 출력하기 위한 것이다. Window를 디버깅하기 위해
 // 만든 것이다.
 //
 #if (defined(_SHOW_WINDOW_ATTR) && !defined(_LIB))
@@ -78,7 +78,7 @@ struct S_BLOOD_BIBLE_DESCRIPTION
 // set/unset background mouse focus message
 //
 // client background에 mouse focus를 set/unset한다.
-// �̰��� mouse pointer�� UI Window�� acquire/unacquire�� client�� �˸��� ���̴�.
+// 이것은 mouse pointer가 UI Window로 acquire/unacquire를 client에 알리는 것이다.
 //
 #define SET_BACKGROUND_MOUSE_FOCUS	if (gpC_window_manager->GetMouseFocusedWindow() == NULL) \
 													gpC_base->SendMessage(UI_BACKGROUND_MOUSE_FOCUS, gpC_mouse_pointer->GetPointerX(), gpC_mouse_pointer->GetPointerY());
@@ -240,7 +240,7 @@ struct NEW_CHARACTER
 // Base
 //
 // 기반을 정의하는 class이다.
-// VS_UI System�� ���������� ������ ������ �͵��� ��� ���⿡ ���ǵȴ�.
+// VS_UI System에 전역적으로 영향을 입히는 것들은 모두 여기에 정의된다.
 //-----------------------------------------------------------------------------
 class Base
 {
@@ -253,7 +253,7 @@ private:
 	//
 	// C_VS_UI_TRIBE class 참조.
 	//
-	// event�� �߻��ϸ� set�ȴ�.
+	// event가 발생하면 set된다.
 	//
 	bool						m_event_occured;
 
@@ -267,7 +267,7 @@ public:
 	//
 public:
 	CSpriteSurface *		m_p_DDSurface_back; // UI를 출력할 surface
-	CSpriteSurface			m_DDSurface_offscreen; // effect�� ���� offscreen
+	CSpriteSurface			m_DDSurface_offscreen; // effect를 위한 offscreen
 
 private:
 	int						m_colorkey_red; // offscreen colorkey
@@ -277,7 +277,7 @@ public:
 	PrintInfo				m_chatting_pi;
 	PrintInfo				m_user_id_pi;
 	PrintInfo				m_value_pi; // 우측정렬된 멋진 숫자..
-	PrintInfo				m_value2_pi; // �������ĵ� ���� ����..
+	PrintInfo				m_value2_pi; // 좌측정렬된 멋진 숫자..
 	PrintInfo				m_item_name_pi; // !item description이 출력된 후 색이 변경될 수 있다.
 	PrintInfo				m_item_desc_pi;
 	PrintInfo				m_dialog_menu_pi;
@@ -333,15 +333,15 @@ extern UINT	g_blink_value;
 extern int ga_item_blink_color_table[];
 
 extern bool gbl_sell_running; // 사는 중..
-extern bool gbl_buy_running; // �Ĵ� ��..
-extern bool gbl_repair_running; // ��ġ�� ��...
+extern bool gbl_buy_running; // 파는 중..
+extern bool gbl_repair_running; // 고치는 중...
 extern bool gbl_silvering_running; // 고치는 중...
 extern bool gbl_item_lock;
 extern bool gbl_gear_lock;
 extern bool gbl_item_trade_lock;
 //extern bool gbl_vampire_interface;
 extern Race g_eRaceInterface;
-extern bool gbl_swap_advancement_item_running; // ��� ��..
+extern bool gbl_swap_advancement_item_running; // 사는 중..
 
 //-----------------------------------------------------------------------------
 // Cross-platform path conversion utilities

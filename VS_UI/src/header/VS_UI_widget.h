@@ -129,7 +129,7 @@ public:
 					m_alpha--;
 				}
 
-				// !m_alpha = 0�� ���¿��� �� m_alpha--�� �� �� �ִ�. �̰��� �ð����� ���ؼ�
+				// !m_alpha = 0인 상태에서 또 m_alpha--가 될 수 있다. 이것은 시간차에 의해서
 				// EventFocuxX가 두번이상 실행되기 때문이다.
 				if (m_alpha <= 0)
 				{
@@ -173,7 +173,7 @@ public:
 	virtual void	ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button) = 0;
 
 	// Desciption 이 있는부분에만 호출된다.
-	// ButtonGroup::ShowDescription(); ���� ȣ���� �Ǹ�, �ʿ����� ������� ������� �ʾƵ� ��
+	// ButtonGroup::ShowDescription(); 으로 호출이 되며, 필요하지 않을경우 사용하지 않아도 상
 	virtual void	ShowButtonDescription(C_VS_UI_EVENT_BUTTON *p_button){}
 
 };
@@ -347,7 +347,7 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // 스크롤바 클래스이다
-// ���������� Show�� ������ ������ �⺻ ��ũ�ѹ� spk�� ����Ѵ�.
+// 내부적으로 Show를 가지고 있으며 기본 스크롤바 spk를 출력한다.
 // 다른 spk를 사용하도록 설정할수 있으나, 스프라이트의 순서는 기본 spk와 같아야 한다.
 ////////////////////////////////////////////////////////////////////////////////////////////
 

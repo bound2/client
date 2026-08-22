@@ -598,7 +598,7 @@ void C_VS_UI_DIALOG::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 				{
 					for(i=0; i < m_p_menu[p_button->m_image_index].sz_menu_str.size(); i++)
 					{
-						// ������ �����ش�.
+						// 윗줄을 컷해준다.
 						if(p_button->y-i*TEXT_EXTRA_HGAP-y_skip_line+m_menu_str_height*i<m_menu_rect.y+m_menu_rect.h)
 						{
 							//m_p_menu[p_button->m_image_index].sz_menu_str[i].c_str()
@@ -993,9 +993,9 @@ void C_VS_UI_DIALOG::SetMessage(char ** sz_msg, UINT line_count, SETMESSAGE_MODE
 	{		
 		m_nofit_mode_msg_y = m_msg_rect.y+m_msg_rect.h/2-(m_message_str_height*line_count)/2; // sort in center
 	}
-	else if (m_line_count > m_print_line_count)				// ��¹����� �����Ƿ� ScrollBar �� �����Ѵ�.
+	else if (m_line_count > m_print_line_count)				// 출력범위가 좁으므로 ScrollBar 를 생성한다.
 	{
-		// ��ũ�ѹٶ����� �ٽ� �۾��� �ڸ���.
+		// 스크롤바때문에 다시 글씨를 자른다.
 		m_vs_msg.clear();
 		for(int i = 0; i < line_count; i++)
 		{
@@ -1093,7 +1093,7 @@ void C_VS_UI_DIALOG::SetMenu(const DIALOG_MENU * p_dialog_menu, UINT menu_count,
 	menuStyle.color = TextSystem::ColorFromCOLORREF(gpC_base->m_dialog_menu_pi.text_color);
 	const int menuWrapWidth = m_client_rect.w - 20;
 
-	// Menu ���� �Ѿ�°� �ڸ���.
+	// Menu 글자 넘어가는거 자르기.
 	for (i=0; i < m_menu_count; i++)
 	{
 		m_p_menu[i].exec_id = p_dialog_menu[i].exec_id;

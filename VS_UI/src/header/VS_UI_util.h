@@ -48,7 +48,7 @@ typedef WORD SPRITE_ID;
 /*-----------------------------------------------------------------------------
   Class Sprite Pack
   `DX가 초기화되어서 555, 565 여부를 판별하므로 바드시 DX를 초기화시킨 후에 
-   ����(����)�ؾ� �Ѵ�.
+   생성(정의)해야 한다.
 -----------------------------------------------------------------------------*/
 // RGB 중 어느 하나.
 #define rgb_RED							0
@@ -131,8 +131,8 @@ public:
 
 /*-----------------------------------------------------------------------------
   Class animation object
-  `animation�� object. �̰��� �� ���� SPK, FRR �̴�. ���� SPK, FRR�� �����ġ��
-   �ٸ��� �� ���, �׸��� ������ Timer�� ����� ��찡 �ֱ� ������ �������. 
+  `animation할 object. 이것은 한 쌍의 SPK, FRR 이다. 깥은 SPK, FRR을 출력위치만
+   다르게 할 경우, 그리고 독립된 Timer를 사용할 경우가 있기 때문에 만들었다. 
 	이것을 C_ANIMATION에 넣으면 animation된다.
 -----------------------------------------------------------------------------*/
 class C_ANI_OBJECT
@@ -142,9 +142,9 @@ private:
 	// m_pC_spk
 	//
 	// m_pC_frr과 대응하는 SPK이다. 하나의 Animation object는 하나씩의 SPK, FRR을
-	// ���´�. �ϳ��� SPK�� �ټ��� FRR�� ������ �� ����. �̷��� �ϴ� ������, �׷���
-	// ���ӻ��� Animation object�� �� ��� ��ɰų� ����, ���� ȥ��(?)�� �����ϸ�,
-	// �ܼ��� Interface�� �����ϱ� �����̴�. ���� �׷� �ʿ䰡 ���Ŀ� ����ٸ�,
+	// 갖는다. 하나의 SPK에 다수의 FRR이 대응할 수 없다. 이렇게 하는 이유는, 그러한
+	// 쓰임새는 Animation object의 일 경우 드믈거나 없고, 또한 혼란(?)을 방지하며,
+	// 단순한 Interface를 제공하기 위함이다. 물론 그럴 필요가 추후에 생긴다면,
 	// 또다른 Class를 만들면 그만이다.
 	//
 	C_SPRITE_PACK *		m_pC_spk;
@@ -168,8 +168,8 @@ public:
   Class animation object
   `Object를 Animation시키는 object.
 
-  `SPK file�� Frr file�� animation�� �ϱ� ���� �ʿ������̴�. Animation Object��
-   �� �ΰ��� ������ �����Ͽ�, ���� ��ġ�� play, �� animation�����ش�. ����
+  `SPK file과 Frr file은 animation을 하기 위한 필요조건이다. Animation Object는
+   이 두개의 정보를 참조하여, 임의 위치에 play, 곧 animation시켜준다. 물론
 	Timer를 내장하고 Timer를 설정할 수 있다. 또한 역으로 animation할 수도 있다.
 -----------------------------------------------------------------------------*/
 class C_ANIMATION
@@ -179,9 +179,9 @@ private:
 	// m_pC_ani_object
 	//
 	// 1. Animation할 object pointer이다. 이 object는 다른 Animation object에서도
-	//    ����� �� �ֱ� ������ pointer�� �ؾ� ȿ�����̴�.
+	//    사용할 수 있기 때문에 pointer로 해야 효율적이다.
 	//
-	// 2. �ϳ��� Animation object������ �ϳ��� ani object�� ���´�. �׷��� �� ����
+	// 2. 하나의 Animation object에서는 하나의 ani object를 갖는다. 그러나 그 역은
 	//    반드시 그러하지 않아도 된다.
 	//
 	C_ANI_OBJECT *			m_pC_ani_object;
@@ -190,7 +190,7 @@ private:
 	// Timer
 	// 
 	// 하나의 Animation object는 play되기 위해 하나의 timer를 갖는다. 내부에 timer가
-	// �����ȴ�. Timer library�� ���� �Լ��� ����������ϱ� ������ ����� �� ����.
+	// 구현된다. Timer library는 전역 함수를 설정해줘야하기 때문에 사용할 수 없다.
 	//
 	DWORD						m_dw_prev_tickcount;
 	DWORD						m_dw_millisec;
@@ -205,9 +205,9 @@ public:
 	{
 		STOP,					// stop
 		PLAY,					// 0번 frame부터 끝까지 한 번만.
-		PLAY_LOOP,			// play�� ��� �ݺ�.
-		PLAY_BACK,			// �� frame���� 0������ �� ����.
-		PLAY_BACKLOOP,		// play back ��� �ݺ�.
+		PLAY_LOOP,			// play를 계속 반복.
+		PLAY_BACK,			// 끝 frame부터 0번까지 한 번만.
+		PLAY_BACKLOOP,		// play back 계속 반복.
 		PLAY_LOOPBACK,		// play -> back -> play (반복)
 	};
 

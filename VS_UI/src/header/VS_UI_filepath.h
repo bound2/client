@@ -1,7 +1,7 @@
 ﻿#ifndef __VS_UI_FILEPATH_H__
 #define __VS_UI_FILEPATH_H__
 
-// Client�� Release�Ǹ� Directory�� ���� ���� ���� ������ directory service ��� ����.
+// Client가 Release되면 Directory가 변할 일이 없기 때문에 directory service 사용 안함.
 
 //////////////////////////////////////////////////////////////////////
 // Cross-platform path separator definitions
@@ -295,7 +295,7 @@
 #define SPK_SKILL_MINI						SPK_ROOT"SkillMini.spk"
 #define SPKI_SKILL_MINI						SPK_ROOT"SkillMini.spki"
 
-// ĳ������ Sprite
+// 캐릭생성 Sprite
 #define SPK_FACE							SPK_ROOT"Face.spk"
 #define SPKI_FACE							SPK_ROOT"Face.spki"
 #define SPK_FACE_MAKE						SPK_ROOT"FaceMake.spk"
@@ -326,15 +326,15 @@
 #define SPK_VAMPIRE_BUY_DIALOG		SPK_ROOT"BuyDialogVampire.spk"
 //#define SPK_MONEY_DIALOG		SPK_ROOT"MoneyDialog.spk"
 
-//�����̾� ��Ż
+//슬레이어 포탈
 #define SPK_SLAYER_PORTAL_ETC			SPK_ROOT"PortalEtcSlayer.spk"
 #define SPK_SLAYER_PORTAL_MAP			SPK_ROOT"PortalMapSlayer.spk"
 
-//��Ƽ
+//파티
 #define SPK_SLAYER_PARTY				SPK_ROOT"PartySlayer.spk"
 #define SPK_VAMPIRE_PARTY				SPK_ROOT"PartyVampire.spk"
 
-//���
+//길드
 #define SPK_SLAYER_TEAM					SPK_ROOT"TeamSlayer.spk"
 #define SPK_VAMPIRE_TEAM				SPK_ROOT"TeamVampire.spk"
 #define SPK_SLAYER_TEAM_MEMBER			SPK_ROOT"TeamMemberSlayer.spk"
@@ -367,7 +367,7 @@
 // SoulChain
 #define SPK_SOUL_CHAIN					SPK_ROOT"Trace.spk"
 
-// �̿� ��� 
+// 이용 등급 
 #define SPK_USE_GRADE					SPK_ROOT"UseGrade.spk"
 
 #define SPK_XMAS_CARD					SPK_ROOT"XMasCard.spk"
@@ -375,10 +375,10 @@
 #define SPK_LOTTERY_CARD				SPK_ROOT"LotteryCard.spk"
 #define SPKI_LOTTERY_CARD				SPK_ROOT"LotteryCard.spki"
 
-// �Խ���  2003.5.12 by sonee
+// 게시판  2003.5.12 by sonee
 #define SPK_BULLETIN_BOARD				SPK_ROOT"BulletinBoard.spk"
 
-// �ƿ콺���� �������̽� ����
+// 아우스터즈 인터페이스 파일
 #define SPK_ASSEMBLE_BOX_OUSTERS		SPK_ROOT"AssembleMessageBoxOusters.spk"
 #define SPK_ASSEMBLE_BOX_BUTTON_OUSTERS	SPK_ROOT"AssembleMessageBoxButtonOusters.spk"
 #define SPK_OUSTERS_GAMEMENU			SPK_ROOT"GameMenuOusters.spk"
@@ -405,7 +405,7 @@
 #define SPK_SLAYER_FRIEND				SPK_ROOT"FrdWinSlayer.spk"
 #define SPK_VAMPIRE_FRIEND				SPK_ROOT"FrdWinVampire.spk"
 
-// �ͽ� ���� 2003.5.20 by gony
+// 믹싱 포지 2003.5.20 by gony
 #define SPK_MIXING_FORGE				SPK_ROOT"MixingForge.spk"
 
 #define SPK_HORN						SPK_ROOT"PortalEtcOusters.spk"//SPK_ROOT"Horn.spk"
@@ -443,16 +443,16 @@
 
 //2004, 5, 31 sobeit add end - sms message
 
-// 2004, 6, 21 sobeit add start -  ���̹� ��Ʈ�� �̹���
+// 2004, 6, 21 sobeit add start -  네이밍 스트링 이미지
 #define SPK_SLAYER_NAMING			SPK_ROOT"NamingSlayer.spk"
 #define SPK_VAMPIRE_NAMING			SPK_ROOT"NamingVampire.spk"
 #define SPK_OUSTERS_NAMING			SPK_ROOT"NamingOusters.spk"
-// 2004, 6, 21 sobeit add end -  ���̹� ��Ʈ�� �̹���
-// 2004, 7, 2 sobeit add start -  ����Ʈ �Ŵ��� ui
+// 2004, 6, 21 sobeit add end -  네이밍 스트링 이미지
+// 2004, 7, 2 sobeit add start -  퀘스트 매니저 ui
 #define SPK_SLAYER_QUESTMAMAGER			SPK_ROOT"QuestManager_Slayer.spk"
 #define SPK_VAMPIRE_QUESTMAMAGER		SPK_ROOT"QuestManager_Vampire.spk"
 #define SPK_OUSTERS_QUESTMAMAGER		SPK_ROOT"QuestManager_Ousters.spk"
-// 2004, 7, 2 sobeit add end -  ����Ʈ �Ŵ��� ui
+// 2004, 7, 2 sobeit add end -  퀘스트 매니저 ui
 
 // 2004, 7, 9 sobeit add start
 #define QUEST_XML_FILE					"SimpleGQuest.xml"
@@ -475,7 +475,7 @@
 #define SPK_PERSNALSHOP_SLAYER						   	SPK_ROOT"SlayerPersnalShop.spk"
 #define SPK_PERSNALSHOP_VAMPIRE							SPK_ROOT"VampirePersnalShop.spk"
 #define SPK_PERSNALSHOP_OUSTERS							SPK_ROOT"OustersPersnalShop.spk"
-// 2004, 12, 1, sobeit add start - ¯ ����Ʈ
+// 2004, 12, 1, sobeit add start - 짱 포인트
 #define SPK_SLAYER_POWERJJANG				SPK_ROOT"Powerjjang_Slayer.spk"
 #define SPK_VAMPIRE_POWERJJANG				SPK_ROOT"Powerjjang_Vampire.spk"
 #define SPK_OUSTERS_POWERJJANG				SPK_ROOT"Powerjjang_Ousters.spk"
