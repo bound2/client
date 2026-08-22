@@ -259,6 +259,7 @@ bool	C_VS_UI_DESC::LoadDesc(const char *szFilename, int row, int col, bool bl_ti
 
 		temp_string = szLine;
 
+		bool string_replaced = false;
 		for(int i = 0; i < m_ori_string.size(); i++)//문자열 대체
 		{
 			int re = temp_string.find(m_ori_string[i]);
