@@ -25,25 +25,23 @@ void	SendBugReport(const char *bug, ...);
 ClientCommunicationManager::ClientCommunicationManager ()
 : m_pDatagramSocket(NULL)
 {
-    __BEGIN_TRY
+    // Note: __BEGIN_TRY/__END_CATCH are not used here because __BEGIN_TRY
+    // expands to a no-op in Release builds (NDEBUG), which would leave the
+    // catch(...) below orphaned. Use explicit try/catch instead.
+    try {
+        try {
+            // create datagram server socket
+            m_pDatagramSocket = new DatagramSocket( g_pClientConfig->CLIENT_COMMUNICATION_UDP_PORT );
 
-	try {
-		// create datagram server socket
-		m_pDatagramSocket = new DatagramSocket( g_pClientConfig->CLIENT_COMMUNICATION_UDP_PORT );
-
-		SocketAPI::setsocketnonblocking_ex( m_pDatagramSocket->getSOCKET(), true );
+            SocketAPI::setsocketnonblocking_ex( m_pDatagramSocket->getSOCKET(), true );
 
 //		m_pDatagramSocket->
-	} catch (Throwable& t)	{
-		DEBUG_ADD_FORMAT_ERR("[Error] CCM-%s", t.toString().c_str());
-		// Note: Socket creation may fail if port is in use, continue without P2P communication
-		m_pDatagramSocket = NULL;
-	}
-
-    // Note: Use empty statement instead of __END_CATCH to avoid re-throwing exceptions
-    // P2P communication is optional, client can function without it
+        } catch (Throwable& t)	{
+            DEBUG_ADD_FORMAT_ERR("[Error] CCM-%s", t.toString().c_str());
+            // Note: Socket creation may fail if port is in use, continue without P2P communication
+            m_pDatagramSocket = NULL;
+        }
     }
-
     catch (...) {
         // Catch-all to prevent constructor from propagating exceptions
     }
