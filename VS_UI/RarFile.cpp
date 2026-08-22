@@ -81,28 +81,16 @@ void CRarFile::SetRAR(const char *rar_filename, const char *pass)
 	m_rar_filename = rar_filename;
 	m_password = pass;  // Store password but don't use it (not needed for extracted files)
 
-	// Convert RAR file path to directory path
-	// Example: "Data/Ui/txt/Item.rpk" → "Data/Ui/txt/Item/"
-	m_base_dir = rar_filename;
-
-	// Remove .rpk or .rar extension (case-insensitive)
-	size_t len = m_base_dir.length();
-	if (len > 4) {
-		std::string ext = m_base_dir.substr(len - 4);
-		std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-
-		if (ext == ".rpk" || ext == ".rar") {
-			m_base_dir = m_base_dir.substr(0, len - 4);
-		}
-	}
-
-	// Append trailing slash if not present
-	len = m_base_dir.length();
-	if (len > 0) {
-		char lastChar = m_base_dir[len - 1];
-		if (lastChar != '/' && lastChar != '\\') {
-			m_base_dir += "/";
-		}
+	// Use the directory containing the .rpk/.rar file as the base directory,
+	// since the game data ships with archive contents extracted flat next to
+	// the archive itself, not into a subfolder named after the archive.
+	// Example: "Data/Info/infodata.rpk" -> "Data/Info/"
+	std::string path = rar_filename;
+	size_t lastSlash = path.find_last_of("/\\");
+	if (lastSlash != std::string::npos) {
+		m_base_dir = path.substr(0, lastSlash + 1);
+	} else {
+		m_base_dir = "";
 	}
 }
 
