@@ -1651,22 +1651,25 @@ InitGame()
 	//                 Init...
 	//
 	//--------------------------------------------------------
-	if (InitClientConfig() &&
-		InitInfomation() &&
-		InitUserOption() &&
+	if (!InitClientConfig()) return false;
+	if (!InitInfomation()) return false;
+	if (!InitUserOption()) return false;
 
-		InitVolume() &&
-		InitInput() &&
-		//InitSound()  &&
-		InitDraw() &&
+	if (!InitVolume()) return false;
+	if (!InitInput()) return false;
+	// if (!InitSound()) return false;
+	if (!InitDraw()) return false;
 
-		//InitThread() &&		// 2001.8.20 주석처리 - 로딩 Thread사용 안함
-		InitGameObject() &&    // GameObject must be initialized before Surface
-		                        // because gC_vs_ui.Init() in InitSurface() depends on g_pMoneyManager
-		InitSurface() &&
+	// InitThread() // 2001.8.20 주석처리 - 로딩 Thread사용 안함
 
-		InitGameUpdate()
-		)		
+	// GameObject must be initialized before Surface
+	// because gC_vs_ui.Init() in InitSurface() depends on g_pMoneyManager
+	if (!InitGameObject()) return false;
+	if (!InitSurface()) return false;
+
+	if (!InitGameUpdate()) return false;
+
+	// --- 모든 초기화 성공 후 로직 계속 ---
 	{	
 		//yckou
 		CheckInvalidProcess();
