@@ -6969,13 +6969,10 @@ void C_VS_UI_OPTION::Show()
 				"Logitech IFeel Mouse Force Feedback",
 			};
 
-			if(gpC_base->m_p_DDSurface_back->Lock())
-			{
-				m_pC_main_spk->BltLocked(x+m_vampire_plus_x+125+TitleOffset, y+m_vampire_plus_y+80, HOTKEY_WINDOW);
-				m_pC_control_button_group->Show();
-				gpC_base->m_p_DDSurface_back->Unlock();
-			}
-			
+			// Text must be drawn before the sprite Lock()/BltLocked()/Unlock()
+			// block below, same as TAB_GRAPHIC/TAB_SOUND/TAB_GAME - drawing it
+			// after (as this used to) left the radio/checkbox labels and the
+			// whole accelerator key list blank.
 			g_FL2_GetDC();
 //			g_PrintColorStr(x+m_vampire_plus_x+130, y+m_vampire_plus_y+56, "Input Style : ", gpC_base->m_user_id_pi, RGB_BLACK);
 			g_PrintColorStr(x+m_vampire_plus_x+m_check_x+30, y+m_vampire_plus_y+m_check_y, 
@@ -7037,9 +7034,17 @@ void C_VS_UI_OPTION::Show()
 				//				char sz_temp[20];
 				//				wsprintf(sz_temp, "%d", m_focus_hotkey);
 				//				g_PrintColorStr(x+m_vampire_plus_x+127+100, y+m_vampire_plus_y+80, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
-				
-			}	
+
+			}
 			g_FL2_ReleaseDC();
+
+			if(gpC_base->m_p_DDSurface_back->Lock())
+			{
+				m_pC_main_spk->BltLocked(x+m_vampire_plus_x+125+TitleOffset, y+m_vampire_plus_y+80, HOTKEY_WINDOW);
+				m_pC_control_button_group->Show();
+				gpC_base->m_p_DDSurface_back->Unlock();
+			}
+
 			if(false == m_IsTitle)
 				m_pC_scroll_bar->Show(x+m_vampire_plus_x, y+m_vampire_plus_y);
 			else
