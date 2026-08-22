@@ -1,4 +1,4 @@
-#ifndef __CSPRITEPALBASE_H__
+﻿#ifndef __CSPRITEPALBASE_H__
 #define __CSPRITEPALBASE_H__
 
 #include "MPalette.h"

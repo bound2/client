@@ -1,4 +1,4 @@
-#include "client_PCH.h"
+﻿#include "client_PCH.h"
 #define assert(e) ((void)(e))
 // Disabled assert for macOS
 

@@ -1,7 +1,7 @@
-//-----------------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------------
 // CGameUpdate.cpp
 //-----------------------------------------------------------------------------
-// ½ÇÁ¦ °ÔÀÓÀ» ÁøÇàÇÏ´Â ºÎºÐ
+// 실제 게임을 진행하는 부분
 //-----------------------------------------------------------------------------
 #include "Client_PCH.h"
 
@@ -97,7 +97,7 @@ extern bool	g_bTestMode;
 
 extern bool g_bZoneSafe;
 
-// ÇÒÇÒ...
+// 할할...
 extern void	SetWatchMode( bool );
 extern bool g_bWatchMode;
 
@@ -107,7 +107,7 @@ extern int g_CheckErrorTime=0;
 extern BOOL g_MyFull;
 extern RECT g_GameRect;
 //add by sonic 2006.7.30
-//¼ì²âÏµÍ³µÇÂ½µÄÓÃ»§
+//检测系统登陆的用户
 #ifdef PLATFORM_WINDOWS
 	#include <tlhelp32.h>
 	// ToolHelp32 functions (CreateToolhelp32Snapshot, etc.) live in kernel32.lib
@@ -139,7 +139,7 @@ extern char	g_CWD[_MAX_PATH];
 	extern int g_tempY;
 #endif
 
-// update loop¿¡ ´ëÇÑ debug message¸¦ Ãâ·ÂÇÒ±î ¸»±î?
+// update loop에 대한 debug message를 출력할까 말까?
 #if defined(OUTPUT_DEBUG) //&& defined(_DEBUG)
 	#ifdef __METROTECH_TEST__
 //		#define	OUTPUT_DEBUG_UPDATE_LOOP	
@@ -261,9 +261,9 @@ CGameUpdate::DXMouseEvent(CSDLInput::E_MOUSE_EVENT event, int x, int y, int z)
 				}
 
 				//---------------------------------------------------------
-				// Minimap¿¡ Å¬¸¯ÇÏ¸é ±×ÂÊÀ¸·Î ÀÌµ¿ÇÑ´Ù.
+				// Minimap에 클릭하면 그쪽으로 이동한다.
 				//---------------------------------------------------------
-				/* // 2001.7.14 ÁÖ¼®Ã³¸®
+				/* // 2001.7.14 주석처리
 				if (g_pSDLInput->KeyDown(DIK_RCONTROL) && g_pUserOption->DrawMinimap)
 				{
 					int x = g_x - (800 - 256) * g_pZone->GetWidth() / 256;
@@ -291,7 +291,7 @@ CGameUpdate::DXMouseEvent(CSDLInput::E_MOUSE_EVENT event, int x, int y, int z)
 				}
 
 				//---------------------------------------------------------
-				// ChattingÃ¢¿¡ extra input
+				// Chatting창에 extra input
 				//---------------------------------------------------------
 				gC_vs_ui.ChatMouseControlExtra( M_LEFTBUTTON_DOWN, g_x, g_y );
 				*/
@@ -299,7 +299,7 @@ CGameUpdate::DXMouseEvent(CSDLInput::E_MOUSE_EVENT event, int x, int y, int z)
 			break;
 
 			case CSDLInput::RIGHTUP :
-				// Áö·Ú ¸¸µå´Â °Å ÁßÁö
+				// 지뢰 만드는 거 중지
 				gC_vs_ui.EndInstallMineProgress();
 				//gC_vs_ui.EndCreateMineProgress();
 				//gC_vs_ui.EndCreateBombProgress();
@@ -307,9 +307,9 @@ CGameUpdate::DXMouseEvent(CSDLInput::E_MOUSE_EVENT event, int x, int y, int z)
 
 			//case CSDLInput::RIGHTDOWN :
 				//---------------------------------------------------------
-				// ChattingÃ¢¿¡ extra input
+				// Chatting창에 extra input
 				//---------------------------------------------------------
-				// 2001.7.14 ÁÖ¼®Ã³¸®
+				// 2001.7.14 주석처리
 				//gC_vs_ui.ChatMouseControlExtra( M_RIGHTBUTTON_DOWN, g_x, g_y );
 			//break;
 
@@ -341,7 +341,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 
 	if (event==CSDLInput::KEYDOWN)
 	{
-		if(key == 0xcc) return;		// ÀÌ°Ç ¸ÓÁö-_-?;;
+		if(key == 0xcc) return;		// 이건 머지-_-?;;
 
 		// Convert DIK scan codes to VK virtual key codes for control keys
 		// These keys need WM_KEYDOWN messages for text editing to work
@@ -385,13 +385,13 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 		{	
 //			__BEGIN_HELP_EVENT
 //				case DIK_LMENU :
-//					// [µµ¿ò¸»] alt´©¸¦¶§
+//					// [도움말] alt누를때
 //				
 //					ExecuteHelpEvent( HE_PRESSED_ALT );					
 //				break;
 //			__END_HELP_EVENT				
 
-// ¸ÓÁö ÀÌ°Ç-_-?;;; È¤½Ã ? ¾Æ´Ñµ¥-_-;
+// 머지 이건-_-?;;; 혹시 ? 아닌데-_-;
 //			case DIK_F10 :
 //				gC_vs_ui.HotKey_F10();
 //			break;
@@ -419,7 +419,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 					}
 					*/
 					/*
-					// ÀÓ½Ã...
+					// 임시...
 					g_TempInformation.Value2 = SKILL_DOUBLE_IMPACT;
 
 					if (g_TempInformation.Mode==TempInformation::MODE_SKILL_LEARN)
@@ -427,7 +427,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 						#ifdef CONNECT_SERVER
 							CGLearnSkill _CGLearnSkill;
 
-							// temp information¿¡ ÀúÀåµÈ Á¤º¸ ÀÐ±â
+							// temp information에 저장된 정보 읽기
 							_CGLearnSkill.setSkillDomainType( g_TempInformation.Value1 );
 							_CGLearnSkill.setSkillType( g_TempInformation.Value2 );
 							
@@ -465,17 +465,17 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 					//
 					//---------------------------------------------------
 					//---------------------------------------------------
-					// UI¿¡ ¾Ë¸²...
+					// UI에 알림...
 					//---------------------------------------------------
 					//
 					// [ TEST CODE ]
 					//
-					// UI¿¡¼­ ¼±ÅÃµÈ ´ë´ä
+					// UI에서 선택된 대답
 					/*
 					g_PCTalkBox.SetAnswerID( rand()%g_PCTalkBox.size() );
 
 					//---------------------------------------------------
-					// server¿¡ ¾Ë¸²
+					// server에 알림
 					//---------------------------------------------------
 					#ifdef CONNECT_SERVER
 						CGNPCAskAnswer _CGNPCAskAnswer;
@@ -527,7 +527,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 						}
 						else
 						{
-							// 5ÃÊ µ¿¾È ÁÂ¿ì ÀÜ»ó
+							// 5초 동안 좌우 잔상
 							g_pPlayer->AddEffectStatus( EFFECTSTATUS_FADE_OUT, 5*1000 );
 						}
 					}
@@ -583,14 +583,14 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 			*/
 
 			//------------------------------------
-			// È¿°úÀ½ on/off
+			// 효과음 on/off
 			//------------------------------------
 			/*
 			case DIK_E : 
 				if (g_pSDLInput->KeyDown(DIK_LCONTROL) || g_pSDLInput->KeyDown(DIK_RCONTROL))
 				{
 					//------------------------------------
-					// ¿¬ÁÖÁßÀÌ¸é.. Áß´Ü..
+					// 연주중이면.. 중단..
 					//------------------------------------
 					if (g_pUserOption->PlaySound)
 					{
@@ -615,13 +615,13 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 			*/
 
 			//------------------------------------
-			// ¹è°æ À½¾Ç on/off
+			// 배경 음악 on/off
 			//------------------------------------
 			/*
 			case DIK_B : 
 				#ifdef OUTPUT_DEBUG
 					//------------------------------------
-					// ¹ÚÁã º¯½Å test
+					// 박쥐 변신 test
 					//------------------------------------
 					if (g_pSDLInput->KeyDown(DIK_LMENU) || g_pSDLInput->KeyDown(DIK_RMENU))
 					{
@@ -641,22 +641,22 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 						}
 
 						//--------------------------------------------------
-						// ¹ÚÁã º¯½Å test
+						// 박쥐 변신 test
 						//--------------------------------------------------								
 						ExecuteActionInfoFromMainNode(
-							RESULT_MAGIC_TRANSFORM_TO_BAT,										// »ç¿ë ±â¼ú ¹øÈ£
+							RESULT_MAGIC_TRANSFORM_TO_BAT,										// 사용 기술 번호
 						
 							g_pPlayer->GetX(), g_pPlayer->GetY(), 0,
-							g_pPlayer->GetDirection(),														// »ç¿ë ¹æÇâ
+							g_pPlayer->GetDirection(),														// 사용 방향
 							
-							OBJECTID_NULL,												// ¸ñÇ¥¿¡ ´ëÇÑ Á¤º¸
+							OBJECTID_NULL,												// 목표에 대한 정보
 							g_pPlayer->GetX(), g_pPlayer->GetY(), 0, 
 							
-							0,													// ±â¼úÀÇ (³²Àº) Áö¼Ó ½Ã°£		
+							0,													// 기술의 (남은) 지속 시간		
 							
 							pResult, //NULL,
 							
-							false);			// ±â¼ú Ã·ºÎÅÍ ½ÃÀÛÇÑ´Ù.
+							false);			// 기술 첨부터 시작한다.
 
 						g_pPlayer->SetDelay( 1000 );
 					}
@@ -674,7 +674,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 					//}
 					
 					//------------------------------------
-					// ¿¬ÁÖÁßÀÌ¸é.. Áß´Ü..
+					// 연주중이면.. 중단..
 					//------------------------------------
 					if (g_pUserOption->PlayWaveMusic)
 					{
@@ -688,7 +688,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 							}
 						}
 						//------------------------------------
-						// ¾Æ´Ï¸é.. ´Ù½Ã play
+						// 아니면.. 다시 play
 						//------------------------------------
 						else 
 						{
@@ -709,7 +709,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 							}
 						}
 						//------------------------------------
-						// ¾Æ´Ï¸é.. ´Ù½Ã play
+						// 아니면.. 다시 play
 						//------------------------------------
 						else 
 						{
@@ -738,7 +738,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 				{
 					//(*g_pUserOption).DrawInterface = !(*g_pUserOption).DrawInterface;
 
-					// µµ¿ò¸» ¶ç¿î´Ù.
+					// 도움말 띄운다.
 					//(*g_pUIDialog).PopupHelpDlg();
 				}
 			break;
@@ -790,7 +790,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 				#if defined(_DEBUG) || defined(OUTPUT_DEBUG)
 					case DIK_F1 :
 					{
-						// info ´Ù½Ã ÀÐ±â 
+						// info 다시 읽기 
 						if (g_pSDLInput->KeyDown(DIK_LMENU) 
 							|| g_pSDLInput->KeyDown(DIK_RMENU))
 						{
@@ -802,7 +802,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 
 					//------------------------------------------------------------
 					//
-					// ±â¼ú »ç¿ë - packet Å×½ºÆ®¸¦ À§ÇØ¼­
+					// 기술 사용 - packet 테스트를 위해서
 					//
 					//------------------------------------------------------------
 					case DIK_L : 
@@ -817,15 +817,15 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 
 								if (pCreature!=g_pPlayer)
 								{
-									// ±â¼ú »ç¿ë
-									// ±â¼ú ½ÇÆÐ
+									// 기술 사용
+									// 기술 실패
 									//int targetID;						
 										
 									//int nth;
 									
 									MZone::CREATURE_MAP::const_iterator iCreature2;
 
-									// ±â¼ú ¼º°ø
+									// 기술 성공
 									if (rand()%2==0)
 									{
 										GCSkillToTileOK2 gcSkillToTileOK2;
@@ -899,7 +899,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 									}
 									else
 									{
-										// ±â¼ú ½ÇÆÐ
+										// 기술 실패
 										nth = rand()%g_pZone->GetCreatureNumber();
 
 										iCreature2 = g_pZone->GetCreatureBegin();
@@ -952,9 +952,9 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 ////							g_pMP3->Open("data\\music\\blood.mp3");
 ////							g_pMP3->Play( true );
 ////							g_bTestMusic = false;
-////							g_pSystemMessage->Add("Blood.mp3 ¸¦ ¿¬ÁÖÇÕ´Ï´Ù");							
+////							g_pSystemMessage->Add("Blood.mp3 를 연주합니다");							
 //						}
-//						// ALT + 1  --> °ø°Ý ¼Óµµ Slow
+//						// ALT + 1  --> 공격 속도 Slow
 						if(g_pSDLInput->KeyDown(DIK_LCONTROL))
 						{ 
 							
@@ -1038,7 +1038,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 //								event.eventType = EVENTTYPE_ZONE;
 //								event.eventFlag = EVENTFLAG_CLOUD_BACKGROUND;
 //								event.parameter3 = 2;
-//								event.eventDelay =60000; // 5 ÃÊ
+//								event.eventDelay =60000; // 5 초
 //								g_pEventManager->AddEvent(event);
 //							}
 							
@@ -1064,29 +1064,29 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 //								g_pPlayer->SetAction( ACTION_STAND );			
 //
 //								//--------------------------------------------------
-//								// ´Á´ë·Î º¯½ÅÇÏ´Â °á°ú
+//								// 늑대로 변신하는 결과
 //								//--------------------------------------------------
 //								MActionResult* pResult = new MActionResult;
 //
 //								pResult->Add( new MActionResultNodeChangeCreatureType( g_pPlayer->GetID(), 742 ) );
 //
 //								//--------------------------------------------------
-//								// ´Á´ë º¯½Å 
+//								// 늑대 변신 
 //								//--------------------------------------------------								
 //								ExecuteActionInfoFromMainNode(
-//									RESULT_SKILL_INSTALL_TURRET,										// »ç¿ë ±â¼ú ¹øÈ£
+//									RESULT_SKILL_INSTALL_TURRET,										// 사용 기술 번호
 //								
 //									g_pPlayer->GetX(), g_pPlayer->GetY(), 0,
-//									g_pPlayer->GetDirection(),														// »ç¿ë ¹æÇâ
+//									g_pPlayer->GetDirection(),														// 사용 방향
 //									
-//									OBJECTID_NULL,												// ¸ñÇ¥¿¡ ´ëÇÑ Á¤º¸
+//									OBJECTID_NULL,												// 목표에 대한 정보
 //									g_pPlayer->GetX(), g_pPlayer->GetY(), 0, 
 //									
-//									0,													// ±â¼úÀÇ (³²Àº) Áö¼Ó ½Ã°£		
+//									0,													// 기술의 (남은) 지속 시간		
 //									
 //									NULL, //NULL,
 //									
-//									false);			// ±â¼ú Ã·ºÎÅÍ ½ÃÀÛÇÑ´Ù.
+//									false);			// 기술 첨부터 시작한다.
 //
 //							}
 //							else
@@ -1103,13 +1103,13 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 							
 //							UI_RunPetStorage();SKILL_CLIENT_TEST_SUMMON_GORE_GRAND_GROUND
 //							UI_SetPetStorage(g_pStorage);
-							// start Æê ¼ÒÈ¯ ´ÜÃàÅ° °ü·Ã
+							// start 펫 소환 단축키 관련
 //							for(int i = 0; i< 10; i++)
 //								for(int j = 0; j < 6; j++)
 //								{
 //									const MItem * p_item = g_pInventory->GetItem(i, j);
 //				
-//									if (p_item) // ItemÀÌ ÀÖ´Ù.
+//									if (p_item) // Item이 있다.
 //									{
 //										if(p_item->GetItemClass() == ITEM_CLASS_PET_ITEM)
 //										{
@@ -1118,9 +1118,9 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 //										}
 //									}
 //								}
-							// end Æê ¼ÒÈ¯ ´ÜÃàÅ° °ü·Ã
+							// end 펫 소환 단축키 관련
 
-							// start npc ´ëÈ­Ã¢ °ü·Ã
+							// start npc 대화창 관련
 //							g_pPCTalkBox->Release();
 //							//---------------------------------------------------
 //							// normal
@@ -1130,28 +1130,28 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 //							int scriptID = 101;
 //							
 //							//---------------------------------------------------
-//							// PC Talk BoxÀÇ Á¤º¸ ¼³Á¤
+//							// PC Talk Box의 정보 설정
 //							//---------------------------------------------------
-//							// SetContent¶ó°í ÀÌ¸§ÀÌ µÇ¾îÀÖÁö¸¸.. SubjectÀÌ´Ù. - -;
-//							g_pPCTalkBox->SetContent( "ÇÏÇÏÇÏ" );
+//							// SetContent라고 이름이 되어있지만.. Subject이다. - -;
+//							g_pPCTalkBox->SetContent( "하하하" );
 //							g_pPCTalkBox->SetNPCID( 297 );
 //							g_pPCTalkBox->SetCreatureType( 297 );
 //							g_pPCTalkBox->SetScriptID( scriptID );
 //							
 //							//---------------------------------------------------
-//							// °¢ string Ãß°¡
+//							// 각 string 추가
 //							//---------------------------------------------------
 //							int contentSize = 2;//g_pNPCScriptTable->GetContentSize( scriptID );
 //							
 //							//for (int i=0; i<contentSize; i++)
 //							{
-//								// g_PCTalkBox¿¡ Ãß°¡
-//								g_pPCTalkBox->AddString( "¿ìÇìÇì" );
-//								g_pPCTalkBox->AddString( "Å©ÇÏÇÏ" );
+//								// g_PCTalkBox에 추가
+//								g_pPCTalkBox->AddString( "우헤헤" );
+//								g_pPCTalkBox->AddString( "크하하" );
 //							}
 //							
 //							g_pUIDialog->PopupPCTalkDlg();
-							// start npc ´ëÈ­Ã¢ °ü·Ã
+							// start npc 대화창 관련
 
 //							gC_vs_ui.AddHelpMail(6); 
 //							gC_vs_ui.AddHelpMail(0); 
@@ -1261,15 +1261,15 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 //
 //
 //								ExecuteActionInfoFromMainNode(
-//									SKILL_CLIENT_TANK_ATTACK_3,										// »ç¿ë ±â¼ú ¹øÈ£
+//									SKILL_CLIENT_TANK_ATTACK_3,										// 사용 기술 번호
 //									
 //									0, 0, 0,
-//									pCreature->GetDirection(), // »ç¿ë ¹æÇâ
+//									pCreature->GetDirection(), // 사용 방향
 //									
-//									petID,												// ¸ñÇ¥¿¡ ´ëÇÑ Á¤º¸
+//									petID,												// 목표에 대한 정보
 //									0, 0, 0, 
 //									
-//									0,													// ±â¼úÀÇ (³²Àº) Áö¼Ó ½Ã°£		
+//									0,													// 기술의 (남은) 지속 시간		
 //									
 //									NULL,
 //									
@@ -1415,15 +1415,15 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 //								
 //								g_pPlayer->SetAction( ACTION_DAMAGED );
 //								ExecuteActionInfoFromMainNode(
-//									SKILL_CLIENT_TANK_ATTACKED,										// »ç¿ë ±â¼ú ¹øÈ£
+//									SKILL_CLIENT_TANK_ATTACKED,										// 사용 기술 번호
 //									
 //									0, 0, 0,
-//									DIRECTION_DOWN, // »ç¿ë ¹æÇâ
+//									DIRECTION_DOWN, // 사용 방향
 //									
-//									g_pPlayer->GetID(),												// ¸ñÇ¥¿¡ ´ëÇÑ Á¤º¸
+//									g_pPlayer->GetID(),												// 목표에 대한 정보
 //									0, 0, 0, 
 //									
-//									0,													// ±â¼úÀÇ (³²Àº) Áö¼Ó ½Ã°£		
+//									0,													// 기술의 (남은) 지속 시간		
 //									
 //									NULL,
 //									
@@ -1441,7 +1441,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 //							event.parameter4 = EVENTBACKGROUNDID_QUEST_2;
 //							g_pEventManager->AddEvent(event);		
 						}
-						// ALT + 2  --> °ø°Ý ¼Óµµ normal
+						// ALT + 2  --> 공격 속도 normal
 						if (g_pSDLInput->KeyDown(DIK_LMENU) || g_pSDLInput->KeyDown(DIK_RMENU))
 						{
 							//g_pPlayer->SetWeaponSpeed( MCreature::WEAPON_SPEED_NORMAL);
@@ -1464,7 +1464,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 						{
 //							g_pZone->RemoveTileEffect( g_pPlayer->GetX()+3, g_pPlayer->GetY(), EFFECTSTATUS_DRAGON_TORNADO, 11000 );
 
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 							MItem* pItem = MItem::NewItem( ITEM_CLASS_SUB_INVENTORY );
 							pItem->SetID( rand()%10000 );
 							pItem->SetItemType( 0 );
@@ -1507,20 +1507,20 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 //								g_pPlayer->GetX()+2, g_pPlayer->GetY()-2, 0, 1000, NULL, false);
 //							ExecuteActionInfoFromMainNode(SKILL_CLIENT_TURRET_LASER_ATTACK,g_pPlayer->GetX()+3, g_pPlayer->GetY()-1, 0,g_pPlayer->GetDirection(),0	,	
 //								g_pPlayer->GetX()+3, g_pPlayer->GetY()-1, 0, 1000, NULL, false);
-//î      î   î î
-//î      î   î î
-//îîîîî   î î 
-//î      î   î î
-//îîîîî   î î
-//             î î
-//îîîîî   î î
-//    î   îîî î
-//    î       î î
-//îîîîîîîîî
-//        î      î
-//îîîîî      î
-//î              î
-//îîîîî      î
+//뷁      뷁   뷁 뷁
+//뷁      뷁   뷁 뷁
+//뷁뷁뷁뷁뷁   뷁 뷁 
+//뷁      뷁   뷁 뷁
+//뷁뷁뷁뷁뷁   뷁 뷁
+//             뷁 뷁
+//뷁뷁뷁뷁뷁   뷁 뷁
+//    뷁   뷁뷁뷁 뷁
+//    뷁       뷁 뷁
+//뷁뷁뷁뷁뷁뷁뷁뷁뷁
+//        뷁      뷁
+//뷁뷁뷁뷁뷁      뷁
+//뷁              뷁
+//뷁뷁뷁뷁뷁      뷁
 
 
 
@@ -1541,10 +1541,10 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 //							g_pMP3->Stop();
 //							g_pMP3->Open("data\\music\\dominator of darkness.mp3");
 //							g_pMP3->Play( true );
-//							g_pSystemMessage->Add("dominator of darkness.mp3 ¸¦ ¿¬ÁÖÇÕ´Ï´Ù");
+//							g_pSystemMessage->Add("dominator of darkness.mp3 를 연주합니다");
 //							g_bTestMusic = false;
 						}
-						// ALT + 3  --> °ø°Ý ¼Óµµ Fast
+						// ALT + 3  --> 공격 속도 Fast
 						if (g_pSDLInput->KeyDown(DIK_LMENU) || g_pSDLInput->KeyDown(DIK_RMENU))
 						{
 							//g_pPlayer->SetWeaponSpeed( MCreature::WEAPON_SPEED_FAST );
@@ -1576,7 +1576,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 //							g_pMP3->Stop();
 //							g_pMP3->Open("data\\music\\oblivion.mp3");
 //							g_pMP3->Play( true );
-//							g_pSystemMessage->Add("oblivion.mp3 ¸¦ ¿¬ÁÖÇÕ´Ï´Ù");
+//							g_pSystemMessage->Add("oblivion.mp3 를 연주합니다");
 //							g_bTestMusic = false;
 						}
 #ifdef __METROTECH_TEST__
@@ -1595,7 +1595,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 //							g_pMP3->Stop();
 //							g_pMP3->Open("data\\music\\rest.mp3");
 //							g_pMP3->Play( true );
-//							g_pSystemMessage->Add("rest.mp3 ¸¦ ¿¬ÁÖÇÕ´Ï´Ù");
+//							g_pSystemMessage->Add("rest.mp3 를 연주합니다");
 //							g_bTestMusic = false;
 //						}
 						
@@ -1621,7 +1621,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 //								g_pMP3->Stop();
 //								g_pMP3->Open("data\\music\\ruin.mp3");
 //								g_pMP3->Play( true );
-//								g_pSystemMessage->Add("ruin.mp3 ¸¦ ¿¬ÁÖÇÕ´Ï´Ù");
+//								g_pSystemMessage->Add("ruin.mp3 를 연주합니다");
 //								g_bTestMusic = false;
 //								
 //								(*g_pUserOption).BlendingShadow = !(*g_pUserOption).BlendingShadow;
@@ -1644,7 +1644,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 //								g_pMP3->Stop();
 //								g_pMP3->Open("data\\music\\silence of battlefield.mp3");
 //								g_pMP3->Play( true );
-//								g_pSystemMessage->Add("silence of battlefield.mp3 ¸¦ ¿¬ÁÖÇÕ´Ï´Ù");
+//								g_pSystemMessage->Add("silence of battlefield.mp3 를 연주합니다");
 //								g_bTestMusic = false;
 //							}				
 //						}
@@ -1665,7 +1665,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 //							g_pMP3->Stop();
 //							g_pMP3->Open("data\\music\\underworld.mp3");
 //							g_pMP3->Play( true );
-//							g_pSystemMessage->Add("underworld.mp3 ¸¦ ¿¬ÁÖÇÕ´Ï´Ù");
+//							g_pSystemMessage->Add("underworld.mp3 를 연주합니다");
 //							g_bTestMusic = false;
 //						}
 						break;
@@ -1750,24 +1750,24 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 									int scriptID = 101;
 									
 									//---------------------------------------------------
-									// PC Talk BoxÀÇ Á¤º¸ ¼³Á¤
+									// PC Talk Box의 정보 설정
 									//---------------------------------------------------
-									// SetContent¶ó°í ÀÌ¸§ÀÌ µÇ¾îÀÖÁö¸¸.. SubjectÀÌ´Ù. - -;
-									g_pPCTalkBox->SetContent( "ÇÏÇÏÇÏ" );
+									// SetContent라고 이름이 되어있지만.. Subject이다. - -;
+									g_pPCTalkBox->SetContent( "하하하" );
 									g_pPCTalkBox->SetNPCID( 297 );
 									g_pPCTalkBox->SetCreatureType( 297 );
 									g_pPCTalkBox->SetScriptID( scriptID );
 									
 									//---------------------------------------------------
-									// °¢ string Ãß°¡
+									// 각 string 추가
 									//---------------------------------------------------
 									int contentSize = 2;//g_pNPCScriptTable->GetContentSize( scriptID );
 									
 									//for (int i=0; i<contentSize; i++)
 									{
-										// g_PCTalkBox¿¡ Ãß°¡
-										g_pPCTalkBox->AddString( "¿ìÇìÇì" );
-										g_pPCTalkBox->AddString( "Å©ÇÏÇÏ" );
+										// g_PCTalkBox에 추가
+										g_pPCTalkBox->AddString( "우헤헤" );
+										g_pPCTalkBox->AddString( "크하하" );
 									}
 									
 									g_pUIDialog->PopupPCTalkDlg();
@@ -1805,7 +1805,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 //							pFakeCreature->SetFakeCreatureFastMoveAction(g_pPlayer->GetX()+10, g_pPlayer->GetY()+10, 0, 0);
 //							
 //							//------------------------------------------------------
-//							// Fake Creature¸¦ Zone¿¡ Ãß°¡
+//							// Fake Creature를 Zone에 추가
 //							//------------------------------------------------------
 //							if (!g_pZone->AddFakeCreature( pFakeCreature ))
 //							{
@@ -1850,10 +1850,10 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 										int strValue = value/4;
 										int intValue = value - strValue;
 
-										// NPC Ã³¸® packetÀ» º¸³½´Ù.
+										// NPC 처리 packet을 보낸다.
 										CGUseBonusPoint _CGUseBonusPoint;
 
-										// 1/4Àº STRÀ» ¿Ã¸°´Ù.
+										// 1/4은 STR을 올린다.
 										_CGUseBonusPoint.setWhich( INC_STR );
 
 										for (int i=0; i<strValue; i++)
@@ -1865,7 +1865,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 											#endif
 										}
 										
-										// 3/4´Â INT¸¦ ¿Ã¸°´Ù.
+										// 3/4는 INT를 올린다.
 										_CGUseBonusPoint.setWhich( INC_INT );
 
 										for (int i=0; i<strValue; i++)
@@ -1888,7 +1888,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 
 				//------------------------------------------------------------
 				//
-				// À½¾Ç º¼·ý Á¶Àý
+				// 음악 볼륨 조절
 				//
 				//------------------------------------------------------------				
 				case DIK_SUBTRACT :
@@ -1948,7 +1948,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 				case DIK_E : 
 					if (g_pSDLInput->KeyDown(DIK_LCONTROL) || g_pSDLInput->KeyDown(DIK_RCONTROL))
 					{
-						if (g_HISTORY_LINE > 4)//HISTORY_LINE) ¤»¤»
+						if (g_HISTORY_LINE > 4)//HISTORY_LINE) ㅋㅋ
 						{
 							g_HISTORY_LINE = 4;
 						}
@@ -1958,7 +1958,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 						}
 					}
 					//---------------------------------------------------------
-					// Wolf º¯½Å test
+					// Wolf 변신 test
 					//---------------------------------------------------------
 					else if (g_pSDLInput->KeyDown(DIK_LMENU) || g_pSDLInput->KeyDown(DIK_RMENU))
 					{
@@ -1978,22 +1978,22 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 						}
 
 						//--------------------------------------------------
-						// ´Á´ë º¯½Å test
+						// 늑대 변신 test
 						//--------------------------------------------------								
 						ExecuteActionInfoFromMainNode(
-							RESULT_MAGIC_TRANSFORM_TO_WOLF,										// »ç¿ë ±â¼ú ¹øÈ£
+							RESULT_MAGIC_TRANSFORM_TO_WOLF,										// 사용 기술 번호
 						
 							g_pPlayer->GetX(), g_pPlayer->GetY(), 0,
-							g_pPlayer->GetDirection(),														// »ç¿ë ¹æÇâ
+							g_pPlayer->GetDirection(),														// 사용 방향
 							
-							OBJECTID_NULL,												// ¸ñÇ¥¿¡ ´ëÇÑ Á¤º¸
+							OBJECTID_NULL,												// 목표에 대한 정보
 							g_pPlayer->GetX(), g_pPlayer->GetY(), 0, 
 							
-							0,													// ±â¼úÀÇ (³²Àº) Áö¼Ó ½Ã°£		
+							0,													// 기술의 (남은) 지속 시간		
 							
 							pResult, //NULL,
 							
-							false);			// ±â¼ú Ã·ºÎÅÍ ½ÃÀÛÇÑ´Ù.
+							false);			// 기술 첨부터 시작한다.
 
 						g_pPlayer->SetDelay( 1000 );
 					}
@@ -2001,12 +2001,12 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 				break;
 				*/
 				//------------------------------------------------------------
-				// Çï±â
+				// 헬기
 				//------------------------------------------------------------
 				/*
 				case DIK_H :
 				{
-					// helicopter Å×½ºÆ®
+					// helicopter 테스트
 					if (g_pSDLInput->KeyDown(DIK_LMENU) || g_pSDLInput->KeyDown(DIK_RMENU))
 					{
 						TYPE_OBJECTID creatureID = g_pPlayer->GetID();
@@ -2059,7 +2059,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 				case DIK_P : 
 				{					
 					//------------------------------------------------------------
-					// ¿ÞÂÊ ´©¸£¸é µé¾î°¡±â
+					// 왼쪽 누르면 들어가기
 					//------------------------------------------------------------
 					if (g_pSDLInput->KeyDown(DIK_LMENU))
 					{
@@ -2070,22 +2070,22 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 							MCreature* pCreature = (*iCreature).second;
 
 							//--------------------------------------------------
-							// Player, NPC°¡ ¾Æ´Ñ °æ¿ì
+							// Player, NPC가 아닌 경우
 							//--------------------------------------------------					
 							if (pCreature->GetID()!=g_pPlayer->GetID()
 								&& pCreature->IsVampire()
 								&& !pCreature->IsNPC())
 							{					
 								AddVampirePortal(
-										0,								// ÀÌÆåÆ®ÀÇ OID
-										pCreature->GetName(),								// Æ÷Å» ÁÖÀÎ
-										pCreature->GetX(), pCreature->GetY(),		// Æ÷Å»ÀÇ ÁÂÇ¥
-										16*10,							// Æ÷Å»ÀÇ Áö¼Ó ½Ã°£
+										0,								// 이펙트의 OID
+										pCreature->GetName(),								// 포탈 주인
+										pCreature->GetX(), pCreature->GetY(),		// 포탈의 좌표
+										16*10,							// 포탈의 지속 시간
 										
-										// ¸ñÇ¥ Á¤º¸
-										rand()%4+11,							// Æ÷Å»ÀÇ ¸ñÇ¥ Á¸ ID
-										rand()%255,			// Æ÷Å»ÀÇ ¸ñÇ¥ ÁÂÇ¥ x
-										rand()%255,			// Æ÷Å»ÀÇ ¸ñÇ¥ ÁÂÇ¥ y
+										// 목표 정보
+										rand()%4+11,							// 포탈의 목표 존 ID
+										rand()%255,			// 포탈의 목표 좌표 x
+										rand()%255,			// 포탈의 목표 좌표 y
 
 										(rand()%2? true : false) );
 
@@ -2100,7 +2100,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 						}
 					}
 					//------------------------------------------------------------
-					// ¿À¸¥ÂÊ ´©¸£¸é ³ª¿À±â
+					// 오른쪽 누르면 나오기
 					//------------------------------------------------------------
 					else if (g_pSDLInput->KeyDown(DIK_RMENU))
 					{
@@ -2111,15 +2111,15 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 							&& !pCreature->IsNPC())
 						{
 							AddVampirePortal(
-										0,								// ÀÌÆåÆ®ÀÇ OID
-										pCreature->GetName(),								// Æ÷Å» ÁÖÀÎ
-										pCreature->GetX(), pCreature->GetY(),		// Æ÷Å»ÀÇ ÁÂÇ¥
-										16*10,							// Æ÷Å»ÀÇ Áö¼Ó ½Ã°£
+										0,								// 이펙트의 OID
+										pCreature->GetName(),								// 포탈 주인
+										pCreature->GetX(), pCreature->GetY(),		// 포탈의 좌표
+										16*10,							// 포탈의 지속 시간
 										
-										// ¸ñÇ¥ Á¤º¸
-										rand()%4+11,							// Æ÷Å»ÀÇ ¸ñÇ¥ Á¸ ID
-										rand()%255,			// Æ÷Å»ÀÇ ¸ñÇ¥ ÁÂÇ¥ x
-										rand()%255,			// Æ÷Å»ÀÇ ¸ñÇ¥ ÁÂÇ¥ y
+										// 목표 정보
+										rand()%4+11,							// 포탈의 목표 존 ID
+										rand()%255,			// 포탈의 목표 좌표 x
+										rand()%255,			// 포탈의 목표 좌표 y
 
 										(rand()%2? true : false) );
 
@@ -2146,7 +2146,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 							MCreature* pCreature = (*iCreature).second;
 
 							//--------------------------------------------------
-							// Player, NPC°¡ ¾Æ´Ñ °æ¿ì
+							// Player, NPC가 아닌 경우
 							//--------------------------------------------------					
 							if (pCreature->GetID()!=g_pPlayer->GetID()
 								&& pCreature->IsVampire()
@@ -2225,7 +2225,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 
 				//------------------------------------------------------------
 				//
-				// ÄÄÇ»ÅÍ ¶ç¿ì±â
+				// 컴퓨터 띄우기
 				//
 				//------------------------------------------------------------
 				case DIK_D : 
@@ -2237,7 +2237,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 
 				//------------------------------------------------------------
 				//
-				// Ä³¸¯ÅÍ Ãß°¡ - packet Å×½ºÆ®¸¦ À§ÇØ¼­
+				// 캐릭터 추가 - packet 테스트를 위해서
 				//
 				//------------------------------------------------------------
 				case DIK_K : 
@@ -2263,7 +2263,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 
 
 							//------------------------------------------------------------
-							// Vampire Ãß°¡
+							// Vampire 추가
 							//------------------------------------------------------------
 							if (rand()%2)
 							{
@@ -2272,7 +2272,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 								pCreature->SetZone( g_pZone );
 								
 								//--------------------------------------------------
-								// CreatureType ¼³Á¤
+								// CreatureType 설정
 								//--------------------------------------------------
 								if (rand()%3)
 								{
@@ -2289,7 +2289,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 
 								pCreature->SetName( name );
 
-								// ÀÓ½Ã·Î
+								// 임시로
 								pCreature->SetGuildNumber( 2 );
 
 								pCreature->SetGroundCreature();
@@ -2302,7 +2302,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 								pCreature->SetCurrentDirection( dir );
 								pCreature->SetAction( ACTION_STAND );
 
-								// »ö±ò
+								// 색깔
 								pCreature->SetBodyColor1( rand()%MAX_COLORSET );
 								pCreature->SetBodyColor2( rand()%MAX_COLORSET );
 								
@@ -2318,7 +2318,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 								}
 							}
 							//------------------------------------------------------------
-							// Slayer Ãß°¡
+							// Slayer 추가
 							//------------------------------------------------------------
 							else
 							{
@@ -2339,16 +2339,16 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 								pCreatureWear->SetCurrentDirection( dir );
 								pCreatureWear->SetAction( ACTION_STAND );
 
-								// ÇÇºÎ»ö
+								// 피부색
 								pCreatureWear->SetBodyColor2( rand()%MAX_COLORSET );
 
 								pCreatureWear->SetStatus( MODIFY_MAX_HP, 80 );
 								pCreatureWear->SetStatus( MODIFY_CURRENT_HP, 100 );
 
-								// ÀÌ¸§
+								// 이름
 								pCreatureWear->SetName( name );
 
-								// ÀÓ½Ã·Î NPCº¹ÀåÀ» ÀÔÈù´Ù.
+								// 임시로 NPC복장을 입힌다.
 								SetAddonToSlayer( pCreatureWear, 250 );
 
 								
@@ -2365,7 +2365,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 				
 
 				//-------------------------------------------------------------
-				// ¹æÇâ ¹Ù²Ù±â
+				// 방향 바꾸기
 				//-------------------------------------------------------------
 				case DIK_LEFT :
 				case DIK_RIGHT :
@@ -2377,7 +2377,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 						MCreature* pCreature = (*iCreature).second;
 
 						//--------------------------------------------------
-						// Player, NPC°¡ ¾Æ´Ñ °æ¿ì
+						// Player, NPC가 아닌 경우
 						//--------------------------------------------------					
 						if (pCreature->GetID()!=g_pPlayer->GetID()
 							&& !pCreature->IsNPC())
@@ -2402,7 +2402,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 				break;
 
 				//------------------------------------
-				// HP È¸º¹ test
+				// HP 회복 test
 				//------------------------------------
 				case DIK_R : 
 					if (g_pSDLInput->KeyDown(DIK_LMENU) || g_pSDLInput->KeyDown(DIK_RMENU))
@@ -2416,7 +2416,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 
 				//------------------------------------------------------------
 				//
-				// zone ÀÌµ¿ ÀÚµ¿..
+				// zone 이동 자동..
 				//
 				//------------------------------------------------------------
 				case DIK_LBRACKET : case DIK_RBRACKET :
@@ -2427,12 +2427,12 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 
 						if (key==DIK_LBRACKET)
 						{
-							// ½½·¹ÀÌ¾î ±æµå
+							// 슬레이어 길드
 							strcpy(str, "*warp 3 229 52");
 						}
 						else
 						{
-							// ¹ìÆÄÀÌ¾î ±æµå
+							// 뱀파이어 길드
 							sprintf(str, "*warp 9 55 78");
 						}
 
@@ -2500,7 +2500,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 //								{
 //									AddNewInventoryEffect( pItem->GetID(),
 //														RESULT_MAGIC_CREATE_HOLY_WATER,
-//														80	// 5ÃÊ
+//														80	// 5초
 //													);
 //								}
 //							}
@@ -2632,13 +2632,13 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 						}
 
 						#ifdef __FIX_GUNFRAME__
-							// ÀÓ½Ã ÃÑ ºÒ²É
+							// 임시 총 불꽃
 							g_pPlayer->ClearAttachEffect();
 							MAttachEffect* pEffect = g_pPlayer->CreateAttachEffect( 
 																(*g_pActionInfoTable)[ac].GetActionEffectSpriteType(), 
 																//(*g_pActionInfoTable)[m_nUsedActionInfo].GetDelay()
 																0xFFFF
-																);	// Áö¼Ó ½Ã°£
+																);	// 지속 시간
 
 							if (pEffect != NULL)
 							{
@@ -2646,7 +2646,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 
 								pEffect->SetLink( ac, NULL );
 
-								// ºÙ¾î¾ß ÇÏ´Â Ä³¸¯ÅÍ
+								// 붙어야 하는 캐릭터
 								pEffect->SetAttachCreatureID( 1 );			
 							}
 						#endif
@@ -2655,10 +2655,10 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 					
 						MMagazine* pMagazine = (MMagazine*)MItem::NewItem( (ITEM_CLASS)ITEM_CLASS_MAGAZINE );
 
-						// ÀÇ¹Ì ¾øÀ½ - -;
+						// 의미 없음 - -;
 						pMagazine->SetID( 0 );
 
-						// ÀÌ°Å´Â ÃÑ¿¡ ¸ÂÃç¼­ ÇØÁà¾ßµÈ´Ù.
+						// 이거는 총에 맞춰서 해줘야된다.
 						for (int j=0; j<g_ItemTable[ITEM_CLASS_MAGAZINE].GetSize(); j++)			
 						{
 							pMagazine->SetItemType(	j );
@@ -2669,14 +2669,14 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 							}
 						}
 
-						// ÀÇ¹Ì ¾øÀ½
+						// 의미 없음
 						pMagazine->SetItemOption( 0 );
 
-						// ÅºÃ¢ °³¼ö
+						// 탄창 개수
 						pMagazine->SetNumber( 0xFFFF );
 
 						//------------------------------------
-						// ÅºÃ¢ ¼³Á¤
+						// 탄창 설정
 						//------------------------------------
 						pGunItem->SetMagazine( pMagazine );
 
@@ -2692,14 +2692,14 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 					if (g_pSDLInput->KeyDown(DIK_LCONTROL) || g_pSDLInput->KeyDown(DIK_RCONTROL))
 					{
 						//------------------------------------------------------
-						// »ç¿ëÀÚ
+						// 사용자
 						//------------------------------------------------------
 						MCreature* pCreature = g_pZone->GetCreature( 1000 );
 
 						if (pCreature!=NULL)
 						{
 							//------------------------------------------------------
-							// TileOK2·Î ÀÎÇÑ °á°ú 
+							// TileOK2로 인한 결과 
 							//------------------------------------------------------
 							MActionResult* pResult = new MActionResult;
 	
@@ -2713,16 +2713,16 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 										);
 								
 							//------------------------------------------------------
-							// TileOK2·Î ÀÎÇÑ °á°ú Ãß°¡
+							// TileOK2로 인한 결과 추가
 							//------------------------------------------------------
 							//Duration_t	m_Duration;
 							pCreature->PacketSpecialActionToSector(
 												MAGIC_LIGHT, 
 												g_pPlayer->GetX(), g_pPlayer->GetY(),
-												pResult						// °á°ú
+												pResult						// 결과
 							);
 
-							// ¹æÇâÀ» ¹Ù¶óº¸±â
+							// 방향을 바라보기
 							pCreature->SetDirectionToPosition(g_pPlayer->GetX(), g_pPlayer->GetY());
 					
 						}
@@ -2744,7 +2744,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 						}
 						else
 						{
-							// Á×Àº °æ¿ì..
+							// 죽은 경우..
 							g_pPlayer->SetDead();						
 						}
 					}
@@ -2785,14 +2785,14 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 //-----------------------------------------------------------------------------
 // ProcessInput RButton Down
 //-----------------------------------------------------------------------------
-// pObject¿Í °ü·Ã..ÀÌ ÀÖÀ» ¼öµµ ÀÖ°í..
+// pObject와 관련..이 있을 수도 있고..
 //-----------------------------------------------------------------------------
 void
 ProcessInputRButtonDown(MObject* pObject, bool bForceAttack = false)
 {
 	g_bRButtonDown = TRUE;
 	
-	// ¼±ÅÃµÈ sector°¡ ¾ø°Ô ÇÑ´Ù.
+	// 선택된 sector가 없게 한다.
 	if (g_pTopView!=NULL)
 	{
 		g_pTopView->SetSelectedSectorNULL();
@@ -2859,10 +2859,10 @@ ProcessInputRButtonDown(MObject* pObject, bool bForceAttack = false)
 	} else
 	//---------------------------------------------------------------
 	// 
-	// ¿ÀÅä¹ÙÀÌ¸¦ Å¸°í ÀÖ´Â °æ¿ì 
+	// 오토바이를 타고 있는 경우 
 	//
 	//---------------------------------------------------------------
-	// ¿ÀÅä¹ÙÀÌ¿¡¼­ ³»¸°´Ù.
+	// 오토바이에서 내린다.
 	//---------------------------------------------------------------
 	if (g_pPlayer->GetMoveDevice()==MCreature::MOVE_DEVICE_RIDE
 		&& g_pPlayer->IsStop()
@@ -2895,7 +2895,7 @@ ProcessInputRButtonDown(MObject* pObject, bool bForceAttack = false)
 	}
 	//---------------------------------------------------------------
 	//
-	// Burrow µÈ °æ¿ì ¶¥À¸·Î ¼Ú¾Æ³ª¿Â´Ù´Â packetÀ» º¸³½´Ù.
+	// Burrow 된 경우 땅으로 솟아나온다는 packet을 보낸다.
 	//
 	//---------------------------------------------------------------
 	else if (g_pPlayer->IsUndergroundCreature())
@@ -2920,7 +2920,7 @@ ProcessInputRButtonDown(MObject* pObject, bool bForceAttack = false)
 	}
 	//---------------------------------------------------------------
 	//
-	// object/tile¿¡ ±â¼úÀ» »ç¿ëÇÏ´Â °æ¿ì 
+	// object/tile에 기술을 사용하는 경우 
 	//
 	//---------------------------------------------------------------
 	else
@@ -2929,7 +2929,7 @@ ProcessInputRButtonDown(MObject* pObject, bool bForceAttack = false)
 			DEBUG_ADD("TileSkill");
 		#endif
 
-		// sector ¼±ÅÃÇÏ±â
+		// sector 선택하기
 		//g_SelectSector = g_pTopView->GetSelectedSector(g_x, g_y);
 		//g_pTopView->SetSelectedSector(g_SelectSector.x, g_SelectSector.y);
 
@@ -2937,7 +2937,7 @@ ProcessInputRButtonDown(MObject* pObject, bool bForceAttack = false)
 		//MObject*	pObject = g_pTopView->GetSelectedObject(g_x, g_y);
 	
 		//--------------------------------------------------
-		// ¼±ÅÃÇÑ °÷¿¡ Object°¡ ¾øÀ¸¸é ..
+		// 선택한 곳에 Object가 없으면 ..
 		//--------------------------------------------------
 		if (pObject == NULL)
 		{		
@@ -2945,25 +2945,25 @@ ProcessInputRButtonDown(MObject* pObject, bool bForceAttack = false)
 			//g_pPlayer->TraceNextNULL();
 
 			//--------------------------------------------------
-			// ÀÚ½ÅÇÑÅ× Æ¯¼ö ±â¼ú »ç¿ë
+			// 자신한테 특수 기술 사용
 			//--------------------------------------------------
 			if (g_pPlayer->SelfSpecialAction())
 			{
 				g_pPlayer->SetRepeatAction();
 			}
 			//--------------------------------------------------
-			// ÀÚ½ÅÇÑÅ× »ç¿ëÇÏ´Â Æ¯¼ö ±â¼úÀÌ ¾Æ´Ñ °æ¿ì
+			// 자신한테 사용하는 특수 기술이 아닌 경우
 			//--------------------------------------------------				
 			else if (!g_pPlayer->IsSpecialActionInfoTargetSelf())
 			{
 				g_SelectSector = g_pTopView->GetSelectedSector(g_x, g_y);
 
 				//--------------------------------------------------				
-				// Zone¿¡ Æ¯¼ö ±â¼úÀ» »ç¿ëÇÑ´Ù.
+				// Zone에 특수 기술을 사용한다.
 				//--------------------------------------------------				
 				if (g_pPlayer->TraceSectorToSpecialAction( g_SelectSector.x, g_SelectSector.y ))
 				{
-					// ¼±ÅÃµÈ Sector·Î Ç¥½ÃÇÑ´Ù.
+					// 선택된 Sector로 표시한다.
 					g_pTopView->SetSelectedSector( g_SelectSector );
 				
 					g_pPlayer->SetRepeatAction();
@@ -2973,13 +2973,13 @@ ProcessInputRButtonDown(MObject* pObject, bool bForceAttack = false)
 			}
 
 			//----------------------------------
-			// TileÀÌ³ª ÀÚ½Å¿¡°Ô ÇÏ´Â Çàµ¿ ¹Ýº¹ ¼³Á¤
+			// Tile이나 자신에게 하는 행동 반복 설정
 			//----------------------------------						
 			g_pTopView->SetSelectedSectorNULL();
 			
 		}		
 		//--------------------------------------------------
-		// ¼±ÅÃµÈ Object¿¡ ´ëÇØ¼­ 
+		// 선택된 Object에 대해서 
 		//--------------------------------------------------
 		else 
 		{				
@@ -2994,11 +2994,11 @@ ProcessInputRButtonDown(MObject* pObject, bool bForceAttack = false)
 				//--------------------------------------------------
 				case MObject::TYPE_CREATURE :		
 				{
-					// ¸ñÇ¥°¡ µÇ´Â Creature
+					// 목표가 되는 Creature
 					MCreature* pCreature = ((MCreature*)pObject);
 					
 					//--------------------------------------------------
-					// ´Ù¸¥ ¾Ö´ú¿¡°Ô »ç¿ëÇÏ´Â°Ç°¡?
+					// 다른 애덜에게 사용하는건가?
 					//--------------------------------------------------
 					if (g_pPlayer->TraceCreatureToSpecialAction( pCreature->GetID(), bForceAttack ))
 					{
@@ -3009,9 +3009,9 @@ ProcessInputRButtonDown(MObject* pObject, bool bForceAttack = false)
 					else if (!g_pPlayer->IsSpecialActionInfoTargetOther())
 					{
 						//--------------------------------------------------
-						// (!) ´Ù¸¥ Creature¿¡ »ç¿ëÇÏ´Â°Ô ¾Æ´Ò °æ¿ì
+						// (!) 다른 Creature에 사용하는게 아닐 경우
 						//--------------------------------------------------
-						// ÀÚ½ÅÇÑÅ× Æ¯¼ö ±â¼ú »ç¿ë
+						// 자신한테 특수 기술 사용
 						if (g_pPlayer->SelfSpecialAction())
 						{
 							g_pPlayer->SetRepeatAction();
@@ -3019,10 +3019,10 @@ ProcessInputRButtonDown(MObject* pObject, bool bForceAttack = false)
 						else
 						{	
 							//--------------------------------------------------
-							// ÀÚ½Å¿¡°Ô »ç¿ëÇÏ´Â°Ô ¾Æ´Ñ °æ¿ì
+							// 자신에게 사용하는게 아닌 경우
 							//--------------------------------------------------
-							// ¼±ÅÃµÆ´ø CreatureÀÇ ÁÂÇ¥ÀÇ ..
-							// Zone¿¡ Æ¯¼ö ±â¼úÀ» »ç¿ëÇÒ±î?
+							// 선택됐던 Creature의 좌표의 ..
+							// Zone에 특수 기술을 사용할까?
 							if (!g_pPlayer->IsSpecialActionInfoTargetSelf()
 								&& g_pPlayer->TraceSectorToSpecialAction( pCreature->GetX(), pCreature->GetY()))
 							{
@@ -3034,7 +3034,7 @@ ProcessInputRButtonDown(MObject* pObject, bool bForceAttack = false)
 					}
 					
 					//----------------------------------
-					// ¼±ÅÃ sectorÇ¥½Ã ¾ø¾Ö±â
+					// 선택 sector표시 없애기
 					//----------------------------------
 					g_pTopView->SetSelectedSectorNULL();
 				}
@@ -3043,11 +3043,11 @@ ProcessInputRButtonDown(MObject* pObject, bool bForceAttack = false)
 				//--------------------------------------------------
 				// Item
 				//--------------------------------------------------
-				// ItemÀÏ °æ¿ì´Â.. ÀÚ½ÅÇÑÅ× »ç¿ëÇÏ°Å³ª Zone¿¡ »ç¿ëÇÑ´Ù.
+				// Item일 경우는.. 자신한테 사용하거나 Zone에 사용한다.
 				case MObject::TYPE_ITEM :		
 				{
 					//--------------------------------------------------
-					// ÀÚ½ÅÇÑÅ× Æ¯¼ö ±â¼ú »ç¿ë
+					// 자신한테 특수 기술 사용
 					//--------------------------------------------------
 					if (g_pPlayer->SelfSpecialAction())
 					{
@@ -3056,22 +3056,22 @@ ProcessInputRButtonDown(MObject* pObject, bool bForceAttack = false)
 					else
 					{	
 						//--------------------------------------------------
-						// ÀÚ½ÅÇÑÅ× »ç¿ëÇÏ´Â°Ô ¾Æ´Ñ °æ¿ì..
+						// 자신한테 사용하는게 아닌 경우..
 						//--------------------------------------------------
-						// ¸ñÇ¥°¡ µÇ´Â Creature
+						// 목표가 되는 Creature
 						if (!g_pPlayer->IsSpecialActionInfoTargetSelf())
 						{
 							MItem* pItem = ((MItem*)pObject);
 
 							if (pItem!=NULL)
 							{
-								// ¿ÍÀÏµå ¿ïÇÁ¸¦ ½ÃÃ¼ÇÑÅ× ½èÀ»¶§ ¿¹¿Ü Ã³¸®
+								// 와일드 울프를 시체한테 썼을때 예외 처리
 								if(g_pPlayer->GetSpecialActionInfo() == SKILL_WILD_WOLF)
 								{
 									g_pPlayer->UseWildWolf_Corpse(pItem);
 								}
-								// ¼±ÅÃµÆ´ø CreatureÀÇ ÁÂÇ¥ÀÇ ..
-								// Zone¿¡ Æ¯¼ö ±â¼úÀ» »ç¿ëÇÑ´Ù.
+								// 선택됐던 Creature의 좌표의 ..
+								// Zone에 특수 기술을 사용한다.
 								else if (g_pPlayer->TraceSectorToSpecialAction( pItem->GetX(), pItem->GetY()))
 								{
 									g_pPlayer->SetRepeatAction();
@@ -3173,7 +3173,7 @@ CGameUpdate::ProcessInput()
 
 
 	//-----------------------------------------------
-	// packet ÀÌµ¿ Å×½ºÆ®
+	// packet 이동 테스트
 	//-----------------------------------------------
 	#ifdef OUTPUT_DEBUG
 		if (g_pSDLInput->KeyDown(DIK_M) 
@@ -3210,7 +3210,7 @@ CGameUpdate::ProcessInput()
 	// LButton Up
 	//---------------------------------------------------	
 	if (g_bLButtonDown
-		// LÀÌ UpÀÌ°Å³ª.. RÀÌ DownÀÎ °æ¿ì
+		// L이 Up이거나.. R이 Down인 경우
 		&& (g_pSDLInput->m_lb_up	|| g_pSDLInput->m_rb_down)
 #ifdef __METROTECH_TEST__
 		&& !g_bCButtonDown
@@ -3223,12 +3223,12 @@ CGameUpdate::ProcessInput()
 
 		g_bLButtonDown = FALSE;
 
-		// ÁÖÀ§ÀÇ ´©±º°¡¸¦ °è¼Ó °ø°ÝÇÏ´Â mode¸¦ ÇØÁ¦ÇÑ´Ù.
+		// 주위의 누군가를 계속 공격하는 mode를 해제한다.
 		g_pPlayer->UnSetLockMode();
 	
 		if (g_pPlayer->IsRepeatAction())
 		{
-			// ¹öÆ°À» ¶¼¾úÀ¸¹Ç·Î Çàµ¿ ¹Ýº¹À» Ãë¼ÒÇÑ´Ù.
+			// 버튼을 떼었으므로 행동 반복을 취소한다.
 			g_pPlayer->UnSetRepeatAction();
 			//g_pPlayer->TraceNextNULL();
 
@@ -3239,14 +3239,14 @@ CGameUpdate::ProcessInput()
 		else 
 		{		
 			//---------------------------------------------------	
-			// itemÀ» µé°í ÀÖÁö ¾ÊÀº °æ¿ì
+			// item을 들고 있지 않은 경우
 			//---------------------------------------------------	
-			// ¼±ÅÃµÈ sector·Î Á¤ÇÑ´Ù.
+			// 선택된 sector로 정한다.
 			POINT point;
 			g_pPlayer->GetNextDestination( point );		
 			if (point.x==SECTORPOSITION_NULL || point.y==SECTORPOSITION_NULL)
 			{
-				// ÇöÀç °¡°í ÀÖ´Â °÷ÀÌ ¾øÀ¸¸é
+				// 현재 가고 있는 곳이 없으면
 				g_pPlayer->GetDestination( point );
 				if (point.x==SECTORPOSITION_NULL || point.y==SECTORPOSITION_NULL)
 				{
@@ -3268,7 +3268,7 @@ CGameUpdate::ProcessInput()
 	// RButton Up
 	//---------------------------------------------------	
 	if (g_bRButtonDown
-		// RÀÌ UpÀÌ°Å³ª. LÀÌ DownÀÎ °æ¿ì
+		// R이 Up이거나. L이 Down인 경우
 		&& (g_pSDLInput->m_rb_up || g_pSDLInput->m_lb_down)
 #ifdef __METROTECH_TEST__
 		&& !g_bCButtonDown
@@ -3289,7 +3289,7 @@ CGameUpdate::ProcessInput()
 		{
 			if (g_pPlayer->IsRepeatAction())
 			{
-				// ¹öÆ°À» ¶¼¾úÀ¸¹Ç·Î Çàµ¿ ¹Ýº¹À» Ãë¼ÒÇÑ´Ù.
+				// 버튼을 떼었으므로 행동 반복을 취소한다.
 				g_pPlayer->UnSetRepeatAction();
 				//g_pPlayer->TraceNextNULL();
 
@@ -3321,7 +3321,7 @@ CGameUpdate::ProcessInput()
 	//if (gC_vs_ui.MouseControl(M_MOVING, g_x, g_y))
 	//	return;
 
-	// Àü½ÃÈ¸¿ë Client´Â interface¸¦ ¾È ±×·ÁÁÙ¶§°¡ ÀÖ´Ù.
+	// 전시회용 Client는 interface를 안 그려줄때가 있다.
 	//#ifdef __EXPO_CLIENT__	
 	//	if ((*g_pUserOption).DrawInterface)
 	//	{
@@ -3413,7 +3413,7 @@ CGameUpdate::ProcessInput()
 	}
 	
 	//#ifdef OUTPUT_DEBUG
-	// Ã¤ÆÃ
+	// 채팅
 //		if (gC_vs_ui.ChatMouseControlExtra( M_MOVING, g_x, g_y ))
 //			return;
 	//#endif
@@ -3442,7 +3442,7 @@ CGameUpdate::ProcessInput()
 	#endif
 
 	//---------------------------------------------------	
-	// ItemName List Ãâ·Â?
+	// ItemName List 출력?
 	//---------------------------------------------------	
 	if ((g_pSDLInput->KeyDown(DIK_LMENU) || g_pSDLInput->KeyDown(DIK_RMENU) || g_pSDLInput->KeyDown(DIK_RCONTROL)
 #ifdef __FRIEND_SYSTEM_VIVA__	// add by viva  g_pSDLInput->KeyDown(DIK_LCONTROL
@@ -3459,9 +3459,9 @@ CGameUpdate::ProcessInput()
 		g_pTopView->SetDrawItemNameList();
 
 		if (!g_bWatchMode 
-			// ¹º°¡ ¹Ýº¹Çàµ¿À» ÇÏ°í ÀÖÁö ¾ÊÀº °æ¿ì
+			// 뭔가 반복행동을 하고 있지 않은 경우
 			&& !g_pPlayer->IsRepeatAction()
-			// ¹ÚÁã³ª ´Á´ë°¡ ¾Æ´Ñ °æ¿ì
+			// 박쥐나 늑대가 아닌 경우
 			&& g_pPlayer->GetCreatureType()!=CREATURETYPE_BAT
 			&& g_pPlayer->GetCreatureType()!=CREATURETYPE_WOLF
 			)
@@ -3514,8 +3514,8 @@ CGameUpdate::ProcessInput()
 
 		
 	//---------------------------------------------------	
-	// ÆÄÆ¼ ¾ø´Âµ¥ ÆÄÆ¼Ã¢ÀÌ ¶° ÀÖ´Â °æ¿ì..
-	// ÆÄÆ¼ ½ÅÃ» ¸ðµå.
+	// 파티 없는데 파티창이 떠 있는 경우..
+	// 파티 신청 모드.
 	//---------------------------------------------------	
 //	if (g_pParty!=NULL 
 //		&& g_pParty->GetSize()==0
@@ -3523,9 +3523,9 @@ CGameUpdate::ProcessInput()
 //		&& !gC_vs_ui.IsRunningRequestParty()
 //		&& g_pTempInformation->Mode==TempInformation::MODE_NULL
 //		&& !g_bWatchMode 
-//		// ¹º°¡ ¹Ýº¹Çàµ¿À» ÇÏ°í ÀÖÁö ¾ÊÀº °æ¿ì
+//		// 뭔가 반복행동을 하고 있지 않은 경우
 //		&& !g_pPlayer->IsRepeatAction()
-//		// ¹ÚÁã³ª ´Á´ë°¡ ¾Æ´Ñ °æ¿ì
+//		// 박쥐나 늑대가 아닌 경우
 //		&& g_pPlayer->GetCreatureType()!=CREATURETYPE_BAT
 //		&& g_pPlayer->GetCreatureType()!=CREATURETYPE_WOLF)
 //	{
@@ -3535,27 +3535,27 @@ CGameUpdate::ProcessInput()
 
 	//---------------------------------------------------	
 	//
-	//		ÀÔ·ÂÀÌ Á¦ÇÑµÇ´Â °æ¿ì..
+	//		입력이 제한되는 경우..
 	//
 	//---------------------------------------------------	
-	// - °ÔÀÓ ¸øÇÏ°Ô ÇÏ´Â dialog°¡ ¶° ÀÖ´Â °æ¿ì
+	// - 게임 못하게 하는 dialog가 떠 있는 경우
 	//
-	// - Player°¡ server·ÎºÎÅÍ °ËÁõÀ» ±â´Ù¸®´Â »óÅÂ
+	// - Player가 server로부터 검증을 기다리는 상태
 	//
-	// - ¹Ýº¹ actionÁß¿¡´Â µý ÀÔ·ÂÀº ÇÊ¿ä¾ø´Ù.(¹«½Ã)
+	// - 반복 action중에는 딴 입력은 필요없다.(무시)
 	//
-	// - UI¿¡¼­ ÀÔ·ÂÀ» ¹Þ°í ÀÖ´Â °æ¿ì
+	// - UI에서 입력을 받고 있는 경우
 	//
 	//---------------------------------------------------	
 	if (g_pPlayer->IsWaitVerify() 
-		|| gC_vs_ui.IsInstallMineProgress()	// Áö·Ú ¸¸µå´Â ÁßÀÌ¸é..
-		//|| gC_vs_ui.IsCreateMineProgress()	// Áö·Ú ¸¸µå´Â ÁßÀÌ¸é..
-		//|| gC_vs_ui.IsCreateBombProgress()	// Áö·Ú ¸¸µå´Â ÁßÀÌ¸é..
-		|| g_pPlayer->IsFastMove()	// »¡¸® ¿òÁ÷ÀÌ´Â °æ¿ì
-		// 2004, 12, 3, ¼®¹Î¾¾ Ãß°¡
+		|| gC_vs_ui.IsInstallMineProgress()	// 지뢰 만드는 중이면..
+		//|| gC_vs_ui.IsCreateMineProgress()	// 지뢰 만드는 중이면..
+		//|| gC_vs_ui.IsCreateBombProgress()	// 지뢰 만드는 중이면..
+		|| g_pPlayer->IsFastMove()	// 빨리 움직이는 경우
+		// 2004, 12, 3, 석민씨 추가
 //		|| g_pPlayer->CurPernalShop() == 1  || gC_vs_ui.inventory_mode == 2
 //		|| gC_vs_ui.IsRunningPersnalShop()
-		// 2004, 12, 3, ¼®¹Î¾¾ Ãß°¡
+		// 2004, 12, 3, 석민씨 추가
 		|| UI_IsRunning_WebBrowser()
 		)	
 	{
@@ -3566,7 +3566,7 @@ CGameUpdate::ProcessInput()
 		return;
 	}
 
-	// ÇöÀç ¼¿·ºÆ®ÁßÀÎ Ä³¸¯ÅÍ¿¡ ´ëÇÑ µ¿ÀÛÀÌ ÀÖÀ¸¸é ¸®ÅÏ
+	// 현재 셀렉트중인 캐릭터에 대한 동작이 있으면 리턴
 	if (g_pPlayer->IsRepeatAction())
 	{
 		g_pTopView->SetSelectedSectorNULL();
@@ -3583,15 +3583,15 @@ CGameUpdate::ProcessInput()
 	#endif
 
 	//---------------------------------------------------	
-	// UI¿¡¼­ mouseÄ¿¼­ ÀÔ·ÂÀ» Àâ°í ÀÖ´Â °æ¿ì
-	// elevator ÀÛµ¿Áß..
+	// UI에서 mouse커서 입력을 잡고 있는 경우
+	// elevator 작동중..
 	//---------------------------------------------------	
 	if ((g_pUIDialog->IsLockInput() || g_bUIInput)
 		
-		// ÆÄÆ¼ ¶°ÀÖÀ»¶§´Â ÆÄÆ¼Ã¢ÀÇ Ä³¸¯À» ¼±ÅÃÇÒ ¼öµµ ÀÖ´Ù.
+		// 파티 떠있을때는 파티창의 캐릭을 선택할 수도 있다.
 		&& !bRunningParty
 
-		// ´Ù¸¥ µ¿ÀÛ ¸øÇÏµµ·Ï ...
+		// 다른 동작 못하도록 ...
 		|| gC_vs_ui.IsRunningElevator()
 		|| gC_vs_ui.IsRunningXmasCardWindow()
 		|| UI_IsRunningSelectWayPoint())
@@ -3609,7 +3609,7 @@ CGameUpdate::ProcessInput()
 	
 	//---------------------------------------------------	
 	//
-	// Player°¡ Á×Àº °æ¿ì... 
+	// Player가 죽은 경우... 
 	//
 	//---------------------------------------------------		
 	if (g_pPlayer->IsDead())
@@ -3618,8 +3618,8 @@ CGameUpdate::ProcessInput()
 		g_pTopView->SetSelectedSectorNULL();
 
 		//---------------------------------------------------	
-		// delay½Ã°£ÀÌ Áö³ª°í ³ª¼­
-		// ¹º°¡¸¦ ´©¸£¸é ´Ù½Ã »ì¾Æ³ª¾ß ÇÑ´Ù.
+		// delay시간이 지나고 나서
+		// 뭔가를 누르면 다시 살아나야 한다.
 		//---------------------------------------------------	
 		//if (g_pPlayer->IsNotDeadDelay() && g_pSDLInput->KeyDown( DIK_SPACE ))
 		//{
@@ -3635,7 +3635,7 @@ CGameUpdate::ProcessInput()
  
 
 
-	// Mouse¸¦ ÇâÇØ¼­ ¹Ù¶óº¸´Â player...
+	// Mouse를 향해서 바라보는 player...
 	//POINT temp = g_pTopView->ScreenToPixel(g_x, g_y);
 	//temp = MTopView::PixelToMap( temp.x, temp.y );
 	//g_pPlayer->SetDirectionToPosition(temp.x, temp.y);
@@ -3646,15 +3646,15 @@ CGameUpdate::ProcessInput()
 
 	//---------------------------------------------------	
 	//
-	// ÇöÀç mouseÀÇ À§Ä¡¿¡ ÀÖ´Â object¿¡ ´ëÇØ¼­ check
+	// 현재 mouse의 위치에 있는 object에 대해서 check
 	//
 	//---------------------------------------------------	
-	// °­Á¦°ø°ÝÀÌ°Å³ª SmallZone¿¡ ÀÖ°Å³ª
-	// Hallucination¿¡ °É·ÈÀ¸¸é ´Ù~ ¼±ÅÃ
+	// 강제공격이거나 SmallZone에 있거나
+	// Hallucination에 걸렸으면 다~ 선택
 	//---------------------------------------------------	
 	
 
-	// °­Á¦ °ø°ÝÀÌ ¼³Á¤µÇ´Â °æ¿ì
+	// 강제 공격이 설정되는 경우
 	bool bForceAttack = (g_pSDLInput->KeyDown(DIK_LSHIFT) 
 						|| g_pPlayer->HasEffectStatus(EFFECTSTATUS_HALLUCINATION));
 						
@@ -3667,7 +3667,7 @@ CGameUpdate::ProcessInput()
 		|| g_pPlayer->IsSlayer() && g_pPlayer->GetSpecialActionInfo() != ACTIONINFO_NULL && (*g_pActionInfoTable)[g_pPlayer->GetSpecialActionInfo()].GetUser() == FLAG_ACTIONINFO_USER_SLAYER
 		|| g_pPlayer->IsVampire() && g_pPlayer->GetSpecialActionInfo() != ACTIONINFO_NULL && (*g_pActionInfoTable)[g_pPlayer->GetSpecialActionInfo()].GetUser() == FLAG_ACTIONINFO_USER_VAMPIRE
 		|| g_pPlayer->IsOusters() && g_pPlayer->GetSpecialActionInfo() != ACTIONINFO_NULL && (*g_pActionInfoTable)[g_pPlayer->GetSpecialActionInfo()].GetUser() == FLAG_ACTIONINFO_USER_OUSTERS
-		// 2004, 11, 26, sobeit add start - ½½·¹ 140 ÀÎÃ¦ ½ºÅ³ - ½½·¹¿¡°Õ Ãàº¹, ³ª¸ÓÁø ÀúÁÖ..¤»¤» 
+		// 2004, 11, 26, sobeit add start - 슬레 140 인챈 스킬 - 슬레에겐 축복, 나머진 저주..ㅋㅋ 
 		|| g_pPlayer->GetSpecialActionInfo() == SKILL_INTIMATE_GRAIL
 		// 2004, 11, 26, sobeit add end
 		)
@@ -3675,7 +3675,7 @@ CGameUpdate::ProcessInput()
 		g_pObjectSelector->SelectAll();				
 	}
 	//---------------------------------------------------	
-	// L-Control´©¸£¸é ¿ì¸®Æí¸¸ ¼±ÅÃ
+	// L-Control누르면 우리편만 선택
 	//---------------------------------------------------	
 	else if (g_pSDLInput->KeyDown(DIK_LCONTROL)
 		|| g_pTopView->IsRequestMode())
@@ -3683,38 +3683,38 @@ CGameUpdate::ProcessInput()
 		g_pObjectSelector->SelectFriend();		
 	}
 	//---------------------------------------------------	
-	// ¾Æ´Ï¸é.. Àû¸¸ ¼±ÅÃ
+	// 아니면.. 적만 선택
 	//---------------------------------------------------	
 	else
 	{
-		// Notice Event Ã¼Å©ÇØ¼­ ...
-		// ¼ºÀ» Â÷ÁöÇÏ±â À§ÇÑ ÀüÀïÁßÀÌ¶ó¸é!!
-		// 1. ±âÁ¸¿¡ ¼öºñÇÏ´Â ±æµåÀÏ °æ¿ì ÀÚ±â ±æµå ¾Æ´Ï¸é ´Ù Àû!
-		// 2. °ø°Ý ½ÅÃ»À» ÇÑ ±æµåÀÏ°æ¿ì ¿ì¸® ±æµå ¾Æ´Ï¸é ´Ù Àû!
-		// 3. ±æµå°£ ÀüÀï ½ÅÃ» ¿Ü¿¡ ´Ù¸¥»ç¶÷ÀÏ°æ¿ì ±× µÎ ±æµå¿ø »©°í ´Ù °°Àº ÆÀ!
+		// Notice Event 체크해서 ...
+		// 성을 차지하기 위한 전쟁중이라면!!
+		// 1. 기존에 수비하는 길드일 경우 자기 길드 아니면 다 적!
+		// 2. 공격 신청을 한 길드일경우 우리 길드 아니면 다 적!
+		// 3. 길드간 전쟁 신청 외에 다른사람일경우 그 두 길드원 빼고 다 같은 팀!
 		
 		g_pObjectSelector->SelectEnemy();		
 	}
 
 	//---------------------------------------------------	
-	// ÀÌ°Í ¿Ü¿¡µµ..
+	// 이것 외에도..
 	//
-	// g_pObjectSelector->SelectByRace()ÀÎÁö
-	// g_pObjectSelector->SelectByGuild()ÀÎÁö¸¦ ¼±ÅÃÇØ¾ß ÇÑ´Ù.
+	// g_pObjectSelector->SelectByRace()인지
+	// g_pObjectSelector->SelectByGuild()인지를 선택해야 한다.
 	//
-	// È­¸é¿¡ ´Ã IconÀ» ¶ç¿ö³õ´Â°Ô ÁÁÀ» µí.. Race/Guild
+	// 화면에 늘 Icon을 띄워놓는게 좋을 듯.. Race/Guild
 	//
-	// ¶Ç, °ø°Ý¸ðµå¿¡ µû¶ó¼­ Peace/Attack/Normal Iconµµ
-	// ÀÖ¾î¾ß ÇÑ´Ù.
+	// 또, 공격모드에 따라서 Peace/Attack/Normal Icon도
+	// 있어야 한다.
 	//---------------------------------------------------	
-	// SlayerÀÎ °æ¿ì´Â Á¾Á·¿¡ µû¶ó¼­ ¼±ÅÃ
+	// Slayer인 경우는 종족에 따라서 선택
 	//---------------------------------------------------	
 	if (g_pPlayer->IsSlayer() || g_pPlayer->IsOusters() )
 	{
 		g_pObjectSelector->SelectByRace();
 	}
 	//---------------------------------------------------	
-	// VampireÀÎ °æ¿ì´Â Guild¿¡ µû¶ó¼­ ¼±ÅÃ
+	// Vampire인 경우는 Guild에 따라서 선택
 	//---------------------------------------------------	
 	else
 	{
@@ -3733,7 +3733,7 @@ CGameUpdate::ProcessInput()
 	int partyMember = (bRunningParty? gC_vs_ui.GetPartyManagerFocused() : -1) - 1;
 
 	//---------------------------------------------------	
-	// ÆÄÆ¼UI¸¦ ¼±ÅÃÇÏ´Â °æ¿ì..
+	// 파티UI를 선택하는 경우..
 	//---------------------------------------------------	
 	if (partyMember >= 0
 		&& partyMember < g_pParty->GetSize())
@@ -3750,9 +3750,9 @@ CGameUpdate::ProcessInput()
 				DEBUG_ADD("SPM");
 			#endif
 
-			// ¿ì¿í.. terrible.. - -;
-			// MZone¿¡ NameÀ¸·Î id°Ë»öÇÒ ¼ö ÀÖ°Ô mapÀ» Ãß°¡ÇØ¾ßÇÑ´Ù.
-			// ±×¸®°í.. ¹Ù·Î Name --> MCreature* ¸¦ ¾Ë ¼ö ÀÖ°Ô ÇØ¾ßÇÑ´Ù.. ¾ðÁ¦? - -;
+			// 우욱.. terrible.. - -;
+			// MZone에 Name으로 id검색할 수 있게 map을 추가해야한다.
+			// 그리고.. 바로 Name --> MCreature* 를 알 수 있게 해야한다.. 언제? - -;
 			pObject = g_pZone->GetCreature( g_pZone->GetCreatureID( pInfo->Name.GetString(), 1 ) );
 
 			#ifdef OUTPUT_DEBUG_PROCESS_INPUT
@@ -3761,7 +3761,7 @@ CGameUpdate::ProcessInput()
 		}
 	}
 	//---------------------------------------------------	
-	// Á¸¿¡¼­ ¼±ÅÃ..
+	// 존에서 선택..
 	//---------------------------------------------------	
 	else
 	{
@@ -3770,11 +3770,11 @@ CGameUpdate::ProcessInput()
 		#endif
 
 		//---------------------------------------------------
-		// ¾Æ¿¹ µý UI¿¡ focus °¡ ÀÖÀ¸¸é °Á returnÇØ¾ß ÇÑ´Ù.
-		// inventory¿¡¼­ ¾ÆÀÌÅÛ »ç¿ëÇß´Âµ¥ ±â¼ú ³ª°¥ ¼ö°¡ ÀÖ¾î¼­.
+		// 아예 딴 UI에 focus 가 있으면 걍 return해야 한다.
+		// inventory에서 아이템 사용했는데 기술 나갈 수가 있어서.
 		//---------------------------------------------------
-		if (partyMember==-2		// partyÃ¢¿¡ focus µÈ°Ô ¾Æ´Ï°í
-			&& g_bUIInput)		// UI¿¡ ÀÔ·ÂÀÌ ÀÖ´Ù¸é..
+		if (partyMember==-2		// party창에 focus 된게 아니고
+			&& g_bUIInput)		// UI에 입력이 있다면..
 		{
 			#ifdef OUTPUT_DEBUG_PROCESS_INPUT
 				DEBUG_ADD("selZk1");
@@ -3784,7 +3784,7 @@ CGameUpdate::ProcessInput()
 		}
 
 		//---------------------------------------------------	
-		// ItemNameÀ» ¼±ÅÃÇÏ´Â °æ¿ì¸é..
+		// ItemName을 선택하는 경우면..
 		//---------------------------------------------------	
 		if (g_pTopView->IsDrawItemNameList())
 		{
@@ -3808,7 +3808,7 @@ CGameUpdate::ProcessInput()
 			}
 
 			//---------------------------------------------------	
-			// ItemNameÀÌ ¼±ÅÃ ¾ÈµÆÀ¸¸é Object¼±ÅÃ
+			// ItemName이 선택 안됐으면 Object선택
 			//---------------------------------------------------	
 			if (pObject==NULL)
 			{
@@ -3824,7 +3824,7 @@ CGameUpdate::ProcessInput()
 			}
 		}
 		//---------------------------------------------------	
-		// ±×³É Object ¼±ÅÃ
+		// 그냥 Object 선택
 		//---------------------------------------------------	
 		else
 		{
@@ -3892,7 +3892,7 @@ CGameUpdate::ProcessInput()
 	#endif
 
 	//---------------------------------------------------	
-	// Lock Mode Ã¼Å©
+	// Lock Mode 체크
 	//---------------------------------------------------	
 	if (g_pSDLInput->KeyDown(DIK_CAPITAL) 
 		&& !g_pPlayer->IsInCasket()
@@ -3900,7 +3900,7 @@ CGameUpdate::ProcessInput()
 	{
 		g_pPlayer->SetLockMode();
 
-		// ¹«Á¶°Ç °ø°Ý Ä¿¼­·Î ¹Ù²ï´Ù.
+		// 무조건 공격 커서로 바뀐다.
 		gpC_mouse_pointer->SetCursorAttack();
 
 		if (g_pSDLInput->m_lb_down)
@@ -3916,13 +3916,13 @@ CGameUpdate::ProcessInput()
 			g_bCButtonDown = TRUE;
 		}
 
-		// Lock Mode¿¡¼­´Â ¼±ÅÃµÈ sector¸¦ ¾ø¾Ø´Ù.
+		// Lock Mode에서는 선택된 sector를 없앤다.
 		g_pTopView->SetSelectedSectorNULL();
 	}
 	else
 	{
-		// ¾Æ¹«°Íµµ ´©¸£Áö ¾ÊÀº »óÅÂ¿¡¼­ 
-		// LockModeÀÌ¸é LockMode ÇØÁ¦ÇØ¾ß ÇÑ´Ù.
+		// 아무것도 누르지 않은 상태에서 
+		// LockMode이면 LockMode 해제해야 한다.
 		if (!g_bLButtonDown && !g_bRButtonDown
 #ifdef __METROTECH_TEST__
 			&& !g_bCButtonDown
@@ -3934,8 +3934,8 @@ CGameUpdate::ProcessInput()
 	}
 
 	//---------------------------------------------------	
-	// Lock Mode°¡ ¾Æ´Ñ °æ¿ì¸¸ 
-	// ÀÏ¹ÝÀûÀÎ ÀÔ·ÂÀ» ¹Þ¾Æµé¿© Çàµ¿À» ÃëÇÑ´Ù.
+	// Lock Mode가 아닌 경우만 
+	// 일반적인 입력을 받아들여 행동을 취한다.
 	//---------------------------------------------------	
 	if (!g_pPlayer->IsLockMode())
 	{	
@@ -3944,7 +3944,7 @@ CGameUpdate::ProcessInput()
 #endif
 		
 		//---------------------------------------------------	
-		// Mouse À§Ä¡¿¡ Object°¡ ¾øÀ¸¸é..
+		// Mouse 위치에 Object가 없으면..
 		//---------------------------------------------------	
 		if (pObject==NULL)
 		{
@@ -3952,11 +3952,11 @@ CGameUpdate::ProcessInput()
 			DEBUG_ADD("noObj");
 #endif
 			
-			// ¼±ÅÃµÈ °Í ¾ø°Ô ÇÑ´Ù.
+			// 선택된 것 없게 한다.
 			g_pTopView->SetSelectedNULL();
 			
 			//---------------------------------------------------	
-			// mouse pointer ¼³Á¤
+			// mouse pointer 설정
 			//---------------------------------------------------	
 			//if (!g_bMouseInPortal)
 			{
@@ -3978,26 +3978,26 @@ CGameUpdate::ProcessInput()
 						const MSector& sector = g_pZone->GetSector(g_MouseSector.x, g_MouseSector.y);
 						
 						//---------------------------------------------------
-						// °¥ ¼ö ¾ø´Â °÷ÀÌ¸é
+						// 갈 수 없는 곳이면
 						//---------------------------------------------------
 						if (g_pPlayer->IsGroundCreature() && sector.IsBlockGround()
 							|| g_pPlayer->IsUndergroundCreature() && sector.IsBlockUnderground()
 							|| g_pPlayer->IsFlyingCreature() && sector.IsBlockFlying())
 							//g_pZone->CanMove(g_pPlayer->GetMoveType(), g_MouseSector.x, g_MouseSector.y))
 						{	
-							// Æ÷Å»ÀÌ ¾Æ´Ï°í
+							// 포탈이 아니고
 							if (!g_bMouseInPortal
-								// UI¿¡ ÀÔ·ÂÀÌ ¾ø´Â °æ¿ì --> °ÔÀÓ¿¡ Ä¿¼­°¡ ÀÖ´Â °æ¿ì
+								// UI에 입력이 없는 경우 --> 게임에 커서가 있는 경우
 								&& !g_bUIInput
-								// ¼±ÅÃµÈ Ä³¸¯ÅÍ°¡ ¾ø´Â °æ¿ì
+								// 선택된 캐릭터가 없는 경우
 								&& g_pTopView->GetSelectedCreature()==OBJECTID_NULL)
 							{
-								// °¥ ¼ö ¾ø´Â Ä¿¼­·Î Ç¥½Ã
+								// 갈 수 없는 커서로 표시
 								gpC_mouse_pointer->SetCursorNotMove();					
 							}
 						}
 						//---------------------------------------------------
-						// °¥ ¼ö ÀÖ´Â °÷ÀÌ¸é..
+						// 갈 수 있는 곳이면..
 						//---------------------------------------------------
 						else
 						{
@@ -4023,7 +4023,7 @@ CGameUpdate::ProcessInput()
 		}
 		//---------------------------------------------------	
 		//
-		// Mouse À§Ä¡¿¡ Object°¡ ÀÖ´Â °æ¿ì
+		// Mouse 위치에 Object가 있는 경우
 		//
 		//---------------------------------------------------	
 		else
@@ -4035,7 +4035,7 @@ CGameUpdate::ProcessInput()
 #endif
 			
 			//------------------------------------------------
-			// Creature À§¿¡ mouse°¡ ÀÖ´Â °æ¿ì
+			// Creature 위에 mouse가 있는 경우
 			//------------------------------------------------
 			if (objectType==MObject::TYPE_CREATURE)
 			{
@@ -4045,11 +4045,11 @@ CGameUpdate::ProcessInput()
 					
 				if (!g_bMouseInPortal 
 						
-					// Á¾Á·¿¡ µû¶ó¼­ °ø°ÝÇÒ ¼ö ÀÖ°Å³ª
-					// °­Á¦ °ø°ÝÀÌ°Å³ª..
+					// 종족에 따라서 공격할 수 있거나
+					// 강제 공격이거나..
 					//&& (g_pPlayer->CanAttackTribe( pCreature ) || bForceAttack)
 					&& g_pObjectSelector->CanAttack( pCreature ) )
-					// ¹ìÆÄÀÌ¾îÀÎ °æ¿ì¿¡´Â Guild¿¡ µû¶ó¼­ °ø°ÝÇÒ ¼ö ÀÖ°Å³ª..	
+					// 뱀파이어인 경우에는 Guild에 따라서 공격할 수 있거나..	
 						
 				{
 					if (pCreature->IsNPC())
@@ -4071,7 +4071,7 @@ CGameUpdate::ProcessInput()
 			}
 			
 			//------------------------------------------------
-			// Item À§¿¡ mouse°¡ ÀÖ´Â °æ¿ì
+			// Item 위에 mouse가 있는 경우
 			//------------------------------------------------
 			else if (pObject->GetObjectType()==MObject::TYPE_ITEM)
 			{
@@ -4079,8 +4079,8 @@ CGameUpdate::ProcessInput()
 
 				if(g_pZone != NULL && pItem != NULL )
 				{
-					// ½½·¹ÀÌ¾î¸é ¾ÈµÇ°Ô
-					// ¹ìÆÄÀÌ¾î¸é creature Ã£¾Æ¼­ ¼º¹°ÀÎ°æ¿ì¸¸
+					// 슬레이어면 안되게
+					// 뱀파이어면 creature 찾아서 성물인경우만
 
 					if(!g_pZone->GetSector(pItem->GetX(), pItem->GetY()).HasDarkness() ||
 						g_pZone->GetSector(pItem->GetX(), pItem->GetY()).HasDarkness() && g_pPlayer->IsVampire() && g_pZone->GetID() != 3001||
@@ -4096,7 +4096,7 @@ CGameUpdate::ProcessInput()
 						
 						COLORREF color;
 						//------------------------------------------------
-						// option¿¡ µû¸¥ »ö±ò
+						// option에 따른 색깔
 						//------------------------------------------------
 						if (pItem->IsSpecialColorItem() )
 						{
@@ -4112,28 +4112,28 @@ CGameUpdate::ProcessInput()
 						{
 							color = g_pClientConfig->COLOR_NAME_ITEM_RARE_OPTION;
 						}
-						// add by Sonic 2006.10.28 Ôö¼ÓÏÔÊ¾ÈýÊôÐÔ×°±¸ÎªºìÉ«
+						// add by Sonic 2006.10.28 增加显示三属性装备为红色
 						else if(pItem->GetItemOptionListCount() > 2)
 						{
 							color = g_pClientConfig->COLOR_NAME_VAMPIRE; //Red
 						}
-						// end by Sonic 2006.10.28 Ôö¼ÓÏÔÊ¾ÈýÊôÐÔ×°±¸ÎªºìÉ«
+						// end by Sonic 2006.10.28 增加显示三属性装备为红色
 						else
 						{
 							color = g_pClientConfig->COLOR_NAME_ITEM_OPTION;
 						}
 						
 						//------------------------------------------------
-						// itemÁý´Â Ä¿¼­
+						// item집는 커서
 						//------------------------------------------------
 						if (!g_bMouseInPortal&&!g_pPlayer->IsInDarkness())
 						{						
-							// ½ÃÃ¼ÀÎ °æ¿ì´Â '½ÃÃ¼'¶ó°í Ç¥½Ã ¾ÈÇÑ´Ù.
+							// 시체인 경우는 '시체'라고 표시 안한다.
 							if (pItem->GetItemClass()==ITEM_CLASS_CORPSE)
 							{
 								gpC_mouse_pointer->SetCursorPickUp( "", color );
 							}
-							// º¸Åë ¾ÆÀÌÅÛÀº ÀÌ¸§ Ç¥½ÃÇÑ´Ù.
+							// 보통 아이템은 이름 표시한다.
 							else
 							{
 								char str[80];
@@ -4147,7 +4147,7 @@ CGameUpdate::ProcessInput()
 			}
 
 			//------------------------------------------------
-			// Effect À§¿¡ mouse°¡ ÀÖ´Â °æ¿ì
+			// Effect 위에 mouse가 있는 경우
 			//------------------------------------------------
 			else if (pObject->GetObjectType()==MObject::TYPE_EFFECT)
 			{
@@ -4155,7 +4155,7 @@ CGameUpdate::ProcessInput()
 			}
 
 			//------------------------------------------------
-			// InteractionObject À§¿¡ mouse°¡ ÀÖ´Â °æ¿ì
+			// InteractionObject 위에 mouse가 있는 경우
 			//------------------------------------------------
 //			else if (pObject->GetObjectType()==MObject::TYPE_INTERACTIONOBJECT)
 //			{
@@ -4166,7 +4166,7 @@ CGameUpdate::ProcessInput()
 
 		//---------------------------------------------------	
 		//
-		// playerÀÇ ±â¼ú »ç¿ë delay ½Ã°£ÀÌ Áö³ª¾ß °ø°Ý °¡´ÉÇÏ´Ù.
+		// player의 기술 사용 delay 시간이 지나야 공격 가능하다.
 		//
 		//---------------------------------------------------	
 		if (g_pPlayer->IsNotDelay() && !g_pPlayer->HasEffectStatus( EFFECTSTATUS_ETERNITY_PAUSE ) )
@@ -4176,7 +4176,7 @@ CGameUpdate::ProcessInput()
 			#endif
 
 			//-----------------------------------------------
-			// Shift + L/R ButtonDown : °­Á¦ Tile °ø°Ý
+			// Shift + L/R ButtonDown : 강제 Tile 공격
 			//-----------------------------------------------
 			if (g_pSDLInput->KeyDown(DIK_LSHIFT))
 			{
@@ -4184,10 +4184,10 @@ CGameUpdate::ProcessInput()
 					DEBUG_ADD("shiAt");
 				#endif
 				//-----------------------------------------------
-				// Shift + LButtonDown : °­Á¦ °ø°Ý
+				// Shift + LButtonDown : 강제 공격
 				//-----------------------------------------------
 				if (g_pSDLInput->m_lb_down
-					// ¼û¾î ÀÖ´Â °æ¿ì°¡ ¾Æ´Ò¶§
+					// 숨어 있는 경우가 아닐때
 					&& !g_pPlayer->IsInCasket()
 					&& !g_pPlayer->IsUndergroundCreature()
 					&& !g_pPlayer->HasEffectStatus(EFFECTSTATUS_INSTALL_TURRET))
@@ -4195,14 +4195,14 @@ CGameUpdate::ProcessInput()
 					g_pPlayer->UnSetRequestMode();
 
 					//-----------------------------------------------
-					// Ä³¸¯ÅÍ¸¦ °­Á¦ °ø°Ý..
+					// 캐릭터를 강제 공격..
 					//-----------------------------------------------
 					if (pObject!=NULL)
 					{
 						if (pObject->GetObjectType()==MObject::TYPE_CREATURE)
 						{
-							// Object°¡ ¹º°¡ ¼±ÅÃµÆÀ» °æ¿ì¿¡´Â 
-							// LButtonÀ» ´©¸£°í ÀÖ´Â °Í¸¸À¸·Î ÀÌµ¿ÀÌ µÇÁö¾Ê°Ô ÇÑ´Ù.
+							// Object가 뭔가 선택됐을 경우에는 
+							// LButton을 누르고 있는 것만으로 이동이 되지않게 한다.
 							MCreature *pCreature = dynamic_cast<MCreature*>(pObject);
 							g_bLButtonDown = TRUE;
 							
@@ -4210,24 +4210,24 @@ CGameUpdate::ProcessInput()
 
 							if (g_pPlayer->TraceCreatureToBasicAction( 
 										pCreature->GetID(), 
-										true))		// °­Á¦ °ø°Ý
+										true))		// 강제 공격
 							{
 								//----------------------------------
-								// ³²¿¡°Ô ÇÏ´Â ±âº» Çàµ¿ ¹Ýº¹ ¼³Á¤
+								// 남에게 하는 기본 행동 반복 설정
 								//----------------------------------
 								g_pPlayer->SetRepeatAction();
 								g_bPreviousMove = false;
 							}
-							// ¸ñÀûÁö Ç¥½Ã¸¦ ¾ø¾Ø´Ù.
+							// 목적지 표시를 없앤다.
 							g_pTopView->SetSelectedSectorNULL();
 						}
 					}
 					//-----------------------------------------------
-					// °­Á¦ Tile °ø°Ý
+					// 강제 Tile 공격
 					//-----------------------------------------------
 					//g_SelectSector = g_pTopView->GetSelectedSector(g_x, g_y);
 					
-					// ¼±ÅÃµÈ Sector·Î Ç¥½ÃÇÑ´Ù.
+					// 선택된 Sector로 표시한다.
 					//g_pTopView->SetSelectedSector( g_SelectSector );
 
 					//g_pPlayer->TraceSectorToBasicAction( g_SelectSector.x, g_SelectSector.y );			
@@ -4237,7 +4237,7 @@ CGameUpdate::ProcessInput()
 					#endif
 				}		
 				//-----------------------------------------------
-				// Shift + RButtonDown : °­Á¦ Tile ±â¼ú °ø°Ý
+				// Shift + RButtonDown : 강제 Tile 기술 공격
 				//-----------------------------------------------
 				else if (g_pSDLInput->m_rb_down)
 				{
@@ -4249,7 +4249,7 @@ CGameUpdate::ProcessInput()
 					/*
 					g_SelectSector = g_pTopView->GetSelectedSector(g_x, g_y);
 
-					// ¼±ÅÃµÈ Sector·Î Ç¥½ÃÇÑ´Ù.
+					// 선택된 Sector로 표시한다.
 					g_pTopView->SetSelectedSector( g_SelectSector );
 
 					if (g_pPlayer->TraceSectorToSpecialAction( g_SelectSector.x, g_SelectSector.y ))
@@ -4258,7 +4258,7 @@ CGameUpdate::ProcessInput()
 					}
 
 
-					// ¸ñÀûÁö Ç¥½Ã¸¦ ¾ø¾Ø´Ù.
+					// 목적지 표시를 없앤다.
 					g_pTopView->SetSelectedSectorNULL();
 					*/
 
@@ -4284,7 +4284,7 @@ CGameUpdate::ProcessInput()
 				//
 				//---------------------------------------------------------------
 				if (g_pSDLInput->m_lb_down 
-					// burrow »óÅÂ°¡ ¾Æ´Ï¾î¾ß ÇÑ´Ù.
+					// burrow 상태가 아니어야 한다.
 					&& !g_pPlayer->IsInCasket()
 					&& !g_pPlayer->IsUndergroundCreature()
 					&& g_pPlayer->CurPernalShop() != 2
@@ -4300,17 +4300,17 @@ CGameUpdate::ProcessInput()
 
 					g_bLButtonDown = TRUE;
 					
-					// ¼±ÅÃµÈ sector°¡ ¾ø°Ô ÇÑ´Ù.
+					// 선택된 sector가 없게 한다.
 					g_pTopView->SetSelectedSectorNULL();
 
-					// sector ¼±ÅÃÇÏ±â
+					// sector 선택하기
 					g_SelectSector = g_pTopView->GetSelectedSector(g_x, g_y);
 					//g_pTopView->SetSelectedSector(g_SelectSector.x, g_SelectSector.y);
 
 					//
 					//MObject*	pObject = g_pTopView->GetSelectedObject(g_x, g_y);
 
-					// ÀÎ½ºÅç ÅÍ·¿ÀÏ¶§.. Àâ´ÙÇÑ lbuttton Ã³¸® ¾Ê´Â´Ù.. lbutton = ¹«Á¶°Ç ÅÍ·¿ °ø°Ý
+					// 인스톨 터렛일때.. 잡다한 lbuttton 처리 않는다.. lbutton = 무조건 터렛 공격
 					if(g_pPlayer->HasEffectStatus(EFFECTSTATUS_INSTALL_TURRET))
 					{		
 						int TempDir = MTopView::GetDirectionToPosition(g_pPlayer->GetX(), g_pPlayer->GetY(),g_SelectSector.x, g_SelectSector.y);
@@ -4330,7 +4330,7 @@ CGameUpdate::ProcessInput()
 //							g_pPlayer->SetSpecialActionInfo(SKILL_TURRET_FIRE);
 //							if (g_pPlayer->TraceSectorToSpecialAction( g_SelectSector.x, g_SelectSector.y ))
 //							{
-//								// ¼±ÅÃµÈ Sector·Î Ç¥½ÃÇÑ´Ù.
+//								// 선택된 Sector로 표시한다.
 //								g_pTopView->SetSelectedSector( g_SelectSector );
 //							
 //								g_pPlayer->SetRepeatAction();
@@ -4338,7 +4338,7 @@ CGameUpdate::ProcessInput()
 //
 //							g_bPreviousMove = false;
 //								char szTemp[128];
-//								sprintf(szTemp, "¹æÇâÀÌ °°´Ù: %d,¹æÇâ ", TempDir);
+//								sprintf(szTemp, "방향이 같다: %d,방향 ", TempDir);
 //								g_pSystemMessage->Add(szTemp);
 						}
 						else
@@ -4353,25 +4353,25 @@ CGameUpdate::ProcessInput()
 						}
 					}
 					//--------------------------------------------------
-					// ¼±ÅÃÇÑ °÷¿¡ Object°¡ ¾øÀ¸¸é MOVE
+					// 선택한 곳에 Object가 없으면 MOVE
 					//--------------------------------------------------
 					else if (pObject == NULL)
 					{		
-						// l-shift³ª l-controlÀÌ ´­·ÁÀÖÁö ¾ÊÀº »óÅÂ¿¡¼­¸¸ ÀÌµ¿.
+						// l-shift나 l-control이 눌려있지 않은 상태에서만 이동.
 						if (//!g_pSDLInput->KeyDown(DIK_LSHIFT) &&
 							!g_pSDLInput->KeyDown(DIK_LCONTROL))
 						{		
 							if (g_pPlayer->IsNotDelay() && !g_pPlayer->HasEffectStatus(EFFECTSTATUS_ETERNITY_PAUSE ) 
-								// 2004, 9, 14, sobeit add start - ÃÑ½½ 130 skill °ü·Ã
+								// 2004, 9, 14, sobeit add start - 총슬 130 skill 관련
 								//&&  !g_pPlayer->HasEffectStatus(EFFECTSTATUS_INSTALL_TURRET ) 
-								// 2004, 9, 14, sobeit add end - ÃÑ½½ 130 skill °ü·Ã
+								// 2004, 9, 14, sobeit add end - 총슬 130 skill 관련
 								)
 							{
 								if (g_pPlayer->SetMovePosition(g_SelectSector.x, g_SelectSector.y))
 								{
 									//if (g_pPlayer->IsStop())
 									{
-										// ´ÙÀ½ ¸ñÇ¥À§Ä¡·Î ¼³Á¤ÇÑ´Ù
+										// 다음 목표위치로 설정한다
 										g_pPlayer->TraceNULL();							
 										
 										g_pPlayer->SetNextActionToMove();
@@ -4385,7 +4385,7 @@ CGameUpdate::ProcessInput()
 						/*
 						if (g_pPlayer->IsStop())
 						{
-							// ´ÙÀ½ ¸ñÇ¥À§Ä¡·Î ¼³Á¤ÇÑ´Ù
+							// 다음 목표위치로 설정한다
 							g_pPlayer->TraceNULL();
 							
 							if (g_pPlayer->SetMovePosition(g_SelectSector.x, g_SelectSector.y))
@@ -4396,19 +4396,19 @@ CGameUpdate::ProcessInput()
 						*/
 					}
 					//--------------------------------------------------
-					// ¼±ÅÃµÈ Object¿¡ ´ëÇØ¼­ 
+					// 선택된 Object에 대해서 
 					//--------------------------------------------------
 					else 
 					{	
-						// Object°¡ ¹º°¡ ¼±ÅÃµÆÀ» °æ¿ì¿¡´Â 
-						// LButtonÀ» ´©¸£°í ÀÖ´Â °Í¸¸À¸·Î ÀÌµ¿ÀÌ µÇÁö¾Ê°Ô ÇÑ´Ù.
+						// Object가 뭔가 선택됐을 경우에는 
+						// LButton을 누르고 있는 것만으로 이동이 되지않게 한다.
 						//g_bLButtonDown = FALSE;
 
 						switch (pObject->GetObjectType())
 						{			
 							case MObject::TYPE_CREATURE :	
 								{
-									// 2004, 12, 3, ¼®¹Î¾¾ Ãß°¡
+									// 2004, 12, 3, 석민씨 추가
 									MCreature* TempCreature = (MCreature*)pObject;
 									if(TempCreature->CurPernalShop() == 1 )
 //										|| g_pPlayer->IsFlyingCreature() || g_pPlayer->IsUndergroundCreature() 
@@ -4418,13 +4418,13 @@ CGameUpdate::ProcessInput()
 										gpC_base->SendMessage(UI_REQUEST_STORE_INFO, pObject->GetID(),0);
 										gC_vs_ui.SetOtherObjectID(pObject->GetID());
 									}
-									// 2004, 12, 3, ¼®¹Î¾¾ Ãß°¡
+									// 2004, 12, 3, 석민씨 추가
 
 									if (g_pPlayer->TraceCreatureToBasicAction( pObject->GetID(), 
 																				bForceAttack, true ))
 									{
 										//----------------------------------
-										// ³²¿¡°Ô ÇÏ´Â ±âº» Çàµ¿ ¹Ýº¹ ¼³Á¤
+										// 남에게 하는 기본 행동 반복 설정
 										//----------------------------------
 										g_pPlayer->SetRepeatAction();
 										g_bPreviousMove = false;
@@ -4491,9 +4491,9 @@ CGameUpdate::ProcessInput()
 				}
 
 				//---------------------------------------------------------------
-				// L/R ButtonÀ» ´©¸£Áö´Â ¾Ê¾ÒÁö¸¸,
-				// ÀÌÀü¿¡ ´©¸¥ LButtonÀÌ °è¼Ó ´­·ÁÁø »óÅÂ¶ó¸é..
-				// But(!), L-Shift°¡ ´­·¯ÁöÁö ¾Ê¾Æ¾ß ÇÑ´Ù.
+				// L/R Button을 누르지는 않았지만,
+				// 이전에 누른 LButton이 계속 눌려진 상태라면..
+				// But(!), L-Shift가 눌러지지 않아야 한다.
 				//---------------------------------------------------------------
 				else if (g_bLButtonDown 				
 						&& !g_pSDLInput->KeyDown(DIK_LSHIFT)
@@ -4507,8 +4507,8 @@ CGameUpdate::ProcessInput()
 					#endif
 
 					//--------------------------------------------------
-					// ¼±ÅÃÇÑ °÷¿¡ Object°¡ ¾ø°í
-					// ¹æ±ÝÀü¿¡ ÀÌµ¿ÇÏ°í ÀÖ´ø ÁßÀÌ¸é MOVE
+					// 선택한 곳에 Object가 없고
+					// 방금전에 이동하고 있던 중이면 MOVE
 					//--------------------------------------------------
 					if (pObject == NULL && g_bPreviousMove)
 					{	
@@ -4516,7 +4516,7 @@ CGameUpdate::ProcessInput()
 						{
 							g_SelectSector = g_pTopView->GetSelectedSector(g_x, g_y);
 
-							// ´ÙÀ½ ¸ñÇ¥À§Ä¡·Î ¼³Á¤ÇÑ´Ù
+							// 다음 목표위치로 설정한다
 							g_pPlayer->TraceNULL();
 							
 							if (g_pPlayer->SetMovePosition(g_SelectSector.x, g_SelectSector.y))
@@ -4551,7 +4551,7 @@ CGameUpdate::ProcessInput()
 	
 		if (g_pPlayer->IsRepeatAction())
 		{
-			// ¹öÆ°À» ¶¼¾úÀ¸¹Ç·Î Çàµ¿ ¹Ýº¹À» Ãë¼ÒÇÑ´Ù.
+			// 버튼을 떼었으므로 행동 반복을 취소한다.
 			g_pPlayer->UnSetRepeatAction();
 			//g_pPlayer->TraceNextNULL();
 
@@ -4559,14 +4559,14 @@ CGameUpdate::ProcessInput()
 		}
 		else
 		{	
-			// ¼±ÅÃµÈ sector·Î Á¤ÇÑ´Ù.
+			// 선택된 sector로 정한다.
 			POINT point;
 			
-			// ´ÙÀ½ °¥ °÷ÀÌ ¾øÀ¸¸é
+			// 다음 갈 곳이 없으면
 			g_pPlayer->GetNextDestination( point );		
 			if (point.x==SECTORPOSITION_NULL || point.y==SECTORPOSITION_NULL)
 			{
-				// ÇöÀç °¡°í ÀÖ´Â °÷ÀÌ ¾øÀ¸¸é
+				// 현재 가고 있는 곳이 없으면
 				g_pPlayer->GetDestination( point );
 				if (point.x==SECTORPOSITION_NULL || point.y==SECTORPOSITION_NULL)
 				{
@@ -4601,7 +4601,7 @@ CGameUpdate::ProcessInput()
 	
 		if (g_pPlayer->IsRepeatAction())
 		{
-			// ¹öÆ°À» ¶¼¾úÀ¸¹Ç·Î Çàµ¿ ¹Ýº¹À» Ãë¼ÒÇÑ´Ù.
+			// 버튼을 떼었으므로 행동 반복을 취소한다.
 			g_pPlayer->UnSetRepeatAction();
 			//g_pPlayer->TraceNextNULL();
 		}
@@ -4612,7 +4612,7 @@ CGameUpdate::ProcessInput()
 		g_bCButtonDown = FALSE;
 	}
 
-	// °¡¸¸È÷ ¼­ ÀÖ´Â »óÅÂÀÌ¸é ¸ñÇ¥ À§Ä¡¸¦ ¾ø¾Ø´Ù.
+	// 가만히 서 있는 상태이면 목표 위치를 없앤다.
 	if (g_pPlayer->GetAction()==ACTION_STAND)
 	{
 		g_pTopView->SetSelectedSectorNULL();
@@ -4629,7 +4629,7 @@ CGameUpdate::ProcessInput()
 	//
 	//---------------------------------------------------
 	/*
-	// Missile Á¾·ù ¹Ù²Ù±â
+	// Missile 종류 바꾸기
 	if (g_pSDLInput->KeyDown(DIK_1))
 		g_pPlayer->SetActionInfo( ACTIONINFO_BOMB_TO_CREATURE );
 
@@ -4648,7 +4648,7 @@ CGameUpdate::ProcessInput()
 
 	#if defined(OUTPUT_DEBUG) && defined(_DEBUG)
 		//---------------------------------------------------
-		// ºñ~~
+		// 비~~
 		//---------------------------------------------------
 		if (g_pSDLInput->KeyDown(DIK_8))
 		{
@@ -4656,7 +4656,7 @@ CGameUpdate::ProcessInput()
 		}
 
 		//---------------------------------------------------
-		// ´«~~
+		// 눈~~
 		//---------------------------------------------------
 		if (g_pSDLInput->KeyDown(DIK_9))
 		{
@@ -4664,7 +4664,7 @@ CGameUpdate::ProcessInput()
 		}
 
 		//---------------------------------------------------
-		// ³¯¾¾ ¸ØÃã
+		// 날씨 멈춤
 		//---------------------------------------------------
 		if (g_pSDLInput->KeyDown(DIK_0))
 		{
@@ -4674,7 +4674,7 @@ CGameUpdate::ProcessInput()
 
 
 		//---------------------------------------------------
-		// ½Ã¾ß  + / -
+		// 시야  + / -
 		//---------------------------------------------------
 
 		if (g_pSDLInput->KeyDown(DIK_SUBTRACT) 
@@ -4733,7 +4733,7 @@ CGameUpdate::ProcessInput()
 		}
 
 		//---------------------------------------------------
-		// ¹à±â °¨¼Ò
+		// 밝기 감소
 		//---------------------------------------------------
 		if (g_pSDLInput->KeyDown(DIK_F9))
 		{
@@ -4742,7 +4742,7 @@ CGameUpdate::ProcessInput()
 		}
 		
 		//---------------------------------------------------
-		// ¹à±â Áõ°¡
+		// 밝기 증가
 		//---------------------------------------------------
 		if (g_pSDLInput->KeyDown(DIK_F10))
 		{
@@ -4808,7 +4808,7 @@ CGameUpdate::ProcessInput()
 	*/
 		
 	#ifdef OUTPUT_DEBUG
-		// ZoneÀÌµ¿ test
+		// Zone이동 test
 		/*
 		if (g_pSDLInput->KeyDown(DIK_1))
 		{	
@@ -4858,9 +4858,9 @@ CGameUpdate::ProcessInput()
 								MEffect*	pEffect;
 								pEffect = new MEffect;
 
-								pEffect->SetFrameID(0, 8);		// 0¹ø Effect, Max 8 Frame
-								pEffect->SetPosition(g_pPlayer->GetX()+j, g_pPlayer->GetY()+i);	// Sector ÁÂÇ¥						
-								pEffect->SetCount(125+rand()%8);			// Áö¼ÓµÇ´Â Frame
+								pEffect->SetFrameID(0, 8);		// 0번 Effect, Max 8 Frame
+								pEffect->SetPosition(g_pPlayer->GetX()+j, g_pPlayer->GetY()+i);	// Sector 좌표						
+								pEffect->SetCount(125+rand()%8);			// 지속되는 Frame
 
 								g_pZone->AddEffect( pEffect );
 							}
@@ -4889,18 +4889,18 @@ CGameUpdate::ProcessInput()
 							//pEffect = new MParabolaEffect(BLT_EFFECT);
 							pEffect = new MLinearEffect(BLT_EFFECT);
 
-							pEffect->SetFrameID(frameID, maxFrame);		// 0¹ø Effect, Max 8 Frame
+							pEffect->SetFrameID(frameID, maxFrame);		// 0번 Effect, Max 8 Frame
 
-							// ¹ß»ç À§Ä¡ PixelÁÂÇ¥
+							// 발사 위치 Pixel좌표
 							pEffect->SetPixelPosition(playerPoint.x, playerPoint.y, 0);	
 							
-							// ¸ñÇ¥ À§Ä¡ PixelÁÂÇ¥
+							// 목표 위치 Pixel좌표
 							pEffect->SetTarget(playerPoint.x + -i*300, 
 												playerPoint.y + -j*350,
 												0,
 												20);	// step
 
-							// Áö¼ÓµÇ´Â Frame (¸ñÇ¥°¡ ÀÖ´Ù¸é º°·Î °ü°è ¾øÀ½ - -;)
+							// 지속되는 Frame (목표가 있다면 별로 관계 없음 - -;)
 							pEffect->SetCount(1000);							
 
 							//pEffect->SetLight(1);							
@@ -4913,21 +4913,21 @@ CGameUpdate::ProcessInput()
 							MLinearEffect*	pEffect;
 							pEffect = new MLinearEffect;
 
-							pEffect->SetFrameID(0, 8);		// 0¹ø Effect, Max 8 Frame
+							pEffect->SetFrameID(0, 8);		// 0번 Effect, Max 8 Frame
 
-							// ¹ß»ç À§Ä¡ PixelÁÂÇ¥
+							// 발사 위치 Pixel좌표
 							int xx=rand()%800-300;
 							int yy=rand()%400-400;
 							int last=rand()%500;
 							pEffect->SetPixelPosition(playerPoint.x+xx, playerPoint.y+yy, 0);
 							
-							// ¸ñÇ¥ À§Ä¡ PixelÁÂÇ¥
+							// 목표 위치 Pixel좌표
 							pEffect->SetTarget(playerPoint.x+xx-rand()%50 , 
 												playerPoint.y+yy+last,
 												0,
 												20);
 
-							// Áö¼ÓµÇ´Â Frame (¸ñÇ¥°¡ ÀÖ´Ù¸é º°·Î °ü°è ¾øÀ½ - -;)
+							// 지속되는 Frame (목표가 있다면 별로 관계 없음 - -;)
 							pEffect->SetCount(25);						
 
 							g_pZone->AddEffect( pEffect );
@@ -4969,10 +4969,10 @@ CGameUpdate::UpdateDraw()
 		char	str[128];
 	//#endif
 
-	// buffer : InitSurface¿¡¼­ SYSTEMMEMORY·Î ÇØÁÖ°í ½á¾ßµÈ´Ù.
+	// buffer : InitSurface에서 SYSTEMMEMORY로 해주고 써야된다.
 	//
 	
-	// È­¸é ¹Ø¿¡ InterfaceºÎºÐ Áö¿öÁÖ±â...
+	// 화면 밑에 Interface부분 지워주기...
 	// [ TEST CODE ]
 	/*
 	rect.left = 0;
@@ -4983,18 +4983,18 @@ CGameUpdate::UpdateDraw()
 	*/
 
 	//-----------------------------------------------------------------		
-	// ¸¶¿ì½º ÁÂÇ¥ ´Ù½Ã ¼³Á¤
+	// 마우스 좌표 다시 설정
 	//-----------------------------------------------------------------
 	GetCursorPos(&point);
 
 	ScreenToClient(g_hWnd, &point);//by viva
 	
 		
-	// ui¿¡ mouseÁÂÇ¥ ¼³Á¤
+	// ui에 mouse좌표 설정
 	gC_vs_ui.MouseControl(M_MOVING, point.x, point.y);
 
 	//-----------------------------------------------------------------
-	// Å¾ºä Zone Ãâ·Â
+	// 탑뷰 Zone 출력
 	//-----------------------------------------------------------------
 	#ifdef OUTPUT_DEBUG_UPDATE_LOOP
 			//DEBUG_ADD("dd");//[Update-Draw] Before Draw");
@@ -5003,7 +5003,7 @@ CGameUpdate::UpdateDraw()
 //	if (true)
 //	{
 //		//-----------------------------------------------------------------
-//		// Game È­¸é Ãâ·Â
+//		// Game 화면 출력
 //		//-----------------------------------------------------------------
 //		__BEGIN_PROFILE("GameDraw3D")
 //			
@@ -5032,7 +5032,7 @@ CGameUpdate::UpdateDraw()
 //		#endif
 //
 //		//-----------------------------------------------------------------
-//		// UI Ãâ·Â
+//		// UI 출력
 //		//-----------------------------------------------------------------		
 //		__BEGIN_PROFILE("UIDraw3D")
 //
@@ -5045,7 +5045,7 @@ CGameUpdate::UpdateDraw()
 //			if (outputInfo || g_pUserOption->DrawFPS)
 //			{
 //				//-----------------------------------------------------------------
-//				// FPS Âï±â	
+//				// FPS 찍기	
 //				//-----------------------------------------------------------------
 //				sprintf(str, "%d FPS(HAL)", g_FrameRate);	
 //			
@@ -5066,12 +5066,12 @@ CGameUpdate::UpdateDraw()
 //	else
 	{
 		//-----------------------------------------------------------------
-		// Font Ãâ·ÂÇÏ´Â Surface¸¦ ¹Ù²ãÁà¾ß ÇÑ´Ù.
+		// Font 출력하는 Surface를 바꿔줘야 한다.
 		//-----------------------------------------------------------------
 		//g_SetFL2Surface( g_pLast->GetSurface() );
 
 		//-----------------------------------------------------------------
-		// Game È­¸é Ãâ·Â
+		// Game 화면 출력
 		//-----------------------------------------------------------------
 		__BEGIN_PROFILE("GameDraw2D")
 
@@ -5109,7 +5109,7 @@ CGameUpdate::UpdateDraw()
 		#endif
 
 		//-----------------------------------------------------------------
-		// UI Ãâ·Â
+		// UI 출력
 		//-----------------------------------------------------------------		
 		__BEGIN_PROFILE("UIDraw2D")
 
@@ -5135,7 +5135,7 @@ CGameUpdate::UpdateDraw()
 			if (outputInfo || g_pUserOption->DrawFPS)
 			{
 				//-----------------------------------------------------------------
-				// FPS Âï±â	
+				// FPS 찍기	
 				//-----------------------------------------------------------------				
 				sprintf(str, "%d FPS", g_FrameRate);	
 				
@@ -5147,7 +5147,7 @@ CGameUpdate::UpdateDraw()
 		__END_PROFILE("DrawFPS")
 
 		//-----------------------------------------------------------------
-		// Last¸¦ BackÀ¸·Î copy - 3D HALÀÌ ¾Æ´Ñ °æ¿ì¸¸..
+		// Last를 Back으로 copy - 3D HAL이 아닌 경우만..
 		//-----------------------------------------------------------------
 		__BEGIN_PROFILE("LastToBack")
 
@@ -5182,7 +5182,7 @@ CGameUpdate::UpdateDraw()
 
 
 	//-------------------------------------------------------------------
-	// Mouse·Î ¼±ÅÃÇÑ ÁÂÇ¥¿¡ ´ëÇÑ debug¿ë code
+	// Mouse로 선택한 좌표에 대한 debug용 code
 	//-------------------------------------------------------------------
 	/*
 	WORD*	lpSurface;
@@ -5209,7 +5209,7 @@ CGameUpdate::UpdateDraw()
 
 
 	//-----------------------------------------------------------------
-	// tab´©¸£¸é MiniMapÀÌ º¸¿©Áø´Ù.
+	// tab누르면 MiniMap이 보여진다.
 	//-----------------------------------------------------------------
 	//if (g_bDrawMinimap)
 	//{	
@@ -5220,7 +5220,7 @@ CGameUpdate::UpdateDraw()
 	//}
 
 	//-----------------------------------------------------------------
-	// ³×Æ®¿÷ »óÅÂ°¡ ÁÁÀº°¡?
+	// 네트웍 상태가 좋은가?
 	//-----------------------------------------------------------------
 	/*
 	if (!g_bNetStatusGood)
@@ -5235,7 +5235,7 @@ CGameUpdate::UpdateDraw()
 	*/
 
 	//-----------------------------------------------------------------
-	// Á×Àº »óÅÂ..
+	// 죽은 상태..
 	//-----------------------------------------------------------------
 	if (g_pPlayer->IsDead())
 	{
@@ -5255,16 +5255,16 @@ CGameUpdate::UpdateDraw()
 				blackValue = min(31, second+20);
 			}
 
-			// Á×´Â µ¿ÀÛÀÌ ³¡³­ °æ¿ì¿¡ È­¸éÀ» °Ë°Ô...
+			// 죽는 동작이 끝난 경우에 화면을 검게...
 			g_pTopView->SetFadeStart(blackValue, 0, 0, 5,5,5);
 		
 
-			// 6 frame¾¿ º¸¿©ÁØ´Ù.
+			// 6 frame씩 보여준다.
 			if ((a & 0x01)==0)
 			{
 				//if (second==0)
 				{
-					//sprintf(str, "[SPACE]¸¦ ´©¸£¸é µÇ»ì¾Æ³¯ ¼ö ÀÖ½À´Ï´Ù.", second);
+					//sprintf(str, "[SPACE]를 누르면 되살아날 수 있습니다.", second);
 					//g_pBack->GDI_Text(270,400, str, RGB(230,230,230));
 				}
 				//else
@@ -5275,7 +5275,7 @@ CGameUpdate::UpdateDraw()
 				//	g_pBack->GDI_Text(300,400, str, RGB(230,230,230));
 				}
 				
-				// 6ÃÊ°¡ Áö³ª°í³ª¼­ ºÎÈ°¹öÆ°À» ¶ç¿î´Ù.
+				// 6초가 지나고나서 부활버튼을 띄운다.
 				if (second < 4
 					&& g_pTempInformation->GetMode()==TempInformation::MODE_NULL)
 				{
@@ -5288,7 +5288,7 @@ CGameUpdate::UpdateDraw()
 					g_pTempInformation->SetMode(TempInformation::MODE_WAIT_RESURRECT);
 					bool bResurrect = false, bElixir= false, bEternity= false, IsSiegeAttacker= false ;
 
-					// 2005, 1, 18, sobeit add start - Äù½ºÆ® actionÀ¸·Î Á×Àº °æ¿ì¿£ ¾Æ·¡¸¦ Ã¼Å© ¾ÈÇÑ´Ù.
+					// 2005, 1, 18, sobeit add start - 퀘스트 action으로 죽은 경우엔 아래를 체크 안한다.
 					if(0 == g_pPlayer->GetResurrectZoneID())
 					// 2005, 1, 18, sobeit add end
 					{
@@ -5301,7 +5301,7 @@ CGameUpdate::UpdateDraw()
 						//bEternity = (*g_pSkillInfoTable)[SKILL_ETERNITY].IsEnable();						
 						bEternity = g_pSkillAvailable->IsEnableSkill( SKILL_ETERNITY ) &&
 									(*g_pSkillInfoTable)[SKILL_ETERNITY].IsAvailableTime() 
-									// 2004, 11, 11, sobeit add start - ·¹º§ °Ë»çµµ ÇÑ´Ù.. ¿ä°Å..g_char_slot_ingame.DOMAIN_HEAL´Â ¹¹Áö? -_-; ¹ö±× ¼öÁ¤..¤Ñ¤Ñ;
+									// 2004, 11, 11, sobeit add start - 레벨 검사도 한다.. 요거..g_char_slot_ingame.DOMAIN_HEAL는 뭐지? -_-; 버그 수정..ㅡㅡ;
 									&& (*g_pSkillManager)[SKILLDOMAIN_HEAL].GetDomainLevel() >= (*g_pSkillInfoTable)[SKILL_ETERNITY].GetLearnLevel();
 									// 2004, 11, 11, sobeit add end
 						IsSiegeAttacker = g_pZone->GetPKType() == PK_TYPE_SIEGE &&
@@ -5325,12 +5325,12 @@ CGameUpdate::UpdateDraw()
 	}
 
 	//-----------------------------------------------------------------
-	// Mouse Cursor À§Ä¡ÀÇ image¸¦ ±â¾ï½ÃÄÑµÎ±â
+	// Mouse Cursor 위치의 image를 기억시켜두기
 	//-----------------------------------------------------------------
 	//
-	// FullScreenÀÌ°í...
-	// ¹Ù·Î ÀüÀÇ FPS°¡ Ãâ·ÂFPS ÇÑ°è¸¦ ³ÑÀ» °æ¿ì....
-	// Ä¿¼­ Ãâ·Â À§Ä¡¸¦ ±â¾ïÇÑ´Ù.
+	// FullScreen이고...
+	// 바로 전의 FPS가 출력FPS 한계를 넘을 경우....
+	// 커서 출력 위치를 기억한다.
 	// 	
 	if (g_pUserOption->UseSmoothCursor)
 	{
@@ -5340,10 +5340,10 @@ CGameUpdate::UpdateDraw()
 			
 			ScreenToClient(g_hWnd, &point);//by viva
 			
-			// ui¿¡ mouseÁÂÇ¥ ¼³Á¤
+			// ui에 mouse좌표 설정
 			gC_vs_ui.MouseControl(M_MOVING, point.x, point.y);
 
-			// ÀúÀåÇÒ ¿µ¿ª ¼³Á¤
+			// 저장할 영역 설정
 			MOUSEPOINTER_INFO mp_info;
 			gC_vs_ui.GetCurrentMousePointerInfo(mp_info);
 
@@ -5366,12 +5366,12 @@ CGameUpdate::UpdateDraw()
 	{
 		//GetCursorPos(&point);	
 			
-		// ui¿¡ mouseÁÂÇ¥ ¼³Á¤
+		// ui에 mouse좌표 설정
 		//gC_vs_ui.MouseControl(M_MOVING, point.x, point.y);
 	}
 
 	//-----------------------------------------------------------------
-	// Mouse ±×¸®±â
+	// Mouse 그리기
 	//-----------------------------------------------------------------
 	if (!g_pTopView->IsDrawRequest())
 	{
@@ -5379,7 +5379,7 @@ CGameUpdate::UpdateDraw()
 	}
 
 	//-----------------------------------------------------------------
-	// Debug InformationÃâ·Â
+	// Debug Information출력
 	//-----------------------------------------------------------------
 	__BEGIN_PROFILE("DrawDebugInfo")
 
@@ -5603,7 +5603,7 @@ CGameUpdate::UpdateDraw()
 					}
 				}
 
-				// Debug Log Filename Ãâ·ÂÇÏ±â
+				// Debug Log Filename 출력하기
 				if (g_pDebugMessage->GetFilename()!=NULL)
 				{
 					sprintf(str, "LogFile : %s", g_pDebugMessage->GetFilename());
@@ -5627,7 +5627,7 @@ CGameUpdate::UpdateDraw()
 				g_Print(300, 5, str, pPrintInfo);
 			}
 			
-			// MissileÁ¾·ù
+			// Missile종류
 			///*	 
 			if (g_pPlayer->GetSpecialActionInfo() != ACTIONINFO_NULL)
 			{
@@ -5648,7 +5648,7 @@ CGameUpdate::UpdateDraw()
 			}	
 			//*/
 
-			// °¡Áø µ·
+			// 가진 돈
 			sprintf(str, "Money : %d", (*g_pMoneyManager).GetMoney());
 			
 			//g_pBack->GDI_Text(550,10, str, RGB(20,20,20));
@@ -5668,7 +5668,7 @@ CGameUpdate::UpdateDraw()
 			g_Print(501, 51, str, pPrintInfo);
 
 			/*
-			// ÀÓ½Ã·Î item °³¼ö º¸¿©ÁÖ±â
+			// 임시로 item 개수 보여주기
 			if (gpC_mouse_pointer->GetPickUpItem() != NULL)
 			{
 				sprintf(str, "%d", gpC_mouse_pointer->GetPickUpItem()->GetNumber());
@@ -5690,7 +5690,7 @@ CGameUpdate::UpdateDraw()
 	if (outputInfo || (*g_pUserOption).DrawFPS)
 	{
 		//-----------------------------------------------------------------
-		// FPS Âï±â	
+		// FPS 찍기	
 		//-----------------------------------------------------------------
 		if (true)
 		{
@@ -5711,14 +5711,14 @@ CGameUpdate::UpdateDraw()
 
 	//---------------------------------------------------------------------
 	//
-	// [ TEST CODE ] - Sword DomainÀÇ SkillµéÀ» °¡Áö°í ÀÛ¾÷ÇÑ´Ù.
+	// [ TEST CODE ] - Sword Domain의 Skill들을 가지고 작업한다.
 	//
 	//---------------------------------------------------------------------
 	/*
 	MSkillDomain& swordDomain = g_SkillManager[SKILLDOMAIN_SWORD];
 
 	//---------------------------------------------------------------------
-	// ¸î°¡Áö skillÀ» ¹è¿ü´Ù°í Ç¥½ÃÇÑ´Ù.
+	// 몇가지 skill을 배웠다고 표시한다.
 	//---------------------------------------------------------------------
 	//swordDomain.LearnSkill( SKILL_DOUBLE_IMPACT );
 	//swordDomain.LearnSkill( SKILL_TRIPLE_SLASHER );
@@ -5728,27 +5728,27 @@ CGameUpdate::UpdateDraw()
 	//swordDomain.UnLearnSkill( SKILL_HURRICANE_COMBO );
 
 	//---------------------------------------------------------------------
-	// Sword DomainÀÇ ¸ðµç ±â¼úµéÀ» Ãâ·ÂÇÑ´Ù.
+	// Sword Domain의 모든 기술들을 출력한다.
 	//---------------------------------------------------------------------
 	swordDomain.SetBegin();
 	
 	while (swordDomain.IsNotEnd())
 	{
-		// skillÀÇ id¿Í status
+		// skill의 id와 status
 		ACTIONINFO					id		= swordDomain.GetSkillID();
 		MSkillDomain::SKILLSTATUS	status	= swordDomain.GetSkillStatus();
 
 		//---------------------------------------
-		// status´Â ´ÙÀ½°ú °°´Ù. 
+		// status는 다음과 같다. 
 		//---------------------------------------
-		//	MSkillDomain::SKILLSTATUS_LEARNED		// ¹è¿ü´Ù.
-		//	MSkillDomain::SKILLSTATUS_NEXT			// ´ÙÀ½¿¡ ¹è¿ï ¼ö ÀÖ´Ù.
-		//	MSkillDomain::SKILLSTATUS_OTHER			// ¾ÆÁ÷Àº ¹è¿ï ¼ö ¾ø´Ù.	
+		//	MSkillDomain::SKILLSTATUS_LEARNED		// 배웠다.
+		//	MSkillDomain::SKILLSTATUS_NEXT			// 다음에 배울 수 있다.
+		//	MSkillDomain::SKILLSTATUS_OTHER			// 아직은 배울 수 없다.	
 		//---------------------------------------
 		
 		//---------------------------------------
-		// id¸¦ ¾Ë¸é g_SkillInfoTable¿¡¼­ 
-		// ±× idÀÇ skill¿¡ ´ëÇÑ Á¤º¸¸¦ ¾òÀ» ¼ö ÀÖ´Ù.
+		// id를 알면 g_SkillInfoTable에서 
+		// 그 id의 skill에 대한 정보를 얻을 수 있다.
 		//---------------------------------------
 		COLORREF color;
 		switch (status)
@@ -5775,12 +5775,12 @@ CGameUpdate::UpdateDraw()
 		// g_pBack->GDI_Text(x, y, skillInfo.GetName(), color);
 		TextSystem::TextService::RenderText(x, y, skillInfo.GetName());
 
-		// ´ÙÀ½
+		// 다음
 		swordDomain.Next();
 	}
 	//*/
 
-	// Ä¿¼­ Ãâ·Â
+	// 커서 출력
 	//g_pBack->HLine(point.x-7, point.y, 7, color);
 	//g_pBack->HLine(point.x+1, point.y, 7, color);
 	//g_pBack->VLine(point.x, point.y-7, 7, color);
@@ -5821,7 +5821,7 @@ CGameUpdate::UpdateDrawHelp()
 		}		
 	}
 
-	// 5ÃÊ¸¶´Ù ÇÑ¹ø¾¿.. scroll
+	// 5초마다 한번씩.. scroll
 	static DWORD HelplastTime = g_CurrentTime;
 	if (g_CurrentTime - HelplastTime >= g_pClientConfig->DELAY_GAMEMESSAGE)
 	{
@@ -5878,7 +5878,7 @@ PacketAttackMelee(int user, int target)
 	packet.execute( g_pSocket );
 }
 */
-///ÒÔÏÂÊÇ¼ì²âÏµÍ³ÊÇ·ñÓÐµÇÂ½¶þ¸öÓÃ»§
+///以下是检测系统是否有登陆二个用户
 int GetCurrentUserNumber()
 {
 	HANDLE			hSnapShot;
@@ -5927,7 +5927,7 @@ int GetCurrentUserNumber()
 //-----------------------------------------------------------------------------
 // Update Game
 //-----------------------------------------------------------------------------
-// °ÔÀÓ ½ÇÇà Áß...
+// 게임 실행 중...
 //-----------------------------------------------------------------------------
 void 
 CGameUpdate::Update(void)
@@ -5950,7 +5950,7 @@ CGameUpdate::Update(void)
 	}
 	
 	//------------------------------------------
-	// Logout ÇÒ ½Ã°£ÀÎÄ¡ Ã¼Å©ÇÑ´Ù.
+	// Logout 할 시간인치 체크한다.
 	//------------------------------------------
 	if (g_pUserInformation!=NULL
 		&& g_pUserInformation->LogoutTime!=0
@@ -5959,7 +5959,7 @@ CGameUpdate::Update(void)
 	{
 		ExecuteLogout();
 
-		g_pUserInformation->LogoutTime = 0;	// Logout½Ã°£ Á¦°Å
+		g_pUserInformation->LogoutTime = 0;	// Logout시간 제거
 
 		#ifdef OUTPUT_DEBUG_UPDATE_LOOP
 			//DEBUG_ADD("UE2");
@@ -5986,9 +5986,9 @@ CGameUpdate::Update(void)
 
 
 	//---------------------------------------------
-	// Sound°ü·Ã
+	// Sound관련
 	//---------------------------------------------
-	// ¸Å loop ¸¶´Ù ¾ÈÇØÁàµµ µÇÁö ¾ÊÀ»±î..
+	// 매 loop 마다 안해줘도 되지 않을까..
 	#ifdef OUTPUT_DEBUG_UPDATE_LOOP
 		//DEBUG_ADD("DXRTDB");
 	#endif
@@ -6003,24 +6003,24 @@ CGameUpdate::Update(void)
 
 	if (g_CurrentTime > nextSoundCheckTime)
 	{
-		// ÃÊ´ç playÇÑ sound ¼ö..
+		// 초당 play한 sound 수..
 		g_SoundPerSecond = 0;
 
-		// 1ÃÊ ÈÄ
+		// 1초 후
 		nextSoundCheckTime = g_CurrentTime + 1000;
 	}
 
 	//---------------------------------------------------
 	//
-	// ÀÏÁ¤ ½Ã°£¸¶´Ù ÇÑ¹ø¾¿ Ã³¸®¸¦ ÇØÁØ´Ù.
+	// 일정 시간마다 한번씩 처리를 해준다.
 	//
 	//---------------------------------------------------
-	// [¿¹Á¦]
+	// [예제]
 	// g_UpdateDelay	: 100
 	// lastTime			: 1000 
 	// currentTime		: 1240 
 	//
-	// 1200, 1100ÀÇ µÎ¹øÀ» Ã³¸®ÇÏ°Ô µÈ´Ù.
+	// 1200, 1100의 두번을 처리하게 된다.
 	//---------------------------------------------------
 
 	int k = g_pClientConfig->MAX_UPDATE_ONETIME;		// 12 frame * 1 Tile.. 
@@ -6035,9 +6035,9 @@ CGameUpdate::Update(void)
 	UpdateMouse();
 
 	//------------------------------------------
-	// ¹«ÇÑ·çÇÁ ¿¹¹æµµ µÇ°í...
-	// k°ª¸¶´Ù ÇÑ¹ø¾¿Àº Draw¸¦ ÇØÁÖ±â ¶§¹®¿¡
-	// Frame SkippingÀ» Àû¿ë½ÃÅ²´Ù.				
+	// 무한루프 예방도 되고...
+	// k값마다 한번씩은 Draw를 해주기 때문에
+	// Frame Skipping을 적용시킨다.				
 	//------------------------------------------
 	DWORD	TempCurrentTime	=g_CurrentTime;
 	DWORD	TemplastTime =lastTime;
@@ -6056,12 +6056,12 @@ CGameUpdate::Update(void)
 	if (g_CheckTimeNum>30)
 	{
 		g_CheckTimeNum=0;
-		// 2006.11.07  È¥³ý³ÌÐòË«¿ª¼ì²â Coffee 
+		// 2006.11.07  去除程序双开检测 Coffee 
 		/*
 		if(GetCurrentUserNumber()>1)
 		{
-			//char* szInfo="³ÌÐòÒÑ¼ì²â³öÄãÊ¹ÓÃÁËË«ÓÃ»§µÇÂ½ÏµÍ³£¬ÇëÍË³öÒ»¸öWindowsÓÃ»§ÔÙµÇÂ½ÓÎÏ·¡£";
-			//MessageBox(0,szInfo,"³ö´í",MB_OK);
+			//char* szInfo="程序已检测出你使用了双用户登陆系统，请退出一个Windows用户再登陆游戏。";
+			//MessageBox(0,szInfo,"놔댄",MB_OK);
 			g_bNeedUpdate = TRUE;
 			SetMode(MODE_QUIT);
 			g_ModeNext = MODE_QUIT;
@@ -6081,7 +6081,7 @@ CGameUpdate::Update(void)
 	FindWindow("a","b");
 	if (g_CurrentTime - lastTime >= tmp)
 	{
-		// º¯È­µÈ°ÍÀÌ ÀÖ´Ù°í check
+		// 변화된것이 있다고 check
 		g_bFrameChanged = true;
 
 		do
@@ -6090,14 +6090,14 @@ CGameUpdate::Update(void)
 				//DEBUG_ADD("CGUP");
 			#endif
 
-			// °ÔÀÓÀÇ frame¼ö Áõ°¡
+			// 게임의 frame수 증가
 			g_CurrentFrame++;
 		
 			//if (--k==0) break;
 
 			//------------------------------------------
 			//
-			// Socket ÀÔ·Â Ã³¸®
+			// Socket 입력 처리
 			//
 			//------------------------------------------
 			__BEGIN_PROFILE("GameSocketInput")
@@ -6124,12 +6124,12 @@ CGameUpdate::Update(void)
 
 			//------------------------------------------
 			//
-			// Input Ã³¸®
+			// Input 처리
 			//
 			//------------------------------------------
 			if (g_bActiveGame)
 			{
-				// Input°ªÀ» ÀÐ¾î¿Â´Ù.
+				// Input값을 읽어온다.
 				UpdateInput();
 				
 				__BEGIN_PROFILE("ProcessInput")
@@ -6165,18 +6165,18 @@ CGameUpdate::Update(void)
 			}
 
 			//------------------------------------------
-			// 1ºÐ¸¶´Ù ÇÑ¹ø¾¿ º¸³»´Â packet
+			// 1분마다 한번씩 보내는 packet
 			//------------------------------------------
 			CheckTime();
 //			CheckInvalidProcess();
 			//------------------------------------------
-			// Á¢¼ÓÀ» À¯ÁöÇØ¾ßÇÏ´Â °æ¿ì¿¡´Â Á¢¼Ó À¯Áö..
+			// 접속을 유지해야하는 경우에는 접속 유지..
 			//------------------------------------------			
 			//KeepConnection();
 
 			//------------------------------------------
 			//
-			// Socket Ãâ·Â Ã³¸®
+			// Socket 출력 처리
 			//
 			//------------------------------------------
 			__BEGIN_PROFILE("GameSocketOutput")
@@ -6198,7 +6198,7 @@ CGameUpdate::Update(void)
 
 			//------------------------------------------
 			//
-			//	³¯¾¾ Ã³¸®
+			//	날씨 처리
 			//
 			//------------------------------------------
 			if (g_pWeather!=NULL)
@@ -6248,7 +6248,7 @@ CGameUpdate::Update(void)
 
 			//------------------------------------------
 			//
-			// ZoneÀÇ objectµéÀ» updateÇÑ´Ù.
+			// Zone의 object들을 update한다.
 			//
 			//------------------------------------------
 			#ifdef OUTPUT_DEBUG_UPDATE_LOOP
@@ -6285,11 +6285,11 @@ CGameUpdate::Update(void)
 //end
 
 /* add by sonic 2006.9.12 */
-//Ôö¼ÓÊ±¼ä¼ì²â
+//增加时间检测
 		static DWORD nextTime = g_CurrentTime + 60000;
 		
 		//------------------------------------------------------------------
-		// 1ºÐ ¸¶´Ù ÇÑ¹ø¾¿ garbarge packetÀ» º¸³½´Ù.
+		// 1분 마다 한번씩 garbarge packet을 보낸다.
 		//------------------------------------------------------------------
 #ifndef PLATFORM_MACOS
 		// Windows-specific anti-cheat time verification - disabled on macOS
@@ -6337,11 +6337,11 @@ CGameUpdate::Update(void)
 		*/
 /* add end by sonic */
 		//CRYPT_END
-		// k¹ø ¸¸Å­ updateÇß´Âµ¥µµ..
-		// ´õ updateÇØ¾ßÇÒ °ÍÀÌ ÀÖÀ¸¸é.. ¹«½ÃÇÑ´Ù..
-		// ¹«½ÃÇÒ±î??
-		// µð¾ÆÃ³·³.. °©ÀÚ±â ´Þ¸®±â´Â ¾î¶³±î? -_-;
-		//¼ì²âÍâ¹Ò
+		// k번 만큼 update했는데도..
+		// 더 update해야할 것이 있으면.. 무시한다..
+		// 무시할까??
+		// 디아처럼.. 갑자기 달리기는 어떨까? -_-;
+		//检测外挂
 
 #ifndef PLATFORM_MACOS
 		// Windows-specific anti-cheat error check - disabled on macOS
@@ -6356,12 +6356,12 @@ CGameUpdate::Update(void)
 		static int OnetimeUpdateCount = 0;
 		if (k==0)
 		{
-			//lastTime = g_CurrentTime;  // ¹«½ÃÇÏ´Â °æ¿ì..
+			//lastTime = g_CurrentTime;  // 무시하는 경우..
 			OnetimeUpdateCount++;
 	
 			if (OnetimeUpdateCount > g_pClientConfig->MAX_UPDATE_ONETIME_COUNT)
 			{
-				// ´õ ÀÌ»óÀº update¸øÇÏ°Ô ÇÑ´Ù.
+				// 더 이상은 update못하게 한다.
 				lastTime = g_CurrentTime;
 				OnetimeUpdateCount = 0;
 			}
@@ -6381,7 +6381,7 @@ CGameUpdate::Update(void)
 	}
 //CRYPT_END
 	//---------------------------------------------
-	// Update È¸¼ö Ãâ·Â
+	// Update 회수 출력
 	//---------------------------------------------
 	/*
 	#ifdef OUTPUT_DEBUG
@@ -6408,7 +6408,7 @@ CGameUpdate::Update(void)
 		if (lastHour != currentHour)
 		{
 			//---------------------------------------------
-			// ½Ã°£ÀÌ ¹Ù²¼À¸¸é ±×¸²ÀÚµµ ¹Ù²ã¾ß ÇÑ´Ù.
+			// 시간이 바꼈으면 그림자도 바꿔야 한다.
 			//---------------------------------------------
 			if (g_pTopView!=NULL)
 			{
@@ -6418,9 +6418,9 @@ CGameUpdate::Update(void)
 			lastHour = g_pGameTime->GetHour();
 
 			//---------------------------------------------
-			// À½¾Çµµ ¹Ù²Û´Ù.
+			// 음악도 바꾼다.
 			//---------------------------------------------
-			// Â¦¼ö ½Ã°£´ë¿¡¸¸ À½¾Ç ¿¬ÁÖ..
+			// 짝수 시간대에만 음악 연주..
 			if ((currentHour & 0x01)==0)
 			{
 				PlayMusicCurrentZone();
@@ -6430,7 +6430,7 @@ CGameUpdate::Update(void)
 
 		
 		//---------------------------------------------
-		// ½Ã°£
+		// 시간
 		//---------------------------------------------
 		char str[80];
 
@@ -6452,7 +6452,7 @@ CGameUpdate::Update(void)
 		}
 
 		//---------------------------------------------
-		// ½Ã°£
+		// 시간
 		//---------------------------------------------
 		sprintf(str, (*g_pGameStringTable)[STRING_DRAW_GAME_DATE].GetString(),
 					g_pGameTime->GetYear(),
@@ -6465,7 +6465,7 @@ CGameUpdate::Update(void)
 	
 	
 	//---------------------------------------------
-	// ZoneÀÇ È¯°æ »ç¿îµå Ãâ·Â
+	// Zone의 환경 사운드 출력
 	//---------------------------------------------
 	if (g_pZoneSoundManager!=NULL)
 	{
@@ -6473,13 +6473,13 @@ CGameUpdate::Update(void)
 	}
 
 	//---------------------------------------------
-	// UI¿¡ player ÁÂÇ¥ ¼³Á¤
+	// UI에 player 좌표 설정
 	//---------------------------------------------
 	gC_vs_ui.SetXY( g_pPlayer->GetX(), g_pPlayer->GetY() );
 
 	//---------------------------------------------
 	//
-	// Draw - º¯È­µÈ°Ô ÀÖÀ¸¸é ±×·ÁÁØ´Ù.
+	// Draw - 변화된게 있으면 그려준다.
 	//
 	//---------------------------------------------
 // 	if (g_bActiveGame
@@ -6494,8 +6494,8 @@ CGameUpdate::Update(void)
 		static DWORD oldFrame = 0;
 
 		//------------------------------------------------------
-		// UpdateµÆÀ¸¸é.. 
-		// »õ·Î¿î °ÔÀÓ È­¸éÀ» ±×·ÁÁØ´Ù.
+		// Update됐으면.. 
+		// 새로운 게임 화면을 그려준다.
 		//------------------------------------------------------
 		if (g_bFrameChanged || !(*g_pUserOption).UseSmoothCursor)
 		{
@@ -6507,7 +6507,7 @@ CGameUpdate::Update(void)
 			
 			/*
 			//------------------------------------------------------
-			// ¿ÜÄ¡±â ½Ã°£ °»½Å..
+			// 외치기 시간 갱신..
 			//------------------------------------------------------
 			if (g_CurrentTime > g_pUserInformation->GlobalSayTime+g_pClientConfig->DELAY_GLOBAL_SAY
 				//#if defined(OUTPUT_DEBUG) && defined(_DEBUG)
@@ -6515,11 +6515,11 @@ CGameUpdate::Update(void)
 				//#endif
 				)			
 			{
-				// Á¤»óÀûÀÎ Ãâ·Â			
+				// 정상적인 출력			
 				gC_vs_ui.SetInputStringColor( gpC_base->m_chatting_pi.text_color );
 			}
 			//------------------------------------------------------
-			// ¿ÜÄ¡±â ºÒ°¡´É »óÅÂ
+			// 외치기 불가능 상태
 			//------------------------------------------------------
 			else
 			{
@@ -6545,9 +6545,9 @@ CGameUpdate::Update(void)
 			*/
 
 			//------------------------------------------------------
-			// È­¸é Ãâ·Â
+			// 화면 출력
 			//------------------------------------------------------
-			// ¸¶¿ì½º ÁÂÇ¥³ª ... frameÀÌ ¹Ù²ï °æ¿ì¿¡ Ãâ·Â..
+			// 마우스 좌표나 ... frame이 바뀐 경우에 출력..
 			if (g_CurrentFrame != oldFrame
 				|| g_x != oldX
 				|| g_y != oldY || 1)
@@ -6584,7 +6584,7 @@ CGameUpdate::Update(void)
 			//g_FrameCount++;
 		}		
 		//------------------------------------------------------
-		// ºÎµå·´°Ô ¿òÁ÷ÀÌ´Â Ä¿¼­¸¦ Ãâ·ÂÇÒ±î??
+		// 부드럽게 움직이는 커서를 출력할까??
 		//------------------------------------------------------
 		else if (g_bSmoothCursor)
 		{
@@ -6597,30 +6597,30 @@ CGameUpdate::Update(void)
 
 			ScreenToClient(g_hWnd, &cursorPoint);//by viva
 
-			// UI¿¡ ¸¶¿ì½º ÁÂÇ¥ ¼³Á¤
+			// UI에 마우스 좌표 설정
 			gC_vs_ui.MouseControl(M_MOVING, cursorPoint.x, cursorPoint.y);
 
 
 			//------------------------------------------------------
-			// ¹æ±Ý °ÔÀÓ È­¸éÀÌ ±×·ÁÁø »óÅÂ¶ó¸é..
+			// 방금 게임 화면이 그려진 상태라면..
 			//------------------------------------------------------
-			// ´ÙÀ½ºÎÅÍ´Â FlipÇØ¼­ ¸¶¿ì½º¸¸ ±×¸®±â À§ÇØ¼­..
-			// Primary¿Í BackÀ» ¶È°°ÀÌ ¸¸µç´Ù.
+			// 다음부터는 Flip해서 마우스만 그리기 위해서..
+			// Primary와 Back을 똑같이 만든다.
 			//------------------------------------------------------
 			if (g_bNewDraw)
 			{
-				// ´Ù½Ã false·Î..
+				// 다시 false로..
 				g_bNewDraw = false;
 				
 				//------------------------------------------------------
-				// PrimarySurface --> BackSurface·Î copy
+				// PrimarySurface --> BackSurface로 copy
 				//------------------------------------------------------
-				// ÇÏµå¿þ¾î °¡¼ÓÀÌ µÇ´Â °æ¿ì..
-				// Primary --> BackÀ¸·Î..
-				// ±×·±µ¥(!) ¹®Á¦°¡ Á»!! ÀÖ´Ù.. 
-				// ±×·¡¼­ µÎ¹ø BltÇØÁá´Ù. - -;;
+				// 하드웨어 가속이 되는 경우..
+				// Primary --> Back으로..
+				// 그런데(!) 문제가 좀!! 있다.. 
+				// 그래서 두번 Blt해줬다. - -;;
 				//------------------------------------------------------
-				// (¹æ±Ý ±×¸° È­¸é°ú ÀÌÀüÀÇ È­¸éÀÌ ´Ù¸£±â ¶§¹®¿¡.. ¶È°°ÀÌ ÇØÁØ´Ù)
+				// (방금 그린 화면과 이전의 화면이 다르기 때문에.. 똑같이 해준다)
 //				if (true)
 //				{
 //					point.x = 0;
@@ -6629,32 +6629,32 @@ CGameUpdate::Update(void)
 //
 //					g_pBack->BltPrimarySurface(&point, &rect);
 //
-//					// ±â¾ïÇß´ø Ä¿¼­ ºÎºÐÀ» Áö¿öÁØ´Ù. --> (0)
+//					// 기억했던 커서 부분을 지워준다. --> (0)
 //					//g_pCursorSurface->Restore(0, g_pBack);
 //					//g_FrameCount++;
 //
 //					g_pBack->BltPrimarySurface(&point, &rect);
 //
-//					// ±â¾ïÇß´ø Ä¿¼­ ºÎºÐÀ» Áö¿öÁØ´Ù. --> (0)
+//					// 기억했던 커서 부분을 지워준다. --> (0)
 //					g_pCursorSurface->Restore(0, g_pBack);
 //					
-//					// °ÔÀÓ È­¸éÀÇ InterfaceºÎºÐÀ» Update½ÃÄÑÁà¾ß ÇÑ´Ù.
+//					// 게임 화면의 Interface부분을 Update시켜줘야 한다.
 //					//
 //					// [ TEST CODE ]					
 //					//gC_vs_ui.VS_UI_Loop();					
 //
 //					//---------------------------------------
-//					// ±ÛÀÚ Ãâ·Â
+//					// 글자 출력
 //					//---------------------------------------
 //					//UpdateDrawText();
 //				}
 //				//------------------------------------------------------
-//				// ÇÏµå¿þ¾î °¡¼ÓÀÌ ¾ÈµÇ´Â °æ¿ì..
-//				// Last --> BackÀ¸·Î copy
+//				// 하드웨어 가속이 안되는 경우..
+//				// Last --> Back으로 copy
 //				//------------------------------------------------------
 //				else
 				{
-					// Last --> BackÀ¸·Î copy
+					// Last --> Back으로 copy
 					RECT rect;
 					point.x = 0;
 					point.y = 0;
@@ -6664,13 +6664,13 @@ CGameUpdate::Update(void)
 					rect.bottom = g_GameRect.bottom;
 					g_pBack->BltNoColorkey( &point, g_pLast, &rect );
 
-					// °ÔÀÓ È­¸éÀÇ InterfaceºÎºÐÀ» Update½ÃÄÑÁà¾ß ÇÑ´Ù.
+					// 게임 화면의 Interface부분을 Update시켜줘야 한다.
 					//
 					// [ TEST CODE ]					
 					gC_vs_ui.Show();					
 
 					//---------------------------------------
-					// ±ÛÀÚ Ãâ·Â
+					// 글자 출력
 					//---------------------------------------
 					//UpdateDrawText();
 
@@ -6680,34 +6680,34 @@ CGameUpdate::Update(void)
 				MOUSEPOINTER_INFO mp_info;
 				gC_vs_ui.GetCurrentMousePointerInfo(mp_info);
 
-				// Ä¿¼­ Ãâ·Â À§Ä¡¸¦ ±â¾ï½ÃÅ²´Ù. --> (1)
+				// 커서 출력 위치를 기억시킨다. --> (1)
 				point.x = mp_info.x;
 				point.y = mp_info.y;
 				g_pCursorSurface->Store(1, g_pBack, &point);
 
-				// ´ÙÀ½¿¡ Ã³¸®ÇÒ surface¹øÈ£
+				// 다음에 처리할 surface번호
 				surface = 0;
 			}
 			//------------------------------------------------------
-			// FlipÇØ¼­ ¸¶¿ì½º¸¸ UpdateÇÏ´Â »óÅÂ..
+			// Flip해서 마우스만 Update하는 상태..
 			//------------------------------------------------------
 			else
 			{	
-				// ±â¾ïÇß´ø ºÎºÐÀ» Ãâ·ÂÇØ¼­ Ä¿¼­¸¦ Áö¿öÁØ´Ù. --> (surface)
+				// 기억했던 부분을 출력해서 커서를 지워준다. --> (surface)
 				g_pCursorSurface->Restore(surface, g_pBack);
 
-				// ¸¶¿ì½º Ãâ·Â ¿µ¿ª ¼³Á¤
+				// 마우스 출력 영역 설정
 				MOUSEPOINTER_INFO mp_info;
 				gC_vs_ui.GetCurrentMousePointerInfo(mp_info);
 
-				// Ä¿¼­ Ãâ·Â À§Ä¡¸¦ ±â¾ï½ÃÅ²´Ù. --> (surface)
+				// 커서 출력 위치를 기억시킨다. --> (surface)
 				point.x = mp_info.x;
 				point.y = mp_info.y;
 				g_pCursorSurface->Store(surface, g_pBack, &point);
 				
 				//g_pCursorSurface->Restore(surface, g_pBack);
 
-				// ´ÙÀ½¿¡ Ã³¸®ÇÒ surface¹øÈ£
+				// 다음에 처리할 surface번호
 				surface = ((surface==0)? 1 : 0);				
 			}
 			
@@ -6732,7 +6732,7 @@ CGameUpdate::Update(void)
 	}
 //#ifdef OUTPUT_DEBUG
 //	static DWORD playTime = 0;
-//	if( g_bTestMusic )			// ¹è°æÀ½¾Ç ·çÇÁÁßÀÌ¸é
+//	if( g_bTestMusic )			// 배경음악 루프중이면
 //	{		
 //		if( playTime == 0 )
 //			playTime = timeGetTime();
@@ -6753,7 +6753,7 @@ CGameUpdate::Update(void)
 //		{
 //			g_pSystemMessage->Clear();
 //			char szbuffer[512];
-//			wsprintf(szbuffer,"CTRL+1~8À» ´©¸£½Ã¸é ÇØ´ç °î¸¸ ¹Ýº¹ÇØ¼­ µéÀ» ¼ö ÀÖ½À´Ï´Ù.CTRL+0 Àº ´ÙÀ½°îÀ¸·Î ³Ñ¾î°©´Ï´Ù.");
+//			wsprintf(szbuffer,"CTRL+1~8을 누르시면 해당 곡만 반복해서 들을 수 있습니다.CTRL+0 은 다음곡으로 넘어갑니다.");
 //			g_pSystemMessage->Add(szbuffer);
 //			wsprintf(szbuffer,"%s(%d/8) %2d:%2d", g_musicfilename[g_CurrentMusicNum].c_str(), g_CurrentMusicNum+1,(timeGetTime() - playTime)/1000/60, ((timeGetTime() - playTime )/ 1000)%60 );
 //			g_pSystemMessage->Add(szbuffer);

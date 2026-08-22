@@ -1,4 +1,4 @@
-// VS_UI_Exchange.cpp
+﻿// VS_UI_Exchange.cpp
 
 #include "client_PCH.h"
 #define assert(e) ((void)(e))

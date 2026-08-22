@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 // MItem.cpp
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
@@ -51,7 +51,7 @@ extern bool g_bHolyLand;
 extern bool g_bZoneSafe;
 
 //----------------------------------------------------------------------
-// ÃÖ´ë ¼ö
+// 최대 수
 //----------------------------------------------------------------------
 //#define MAX_FIRE_CRACKER_PILE_NUMBER	9
 //#define	MAX_POTION_PILE_NUMBER			9
@@ -123,12 +123,12 @@ extern bool g_bZoneSafe;
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// ÇÑ±ÛÀ» »ç¿ëÇÏ´Â°¡?
+// 한글을 사용하는가?
 //----------------------------------------------------------------------
 bool	MItem::s_bUseKorean	= true;
 
 //----------------------------------------------------------------------
-// Item ¶³¾î¶ß¸±¶§ÀÇ ³ôÀÌµé..
+// Item 떨어뜨릴때의 높이들..
 //----------------------------------------------------------------------
 int		MItem::s_DropHeight[MAX_DROP_COUNT] = 
 {
@@ -136,7 +136,7 @@ int		MItem::s_DropHeight[MAX_DROP_COUNT] =
 };
 
 //----------------------------------------------------------------------
-// ItemClass¿¡ ¸Â°Ô ¸Þ¸ð¸®¸¦ Àâ¾ÆÁÖ´Â class tableÀ» ¼³Á¤..
+// ItemClass에 맞게 메모리를 잡아주는 class table을 설정..
 //----------------------------------------------------------------------
 MItem::FUNCTION_NEWITEMCLASS
 MItem::s_NewItemClassTable[MAX_ITEM_CLASS] =
@@ -173,7 +173,7 @@ MItem::s_NewItemClassTable[MAX_ITEM_CLASS] =
 	MCorpse::NewItem,
 	//MSkull::NewItem,
 
-	// vampire¿ë item
+	// vampire용 item
 	MVampireRing::NewItem,
 	MVampireBracelet::NewItem,
 	MVampireNecklace::NewItem,
@@ -182,7 +182,7 @@ MItem::s_NewItemClassTable[MAX_ITEM_CLASS] =
 	// skull
 	MSkull::NewItem,
 
-	// maceÃß°¡ - 2001/3/26
+	// mace추가 - 2001/3/26
 	MMace::NewItem,
 
 	MSerum::NewItem,
@@ -257,7 +257,7 @@ MItem::s_NewItemClassTable[MAX_ITEM_CLASS] =
 	MTrapItem::NewItem,
 	MBloodBibleSign::NewItem,
 	MWarItem::NewItem,
-		//by csm 2Â÷ ÀüÁ÷ ¾ÆÀÌÅÛ Å¬·¡½º Ãß°¡ 
+		//by csm 2차 전직 아이템 클래스 추가 
 	MCarryingReceiver::NewItem,
 	MShoulderArmor::NewItem,
 	MDermis::NewItem,
@@ -265,7 +265,7 @@ MItem::s_NewItemClassTable[MAX_ITEM_CLASS] =
 	MFascia::NewItem,
 	MMitten::NewItem,
 	
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 		MSubInventory::NewItem,
 	#endif
 
@@ -306,7 +306,7 @@ MItem*	MLearningItem::NewItem()	{ return new MLearningItem; }
 MItem*	MMoney::NewItem()			{ return new MMoney; }
 MItem*	MCorpse::NewItem()			{ return new MCorpse; }
 
-// vampire¿ë item
+// vampire용 item
 MItem*	MVampireRing::NewItem()		{ return new MVampireRing; }
 MItem*	MVampireBracelet::NewItem()	{ return new MVampireBracelet; }
 MItem*	MVampireNecklace::NewItem()	{ return new MVampireNecklace; }
@@ -317,7 +317,7 @@ MItem*	MVampireShoes::NewItem()	{ return new MVampireShoes; }
 //----------------------------------------------------------------------
 // New Item
 //----------------------------------------------------------------------
-// itemClass¿¡ ¸Â´Â classÀÇ °´Ã¼¸¦ »ý¼ºÇØ¼­(new) ³Ñ°ÜÁØ´Ù.
+// itemClass에 맞는 class의 객체를 생성해서(new) 넘겨준다.
 //----------------------------------------------------------------------
 MItem*		
 MItem::NewItem(ITEM_CLASS itemClass)
@@ -342,8 +342,8 @@ MItem::MItem()
 	m_ItemType		= 0;//ITEMTYPE_NULL;
 //	m_ItemOption	= 0;
 
-	m_bDropping		= FALSE;	// ¶³¾îÁö°í ÀÖ´Â Áß
-	m_DropCount		= 0;		// ÇöÀç count
+	m_bDropping		= FALSE;	// 떨어지고 있는 중
+	m_DropCount		= 0;		// 현재 count
 
 	// identify
 	m_bIdentified	= TRUE;
@@ -380,7 +380,7 @@ MItem::~MItem()
 //----------------------------------------------------------------------
 // Is Insert To Item ( pItem )
 //----------------------------------------------------------------------
-// pItem¿¡ Ãß°¡µÉ ¼ö ÀÖ´Â°¡?
+// pItem에 추가될 수 있는가?
 //----------------------------------------------------------------------
 bool		
 MItem::IsInsertToItem(const MItem* pItem) const
@@ -391,13 +391,13 @@ MItem::IsInsertToItem(const MItem* pItem) const
 	}
 
 	//-------------------------------------------------
-	// ½×ÀÌ´Â ItemÀÌ°í 
-	// class¿Í typeÀÌ °°¾Æ¾ß ½×ÀÎ´Ù.	
-	// ÇöÀç °³¼ö°¡ ÇÑ°è¸¦ ³ÑÁö ¾ÊÀº °æ¿ì 
-	// --> Ãß°¡ °¡´É
+	// 쌓이는 Item이고 
+	// class와 type이 같아야 쌓인다.	
+	// 현재 개수가 한계를 넘지 않은 경우 
+	// --> 추가 가능
 	//-------------------------------------------------
 
-	// (!)¾ÆÁ÷Àº ½×ÀÌ°Ô ÇÏ¸é ¾ÈµÈ´Ù.
+	// (!)아직은 쌓이게 하면 안된다.
 
 	///*
 	if (pItem->IsPileItem() 
@@ -419,13 +419,13 @@ const char *
 MItem::GetName()
 {
 	//---------------------------------------------------------
-	// Á¤ÇØÁø ÀÌ¸§ÀÌ µû·Î ¾ø´Ù¸é.. °íÁ¤µÈ ÀÌ¸§ return
+	// 정해진 이름이 따로 없다면.. 고정된 이름 return
 	//---------------------------------------------------------
 	if (m_pName==NULL)
 	{
 		//if (s_bUseKorean) 
 		{
-			// Æ¾¹öÀüÀÎ°æ¿ì XXX¸Ó¸®¸¦ XXX¼Ò¿ï ½ºÅæ·Î Ç¥½ÃÇÑ´Ù.
+			// 틴버전인경우 XXX머리를 XXX소울 스톤로 표시한다.
 			if(g_pUserInformation->GoreLevel == false && GetItemClass() == ITEM_CLASS_SKULL)
 			{
 //				static char sz_temp[256];
@@ -458,11 +458,11 @@ const char *
 MItem::GetEName() const
 {
 	//---------------------------------------------------------
-	// Á¤ÇØÁø ÀÌ¸§ÀÌ µû·Î ¾ø´Ù¸é.. °íÁ¤µÈ ÀÌ¸§ return
+	// 정해진 이름이 따로 없다면.. 고정된 이름 return
 	//---------------------------------------------------------
 //	if (m_pName==NULL)
 	{
-		// Æ¾¹öÀüÀÎ°æ¿ì XXXHead¶Ç´Â XXXSkull¸¦ XXXSoul Stone·Î Ç¥½ÃÇÑ´Ù.
+		// 틴버전인경우 XXXHead또는 XXXSkull를 XXXSoul Stone로 표시한다.
 		if(g_pUserInformation->GoreLevel == false && GetItemClass() == ITEM_CLASS_SKULL)
 		{
 			static char sz_temp[256];
@@ -489,7 +489,7 @@ MItem::GetEName() const
 //----------------------------------------------------------------------
 // Set Name
 //----------------------------------------------------------------------
-// m_pName¿¡ ÀÌ¸§À» Á¤ÇØ³Ö´Â´Ù.
+// m_pName에 이름을 정해넣는다.
 //----------------------------------------------------------------------
 void
 MItem::SetName(const char* pName)
@@ -506,7 +506,7 @@ MItem::SetName(const char* pName)
 	}
 
 	//---------------------------------------------
-	// ¼³Á¤..
+	// 설정..
 	//---------------------------------------------
 	m_pName = new char[strlen(pName) + 1];
 
@@ -569,7 +569,7 @@ MItem::GetGridHeight() const
 TYPE_FRAMEID			
 MItem::GetTileFrameID() const
 {
-	// Æ¾¹öÀüÀÎ °æ¿ì ¸Ó¸®´Â º¸¼®À¸·Î Ç¥½ÃÇÑ´Ù.
+	// 틴버전인 경우 머리는 보석으로 표시한다.
 	if(g_pUserInformation->GoreLevel == false && GetItemClass() == ITEM_CLASS_SKULL)
 		return 271;
 
@@ -582,7 +582,7 @@ MItem::GetTileFrameID() const
 TYPE_FRAMEID			
 MItem::GetInventoryFrameID() const
 {
-	// Æ¾¹öÀüÀÎ °æ¿ì ¸Ó¸®´Â º¸¼®À¸·Î Ç¥½ÃÇÑ´Ù.
+	// 틴버전인 경우 머리는 보석으로 표시한다.
 	if(g_pUserInformation->GoreLevel == false && GetItemClass() == ITEM_CLASS_SKULL)
 		return 285;
 
@@ -609,7 +609,7 @@ MItem::GetDropFrameID() const
 	{
 		int frameID = (*g_pItemTable)[GetItemClass()][m_ItemType].DropFrameID;
 	}
-	// Æ¾¹öÀüÀÎ °æ¿ì ¸Ó¸®´Â º¸¼®À¸·Î Ç¥½ÃÇÑ´Ù.
+	// 틴버전인 경우 머리는 보석으로 표시한다.
 	if(g_pUserInformation->GoreLevel == false && GetItemClass() == ITEM_CLASS_SKULL)
 		return 271;
 
@@ -856,19 +856,19 @@ int
 MWeaponItem::GetMinDamage() const
 {
 	return max(1, (*g_pItemTable)[GetItemClass()][m_ItemType].Value3 + (GetGrade()-4) );
-}	// ÃÖ¼Ò °ø°Ý·Â
+}	// 최소 공격력
 
 int
 MWeaponItem::GetMaxDamage() const
 {
 	return max(1, (*g_pItemTable)[GetItemClass()][m_ItemType].Value4 + (GetGrade()-4) );
-}	// ÃÖ´ë °ø°Ý·Â		
+}	// 최대 공격력		
 
 int
 MWeaponItem::GetToHit() const
 {
 	return (*g_pItemTable)[GetItemClass()][m_ItemType].ToHit;
-}		// ÃÖ´ë °ø°Ý·Â		
+}		// 최대 공격력		
 
 int
 MWeaponItem::GetCriticalHit() const
@@ -1102,7 +1102,7 @@ MItem::GetItemOptionColorSet(int OptionNum)
 #endif
 		if(GetItemColorSet() == 0xFFFF)
 		{
-			if(GetSilver() > 0)	// ¼Ó¼ºÀÌ ÀÖ´Â °æ¿ì´Â »ö Ç¥½Ã
+			if(GetSilver() > 0)	// 속성이 있는 경우는 색 표시
 			{
 				ITEMOPTION_TABLE::ITEMOPTION_PART optionPart = static_cast<ITEMOPTION_TABLE::ITEMOPTION_PART>(GetEnchantLevel());
 
@@ -1273,7 +1273,7 @@ MItem::GetRequireSTR() const
 	
 	return min(original, maxValue);
 	
-	// option¿¡ µû¸¥ Áõ°¡Ä¡
+	// option에 따른 증가치
 	//return max(original, GetItemOptionRequireSTR());
 		//(*g_pItemOptionTable)[m_ItemOption].PlusRequireAbility;
 }
@@ -1304,7 +1304,7 @@ MItem::GetRequireDEX() const
 
 	return min(original, maxValue);
 
-	// option¿¡ µû¸¥ Áõ°¡Ä¡
+	// option에 따른 증가치
 	//return max(original, GetItemOptionRequireDEX());
 	//+ (*g_pItemOptionTable)[m_ItemOption].PlusRequireAbility;
 }
@@ -1335,7 +1335,7 @@ MItem::GetRequireINT() const
 
 	return min(original, maxValue);
 
-	// option¿¡ µû¸¥ Áõ°¡Ä¡
+	// option에 따른 증가치
 	//return max(original, GetItemOptionRequireINT());
 	//+ (*g_pItemOptionTable)[m_ItemOption].PlusRequireAbility;
 }
@@ -1364,7 +1364,7 @@ MItem::GetRequireSUM() const
 
 	return min(original, maxValue);
 
-	// option¿¡ µû¸¥ Áõ°¡Ä¡
+	// option에 따른 증가치
 	//return max(original, GetItemOptionRequireSUM());
 	//+ (*g_pItemOptionTable)[m_ItemOption].PlusRequireAbility;
 }
@@ -1386,7 +1386,7 @@ MItem::GetRequireLevel() const
 	else
 		maxValue = MAX_VAMPIRE_LEVEL;
 
-	// option¿¡ µû¸¥ Áõ°¡Ä¡
+	// option에 따른 증가치
 	original += GetItemOptionRequireLevel();
 
 	if( IsOustersItem() )
@@ -1453,7 +1453,7 @@ void
 MItem::SetDropping()
 {
 	TYPE_FRAMEID dropID = GetDropFrameID();
-	// °ü·ÃµÈ frameÀÌ ¾ø´Â °æ¿ì
+	// 관련된 frame이 없는 경우
 	if (dropID==FRAMEID_NULL)
 	{
 		return;
@@ -1477,8 +1477,8 @@ MItem::NextDropFrame()
 
 	if (++m_DropCount >= MAX_DROP_COUNT)
 	{
-		m_CurrentFrame = m_MaxFrame - 1;	// ¸¶Áö¸· frameÀ¸·Î..
-		m_DropCount--;						// ÇÏ³ª »©Áà¾ß ÇÏ´Â µí - -;
+		m_CurrentFrame = m_MaxFrame - 1;	// 마지막 frame으로..
+		m_DropCount--;						// 하나 빼줘야 하는 듯 - -;
 		m_bDropping = FALSE;
 	}
 }
@@ -1516,7 +1516,7 @@ MItem::ChangeItemOption(TYPE_ITEM_OPTION ori_option, TYPE_ITEM_OPTION new_option
 	}
 }
 
-// À¯´ÏÅ© ¾ÆÀÌÅÛ »öº¯ÇÏ´Â°Å
+// 유니크 아이템 색변하는거
 int
 MItem::GetUniqueItemColorset()
 {
@@ -1568,7 +1568,7 @@ MItem::GetSpecialColorItemColorset(unsigned short srcColor)
 	return 0xffff;	
 }
 
-// ·¹¾î ¾ÆÀÌÅÛ »öº¯ÇÏ´Â°Å
+// 레어 아이템 색변하는거
 int	MItem::GetRareItemColorset()
 {
 /*
@@ -1615,7 +1615,7 @@ MCorpse::~MCorpse()
 //----------------------------------------------------------------------
 // Set ItemType
 //----------------------------------------------------------------------
-// ItemTypeÀ» ¼³Á¤ÇÒ¶§ SlotItemManagerµµ ÃÊ±âÈ­ÇØ¾ßÇÑ´Ù.
+// ItemType을 설정할때 SlotItemManager도 초기화해야한다.
 //----------------------------------------------------------------------
 void				
 MBelt::SetItemType(TYPE_ITEMTYPE type)		
@@ -1628,13 +1628,13 @@ MBelt::SetItemType(TYPE_ITEMTYPE type)
 //----------------------------------------------------------------------
 // AddItem ( pItem )
 //----------------------------------------------------------------------
-// ÀûÀýÇÑ slot¿¡ pItemÀ» Ãß°¡ÇÑ´Ù.
+// 적절한 slot에 pItem을 추가한다.
 //----------------------------------------------------------------------
 bool			
 MBelt::AddItem(MItem* pItem)
 {
 	//---------------------------------------------------------------
-	// ºñ¾îÀÖ´Â slotÀ» Ã£¾Æ¼­ itemÀ» Ãß°¡ÇÑ´Ù.
+	// 비어있는 slot을 찾아서 item을 추가한다.
 	//---------------------------------------------------------------
 	for (int n=0; n<m_Size; n++)
 	{
@@ -1650,7 +1650,7 @@ MBelt::AddItem(MItem* pItem)
 //----------------------------------------------------------------------
 // AddItem ( pItem, n )
 //----------------------------------------------------------------------
-// slot(n)¿¡ pItemÀ» Ãß°¡ÇÑ´Ù.
+// slot(n)에 pItem을 추가한다.
 //----------------------------------------------------------------------
 bool			
 MBelt::AddItem(MItem* pItem, BYTE n)
@@ -1661,7 +1661,7 @@ MBelt::AddItem(MItem* pItem, BYTE n)
 	}
 
 	//---------------------------------------------------------------
-	// Quick itemÀÌ¾î¾ßÁö belt¿¡ Ãß°¡ÇÒ ¼ö ÀÖ´Ù.
+	// Quick item이어야지 belt에 추가할 수 있다.
 	//---------------------------------------------------------------
 	if (pItem->IsQuickItem())
 	{
@@ -1674,7 +1674,7 @@ MBelt::AddItem(MItem* pItem, BYTE n)
 //----------------------------------------------------------------------
 // ReplaceItem
 //----------------------------------------------------------------------
-// pItemÀ» Ãß°¡ÇÏ°í µý°Ô ÀÖ´Ù¸é Item±³È¯
+// pItem을 추가하고 딴게 있다면 Item교환
 //----------------------------------------------------------------------
 bool			
 MBelt::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
@@ -1685,7 +1685,7 @@ MBelt::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 	}
 
 	//---------------------------------------------------------------
-	// ºñ¾î ÀÖ´Â slotÀÌ¸é ±×³É Ãß°¡
+	// 비어 있는 slot이면 그냥 추가
 	//---------------------------------------------------------------
 	if (m_ItemSlot[n]==NULL)
 	{
@@ -1693,8 +1693,8 @@ MBelt::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 	}
 	
 	//---------------------------------------------------------------
-	// ¹º°¡ ÀÖ´Ù¸é replaceÇØ¾ß ÇÑ´Ù.
-	// ¹Ù²Ü·Á´Â ItemÀÌ quickItemÀÎ °æ¿ì¸¸ ±³Ã¼..
+	// 뭔가 있다면 replace해야 한다.
+	// 바꿀려는 Item이 quickItem인 경우만 교체..
 	//---------------------------------------------------------------	
 	if (pItem->IsQuickItem())
 	{
@@ -1706,25 +1706,25 @@ MBelt::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 
 
 //----------------------------------------------------------------------
-// Can ReplaceItem : (n) slot¿¡ pItemÀ» Ãß°¡ÇÏ°Å³ª 
-//						¿ø·¡ ÀÖ´ø Item°ú ±³Ã¼°¡ °¡´ÉÇÑ°¡?
+// Can ReplaceItem : (n) slot에 pItem을 추가하거나 
+//						원래 있던 Item과 교체가 가능한가?
 //----------------------------------------------------------------------
 bool			
 MBelt::CanReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 {
 	//---------------------------------------------------------
-	// ItemSlot ¹üÀ§¸¦ ³Ñ¾î°¡´Â °æ¿ì..
+	// ItemSlot 범위를 넘어가는 경우..
 	//---------------------------------------------------------	
 	if (n>=m_Size)
 	{		
-		// NULL·Î ¼³Á¤ÇÑ´Ù.
+		// NULL로 설정한다.
 		pOldItem = NULL;
 
 		return false;
 	}
 
 	//---------------------------------------------------------	
-	// QuickItemÀÎ°¡?
+	// QuickItem인가?
 	//---------------------------------------------------------	
 	if (pItem->IsQuickItem())
 	{		
@@ -1741,8 +1741,8 @@ MBelt::CanReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 //----------------------------------------------------------------------
 // Find Slot To Add Item
 //----------------------------------------------------------------------
-// return°ªÀº ÀÚ¸®°¡ ÀÖ´À³Ä(true) / ¾ø´À³Ä(false)
-// trueÀÎ °æ¿ì¿¡.. pItemÀÌ µé¾î°¥ ¼ö ÀÖ´Â ÀÚ¸®°¡ slotÀÌ´Ù.
+// return값은 자리가 있느냐(true) / 없느냐(false)
+// true인 경우에.. pItem이 들어갈 수 있는 자리가 slot이다.
 //----------------------------------------------------------------------
 bool			
 MBelt::FindSlotToAddItem(MItem* pItem, int &slot) const
@@ -1753,14 +1753,14 @@ MBelt::FindSlotToAddItem(MItem* pItem, int &slot) const
 	}
 
 	//---------------------------------------------------------
-	// ¾îµð¿¡ µé¾î°¥ ¼ö ÀÖÀ»±î?
+	// 어디에 들어갈 수 있을까?
 	//---------------------------------------------------------
 	for (int i=0; i<m_Size; i++)
 	{
 		const MItem* pQuickItem = m_ItemSlot[i];
 
 		//---------------------------------------------------------
-		// ¾Æ¹«°Íµµ ¾ø´Â °÷ÀÌ¸é ±×³É ³ÖÀ¸¸é µÈ´Ù.
+		// 아무것도 없는 곳이면 그냥 넣으면 된다.
 		//---------------------------------------------------------
 		if (pQuickItem==NULL)
 		{
@@ -1768,13 +1768,13 @@ MBelt::FindSlotToAddItem(MItem* pItem, int &slot) const
 			return true;
 		}
 		//---------------------------------------------------------
-		// ¹º°¡ ÀÖÀ¸¸é.. ±×°÷¿¡ ½×ÀÏ ¼ö ÀÖ´ÂÁö ¾Ë¾Æº»´Ù.
+		// 뭔가 있으면.. 그곳에 쌓일 수 있는지 알아본다.
 		//---------------------------------------------------------
 		if (pQuickItem->GetItemClass()==pItem->GetItemClass()
 			&& pQuickItem->GetItemType()==pItem->GetItemType())
 		{
 			//----------------------------------------------------
-			// ´õÇÑ °³¼ö°¡ max¸¦ ³ÑÁö ¾Ê¾Æ¾ß ÇÑ´Ù.
+			// 더한 개수가 max를 넘지 않아야 한다.
 			//----------------------------------------------------
 			int addTotal = pQuickItem->GetNumber() + pItem->GetNumber();
 
@@ -1786,7 +1786,7 @@ MBelt::FindSlotToAddItem(MItem* pItem, int &slot) const
 		}		
 	}
 
-	// µé¾î°¥ °÷ÀÌ ¾ø´Ù.
+	// 들어갈 곳이 없다.
 	return false;
 }
 
@@ -1798,7 +1798,7 @@ MBelt::FindSlotToAddItem(MItem* pItem, int &slot) const
 //----------------------------------------------------------------------
 // Is Insert To Item
 //----------------------------------------------------------------------
-// ´Ù¸¥ Item¿¡ Ãß°¡µÉ ¼ö ÀÖ´Â°¡?
+// 다른 Item에 추가될 수 있는가?
 //----------------------------------------------------------------------
 bool		
 MMagazine::IsInsertToItem(const MItem* pItem) const
@@ -1809,11 +1809,11 @@ MMagazine::IsInsertToItem(const MItem* pItem) const
 	}
 
 	//------------------------------------------------
-	// ÃÑÀÎ °æ¿ì
+	// 총인 경우
 	//------------------------------------------------
 	if (pItem->IsGunItem())
 	{
-		// ÀÌ ÅºÃ¢À» ÀåÂøÇÒ ¼ö ÀÖ´Â ÃÑÀÎ °æ¿ì..
+		// 이 탄창을 장착할 수 있는 총인 경우..
 		if (GetGunClass()==pItem->GetItemClass())
 		{
 			return true;
@@ -1822,7 +1822,7 @@ MMagazine::IsInsertToItem(const MItem* pItem) const
 		return false;
 	}
 	
-	// °°Àº ÅºÃ¢ÀÎ °æ¿ì Ã¼Å©..
+	// 같은 탄창인 경우 체크..
 	return MItem::IsInsertToItem( pItem );	
 }
 
@@ -1832,7 +1832,7 @@ MMagazine::IsInsertToItem(const MItem* pItem) const
 //
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
-// Get MaxNumber - Charge°³¼ö
+// Get MaxNumber - Charge개수
 //----------------------------------------------------------------------
 TYPE_ITEM_NUMBER	
 MSlayerPortalItem::GetMaxNumber() const
@@ -1842,7 +1842,7 @@ MSlayerPortalItem::GetMaxNumber() const
 
 //----------------------------------------------------------------------
 // Set EnchantLevel
-// ½ÇÁ¦·Î´Â Charge °³¼ö¸¦ ÀúÀåÇÑ´Ù.
+// 실제로는 Charge 개수를 저장한다.
 //----------------------------------------------------------------------
 void				
 MSlayerPortalItem::SetEnchantLevel(WORD s)
@@ -1874,7 +1874,7 @@ MVampirePortalItem::IsMarked() const
 }
 
 //----------------------------------------------------------------------
-// Get MaxNumber - Charge°³¼ö
+// Get MaxNumber - Charge개수
 //----------------------------------------------------------------------
 TYPE_ITEM_NUMBER	
 MVampirePortalItem::GetMaxNumber() const
@@ -1895,7 +1895,7 @@ MVampirePortalItem::SetZone(int zoneID, TYPE_SECTORPOSITION x, TYPE_SECTORPOSITI
 
 //----------------------------------------------------------------------
 // Set EnchantLevel
-// ½ÇÁ¦·Î´Â Charge °³¼ö¸¦ ÀúÀåÇÑ´Ù.
+// 실제로는 Charge 개수를 저장한다.
 //----------------------------------------------------------------------
 void				
 MVampirePortalItem::SetEnchantLevel(WORD s)
@@ -1918,7 +1918,7 @@ MVampirePortalItem::SetSilver(int s)
 void				
 MVampirePortalItem::SetCurrentDurability(TYPE_ITEM_DURATION d)
 {
-	m_ZoneX = (d >> 8) & 0xFF;		// 0xFF´Â ¾ø¾îµµ µÉ µí..
+	m_ZoneX = (d >> 8) & 0xFF;		// 0xFF는 없어도 될 듯..
 	m_ZoneY = (d & 0xFF);
 }
 
@@ -1969,9 +1969,9 @@ MMixingItem::GetMaxNumber() const
 //----------------------------------------------------------------------
 // Is BombMaterial
 //----------------------------------------------------------------------
-// ÀÌ°Å´Â ³ªÁß¿¡ ÇÊ»ì~¼öÁ¤ÀÌ ÇÊ¿äÇÏ´Ù.
-// BombMaterial¿¡ member·Î ³ÖµçÁö.. 
-// Bomb / Mine MaterialÀ» ºÐ¸®ÇÏµçÁö....
+// 이거는 나중에 필살~수정이 필요하다.
+// BombMaterial에 member로 넣든지.. 
+// Bomb / Mine Material을 분리하든지....
 //----------------------------------------------------------------------
 bool
 IsBombMaterial(const MItem* pItem)
@@ -1983,9 +1983,9 @@ IsBombMaterial(const MItem* pItem)
 //----------------------------------------------------------------------
 // Is MineMaterial
 //----------------------------------------------------------------------
-// ÀÌ°Å´Â ³ªÁß¿¡ ÇÊ»ì~¼öÁ¤ÀÌ ÇÊ¿äÇÏ´Ù.
-// BombMaterial¿¡ member·Î ³ÖµçÁö.. 
-// Bomb / Mine MaterialÀ» ºÐ¸®ÇÏµçÁö....
+// 이거는 나중에 필살~수정이 필요하다.
+// BombMaterial에 member로 넣든지.. 
+// Bomb / Mine Material을 분리하든지....
 //----------------------------------------------------------------------
 bool
 IsMineMaterial(const MItem* pItem)
@@ -2020,7 +2020,7 @@ MOustersComposMei::GetMaxNumber() const
 
 //----------------------------------------------------------------------
 // Set EnchantLevel
-// ½ÇÁ¦·Î´Â Charge °³¼ö¸¦ ÀúÀåÇÑ´Ù.
+// 실제로는 Charge 개수를 저장한다.
 //----------------------------------------------------------------------
 void				
 MOustersSummonGem::SetEnchantLevel(WORD s)
@@ -2035,7 +2035,7 @@ MOustersSummonGem::SetEnchantLevel(WORD s)
 //----------------------------------------------------------------------
 // Set ItemType
 //----------------------------------------------------------------------
-// ItemTypeÀ» ¼³Á¤ÇÒ¶§ SlotItemManagerµµ ÃÊ±âÈ­ÇØ¾ßÇÑ´Ù.
+// ItemType을 설정할때 SlotItemManager도 초기화해야한다.
 //----------------------------------------------------------------------
 void				
 MOustersArmsBand::SetItemType(TYPE_ITEMTYPE type)		
@@ -2048,13 +2048,13 @@ MOustersArmsBand::SetItemType(TYPE_ITEMTYPE type)
 //----------------------------------------------------------------------
 // AddItem ( pItem )
 //----------------------------------------------------------------------
-// ÀûÀýÇÑ slot¿¡ pItemÀ» Ãß°¡ÇÑ´Ù.
+// 적절한 slot에 pItem을 추가한다.
 //----------------------------------------------------------------------
 bool			
 MOustersArmsBand::AddItem(MItem* pItem)
 {
 	//---------------------------------------------------------------
-	// ºñ¾îÀÖ´Â slotÀ» Ã£¾Æ¼­ itemÀ» Ãß°¡ÇÑ´Ù.
+	// 비어있는 slot을 찾아서 item을 추가한다.
 	//---------------------------------------------------------------
 	for (int n=0; n<m_Size; n++)
 	{
@@ -2070,7 +2070,7 @@ MOustersArmsBand::AddItem(MItem* pItem)
 //----------------------------------------------------------------------
 // AddItem ( pItem, n )
 //----------------------------------------------------------------------
-// slot(n)¿¡ pItemÀ» Ãß°¡ÇÑ´Ù.
+// slot(n)에 pItem을 추가한다.
 //----------------------------------------------------------------------
 bool			
 MOustersArmsBand::AddItem(MItem* pItem, BYTE n)
@@ -2081,7 +2081,7 @@ MOustersArmsBand::AddItem(MItem* pItem, BYTE n)
 	}
 
 	//---------------------------------------------------------------
-	// Quick itemÀÌ¾î¾ßÁö belt¿¡ Ãß°¡ÇÒ ¼ö ÀÖ´Ù.
+	// Quick item이어야지 belt에 추가할 수 있다.
 	//---------------------------------------------------------------
 	if (pItem->IsQuickItem())
 	{
@@ -2094,7 +2094,7 @@ MOustersArmsBand::AddItem(MItem* pItem, BYTE n)
 //----------------------------------------------------------------------
 // ReplaceItem
 //----------------------------------------------------------------------
-// pItemÀ» Ãß°¡ÇÏ°í µý°Ô ÀÖ´Ù¸é Item±³È¯
+// pItem을 추가하고 딴게 있다면 Item교환
 //----------------------------------------------------------------------
 bool			
 MOustersArmsBand::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
@@ -2105,7 +2105,7 @@ MOustersArmsBand::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 	}
 
 	//---------------------------------------------------------------
-	// ºñ¾î ÀÖ´Â slotÀÌ¸é ±×³É Ãß°¡
+	// 비어 있는 slot이면 그냥 추가
 	//---------------------------------------------------------------
 	if (m_ItemSlot[n]==NULL)
 	{
@@ -2113,8 +2113,8 @@ MOustersArmsBand::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 	}
 	
 	//---------------------------------------------------------------
-	// ¹º°¡ ÀÖ´Ù¸é replaceÇØ¾ß ÇÑ´Ù.
-	// ¹Ù²Ü·Á´Â ItemÀÌ quickItemÀÎ °æ¿ì¸¸ ±³Ã¼..
+	// 뭔가 있다면 replace해야 한다.
+	// 바꿀려는 Item이 quickItem인 경우만 교체..
 	//---------------------------------------------------------------	
 	if (pItem->IsQuickItem())
 	{
@@ -2126,25 +2126,25 @@ MOustersArmsBand::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 
 
 //----------------------------------------------------------------------
-// Can ReplaceItem : (n) slot¿¡ pItemÀ» Ãß°¡ÇÏ°Å³ª 
-//						¿ø·¡ ÀÖ´ø Item°ú ±³Ã¼°¡ °¡´ÉÇÑ°¡?
+// Can ReplaceItem : (n) slot에 pItem을 추가하거나 
+//						원래 있던 Item과 교체가 가능한가?
 //----------------------------------------------------------------------
 bool			
 MOustersArmsBand::CanReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 {
 	//---------------------------------------------------------
-	// ItemSlot ¹üÀ§¸¦ ³Ñ¾î°¡´Â °æ¿ì..
+	// ItemSlot 범위를 넘어가는 경우..
 	//---------------------------------------------------------	
 	if (n>=m_Size)
 	{		
-		// NULL·Î ¼³Á¤ÇÑ´Ù.
+		// NULL로 설정한다.
 		pOldItem = NULL;
 
 		return false;
 	}
 
 	//---------------------------------------------------------	
-	// QuickItemÀÎ°¡?
+	// QuickItem인가?
 	//---------------------------------------------------------	
 	if (pItem->IsQuickItem())
 	{		
@@ -2161,8 +2161,8 @@ MOustersArmsBand::CanReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 //----------------------------------------------------------------------
 // Find Slot To Add Item
 //----------------------------------------------------------------------
-// return°ªÀº ÀÚ¸®°¡ ÀÖ´À³Ä(true) / ¾ø´À³Ä(false)
-// trueÀÎ °æ¿ì¿¡.. pItemÀÌ µé¾î°¥ ¼ö ÀÖ´Â ÀÚ¸®°¡ slotÀÌ´Ù.
+// return값은 자리가 있느냐(true) / 없느냐(false)
+// true인 경우에.. pItem이 들어갈 수 있는 자리가 slot이다.
 //----------------------------------------------------------------------
 bool			
 MOustersArmsBand::FindSlotToAddItem(MItem* pItem, int &slot) const
@@ -2173,14 +2173,14 @@ MOustersArmsBand::FindSlotToAddItem(MItem* pItem, int &slot) const
 	}
 
 	//---------------------------------------------------------
-	// ¾îµð¿¡ µé¾î°¥ ¼ö ÀÖÀ»±î?
+	// 어디에 들어갈 수 있을까?
 	//---------------------------------------------------------
 	for (int i=0; i<m_Size; i++)
 	{
 		const MItem* pQuickItem = m_ItemSlot[i];
 
 		//---------------------------------------------------------
-		// ¾Æ¹«°Íµµ ¾ø´Â °÷ÀÌ¸é ±×³É ³ÖÀ¸¸é µÈ´Ù.
+		// 아무것도 없는 곳이면 그냥 넣으면 된다.
 		//---------------------------------------------------------
 		if (pQuickItem==NULL)
 		{
@@ -2188,13 +2188,13 @@ MOustersArmsBand::FindSlotToAddItem(MItem* pItem, int &slot) const
 			return true;
 		}
 		//---------------------------------------------------------
-		// ¹º°¡ ÀÖÀ¸¸é.. ±×°÷¿¡ ½×ÀÏ ¼ö ÀÖ´ÂÁö ¾Ë¾Æº»´Ù.
+		// 뭔가 있으면.. 그곳에 쌓일 수 있는지 알아본다.
 		//---------------------------------------------------------
 		if (pQuickItem->GetItemClass()==pItem->GetItemClass()
 			&& pQuickItem->GetItemType()==pItem->GetItemType())
 		{
 			//----------------------------------------------------
-			// ´õÇÑ °³¼ö°¡ max¸¦ ³ÑÁö ¾Ê¾Æ¾ß ÇÑ´Ù.
+			// 더한 개수가 max를 넘지 않아야 한다.
 			//----------------------------------------------------
 			int addTotal = pQuickItem->GetNumber() + pItem->GetNumber();
 
@@ -2206,7 +2206,7 @@ MOustersArmsBand::FindSlotToAddItem(MItem* pItem, int &slot) const
 		}		
 	}
 
-	// µé¾î°¥ °÷ÀÌ ¾ø´Ù.
+	// 들어갈 곳이 없다.
 	return false;
 }
 
@@ -2237,7 +2237,7 @@ MLuckyBag::GetMaxNumber() const
 //	Item Use
 //
 ///////////////////////////////////////////////////////////////////////////
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MUsePotionItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 	#else
 void	MUsePotionItem::UseInventory()
@@ -2252,16 +2252,16 @@ void	MUsePotionItem::UseInventory()
 	g_pSocket->sendPacket( &_CGUsePotionFromInventory );
 
 	
-	// ÀÏ´Ü(!) ±×³É ¾ø¾Ö°í º»´Ù.
+	// 일단(!) 그냥 없애고 본다.
 	//(*g_pInventory).RemoveItem( pItem->GetID() );
 
 	//----------------------------------------------------
-	// Inventory¿¡¼­ itemÀ» »ç¿ëÇÏ´Â °É °ËÁõ¹Þ±â¸¦ ±â´Ù¸°´Ù.
+	// Inventory에서 item을 사용하는 걸 검증받기를 기다린다.
 	//----------------------------------------------------
 	g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY);
 #endif
 }
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MWater::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 	#else
 void	MWater::UseInventory()
@@ -2288,19 +2288,19 @@ void	MWater::UseInventory()
 	}
 
 	//----------------------------------------------------
-	// skillÀÌ Á¦´ë·Î ¼³Á¤µÈ °æ¿ì
+	// skill이 제대로 설정된 경우
 	//----------------------------------------------------
 	if (bUseOK)//playerSkill < (*g_pActionInfoTable).GetMinResultActionInfo())
 	{
 		//if ((*g_pActionInfoTable)[playerSkill].IsTargetItem())
 		{
 			//----------------------------------------------------
-			// °ËÁõ ¹ÞÀ»°Ô ¾ø´Â °æ¿ì..
+			// 검증 받을게 없는 경우..
 			//----------------------------------------------------
 			if (!g_pPlayer->IsWaitVerify()
 				&& g_pPlayer->IsItemCheckBufferNULL())							
 			{	
-				POINT fitPoint;			// ¼º¼ö°¡ µé¾î°¥ ÀÚ¸®
+				POINT fitPoint;			// 성수가 들어갈 자리
 
 				if( bCreateHolyWater )
 				{
@@ -2319,11 +2319,11 @@ void	MWater::UseInventory()
 
 						g_pSocket->sendPacket( &_CGSkillToInventory );								
 					
-						// ÀÏ´Ü(!) ±×³É ¾ø¾Ö°í º»´Ù.
+						// 일단(!) 그냥 없애고 본다.
 						//(*g_pInventory).RemoveItem( pItem->GetID() );
 
 						//----------------------------------------------------
-						// Inventory¿¡¼­ itemÀ» »ç¿ëÇÏ´Â °É °ËÁõ¹Þ±â¸¦ ±â´Ù¸°´Ù.
+						// Inventory에서 item을 사용하는 걸 검증받기를 기다린다.
 						//----------------------------------------------------
 						g_pPlayer->SetWaitVerify( MPlayer::WAIT_VERIFY_SKILL_SUCCESS );
 						g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_SKILL_TO_INVENTORY );								
@@ -2331,16 +2331,16 @@ void	MWater::UseInventory()
 						(*g_pSkillInfoTable)[useSkill].SetNextAvailableTime();
 
 						//----------------------------------------------------
-						// ±â¼ú »ç¿ë ½Ãµµ µ¿ÀÛ
+						// 기술 사용 시도 동작
 						//----------------------------------------------------
 						AddNewInventoryEffect( GetID(),
 											useSkill, //+ (*g_pActionInfoTable).GetMinResultActionInfo(),
-											g_pClientConfig->FPS*3	// 3ÃÊ
+											g_pClientConfig->FPS*3	// 3초
 										);
 					}
 //								else
 //								{
-//									// g_pGameMessage( "ÀÚ¸®°¡ ¾øµû¾ß~" );
+//									// g_pGameMessage( "자리가 없따야~" );
 //								}
 				}
 				else if (bCreateHolyPotion )
@@ -2381,7 +2381,7 @@ void	MWater::UseInventory()
 	}
 #endif
 }
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MMagazine::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 	#else
 void	MMagazine::UseInventory()
@@ -2413,7 +2413,7 @@ void	MMagazine::UseInventory()
 	{
 		const MGunItem* pGunItem = (const MGunItem*)pHandItem;
 
-		// ÇöÀç ÃÑ¿¡ ÀåÂøÇÒ ¼ö ÀÖ´Â ÅºÃ¢ÀÎ°¡?
+		// 현재 총에 장착할 수 있는 탄창인가?
 		if (IsInsertToItem( pGunItem ))	
 		{
 			CGReloadFromInventory _CGReloadFromInventory;
@@ -2424,17 +2424,17 @@ void	MMagazine::UseInventory()
 			g_pSocket->sendPacket( &_CGReloadFromInventory );
 
 			
-			// ÀÏ´Ü(!) ±×³É ¾ø¾Ö°í º»´Ù.
+			// 일단(!) 그냥 없애고 본다.
 			//(*g_pInventory).RemoveItem( GetID() );
 
 			//----------------------------------------------------
-			// Inventory¿¡¼­ itemÀ» »ç¿ëÇÏ´Â °É °ËÁõ¹Þ±â¸¦ ±â´Ù¸°´Ù.
+			// Inventory에서 item을 사용하는 걸 검증받기를 기다린다.
 			//----------------------------------------------------
 			g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY);
 		}
 		else
 		{
-			// [µµ¿ò¸»] ÃÑ¾ËÀÌ ¾È ¸Â´Â °æ¿ì
+			// [도움말] 총알이 안 맞는 경우
 //			__BEGIN_HELP_EVENT
 //				ExecuteHelpEvent( HE_ITEM_DIFFERENT_BULLET_TYPE );
 //			__END_HELP_EVENT
@@ -2459,7 +2459,7 @@ void	MMagazine::UseQuickItem()
 		const MGunItem* pGunItem = (const MGunItem*)pHandItem;
 
 		//----------------------------------------------------
-		// ÇöÀç ÃÑ¿¡ ÀåÂøÇÒ ¼ö ÀÖ´Â ÅºÃ¢ÀÎ°¡?
+		// 현재 총에 장착할 수 있는 탄창인가?
 		//----------------------------------------------------
 		if (IsInsertToItem( pGunItem ))	
 		{
@@ -2471,32 +2471,32 @@ void	MMagazine::UseQuickItem()
 
 			
 			//----------------------------------------------------
-			// Inventory¿¡¼­ itemÀ» »ç¿ëÇÏ´Â °É °ËÁõ¹Þ±â¸¦ ±â´Ù¸°´Ù.
+			// Inventory에서 item을 사용하는 걸 검증받기를 기다린다.
 			//----------------------------------------------------
 			g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_QUICKSLOT);
 
 			//----------------------------------------------------
-			// º§Æ® ¸ø ¾ø¾Öµµ·Ï..
+			// 벨트 못 없애도록..
 			//----------------------------------------------------
 			UI_LockGear();
 
 //			__BEGIN_HELP_EVENT
-//				// [µµ¿ò¸»] ÅºÃ¢ »ç¿ë
+//				// [도움말] 탄창 사용
 //				ExecuteHelpEvent( HE_ITEM_USE_MAGAZINE );	
-//				// [µµ¿ò¸»] º§Æ®ÀÇ ¾ÆÀÌÅÛ »ç¿ë
+//				// [도움말] 벨트의 아이템 사용
 //				ExecuteHelpEvent( HE_ITEM_USE_BELT_ITEM );	
 //			__END_HELP_EVENT
 		}
 		else
 		{
-			// [µµ¿ò¸»] ÃÑ¾ËÀÌ ¾È ¸Â´Â °æ¿ì
+			// [도움말] 총알이 안 맞는 경우
 //			__BEGIN_HELP_EVENT
 //				ExecuteHelpEvent( HE_ITEM_DIFFERENT_BULLET_TYPE );
 //			__END_HELP_EVENT
 
 			PlaySound( SOUND_ITEM_NO_MAGAZINE );
 
-			// ÅºÃ¢ÀÌ ¾È ¸Â´Â °æ¿ì
+			// 탄창이 안 맞는 경우
 			DEBUG_ADD("[Can't use Magazine] Wrong Magazine");
 		}
 	}
@@ -2504,12 +2504,12 @@ void	MMagazine::UseQuickItem()
 	{
 		//PlaySound( SOUND_ITEM_NO_MAGAZINE );
 
-		// ÃÑÀÌ ¾ø´Â °æ¿ì
+		// 총이 없는 경우
 		DEBUG_ADD("[Can't use Magazine] No Gun");
 	}
 #endif
 }
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MBombMaterial::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 	#else
 void	MBombMaterial::UseInventory()
@@ -2527,9 +2527,9 @@ void	MBombMaterial::UseInventory()
 	int					itemType;
 
 	//-------------------------------------------
-	// ÆøÅºÀÌ³Ä Áö·Ú³Ä...
+	// 폭탄이냐 지뢰냐...
 	//-------------------------------------------
-	// ÇÏµåÄÚµù -_-;
+	// 하드코딩 -_-;
 	//-------------------------------------------
 	if (currentItemType < 5)
 	{
@@ -2551,17 +2551,17 @@ void	MBombMaterial::UseInventory()
 	}
 
 	//----------------------------------------------------
-	// skillÀÌ Á¦´ë·Î ¼³Á¤µÈ °æ¿ì
+	// skill이 제대로 설정된 경우
 	//----------------------------------------------------
 	if (bUseOK)//playerSkill < (*g_pActionInfoTable).GetMinResultActionInfo())
 	{				
 		//----------------------------------------------------
-		// °ËÁõ ¹ÞÀ»°Ô ¾ø´Â °æ¿ì..
+		// 검증 받을게 없는 경우..
 		//----------------------------------------------------
 		if (!g_pPlayer->IsWaitVerify()
 			&& g_pPlayer->IsItemCheckBufferNULL())							
 		{	
-			POINT fitPoint;			// ÆøÅºÀÌ µé¾î°¥ ÀÚ¸®						
+			POINT fitPoint;			// 폭탄이 들어갈 자리						
 			
 			if (GetMakeItemFitPosition(this, itemClass, itemType, fitPoint))
 			{
@@ -2575,62 +2575,62 @@ void	MBombMaterial::UseInventory()
 
 				g_pSocket->sendPacket( &_CGSkillToInventory );								
 			
-				// ÀÏ´Ü(!) ±×³É ¾ø¾Ö°í º»´Ù.
+				// 일단(!) 그냥 없애고 본다.
 				//(*g_pInventory).RemoveItem( GetID() );
 
 				//----------------------------------------------------
-				// Inventory¿¡¼­ itemÀ» »ç¿ëÇÏ´Â °É °ËÁõ¹Þ±â¸¦ ±â´Ù¸°´Ù.
+				// Inventory에서 item을 사용하는 걸 검증받기를 기다린다.
 				//----------------------------------------------------
 				g_pPlayer->SetWaitVerify( MPlayer::WAIT_VERIFY_SKILL_SUCCESS );
 				g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_SKILL_TO_INVENTORY );
 
-				// ¸¸µå´Â ½Ãµµ Áß¿¡ ÀÌ¹Ì delay¸¸Å­ ½Ã°£À» º¸³½´Ù.
+				// 만드는 시도 중에 이미 delay만큼 시간을 보낸다.
 				//(*g_pSkillInfoTable)[useSkill].SetNextAvailableTime();
 
 				//----------------------------------------------------
-				// ±â¼ú »ç¿ë ½Ãµµ µ¿ÀÛ
+				// 기술 사용 시도 동작
 				//----------------------------------------------------
 				AddNewInventoryEffect( GetID(),
 									useSkill, //+ (*g_pActionInfoTable).GetMinResultActionInfo(),
-									g_pClientConfig->FPS*3	// 3ÃÊ
+									g_pClientConfig->FPS*3	// 3초
 								);
 			}
 			else
 			{
-				// g_pGameMessage( "ÀÚ¸®°¡ ¾øµû¾ß~" );
+				// g_pGameMessage( "자리가 없따야~" );
 			}
 		}
 	}
 #endif
 }
 
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MMoney::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 	#else
 void	MMoney::UseInventory()
 	#endif
 {
 #ifdef __GAME_CLIENT__
-	// 2°³ ÀÌ»ó ÀÖ¾î¾ß ºÐ¸® µÈ´Ù.
+	// 2개 이상 있어야 분리 된다.
 	if(GetNumber() > 1)
 	{
-		// ¾ÆÀÌÅÛ ºÐ¸®
+		// 아이템 분리
 		CGAddInventoryToMouse _CGAddInventoryToMouse;
-		_CGAddInventoryToMouse.setObjectID( 0 );	// ºÐ¸®ÇÑ´Ù´Â ÀÇ¹Ì
+		_CGAddInventoryToMouse.setObjectID( 0 );	// 분리한다는 의미
 		_CGAddInventoryToMouse.setX( GetGridX() );
 		_CGAddInventoryToMouse.setY( GetGridY() );
 		
 		g_pSocket->sendPacket( &_CGAddInventoryToMouse );				
 		
 		//----------------------------------------------------
-		// Inventory¿¡¼­ itemÀ» ¸î°³ µå´Â °É °ËÁõ¹Þ´Â´Ù.
-		// ÀÏ´ÜÀº 1°³¸¸ µé¸®µµ·Ï ÇÑ´Ù.
+		// Inventory에서 item을 몇개 드는 걸 검증받는다.
+		// 일단은 1개만 들리도록 한다.
 		//----------------------------------------------------
 		g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_PICKUP_SOME_FROM_INVENTORY);
 	}
 #endif
 }
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MMine::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 	#else
 void	MMine::UseInventory()
@@ -2642,7 +2642,7 @@ void	MMine::UseInventory()
 	ACTIONINFO useSkill;					
 		
 	//----------------------------------------------------
-	// »ç¿ë°¡´ÉÇÑ°¡?
+	// 사용가능한가?
 	//----------------------------------------------------			
 	useSkill = SKILL_INSTALL_MINE;					
 
@@ -2664,7 +2664,7 @@ void	MMine::UseInventory()
 		_CGSkillToInventory.setObjectID( GetID() );
 		_CGSkillToInventory.setX( GetGridX() );
 		_CGSkillToInventory.setY( GetGridY() );
-		// Áö·Ú ½É´Â ¹æÇâ
+		// 지뢰 심는 방향
 		_CGSkillToInventory.setTargetX( g_pPlayer->GetDirection() );
 		_CGSkillToInventory.setSkillType( useSkill );
 
@@ -2678,7 +2678,7 @@ void	MMine::UseInventory()
 		(*g_pSkillInfoTable)[useSkill].SetNextAvailableTime();
 
 		//----------------------------------------------------
-		// ±â¼ú »ç¿ë ½Ãµµ µ¿ÀÛ
+		// 기술 사용 시도 동작
 		//----------------------------------------------------
 		/*
 		if (useSkill == MAGIC_BLOODY_MARK)
@@ -2693,7 +2693,7 @@ void	MMine::UseInventory()
 	}
 #endif
 }
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MSlayerPortalItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 	#else
 void	MSlayerPortalItem::UseInventory()
@@ -2701,19 +2701,19 @@ void	MSlayerPortalItem::UseInventory()
 
 {
 #ifdef __GAME_CLIENT__
-	if(g_bHolyLand == false					// ¼ºÁö°¡ ¾Æ´Ï¾î¾ß ÇÏ°í
-		&& g_pZoneTable->Get( g_pZone->GetID() )->CannotUseSpecialItem == false		// ÇöÀç Á¸ÀÌ ½ºÆä¼È ¾ÆÀÌÅÛÀ» »ç¿ëÇÒ ¼ö ÀÖ¾î¾ß ÇÏ°í
-		&& IsAffectStatus()						// Àû¿ë °¡´ÉÇØ¾ß ÇÏ°í
-		&& IsChargeItem() && GetNumber() > 0	// ÃæÀü¾ÆÀÌÅÛÀÌ¸ç ¼ýÀÚ°¡ 0º¸´Ù Ä¿¾ß ÇÑ´Ù.
-		&& g_pZone->GetHelicopter( g_pPlayer->GetID() ) == NULL// Çï±â¸¦ ºÒ·¶À¸¸é ¾ÈµÈ´Ù.
+	if(g_bHolyLand == false					// 성지가 아니어야 하고
+		&& g_pZoneTable->Get( g_pZone->GetID() )->CannotUseSpecialItem == false		// 현재 존이 스페셜 아이템을 사용할 수 있어야 하고
+		&& IsAffectStatus()						// 적용 가능해야 하고
+		&& IsChargeItem() && GetNumber() > 0	// 충전아이템이며 숫자가 0보다 커야 한다.
+		&& g_pZone->GetHelicopter( g_pPlayer->GetID() ) == NULL// 헬기를 불렀으면 안된다.
 		&& !g_pPlayer->HasEffectStatus(EFFECTSTATUS_INSTALL_TURRET))	
 	{
-		// slayer´Â item»ç¿ëÇÏ´Â°Å´ç
+		// slayer는 item사용하는거당
 		CGUseItemFromInventory _CGUseItemFromInventory;
 		_CGUseItemFromInventory.setObjectID( GetID() );
 		_CGUseItemFromInventory.setX( GetGridX() );
 		_CGUseItemFromInventory.setY( GetGridY() );
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 		if(0 != SubInventoryItemID)
 			_CGUseItemFromInventory.setInventoryItemObjectID( SubInventoryItemID );
 	#else
@@ -2726,7 +2726,7 @@ void	MSlayerPortalItem::UseInventory()
 	}
 #endif
 }
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MVampirePortalItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 	#else
 void	MVampirePortalItem::UseInventory()
@@ -2734,10 +2734,10 @@ void	MVampirePortalItem::UseInventory()
 
 {
 #ifdef __GAME_CLIENT__
-	if(g_bHolyLand == false					// ¼ºÁö°¡ ¾Æ´Ï¾î¾ß ÇÏ°í
-		&& g_pZoneTable->Get( g_pZone->GetID() )->CannotUseSpecialItem == false		// ÇöÀç Á¸ÀÌ ½ºÆä¼È ¾ÆÀÌÅÛÀ» »ç¿ëÇÒ ¼ö ÀÖ¾î¾ß ÇÏ°í
-		&& IsAffectStatus()						// Àû¿ë °¡´ÉÇØ¾ß ÇÏ°í
-		&& IsChargeItem() && GetNumber() > 0	// ÃæÀü¾ÆÀÌÅÛÀÌ¸ç ¼ýÀÚ°¡ 0º¸´Ù Ä¿¾ß ÇÑ´Ù.
+	if(g_bHolyLand == false					// 성지가 아니어야 하고
+		&& g_pZoneTable->Get( g_pZone->GetID() )->CannotUseSpecialItem == false		// 현재 존이 스페셜 아이템을 사용할 수 있어야 하고
+		&& IsAffectStatus()						// 적용 가능해야 하고
+		&& IsChargeItem() && GetNumber() > 0	// 충전아이템이며 숫자가 0보다 커야 한다.
 		)
 	{
 		ACTIONINFO useSkill;					
@@ -2754,7 +2754,7 @@ void	MVampirePortalItem::UseInventory()
 		if(g_pSkillAvailable->IsEnableSkill( useSkill )
 			&& (*g_pSkillInfoTable)[useSkill].IsAvailableTime())
 		{
-			// vampire´Â ±â¼ú »ç¿ëÇÏ´Â°Å´Ù
+			// vampire는 기술 사용하는거다
 			CGSkillToInventory _CGSkillToInventory;
 			_CGSkillToInventory.setObjectID( GetID() );
 			_CGSkillToInventory.setX( GetGridX() );
@@ -2770,7 +2770,7 @@ void	MVampirePortalItem::UseInventory()
 			(*g_pSkillInfoTable)[useSkill].SetNextAvailableTime();
 
 			//----------------------------------------------------
-			// ±â¼ú »ç¿ë ½Ãµµ µ¿ÀÛ
+			// 기술 사용 시도 동작
 			//----------------------------------------------------
 			if (useSkill == MAGIC_BLOODY_MARK)
 			{
@@ -2784,7 +2784,7 @@ void	MVampirePortalItem::UseInventory()
 	}
 #endif
 }
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MEventStarItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 	#else
 void	MEventStarItem::UseInventory()
@@ -2792,26 +2792,26 @@ void	MEventStarItem::UseInventory()
 
 {
 #ifdef __GAME_CLIENT__
-	// 2°³ ÀÌ»ó ÀÖ¾î¾ß ºÐ¸® µÈ´Ù.
+	// 2개 이상 있어야 분리 된다.
 	if(GetNumber() > 1)
 	{
-		// ¾ÆÀÌÅÛ ºÐ¸®
+		// 아이템 분리
 		CGAddInventoryToMouse _CGAddInventoryToMouse;
-		_CGAddInventoryToMouse.setObjectID( 0 );	// ºÐ¸®ÇÑ´Ù´Â ÀÇ¹Ì
+		_CGAddInventoryToMouse.setObjectID( 0 );	// 분리한다는 의미
 		_CGAddInventoryToMouse.setX( GetGridX() );
 		_CGAddInventoryToMouse.setY( GetGridY() );
 		
 		g_pSocket->sendPacket( &_CGAddInventoryToMouse );				
 		
 		//----------------------------------------------------
-		// Inventory¿¡¼­ itemÀ» ¸î°³ µå´Â °É °ËÁõ¹Þ´Â´Ù.
-		// ÀÏ´ÜÀº 1°³¸¸ µé¸®µµ·Ï ÇÑ´Ù.
+		// Inventory에서 item을 몇개 드는 걸 검증받는다.
+		// 일단은 1개만 들리도록 한다.
 		//----------------------------------------------------
 		g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_PICKUP_SOME_FROM_INVENTORY);
 	}
 #endif
 }
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MMixingItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 	#else
 void	MMixingItem::UseInventory()
@@ -2821,7 +2821,7 @@ void	MMixingItem::UseInventory()
 #ifdef __GAME_CLIENT__
 	if( GetItemType() >= 0 && GetItemType() <= 8 )
 	{
-		if( GetNumber() > 1 )	// ¾ÆÀÌÅÛ ºÐ¸®
+		if( GetNumber() > 1 )	// 아이템 분리
 		{
 			CGAddInventoryToMouse _CGAddInventoryToMouse;
 			_CGAddInventoryToMouse.setObjectID( 0 );
@@ -2857,7 +2857,7 @@ void	MMixingItem::UseInventory()
 	} else
 	if( GetItemType() >= 9 && GetItemType() <= 18 )
 	{
-		// Puritas ´Â ¿ìÅ¬¸¯ÇÏ¸é ºÐ¸®ÇÑ´Ù.
+		// Puritas 는 우클릭하면 분리한다.
 		CGAddInventoryToMouse _CGAddInventoryToMouse;
 		_CGAddInventoryToMouse.setObjectID( 0 );
 		_CGAddInventoryToMouse.setX( GetGridX() );
@@ -2868,7 +2868,7 @@ void	MMixingItem::UseInventory()
 	}
 #endif
 }
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void MEffectItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 	#else
 void MEffectItem::UseInventory()
@@ -2883,7 +2883,7 @@ void MEffectItem::UseInventory()
 		return;
 	}
 	
-	// È®¼º±â°°Àº°Í..
+	// 확성기같은것..
 	CGUseItemFromInventory _CGUseItemFromInventory;
 	
 	_CGUseItemFromInventory.setObjectID( GetID() );
@@ -2893,7 +2893,7 @@ void MEffectItem::UseInventory()
 	g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY );
 #endif
 }
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void MItemETC::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 	#else
 void MItemETC::UseInventory()
@@ -2911,7 +2911,7 @@ void MItemETC::UseInventory()
 	}
 #endif
 }
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void MVampireETC::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 	#else
 void MVampireETC::UseInventory()
@@ -2920,14 +2920,14 @@ void MVampireETC::UseInventory()
 #ifdef __GAME_CLIENT__
 	//----------------------------------------------------
 	//
-	//					º¯½Å¿ë ¾ÆÀÌÅÛ - vampireÀÎ °æ¿ì
+	//					변신용 아이템 - vampire인 경우
 	//
 	//----------------------------------------------------
 	if (g_pZoneTable->Get( g_pZone->GetID() )->CannotUseSpecialItem == false )
 	{				
 		ACTIONINFO useSkill;// = g_pPlayer->GetSpecialActionInfo();
 
-		if ( GetItemClass() == ITEM_CLASS_SKULL )						// ´Á´ë ¸Ó¸®
+		if ( GetItemClass() == ITEM_CLASS_SKULL )						// 늑대 머리
 		{
 			useSkill = SKILL_TRANSFORM_TO_WERWOLF;
 		}
@@ -2958,7 +2958,7 @@ void MVampireETC::UseInventory()
 		}
 
 		//----------------------------------------------------
-		// skillÀÌ Á¦´ë·Î ¼³Á¤µÈ °æ¿ì
+		// skill이 제대로 설정된 경우
 		//----------------------------------------------------
 		if (useSkill != ACTIONINFO_NULL)
 		{
@@ -2967,7 +2967,7 @@ void MVampireETC::UseInventory()
 				&& (*g_pSkillInfoTable)[useSkill].IsAvailableTime())					
 			{
 				//----------------------------------------------------
-				// °ËÁõ ¹ÞÀ»°Ô ¾ø´Â °æ¿ì..
+				// 검증 받을게 없는 경우..
 				//----------------------------------------------------
 				if (!g_pPlayer->IsWaitVerify()
 					&& g_pPlayer->IsItemCheckBufferNULL())
@@ -2978,21 +2978,21 @@ void MVampireETC::UseInventory()
 					_CGSkillToInventory.setY( GetGridY() );
 					_CGSkillToInventory.setSkillType( useSkill );
 					//_CGSkillToInventory.setCEffectID( 0 );	// -_-;;							
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 					if(0 != SubInventoryItemID)
 						_CGSkillToInventory.setInventoryItemObjectID( SubInventoryItemID );
 	#endif
 					g_pSocket->sendPacket( &_CGSkillToInventory );
 
 					
-					// ÀÏ´Ü(!) ±×³É ¾ø¾Ö°í º»´Ù.
+					// 일단(!) 그냥 없애고 본다.
 					//(*g_pInventory).RemoveItem( GetID() );
 
 					//----------------------------------------------------
-					// Inventory¿¡¼­ itemÀ» »ç¿ëÇÏ´Â °É °ËÁõ¹Þ±â¸¦ ±â´Ù¸°´Ù.
+					// Inventory에서 item을 사용하는 걸 검증받기를 기다린다.
 					//----------------------------------------------------
 					g_pPlayer->SetWaitVerify( MPlayer::WAIT_VERIFY_SKILL_SUCCESS );
-				#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+				#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 					g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_SKILL_TO_INVENTORY, SubInventoryItemID );
 				#else
 					g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_SKILL_TO_INVENTORY );
@@ -3002,11 +3002,11 @@ void MVampireETC::UseInventory()
 					(*g_pSkillInfoTable)[useSkill].SetNextAvailableTime();
 
 					//----------------------------------------------------
-					// ±â¼ú »ç¿ë ½Ãµµ µ¿ÀÛ
+					// 기술 사용 시도 동작
 					//----------------------------------------------------
 					AddNewInventoryEffect( GetID(),
 										useSkill, //+ (*g_pActionInfoTable).GetMinResultActionInfo(),
-										g_pClientConfig->FPS*3	// 3ÃÊ
+										g_pClientConfig->FPS*3	// 3초
 									);								
 				}
 			}
@@ -3014,7 +3014,7 @@ void MVampireETC::UseInventory()
 	}
 #endif
 }
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MSkull::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 	#else
 void	MSkull::UseInventory()
@@ -3024,14 +3024,14 @@ void	MSkull::UseInventory()
 #ifdef __GAME_CLIENT__
 	//----------------------------------------------------
 	//
-	//					º¯½Å¿ë ¾ÆÀÌÅÛ - vampireÀÎ °æ¿ì
+	//					변신용 아이템 - vampire인 경우
 	//
 	//----------------------------------------------------
 	if (g_pZoneTable->Get( g_pZone->GetID() )->CannotUseSpecialItem == false )
 	{				
 		ACTIONINFO useSkill;// = g_pPlayer->GetSpecialActionInfo();
 
-		if ( GetItemClass() == ITEM_CLASS_SKULL && GetItemType() == 39)						// ´Á´ë ¸Ó¸®
+		if ( GetItemClass() == ITEM_CLASS_SKULL && GetItemType() == 39)						// 늑대 머리
 		{
 			useSkill = SKILL_TRANSFORM_TO_WERWOLF;
 		}
@@ -3062,7 +3062,7 @@ void	MSkull::UseInventory()
 		}
 
 		//----------------------------------------------------
-		// skillÀÌ Á¦´ë·Î ¼³Á¤µÈ °æ¿ì
+		// skill이 제대로 설정된 경우
 		//----------------------------------------------------
 		if (useSkill != ACTIONINFO_NULL)
 		{
@@ -3071,7 +3071,7 @@ void	MSkull::UseInventory()
 				&& (*g_pSkillInfoTable)[useSkill].IsAvailableTime())					
 			{
 				//----------------------------------------------------
-				// °ËÁõ ¹ÞÀ»°Ô ¾ø´Â °æ¿ì..
+				// 검증 받을게 없는 경우..
 				//----------------------------------------------------
 				if (!g_pPlayer->IsWaitVerify()
 					&& g_pPlayer->IsItemCheckBufferNULL())
@@ -3086,11 +3086,11 @@ void	MSkull::UseInventory()
 					g_pSocket->sendPacket( &_CGSkillToInventory );
 
 					
-					// ÀÏ´Ü(!) ±×³É ¾ø¾Ö°í º»´Ù.
+					// 일단(!) 그냥 없애고 본다.
 					//(*g_pInventory).RemoveItem( GetID() );
 
 					//----------------------------------------------------
-					// Inventory¿¡¼­ itemÀ» »ç¿ëÇÏ´Â °É °ËÁõ¹Þ±â¸¦ ±â´Ù¸°´Ù.
+					// Inventory에서 item을 사용하는 걸 검증받기를 기다린다.
 					//----------------------------------------------------
 					g_pPlayer->SetWaitVerify( MPlayer::WAIT_VERIFY_SKILL_SUCCESS );
 					g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_SKILL_TO_INVENTORY );
@@ -3098,11 +3098,11 @@ void	MSkull::UseInventory()
 					(*g_pSkillInfoTable)[useSkill].SetNextAvailableTime();
 
 					//----------------------------------------------------
-					// ±â¼ú »ç¿ë ½Ãµµ µ¿ÀÛ
+					// 기술 사용 시도 동작
 					//----------------------------------------------------
 					AddNewInventoryEffect( GetID(),
 										useSkill, //+ (*g_pActionInfoTable).GetMinResultActionInfo(),
-										g_pClientConfig->FPS*3	// 3ÃÊ
+										g_pClientConfig->FPS*3	// 3초
 									);								
 				}
 			}
@@ -3111,17 +3111,17 @@ void	MSkull::UseInventory()
 #endif
 }
 
-// ÇØ´ç Å©¸®ÃÄÀÇ ÁÖº¯¿¡ ¿øÇÏ´Â ½ÃÃ¼°¡ ÀÖ´ÂÁö °Ë»çÇÑ´Ù.
+// 해당 크리쳐의 주변에 원하는 시체가 있는지 검사한다.
 extern bool IsExistCorpseFromPlayer(MCreature* OriginCreature, int creature_type);
 
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MKey::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 	#else
 void	MKey::UseInventory()
 	#endif
 {
 #ifdef __GAME_CLIENT__
-	// ÁÖº¯¿¡ ±ê¹ßÀÌ ¾ø¾î¾ß ÇÑ´Ù.
+	// 주변에 깃발이 없어야 한다.
 	if( !IsExistCorpseFromPlayer( dynamic_cast<MCreature*>(g_pPlayer), 670 ) )
 	{
 		CGUseItemFromInventory _CGUseItemFromInventory;
@@ -3129,14 +3129,14 @@ void	MKey::UseInventory()
 		_CGUseItemFromInventory.setX( GetGridX() );
 		_CGUseItemFromInventory.setY( GetGridY() );
 		
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 		if(0 != SubInventoryItemID)
 			_CGUseItemFromInventory.setInventoryItemObjectID( SubInventoryItemID );
 	#endif
 		g_pSocket->sendPacket( &_CGUseItemFromInventory );
 
 	//modify by viva for notice : i don't understand it :(
-//	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+//	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 //		g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_SKILL_TO_INVENTORY, SubInventoryItemID );
 //	#else
 		g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY);
@@ -3153,7 +3153,7 @@ void	MKey::UseInventory()
 void	MKey::UseQuickItem()
 {
 #ifdef __GAME_CLIENT__
-	// 2004, 12, 16, sobeit add start - ÀÎ½ºÅç ÅÍ·¿ »óÅÂ¿¡¼­ ¿ÀÅä¹ÙÀÌ¸¦ Å¸¸é ¹®Á¦ »ý±è..¤¾¤¾ ±×·¡¼­ ¸·À½
+	// 2004, 12, 16, sobeit add start - 인스톨 터렛 상태에서 오토바이를 타면 문제 생김..ㅎㅎ 그래서 막음
 	if(g_pPlayer->HasEffectStatus(EFFECTSTATUS_INSTALL_TURRET))
 	{
 		return ;
@@ -3167,21 +3167,21 @@ void	MKey::UseQuickItem()
 
 	UI_LockGear();
 	g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_QUICKSLOT);
-	// ÀÏ´Ü(!) ±×³É ¾ø¾Ö°í º»´Ù.
+	// 일단(!) 그냥 없애고 본다.
 	//(*g_pInventory).RemoveItem( GetID() );
 
 	//----------------------------------------------------
-	// Inventory¿¡¼­ itemÀ» »ç¿ëÇÏ´Â °É °ËÁõ¹Þ±â¸¦ ±â´Ù¸°´Ù.
+	// Inventory에서 item을 사용하는 걸 검증받기를 기다린다.
 	//----------------------------------------------------
 	g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_QUICKSLOT);
 	//----------------------------------------------------
-	// º§Æ® ¸ø ¾ø¾Öµµ·Ï..
+	// 벨트 못 없애도록..
 	//----------------------------------------------------
 	UI_LockGear();
 
 #endif
 }
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MEventTreeItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 	#else
 void	MEventTreeItem::UseInventory()
@@ -3198,9 +3198,9 @@ void	MEventTreeItem::UseInventory()
 					|| g_pPlayer->GetCreatureType()==CREATURETYPE_OUSTERS_OPERATOR;
 		
 		if(IsPlayerInSafePosition() || g_pZone != NULL && (g_pZone->GetID() == 1104 || g_pZone->GetID() == 1106 || g_pZone->GetID() == 1114 || g_pZone->GetID() == 1115))
-			// ¾ÈÀüÁö´ë¿Í ¸¶½ºÅÍ ·¹¾î¿¡¼­´Â ¸ø¾´´Ù
+			// 안전지대와 마스터 레어에서는 못쓴다
 		{				
-			// °¢ ¼ºÀÌ ¾Æ´Ï¸é¼­ ¿î¿µÀÚ°¡ ¾Æ´Ï¸é
+			// 각 성이 아니면서 운영자가 아니면
 			if( !( g_pZone->GetID() >= 1201 && g_pZone->GetID() <= 1206 ) && !bMasterWords )
 			{				
 				bUseOK = false;
@@ -3241,11 +3241,11 @@ void	MEventTreeItem::UseInventory()
 						if(pCreature != NULL && pCreature->GetCreatureType() == 482 || pCreature->GetCreatureType() == 650)
 						{
 							bUseOK = false;
-							if(GetItemType() == 12)	// Å©¸®½º ¸¶½º Æ®¸®
+							if(GetItemType() == 12)	// 크리스 마스 트리
 							{
 								g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_MESSAGE_XMAS_TREE_CANNOT_USE].GetString() );
 							}
-							else					// °Ô½ÃÆÇ
+							else					// 게시판
 							{
 								g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_MESSAGE_BULLETIN_BOARD_CANNOT_USE].GetString() );
 							}
@@ -3257,11 +3257,11 @@ void	MEventTreeItem::UseInventory()
 		}
 		if (bUseOK)
 		{
-			if(GetItemType() == 12)		// Å©¸®½º¸¶½º Æ®¸®
+			if(GetItemType() == 12)		// 크리스마스 트리
 			{
 				gC_vs_ui.RunXmasCardWindow(this);
 			}
-			else						// °Ô½ÃÆÇ
+			else						// 게시판
 			{
 				gC_vs_ui.RunBulletinBoardWindow(this);
 			}
@@ -3269,7 +3269,7 @@ void	MEventTreeItem::UseInventory()
 	}
 #endif
 }
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MEventEtcItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 	#else
 void	MEventEtcItem::UseInventory()
@@ -3282,7 +3282,7 @@ void	MEventEtcItem::UseInventory()
 		&& GetItemType() != 14 
 		&& GetItemType()!=15
 		&& GetItemType()!=16
-		&& GetItemType()!=17) // 14´Â ¸Ó½Ã³Ä..»çÅÁ..°ú ¼ÛÆíµé..
+		&& GetItemType()!=17) // 14는 머시냐..사탕..과 송편들..
 	{
 		bUseOK = false;
 		g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_MESSAGE_NOT_USE_SAFETY_ZONE].GetString() );
@@ -3294,7 +3294,7 @@ void	MEventEtcItem::UseInventory()
 		if(GetItemType() == 14||
 		GetItemType() == 15||
 		GetItemType() == 16||
-		GetItemType() == 17) // »çÅÁ¸¸, + ¼ÛÆí
+		GetItemType() == 17) // 사탕만, + 송편
 		{
 			CGUsePotionFromInventory _CGUsePotionFromInventory;
 			_CGUsePotionFromInventory.setObjectID( GetID() );
@@ -3324,7 +3324,7 @@ void	MEventEtcItem::UseQuickItem()
 	if(GetItemType() == 14||
 		GetItemType() == 15||
 		GetItemType() == 16||
-		GetItemType() == 17) // »çÅÁ¸¸, + ¼ÛÆí
+		GetItemType() == 17) // 사탕만, + 송편
 	{
 		if( g_pPlayer->IsOusters() )
 		{
@@ -3332,14 +3332,14 @@ void	MEventEtcItem::UseQuickItem()
 			_CGUsePotionFromQuickSlot.setObjectID( GetID() );
 			int slotID = GetItemSlot();
 
-			if( g_pArmsBand1 != NULL )	// 1¹ø ¾Ï½º¹êµå°¡ ÀÖÀ¸¸é ±×³É
+			if( g_pArmsBand1 != NULL )	// 1번 암스밴드가 있으면 그냥
 			{
 				if(g_pArmsBand1->GetItem( slotID ) == this)
 					_CGUsePotionFromQuickSlot.setSlotID( slotID );
 				else
 					_CGUsePotionFromQuickSlot.setSlotID( slotID + 3);
 			}
-			else						// 1¹ø ¾Ï½º¹êµå°¡ ¾øÀ¸¸é 2¹ø +3 À» ÇØÁØ´Ù
+			else						// 1번 암스밴드가 없으면 2번 +3 을 해준다
 			{
 				_CGUsePotionFromQuickSlot.setSlotID( slotID + 3);
 			}
@@ -3350,7 +3350,7 @@ void	MEventEtcItem::UseQuickItem()
 		//	DEBUG_ADD_FORMAT("[ Ousters Item Use From QuickSlot ] %d %d",slotID, GetID() );
 			
 			//----------------------------------------------------
-			// º§Æ® ¸ø ¾ø¾Öµµ·Ï..
+			// 벨트 못 없애도록..
 			//----------------------------------------------------
 			UI_LockGear();
 		}
@@ -3363,23 +3363,23 @@ void	MEventEtcItem::UseQuickItem()
 			g_pSocket->sendPacket( &_CGUsePotionFromQuickSlot );
 
 			
-			// ÀÏ´Ü(!) ±×³É ¾ø¾Ö°í º»´Ù.
+			// 일단(!) 그냥 없애고 본다.
 			//(*g_pInventory).RemoveItem( GetID() );
 
 			//----------------------------------------------------
-			// Inventory¿¡¼­ itemÀ» »ç¿ëÇÏ´Â °É °ËÁõ¹Þ±â¸¦ ±â´Ù¸°´Ù.
+			// Inventory에서 item을 사용하는 걸 검증받기를 기다린다.
 			//----------------------------------------------------
 			g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_QUICKSLOT);
 
 			//----------------------------------------------------
-			// º§Æ® ¸ø ¾ø¾Öµµ·Ï..
+			// 벨트 못 없애도록..
 			//----------------------------------------------------
 			UI_LockGear();
 		}
 	}
 #endif
 }
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MDyePotionItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 	#else
 void	MDyePotionItem::UseInventory()
@@ -3387,19 +3387,19 @@ void	MDyePotionItem::UseInventory()
 
 {
 #ifdef __GAME_CLIENT__
-	// ¾Æ¿ì½ºÅÍÁî´Â ¼ºÀÌ ¾ø±â ¶§¹®¿¡ ¼ºÀüÈ¯ ¾ÆÀÌÅÛÀ» »ç¿ëÇÒ ¼ö ¾ø´Ù
+	// 아우스터즈는 성이 없기 때문에 성전환 아이템을 사용할 수 없다
 	if( g_pPlayer->IsOusters() && GetItemType() == 48 )
 	{
 		UI_PopupMessage(STRING_MESSAGE_CANNOT_USE_OUSTERS);
 	}
 	else
 	{
-		// edit by sonic 2006.10.29  È¥³ý¶þ×ªºó²»ÄÜÊ¹ÓÃ¸Ä±ä»ðÑÕÉ«µÀ¾ß
+		// edit by sonic 2006.10.29  去除二转后不能使用改变火颜色道具
 
 			/*	
 				// 2005, 2, 22, sobeit add start
 				if(g_pPlayer->IsAdvancementClass() && GetItemType() >= 58 && GetItemType() <= 61)
-				{ // ½ÂÁ÷ À¯Àú´Â ¸¶½ºÅÍ ÀÌÆåÆ® »ö»ó ¹Ù²Ù´Â ¾ÆÀÌÅÛÀ» ¸ø¾²°Ô ÇÑ´Ù³×..Í±î...?
+				{ // 승직 유저는 마스터 이펙트 색상 바꾸는 아이템을 못쓰게 한다네..왤까...?
 					UI_PopupMessage(UI_STRING_MESSAGE_CANNOT_USE_ADVANCEMENTCLASS);
 					return;
 				}
@@ -3424,7 +3424,7 @@ void	MDyePotionItem::UseInventory()
 //	
 //	if( g_pPlayer->IsOusters() )
 //	{
-//		// ¾Æ¿ì½ºÅÍÁî´Â ¼ºÀÌ ¾ø±â ¶§¹®¿¡ ¼ºÀüÈ¯ ¾ÆÀÌÅÛÀ» »ç¿ëÇÒ ¼ö ¾ø´Ù
+//		// 아우스터즈는 성이 없기 때문에 성전환 아이템을 사용할 수 없다
 //		if(GetItemType() == 48)
 //			UI_PopupMessage(STRING_MESSAGE_CANNOT_USE_OUSTERS);
 //		else
@@ -3433,14 +3433,14 @@ void	MDyePotionItem::UseInventory()
 //			_CGUsePotionFromQuickSlot.setObjectID( GetID() );
 //			int slotID = GetItemSlot();
 //
-//			if( g_pArmsBand1 != NULL )	// 1¹ø ¾Ï½º¹êµå°¡ ÀÖÀ¸¸é ±×³É
+//			if( g_pArmsBand1 != NULL )	// 1번 암스밴드가 있으면 그냥
 //			{
 //				if(g_pArmsBand1->GetItem( slotID ) == this)
 //					_CGUsePotionFromQuickSlot.setSlotID( slotID );
 //				else
 //					_CGUsePotionFromQuickSlot.setSlotID( slotID + 3);
 //			}
-//			else						// 1¹ø ¾Ï½º¹êµå°¡ ¾øÀ¸¸é 2¹ø +3 À» ÇØÁØ´Ù
+//			else						// 1번 암스밴드가 없으면 2번 +3 을 해준다
 //			{
 //				_CGUsePotionFromQuickSlot.setSlotID( slotID + 3);
 //			}
@@ -3451,7 +3451,7 @@ void	MDyePotionItem::UseInventory()
 //		//	DEBUG_ADD_FORMAT("[ Ousters Item Use From QuickSlot ] %d %d",slotID, GetID() );
 //			
 //			//----------------------------------------------------
-//			// º§Æ® ¸ø ¾ø¾Öµµ·Ï..
+//			// 벨트 못 없애도록..
 //			//----------------------------------------------------
 //			UI_LockGear();
 //		}
@@ -3465,22 +3465,22 @@ void	MDyePotionItem::UseInventory()
 //		g_pSocket->sendPacket( &_CGUsePotionFromQuickSlot );
 //
 //		
-//		// ÀÏ´Ü(!) ±×³É ¾ø¾Ö°í º»´Ù.
+//		// 일단(!) 그냥 없애고 본다.
 //		//(*g_pInventory).RemoveItem( GetID() );
 //
 //		//----------------------------------------------------
-//		// Inventory¿¡¼­ itemÀ» »ç¿ëÇÏ´Â °É °ËÁõ¹Þ±â¸¦ ±â´Ù¸°´Ù.
+//		// Inventory에서 item을 사용하는 걸 검증받기를 기다린다.
 //		//----------------------------------------------------
 //		g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_QUICKSLOT);
 //
 //		//----------------------------------------------------
-//		// º§Æ® ¸ø ¾ø¾Öµµ·Ï..
+//		// 벨트 못 없애도록..
 //		//----------------------------------------------------
 //		UI_LockGear();
 //	}
 //#endif
 //}
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MOustersSummonGem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 	#else
 void	MOustersSummonGem::UseInventory()
@@ -3494,14 +3494,14 @@ void	MOustersSummonGem::UseInventory()
 		_CGUseItemFromInventory.setObjectID( GetID() );
 		_CGUseItemFromInventory.setX( GetGridX() );
 		_CGUseItemFromInventory.setY( GetGridY() );
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 		if(0 != SubInventoryItemID)
 			_CGUseItemFromInventory.setInventoryItemObjectID( SubInventoryItemID );
 	#endif
 
 		g_pSocket->sendPacket( &_CGUseItemFromInventory );
 
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 		g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY, SubInventoryItemID);
 	#else
 		g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY);
@@ -3511,7 +3511,7 @@ void	MOustersSummonGem::UseInventory()
 	}
 #endif
 }
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MCodeSheetItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 	#else
 void	MCodeSheetItem::UseInventory()
@@ -3536,20 +3536,20 @@ void	MPotion::UseQuickItem()
 	g_pSocket->sendPacket( &_CGUsePotionFromQuickSlot );
 
 	
-	// ÀÏ´Ü(!) ±×³É ¾ø¾Ö°í º»´Ù.
+	// 일단(!) 그냥 없애고 본다.
 	//(*g_pInventory).RemoveItem( GetID() );
 
 	//----------------------------------------------------
-	// Inventory¿¡¼­ itemÀ» »ç¿ëÇÏ´Â °É °ËÁõ¹Þ±â¸¦ ±â´Ù¸°´Ù.
+	// Inventory에서 item을 사용하는 걸 검증받기를 기다린다.
 	//----------------------------------------------------
 	g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_QUICKSLOT);
 
 	//----------------------------------------------------
-	// º§Æ® ¸ø ¾ø¾Öµµ·Ï..
+	// 벨트 못 없애도록..
 	//----------------------------------------------------
 	UI_LockGear();
 
-	// [µµ¿ò¸»] º§Æ®ÀÇ ¾ÆÀÌÅÛ »ç¿ë
+	// [도움말] 벨트의 아이템 사용
 //	__BEGIN_HELP_EVENT
 ///		ExecuteHelpEvent( HE_ITEM_USE_BELT_ITEM );	
 //	__END_HELP_EVENT
@@ -3563,14 +3563,14 @@ void	MOustersPupa::UseQuickItem()
 	_CGUsePotionFromQuickSlot.setObjectID( GetID() );
 	int slotID = GetItemSlot();
 
-	if( g_pArmsBand1 != NULL )	// 1¹ø ¾Ï½º¹êµå°¡ ÀÖÀ¸¸é ±×³É
+	if( g_pArmsBand1 != NULL )	// 1번 암스밴드가 있으면 그냥
 	{
 		if(g_pArmsBand1->GetItem( slotID ) == this)
 			_CGUsePotionFromQuickSlot.setSlotID( slotID );
 		else
 			_CGUsePotionFromQuickSlot.setSlotID( slotID + 3);
 	}
-	else						// 1¹ø ¾Ï½º¹êµå°¡ ¾øÀ¸¸é 2¹ø +3 À» ÇØÁØ´Ù
+	else						// 1번 암스밴드가 없으면 2번 +3 을 해준다
 	{
 		_CGUsePotionFromQuickSlot.setSlotID( slotID + 3);
 	}
@@ -3581,7 +3581,7 @@ void	MOustersPupa::UseQuickItem()
 //	DEBUG_ADD_FORMAT("[ Ousters Item Use From QuickSlot ] %d %d",slotID, GetID() );
 	
 	//----------------------------------------------------
-	// º§Æ® ¸ø ¾ø¾Öµµ·Ï..
+	// 벨트 못 없애도록..
 	//----------------------------------------------------
 	UI_LockGear();
 #endif
@@ -3594,14 +3594,14 @@ void	MOustersComposMei::UseQuickItem()
 	_CGUsePotionFromQuickSlot.setObjectID( GetID() );
 	int slotID = GetItemSlot();
 
-	if( g_pArmsBand1 != NULL )	// 1¹ø ¾Ï½º¹êµå°¡ ÀÖÀ¸¸é ±×³É
+	if( g_pArmsBand1 != NULL )	// 1번 암스밴드가 있으면 그냥
 	{
 		if(g_pArmsBand1->GetItem( slotID ) == this)
 			_CGUsePotionFromQuickSlot.setSlotID( slotID );
 		else
 			_CGUsePotionFromQuickSlot.setSlotID( slotID + 3);
 	}
-	else						// 1¹ø ¾Ï½º¹êµå°¡ ¾øÀ¸¸é 2¹ø +3 À» ÇØÁØ´Ù
+	else						// 1번 암스밴드가 없으면 2번 +3 을 해준다
 	{
 		_CGUsePotionFromQuickSlot.setSlotID( slotID + 3);
 	}
@@ -3612,7 +3612,7 @@ void	MOustersComposMei::UseQuickItem()
 //	DEBUG_ADD_FORMAT("[ Ousters Item Use From QuickSlot ] %d %d",slotID, GetID() );
 	
 	//----------------------------------------------------
-	// º§Æ® ¸ø ¾ø¾Öµµ·Ï..
+	// 벨트 못 없애도록..
 	//----------------------------------------------------
 	UI_LockGear();
 #endif
@@ -3645,15 +3645,15 @@ void	MVampireCoupleRing::UseGear()
 	g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_GEAR );
 #endif
 }
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MPetItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 	#else
 void	MPetItem::UseInventory()
 	#endif
 {
 #ifdef __GAME_CLIENT__
-// ÇöÀç ÆêÀÌ ÀÖÀ¸¸é ÆêÀ» È£ÃâÇÏÁö ¸øÇÏµµ·Ï ÇßÀ¸³ª ÆêÀ» ¾ø¾Ù¶§µµ °°ÀÌ »ç¿ëÇÏ¹Ç·Î ÁÖ¼®Ã³¸®ÇßÀ½
-// ¾î¶² ¾ÆÀÌÅÛÀ¸·Î ÆêÀ» È£ÃâÇß´ÂÁö ¾ÆÀÌÅÛ¿¡ Ç¥½ÃÇØÁÖ´Â°Íµµ....¿ÀÅä¹ÙÀÌµµ ¾ÈÇÏ´Ï±î ½ß
+// 현재 펫이 있으면 펫을 호출하지 못하도록 했으나 펫을 없앨때도 같이 사용하므로 주석처리했음
+// 어떤 아이템으로 펫을 호출했는지 아이템에 표시해주는것도....오토바이도 안하니까 쌩
 
 //	if(g_pPlayer->GetPetID() == OBJECTID_NULL)
 //	{
@@ -3664,14 +3664,14 @@ void	MPetItem::UseInventory()
 		_CGUseItemFromInventory.setX( GetGridX() );
 		_CGUseItemFromInventory.setY( GetGridY() );
 
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 		if(0 != SubInventoryItemID)
 			_CGUseItemFromInventory.setInventoryItemObjectID( SubInventoryItemID );
 	#endif
 
 		g_pSocket->sendPacket( &_CGUseItemFromInventory );
 
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 		g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY, SubInventoryItemID);
 	#else
 		g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY);
@@ -3681,7 +3681,7 @@ void	MPetItem::UseInventory()
 //	}
 #endif
 }
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MPetFood::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 	#else
 void	MPetFood::UseInventory()
@@ -3698,13 +3698,13 @@ void	MPetFood::UseInventory()
 		_CGUseItemFromInventory.setX( GetGridX() );
 		_CGUseItemFromInventory.setY( GetGridY() );
 		
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 		if(0 != SubInventoryItemID)
 			_CGUseItemFromInventory.setInventoryItemObjectID( SubInventoryItemID );
 	#endif
 		g_pSocket->sendPacket( &_CGUseItemFromInventory );
 
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 		g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY, SubInventoryItemID);
 	#else
 		g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY);
@@ -3713,27 +3713,27 @@ void	MPetFood::UseInventory()
 	}
 	else
 	{
-		// 2°³ ÀÌ»ó ÀÖ¾î¾ß ºÐ¸® µÈ´Ù.
+		// 2개 이상 있어야 분리 된다.
 		if(GetNumber() > 1)
 		{
-			// ¾ÆÀÌÅÛ ºÐ¸®
+			// 아이템 분리
 			CGAddInventoryToMouse _CGAddInventoryToMouse;
-			_CGAddInventoryToMouse.setObjectID( 0 );	// ºÐ¸®ÇÑ´Ù´Â ÀÇ¹Ì
+			_CGAddInventoryToMouse.setObjectID( 0 );	// 분리한다는 의미
 			_CGAddInventoryToMouse.setX( GetGridX() );
 			_CGAddInventoryToMouse.setY( GetGridY() );
 			
 			g_pSocket->sendPacket( &_CGAddInventoryToMouse );				
 			
 			//----------------------------------------------------
-			// Inventory¿¡¼­ itemÀ» ¸î°³ µå´Â °É °ËÁõ¹Þ´Â´Ù.
-			// ÀÏ´ÜÀº 1°³¸¸ µé¸®µµ·Ï ÇÑ´Ù.
+			// Inventory에서 item을 몇개 드는 걸 검증받는다.
+			// 일단은 1개만 들리도록 한다.
 			//----------------------------------------------------
 			g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_PICKUP_SOME_FROM_INVENTORY);
 		}
 	}
 #endif
 }
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MSms_item::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 	#else
 void	MSms_item::UseInventory()
@@ -3753,27 +3753,27 @@ void	MSms_item::UseInventory()
 	}
 #endif
 }
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MPetEnchantItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 	#else
 void	MPetEnchantItem::UseInventory()
 	#endif
 {
 #ifdef __GAME_CLIENT__
-	// 2°³ ÀÌ»ó ÀÖ¾î¾ß ºÐ¸® µÈ´Ù.
+	// 2개 이상 있어야 분리 된다.
 	if(GetNumber() > 1)
 	{
-		// ¾ÆÀÌÅÛ ºÐ¸®
+		// 아이템 분리
 		CGAddInventoryToMouse _CGAddInventoryToMouse;
-		_CGAddInventoryToMouse.setObjectID( 0 );	// ºÐ¸®ÇÑ´Ù´Â ÀÇ¹Ì
+		_CGAddInventoryToMouse.setObjectID( 0 );	// 분리한다는 의미
 		_CGAddInventoryToMouse.setX( GetGridX() );
 		_CGAddInventoryToMouse.setY( GetGridY() );
 		
 		g_pSocket->sendPacket( &_CGAddInventoryToMouse );				
 		
 		//----------------------------------------------------
-		// Inventory¿¡¼­ itemÀ» ¸î°³ µå´Â °É °ËÁõ¹Þ´Â´Ù.
-		// ÀÏ´ÜÀº 1°³¸¸ µé¸®µµ·Ï ÇÑ´Ù.
+		// Inventory에서 item을 몇개 드는 걸 검증받는다.
+		// 일단은 1개만 들리도록 한다.
 		//----------------------------------------------------
 		g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_PICKUP_SOME_FROM_INVENTORY);
 	}
@@ -3818,7 +3818,7 @@ std::string MPetItem::GetPetOptionName()
 				}
 			}
 		}
-		if(optionLevel != 0 && bFound == true)	// ´Ù¸¥ ¿É¼Ç ÆÄÆ®°¡ ³ª¿ÔÀ»¶§
+		if(optionLevel != 0 && bFound == true)	// 다른 옵션 파트가 나왔을때
 		{
 			switch(optionPart)
 			{
@@ -3867,7 +3867,7 @@ std::string MPetItem::GetPetOptionEName()
 				}
 			}
 		}
-		if(optionLevel != 0 && bFound == true)	// ´Ù¸¥ ¿É¼Ç ÆÄÆ®°¡ ³ª¿ÔÀ»¶§
+		if(optionLevel != 0 && bFound == true)	// 다른 옵션 파트가 나왔을때
 		{
 			switch(optionPart)
 			{
@@ -3921,7 +3921,7 @@ std::string MPetItem::GetPetName()
 
 	return petName;
 }
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MEventGiftBoxItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 	#else
 void	MEventGiftBoxItem::UseInventory()
@@ -3941,36 +3941,36 @@ void	MEventGiftBoxItem::UseInventory()
 	}
 #endif
 }
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void MMoonCardItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 	#else
 void MMoonCardItem::UseInventory()
 	#endif
 {
 #ifdef __GAME_CLIENT__
-	// 2°³ ÀÌ»ó ÀÖ¾î¾ß ºÐ¸® µÈ´Ù.
-	// edit by sonic 2006.11.1  ½«ËÄÒ¶²ÝÉèÎª¿É·Ö¿ª
+	// 2개 이상 있어야 분리 된다.
+	// edit by sonic 2006.11.1  将四叶草设为可分开
 	//if(GetItemType() == 2 && GetNumber() > 1 && GetNumber() < GetMaxNumber())
 	if(GetItemType() == 2 || GetItemType() ==3 && GetNumber() > 1 && GetNumber() < GetMaxNumber())
 	{
-		// ¾ÆÀÌÅÛ ºÐ¸®
+		// 아이템 분리
 		CGAddInventoryToMouse _CGAddInventoryToMouse;
-		_CGAddInventoryToMouse.setObjectID( 0 );	// ºÐ¸®ÇÑ´Ù´Â ÀÇ¹Ì
+		_CGAddInventoryToMouse.setObjectID( 0 );	// 분리한다는 의미
 		_CGAddInventoryToMouse.setX( GetGridX() );
 		_CGAddInventoryToMouse.setY( GetGridY() );
 		
 		g_pSocket->sendPacket( &_CGAddInventoryToMouse );				
 		
 		//----------------------------------------------------
-		// Inventory¿¡¼­ itemÀ» ¸î°³ µå´Â °É °ËÁõ¹Þ´Â´Ù.
-		// ÀÏ´ÜÀº 1°³¸¸ µé¸®µµ·Ï ÇÑ´Ù.
+		// Inventory에서 item을 몇개 드는 걸 검증받는다.
+		// 일단은 1개만 들리도록 한다.
 		//----------------------------------------------------
 		g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_PICKUP_SOME_FROM_INVENTORY);
 	}
 #endif
 }
 
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void MTrapItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 	#else
 void MTrapItem::UseInventory()
@@ -3989,7 +3989,7 @@ void MTrapItem::UseInventory()
 }
 	
 
-#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 
 void MSubInventory::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 {
@@ -4014,11 +4014,11 @@ MSubInventory::SetItemType(TYPE_ITEMTYPE type)
 		MGridItemManager::Init(2, 4);   
 		break;
 	
-	//  2005.08.15 Sjheon 4x6 ÆÑ Add	
+	//  2005.08.15 Sjheon 4x6 팩 Add	
 	case 1:	// 4*6 pack
 		MGridItemManager::Init(4, 6); 
 		break;
-	//  2005.08.15 Sjheon 4x6 ÆÑ End
+	//  2005.08.15 Sjheon 4x6 팩 End
 
 	default:
 		MGridItemManager::Init(2, 4);
@@ -4029,46 +4029,46 @@ MSubInventory::SetItemType(TYPE_ITEMTYPE type)
 //----------------------------------------------------------------------
 // AddItem ( pItem )
 //----------------------------------------------------------------------
-// ÀûÀýÇÑ slot¿¡ pItemÀ» Ãß°¡ÇÑ´Ù.
+// 적절한 slot에 pItem을 추가한다.
 //----------------------------------------------------------------------
 bool			
 MSubInventory::AddItem(MItem* pItem)
 {
 	bool re = MGridItemManager::AddItem( pItem );
-	SetEnchantLevel(MGridItemManager::GetItemNum()); // Enchant levelÀ» ¾ÆÀÌÅÛ °¹¼ö·Î ¾²±â·Î ÇßÀ½.
+	SetEnchantLevel(MGridItemManager::GetItemNum()); // Enchant level을 아이템 갯수로 쓰기로 했음.
 	return re;
 }
 
 //----------------------------------------------------------------------
 // AddItem ( pItem, n )
 //----------------------------------------------------------------------
-// slot(n)¿¡ pItemÀ» Ãß°¡ÇÑ´Ù.
+// slot(n)에 pItem을 추가한다.
 //----------------------------------------------------------------------
 bool			
 MSubInventory::AddItem(MItem* pItem, BYTE X, BYTE Y)
 {
 	bool re = MGridItemManager::AddItem( pItem, X, Y );
-	SetEnchantLevel(MGridItemManager::GetItemNum()); // Enchant levelÀ» ¾ÆÀÌÅÛ °¹¼ö·Î ¾²±â·Î ÇßÀ½.
+	SetEnchantLevel(MGridItemManager::GetItemNum()); // Enchant level을 아이템 갯수로 쓰기로 했음.
 	return re;
 }
 
 //----------------------------------------------------------------------
 // ReplaceItem
 //----------------------------------------------------------------------
-// pItemÀ» Ãß°¡ÇÏ°í µý°Ô ÀÖ´Ù¸é Item±³È¯
+// pItem을 추가하고 딴게 있다면 Item교환
 //----------------------------------------------------------------------
 bool			
 MSubInventory::ReplaceItem(MItem* pItem, BYTE X, BYTE Y, MItem*& pOldItem)
 {
 	bool re =  MGridItemManager::ReplaceItem( pItem, X, Y, pOldItem );
-	SetEnchantLevel(MGridItemManager::GetItemNum()); // Enchant levelÀ» ¾ÆÀÌÅÛ °¹¼ö·Î ¾²±â·Î ÇßÀ½.
+	SetEnchantLevel(MGridItemManager::GetItemNum()); // Enchant level을 아이템 갯수로 쓰기로 했음.
 	return re;
 }
 
 
 //----------------------------------------------------------------------
-// Can ReplaceItem : (n) slot¿¡ pItemÀ» Ãß°¡ÇÏ°Å³ª 
-//						¿ø·¡ ÀÖ´ø Item°ú ±³Ã¼°¡ °¡´ÉÇÑ°¡?
+// Can ReplaceItem : (n) slot에 pItem을 추가하거나 
+//						원래 있던 Item과 교체가 가능한가?
 //----------------------------------------------------------------------
 bool			
 MSubInventory::CanReplaceItem(MItem* pItem, BYTE X, BYTE Y, MItem*& pOldItem)

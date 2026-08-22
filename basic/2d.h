@@ -1,4 +1,4 @@
-#ifndef __2D__
+﻿#ifndef __2D__
 #define __2D__
 
 #include "Typedef.h"

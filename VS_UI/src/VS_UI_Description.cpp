@@ -1,4 +1,4 @@
-// VS_UI_Description.cpp
+﻿// VS_UI_Description.cpp
 
 #include "client_PCH.h"
 #include <assert.h>
@@ -989,7 +989,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				if (pPartName)
 				{
 					fOptionCheck=TRUE;
-					vx = g_PrintColorStr(px, py, "¿É¼Ç : ", gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+					vx = g_PrintColorStr(px, py, "옵션 : ", gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
 					if(optionInfo.Part == ITEMOPTION_INFO::PART_DURABILITY)
 					{
 						sprintf(sz_buf, "%s +%d", pPartName, PlusPoint-100);

@@ -1,4 +1,4 @@
-// VS_UI_DESC.cpp: implementation of the C_VS_UI_DESC class.
+﻿// VS_UI_DESC.cpp: implementation of the C_VS_UI_DESC class.
 //
 //////////////////////////////////////////////////////////////////////
 

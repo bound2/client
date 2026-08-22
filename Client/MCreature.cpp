@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 // MCreature.cpp
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
@@ -29,7 +29,7 @@
 //#include "RequestClientPlayerManager.h"
 //#include "packet\Rpackets\CRRequest.h"
 #include "VS_UI_base.h"
-#include "MSkillManager.h"	// [»õ±â¼ú3]
+#include "MSkillManager.h"	// [새기술3]
 #include "UIFunction.h"
 #include "MEventManager.h"
 #include "PacketFunction2.h"
@@ -58,7 +58,7 @@ extern bool					g_bZonePlayerInLarge;
 extern WORD					g_ZoneCreatureColorSet;
 
 #ifdef OUTPUT_DEBUG	
-	bool g_bCheckError = false;	// Å×½ºÆ®¸¦ À§ÇØ¼­ ÀÓ½Ã·Î..
+	bool g_bCheckError = false;	// 테스트를 위해서 임시로..
 #endif
 
 //#define	new			DEBUG_NEW
@@ -71,7 +71,7 @@ extern WORD					g_ZoneCreatureColorSet;
 //----------------------------------------------------------------------
 // Get ArmageddonSprite
 //----------------------------------------------------------------------
-// ÀÌ°Åµµ member functionÀ¸·Î ³Ö¾î¾ß µÇ´Âµ¥.. ÄÄÆÄÀÏ ½Ã°£¶§¹®¿¡ ÀÏ´Ü -_-;
+// 이거도 member function으로 넣어야 되는데.. 컴파일 시간때문에 일단 -_-;
 //----------------------------------------------------------------------
 //TYPE_EFFECTSPRITETYPE
 //GetArmageddonSprite(MCreature* pCreature)
@@ -136,7 +136,7 @@ extern WORD					g_ZoneCreatureColorSet;
 //----------------------------------------------------------------------
 // define
 //----------------------------------------------------------------------
-// °Á ÇÔ¼ö·Î ¸¸µé¾î¾ß µÇ´Âµ¥.. Çì´õ¹Ù²Ù°í ÄÄÆÄÀÏÇÏ±â ½È¾î¼­ ÀÓ½Ã·Î - -;
+// 걍 함수로 만들어야 되는데.. 헤더바꾸고 컴파일하기 싫어서 임시로 - -;
 //DEBUG_ADD_FORMAT("[ Apply Buffering Move ] [ID=%d] Current(%d, %d) Dir(%d) --> Next(%d, %d) Dir(%d)",	\
 //															m_ID,												\
 //															m_X, m_Y, m_Direction,								\
@@ -192,9 +192,9 @@ extern WORD					g_ZoneCreatureColorSet;
 		}
 
 //----------------------------------------------------------------------
-// ÇÑ¹ø¿¡ ÀÌµ¿ÇÏ´Â pixel¿¡ ´ëÇÑ Á¤º¸ 
-// ACTIONCOUNT_MOVE¸¸Å­ sXTableÀÇ ¹æÇâ¿¡ ´õÇØÁÖ¸é sXTable°ªÀÌ 0ÀÌ µÈ´Ù.
-// 8¹æÇâ¿¡ ¹æÇâ¸¶´Ù Move¼ö¸¸Å­..
+// 한번에 이동하는 pixel에 대한 정보 
+// ACTIONCOUNT_MOVE만큼 sXTable의 방향에 더해주면 sXTable값이 0이 된다.
+// 8방향에 방향마다 Move수만큼..
 //----------------------------------------------------------------------
 /*
 int MCreature::m_cXTableFrame8[8][8] = 
@@ -247,7 +247,7 @@ int MCreature::m_cXTableFrame4[8][4] =
 */
 
 //------------------------------------------------------------------
-// Slayer action ¼Óµµ
+// Slayer action 속도
 //------------------------------------------------------------------
 int MCreature::s_SlayerActionSpeed[ACTION_MAX_SLAYER][3] =
 {
@@ -274,7 +274,7 @@ int MCreature::s_SlayerActionSpeed[ACTION_MAX_SLAYER][3] =
 };
 
 //------------------------------------------------------------------
-// vampire action ¼Óµµ
+// vampire action 속도
 //------------------------------------------------------------------
 int MCreature::s_VampireActionSpeed[ACTION_MAX_SLAYER][3] = //ACTION_MAX_VAMPIRE][3] =
 {
@@ -301,7 +301,7 @@ int MCreature::s_VampireActionSpeed[ACTION_MAX_SLAYER][3] = //ACTION_MAX_VAMPIRE
 };
 
 //------------------------------------------------------------------
-// ousters action ¼Óµµ
+// ousters action 속도
 //------------------------------------------------------------------
 int MCreature::s_OustersActionSpeed[ACTION_MAX_SLAYER][3] = //ACTION_MAX_OUSTERS][3] =
 {
@@ -328,7 +328,7 @@ int MCreature::s_OustersActionSpeed[ACTION_MAX_SLAYER][3] = //ACTION_MAX_OUSTERS
 };
 
 //----------------------------------------------------------------------
-// ÇÑ Tile ÀÌµ¿ÀÇ Pixel¼ö
+// 한 Tile 이동의 Pixel수
 //----------------------------------------------------------------------
 int MCreature::m_sXTable[MAX_DIRECTION] = 
 {
@@ -344,7 +344,7 @@ int *MCreature::m_cXTable[MAX_FRAME_MOVE][MAX_DIRECTION] = { NULL, };
 int *MCreature::m_cYTable[MAX_FRAME_MOVE][MAX_DIRECTION] = { NULL, };
 
 //----------------------------------------------------------------------
-// ¹æÇâ¿¡ µû¸¥ º¯È­°ª
+// 방향에 따른 변화값
 //----------------------------------------------------------------------
 POINT g_DirectionValue[MAX_DIRECTION] =
 {
@@ -505,8 +505,8 @@ void			RemoveEffectStatusSummonSylph( MCreature* pCreature )
 //----------------------------------------------------------------------
 // Init MoveTable
 //----------------------------------------------------------------------
-// cX,cYtableÀ» ÃÊ±âÈ­ÇÑ´Ù.
-// [maxFrameÁ¾·ù8][8¹æÇâ][maxFrame°³ ¸¸Å­ÀÇ frameµé]
+// cX,cYtable을 초기화한다.
+// [maxFrame종류8][8방향][maxFrame개 만큼의 frame들]
 //----------------------------------------------------------------------
 void
 MCreature::InitMoveTable()
@@ -517,7 +517,7 @@ MCreature::InitMoveTable()
 
 		for (int d=0; d<MAX_DIRECTION; d++)
 		{			
-			// maxFrame°³ ¸¸Å­ÀÇ frameµé
+			// maxFrame개 만큼의 frame들
 			if (m_cXTable[maxFrame][d]!=NULL)
 			{
 				delete [] m_cXTable[maxFrame][d];			
@@ -530,29 +530,29 @@ MCreature::InitMoveTable()
 			}
 			m_cYTable[maxFrame][d] = new int [maxFrame_plus_1];
 			
-												// maxFrameÀÌ 8ÀÏ °æ¿ì..
+												// maxFrame이 8일 경우..
 			int totalX	= -m_sXTable[d];				// 48
 			int totalY	= -m_sYTable[d];				// 24
 
-			int		pX	= 0, pY = 0;			// ¹Ù·ÎÀüÀÇ x,y°ª
-			float	fX	= 0, fY = 0;			// ÇöÀç±îÁö ´õÇÑ x,y°ª
+			int		pX	= 0, pY = 0;			// 바로전의 x,y값
+			float	fX	= 0, fY = 0;			// 현재까지 더한 x,y값
 			float	cX	= (float)totalX / maxFrame_plus_1;	// 6
 			float	cY	= (float)totalY / maxFrame_plus_1;	// 3
 
-			// °¢ FrameÀ» ÃÊ±âÈ­ ½ÃÅ²´Ù.
-			// maxFrame°³¸¦ ´õÇÏ¸é totalX, totalY°¡ µÇ¾î¾ß ÇÑ´Ù.			
+			// 각 Frame을 초기화 시킨다.
+			// maxFrame개를 더하면 totalX, totalY가 되어야 한다.			
 			for (int f=0; f<maxFrame; f++)
 			{
-				// ÇöÀç±îÁö ´õÇÑ x, y°ª
+				// 현재까지 더한 x, y값
 				fX += cX;
 				fY += cY;
 
-				// ÇöÀç °ª¿¡¼­ ÀÌÀü °ªÀ» »©¼­ Â÷ÀÌ¸¦ ±¸ÇÑ´Ù.
-				// fX¸¦ ¹Ý¿Ã¸² ÇÏ´Â°Íµµ ±¦ÂúÁö ½Í´Ù.
+				// 현재 값에서 이전 값을 빼서 차이를 구한다.
+				// fX를 반올림 하는것도 괜찮지 싶다.
 				m_cXTable[maxFrame][d][f] = fX - pX;
 				m_cYTable[maxFrame][d][f] = fY - pY;
 
-				// ÇöÀçÀÇ °ªÀ» ±â¾ïÇØµÐ´Ù.
+				// 현재의 값을 기억해둔다.
 				pX = fX;
 				pY = fY;
 			}
@@ -566,7 +566,7 @@ MCreature::InitMoveTable()
 //----------------------------------------------------------------------
 // Release MoveTable
 //----------------------------------------------------------------------
-// cX,cYTableÀ» Á¦°ÅÇÑ´Ù.	
+// cX,cYTable을 제거한다.	
 //----------------------------------------------------------------------
 void
 MCreature::ReleaseMoveTable()
@@ -610,7 +610,7 @@ MCreature::MCreature()
 
 	m_MoveType = CREATURE_GROUND;
 
-	// ¿òÁ÷ÀÌ´Â ¹æ¹ý°ú ±×¿¡ µû¸¥ ÀÌµ¿ ´ÜÀ§
+	// 움직이는 방법과 그에 따른 이동 단위
 	m_MoveDevice = MOVE_DEVICE_WALK;
 	m_MoveAction = ACTION_MOVE;
 
@@ -619,7 +619,7 @@ MCreature::MCreature()
 
 	m_ColorBody1 = 0;
 	m_ColorBody2 = 0;
-	m_ChangeColorSet = ATTACHEFFECTCOLOR_NULL;	// ±âº»ÀûÀ¸·Î »ç¿ëÇÏÁö ¾Ê´Â´Ù.
+	m_ChangeColorSet = ATTACHEFFECTCOLOR_NULL;	// 기본적으로 사용하지 않는다.
 
 	m_ID = OBJECTID_NULL;
 
@@ -634,13 +634,13 @@ MCreature::MCreature()
 	m_cX = 0;
 	m_cY = 0;
 
-	m_Action = ACTION_STAND;				// Action¿¡ ´ëÇÑ ID
-	m_Direction = DIRECTION_LEFTDOWN;			// ¹Ù¶óºÁ¾ßÇÒ ¹æÇâ
+	m_Action = ACTION_STAND;				// Action에 대한 ID
+	m_Direction = DIRECTION_LEFTDOWN;			// 바라봐야할 방향
 	m_DirectionMove = m_Direction;
 	m_DirectionMoved = m_Direction;
-	m_CurrentDirection = DIRECTION_LEFTDOWN;	// ÇöÀç¹Ù¶óº¸´Â ¹æÇâ
+	m_CurrentDirection = DIRECTION_LEFTDOWN;	// 현재바라보는 방향
 
-	//  Çàµ¿	
+	//  행동	
 	m_NextAction		= ACTION_STAND;
 
 
@@ -651,18 +651,18 @@ MCreature::MCreature()
 	m_MoveCountMax		= 0;
 	m_NextMoveCount		= 0;
 
-	// ³ôÀÌ
+	// 높이
 	m_Z		= 0;
 	
 	//-------------------------------------------------------
-	// ´ÙÀ½ ¿òÁ÷ÀÏ ¹æÇâ	
+	// 다음 움직일 방향	
 	//-------------------------------------------------------
 	m_NextX			= SECTORPOSITION_NULL;
 	m_NextY			= SECTORPOSITION_NULL;
 	m_NextDirection	= DIRECTION_NULL;
 
 	//-------------------------------------------------------
-	// ¸¶Áö¸·À¸·Î °ËÁõµÈ SectorÀÇ ÁÂÇ¥
+	// 마지막으로 검증된 Sector의 좌표
 	//-------------------------------------------------------
 	m_ServerX	= SECTORPOSITION_NULL;
 	m_ServerY	= SECTORPOSITION_NULL;
@@ -689,14 +689,14 @@ MCreature::MCreature()
 	m_ChatTime = 0;
 
 	//-------------------------------------------------------
-	// ±â¼ú Á¾·ù
+	// 기술 종류
 	//-------------------------------------------------------
 	m_nBasicActionInfo		= SKILL_ATTACK_MELEE;
 	m_nSpecialActionInfo	= ACTIONINFO_NULL;
 	m_nUsedActionInfo		= ACTIONINFO_NULL;
 
 	//-------------------------------------------------------
-	// Ä³¸¯ÅÍ¿¡ ºÙ¾î ÀÖ´Â EffectÁ¾·ù
+	// 캐릭터에 붙어 있는 Effect종류
 	//-------------------------------------------------------
 	m_bAttachEffect = new bool [(*g_pEffectSpriteTypeTable).GetSize()];
 	for (i=0; i<(*g_pEffectSpriteTypeTable).GetSize(); i++)
@@ -712,20 +712,20 @@ MCreature::MCreature()
 
 	m_AttachEffectColor = ATTACHEFFECTCOLOR_NULL;
 
-//	m_MaxEffectLight = 0;	// ÃÖ°í ¹à±â
+//	m_MaxEffectLight = 0;	// 최고 밝기
 
 	//-------------------------------------------------------
-	// ¸ñÇ¥¿¡ ´ëÇÑ Á¤º¸
+	// 목표에 대한 정보
 	//-------------------------------------------------------
 	SetTraceID( OBJECTID_NULL );
 	m_TraceX				= SECTORPOSITION_NULL;
 	m_TraceY				= SECTORPOSITION_NULL;
 	m_TraceZ				= 0;
 
-	// ºû³ª´Â Effectµé
+	// 빛나는 Effect들
 	//m_nAlphaEffect = 0;
 
-	// ÃÖ±Ù¿¡ Ã¤ÆÃ StringÀÌ Ãß°¡µÈ ½ÃÁ¡
+	// 최근에 채팅 String이 추가된 시점
 	m_NextChatFadeTime = g_CurrentTime;
 
 	m_pActionResult = NULL;
@@ -799,7 +799,7 @@ MCreature::MCreature()
 	m_bStopBloodDrain = 0;
 	m_bStopAbsorbSoul = 0;
 
-	// -1ÀÌ¸é darkness¿¡ ÀÖ´Â°Ô ¾Æ´Ï´Ù.
+	// -1이면 darkness에 있는게 아니다.
 	m_DarknessCount = -1;
 	m_DarknessCountInc = 0;
 
@@ -857,7 +857,7 @@ MCreature::MCreature()
 MCreature::~MCreature()
 {
 	//----------------------------------------
-	// Æê Á¦°Å
+	// 펫 제거
 	//----------------------------------------
 	if(GetPetID() != OBJECTID_NULL && g_pZone != NULL)
 	{
@@ -865,7 +865,7 @@ MCreature::~MCreature()
 	}
 
 	//----------------------------------------
-	// Á¤·É Á¦°Å
+	// 정령 제거
 	//----------------------------------------
 	if(GetElementalID() != OBJECTID_NULL && g_pZone != NULL)
 	{
@@ -875,7 +875,7 @@ MCreature::~MCreature()
 	ClearAttachEffect();
 
 	//-------------------------------------------------------
-	// ÀÌ¸§ Á¦°Å
+	// 이름 제거
 	//-------------------------------------------------------
 	if (m_pName!=NULL)
 	{
@@ -930,7 +930,7 @@ bool IsCreatureTypeVampirePC(int type)
 		type == CREATURETYPE_VAMPIRE_FEMALE2 ||
 		type == CREATURETYPE_VAMPIRE_FEMALE3 ||
 		type == CREATURETYPE_WER_WOLF	||	
-				// add by Coffee 2006.11.24  Ôö¼Ó¹í×åÑÇÂéÐÎÏó
+				// add by Coffee 2006.11.24  增加鬼族亚麻形象
 		type == CREATURETYPE_VAMPIRE_FEMALE4 ||
 		type == CREATURETYPE_VAMPIRE_MALE4	||
 		//add by viva
@@ -973,7 +973,7 @@ MCreature::SetCreatureType(TYPE_CREATURETYPE type)
 	m_sX=0; 
 	m_sY=0;
 	
-	// ´ÙÀ½ µ¿ÀÛµµ ¾ø¾Ú
+	// 다음 동작도 없앰
 	m_bNextAction = false;
 	m_NextX = SECTORPOSITION_NULL;
 	m_NextY = SECTORPOSITION_NULL;
@@ -997,27 +997,27 @@ MCreature::SetCreatureType(TYPE_CREATURETYPE type)
 
 
 	
-	// »ö±ò - ¸÷ÀÎ °æ¿ì¸¸.. ¼³Á¤ÇØÁØ´Ù.
+	// 색깔 - 몹인 경우만.. 설정해준다.
 	if(!IsCreatureTypeVampirePC(m_CreatureType))
 	{
 		m_ColorBody1		= (*g_pCreatureTable)[m_CreatureType].ColorSet;
 		m_ColorBody2		= m_ColorBody1;
 	}
 	
-	// ¾îµÓ°Ô Âï±â Á¦°Å
+	// 어둡게 찍기 제거
 	m_bFade				= false;
 
-	// ¿ø·¡ Å©¸®ÃÄ Å¸ÀÔÀÌ ¹Ù²ð¶§ ÀÌÆåÆ®¸¦ ³¯¸®µµ·Ï Çß´Ù.
-	// ÀÌ´Â ½½·¹ÀÌ¾î<->¹ìÆÄÀÌ¾îÀÇ º¯½Å½Ã¸¸ ÇÏµµ·Ï ÇÏÀð
-	// ºÙÀº effect Á¦°Å
+	// 원래 크리쳐 타입이 바뀔때 이펙트를 날리도록 했다.
+	// 이는 슬레이어<->뱀파이어의 변신시만 하도록 하쟈
+	// 붙은 effect 제거
 //	ClearAttachEffect();
 
 	//by csm
 	spriteType = (*g_pCreatureTable)[m_CreatureType].SpriteTypes[0];
 	//---------------------------------------------------------------------------
-	// ±â¼ú ¼³Á¤
+	// 기술 설정
 	//---------------------------------------------------------------------------
-	// ±âº» °ø°Ý µ¿ÀÛÀÌ ¾ø´Â °æ¿ì..
+	// 기본 공격 동작이 없는 경우..
 	if (!(*g_pCreatureSpriteTable)[spriteType].IsPlayerSprite()
 		//&& (*g_pCreatureTable)[m_CreatureType].GetActionCount( ACTION_ATTACK )==0)
 		&& GetCreatureActionCountMax( this, ACTION_ATTACK )==0)
@@ -1035,7 +1035,7 @@ MCreature::SetCreatureType(TYPE_CREATURETYPE type)
 	//m_WeaponSpeed			= WEAPON_SPEED_NORMAL;
 
 	//---------------------------------------------------------------------------
-	// ¿ÏÀüÈ÷ »ö±òÀÌ ¹Ù²î´Â ¸÷ÀÎ °æ¿ì
+	// 완전히 색깔이 바뀌는 몹인 경우
 	//---------------------------------------------------------------------------
 	int changeColor = (*g_pCreatureTable)[m_CreatureType].ChangeColorSet;
 	if (changeColor < MAX_COLORSET)
@@ -1045,7 +1045,7 @@ MCreature::SetCreatureType(TYPE_CREATURETYPE type)
 	}
 	else
 	{
-		// ATTACHEFFECTCOLOR_NULLÀÌ¸é Á¤»óÀûÀÎ »ö±òÀÌ´Ù.
+		// ATTACHEFFECTCOLOR_NULL이면 정상적인 색깔이다.
 
 		if ((*g_pCreatureSpriteTable)[spriteType].IsMonsterSprite())
 		{
@@ -1060,14 +1060,14 @@ MCreature::SetCreatureType(TYPE_CREATURETYPE type)
 	}
 
 	//---------------------------------------------------------------------------
-	// ±âº»(?)ÀûÀ¸·Î ¼ºº° ¼³Á¤..
-	// ´Á´ë³ª ¹ÚÁãÀÎ °æ¿ì´Â creaturetypeÀ¸·Î ¼ºº°À» ¾Ë ¼ö°¡ ¾ø¾î¼­¸®..
+	// 기본(?)적으로 성별 설정..
+	// 늑대나 박쥐인 경우는 creaturetype으로 성별을 알 수가 없어서리..
 	//---------------------------------------------------------------------------
 	if( m_CreatureType != CREATURETYPE_WER_WOLF )
 		m_bMale = (*g_pCreatureTable)[m_CreatureType].bMale;
 
 	//---------------------------------------------------------------------------
-	// ¸ö ÀÜ»ó
+	// 몸 잔상
 	//---------------------------------------------------------------------------
 	m_ShadowCount = (*g_pCreatureTable)[m_CreatureType].ShadowCount;
 
@@ -1075,7 +1075,7 @@ MCreature::SetCreatureType(TYPE_CREATURETYPE type)
 	m_CasketCount = 0;
 
 	//---------------------------------------------------------------------------
-	// Effect Á¦°Å
+	// Effect 제거
 	//---------------------------------------------------------------------------
 	if (HasEffectStatus(EFFECTSTATUS_TRANSFORM_TO_BAT)
 		&& m_CreatureType!=CREATURETYPE_BAT)
@@ -1095,18 +1095,18 @@ MCreature::SetCreatureType(TYPE_CREATURETYPE type)
 		RemoveEffectStatus(EFFECTSTATUS_TRANSFORM_TO_WERWOLF);
 	}
 
-	// 2004, 9, 13, sobeit add start - ÃÑ½½ 130 ½ºÅ³
+	// 2004, 9, 13, sobeit add start - 총슬 130 스킬
 	if (HasEffectStatus(EFFECTSTATUS_INSTALL_TURRET)
 		&& m_CreatureType != CREATURETYPE_INSTALL_TURRET)
 	{
 		RemoveEffectStatus(EFFECTSTATUS_INSTALL_TURRET);
 	}
-	// 2004, 9, 13, sobeit add end - ÃÑ½½ 130 ½ºÅ³
+	// 2004, 9, 13, sobeit add end - 총슬 130 스킬
 	
-	// Weapon Speed¸¦ ´Ù½Ã ¼³Á¤ÇØÁØ´Ù.
+	// Weapon Speed를 다시 설정해준다.
 	int attackSpeed = m_Status[MODIFY_ATTACK_SPEED];
 
-	// 0ÀÌ¸é °ªÀÌ ¼³Á¤ÀÌ ¾ÈµÆ´Ù°í °¡Á¤ÇÑ´Ù. Æ¯È÷, ¸÷ÀÎ °æ¿ìÀÌ´Ù.
+	// 0이면 값이 설정이 안됐다고 가정한다. 특히, 몹인 경우이다.
 	if (attackSpeed!=0)	
 	{
 		SetWeaponSpeed( attackSpeed );
@@ -1147,7 +1147,7 @@ void
 MCreature::ClearAttachEffect()
 {
 	//-------------------------------------------------------
-	// Creature¿¡ ºÙ¾î ÀÖ´Â Effect¸¦ ¸Þ¸ð¸®¿¡¼­ Á¦°ÅÇÑ´Ù.
+	// Creature에 붙어 있는 Effect를 메모리에서 제거한다.
 	//-------------------------------------------------------
 	ATTACHEFFECT_LIST::iterator iEffect = m_listEffect.begin();
 
@@ -1162,7 +1162,7 @@ MCreature::ClearAttachEffect()
 	m_listEffect.clear();
 
 	//-------------------------------------------------------
-	// ¸ö¿¡ ºÙ´Â Effect
+	// 몸에 붙는 Effect
 	//-------------------------------------------------------
 	iEffect = m_listGroundEffect.begin();
 
@@ -1177,7 +1177,7 @@ MCreature::ClearAttachEffect()
 	m_listGroundEffect.clear();
 
 	//-------------------------------------------------------
-	// Ã¼Å© °ª Á¦°Å
+	// 체크 값 제거
 	//-------------------------------------------------------
 	if (g_pEffectSpriteTypeTable!=NULL)
 	{
@@ -1225,13 +1225,13 @@ MCreature::RemoveGlacierEffect()
 			||EFFECTSPRITETYPE_CAUSE_CRITICAL_WOUND_4 == Type 
 			)
 		{
-			// ¸Þ¸ð¸® Á¦°Å
+			// 메모리 제거
 			delete pEffect;
 
 			ATTACHEFFECT_LIST::iterator dEffect = iEffect;
 			iEffect--;
 
-			// list¿¡¼­ Á¦°Å
+			// list에서 제거
 			m_listEffect.erase( dEffect );
 
 			m_bAttachEffect[Type] = false;
@@ -1264,7 +1264,7 @@ MCreature::Remove_Curse_Paralsis_Effect()
 //----------------------------------------------------------------------
 // Remove EffectStatus
 //----------------------------------------------------------------------
-// Æ¯Á¤ÇÑ EffectSpriteTypeÀ» Á¦°ÅÇÑ´Ù.
+// 특정한 EffectSpriteType을 제거한다.
 //----------------------------------------------------------------------
 bool
 MCreature::RemoveEffectStatus(EFFECTSTATUS status)
@@ -1280,7 +1280,7 @@ MCreature::RemoveEffectStatus(EFFECTSTATUS status)
 
 	if (!m_bEffectStatus[status])
 	{
-		// [»õ±â¼ú7]
+		// [새기술7]
 		DEBUG_ADD_FORMAT("NotEffectStatus(%d)", (int)status);
 		return false;
 	}
@@ -1291,7 +1291,7 @@ MCreature::RemoveEffectStatus(EFFECTSTATUS status)
 
 	int pTypes = (*g_pEffectStatusTable)[status].EffectSpriteType;
 	//------------------------------------------------------------
-	// effectStatus¿¡ µû¶ó¼­.
+	// effectStatus에 따라서.
 	//------------------------------------------------------------
 	switch (status)
 	{
@@ -1318,7 +1318,7 @@ MCreature::RemoveEffectStatus(EFFECTSTATUS status)
 		break;
 
 		//------------------------------------------------------------
-		// ¸¶ºñ Ç®¸± ¶§
+		// 마비 풀릴 때
 		//------------------------------------------------------------
 		case EFFECTSTATUS_CAUSE_CRITICAL_WOUNDS :
 		case EFFECTSTATUS_EXPLOSION_WATER :
@@ -1341,7 +1341,7 @@ MCreature::RemoveEffectStatus(EFFECTSTATUS status)
 		break;
 
 		//------------------------------------------------------------
-		// ¸¶ºñ Ç®¸± ¶§
+		// 마비 풀릴 때
 		//------------------------------------------------------------
 		// add by Coffee 2007-3-21
 		case EFFECTSTATUS_SATELLITE_BOMB_AIM :
@@ -1358,37 +1358,37 @@ MCreature::RemoveEffectStatus(EFFECTSTATUS status)
 		break;
 
 		//------------------------------------------------------------
-		// EFFECTSTATUS_SUMMON_CASKET [»õ±â¼ú]
+		// EFFECTSTATUS_SUMMON_CASKET [새기술]
 		//------------------------------------------------------------
 		case EFFECTSTATUS_CASKET :
-			// ¹Ù·Î invisible·Î ¸¸µç´Ù.
+			// 바로 invisible로 만든다.
 			RemoveCasket();
 		break;
 
 
 		//------------------------------------------------------------
-		// Invisible Á¦°Å
+		// Invisible 제거
 		//------------------------------------------------------------
 		case EFFECTSTATUS_INVISIBILITY :
 		case EFFECTSTATUS_SNIPPING_MODE :	
-			// invisibleÀ» Á¦°ÅÇÑ´Ù.
+			// invisible을 제거한다.
 			SetVisible();
 		break;
 
 		//------------------------------------------------------------
-		// COMA Á¦°Å
+		// COMA 제거
 		//------------------------------------------------------------
 		case EFFECTSTATUS_COMA :
 			SetAlive();
 			if(IsVampire())
 			{
 				ExecuteActionInfoFromMainNode(
-							BLOOD_RESURRECT,										// »ç¿ë ±â¼ú ¹øÈ£
+							BLOOD_RESURRECT,										// 사용 기술 번호
 						
 							m_X, m_Y, 0,
-							(int)m_Direction,														// »ç¿ë ¹æÇâ
+							(int)m_Direction,														// 사용 방향
 							
-							m_ID,												// ¸ñÇ¥¿¡ ´ëÇÑ Á¤º¸
+							m_ID,												// 목표에 대한 정보
 							m_X, m_Y, 0,
 							
 							2*16, //5*16, 
@@ -1402,7 +1402,7 @@ MCreature::RemoveEffectStatus(EFFECTSTATUS status)
 		break;
 
 		case EFFECTSTATUS_GHOST:
-			if (!(*g_pCreatureTable)[m_CreatureType].bFlyingCreature)	// ¹ÚÁãÀÎ °æ¿ì
+			if (!(*g_pCreatureTable)[m_CreatureType].bFlyingCreature)	// 박쥐인 경우
 				SetGroundCreature();
 			break;
 		case EFFECTSTATUS_WILL_OF_LIFE :
@@ -1456,7 +1456,7 @@ MCreature::RemoveEffectStatus(EFFECTSTATUS status)
 
 	//------------------------------------------------------------
 	//
-	//			EffectSprite·Î Ç¥ÇöÇÏ´Â °æ¿ì
+	//			EffectSprite로 표현하는 경우
 	//
 	//------------------------------------------------------------
 	if (bUseEffectSprite)
@@ -1512,8 +1512,8 @@ MCreature::RemoveEffectStatus(EFFECTSTATUS status)
 				type2 = type - 1;
 
 			//-------------------------------------------------------
-			// Creature¿¡ ºÙ¾î ÀÖ´Â EffectÁß¿¡¼­
-			// EffectSpriteTypeÀÌ typeÀÎ °ÍÀ» Á¦°ÅÇÑ´Ù.
+			// Creature에 붙어 있는 Effect중에서
+			// EffectSpriteType이 type인 것을 제거한다.
 			//-------------------------------------------------------
 			if (type < g_pEffectSpriteTypeTable->GetSize())
 			{
@@ -1527,7 +1527,7 @@ MCreature::RemoveEffectStatus(EFFECTSTATUS status)
 				if (m_bAttachEffect[type])
 				{
 					//-------------------------------------------------------
-					// ¸ö¿¡ ºÙÀº°Å
+					// 몸에 붙은거
 					//-------------------------------------------------------
 					ATTACHEFFECT_LIST::iterator iEffect = m_listEffect.begin();
 
@@ -1537,19 +1537,19 @@ MCreature::RemoveEffectStatus(EFFECTSTATUS status)
 						MAttachEffect* pEffect = *iEffect;
 						
 						//-------------------------------------------------------
-						// °°Àº typeÀ» Ã£´Â´Ù.
+						// 같은 type을 찾는다.
 						//-------------------------------------------------------
 						if (pEffect->IsEffectSprite() 
 							&& (pEffect->GetEffectSpriteType() == type || type2 != EFFECTSPRITETYPE_NULL &&
 							type2 == pEffect->GetEffectSpriteType()) )
 						{
-							// ¸Þ¸ð¸® Á¦°Å
+							// 메모리 제거
 							delete pEffect;
 
 							ATTACHEFFECT_LIST::iterator dEffect = iEffect;
 							iEffect--;
 
-							// list¿¡¼­ Á¦°Å
+							// list에서 제거
 							m_listEffect.erase( dEffect );
 
 							m_bAttachEffect[type] = false;
@@ -1568,7 +1568,7 @@ MCreature::RemoveEffectStatus(EFFECTSTATUS status)
 					}
 
 					//-------------------------------------------------------
-					// ¹Ù´Ú¿¡ ºÙÀº °Å
+					// 바닥에 붙은 거
 					//-------------------------------------------------------
 					iEffect = m_listGroundEffect.begin();
 
@@ -1577,15 +1577,15 @@ MCreature::RemoveEffectStatus(EFFECTSTATUS status)
 						MAttachEffect* pEffect = *iEffect;
 						
 						//-------------------------------------------------------
-						// °°Àº typeÀ» Ã£´Â´Ù.
+						// 같은 type을 찾는다.
 						//-------------------------------------------------------
 						if (pEffect->IsEffectSprite() && pEffect->GetEffectSpriteType() == type
 							|| type2 != EFFECTSPRITETYPE_NULL && type2 == pEffect->GetEffectSpriteType() )
 						{
-							// ¸Þ¸ð¸® Á¦°Å
+							// 메모리 제거
 							delete pEffect;
 
-							// list¿¡¼­ Á¦°Å
+							// list에서 제거
 							m_listGroundEffect.erase( iEffect );
 
 							m_bAttachEffect[type] = false;
@@ -1604,7 +1604,7 @@ MCreature::RemoveEffectStatus(EFFECTSTATUS status)
 	}
 	//------------------------------------------------------------
 	//
-	//			EffectColor·Î Ç¥ÇöÇÏ´Â °æ¿ì
+	//			EffectColor로 표현하는 경우
 	//
 	//------------------------------------------------------------
 	else
@@ -1612,8 +1612,8 @@ MCreature::RemoveEffectStatus(EFFECTSTATUS status)
 		WORD colorSet = (*g_pEffectStatusTable)[status].EffectColor;
 
 		//-------------------------------------------------------
-		// Creature¿¡ ºÙ¾î ÀÖ´Â EffectÁß¿¡¼­
-		// EffectColor°¡ colorÀÎ °ÍÀ» Á¦°ÅÇÑ´Ù.
+		// Creature에 붙어 있는 Effect중에서
+		// EffectColor가 color인 것을 제거한다.
 		//-------------------------------------------------------
 		ATTACHEFFECT_LIST::iterator iEffect = m_listEffect.begin();
 
@@ -1622,14 +1622,14 @@ MCreature::RemoveEffectStatus(EFFECTSTATUS status)
 			MAttachEffect* pEffect = *iEffect;
 			
 			//-------------------------------------------------------
-			// °°Àº typeÀ» Ã£´Â´Ù.
+			// 같은 type을 찾는다.
 			//-------------------------------------------------------
 			if (pEffect->IsEffectColor() && pEffect->GetEffectColor() == colorSet)
 			{
-				// ¸Þ¸ð¸® Á¦°Å
+				// 메모리 제거
 				delete pEffect;
 
-				// list¿¡¼­ Á¦°Å
+				// list에서 제거
 				m_listEffect.erase( iEffect );
 
 				return true;
@@ -1638,7 +1638,7 @@ MCreature::RemoveEffectStatus(EFFECTSTATUS status)
 			iEffect++;
 		}		
 
-		// GroundEffect´Â ¾ø´Ù°í º»´Ù.
+		// GroundEffect는 없다고 본다.
 	}
 	
 	return false;
@@ -1648,14 +1648,14 @@ MCreature::RemoveEffectStatus(EFFECTSTATUS status)
 // Add EffectStatus
 //----------------------------------------------------------------------
 // 
-// Æ¯º°ÇÑ »óÅÂ¸¦ ³ªÅ¸³»´Â effect
+// 특별한 상태를 나타내는 effect
 //
-// Creature¿¡ ´Þ¶óºÙ¾î¼­ Ç¥ÇöµÇ´Â Effect Ç¥Çö
+// Creature에 달라붙어서 표현되는 Effect 표현
 //
-// ÁßÃ¸À» Çã¿ëÇÏÁö ¾ÊÀ¸¹Ç·Î.. 
-// ¾ÆÁ÷ ºÙ¾î¼­ Ç¥ÇöµÇÁö ¾ÊÀº Effect¸¸ »õ·Î Ãß°¡ÇÑ´Ù.
+// 중첩을 허용하지 않으므로.. 
+// 아직 붙어서 표현되지 않은 Effect만 새로 추가한다.
 //
-// ±×·¯³ª, ½Ã°£ È®ÀåÀ» ÇØ¾ßÇÏ´Â °æ¿ì°¡ »ý±ä´Ù.
+// 그러나, 시간 확장을 해야하는 경우가 생긴다.
 //----------------------------------------------------------------------
 bool
 MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
@@ -1667,14 +1667,14 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 //	}
 	
 	//----------------------------------------------------------
-	// ÀÌ¹Ì Á×Àº °æ¿ì
+	// 이미 죽은 경우
 	//----------------------------------------------------------
 	if (IsDead() && status != EFFECTSTATUS_COMA && 
 		!(
 		GetCreatureType() >= 371 && GetCreatureType() <= 376 || GetCreatureType() >= 560 && GetCreatureType() <= 563) && 
 		GetCreatureType() != 482 && GetCreatureType() != 650 && !(GetCreatureType() >= 526 && GetCreatureType() <= 549) &&
 		GetCreatureType() != 670 && GetCreatureType() != 672 && GetCreatureType() != 673
-		)	// ¼º¹°ÀÎ °æ¿ì´Â ÀÌÆåÆ® ºÙÀÓ
+		)	// 성물인 경우는 이펙트 붙임
 	{
 		DEBUG_ADD("Don't AddEffectStatus : Already Dead");
 		
@@ -1688,11 +1688,11 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 		return false;
 	}
 
-	int eCount = 0; // ÀÌÆåÆ®ÀÇ °³¼ö
+	int eCount = 0; // 이펙트의 개수
 	int orbit_type = 0;
 
 	//------------------------------------------------------------
-	// effectStatus¿¡ µû¶ó¼­.
+	// effectStatus에 따라서.
 	//------------------------------------------------------------
 	MEffect::EFFECT_TYPE eType = MEffect::EFFECT_ATTACH;
 	TYPE_EFFECTSPRITETYPE type = (*g_pEffectStatusTable)[status].EffectSpriteType;
@@ -1709,7 +1709,7 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 	case EFFECTSTATUS_SUMMON_SYLPH:
 		{
 			SetMoveDevice(MOVE_DEVICE_SUMMON_SYLPH);
-			/********  Edit By sonic È¥³ýÄ§Áé¶þ×ªºó±äÇòÐ§¹û********/
+			/********  Edit By sonic 去除魔灵二转后变球效果********/
 			
 			if(IsAdvancementClass() && status==EFFECTSTATUS_SUMMON_SYLPH)
 			{
@@ -1725,15 +1725,15 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 		// EFFECTSTATUS_INVISIBILITY
 		//------------------------------------------------------------
 		case EFFECTSTATUS_INVISIBILITY :
-			// ¹Ù·Î invisible·Î ¸¸µç´Ù.
+			// 바로 invisible로 만든다.
 			SetInvisibleSoon();
 		break;
 
 		//------------------------------------------------------------
-		// EFFECTSTATUS_SUMMON_CASKET [»õ±â¼ú]
+		// EFFECTSTATUS_SUMMON_CASKET [새기술]
 		//------------------------------------------------------------
 		case EFFECTSTATUS_CASKET :
-			// ¹Ù·Î invisible·Î ¸¸µç´Ù.
+			// 바로 invisible로 만든다.
 			AddCasketSoon(0);
 		break;
 
@@ -1771,8 +1771,8 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 #endif
 //				AffectMoveBufferAll();
 //				ActionMoveNextPosition();
-			// CauseCriticalWoundsÀÎ °æ¿ì ½½·¹ÀÌ¾î´Â AddEffect¸¦ ÇÏÁö ¾Ê´Â´Ù. ÀÌÆåÆ® ºÙÀÌÁö ¾Ê°í µ¥¹ÌÁö¸¸
-			// 2005, 1, 18, sobeit modify start // g_pZone->GetID() == 4002 Ãß°¡ - Äù½ºÆ® cause_critical_wounds°É·ÁÀÖ´Â ½½·¹ÀÌ¾î npc
+			// CauseCriticalWounds인 경우 슬레이어는 AddEffect를 하지 않는다. 이펙트 붙이지 않고 데미지만
+			// 2005, 1, 18, sobeit modify start // g_pZone->GetID() == 4002 추가 - 퀘스트 cause_critical_wounds걸려있는 슬레이어 npc
 			if(!IsSlayer() || GetCreatureType() == 793) 
 			// 2005, 1, 18, sobeit modify end
 			{
@@ -1794,7 +1794,7 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 			break;
 			
 		case EFFECTSTATUS_CURSE_PARALYSIS :
-			// ´Ù ÀÌµ¿½ÃÅ²´Ù.
+			// 다 이동시킨다.
 			AffectMoveBufferAll();
 			
 			ActionMoveNextPosition();
@@ -1821,12 +1821,12 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 //				ClearAttachEffect();
 				delayFrame = 0;
 				ExecuteActionInfoFromMainNode(
-							SKILL_CLIENT_FIRE_ELEMENTAL_ATTACK,										// »ç¿ë ±â¼ú ¹øÈ£
+							SKILL_CLIENT_FIRE_ELEMENTAL_ATTACK,										// 사용 기술 번호
 						
 							m_X, m_Y, 0,
-							(int)m_Direction,														// »ç¿ë ¹æÇâ
+							(int)m_Direction,														// 사용 방향
 							
-							m_ID,												// ¸ñÇ¥¿¡ ´ëÇÑ Á¤º¸
+							m_ID,												// 목표에 대한 정보
 							m_X, m_Y, 0,
 							
 							0xFFFF, //5*16, 
@@ -1869,12 +1869,12 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 //				ClearAttachEffect();
 				delayFrame = 0;
 				ExecuteActionInfoFromMainNode(
-							SKILL_CLIENT_WATER_ELEMENTAL_HEAL,										// »ç¿ë ±â¼ú ¹øÈ£
+							SKILL_CLIENT_WATER_ELEMENTAL_HEAL,										// 사용 기술 번호
 						
 							m_X, m_Y, 0,
-							(int)m_Direction,														// »ç¿ë ¹æÇâ
+							(int)m_Direction,														// 사용 방향
 							
-							m_ID,												// ¸ñÇ¥¿¡ ´ëÇÑ Á¤º¸
+							m_ID,												// 목표에 대한 정보
 							m_X, m_Y, 0,
 							
 							0xFFFF, //5*16, 
@@ -1942,11 +1942,11 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 		//------------------------------------------------------------
 		case EFFECTSTATUS_ARMAGEDDON :
 		case EFFECTSTATUS_GROUND_ELEMENTAL_CENTER:
-			delayFrame = 0xFFFF;		// ¹«ÇÑ..
+			delayFrame = 0xFFFF;		// 무한..
 		break;
 
 		//------------------------------------------------------------
-		// ¼º¹° °ü·Ã
+		// 성물 관련
 		//------------------------------------------------------------
 		case EFFECTSTATUS_HAS_BLOOD_BIBLE_GREGORI :         // 151			
 		case EFFECTSTATUS_HAS_BLOOD_BIBLE_NEMA :         // 152				
@@ -1988,7 +1988,7 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 		case EFFECTSTATUS_SLAYER_RELIC:
 //		case EFFECTSTATUS_DROP_BLOOD_BIBLE:			
 		case EFFECTSTATUS_VAMPIRE_RELIC:
-			delayFrame = 0xFFFF;		// ¹«ÇÑ..
+			delayFrame = 0xFFFF;		// 무한..
 			break;
 
 		//------------------------------------------------------------
@@ -2062,10 +2062,10 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 			delayFrame = 12;
 			break;
 
-		case EFFECTSTATUS_WARP_BLOOD_BIBLE_FROM_ME :// 195 ³»°¡ °¡Áö°íÀÖ´ø ÇÇÀÇ¼º¼­°¡ ¿öÇÁµÉ¶§ ¸Ó¸®¿¡ Âï¾îÁÖ´Â-_- ÀÌÆåÆ®			
-		case EFFECTSTATUS_WARP_BLOOD_BIBLE_FROM_TILE :		// 196 ¶¥¿¡ ¶³¾îÁ®ÀÖ´ø ÇÇÀÇ¼º¼­°¡ ¿öÇÁµÉ¶§ ±× Å¸ÀÏ¿¡ Âï¾îÁÖ´Â ÀÌÆåÆ®
-		case EFFECTSTATUS_SHRINE_GUARD_WARP :			// 187		¼öÈ£¼º´Ü¿¡¼­ ¿öÇÁµÉ¶§
-		case EFFECTSTATUS_SHRINE_HOLY_WARP :			// 188		¼ºÁö¼º´Ü¿¡¼­ ¿öÇÁµÉ¶§
+		case EFFECTSTATUS_WARP_BLOOD_BIBLE_FROM_ME :// 195 내가 가지고있던 피의성서가 워프될때 머리에 찍어주는-_- 이펙트			
+		case EFFECTSTATUS_WARP_BLOOD_BIBLE_FROM_TILE :		// 196 땅에 떨어져있던 피의성서가 워프될때 그 타일에 찍어주는 이펙트
+		case EFFECTSTATUS_SHRINE_GUARD_WARP :			// 187		수호성단에서 워프될때
+		case EFFECTSTATUS_SHRINE_HOLY_WARP :			// 188		성지성단에서 워프될때
 		case EFFECTSTATUS_WARP_BLOOD_BIBLE_SLAYER:
 		case EFFECTSTATUS_WARP_BLOOD_BIBLE_VAMPIRE:
 			delayFrame = 14;				
@@ -2141,7 +2141,7 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 			delayFrame = 36;
 			break;
 
-		// 2004, 6 ,12 sobeit add start - 130,150 ¸¶½ºÅÍ ÀÌÆåÆ®½Ã ±×Àü ¸¶½ºÅÍ ÀÌÆåÆ® Áö¿öÁØ´Ù.
+		// 2004, 6 ,12 sobeit add start - 130,150 마스터 이펙트시 그전 마스터 이펙트 지워준다.
 		case EFFECTSTATUS_GRAND_MASTER_SLAYER:
 		case EFFECTSTATUS_GRAND_MASTER_VAMPIRE:
 		case EFFECTSTATUS_GRAND_MASTER_OUSTERS:
@@ -2158,11 +2158,11 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 					return false;
 			}
 			break;
-		// 2004, 6 ,12 sobeit add end - 130,150 ¸¶½ºÅÍ ÀÌÆåÆ®½Ã ±×Àü ¸¶½ºÅÍ ÀÌÆåÆ® Áö¿öÁØ´Ù.
+		// 2004, 6 ,12 sobeit add end - 130,150 마스터 이펙트시 그전 마스터 이펙트 지워준다.
 //		case EFFECTSTATUS_GDR_FLOATING:
 //			//SetAction(ACTION_DRAINED);
 //		//	m_MoveAction = ACTION_DRAINED;
-//			if(GetCreatureType() == 717) // Áúµå·¹ ÀÏ¶§
+//			if(GetCreatureType() == 717) // 질드레 일때
 //			{ 
 //				
 //			}
@@ -2271,7 +2271,7 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 				SetBurningSol(0);
 			}
 			break;
-		case EFFECTSTATUS_INSTALL_TURRET: // ÃÑ½½ 130 ÀÎ½ºÅç ÅÍ·¿
+		case EFFECTSTATUS_INSTALL_TURRET: // 총슬 130 인스톨 터렛
 			{
 				SetAction( ACTION_STAND );
 				SetInstallTurretCount(0);
@@ -2282,7 +2282,7 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 				SetDirection( 2 );
 				SetCurrentDirection( 2 );
 //				//--------------------------------------------------
-//				// ´Á´ë·Î º¯½ÅÇÏ´Â °á°ú
+//				// 늑대로 변신하는 결과
 //				//--------------------------------------------------
 //				MActionResult* pResult = new MActionResult;
 //
@@ -2290,19 +2290,19 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 
 //					
 //				ExecuteActionInfoFromMainNode(
-//					RESULT_SKILL_INSTALL_TURRET,										// »ç¿ë ±â¼ú ¹øÈ£
+//					RESULT_SKILL_INSTALL_TURRET,										// 사용 기술 번호
 //				
 //					GetX(), GetY(), 0,
-//					GetDirection(),														// »ç¿ë ¹æÇâ
+//					GetDirection(),														// 사용 방향
 //					
-//					OBJECTID_NULL,												// ¸ñÇ¥¿¡ ´ëÇÑ Á¤º¸
+//					OBJECTID_NULL,												// 목표에 대한 정보
 //					GetX(), GetY(), 0, 
 //					
-//					0,													// ±â¼úÀÇ (³²Àº) Áö¼Ó ½Ã°£		
+//					0,													// 기술의 (남은) 지속 시간		
 //					
 //					NULL, //NULL,
 //					
-//					false);			// ±â¼ú Ã·ºÎÅÍ ½ÃÀÛÇÑ´Ù.
+//					false);			// 기술 첨부터 시작한다.
 			}
 			break;
 			// 2004, 10, 25, sobeit add start
@@ -2323,20 +2323,20 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 			ExecuteActionInfoFromMainNode(SKILL_CLIENT_FIERCE_FLAME,GetX(), GetY(), 0,GetDirection(),	GetID(),	
 					GetX(), GetY(), 0, delayFrame, NULL, false);
 			break;
-		// add by Coffee 2007-5-3 »ð·¨	
+		// add by Coffee 2007-5-3 삽랬	
 		case EFFECTSTATUS_DUMMY_DRAKE:
 			ExecuteActionInfoFromMainNode(SKILL_CLIENT_DUMMY_DRAKE,GetX(), GetY(), 0,GetDirection(),	GetID(),	
 					GetX(), GetY(), 0, delayFrame, NULL, false);
 			break;
-		case EFFECTSTATUS_HYDRO_CONVERGENCE: //Ë®·¨
+		case EFFECTSTATUS_HYDRO_CONVERGENCE: //水法
 			ExecuteActionInfoFromMainNode(SKILL_CLIENT_HYDRO_CONVERGENCE,GetX(), GetY(), 0,GetDirection(),	GetID(),	
 					GetX(), GetY(), 0, delayFrame, NULL, false);
 			break;
-		case EFFECTSTATUS_HETER_CHAKRAM: //ÃôÕ½
+		case EFFECTSTATUS_HETER_CHAKRAM: //敏战
 			ExecuteActionInfoFromMainNode(SKILL_CLIENT_SKILL_DUMMY_DRAKE,GetX(), GetY(), 0,GetDirection(),	GetID(),	
 					GetX(), GetY(), 0, delayFrame, NULL, false);
 			break;	
-		case EFFECTSTATUS_BLOOD_CURSE: // ÎüÑª¹í¼¼ÄÜ
+		case EFFECTSTATUS_BLOOD_CURSE: // 吸血鬼技能
 			ExecuteActionInfoFromMainNode(SKILL_CLIENT_BLOOD_CURSE,GetX(), GetY(), 0,GetDirection(),	GetID(),	
 					GetX(), GetY(), 0, delayFrame, NULL, false);
 			break;
@@ -2357,7 +2357,7 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 
 	//------------------------------------------------------------
 	//
-	//			EffectSprite·Î Ç¥ÇöÇÏ´Â °æ¿ì
+	//			EffectSprite로 표현하는 경우
 	//
 	//------------------------------------------------------------		
 	if (bUseEffectSprite)
@@ -2403,24 +2403,24 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 		}
 
 		//------------------------------------------------------------
-		// ÀÌ¹Ì ÀÖ´Â °æ¿ì 
+		// 이미 있는 경우 
 		//------------------------------------------------------------
 		if (m_bAttachEffect[type])
 		{		
 			ATTACHEFFECT_LIST::iterator iEffect = m_listEffect.begin();
 
 			//------------------------------------------------------
-			// ¸ö¿¡ ºÙ´Â°Å
+			// 몸에 붙는거
 			//------------------------------------------------------
-			// °°Àº Effect¸¦ Ã£´Â´Ù. 
+			// 같은 Effect를 찾는다. 
 			while (iEffect != m_listEffect.end())
 			{
 				MAttachEffect*	pEffect = *iEffect;
 				
-				// °°Àº typeÀ» Ã£´Â´Ù.
+				// 같은 type을 찾는다.
 				if (pEffect->IsEffectSprite() && pEffect->GetEffectSpriteType() == type)
 				{
-					// Ãß°¡ÇÒ·Á´Â °ÍÀÌ ´õ ´Ê°Ô ³¡³¯ °æ¿ì¿¡¸¸ ½Ã°£À» È®ÀåÇÑ´Ù.
+					// 추가할려는 것이 더 늦게 끝날 경우에만 시간을 확장한다.
 					if (g_CurrentFrame+delayFrame > pEffect->GetEndFrame()) 
 					{
 						pEffect->SetCount( delayFrame );
@@ -2433,19 +2433,19 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 			}
 
 			//------------------------------------------------------
-			// ¹Ù´Ú¿¡ ºÙ´Â °Å
+			// 바닥에 붙는 거
 			//------------------------------------------------------
 			iEffect = m_listGroundEffect.begin();
 
-			// °°Àº Effect¸¦ Ã£´Â´Ù. 
+			// 같은 Effect를 찾는다. 
 			while (iEffect != m_listGroundEffect.end())
 			{
 				MAttachEffect*	pEffect = *iEffect;
 				
-				// °°Àº typeÀ» Ã£´Â´Ù.
+				// 같은 type을 찾는다.
 				if (pEffect->IsEffectSprite() && pEffect->GetEffectSpriteType() == type)
 				{
-					// Ãß°¡ÇÒ·Á´Â °ÍÀÌ ´õ ´Ê°Ô ³¡³¯ °æ¿ì¿¡¸¸ ½Ã°£À» È®ÀåÇÑ´Ù.
+					// 추가할려는 것이 더 늦게 끝날 경우에만 시간을 확장한다.
 					if (g_CurrentFrame+delayFrame > pEffect->GetEndFrame()) 
 					{
 						pEffect->SetCount( delayFrame );
@@ -2461,7 +2461,7 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 		}
 
 		//------------------------------------------------------------
-		// ¾ø´Â °æ¿ì Ãß°¡ÇÑ´Ù.
+		// 없는 경우 추가한다.
 		//------------------------------------------------------------
 		MAttachEffect*	pEffect = NULL;
 		
@@ -2482,10 +2482,10 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 				
 				pEffect->SetAttachCreature( this );
 				
-				// ºû³ª´Â EffectÀÇ °³¼ö¸¦ Áõ°¡?
+				// 빛나는 Effect의 개수를 증가?
 				if (pEffect->GetBltType()==BLT_EFFECT)
 				{
-					// ÃÖÃÊ·Î Ãß°¡µÇ´Â ºû³ª´ÂEffectÀÌ¸é ½Ã¾ß¸¦ Ãß°¡½ÃÅ²´Ù.
+					// 최초로 추가되는 빛나는Effect이면 시야를 추가시킨다.
 					//if (m_nAlphaEffect==0)
 					{
 						pEffect->SetPosition( m_X, m_Y );
@@ -2496,14 +2496,14 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 				}
 				
 				//------------------------------------------------------------
-				// ¹Ù´Ú¿¡ ºÙ´Â °Å¶ó¸é..
+				// 바닥에 붙는 거라면..
 				//------------------------------------------------------------
 				if ((*g_pEffectStatusTable)[status].bAttachGround)
 				{
 					m_listGroundEffect.push_back( pEffect );
 				}
 				//------------------------------------------------------------
-				// ¸ö¿¡ ºÙ´Â °Å..
+				// 몸에 붙는 거..
 				//------------------------------------------------------------
 				else
 				{
@@ -2520,10 +2520,10 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 			
 			pEffect->SetAttachCreature( this );
 			
-			// ºû³ª´Â EffectÀÇ °³¼ö¸¦ Áõ°¡?
+			// 빛나는 Effect의 개수를 증가?
 			if (pEffect->GetBltType()==BLT_EFFECT)
 			{
-				// ÃÖÃÊ·Î Ãß°¡µÇ´Â ºû³ª´ÂEffectÀÌ¸é ½Ã¾ß¸¦ Ãß°¡½ÃÅ²´Ù.
+				// 최초로 추가되는 빛나는Effect이면 시야를 추가시킨다.
 				//if (m_nAlphaEffect==0)
 				{
 					pEffect->SetPosition( m_X, m_Y );
@@ -2534,14 +2534,14 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 			}
 			
 			//------------------------------------------------------------
-			// ¹Ù´Ú¿¡ ºÙ´Â °Å¶ó¸é..
+			// 바닥에 붙는 거라면..
 			//------------------------------------------------------------
 			if ((*g_pEffectStatusTable)[status].bAttachGround)
 			{
 				m_listGroundEffect.push_back( pEffect );
 			}
 			//------------------------------------------------------------
-			// ¸ö¿¡ ºÙ´Â °Å..
+			// 몸에 붙는 거..
 			//------------------------------------------------------------
 			else
 			{
@@ -2569,7 +2569,7 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 	}
 	//------------------------------------------------------------
 	//
-	//			EffectColor·Î Ç¥ÇöÇÏ´Â °æ¿ì
+	//			EffectColor로 표현하는 경우
 	//
 	//------------------------------------------------------------
 //	else
@@ -2587,25 +2587,25 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 		}
 
 		//------------------------------------------------------------
-		// ÀÌ¹Ì ÀÖ´ÂÁö Ã¼Å©ÇÑ´Ù.
-		// »ö±ò·Î Ã¼Å©ÇØ¾ßµÇ¹Ç·Î.. list¸¦ ´Ù °Ë»öÇØ¾ß ÇÑ´Ù. T_T;
+		// 이미 있는지 체크한다.
+		// 색깔로 체크해야되므로.. list를 다 검색해야 한다. T_T;
 		//------------------------------------------------------------
 		DEBUG_ADD_FORMAT("listEffect size = %d", m_listEffect.size());
 		
 		ATTACHEFFECT_LIST::iterator iEffect = m_listEffect.begin();
 
 		//----------------------------------------------------------------
-		// ¸ö¿¡ ºÙ´Â°Å
+		// 몸에 붙는거
 		//----------------------------------------------------------------
-		// °°Àº Effect¸¦ Ã£´Â´Ù. 
+		// 같은 Effect를 찾는다. 
 		while (iEffect != m_listEffect.end())
 		{
 			MAttachEffect*	pEffect = *iEffect;
 			
-			// °°Àº »ö±òÀ» Ã£´Â´Ù.
+			// 같은 색깔을 찾는다.
 			if (pEffect->IsEffectColor() && pEffect->GetEffectColor() == colorSet)
 			{
-				// Ãß°¡ÇÒ·Á´Â °ÍÀÌ ´õ ´Ê°Ô ³¡³¯ °æ¿ì¿¡¸¸ ½Ã°£À» È®ÀåÇÑ´Ù.
+				// 추가할려는 것이 더 늦게 끝날 경우에만 시간을 확장한다.
 				if (g_CurrentFrame+delayFrame > pEffect->GetEndFrame()) 
 				{
 					pEffect->SetCount( delayFrame );
@@ -2618,14 +2618,14 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 		}
 
 		//----------------------------------------------------------------
-		// ¹Ù´Ú¿¡ ºÙ´Â°Å
+		// 바닥에 붙는거
 		//----------------------------------------------------------------
-		// ¾ø´Ù°í º»´Ù.
+		// 없다고 본다.
 
 		DEBUG_ADD("[Create New AttachEffect]");
 		
 		//------------------------------------------------------------
-		// ¾ø´Â °æ¿ì Ãß°¡ÇÑ´Ù.
+		// 없는 경우 추가한다.
 		//------------------------------------------------------------
 		MAttachEffect*	pEffect = new MAttachEffect(EFFECTSPRITETYPE_NULL, delayFrame);
 
@@ -2635,13 +2635,13 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 
 		DEBUG_ADD("[Set AttachCreature]");
 		
-		// »ö±ò ¼³Á¤
+		// 색깔 설정
 		pEffect->SetEffectColor( colorSet );
 
 		ADDON	part = (*g_pEffectStatusTable)[status].EffectColorPart;
 
 		//------------------------------------------------------------
-		// Æ¯Á¤ÇÑ ºÎÀ§¸¸ »ö±òÀÌ ¹Ù²î´Â °æ¿ìµµ ÀÖ´Ù.
+		// 특정한 부위만 색깔이 바뀌는 경우도 있다.
 		//------------------------------------------------------------
 		//if (part<ADDON_MAX)
 		//{
@@ -2650,10 +2650,10 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 
 		DEBUG_ADD("[if (pEffect->GetBltType()==BLT_EFFECT)]");
 		
-		// ºû³ª´Â EffectÀÇ °³¼ö¸¦ Áõ°¡?
+		// 빛나는 Effect의 개수를 증가?
 		if (pEffect->GetBltType()==BLT_EFFECT)
 		{
-			// ÃÖÃÊ·Î Ãß°¡µÇ´Â ºû³ª´ÂEffectÀÌ¸é ½Ã¾ß¸¦ Ãß°¡½ÃÅ²´Ù.
+			// 최초로 추가되는 빛나는Effect이면 시야를 추가시킨다.
 			//if (m_nAlphaEffect==0)
 			{
 				pEffect->SetPosition( m_X, m_Y );
@@ -2664,7 +2664,7 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 		}
 
 		//------------------------------------------------------
-		// »ö±ò º¯ÇÏ´Â°Å´Â ±×³É ¸ö¿¡ ºÙÀÌ´Â°Å¿¡ Ãß°¡ÇÑ´Ù.
+		// 색깔 변하는거는 그냥 몸에 붙이는거에 추가한다.
 		//------------------------------------------------------
 		m_listEffect.push_back( pEffect );				
 	}
@@ -2675,7 +2675,7 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 }
 
 //----------------------------------------------------------------------
-// Set Name - Ä³¸¯ÅÍ ÀÌ¸§ ¼³Á¤
+// Set Name - 캐릭터 이름 설정
 //----------------------------------------------------------------------
 void	
 MCreature::SetName(const char* pName)
@@ -2710,7 +2710,7 @@ void
 MCreature::SetServerPosition(TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY)	
 { 
 	//------------------------------------------------
-	// ±âÁ¸ÀÇ MoveBuffer¸¦ ´Ù Áö¿ò
+	// 기존의 MoveBuffer를 다 지움
 	//------------------------------------------------
 	ReleaseMoveBuffer();
 
@@ -2720,7 +2720,7 @@ MCreature::SetServerPosition(TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY)
 //----------------------------------------------------------------------
 // Is Slayer Character
 //----------------------------------------------------------------------
-// slayer ±×¸²À» »ç¿ëÇß³ª?
+// slayer 그림을 사용했나?
 //----------------------------------------------------------------------
 bool			
 MCreature::IsSlayerCharacter() const
@@ -2731,18 +2731,18 @@ MCreature::IsSlayerCharacter() const
 }
 
 //----------------------------------------------------------------------
-// ¿òÁ÷ÀÌ´Â ¹æ¹ý°ú ±×¿¡ µû¸¥ ÀÌµ¿´ÜÀ§¸¦ °áÁ¤ÇÑ´Ù.
+// 움직이는 방법과 그에 따른 이동단위를 결정한다.
 //----------------------------------------------------------------------
 void		
 MCreature::SetMoveDevice(MOVE_DEVICE md)
 {	
 	//--------------------------------------------------------
-	// ¸ðµÎ Àû¿ë
+	// 모두 적용
 	//--------------------------------------------------------
 	AffectMoveBufferAll();
 
 	//--------------------------------------------------
-	// SlayerÀÎ °æ¿ì¸¸ º¯°æÀÌ °¡´ÉÇÏ´Ù.
+	// Slayer인 경우만 변경이 가능하다.
 	//--------------------------------------------------
 	if (IsSlayer())
 	{
@@ -2775,7 +2775,7 @@ MCreature::SetMoveDevice(MOVE_DEVICE md)
 		}	
 	}
 	//--------------------------------------------------
-	// ¾Æ´Ñ °æ¿ì..
+	// 아닌 경우..
 	//--------------------------------------------------
 	else if( IsOusters() )
 	{
@@ -2798,13 +2798,13 @@ MCreature::SetMoveDevice(MOVE_DEVICE md)
 }
 
 //----------------------------------------------------------------------
-// CreatureÀÇ À§Ä¡¸¦ SetÇÏ°í ¿òÁ÷ÀÌ´ø µ¿ÀÛÀ» ¸ØÃá´Ù.
+// Creature의 위치를 Set하고 움직이던 동작을 멈춘다.
 //----------------------------------------------------------------------
 void	
 MCreature::SetPosition(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y)	
 { 
 	//------------------------------------------------
-	// ±âÁ¸ÀÇ MoveBuffer¸¦ ´Ù Áö¿ò
+	// 기존의 MoveBuffer를 다 지움
 	//------------------------------------------------
 	ReleaseMoveBuffer();
 
@@ -2836,7 +2836,7 @@ void
 MCreature::SetWeaponSpeed(int speed)
 {
 	//-----------------------------------------------------------
-	// ¹ÚÁã³ª ´Á´ë¸é °ø°Ý¼Óµµ µû·Î ¾ø´ç..
+	// 박쥐나 늑대면 공격속도 따로 없당..
 	//-----------------------------------------------------------
 	if (m_CreatureType==CREATURETYPE_BAT ||
 		m_CreatureType==CREATURETYPE_WOLF ||
@@ -2845,7 +2845,7 @@ MCreature::SetWeaponSpeed(int speed)
 		m_WeaponSpeed = WEAPON_SPEED_NORMAL;
 	}
 	//-----------------------------------------------------------
-	// °ø°Ý ¼Óµµ °è»ê..
+	// 공격 속도 계산..
 	//-----------------------------------------------------------
 	else
 	{
@@ -2869,7 +2869,7 @@ MCreature::SetWeaponSpeed(int speed)
 }
 
 //----------------------------------------------------------------------
-// Creature¸¦ ¸ØÃß°Ô ÇÑ´Ù.
+// Creature를 멈추게 한다.
 //----------------------------------------------------------------------
 void
 MCreature::SetStop()
@@ -2879,15 +2879,15 @@ MCreature::SetStop()
 	m_bKnockBack = 0;	
 
 	//------------------------------------------------
-	// ±âÁ¸ÀÇ MoveBuffer¸¦ ´Ù Áö¿ò
+	// 기존의 MoveBuffer를 다 지움
 	//------------------------------------------------
 	AffectMoveBufferAll();
 	//ReleaseMoveBuffer();
 
-	// 2001.11.8 - Á¤ÁöÇÒ¶§ ÁÂÇ¥ º¸Á¤ È®½ÇÈ÷..
+	// 2001.11.8 - 정지할때 좌표 보정 확실히..
 	ActionMoveNextPosition();
 
-	// Action ÁßÁö
+	// Action 중지
 	m_sX=0; 
 	m_sY=0;
 
@@ -2904,13 +2904,13 @@ MCreature::SetStop()
 		}
 	}
 	m_Action		= action;
-	// 2004, 11, 3, sobeit modify start - m_ActionCount¸¦ ¹Ù²ï ¾×¼ÇÀÇ ¸Æ½º Ä«¿îÆ®·Î ¼¼ÆÃ ÇßÀ½ - ¾Æ¿ì½ºÅÍÁî °í½ºÆ® ¹ö±× ¶«½Ã..¤Ñ¤Ñ;
+	// 2004, 11, 3, sobeit modify start - m_ActionCount를 바뀐 액션의 맥스 카운트로 세팅 했음 - 아우스터즈 고스트 버그 땜시..ㅡㅡ;
 	m_ActionCount	= GetActionCountMax(); 
 	//m_ActionCount	= (*g_pCreatureTable)[m_CreatureType].GetActionCount( m_Action );
 	// 2004, 11, 3, sobeit modify end
 	m_MoveCount		= m_MoveCountMax;
 
-	// ´ÙÀ½ µ¿ÀÛµµ ¾ø¾Ú
+	// 다음 동작도 없앰
 	m_bNextAction = false;
 	m_NextX = SECTORPOSITION_NULL;
 	m_NextY = SECTORPOSITION_NULL;
@@ -2920,7 +2920,7 @@ MCreature::SetStop()
 }
 
 //----------------------------------------------------------------------
-// Get PixelX - CreatureÀÇ PixelXÁÂÇ¥
+// Get PixelX - Creature의 PixelX좌표
 //----------------------------------------------------------------------
 int			
 MCreature::GetPixelX() const
@@ -2929,7 +2929,7 @@ MCreature::GetPixelX() const
 }
 
 //----------------------------------------------------------------------
-// Get PixelY - CreatureÀÇ PixelYÁÂÇ¥
+// Get PixelY - Creature의 PixelY좌표
 //----------------------------------------------------------------------
 int			
 MCreature::GetPixelY() const			
@@ -2943,9 +2943,9 @@ MCreature::GetPixelY() const
 void				
 MCreature::SetLevelName(int ln)
 {
-	// slayerÀÌ¸é ±â¼ú ·¹º§¿¡ µû¶ó¼­...
+	// slayer이면 기술 레벨에 따라서...
 
-	// vampireÀÌ¸é ·¹º§¿¡ µû¶ó¼­?
+	// vampire이면 레벨에 따라서?
 
 	// 
 	m_LevelName = rand() % g_pLevelNameTable->GetSize();
@@ -2963,8 +2963,8 @@ MCreature::GetLevelName() const
 //----------------------------------------------------------------------
 // Move Position
 //----------------------------------------------------------------------
-// Zone¿¡¼­ (m_X, m_Y) Sector¿¡ ÀÖ´Â 
-// this Creature¸¦ (x, y)·Î ¿Å°Ü¾ß ÇÑ´Ù.
+// Zone에서 (m_X, m_Y) Sector에 있는 
+// this Creature를 (x, y)로 옮겨야 한다.
 //----------------------------------------------------------------------
 bool
 MCreature::MovePosition(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y)
@@ -2974,24 +2974,24 @@ MCreature::MovePosition(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y)
 		return false;
 	}
 
-	// Creature Type¿¡ µû¶ó¼­ ´Ù¸£´Ù.			
+	// Creature Type에 따라서 다르다.			
 	switch (m_MoveType)
 	{
 		case CREATURE_UNDERGROUND : 
 			if (m_pZone->MoveUndergroundCreature(this, m_X, m_Y, x, y))
 			{
-				// Effect°¡ ÀÖÀ» °æ¿ì
+				// Effect가 있을 경우
 				/*
 				if (m_nAlphaEffect)
 				{
-					// ½Ã¾ß¸¦ ¹Ù²ãÁØ´Ù.
+					// 시야를 바꿔준다.
 					g_pZone->UnSetLightSight(m_X, m_Y, 0);
-					// ½Ã¾ß¸¦ ¹Ù²ãÁØ´Ù.
+					// 시야를 바꿔준다.
 					g_pZone->SetLightSight(x, y, 0);
 				}
 				*/
 
-				// ÀÌµ¿ÇßÀ¸¸é »õ·Î¿î ÁÂÇ¥ ¼³Á¤
+				// 이동했으면 새로운 좌표 설정
 				m_X	= x;
 				m_Y	= y;		
 				
@@ -3004,18 +3004,18 @@ MCreature::MovePosition(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y)
 		case CREATURE_GROUND : 
 			if (m_pZone->MoveGroundCreature(this, m_X, m_Y, x, y))
 			{
-				// Effect°¡ ÀÖÀ» °æ¿ì
+				// Effect가 있을 경우
 				/*
 				if (m_nAlphaEffect)
 				{
-					// ½Ã¾ß¸¦ ¹Ù²ãÁØ´Ù.
+					// 시야를 바꿔준다.
 					g_pZone->UnSetLightSight(m_X, m_Y, 0);
-					// ½Ã¾ß¸¦ ¹Ù²ãÁØ´Ù.
+					// 시야를 바꿔준다.
 					g_pZone->SetLightSight(x, y, 0);
 				}
 				*/
 
-				// ÀÌµ¿ÇßÀ¸¸é »õ·Î¿î ÁÂÇ¥ ¼³Á¤
+				// 이동했으면 새로운 좌표 설정
 				m_X	= x;
 				m_Y	= y;
 
@@ -3028,18 +3028,18 @@ MCreature::MovePosition(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y)
 		case CREATURE_FLYING : 
 			if (m_pZone->MoveFlyingCreature(this, m_X, m_Y, x, y))
 			{
-				// Effect°¡ ÀÖÀ» °æ¿ì
+				// Effect가 있을 경우
 				/*
 				if (m_nAlphaEffect)
 				{
-					// ½Ã¾ß¸¦ ¹Ù²ãÁØ´Ù.
+					// 시야를 바꿔준다.
 					g_pZone->UnSetLightSight(m_X, m_Y, 0);
-					// ½Ã¾ß¸¦ ¹Ù²ãÁØ´Ù.
+					// 시야를 바꿔준다.
 					g_pZone->SetLightSight(x, y, 0);
 				}
 				*/
 
-				// ÀÌµ¿ÇßÀ¸¸é »õ·Î¿î ÁÂÇ¥ ¼³Á¤
+				// 이동했으면 새로운 좌표 설정
 				m_X	= x;
 				m_Y	= y;
 
@@ -3049,7 +3049,7 @@ MCreature::MovePosition(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y)
 			}
 		break;
 
-		// fake´Â ±×³É ¿òÁ÷ÀÎ´Ù.
+		// fake는 그냥 움직인다.
 		case CREATURE_FAKE_NO_BLOCK :
 		case CREATURE_FAKE_UNDERGROUND :
 		case CREATURE_FAKE_GROUND :
@@ -3064,7 +3064,7 @@ MCreature::MovePosition(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y)
 }
 
 //----------------------------------------------------------------------
-// (x,y)¿¡¼­ ¹æÇâÀ¸·Î ÀÌµ¿ÇÑ À§Ä¡¸¦ ¾ò´Â´Ù.
+// (x,y)에서 방향으로 이동한 위치를 얻는다.
 //----------------------------------------------------------------------
 void
 MCreature::GetPositionToDirection(TYPE_SECTORPOSITION &x, TYPE_SECTORPOSITION &y, BYTE direction)
@@ -3085,12 +3085,12 @@ MCreature::GetPositionToDirection(TYPE_SECTORPOSITION &x, TYPE_SECTORPOSITION &y
 //----------------------------------------------------------------------
 // Add Effect
 //----------------------------------------------------------------------
-// Creature¿¡ ´Þ¶óºÙ¾î¼­ Ç¥ÇöµÇ´Â Effect Ç¥Çö
+// Creature에 달라붙어서 표현되는 Effect 표현
 //
-// ÁßÃ¸À» Çã¿ëÇÏÁö ¾ÊÀ¸¹Ç·Î.. 
-// ¾ÆÁ÷ ºÙ¾î¼­ Ç¥ÇöµÇÁö ¾ÊÀº Effect¸¸ »õ·Î Ãß°¡ÇÑ´Ù.
+// 중첩을 허용하지 않으므로.. 
+// 아직 붙어서 표현되지 않은 Effect만 새로 추가한다.
 //
-// ±×·¯³ª, ½Ã°£ È®ÀåÀ» ÇØ¾ßÇÏ´Â °æ¿ì°¡ »ý±ä´Ù.
+// 그러나, 시간 확장을 해야하는 경우가 생긴다.
 //----------------------------------------------------------------------
 MAttachEffect*		
 MCreature::CreateAttachEffect(TYPE_EFFECTSPRITETYPE type, 
@@ -3101,7 +3101,7 @@ MCreature::CreateAttachEffect(TYPE_EFFECTSPRITETYPE type,
 {
 	DEBUG_ADD_FORMAT("CreateAttachEffect. type=%d, delayf=%d", type, delayFrame);
 
-	// Á×Àº °æ¿ì... delay¸¦ ¾ø¾Ø´Ù. 
+	// 죽은 경우... delay를 없앤다. 
 	if (!m_bAlive)
 	{
 		// - -;;
@@ -3109,16 +3109,16 @@ MCreature::CreateAttachEffect(TYPE_EFFECTSPRITETYPE type,
 	}
 	bool	IsMulti = false;
 	int		orbitType = 0;
-	// 2004, 08, 05 sobeit add start - ¼º¹®, ±æµå Å¸¿ö ÆÄÆíÆ¢±â
+	// 2004, 08, 05 sobeit add start - 성문, 길드 타워 파편튀기
 	if(GetCreatureType() >= 726 && GetCreatureType() <= 729)
 	{	
 		if(type < EFFECTSPRITETYPE_CASTLE_GATE_DUST_1 ||
-		   type > EFFECTSPRITETYPE_CASTLE_GATE_DAMAGED) // ¼º¹® °ü·Ã ÀÌÆåÆ®°¡ ¾Æ´Ï¸é ¹«Àú°Ç ÆÄÆíÆ¢±â..¤¾¤¾
+		   type > EFFECTSPRITETYPE_CASTLE_GATE_DAMAGED) // 성문 관련 이펙트가 아니면 무저건 파편튀기..ㅎㅎ
 		{
 			int currentHP		= max(0,int(GetHP()));
 			int frame = 4 -(currentHP*5/GetMAX_HP());
 			
-			if(m_NickNameType != frame) // º¯¼ö Ãß°¡ÇÏ±ä ±×·¸°í..¼º¹®Àº m_NickNameTypeÀ» ¾È¾²±â ¶§¹®¿¡ ¿ä±â¼­ TemporaryÇÏ°Ô ¾²ÀÚ-_-; 
+			if(m_NickNameType != frame) // 변수 추가하긴 그렇고..성문은 m_NickNameType을 안쓰기 때문에 요기서 Temporary하게 쓰자-_-; 
 			{
 				m_NickNameType = frame;
 				if(frame<1) frame = 1;
@@ -3131,7 +3131,7 @@ MCreature::CreateAttachEffect(TYPE_EFFECTSPRITETYPE type,
 				type = EFFECTSPRITETYPE_CASTLE_GATE_PIECE_1 + rand()%(5-frame);
 				delayFrame = 14;
 			}
-			// ¼º¹® Å¸°Ý ÀÌÆåÆ® ÀÎµ¥.. ¾ø´Â°Ô ³ªÀ»µí..¤¾
+			// 성문 타격 이펙트 인데.. 없는게 나을듯..ㅎ
 //			ExecuteActionInfoFromMainNode(SKILL_CLIENT_CASTLE_GATE_DAMAGED,GetX(), GetY(), 0,GetDirection(),	GetID(),	
 //				GetX(), GetY(), 0, 8, NULL, false);
 		}
@@ -3145,10 +3145,10 @@ MCreature::CreateAttachEffect(TYPE_EFFECTSPRITETYPE type,
 				delayFrame = 32;
 		}
 	}
-	else if(GetCreatureType() == 734) // ±æµå Å¸¿ö
+	else if(GetCreatureType() == 734) // 길드 타워
 	{
 		if(type < EFFECTSPRITETYPE_CASTLE_GATE_DAMAGED ||
-		   type > EFFECTSPRITETYPE_GUILD_TOWER_PROTECT) // ±æµå Å¸¿ö°ü·Ã ÀÌÆåÆ®°¡ ¾Æ´Ï¸é ¹«Àú°Ç ÆÄÆíÆ¢±â..¤¾¤¾
+		   type > EFFECTSPRITETYPE_GUILD_TOWER_PROTECT) // 길드 타워관련 이펙트가 아니면 무저건 파편튀기..ㅎㅎ
 		{
 			type = EFFECTSPRITETYPE_CASTLE_GATE_DAMAGED;
 			delayFrame = 8;
@@ -3160,7 +3160,7 @@ MCreature::CreateAttachEffect(TYPE_EFFECTSPRITETYPE type,
 			delayFrame = 32;
 		}
 	}
-//	else if(GetCreatureType() == 723) // °¢¼º Áúµå·¹
+//	else if(GetCreatureType() == 723) // 각성 질드레
 //	{
 //		if(type == EFFECTSPRITETYPE_GDR_DEAD)
 //			delayFrame = 218;
@@ -3168,12 +3168,12 @@ MCreature::CreateAttachEffect(TYPE_EFFECTSPRITETYPE type,
 //	}
 	else
 	{
-//		if(GetCreatureType() == 734&&type == EFFECTSPRITETYPE_GUILD_TOWER_DESTROY) // ±æµå Å¸¿ö
+//		if(GetCreatureType() == 734&&type == EFFECTSPRITETYPE_GUILD_TOWER_DESTROY) // 길드 타워
 //			delayFrame = 32;
-	// 2004, 08, 05 sobeit add end - ¼º¹®, ±æµå Å¸¿ö ÆÄÆíÆ¢±â
+	// 2004, 08, 05 sobeit add end - 성문, 길드 타워 파편튀기
 
 		//------------------------------------------------
-		// ÇÇÀÎ °æ¿ì´Â À§Ä¡¸¦ randomÇÏ°Ô
+		// 피인 경우는 위치를 random하게
 		//------------------------------------------------
 		if (type==EFFECTSPRITETYPE_BLOOD_GUN_1_1
 			|| type==EFFECTSPRITETYPE_BLOOD_GUN_2_1
@@ -3182,7 +3182,7 @@ MCreature::CreateAttachEffect(TYPE_EFFECTSPRITETYPE type,
 			|| type==EFFECTSPRITETYPE_GREEN_BLOOD_GUN_2_1
 			|| type==EFFECTSPRITETYPE_GREEN_BLOOD_GUN_3_1)
 		{
-			// Å°¿¡ µû¶ó¼­.. 100³ÑÀ¸¸é... (°ñ·¹¸Ó)
+			// 키에 따라서.. 100넘으면... (골레머)
 			if ((*g_pCreatureTable)[m_CreatureType].Height > 100)
 			{
 				// type + 0~6
@@ -3196,11 +3196,11 @@ MCreature::CreateAttachEffect(TYPE_EFFECTSPRITETYPE type,
 		}
 
 		//------------------------------------------------
-		// ÇÇÀÎ °æ¿ì´Â À§Ä¡¸¦ randomÇÏ°Ô
+		// 피인 경우는 위치를 random하게
 		//------------------------------------------------
 		if (type==EFFECTSPRITETYPE_BULLET_OF_LIGHT_START_1)
 		{
-			// Å°¿¡ µû¶ó¼­.. 100³ÑÀ¸¸é... (°ñ·¹¸Ó)
+			// 키에 따라서.. 100넘으면... (골레머)
 			if ((*g_pCreatureTable)[m_CreatureType].Height > 100)
 			{
 				// type + 0~6
@@ -3213,7 +3213,7 @@ MCreature::CreateAttachEffect(TYPE_EFFECTSPRITETYPE type,
 			}		
 		}
 		//------------------------------------------------
-		// Ä® ¸ÂÀº ÇÇ (¼¼·Î)
+		// 칼 맞은 피 (세로)
 		//------------------------------------------------
 		if (type==EFFECTSPRITETYPE_BLOOD_VERTICAL_1 
 			|| type==EFFECTSPRITETYPE_BLOOD_HORIZONTAL_1)
@@ -3240,7 +3240,7 @@ MCreature::CreateAttachEffect(TYPE_EFFECTSPRITETYPE type,
 			}		
 		}
 		//------------------------------------------------
-		// »ê¿¡ ¸ÂÀº smokeÀÎ °æ¿ì
+		// 산에 맞은 smoke인 경우
 		//------------------------------------------------
 		else if (type==EFFECTSPRITETYPE_SMOKE)
 		{
@@ -3248,7 +3248,7 @@ MCreature::CreateAttachEffect(TYPE_EFFECTSPRITETYPE type,
 		}
 		
 		//------------------------------------------------
-		// Typhoon back [»õ±â¼ú]
+		// Typhoon back [새기술]
 		//------------------------------------------------
 		else if (type==EFFECTSPRITETYPE_TYPHOON_BACK)
 		{	
@@ -3264,7 +3264,7 @@ MCreature::CreateAttachEffect(TYPE_EFFECTSPRITETYPE type,
 		}
 
 		//------------------------------------------------
-		// ¿©ÀÚ¿ë EffectSpriteTypeÀ» »ç¿ëÇÏ´Â °æ¿ì
+		// 여자용 EffectSpriteType을 사용하는 경우
 		//------------------------------------------------
 		if (IsFemale()
 			&& (*g_pEffectSpriteTypeTable)[type].FemaleEffectSpriteType!=EFFECTSPRITETYPE_NULL)
@@ -3280,7 +3280,7 @@ MCreature::CreateAttachEffect(TYPE_EFFECTSPRITETYPE type,
 		}
 	
 
-		// °ø°Ý ¼Óµµ¿¡ µû¸¥ ÀÌÆåÆ®¸¦ ´Ù¸£°Ô ±¸º°ÇÑ´Ù.
+		// 공격 속도에 따른 이펙트를 다르게 구별한다.
 		switch( type )
 		{
 		case EFFECTSPRITETYPE_FLOURISH_NORMAL :
@@ -3442,24 +3442,24 @@ MCreature::CreateAttachEffect(TYPE_EFFECTSPRITETYPE type,
 
 
 	//------------------------------
-	// ÀÌ¹Ì ÀÖ´Â °æ¿ì 
+	// 이미 있는 경우 
 	//------------------------------
 	if (m_bAttachEffect[type] && !IsMulti)
 	{	
 		//------------------------------------------------------
-		// ¸ö¿¡ ºÙÀº°Å Ã¼Å©
+		// 몸에 붙은거 체크
 		//------------------------------------------------------
 		ATTACHEFFECT_LIST::iterator iEffect = m_listEffect.begin();
 
-		// °°Àº Effect¸¦ Ã£´Â´Ù. 
+		// 같은 Effect를 찾는다. 
 		while (iEffect != m_listEffect.end())
 		{
 			MAttachEffect*	pEffect = *iEffect;
 			
-			// °°Àº typeÀ» Ã£´Â´Ù.
+			// 같은 type을 찾는다.
 			if (pEffect->IsEffectSprite() && pEffect->GetEffectSpriteType() == type)
 			{
-				// Ãß°¡ÇÒ·Á´Â °ÍÀÌ ´õ ´Ê°Ô ³¡³¯ °æ¿ì¿¡¸¸ ½Ã°£À» È®ÀåÇÑ´Ù.
+				// 추가할려는 것이 더 늦게 끝날 경우에만 시간을 확장한다.
 				if (g_CurrentFrame+delayFrame > pEffect->GetEndFrame()) 
 				{
 					pEffect->SetCount( delayFrame );
@@ -3473,19 +3473,19 @@ MCreature::CreateAttachEffect(TYPE_EFFECTSPRITETYPE type,
 		}
 
 		//------------------------------------------------------
-		// ¹Ù´Ú¿¡ ºÙÀº°Å Ã¼Å©
+		// 바닥에 붙은거 체크
 		//------------------------------------------------------
 		iEffect = m_listGroundEffect.begin();
 
-		// °°Àº Effect¸¦ Ã£´Â´Ù. 
+		// 같은 Effect를 찾는다. 
 		while (iEffect != m_listGroundEffect.end())
 		{
 			MAttachEffect*	pEffect = *iEffect;
 			
-			// °°Àº typeÀ» Ã£´Â´Ù.
+			// 같은 type을 찾는다.
 			if (pEffect->IsEffectSprite() && pEffect->GetEffectSpriteType() == type)
 			{
-				// Ãß°¡ÇÒ·Á´Â °ÍÀÌ ´õ ´Ê°Ô ³¡³¯ °æ¿ì¿¡¸¸ ½Ã°£À» È®ÀåÇÑ´Ù.
+				// 추가할려는 것이 더 늦게 끝날 경우에만 시간을 확장한다.
 				if (g_CurrentFrame+delayFrame > pEffect->GetEndFrame()) 
 				{
 					pEffect->SetCount( delayFrame );
@@ -3502,7 +3502,7 @@ MCreature::CreateAttachEffect(TYPE_EFFECTSPRITETYPE type,
 	}
 
 	//------------------------------
-	// ¾ø´Â °æ¿ì Ãß°¡ÇÑ´Ù.
+	// 없는 경우 추가한다.
 	//------------------------------
 	MAttachEffect*	pEffect = NULL;
 	
@@ -3517,10 +3517,10 @@ MCreature::CreateAttachEffect(TYPE_EFFECTSPRITETYPE type,
 
 	pEffect->SetAttachCreatureID( m_ID );
 
-	// ºû³ª´Â EffectÀÇ °³¼ö¸¦ Áõ°¡?
+	// 빛나는 Effect의 개수를 증가?
 	if (pEffect->GetBltType()==BLT_EFFECT)
 	{
-		// ÃÖÃÊ·Î Ãß°¡µÇ´Â ºû³ª´ÂEffectÀÌ¸é ½Ã¾ß¸¦ Ãß°¡½ÃÅ²´Ù.
+		// 최초로 추가되는 빛나는Effect이면 시야를 추가시킨다.
 		//if (m_nAlphaEffect==0)
 		{
 			pEffect->SetPosition( m_X, m_Y );
@@ -3531,14 +3531,14 @@ MCreature::CreateAttachEffect(TYPE_EFFECTSPRITETYPE type,
 	}
 
 	//------------------------------------------------------
-	// ¹Ù´Ú¿¡ ºÙ´Â°Å
+	// 바닥에 붙는거
 	//------------------------------------------------------
 	if (bGroundEffect)
 	{
 		m_listGroundEffect.push_back( pEffect );
 	}
 	//------------------------------------------------------
-	// ¸ö¿¡ ºÙ´Â °Å
+	// 몸에 붙는 거
 	//------------------------------------------------------
 	else
 	{
@@ -3556,8 +3556,8 @@ MCreature::CreateAttachEffect(TYPE_EFFECTSPRITETYPE type,
 //----------------------------------------------------------------------
 // Update Effect
 //----------------------------------------------------------------------
-// Creature¿¡ ºÙÀº ¸ðµç EffectÀÇ FrameÀ» ¹Ù²ãÁÖ°í..
-// ³¡³ª´Â°Ô ÀÖÀ¸¸é list¿Í memory¿¡¼­ »èÁ¦ÇÑ´Ù.
+// Creature에 붙은 모든 Effect의 Frame을 바꿔주고..
+// 끝나는게 있으면 list와 memory에서 삭제한다.
 //----------------------------------------------------------------------
 void		
 MCreature::UpdateAttachEffect()
@@ -3565,20 +3565,20 @@ MCreature::UpdateAttachEffect()
 	ATTACHEFFECT_LIST::iterator iEffect = m_listEffect.begin();
 	ATTACHEFFECT_LIST::iterator iEffectTemp;
 
-	// ¹à±â´Â 0
+	// 밝기는 0
 	//m_MaxEffectLight = 0;
 
 	//---------------------------------------------------------------------
-	// Ä³¸¯ÅÍ »ö±ò ¹Ù²Ù´Â »ö..
+	// 캐릭터 색깔 바꾸는 색..
 	//---------------------------------------------------------------------
-	// NULL°ªÀÌ´ç.. ¿ÜºÎ¿¡¼­ Ã¼Å©ÇØ¾ßÇÔ..
+	// NULL값이당.. 외부에서 체크해야함..
 	m_AttachEffectColor = m_ChangeColorSet;	//ATTACHEFFECTCOLOR_NULL;
 	int bShowColor =  (HasEffectStatus(EFFECTSTATUS_CURSE_PARALYSIS)
-						|| g_CurrentFrame % g_pClientConfig->FRAME_DRAW_ORIGINAL_SPRITE);	// ¸î frame¸¶´Ù ÇÑ¹ø¾¿Àº ¿ø·¡ »ö±òÀ» º¸¿©ÁØ´Ù.
+						|| g_CurrentFrame % g_pClientConfig->FRAME_DRAW_ORIGINAL_SPRITE);	// 몇 frame마다 한번씩은 원래 색깔을 보여준다.
 	int numColors = 0;
 	
 	//---------------------------------------------------------------------
-	// ¸ðµç Effect¸¦ UpdateÇÑ´Ù.
+	// 모든 Effect를 Update한다.
 	//---------------------------------------------------------------------
 	while (iEffect != m_listEffect.end())
 	{
@@ -3599,7 +3599,7 @@ MCreature::UpdateAttachEffect()
 		//#endif
 
 
-		// ºü¸¥ ÀÌµ¿ÀÏ °æ¿ì ÀÌµ¿°ú Á¤ÁöÀÇ ÀÌÆåÆ®°¡ ´Ù¸£´Ù.... ÇÏµåÄÚµù..¤Ñ.¤Ì
+		// 빠른 이동일 경우 이동과 정지의 이펙트가 다르다.... 하드코딩..ㅡ.ㅜ
 		if( pEffect->GetEffectSpriteType() == EFFECTSPRITETYPE_FAST_MOVE_FLY ||
 			pEffect->GetEffectSpriteType() == EFFECTSPRITETYPE_FAST_MOVE_STOP ||
 			(
@@ -3682,29 +3682,29 @@ MCreature::UpdateAttachEffect()
 
 		if (bErase == false && pEffect->Update())
 		{
-			// Èí¿µÀÎ °æ¿ì¿¡´Â ¹æÇâÀ» ¹Ù²ÙÁö ¾Ê´Â´Ù.
+			// 흡영인 경우에는 방향을 바꾸지 않는다.
 			if( pEffect->GetEffectSpriteType() != EFFECTSPRITETYPE_ABSORB_SOUL &&
 				pEffect->GetEffectSpriteType() != EFFECTSPRITETYPE_PIERCING_FRONT &&
 				pEffect->GetEffectSpriteType() != EFFECTSPRITETYPE_PIERCING_BACK )
 				pEffect->SetDirection( m_CurrentDirection );
 
-			// ÃÖ°í ¹à±â¸¦ °¡Áø EffectÀÇ ¹à±â¸¦ ÀúÀåÇÑ´Ù.
+			// 최고 밝기를 가진 Effect의 밝기를 저장한다.
 //			if (m_MaxEffectLight < pEffect->GetLight())
 //			{
 //				m_MaxEffectLight = pEffect->GetLight();
 //			}
 
-			// À§Ä¡ ¼³Á¤
+			// 위치 설정
 			pEffect->SetPosition(m_X, m_Y);
 
 			//---------------------------------------------------------------------
-			// À§Ä¡°¡ ¹Ù²î¾ú°Å³ª
-			// ºûÀÇ Å©±â(½Ã¾ß)°¡ ¹Ù²ï °æ¿ì
+			// 위치가 바뀌었거나
+			// 빛의 크기(시야)가 바뀐 경우
 			//---------------------------------------------------------------------
 			if (x!=pEffect->GetX() || y!=pEffect->GetY()
 				|| light != pEffect->GetLight())
 			{				
-				// ½Ã¾ß ¹Ù²Ù±â
+				// 시야 바꾸기
 //				g_pZone->UnSetLight(x, y, light);
 //				g_pZone->SetLight(pEffect->GetX(), pEffect->GetY(), pEffect->GetLight());
 
@@ -3724,8 +3724,8 @@ MCreature::UpdateAttachEffect()
 			}
 
 			//---------------------------------------------------------------------
-			// Ä³¸¯ÅÍ »ö±ò ¹Ù²Ù´Â EffectÀÌ¸é
-			// ÇÏ³ª¸¦ ¼±ÅÃÇØ¾ß ÇÑ´Ù.
+			// 캐릭터 색깔 바꾸는 Effect이면
+			// 하나를 선택해야 한다.
 			//---------------------------------------------------------------------
 			if (bShowColor && pEffect->IsEffectColor())
 			{
@@ -3739,62 +3739,62 @@ MCreature::UpdateAttachEffect()
 
 			//-----------------------------------------------
 			//
-			// ÀÌ Effect°¡ ³¡³ª±â Àü¿¡ LinkCount¿¡ ÀÇÇØ¼­
-			// ´ÙÀ½ ¿¬°áµÇ´Â Effect°¡ ÀÖÀ¸¸é »ý¼ºÇØ¾ß ÇÑ´Ù.
+			// 이 Effect가 끝나기 전에 LinkCount에 의해서
+			// 다음 연결되는 Effect가 있으면 생성해야 한다.
 			//
-			// ÇöÀçFrameÀÌ EndLinkFrameÀ» ³Ñ¾î°£ °æ¿ì
+			// 현재Frame이 EndLinkFrame을 넘어간 경우
 			//
 			//-----------------------------------------------
 			if (g_CurrentFrame >= pEffect->GetEndLinkFrame()
 				&& pEffect->GetLinkSize() != 0)
 			{
-				// GenerateNext¿¡¼­ 
-				// pEffectÀÇ EffectTargetÀ» NULL·Î ¸¸µé¾îÁÖ±â ¶§¹®¿¡
-				// ¿©±â¼­ Áö¿ï ÇÊ¿ä ¾ø´Ù.
+				// GenerateNext에서 
+				// pEffect의 EffectTarget을 NULL로 만들어주기 때문에
+				// 여기서 지울 필요 없다.
 				g_pEffectGeneratorTable->GenerateNext( pEffect );
 
-				// pEffect´Â ¿©ÀüÈ÷ Á¸ÀçÇØ¾ß ÇÏ¹Ç·Î Áö¿ì¸é ¾ÈµÈ´Ù.
+				// pEffect는 여전히 존재해야 하므로 지우면 안된다.
 			}
 
-			// Á¦´ë·Î µÈ °æ¿ì
+			// 제대로 된 경우
 			iEffect++;
 		}
 		//---------------------------------------------------------------------
-		// ½Ã°£ÀÌ ´Ù µÅ¼­ ³¡³ª´Â °æ¿ì
+		// 시간이 다 돼서 끝나는 경우
 		//---------------------------------------------------------------------
 		else
 		{
 			
 			bool bUseEffectSprite = pEffect->IsEffectSprite();
 
-			// flagÁ¦°Å
+			// flag제거
 			if (bUseEffectSprite)
 			{
-				m_bAttachEffect[pEffect->GetEffectSpriteType()] = false;	// flagÁ¦°Å
+				m_bAttachEffect[pEffect->GetEffectSpriteType()] = false;	// flag제거
 			}
 		
 			//---------------------------------------------------------------------
 			//
-			// ´ÙÀ½ ¿¬°áµÇ´Â Effect°¡ ÀÖÀ¸¸é »ý¼ºÇØ¾ß ÇÑ´Ù.
+			// 다음 연결되는 Effect가 있으면 생성해야 한다.
 			//
 			//---------------------------------------------------------------------
-//			// 2004, 8, 16, sobeit add start test - µµ½½ 130 ½ºÅ³
+//			// 2004, 8, 16, sobeit add start test - 도슬 130 스킬
 //			if(pEffect->GetEffectSpriteType() == EFFECTSPRITETYPE_BURNING_SOL_CHARGING)
 //			{
-//				// 	¾ÆÁ÷ Â÷Â¡ ÁßÀÌ¸é ³¯¶ó°¡´Â°Ô ³ª¿À¸é ¾ÈµÈ´Ù..^^
+//				// 	아직 차징 중이면 날라가는게 나오면 안된다..^^
 //			}
-//			// 2004, 8, 16, sobeit add end test - µµ½½ 130 ½ºÅ³
+//			// 2004, 8, 16, sobeit add end test - 도슬 130 스킬
 			if (pEffect->GetLinkSize() != 0)
 			{				
 				(*g_pEffectGeneratorTable).GenerateNext( pEffect );
 			}
 
-			// ºû³ª´Â Effect¸é ½Ã¾ß¸¦ »ç¶óÁö°Ô ÇØ¾ßÇÑ´Ù.
+			// 빛나는 Effect면 시야를 사라지게 해야한다.
 			//if (pEffect->GetBltType()==BLT_EFFECT)
 			{
 				//m_nAlphaEffect --;
 
-				// ¸ðµç ºû³ª´ÂEffect°¡ »ç¶óÁ³À¸¸é ½Ã¾ß¸¦ Á¦°Å½ÃÅ²´Ù.
+				// 모든 빛나는Effect가 사라졌으면 시야를 제거시킨다.
 				//if (m_nAlphaEffect==0)
 				{
 //					g_pZone->UnSetLight(x, y, light);
@@ -3811,25 +3811,25 @@ MCreature::UpdateAttachEffect()
 
 			DEBUG_ADD_FORMAT("[DeleteAttachEffect] id=%d, esType=%d", m_ID, pEffect->GetEffectSpriteType());
 			
-			// memory»èÁ¦, list»èÁ¦						
-			delete pEffect;						// memoryÁ¦°Å
+			// memory삭제, list삭제						
+			delete pEffect;						// memory제거
 			
-			// list¿¡¼­ »èÁ¦ÇÏ±â À§ÇØ¼­.. ÀÓ½Ã·Î ÀúÀå
+			// list에서 삭제하기 위해서.. 임시로 저장
 			iEffectTemp = iEffect;
 
 			iEffect++;
-			m_listEffect.erase( iEffectTemp );	// list¿¡¼­ Á¦°Å
+			m_listEffect.erase( iEffectTemp );	// list에서 제거
 		}		
 	}
 
 
 	//---------------------------------------------------------------------
-	// ¹Ù´Ú¿¡ ºÙ´Â effect
+	// 바닥에 붙는 effect
 	//---------------------------------------------------------------------
 	iEffect = m_listGroundEffect.begin();
 	
 	//---------------------------------------------------------------------
-	// ¸ðµç Effect¸¦ UpdateÇÑ´Ù.
+	// 모든 Effect를 Update한다.
 	//---------------------------------------------------------------------
 	while (iEffect != m_listGroundEffect.end())
 	{
@@ -3850,23 +3850,23 @@ MCreature::UpdateAttachEffect()
 
 		if (pEffect->Update())
 		{
-			// ÃÖ°í ¹à±â¸¦ °¡Áø EffectÀÇ ¹à±â¸¦ ÀúÀåÇÑ´Ù.
+			// 최고 밝기를 가진 Effect의 밝기를 저장한다.
 //			if (m_MaxEffectLight < pEffect->GetLight())
 //			{
 //				m_MaxEffectLight = pEffect->GetLight();
 //			}
 
-			// À§Ä¡ ¼³Á¤
+			// 위치 설정
 			pEffect->SetPosition(m_X, m_Y);
 
 			//---------------------------------------------------------------------
-			// À§Ä¡°¡ ¹Ù²î¾ú°Å³ª
-			// ºûÀÇ Å©±â(½Ã¾ß)°¡ ¹Ù²ï °æ¿ì
+			// 위치가 바뀌었거나
+			// 빛의 크기(시야)가 바뀐 경우
 			//---------------------------------------------------------------------
 			if (x!=pEffect->GetX() || y!=pEffect->GetY()
 				|| light != pEffect->GetLight())
 			{				
-				// ½Ã¾ß ¹Ù²Ù±â
+				// 시야 바꾸기
 //				g_pZone->UnSetLight(x, y, light);
 //				g_pZone->SetLight(pEffect->GetX(), pEffect->GetY(), pEffect->GetLight());
 
@@ -3886,11 +3886,11 @@ MCreature::UpdateAttachEffect()
 			}
 
 			//---------------------------------------------------------------------
-			// Ä³¸¯ÅÍ »ö±ò ¹Ù²Ù´Â EffectÀÌ¸é
-			// ÇÏ³ª¸¦ ¼±ÅÃÇØ¾ß ÇÑ´Ù.
+			// 캐릭터 색깔 바꾸는 Effect이면
+			// 하나를 선택해야 한다.
 			//---------------------------------------------------------------------
 			/*
-			// ¹Ù´Ú¿¡ ±ò¸®´Â °Å´Â »ö±ò ¹Ù²Ù´Â°Ô ¾ø´Ù.
+			// 바닥에 깔리는 거는 색깔 바꾸는게 없다.
 			if (bShowColor && pEffect->IsEffectColor())
 			{
 				numColors++;
@@ -3902,42 +3902,42 @@ MCreature::UpdateAttachEffect()
 			*/
 			//-----------------------------------------------
 			//
-			// ÀÌ Effect°¡ ³¡³ª±â Àü¿¡ LinkCount¿¡ ÀÇÇØ¼­
-			// ´ÙÀ½ ¿¬°áµÇ´Â Effect°¡ ÀÖÀ¸¸é »ý¼ºÇØ¾ß ÇÑ´Ù.
+			// 이 Effect가 끝나기 전에 LinkCount에 의해서
+			// 다음 연결되는 Effect가 있으면 생성해야 한다.
 			//
-			// ÇöÀçFrameÀÌ EndLinkFrameÀ» ³Ñ¾î°£ °æ¿ì
+			// 현재Frame이 EndLinkFrame을 넘어간 경우
 			//
 			//-----------------------------------------------
 			if (g_CurrentFrame >= pEffect->GetEndLinkFrame()
 				&& pEffect->GetLinkSize() != 0)
 			{
-				// GenerateNext¿¡¼­ 
-				// pEffectÀÇ EffectTargetÀ» NULL·Î ¸¸µé¾îÁÖ±â ¶§¹®¿¡
-				// ¿©±â¼­ Áö¿ï ÇÊ¿ä ¾ø´Ù.
+				// GenerateNext에서 
+				// pEffect의 EffectTarget을 NULL로 만들어주기 때문에
+				// 여기서 지울 필요 없다.
 				g_pEffectGeneratorTable->GenerateNext( pEffect );
 
-				// pEffect´Â ¿©ÀüÈ÷ Á¸ÀçÇØ¾ß ÇÏ¹Ç·Î Áö¿ì¸é ¾ÈµÈ´Ù.
+				// pEffect는 여전히 존재해야 하므로 지우면 안된다.
 			}
 
-			// Á¦´ë·Î µÈ °æ¿ì
+			// 제대로 된 경우
 			iEffect++;
 		}
 		//---------------------------------------------------------------------
-		// ½Ã°£ÀÌ ´Ù µÅ¼­ ³¡³ª´Â °æ¿ì
+		// 시간이 다 돼서 끝나는 경우
 		//---------------------------------------------------------------------
 		else
 		{
 			bool bUseEffectSprite = pEffect->IsEffectSprite();
 
-			// flagÁ¦°Å
+			// flag제거
 			if (bUseEffectSprite)
 			{
-				m_bAttachEffect[pEffect->GetEffectSpriteType()] = false;	// flagÁ¦°Å
+				m_bAttachEffect[pEffect->GetEffectSpriteType()] = false;	// flag제거
 			}
 		
 			//---------------------------------------------------------------------
 			//
-			// ´ÙÀ½ ¿¬°áµÇ´Â Effect°¡ ÀÖÀ¸¸é »ý¼ºÇØ¾ß ÇÑ´Ù.
+			// 다음 연결되는 Effect가 있으면 생성해야 한다.
 			//
 			//---------------------------------------------------------------------
 			if (pEffect->GetLinkSize() != 0)
@@ -3945,12 +3945,12 @@ MCreature::UpdateAttachEffect()
 				(*g_pEffectGeneratorTable).GenerateNext( pEffect );
 			}
 
-			// ºû³ª´Â Effect¸é ½Ã¾ß¸¦ »ç¶óÁö°Ô ÇØ¾ßÇÑ´Ù.
+			// 빛나는 Effect면 시야를 사라지게 해야한다.
 			//if (pEffect->GetBltType()==BLT_EFFECT)
 			{
 				//m_nAlphaEffect --;
 
-				// ¸ðµç ºû³ª´ÂEffect°¡ »ç¶óÁ³À¸¸é ½Ã¾ß¸¦ Á¦°Å½ÃÅ²´Ù.
+				// 모든 빛나는Effect가 사라졌으면 시야를 제거시킨다.
 				//if (m_nAlphaEffect==0)
 				{
 //					g_pZone->UnSetLight(x, y, light);
@@ -3968,14 +3968,14 @@ MCreature::UpdateAttachEffect()
 			
 			DEBUG_ADD_FORMAT("[DeleteAttachEffect] id=%d, esType=%d", m_ID, pEffect->GetEffectSpriteType());
 			
-			// memory»èÁ¦, list»èÁ¦						
-			delete pEffect;						// memoryÁ¦°Å
+			// memory삭제, list삭제						
+			delete pEffect;						// memory제거
 			
-			// list¿¡¼­ »èÁ¦ÇÏ±â À§ÇØ¼­.. ÀÓ½Ã·Î ÀúÀå
+			// list에서 삭제하기 위해서.. 임시로 저장
 			iEffectTemp = iEffect;
 
 			iEffect++;
-			m_listGroundEffect.erase( iEffectTemp );	// list¿¡¼­ Á¦°Å
+			m_listGroundEffect.erase( iEffectTemp );	// list에서 제거
 		}		
 	}
 }
@@ -3983,7 +3983,7 @@ MCreature::UpdateAttachEffect()
 //----------------------------------------------------------------------
 // UnSet LightSight AttachEffect
 //----------------------------------------------------------------------
-// Creature¿¡ ºÙÀº ¸ðµç EffectÀÇ ½Ã¾ß¸¦ »èÁ¦ÇÑ´Ù.
+// Creature에 붙은 모든 Effect의 시야를 삭제한다.
 //----------------------------------------------------------------------
 /*
 void		
@@ -3991,15 +3991,15 @@ MCreature::UnSetLightSightAttachEffect()
 {
 	ATTACHEFFECT_LIST::iterator iEffect = m_listEffect.begin();
 	
-	// ¸ðµç Effect¸¦ UpdateÇÑ´Ù.
+	// 모든 Effect를 Update한다.
 	while (iEffect != m_listEffect.end())
 	{
 		MAttachEffect*	pEffect = *iEffect;
 		
-		// ½Ã¾ß »èÁ¦
+		// 시야 삭제
 //		g_pZone->UnSetLight(pEffect->GetX(), pEffect->GetY(), pEffect->GetLight());
 
-		// ´ÙÀ½ ²¨
+		// 다음 꺼
 		iEffect++;
 	}
 }
@@ -4008,7 +4008,7 @@ MCreature::UnSetLightSightAttachEffect()
 //----------------------------------------------------------------------
 // Set LightSight AttachEffect
 //----------------------------------------------------------------------
-// Creature¿¡ ºÙÀº ¸ðµç EffectÀÇ ½Ã¾ß¸¦ Ãß°¡ÇÑ´Ù.
+// Creature에 붙은 모든 Effect의 시야를 추가한다.
 //----------------------------------------------------------------------
 /*
 void		
@@ -4016,15 +4016,15 @@ MCreature::SetLightSightAttachEffect()
 {
 	ATTACHEFFECT_LIST::iterator iEffect = m_listEffect.begin();
 	
-	// ¸ðµç Effect¸¦ UpdateÇÑ´Ù.
+	// 모든 Effect를 Update한다.
 	while (iEffect != m_listEffect.end())
 	{
 		MAttachEffect*	pEffect = *iEffect;
 		
-		// ½Ã¾ß »èÁ¦
+		// 시야 삭제
 //		g_pZone->SetLight(pEffect->GetX(), pEffect->GetY(), pEffect->GetLight());
 
-		// ´ÙÀ½ ²¨
+		// 다음 꺼
 		iEffect++;
 	}
 }
@@ -4034,28 +4034,28 @@ MCreature::SetLightSightAttachEffect()
 //----------------------------------------------------------------------
 // Set Dead
 //----------------------------------------------------------------------
-// Á×´Â actionInfo¸¦ º¸¿©ÁÖ°í Á×´Â´Ù.
+// 죽는 actionInfo를 보여주고 죽는다.
 //----------------------------------------------------------------------
 void
 MCreature::SetDead()
 {
-	// »ì¾Æ ÀÖ´Â °æ¿ì¸¸ Á×ÀÎ´Ù. -_-;;
+	// 살아 있는 경우만 죽인다. -_-;;
 	if (m_bAlive)
 	{	
 //		if(HasEffectStatus(EFFECTSTATUS_HIDE_TO_ATTACKER))
 //		{
-//			if(GetCreatureType() == 738) // ÇÃ·¡Á® ½ºÅ×ÀÌ¼Ç
+//			if(GetCreatureType() == 738) // 플래져 스테이션
 //				ExecuteActionInfoFromMainNode(SKILL_PLEASURE_EXPLOSION,GetX(), GetY(), 0,GetDirection(),	GetID(),	
 //								GetX(), GetY(), 0, 20, NULL, false);			
-//			else if(GetCreatureType() == 739) // ·£µå ¸¶ÀÎ
+//			else if(GetCreatureType() == 739) // 랜드 마인
 //				ExecuteActionInfoFromMainNode(SKILL_LAND_MINE_EXPLOSION,GetX(), GetY(), 0,GetDirection(),	GetID(),	
 //								GetX(), GetY(), 0, 0, NULL, false);	
-//			else if(GetCreatureType() == 740) // Å¬·¹ÀÌ ¸ð¾î
+//			else if(GetCreatureType() == 740) // 클레이 모어
 //				ExecuteActionInfoFromMainNode(SKILL_CLAYMORE_EXPLOSION,GetX(), GetY(), 0,GetDirection(),	GetID(),	
 //								GetX(), GetY(), 0, 20, NULL, false);	
 //		}
 		//if(HasEffectStatus( EFFECTSTATUS_SUMMON_SYLPH ) )
-		if(GetCreatureType() == 723) // °¢¼º Áúµå·¹
+		if(GetCreatureType() == 723) // 각성 질드레
 			ExecuteActionInfoFromMainNode(SKILL_CLIENT_GDR_DEAD, GetX(), GetY(), 0,GetDirection(),	GetID(),	
 								GetX(), GetY(), 0, 20, NULL, false);			
 
@@ -4080,22 +4080,22 @@ MCreature::SetDead()
 		StopAbsorb();
 
 		//-------------------------------------------------------`
-		// server blockÁÂÇ¥ ¾ø¾ÖÁÖ±â
+		// server block좌표 없애주기
 		//-------------------------------------------------------
 		m_pZone->UnSetServerBlock(m_MoveType, m_ServerX, m_ServerY);
 	
-		// 2002.3.22 Ãß°¡
+		// 2002.3.22 추가
 		SetGroundCreature();
 
 		MovePosition( m_ServerX, m_ServerY );
 		SetStop();
 
-		// ´Ù¸¥ °á°ú¸¦ Àû¿ë½ÃÅ²´Ù.
+		// 다른 결과를 적용시킨다.
 		AffectUsedActionInfo(m_nUsedActionInfo);		
 		m_nUsedActionInfo	= ACTIONINFO_NULL;
 		m_nSpecialActionInfo = ACTIONINFO_NULL;
 
-		// Á×À» ¶§ÀÇ ActionInfo	
+		// 죽을 때의 ActionInfo	
 		m_nNextUsedActionInfo	= (*g_pCreatureTable)[m_CreatureType].DeadActionInfo;	
 
 		MActionResultNode* pActionResultNode = CreateActionResultNode(this, m_nNextUsedActionInfo);
@@ -4116,10 +4116,10 @@ MCreature::SetDead()
 		
 		if (m_nNextUsedActionInfo!=ACTIONINFO_NULL)
 		{		
-			// Á×À» ¶§ÀÇ µ¿ÀÛ
+			// 죽을 때의 동작
 			SetNextAction( GetActionInfoAction(m_nNextUsedActionInfo) );
 
-			// ³ªÇÑÅ× ÇÏ´Â µ¿ÀÛ
+			// 나한테 하는 동작
 			SetTraceID( m_ID );
 			m_TraceX				= m_X;
 			m_TraceY				= m_Y;
@@ -4127,7 +4127,7 @@ MCreature::SetDead()
 		}
 
 		//-------------------------------------------------------
-		// º¸ÀÌ°Ô ÇÏ±â
+		// 보이게 하기
 		//-------------------------------------------------------
 		SetVisibleSoon();
 
@@ -4139,17 +4139,17 @@ MCreature::SetDead()
 		m_Z = 0;
 
 
-		// Á×¾ú´Ù.
+		// 죽었다.
 		m_bAlive = false;	
 		m_bInCasket = false;
 
 		//-------------------------------------------------------
-		// Effect Á¦°Å
+		// Effect 제거
 		//-------------------------------------------------------
 		ClearAttachEffect();
 
 		//-------------------------------------------------------
-		// Effect»óÅÂµé Á¦°Å
+		// Effect상태들 제거
 		//-------------------------------------------------------
 		if (g_pEffectStatusTable!=NULL)
 		{
@@ -4162,7 +4162,7 @@ MCreature::SetDead()
 			}
 		}
 
-		// ´ÙÅ©´Ï½º ¹þ¾î³ª±â..
+		// 다크니스 벗어나기..
 		m_DarknessCount = -1;
 		m_DarknessCountInc = 0;
 
@@ -4172,36 +4172,36 @@ MCreature::SetDead()
 //----------------------------------------------------------------------
 // Set Corpse
 //----------------------------------------------------------------------
-// Á×¾î ÀÖ´Â »óÅÂ·Î ¸¸µç´Ù. --> ¹Ù·Î ½ÃÃ¼·Î..
+// 죽어 있는 상태로 만든다. --> 바로 시체로..
 //----------------------------------------------------------------------
 void
 MCreature::SetCorpse()
 {	
 	//-------------------------------------------------------
-	// server blockÁÂÇ¥ ¾ø¾ÖÁÖ±â
+	// server block좌표 없애주기
 	//-------------------------------------------------------
 	m_pZone->UnSetServerBlock(m_MoveType, m_ServerX, m_ServerY);
 
-	// Á¤Áö
+	// 정지
 	SetStop();
 
-	// Á×´Â ¸ð½À
+	// 죽는 모습
 	ACTIONINFO deadAI = (enum ACTIONINFO)(*g_pCreatureTable)[m_CreatureType].DeadActionInfo;
 	
-	// Á×À» ¶§ÀÇ µ¿ÀÛ
+	// 죽을 때의 동작
 	SetAction( GetActionInfoAction(deadAI) );
 
-	// 2002.3.22 Ãß°¡
+	// 2002.3.22 추가
 	SetGroundCreature();
 	
-	// µ¿ÀÛ ¸ðµÎ ¼öÇà..
+	// 동작 모두 수행..
 	m_ActionCount	= GetActionCountMax(); 
 	m_MoveCount		= m_MoveCountMax;
 	
-	// Á×¾ú´Ù.
+	// 죽었다.
 	m_bAlive = false;
 
-	// ´ÙÅ©´Ï½º ¹þ¾î³ª±â..
+	// 다크니스 벗어나기..
 	m_DarknessCount = -1;
 	m_DarknessCountInc = 0;
 }
@@ -4212,7 +4212,7 @@ MCreature::SetCorpse()
 void
 MCreature::SetAlive()
 {
-	// »ì¾Æ³­´Ù. 
+	// 살아난다. 
 	m_bAlive = true;
 
 	m_bHasHead = true;
@@ -4220,7 +4220,7 @@ MCreature::SetAlive()
 	SetAction( ACTION_STAND );
 
 	//-------------------------------------------------------
-	// Effect»óÅÂµé Á¦°Å
+	// Effect상태들 제거
 	//-------------------------------------------------------
 	/*
 	if (g_pEffectStatusTable!=NULL)
@@ -4232,7 +4232,7 @@ MCreature::SetAlive()
 	}
 	*/
 
-	if ((*g_pCreatureTable)[m_CreatureType].bFlyingCreature)	// ¹ÚÁãÀÎ °æ¿ì¿¡´Â SetGroundCreatureÇß´ø°Å ¶§¸Å ´Ù½Ã m_MoveType¸¦ ¹Ù²ãÁØ´Ù
+	if ((*g_pCreatureTable)[m_CreatureType].bFlyingCreature)	// 박쥐인 경우에는 SetGroundCreature했던거 때매 다시 m_MoveType를 바꿔준다
 		m_MoveType = CREATURE_FLYING;
 
 	if (m_MoveType == CREATURE_FLYING)
@@ -4244,7 +4244,7 @@ MCreature::SetAlive()
 //----------------------------------------------------------------------
 // Set NextAction
 //----------------------------------------------------------------------
-// ´ÙÀ½¿¡ ÇÒ Çàµ¿À» ¼³Á¤ÇÑ´Ù.
+// 다음에 할 행동을 설정한다.
 //----------------------------------------------------------------------
 void			
 MCreature::SetNextAction(BYTE action)
@@ -4255,7 +4255,7 @@ MCreature::SetNextAction(BYTE action)
 //----------------------------------------------------------------------
 // Set NextAction to Move
 //----------------------------------------------------------------------
-// ´ÙÀ½ action¿¡´Â moveÇÑ´Ù.
+// 다음 action에는 move한다.
 //----------------------------------------------------------------------
 void	
 MCreature::SetNextActionToMove()
@@ -4299,7 +4299,7 @@ MCreature::UpdateCutHeight()
 			m_CutHeightCountInc = 0;
 		}	
 		
-		// ºùºù µ¹¸°´Ù.
+		// 빙빙 돌린다.
 		m_Direction = ((m_Direction+1) & 0x07);		
 
 		if( GetCreatureType() == 702 || GetCreatureType() == 703 || GetCreatureType() == 704 )
@@ -4324,7 +4324,7 @@ MCreature::UpdateTurning()
 		}
 		else
 		{
-			// ºùºù µ¹¸°´Ù.
+			// 빙빙 돌린다.
 			m_Direction = ((m_Direction+1) & 0x07);
 		}
 	}
@@ -4354,7 +4354,7 @@ MCreature::UpdateCauseCriticalWounds()
 		else if(m_ActionCount < 10)
 			m_ActionCount++;
 
-		if(m_CreatureType == 793) // ½½·¹ÀÌ¾î Á¦¹° -_-;
+		if(m_CreatureType == 793) // 슬레이어 제물 -_-;
 			m_ActionCount = 20;
 
 	#ifdef OUTPUT_DEBUG					
@@ -4409,7 +4409,7 @@ MCreature::UpdateBloodyZenith()
 		{
 			StopBloodyZenith();
 //			char TempBuffer[256];
-//			sprintf(TempBuffer,"ºí·¯µð Á¦´Ï½º ³¡ a:%d, n:%d, n:%d, z:%d,s:%d", m_nUsedActionInfo, m_NextAction, m_nNextUsedActionInfo,MAGIC_BLOODY_ZENITH,SKILL_SET_AFIRE);
+//			sprintf(TempBuffer,"블러디 제니스 끝 a:%d, n:%d, n:%d, z:%d,s:%d", m_nUsedActionInfo, m_NextAction, m_nNextUsedActionInfo,MAGIC_BLOODY_ZENITH,SKILL_SET_AFIRE);
 //			
 //			g_pSystemMessage->Add(TempBuffer);
 //			SetStop();
@@ -4537,9 +4537,9 @@ MCreature::SetSameBody(const MCreature* pCreature)
 //----------------------------------------------------------------------
 // Set Action
 //----------------------------------------------------------------------
-// ÇÑ Action¸¶´Ù Frame¼ö°¡ ´Ù¸¦ °ÍÀÌ´Ù.. 
-// ÀÌ°Å´Â file·Î »©¼­ Á¤º¸¸¦ µÎ´Â°Ô ³ªÀ» °ÍÀÎµ¥
-// FRAME_PACK¿¡¼­ ÀÐ¾î¿Í¾ß ÇÑ´Ù.
+// 한 Action마다 Frame수가 다를 것이다.. 
+// 이거는 file로 빼서 정보를 두는게 나을 것인데
+// FRAME_PACK에서 읽어와야 한다.
 //----------------------------------------------------------------------
 void
 MCreature::SetAction(BYTE action)
@@ -4552,7 +4552,7 @@ MCreature::SetAction(BYTE action)
 //		return;
 //	}
 
-	// ¹«Á¶°Ç ²¨ÁØ´Ù.
+	// 무조건 꺼준다.
 	m_bFastMove = false;
 
 	if (!m_bAlive
@@ -4569,13 +4569,13 @@ MCreature::SetAction(BYTE action)
 //	if(action>ACTION_OUSTERS_MAGIC_ATTACK)
 //		int i = 0;
 	//-----------------------------------------------------------------
-	// ÇöÀç ¸ð½ÀÀÇ action¿¡ ¸Â´Â °æ¿ì. 2001.10.5
+	// 현재 모습의 action에 맞는 경우. 2001.10.5
 	//-----------------------------------------------------------------
 	if (action < GetActionMax())
 	{
 		
 		//-----------------------------------------------------
-		// ¿ÀÅä¹ÙÀÌ Å¸°í ÀÖÀ»¶§
+		// 오토바이 타고 있을때
 		//-----------------------------------------------------
 		if (m_MoveDevice==MOVE_DEVICE_RIDE)
 		{
@@ -4592,7 +4592,7 @@ MCreature::SetAction(BYTE action)
 			}
 		} else
 			//-----------------------------------------------------
-			// °É¾î´Ù´Ò¶§
+			// 걸어다닐때
 			//-----------------------------------------------------
 		{
 			if (IsSlayer())
@@ -4622,12 +4622,12 @@ MCreature::SetAction(BYTE action)
 		m_bNextAction = false;
 			
 		//------------------------------------------------
-		// MoveÀÎ °æ¿ì
+		// Move인 경우
 		//------------------------------------------------
 		if (action==m_MoveAction)//ACTION_MOVE || action==ACTION_SLAYER_MOTOR_MOVE)
 		{
-			// ±×³É ¼­ÀÖ´Â °æ¿ì¸é... ³¡µ¿ÀÛÀ¸·Î ¸¸µç´Ù.
-			// ActionÀÌ ³¡³µ´Ù°í Ç¥½ÃÇØÁÖ±â À§ÇØ¼­..
+			// 그냥 서있는 경우면... 끝동작으로 만든다.
+			// Action이 끝났다고 표시해주기 위해서..
 			if (m_Action==ACTION_STAND 
 				|| IsSlayer() && m_Action==ACTION_SLAYER_MOTOR_STAND)
 			{			
@@ -4635,30 +4635,30 @@ MCreature::SetAction(BYTE action)
 				m_ActionCountMax = 0;			
 			}		
 
-			// ActionÀÌ ³¡³­ °æ¿ì¸¸ ActionÀ» Move·Î ÇÑ´Ù.
-			// ¾Æ´Ñ °æ¿ì´Â.. ActionÀÌ ³¡³ª°í Move·Î ¹Ù²ï´Ù.
+			// Action이 끝난 경우만 Action을 Move로 한다.
+			// 아닌 경우는.. Action이 끝나고 Move로 바뀐다.
 			if (m_ActionCount>=GetActionCountMax())
 			{
 				m_Action = action;
 			}		
 
-			// Á¤Áö
+			// 정지
 			m_sX = 0;
 			m_sY = 0;
 
-			// Server¿¡¼­ °ËÁõµÈ À§Ä¡·Î ÀÌµ¿½ÃÅ²´Ù.
+			// Server에서 검증된 위치로 이동시킨다.
 			//MovePosition( m_ServerX, m_ServerY );
 			
 			// [ TEST CODE ]
-			// ActionÀ» ¾ø¾Ø´Ù.
-			// --> ¾È ¾ø¾Ö¸é.. ActionÀÌ ³¡³ª°í Move°¡ ¼öÇàµÈ´Ù. 
-			// ±×·±µ¥, Move°¡ ¾ÈµÅ¼­ ÁÂÇ¥°¡ ºø³ª°¥ È®·üÀÌ ÀÖ´Ù. Èì!!
+			// Action을 없앤다.
+			// --> 안 없애면.. Action이 끝나고 Move가 수행된다. 
+			// 그런데, Move가 안돼서 좌표가 빗나갈 확률이 있다. 흠!!
 			//m_ActionCount = 0;
 			//m_ActionCountMax = 0;
 
 			m_RepeatCount = 0;
 
-			// Move Ã¹ µ¿ÀÛ
+			// Move 첫 동작
 			m_MoveCount = 0;
 			m_NextMoveCount = 0;
 			
@@ -4669,12 +4669,12 @@ MCreature::SetAction(BYTE action)
 
 		}
 		//------------------------------------------------
-		// ActionÀÎ °æ¿ì
+		// Action인 경우
 		//------------------------------------------------
 		else
 		{
 			//------------------------------------------------
-			// extremeÀº Æ¯Á¤ µ¿ÀÛ¿¡¼­ Ç®¸°´Ù.
+			// extreme은 특정 동작에서 풀린다.
 			//------------------------------------------------
 //			if (HasEffectStatus(EFFECTSTATUS_EXTREME))
 //			{
@@ -4687,15 +4687,15 @@ MCreature::SetAction(BYTE action)
 //				}
 //			}
 
-			if (// ¿ÀÅä¹ÙÀÌ Å¸°í ÀÖÀ»¶§´Â action ¾È º¸¿©ÁØ´Ù.
+			if (// 오토바이 타고 있을때는 action 안 보여준다.
 				m_MoveDevice==MOVE_DEVICE_RIDE && action!=ACTION_SLAYER_MOTOR_STAND
-				// damagedÀÎ °æ¿ì..
+				// damaged인 경우..
 				|| action==ACTION_DAMAGED 						
-						&& (// °ø°Ý¹Þ´Â ÁßÀÌ ¾Æ´Ï°Å³ª Á¤Áö µ¿ÀÛÀÌ ¾Æ´Ï¸é °ø°Ý ¹Þ´Â ¸ð½À Ç¥Çö ¾È ÇÑ´Ù
+						&& (// 공격받는 중이 아니거나 정지 동작이 아니면 공격 받는 모습 표현 안 한다
 							m_Action!=ACTION_DAMAGED && m_Action!=ACTION_STAND && m_Action!=ACTION_MOVE
-						//&& (// ÈíÇ÷ ´çÇÏ´Â µ¿ÀÛ ÁßÀÌ°Å³ª 
+						//&& (// 흡혈 당하는 동작 중이거나 
 						//	m_Action==ACTION_DRAINED
-							// ¹ìÆÄÀÌ¾îÀÏ¶§, ÈíÇ÷ÇÏ´Â µ¿ÀÛ Áß¿¡´Â damaged¸¦ ¾È º¸¿©ÁØ´Ù.
+							// 뱀파이어일때, 흡혈하는 동작 중에는 damaged를 안 보여준다.
 						//	|| IsVampire() && m_Action==ACTION_VAMPIRE_DRAIN
 							)
 				)
@@ -4705,7 +4705,7 @@ MCreature::SetAction(BYTE action)
 			}
 
 			
-			// 2005, 1, 6, sobeit add start - motor ride move ÇÏ´øÁß stop °¡ ³¯¶ó¿À¸é ÇÑ¹øÀº ¹«½Ã..
+			// 2005, 1, 6, sobeit add start - motor ride move 하던중 stop 가 날라오면 한번은 무시..
 			if (IsAdvancementClass() && m_MoveDevice==MOVE_DEVICE_RIDE && action == ACTION_SLAYER_MOTOR_STAND&& m_Action==ACTION_SLAYER_MOTOR_MOVE)
 			{
 				if(!m_IsSkipMotorStand)
@@ -4722,14 +4722,14 @@ MCreature::SetAction(BYTE action)
 
 			if (m_ActionCountMax==0)
 			{
-				// µ¿ÀÛÀÌ ¾ø´Â °æ¿ì
+				// 동작이 없는 경우
 				m_Action = (m_MoveDevice==MOVE_DEVICE_WALK)? ACTION_STAND : ACTION_SLAYER_MOTOR_STAND;
 				m_ActionCount = 0;		
 				m_RepeatCount = 0;
 				//m_ActionCountMax = (*g_pCreatureTable)[m_CreatureType].GetActionCount( m_Action );
 				m_ActionCountMax = GetCreatureActionCountMax( this, m_Action );
 				
-				// ¹Ø¿¡ ÇØ³ù±æ·¡ ÀÏ´Ü ÇØ³õ´Âµ¥.. ¹ºÁö ¸ô°Ú´Ù - -; 2002.1.10
+				// 밑에 해놨길래 일단 해놓는데.. 뭔지 몰겠다 - -; 2002.1.10
 				m_nSpecialActionInfo = ACTIONINFO_NULL;
 			}
 			else
@@ -4737,11 +4737,11 @@ MCreature::SetAction(BYTE action)
 				m_Action = action;			
 
 				//---------------------------------------------
-				// actionÀ» ¹Ýº¹ÇÏ´Â °æ¿ì
+				// action을 반복하는 경우
 				//---------------------------------------------
-				// ¹Ýº¹ actionÀÇ ½ÃÀÛºÎÅÍ º¸¿©ÁØ´Ù.
-				// ±×·¯³ª, ´ÙÀ½ ¹Ýº¹ packetÀÌ ¾ðÁ¦ ¿ÃÁö ¸ð¸£±â ¶§¹®¿¡..
-				// ActionCounMax´Â ¹«Á¶°Ç ³¡~frameÀ¸·Î Á¤ÇÑ´Ù.
+				// 반복 action의 시작부터 보여준다.
+				// 그러나, 다음 반복 packet이 언제 올지 모르기 때문에..
+				// ActionCounMax는 무조건 끝~frame으로 정한다.
 				//---------------------------------------------
 //				BOOL bSlayer = IsSlayer();
 
@@ -4751,7 +4751,7 @@ MCreature::SetAction(BYTE action)
 					//&& (*g_pActionInfoTable)[m_nUsedActionInfo].IsUseRepeatFrame())
 					)
 				{
-					// count ¼³Á¤..
+					// count 설정..
 					
 					m_ActionCount = GetActionInfoRepeatStartFrame( m_nSpecialActionInfo );
 //					char Msg[128];
@@ -4759,16 +4759,16 @@ MCreature::SetAction(BYTE action)
 //					g_pSystemMessage->Add(Msg);	
 				}
 				//---------------------------------------------
-				// ÀÏ¹ÝÀûÀÎ °æ¿ì..
+				// 일반적인 경우..
 				//---------------------------------------------
 				else
 				{			
-					// count ¼³Á¤..
+					// count 설정..
 					m_ActionCount = 0;		
 					m_RepeatCount = 0;
 
 					// 2004, 11, 12, sobeit modify start - block
-					// ÀÌ°Å ¹¹Áö? ¿Ö ÇØ³ù´ÂÁö ¸ð¸£°Ú³×.. - -;; 2002.1.10
+					// 이거 뭐지? 왜 해놨는지 모르겠네.. - -;; 2002.1.10
 				//	m_nSpecialActionInfo = ACTIONINFO_NULL;	
 					// 2004, 11, 12, sobeit modify end - block
 				}				
@@ -4780,8 +4780,8 @@ MCreature::SetAction(BYTE action)
 		m_nSpecialActionInfo = ACTIONINFO_NULL;	
 	// 2004, 11, 12, sobeit add end - block
 
-	// µ¿ÀÛÀ» ½ÃÀÛÇÒ¶§ ºÎ°¡ÀûÀ¸·Î ºÙ´Â Effect µé.
-	// ¾îµò°¡·Î »©¾ß ÇÏ´Âµ¥.-_-
+	// 동작을 시작할때 부가적으로 붙는 Effect 들.
+	// 어딘가로 빼야 하는데.-_-
 	if( HasEffectStatus( EFFECTSTATUS_REDIANCE ) )
 	{
 		if( 
@@ -4809,7 +4809,7 @@ MCreature::SetAction(BYTE action)
 		}				
 	}
 
-//	// 2004, 9, 8, sobeit add start - µµ½½ 130 ½ºÅ³ °ü·Ã
+//	// 2004, 9, 8, sobeit add start - 도슬 130 스킬 관련
 //	else if(HasEffectStatus(EFFECTSTATUS_BURNING_SOL_CHARGE_1)||
 //			HasEffectStatus(EFFECTSTATUS_BURNING_SOL_CHARGE_2)||
 //			HasEffectStatus(EFFECTSTATUS_BURNING_SOL_CHARGE_3)||
@@ -4825,7 +4825,7 @@ MCreature::SetAction(BYTE action)
 //			m_Action = ACTION_SLAYER_BLADE;
 //	
 //	}
-//	// 2004, 9, 8, sobeit add end - µµ½½ 130 ½ºÅ³ °ü·Ã
+//	// 2004, 9, 8, sobeit add end - 도슬 130 스킬 관련
 	m_NextAction = (m_MoveAction==ACTION_SLAYER_MOTOR_MOVE)? ACTION_SLAYER_MOTOR_STAND : ACTION_STAND;
 }
 
@@ -4881,7 +4881,7 @@ MCreature::SetPersnalString(char *str, COLORREF color)
 	{
 		endIndex = startIndex + g_pClientConfig->MAX_CHATSTRING_LENGTH;
 
-		// Å©¸®½º¸¶½º Æ®¸®¿ë ÇÏµå ÄÚµù
+		// 크리스마스 트리용 하드 코딩
 		bool bTree = false;
 		char *find = strchr(str+startIndex, '\n'); 
 		if(find != NULL)
@@ -4891,23 +4891,23 @@ MCreature::SetPersnalString(char *str, COLORREF color)
 			bTree = true;
 		}
 		
-		// lenÀÌ Â¥¸¦¸¸ÇÑ ±æÀÌµµ ¾ÈµÇ¸é...
+		// len이 짜를만한 길이도 안되면...
 		if (endIndex >= len)
 		{
 			endIndex = len;
 
-			// ÀÏÁ¤ °³¼öÀÇ StringÀ» copyÇÑ´Ù.
+			// 일정 개수의 String을 copy한다.
 			strcpy(m_ChatString[m_ChatStringCurrent], str+startIndex);					
 		}
 		else
 		{
-			// g_pClientConfig->MAX_CHATSTRING_LENGTH°³¸¦ Â¥¸¦ ¼ö ¾ø´Â°¡?
+			// g_pClientConfig->MAX_CHATSTRING_LENGTH개를 짜를 수 없는가?
 			if (!g_PossibleStringCut(str, endIndex))
 			{
 				endIndex --;
 			}			
 			
-			// startIndex ~ endIndex-1 ±îÁö strcpy
+			// startIndex ~ endIndex-1 까지 strcpy
 			char	*pSource=str+startIndex, 
 					*pDest	=m_ChatString[m_ChatStringCurrent];
 			for (int i=startIndex; i<endIndex; i++)
@@ -4922,19 +4922,19 @@ MCreature::SetPersnalString(char *str, COLORREF color)
 			}
 		}
 
-		// ´ÙÀ½ ÁÙ..
+		// 다음 줄..
 		m_ChatStringCurrent++;
 		if (m_ChatStringCurrent==g_pClientConfig->MAX_CHATSTRING) m_ChatStringCurrent=0;
 
-		// index¸¦ ¹Ù²Û´Ù.
+		// index를 바꾼다.
 		startIndex = endIndex;
 	}
 	
-	// Ã¤ÆÃ StringÀÌ DelayµÉ ½Ã°£À» ÁöÁ¤ÇØÁØ´Ù.	
+	// 채팅 String이 Delay될 시간을 지정해준다.	
 //	m_NextChatFadeTime = g_CurrentTime + g_pClientConfig->DELAY_CHATSTRING_KEEP;
 //	m_NextChatFadeTime = g_CurrentTime + 0xFFFFFFFF;
 
-	// Ã¤ÆÃ »ö±ò
+	// 채팅 색깔
 //	m_ChatColor = RGB(50, 50, 200);//RGB_WHITE;//0xFFFF;
 //	m_OriChatColor = m_ChatColor;
 	
@@ -4956,7 +4956,7 @@ MCreature::SetPersnalString(char *str, COLORREF color)
 //----------------------------------------------------------------------
 // Set ChatString
 //----------------------------------------------------------------------
-// StringÀ» Ãß°¡ÇÑ´Ù. ³¡¿¡~..
+// String을 추가한다. 끝에~..
 //----------------------------------------------------------------------
 void		
 MCreature::SetChatString(char *str, COLORREF color)
@@ -4995,7 +4995,7 @@ MCreature::SetChatString(char *str, COLORREF color)
 //
 //	str = (char*)temp.c_str();
 
-	// Å©¸®½º¸¶½º Æ®¸®¿ë ÇÏµåÄÚµù
+	// 크리스마스 트리용 하드코딩
 	char *szTreeFrom = NULL;
 	if( GetCreatureType() == 482 || GetCreatureType() == 650 )
 	{
@@ -5036,35 +5036,35 @@ MCreature::SetChatString(char *str, COLORREF color)
 
 	int len = strlen(str);
 	
-	if(strstr(str, "¹èÃ¶¼ü´Ï´Ù") != NULL)
+	if(strstr(str, "배철숩니다") != NULL)
 	{
 		m_HeadSkin = 215;
 	}
-	else if(strstr(str, "ÇØ°ñ¹Ù°¡Áö") != NULL)
+	else if(strstr(str, "해골바가지") != NULL)
 	{
 		m_HeadSkin = 149;
 	}
-	else if(strstr(str, "´Á´ëÀÎ°£") != NULL)
+	else if(strstr(str, "늑대인간") != NULL)
 	{
 		m_HeadSkin = 397;
 	}
-	else if(strstr(str, "´ß´ë°¡¸®") != NULL)
+	else if(strstr(str, "닭대가리") != NULL)
 	{
 		m_HeadSkin = 221;
 	}
-	else if(strstr(str, "°¡¸é¶óÀÌ´õ") != NULL)
+	else if(strstr(str, "가면라이더") != NULL)
 	{
 		m_HeadSkin = 316;
 	}
 
 
-	// ÇÑ ¹®ÀåÀÇ StringÀ» ÀûÀýÇÑ ±æÀÌ·Î Àß¶óÁØ´Ù~~
+	// 한 문장의 String을 적절한 길이로 잘라준다~~
 	DEBUG_ADD("[SetChatString] before while");
 	while (endIndex < len)
 	{
 		endIndex = startIndex + g_pClientConfig->MAX_CHATSTRING_LENGTH;
 
-		// Å©¸®½º¸¶½º Æ®¸®¿ë ÇÏµå ÄÚµù
+		// 크리스마스 트리용 하드 코딩
 		bool bTree = false;
 		if(GetCreatureType() == 482 || GetCreatureType() == 650 )
 		{
@@ -5077,23 +5077,23 @@ MCreature::SetChatString(char *str, COLORREF color)
 			}
 		}
 		
-		// lenÀÌ Â¥¸¦¸¸ÇÑ ±æÀÌµµ ¾ÈµÇ¸é...
+		// len이 짜를만한 길이도 안되면...
 		if (endIndex >= len)
 		{
 			endIndex = len;
 
-			// ÀÏÁ¤ °³¼öÀÇ StringÀ» copyÇÑ´Ù.
+			// 일정 개수의 String을 copy한다.
 			strcpy(m_ChatString[m_ChatStringCurrent], str+startIndex);					
 		}
 		else
 		{
-			// g_pClientConfig->MAX_CHATSTRING_LENGTH°³¸¦ Â¥¸¦ ¼ö ¾ø´Â°¡?
+			// g_pClientConfig->MAX_CHATSTRING_LENGTH개를 짜를 수 없는가?
 			if (!g_PossibleStringCut(str, endIndex))
 			{
 				endIndex --;
 			}			
 			
-			// startIndex ~ endIndex-1 ±îÁö strcpy
+			// startIndex ~ endIndex-1 까지 strcpy
 			char	*pSource=str+startIndex, 
 					*pDest	=m_ChatString[m_ChatStringCurrent];
 			for (int i=startIndex; i<endIndex; i++)
@@ -5108,16 +5108,16 @@ MCreature::SetChatString(char *str, COLORREF color)
 			}
 		}
 
-		// ´ÙÀ½ ÁÙ..
+		// 다음 줄..
 		m_ChatStringCurrent++;
 		if (m_ChatStringCurrent==g_pClientConfig->MAX_CHATSTRING) m_ChatStringCurrent=0;
 
-		// index¸¦ ¹Ù²Û´Ù.
+		// index를 바꾼다.
 		startIndex = endIndex;
 	}
 	DEBUG_ADD("[SetChatString] while ok");
 
-	// Å©¸®½º¸¶½º Æ®¸®¿ë ÇÏµåÄÚµù
+	// 크리스마스 트리용 하드코딩
 	if(GetCreatureType() == 482 || GetCreatureType() == 650)
 	{
 		DEBUG_ADD("[SetChatString] Tree code");
@@ -5132,21 +5132,21 @@ MCreature::SetChatString(char *str, COLORREF color)
 
 		strcpy(m_ChatString[m_ChatStringCurrent], szTemp);
 
-		// ´ÙÀ½ ÁÙ..
+		// 다음 줄..
 		m_ChatStringCurrent++;
 
 		DEBUG_ADD("[SetChatString] Tree code ok");
 	}
 	
 
-	// Ã¤ÆÃ StringÀÌ DelayµÉ ½Ã°£À» ÁöÁ¤ÇØÁØ´Ù.	
+	// 채팅 String이 Delay될 시간을 지정해준다.	
 	m_NextChatFadeTime = g_CurrentTime + g_pClientConfig->DELAY_CHATSTRING_KEEP;
 
-	// Ã¤ÆÃ »ö±ò
+	// 채팅 색깔
 	m_ChatColor = color;//RGB_WHITE;//0xFFFF;
 	m_OriChatColor = m_ChatColor;
 	
-	// Å©¸®½º¸¶½º Æ®¸®¿ë ÇÏµå ÄÚµù
+	// 크리스마스 트리용 하드 코딩
 	if(GetCreatureType() == 482 || GetCreatureType() == 650)
 	{
 		m_NextChatFadeTime = 0;
@@ -5156,7 +5156,7 @@ MCreature::SetChatString(char *str, COLORREF color)
 		m_OriChatColor |= 0xFF000000;
 	}
 
-	// ¸»ÇÑ ½Ã°£ ¼³Á¤
+	// 말한 시간 설정
 	m_ChatTime = g_CurrentFrame;
 	
 
@@ -5171,7 +5171,7 @@ MCreature::SetChatString(char *str, COLORREF color)
 //----------------------------------------------------------------------
 // Fade ChatString
 //----------------------------------------------------------------------
-// ChatStringÀ» ¾îµÓ°Ô ÇÑ´Ù.
+// ChatString을 어둡게 한다.
 //----------------------------------------------------------------------
 void		
 MCreature::FadeChatString()
@@ -5182,7 +5182,7 @@ MCreature::FadeChatString()
 	m_ChatStringCurrent++;
 	if (m_ChatStringCurrent==g_pClientConfig->MAX_CHATSTRING) m_ChatStringCurrent=0;
 
-	// Ã¤ÆÃ StringÀÌ DelayµÉ ½Ã°£À» ÁöÁ¤ÇØÁØ´Ù.	
+	// 채팅 String이 Delay될 시간을 지정해준다.	
 	m_NextChatFadeTime = g_CurrentTime + DELAY_FADECHATSTRING;
 	*/
 
@@ -5210,7 +5210,7 @@ MCreature::FadeChatString()
 
 	if (b>=g_pClientConfig->MIN_CHATSTRING_COLOR256)
 	{
-		// Å©¸®½º¸¶½º Æ®¸®¿ë ÇÏµåÄÚµù
+		// 크리스마스 트리용 하드코딩
 		if(GetCreatureType() == 482 || GetCreatureType() == 650)
 		{
 			b -= g_pClientConfig->VALUE_CHATSTRING_FADE*4;
@@ -5229,7 +5229,7 @@ MCreature::FadeChatString()
 	}
 	else
 	{
-		// Å©¸®½º¸¶½º Æ®¸®¿ë ÇÏµåÄÚµù
+		// 크리스마스 트리용 하드코딩
 		if(GetCreatureType() == 482 || GetCreatureType() == 650)
 		{
 			const int treeColorMax = 18;
@@ -5258,7 +5258,7 @@ MCreature::FadeChatString()
 				RGB(200, 200, 255),
 			};
 
-			// Ã¤ÆÃ »ö±ò
+			// 채팅 색깔
 			COLORREF color = 0;
 			
 			do
@@ -5291,13 +5291,13 @@ MCreature::FadeChatString()
 // Get ChatString
 //----------------------------------------------------------------------
 // 0 ~ g_pClientConfig->MAX_CHATSTRING-1
-// 0ÀÌ °¡Àå ¿À·¡µÈ StringÀÌ°í g_pClientConfig->MAX_CHATSTRING-1ÀÌ °¡Àå ÃÖ±Ù¿¡ °ÍÀ¸·Î
-// returnÇØ¾ß ÇÑ´Ù.
+// 0이 가장 오래된 String이고 g_pClientConfig->MAX_CHATSTRING-1이 가장 최근에 것으로
+// return해야 한다.
 //----------------------------------------------------------------------
 const char*	
 MCreature::GetChatString(BYTE i)
 { 
-	//                          i   = ½ÇÁ¦·Î returnµÇ¾î¾ß ÇÏ´Â °ª
+	//                          i   = 실제로 return되어야 하는 값
 	//m_ChatStringCurrent - (3-[0]) = m_ChatStringCurrent;
 	//m_ChatStringCurrent - (3-[1]) = m_ChatStringCurrent - 2;
 	//m_ChatStringCurrent - (3-[2]) = m_ChatStringCurrent - 1;
@@ -5315,7 +5315,7 @@ MCreature::GetChatString(BYTE i)
 //----------------------------------------------------------------------
 // Check AffectStatus
 //----------------------------------------------------------------------
-// pItemÀ» this Creature°¡ »ç¿ëÇÒ ¼ö ÀÖ´ÂÁöÀÇ ¿©ºÎ¸¦ Ã¼Å©ÇØ¼­ ¼³Á¤ÇÑ´Ù.
+// pItem을 this Creature가 사용할 수 있는지의 여부를 체크해서 설정한다.
 //----------------------------------------------------------------------
 void	
 MCreature::CheckAffectStatus(MItem* pItem)
@@ -5340,7 +5340,7 @@ MCreature::CheckAffectStatus(MItem* pItem)
 		if (pItem->IsSlayerItem())
 		{
 			//-----------------------------------------------------
-			// ½½·¹ÀÌ¾îÀÎ °æ¿ì´Â STR, DEX, INTÃ¼Å©
+			// 슬레이어인 경우는 STR, DEX, INT체크
 			//-----------------------------------------------------
 			int reqSTR = pItem->GetRequireSTR();
 			int reqDEX = pItem->GetRequireDEX();
@@ -5353,12 +5353,12 @@ MCreature::CheckAffectStatus(MItem* pItem)
 			int sum = str+dex+inte;
 			
 			//-----------------------------------------------------
-			// Á¦ÇÑ ¼öÄ¡°¡ ¾ø°Å³ª 
-			// Æ¯Á¤ ¼öÄ¡¸¦ ÇÏ³ª ¸¸Á·ÇÏ´Â °æ¿ì..
+			// 제한 수치가 없거나 
+			// 특정 수치를 하나 만족하는 경우..
 			//-----------------------------------------------------
 			if (
 				//-----------------------------------------------------
-				// ¼ºº° °Ë»ç
+				// 성별 검사
 				//-----------------------------------------------------
 				(pItem->IsGenderForAll() 
 				|| pItem->IsGenderForMale() && IsMale()
@@ -5366,12 +5366,12 @@ MCreature::CheckAffectStatus(MItem* pItem)
 				)
 				
 				//-----------------------------------------------------
-				// ÇÊ¿ä´É·ÂÄ¡°¡ ¾ø°Å³ª..
+				// 필요능력치가 없거나..
 				//-----------------------------------------------------
 				&& (
 				
 				//-----------------------------------------------------
-				// ÀÖ´Â°æ¿ì.. ´Ù ¸¸Á·½ÃÄÑ¾ß ÇÑ´Ù.
+				// 있는경우.. 다 만족시켜야 한다.
 				//-----------------------------------------------------
 				(reqSTR==0 || reqSTR!=0 && str >= reqSTR)
 				&&	(reqDEX==0 || reqDEX!=0 && dex >= reqDEX)
@@ -5398,7 +5398,7 @@ MCreature::CheckAffectStatus(MItem* pItem)
 		else
 		{
 			//-----------------------------------------------------
-			// Å¸Á¾Á· ¾ÆÀÌÅÛ »ç¿ë ºÒ°¡
+			// 타종족 아이템 사용 불가
 			//-----------------------------------------------------
 			pItem->UnSetAffectStatus();
 		}
@@ -5410,11 +5410,11 @@ MCreature::CheckAffectStatus(MItem* pItem)
 			int reqLevel =  pItem->GetRequireLevel();
 
 			//-----------------------------------------------------
-			// ¹ìÆÄÀÌ¾îÀÎ °æ¿ì´Â level·Î Ã¼Å©ÇÑ´Ù.
+			// 뱀파이어인 경우는 level로 체크한다.
 			//-----------------------------------------------------
 			if (
 					//-----------------------------------------------------
-					// ¼ºº° °Ë»ç
+					// 성별 검사
 					//-----------------------------------------------------
 					(pItem->IsGenderForAll() 
 						|| pItem->IsGenderForMale() && IsMale()
@@ -5440,11 +5440,11 @@ MCreature::CheckAffectStatus(MItem* pItem)
 			
 
 			//-----------------------------------------------------
-			// item Á¾·ù¿¡ µû¶ó¼­ skill Ã¼Å©ÇÑ´Ù.
+			// item 종류에 따라서 skill 체크한다.
 			//-----------------------------------------------------
-			// g_pSkillAvailableÀº playerÀÇ skillÁ¤º¸ÀÌ´Ù.
-			// ¾îÂ÷ÇÇ ´Ù¸¥ creature°¡ CheckAffectStatus()¸¦ »ç¿ëÇÒ ÀÏÀº ¾øÁö¸¸.. --;
-			// ÀÏ´ÜÀº item levelÃ¼Å©·Î¸¸ ³¡³»µµ·Ï ÇÑ´Ù...
+			// g_pSkillAvailable은 player의 skill정보이다.
+			// 어차피 다른 creature가 CheckAffectStatus()를 사용할 일은 없지만.. --;
+			// 일단은 item level체크로만 끝내도록 한다...
 			/*
 			switch (pItem->GetItemClass())
 			{
@@ -5509,7 +5509,7 @@ MCreature::CheckAffectStatus(MItem* pItem)
 		else
 		{
 			//-----------------------------------------------------
-			// Å¸Á¾Á· ¾ÆÀÌÅÛ »ç¿ë ºÒ°¡
+			// 타종족 아이템 사용 불가
 			//-----------------------------------------------------
 			pItem->UnSetAffectStatus();
 		}
@@ -5521,7 +5521,7 @@ MCreature::CheckAffectStatus(MItem* pItem)
 			int reqLevel =  pItem->GetRequireLevel();
 
 			//-----------------------------------------------------
-			// ½½·¹ÀÌ¾îÀÎ °æ¿ì´Â STR, DEX, INTÃ¼Å©
+			// 슬레이어인 경우는 STR, DEX, INT체크
 			//-----------------------------------------------------
 			int reqSTR = pItem->GetRequireSTR();
 			int reqDEX = pItem->GetRequireDEX();
@@ -5534,7 +5534,7 @@ MCreature::CheckAffectStatus(MItem* pItem)
 			int sum = str+dex+inte;
 
 			//-----------------------------------------------------
-			// ¾Æ¿ì½ºÅÍÁîÀÎ °æ¿ìµµ-_- level·Î Ã¼Å©ÇÑ´Ù.
+			// 아우스터즈인 경우도-_- level로 체크한다.
 			//-----------------------------------------------------
 			if (
 				(reqLevel==0 || reqLevel!=0 && GetLEVEL() >= reqLevel)
@@ -5559,7 +5559,7 @@ MCreature::CheckAffectStatus(MItem* pItem)
 		else
 		{
 			//-----------------------------------------------------
-			// Å¸Á¾Á· ¾ÆÀÌÅÛ »ç¿ë ºÒ°¡
+			// 타종족 아이템 사용 불가
 			//-----------------------------------------------------
 			pItem->UnSetAffectStatus();
 		}
@@ -5570,12 +5570,12 @@ MCreature::CheckAffectStatus(MItem* pItem)
 //----------------------------------------------------------------------
 // Set Direction To Creature
 //----------------------------------------------------------------------
-// ´Ù¸¥ Creature¸¦ ÇâÇØ¼­ ¹Ù¶óº»´Ù.
+// 다른 Creature를 향해서 바라본다.
 //----------------------------------------------------------------------
 void	
 MCreature::SetDirectionToPosition(TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY)
 {
-	// °°Àº ÁÂÇ¥¶ó¸é.. ÇöÀç ¹æÇâÀ¸·Î µÐ´Ù.
+	// 같은 좌표라면.. 현재 방향으로 둔다.
 	if (m_X==sX && m_Y==sY)
 	{
 		m_Direction = m_CurrentDirection;
@@ -5589,49 +5589,49 @@ MCreature::SetDirectionToPosition(TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY
 //----------------------------------------------------------------------
 // Change Near Direction
 //----------------------------------------------------------------------
-// m_CurrentDirectionÀ» m_DirectionÀ¸·Î ÀÚ¿¬½º·´°Ô ¹Ù²Û´Ù.
-// ±×·¯³ª, ÇöÀç ¿òÁ÷ÀÌ´Â ¹æÇâ(m_DirectionMoved)ÀÌ ¿ì¼±ÀÌ´Ù.
+// m_CurrentDirection을 m_Direction으로 자연스럽게 바꾼다.
+// 그러나, 현재 움직이는 방향(m_DirectionMoved)이 우선이다.
 //----------------------------------------------------------------------
 bool	
 MCreature::ChangeNearDirection()
 {
 	int toDir;
 	
-	// actionÀ» º¸¿©ÁÖ´Â ÁßÀÌ¸é.. ¹æÇâ ¼³Á¤
+	// action을 보여주는 중이면.. 방향 설정
 	if (m_ActionCount<GetActionCountMax())
 	{
 		toDir = m_Direction;
 	}
-	// ¿òÁ÷ÀÌ´Â ÁßÀÌ¸é m_DirectionMoved
-	// ´Ü, KnockBackÀÌ³ª FastMoveÀÎ °æ¿ì¿¡´Â... ¹æÇâ ¹«½Ã..
+	// 움직이는 중이면 m_DirectionMoved
+	// 단, KnockBack이나 FastMove인 경우에는... 방향 무시..
 	else if (m_MoveCount>0 && m_MoveCount<m_MoveCountMax
 		&& !m_bKnockBack
 		&& !m_bFastMove)		
 	{
 		toDir = m_DirectionMoved;
 	}
-	// ¾Æ´Ï¸é.. m_Direction
+	// 아니면.. m_Direction
 	else
 	{
 		toDir = m_Direction;
 	}
 
-	// °°À¸¸é ¹Ù²Ü ÇÊ¿ä°¡ ¾ø´Ù.
+	// 같으면 바꿀 필요가 없다.
 	if (m_CurrentDirection==toDir)
 	{
 		return false;
 	}
 
-	// ´Ù¸£¸é.. 
-	// ¿ÞÂÊÀ¸·Î µ¹°Å³ª ¿À¸¥ÂÊÀ¸·Î µ¹°Ô ÇØ¾ßÇÑ´Ù.
+	// 다르면.. 
+	// 왼쪽으로 돌거나 오른쪽으로 돌게 해야한다.
 
-	// ¾ç¼ö·Î ¸¸µé±â À§ÇØ¼­.. ±Û°í.. ¼Óµµ¸¦ À§ÇØ¼­.. &¸¦ »ç¿ëÇß´Ù.
+	// 양수로 만들기 위해서.. 글고.. 속도를 위해서.. &를 사용했다.
 	int gap = (((m_CurrentDirection+MAX_DIRECTION) - toDir) & 0x07);//% MAX_DIRECTION;
 
 	// 4, 7
 	if (gap==4)
 	{
-		// ¿ÞÂÊÀÌ³ª ¿À¸¥ÂÊÀ¸·Î randomÇÏ°Ô µ·´Ù.
+		// 왼쪽이나 오른쪽으로 random하게 돈다.
 		if (rand() & 0x01)
 		{
 			m_CurrentDirection ++;			
@@ -5651,7 +5651,7 @@ MCreature::ChangeNearDirection()
 		m_CurrentDirection ++;		
 	}
 
-	// 0~7À» À¯ÁöÇÏµµ·Ï ÇÑ´Ù.
+	// 0~7을 유지하도록 한다.
 	m_CurrentDirection &= 0x07;
 
 	return true;	
@@ -5660,16 +5660,16 @@ MCreature::ChangeNearDirection()
 //----------------------------------------------------------------------
 // Get Counter Direction
 //----------------------------------------------------------------------
-// ÁøÇà ¹æÇâÀÇ ¹Ý´ë ¹æÇâÀ» ±¸ÇÑ´Ù.
-// À½ ÀÌ°Å staticÀ¸·Î ¹Ù²ÙµçÁö d¸¦ ¾ø¾ÖµçÁö ÇØ¾ß´Âµ¥... - -
+// 진행 방향의 반대 방향을 구한다.
+// 음 이거 static으로 바꾸든지 d를 없애든지 해야는데... - -
 //----------------------------------------------------------------------
 int
 MCreature::GetCounterDirection( int d )
 {
-	// ¹Ý´ë¹æÇâ
+	// 반대방향
 	d += 4;
 
-	// 0~7±îÁö¸¸ µÇµµ·Ï ÇÑ´Ù.
+	// 0~7까지만 되도록 한다.
 	while (d < 8)
 	{
 		d -= 8;
@@ -5681,12 +5681,12 @@ MCreature::GetCounterDirection( int d )
 //----------------------------------------------------------------------
 // Get Direction To Creature
 //----------------------------------------------------------------------
-// ÇöÀç À§Ä¡(m_X,m_Y)¿¡¼­ (sX,sY)¸¦ ÇâÇØ¼­ ¹Ù¶óº¸´Â ¹æÇâÀ» °áÁ¤ÇÑ´Ù.
+// 현재 위치(m_X,m_Y)에서 (sX,sY)를 향해서 바라보는 방향을 결정한다.
 //----------------------------------------------------------------------
 BYTE	
 MCreature::GetDirectionToPosition(TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY)
 {
-	// °°Àº ÁÂÇ¥¶ó¸é.. ÇöÀç ¹æÇâÀ¸·Î µÐ´Ù.
+	// 같은 좌표라면.. 현재 방향으로 둔다.
 	if (m_X==sX && m_Y==sY)
 	{
 		return m_CurrentDirection;
@@ -5698,12 +5698,12 @@ MCreature::GetDirectionToPosition(TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY
 //----------------------------------------------------------------------
 // Get NextPosition()
 //----------------------------------------------------------------------
-// ÇöÀç CreatureÀÇ À§Ä¡¿¡¼­ direction¹æÇâÀ¸·Î ÀÌµ¿ÇÑ °æ¿ìÀÇ À§Ä¡
+// 현재 Creature의 위치에서 direction방향으로 이동한 경우의 위치
 //----------------------------------------------------------------------
 void
 MCreature::GetNextPosition(BYTE direction, POINT &next)
 {
-	// ÇöÀç À§Ä¡¿¡¼­ ´ÙÀ½ ¹æÇâ¿¡ ´ëÇØ¼­ ¸ñÇ¥ ¼³Á¤
+	// 현재 위치에서 다음 방향에 대해서 목표 설정
 	next.x = m_X;
 	next.y = m_Y;
 	
@@ -5723,13 +5723,13 @@ MCreature::GetNextPosition(BYTE direction, POINT &next)
 //----------------------------------------------------------------------
 // Get NextPosition()
 //----------------------------------------------------------------------
-// ÇöÀç CreatureÀÇ À§Ä¡¿¡¼­ m_CurrentDirection¹æÇâÀ¸·Î ÀÌµ¿ÇÑ °æ¿ìÀÇ À§Ä¡
+// 현재 Creature의 위치에서 m_CurrentDirection방향으로 이동한 경우의 위치
 //----------------------------------------------------------------------
 /*
 void
 MCreature::GetNextPosition(POINT &next)
 {
-	// ÇöÀç À§Ä¡¿¡¼­ ´ÙÀ½ ¹æÇâ¿¡ ´ëÇØ¼­ ¸ñÇ¥ ¼³Á¤
+	// 현재 위치에서 다음 방향에 대해서 목표 설정
 	next.x = m_X;
 	next.y = m_Y;
 	
@@ -5750,12 +5750,12 @@ MCreature::GetNextPosition(POINT &next)
 //----------------------------------------------------------------------
 // Get NextPosition()
 //----------------------------------------------------------------------
-// ÇöÀç CreatureÀÇ À§Ä¡¿¡¼­ m_CurrentDirection¹æÇâÀ¸·Î ÀÌµ¿ÇÑ °æ¿ìÀÇ À§Ä¡
+// 현재 Creature의 위치에서 m_CurrentDirection방향으로 이동한 경우의 위치
 //----------------------------------------------------------------------
 void
 MCreature::GetNextPosition(TYPE_SECTORPOSITION &sX, TYPE_SECTORPOSITION &sY)
 {
-	// ÇöÀç À§Ä¡¿¡¼­ ´ÙÀ½ ¹æÇâ¿¡ ´ëÇØ¼­ ¸ñÇ¥ ¼³Á¤
+	// 현재 위치에서 다음 방향에 대해서 목표 설정
 	sX = m_X;
 	sY = m_Y;
 	
@@ -5776,18 +5776,18 @@ MCreature::GetNextPosition(TYPE_SECTORPOSITION &sX, TYPE_SECTORPOSITION &sY)
 // Move
 //----------------------------------------------------------------------
 //
-// ÇöÀçÀÇ ¹æÇâ(m_CurrentDirection)À¸·Î ÇÑ FrameÀÌµ¿ÇÑ´Ù.
+// 현재의 방향(m_CurrentDirection)으로 한 Frame이동한다.
 //
-// ÇÑ Sector¸¦ ÀÌµ¿ÇÏ´Â°Ô ¾Æ´Ï°í Sector¿Í Sector»çÀÌ¸¦ ÀÌµ¿ÇÏ´Â Áß°£ÀÇ
-// ÇÑ FrameÀ» ÀÌµ¿ÇÏ´Â °ÍÀÌ´Ù. 
+// 한 Sector를 이동하는게 아니고 Sector와 Sector사이를 이동하는 중간의
+// 한 Frame을 이동하는 것이다. 
 //
-// Sector --> Sector¿¡¼­ ¸î FrameÀ» ÀÌµ¿ÇÒ±î??°¡ ¹®Á¦ÀÎµ¥...
-//    = cX,cY¿¡ ÇÑ¹ø¿¡ ÀÌµ¿ÇÏ´Â pixel´ÜÀ§¸¦ ´ëÀÔÇÏ°í
-//    = sX,sY¿¡ ÇÑ¹ø¿¡ ÀÌµ¿ÇÏ´Â pixel´ÜÀ§¸¦ ÀÔ·ÂÇÏ¸é µÈ´Ù.
+// Sector --> Sector에서 몇 Frame을 이동할까??가 문제인데...
+//    = cX,cY에 한번에 이동하는 pixel단위를 대입하고
+//    = sX,sY에 한번에 이동하는 pixel단위를 입력하면 된다.
 //
-// Move()¿¡¼­´Â
-//    cX,cY°¡ 0ÀÌ¸é ´Ù½Ã cX,cY, sX,sY °ªÀ» »ý¼ºÇÏ°í
-//    0ÀÌ ¾Æ´Ï¸é sX
+// Move()에서는
+//    cX,cY가 0이면 다시 cX,cY, sX,sY 값을 생성하고
+//    0이 아니면 sX
 //----------------------------------------------------------------------
 void	
 MCreature::ActionMove()
@@ -5816,19 +5816,19 @@ MCreature::ActionMove()
 			RemoveEffectStatus( EFFECTSTATUS_TRYING );
 	}
 
-	// ¸ñÀû Sector¿¡ µµ´ÞÇÑ °æ¿ì	
+	// 목적 Sector에 도달한 경우	
 	if (m_MoveCount==0)//m_sX==0 && m_sY==0)// && m_ActionCount==0)
 	{
-		// ÇöÀç ¹æÇâÀ¸·Î ÇÑ Sector¸¦ ÁøÇàÇÏ°í
-		// cX,cY, sX,sY¸¦ ´Ù½Ã ÁöÁ¤ÇØÁà¾ß ÇÑ´Ù.
+		// 현재 방향으로 한 Sector를 진행하고
+		// cX,cY, sX,sY를 다시 지정해줘야 한다.
 
 		//--------------------------------------------
-		// ÀÌµ¿ °¡´ÉÇÑÁö check
+		// 이동 가능한지 check
 		//--------------------------------------------
 		TYPE_SECTORPOSITION	x, y;
 
 		//--------------------------------------------
-		// fast moveÀÎ °æ¿ì´Â nextX, nextY¿¡ ÁÂÇ¥°¡ ÀÖ´Ù.
+		// fast move인 경우는 nextX, nextY에 좌표가 있다.
 		//--------------------------------------------
 		if (m_bFastMove)
 		{
@@ -5842,18 +5842,18 @@ MCreature::ActionMove()
 		}
 		else
 		{
-			// ÇöÀç ¹æÇâÀ¸·Î ¿òÁ÷¿´À» ¶§ÀÇ ÁÂÇ¥¸¦ °áÁ¤ÇÑ´Ù.
+			// 현재 방향으로 움직였을 때의 좌표를 결정한다.
 			x = m_X; 
 			y = m_Y;
 			GetPositionToDirection( x, y, m_DirectionMove );
 		}
 
 		//--------------------------------------------
-		// ¿òÁ÷ÀÏ ¼ö ÀÖÀ» °æ¿ì
+		// 움직일 수 있을 경우
 		//--------------------------------------------
 		//
-		// ¿òÁ÷ÀÏ ¼ö ¾ø´õ¶óµµ ¿òÁ÷¿©¾ß ÇÑ´Ù.
-		// Server¿¡¼­ ³¯¾Æ¿Â Á¤º¸ÀÌ±â ¶§¹®¿¡..
+		// 움직일 수 없더라도 움직여야 한다.
+		// Server에서 날아온 정보이기 때문에..
 		// 
 		//--------------------------------------------
 		// [ TEST CODE ]
@@ -5876,8 +5876,8 @@ MCreature::ActionMove()
 		//#endif
 		
 		{
-			// zoneÀÇ sectorÀÇ Á¤º¸¸¦ ¹Ù²ãÁØ´Ù.
-			// m_X¿Í m_Yµµ ¼³Á¤ÇØÁØ´Ù.
+			// zone의 sector의 정보를 바꿔준다.
+			// m_X와 m_Y도 설정해준다.
 			if (MovePosition( x, y ))
 			{
 				#ifdef OUTPUT_DEBUG
@@ -5893,39 +5893,39 @@ MCreature::ActionMove()
 					}
 				#endif
 				//--------------------------------------------
-				// 5 FrameÀÌ ÀÖ´Ù°í ÇÒ °æ¿ì
+				// 5 Frame이 있다고 할 경우
 				//--------------------------------------------
 				//
-				// [1] UP,DOWN,LEFT,RIGHTÀÏ ¶§,
+				// [1] UP,DOWN,LEFT,RIGHT일 때,
 				//
-				//     Xº¯È­ : 0 16 32 48 64   (+-16)
-				//     Yº¯È­ : 0  8 16 24 32   (+-8)
+				//     X변화 : 0 16 32 48 64   (+-16)
+				//     Y변화 : 0  8 16 24 32   (+-8)
 				// 
 				//
-				// [2] ´ë°¢¼±(LEFTUP,LEFTDOWN,RIGHTUP,RIGHTDOWN)À¸·Î ¿òÁ÷ÀÏ¶§,
+				// [2] 대각선(LEFTUP,LEFTDOWN,RIGHTUP,RIGHTDOWN)으로 움직일때,
 				//
-				//     Xº¯È­ : 0  8 16 24 32   (+-8)
-				//     Yº¯È­ : 0  4  8 12 16   (+-4)
+				//     X변화 : 0  8 16 24 32   (+-8)
+				//     Y변화 : 0  4  8 12 16   (+-4)
 				//
 				//--------------------------------------------
-				// sX,sY : ¿òÁ÷¿©¾ßÇÒ ÀüÃ¼ pixel(ÇÑ TILE)
-				// cX,cY : ÀÌµ¿ÇÏ´Â ´ÜÀ§ pixel
+				// sX,sY : 움직여야할 전체 pixel(한 TILE)
+				// cX,cY : 이동하는 단위 pixel
 				//--------------------------------------------
 
 				//--------------------------------------------
-				// Fast Move ÀÎ °æ¿ì
+				// Fast Move 인 경우
 				//--------------------------------------------
 				if (m_bFastMove)
 				{
-					// Á÷¼± °Å¸®·Î ¿òÁ÷ÀÏ¶§ÀÇ pixel°Å¸®
-					// ex) ¿ÞÂÊ 2 --> 1 : ( 2 - 1 ) * TILE_X
-					//     À§ÂÊ 2 --> 1 : ( 2 - 1 ) * TILE_Y
+					// 직선 거리로 움직일때의 pixel거리
+					// ex) 왼쪽 2 --> 1 : ( 2 - 1 ) * TILE_X
+					//     위쪽 2 --> 1 : ( 2 - 1 ) * TILE_Y
 					m_sX = (ox - m_X) * TILE_X;
 					m_sY = (oy - m_Y) * TILE_Y;
 					//------------------------------------------------
-					// ½ÇÁ¦ ÇÑ Å¸ÀÏ ÀÌµ¿ ¼ÓµµÀÇ ¹ÝÀÇ ¼Óµµ¿¡ ¸ñÀûÁö±îÁö ÀÌµ¿ÇÑ´Ù.
+					// 실제 한 타일 이동 속도의 반의 속도에 목적지까지 이동한다.
 					//------------------------------------------------
-					// ÇÑ Å¸ÀÏ ÀÌµ¿ÇÒ¶§ÀÇ Frame ¼ö
+					// 한 타일 이동할때의 Frame 수
 					int moveTimes_div_2 = (*g_pCreatureTable)[m_CreatureType].MoveTimes >> 1;
 
 					// 2005, 1, 5, sobeit add start
@@ -5947,7 +5947,7 @@ MCreature::ActionMove()
 					}
 				}
 				//--------------------------------------------	
-				// Á¤»ó ÀÌµ¿
+				// 정상 이동
 				//--------------------------------------------
 				else
 				{				
@@ -5957,7 +5957,7 @@ MCreature::ActionMove()
 					
 					//????????????????????????????????????????????????????????
 					//???                                                  ???
-					//???   ÇÑ FrameÀ» ÀÌµ¿...ÇØ¾ßÇÏ´Â°¡?? ¸»¾Æ¾ß ÇÏ´Â°¡   ???
+					//???   한 Frame을 이동...해야하는가?? 말아야 하는가   ???
 					//???                                                  ???
 					//????????????????????????????????????????????????????????
 					int moveTimes_1;
@@ -6005,13 +6005,13 @@ MCreature::ActionMove()
 				m_sX += m_cX;
 				m_sY += m_cY;	
 				
-				// ´ÙÀ½¿¡ ÀÌµ¿ÇÒ count¸¦ ÁöÁ¤ÇÑ´Ù.
-				// frame¸¸ ¹Ù²î´Â °æ¿ì¿Í
-				// frameÀÌ ¹Ù²î°í ÀÌµ¿ÇÏ´Â °æ¿ì°¡ ÀÖ´Ù.
+				// 다음에 이동할 count를 지정한다.
+				// frame만 바뀌는 경우와
+				// frame이 바뀌고 이동하는 경우가 있다.
 				m_NextMoveCount = (*g_pCreatureTable)[m_CreatureType].MoveRatio;				
 
 				//------------------------------------------------
-				// Ä³¸¯ÅÍÀÇ MoveAction¿¡ ¸Â´Â Sound¸¦ Ãâ·ÂÇØÁØ´Ù.
+				// 캐릭터의 MoveAction에 맞는 Sound를 출력해준다.
 				//------------------------------------------------
 				TYPE_SOUNDID soundID = (*g_pCreatureTable)[m_CreatureType].GetActionSound( m_MoveAction );
 
@@ -6023,21 +6023,21 @@ MCreature::ActionMove()
 								m_Y);
 				}
 			}
-			// ¸ø ¿òÁ÷ÀÎ °æ¿ì
+			// 못 움직인 경우
 			else
 			{
-				// ¸ØÃã
+				// 멈춤
 				SetAction( ACTION_STAND );	
 			}			
 		}
 		//--------------------------------------------
-		// ¿òÁ÷ÀÏ ¼ö ¾øÀ» °æ¿ì
+		// 움직일 수 없을 경우
 		//--------------------------------------------
 	}
-	// ¾ÆÁ÷ ´ÙÀ½ Sector±îÁö ´ú µµ´ÞÇÑ °æ¿ì
+	// 아직 다음 Sector까지 덜 도달한 경우
 	else
 	{
-		// ÇÑ FrameÀ» ÀÌµ¿ÇÑ´Ù.
+		// 한 Frame을 이동한다.
 		/*
 		switch (m_MoveDevice)
 		{
@@ -6055,11 +6055,11 @@ MCreature::ActionMove()
 		//m_sX += m_cX;
 		//m_sY += m_cY;
 
-		// ÀÌµ¿ÇÒ count°¡ µÆÀ»¶§¸¸ ÀÌµ¿ÇÑ´Ù.
+		// 이동할 count가 됐을때만 이동한다.
 		if (m_MoveCount>=m_NextMoveCount)
 		{			
 			//--------------------------------------------
-			// Fast Move ÀÎ °æ¿ì
+			// Fast Move 인 경우
 			//--------------------------------------------
 			if (m_bFastMove)
 			{
@@ -6073,11 +6073,11 @@ MCreature::ActionMove()
 					m_MoveCount = m_MoveCountMax;
 				}
 
-				// ´ÙÀ½¿¡ ÀÌµ¿ÇÒ count¸¦ ÁöÁ¤ÇÑ´Ù.
+				// 다음에 이동할 count를 지정한다.
 				m_NextMoveCount += (*g_pCreatureTable)[m_CreatureType].MoveRatio;
 
 				//----------------------------------------------------------
-				// fast move ÈÄ¿¡ ÇÑ¹ø ¶§¸®±â.. - -
+				// fast move 후에 한번 때리기.. - -
 				// Flash Sliding
 				//----------------------------------------------------------
 				if (m_MoveCount+1 >= m_MoveCountMax
@@ -6092,7 +6092,7 @@ MCreature::ActionMove()
 						&& !HasEffectStatus(EFFECTSTATUS_BIKE_CRASH))
 					{
 						//---------------------------------------------------
-						// »ó´ë°¡ ¸Â´Â ¸ð½À
+						// 상대가 맞는 모습
 						//---------------------------------------------------
 						MActionResult* pResult = new MActionResult;
 						
@@ -6116,7 +6116,7 @@ MCreature::ActionMove()
 //							SetBloodyZenith(16);
 //						}						
 
-						// °á°ú Ç¥Çö
+						// 결과 표현
 						SetDirection( MTopView::GetDirectionToPosition( GetX(), GetY(), pCreature->GetX(), pCreature->GetY() ) );
 						pResult->Add( new MActionResultNodeActionInfo( 
 														ActionInfo,
@@ -6134,7 +6134,7 @@ MCreature::ActionMove()
 				}
 			}
 			//--------------------------------------------
-			// ÀÏ¹ÝÀûÀÎ ÀÌµ¿ÀÇ °æ¿ì
+			// 일반적인 이동의 경우
 			//--------------------------------------------
 			else
 			{
@@ -6168,7 +6168,7 @@ MCreature::ActionMove()
 				m_sX += m_cX;
 				m_sY += m_cY;
 
-				// ´ÙÀ½¿¡ ÀÌµ¿ÇÒ count¸¦ ÁöÁ¤ÇÑ´Ù.
+				// 다음에 이동할 count를 지정한다.
 				m_NextMoveCount += (*g_pCreatureTable)[m_CreatureType].MoveRatio;
 
 				m_MoveCount++;
@@ -6182,7 +6182,7 @@ MCreature::ActionMove()
 		}	
 
 
-		// frameÀ» ¹Ù²ãÁØ´Ù. ¸¶Áö¸· Frame±îÁö °¬À¸¸é 0¹øÂ° FrameÀ¸·Î ¹Ù²Û´Ù.
+		// frame을 바꿔준다. 마지막 Frame까지 갔으면 0번째 Frame으로 바꾼다.
 		//if (++m_ActionCount == (*m_pFrames)[m_Action][m_CurrentDirection].GetCount())
 		//	m_ActionCount = 0;
 	}
@@ -6216,13 +6216,13 @@ MCreature::AttachCastingEffect(TYPE_ACTIONINFO nUsedActionInfo, BOOL bForceAttac
 			{
 				int castingFrames = GetActionInfoCastingFrames(nUsedActionInfo);
 			
-				// ¼³Á¤ÀÌ ¾È µÅ ÀÖÀ¸¸é.. action µ¿ÀÛ¿¡ ¸ÂÃá´Ù.
+				// 설정이 안 돼 있으면.. action 동작에 맞춘다.
 				if (castingFrames==0)
 				{
 					int actionInfoAction = GetActionInfoAction(nUsedActionInfo);
 						
 					//-------------------------------------------------
-					// ¿ÀÅä¹ÙÀÌ¸¦ Å¸°í ÀÖ´Â °æ¿ì
+					// 오토바이를 타고 있는 경우
 					//-------------------------------------------------				
 					if (m_MoveDevice==MOVE_DEVICE_RIDE)
 					{
@@ -6232,12 +6232,12 @@ MCreature::AttachCastingEffect(TYPE_ACTIONINFO nUsedActionInfo, BOOL bForceAttac
 					else
 					{	
 						//-------------------------------------------------
-						// ÈíÇ÷ µ¿ÀÛÁß¿¡ °ø°Ý¹ÞÀº °æ¿ì
+						// 흡혈 동작중에 공격받은 경우
 						//-------------------------------------------------
 						if (actionInfoAction==ACTION_DAMAGED
-							//&& (// ÈíÇ÷ ´çÇÏ´Â µ¿ÀÛ ÁßÀÌ°Å³ª 
+							//&& (// 흡혈 당하는 동작 중이거나 
 								//m_Action==ACTION_DRAINED
-								// ¹ìÆÄÀÌ¾îÀÏ¶§, ÈíÇ÷ÇÏ´Â µ¿ÀÛ Áß¿¡´Â damaged¸¦ ¾È º¸¿©ÁØ´Ù.
+								// 뱀파이어일때, 흡혈하는 동작 중에는 damaged를 안 보여준다.
 								//|| IsVampire() && m_Action==ACTION_VAMPIRE_DRAIN
 							//	)
 							)
@@ -6249,8 +6249,8 @@ MCreature::AttachCastingEffect(TYPE_ACTIONINFO nUsedActionInfo, BOOL bForceAttac
 						{
 							castingFrames = (int)GetActionCountMax() - (int)castingStartFrame;
 
-							// ÀÓ½Ã·Î..
-							// ¿©±â¼­ À½¼ö°¡ ³ª¿À´Â °æ¿ì.. ¾îÄÉ ÇÏÁö.. - -;
+							// 임시로..
+							// 여기서 음수가 나오는 경우.. 어케 하지.. - -;
 							if (castingFrames < 0)
 							{
 								castingFrames = 16;
@@ -6264,7 +6264,7 @@ MCreature::AttachCastingEffect(TYPE_ACTIONINFO nUsedActionInfo, BOOL bForceAttac
 				MCreature* targetCreature = NULL;
 
 				//-------------------------------------------------
-				// castingÀÌ ´©±¸ÇÑÅ× ºÙ´Â°¡?
+				// casting이 누구한테 붙는가?
 				//-------------------------------------------------
 				if(nUsedActionInfo != ACTIONINFO_NULL)
 				{
@@ -6282,7 +6282,7 @@ MCreature::AttachCastingEffect(TYPE_ACTIONINFO nUsedActionInfo, BOOL bForceAttac
 				if (targetCreature!=NULL)
 				{
 					// [ TEST CODE ]
-					// Creature¿¡°Ô ºÙÀÌ´Â Effect¸¦ »ý¼ºÇØ¼­ pointer¸¦ ³Ñ°Ü¹Þ´Â´Ù.
+					// Creature에게 붙이는 Effect를 생성해서 pointer를 넘겨받는다.
 					MAttachEffect* pEffect = targetCreature->CreateAttachEffect( 
 																effectSpriteType, 
 																//(*g_pActionInfoTable)[nUsedActionInfo].GetDelay() 
@@ -6296,7 +6296,7 @@ MCreature::AttachCastingEffect(TYPE_ACTIONINFO nUsedActionInfo, BOOL bForceAttac
 
 						pEffect->SetLink( nUsedActionInfo, NULL );
 
-						// ºÙ¾î¾ß ÇÏ´Â Ä³¸¯ÅÍ
+						// 붙어야 하는 캐릭터
 						pEffect->SetAttachCreatureID( targetCreature->GetID() );
 						
 						#ifdef OUTPUT_DEBUG
@@ -6308,7 +6308,7 @@ MCreature::AttachCastingEffect(TYPE_ACTIONINFO nUsedActionInfo, BOOL bForceAttac
 							else
 							{	
 								//-------------------------------------------------
-								// ÈíÇ÷ µ¿ÀÛÁß¿¡ °ø°Ý¹ÞÀº °æ¿ì
+								// 흡혈 동작중에 공격받은 경우
 								//-------------------------------------------------
 								if (GetActionInfoAction(nUsedActionInfo)==ACTION_DAMAGED)
 								{
@@ -6324,7 +6324,7 @@ MCreature::AttachCastingEffect(TYPE_ACTIONINFO nUsedActionInfo, BOOL bForceAttac
 			}
 
 			//-------------------------------------------------------------
-			// Casting ActionInfo Ç¥Çö
+			// Casting ActionInfo 표현
 			//-------------------------------------------------------------
 			TYPE_ACTIONINFO castingActionInfo = (*g_pActionInfoTable)[nUsedActionInfo].GetCastingActionInfo();
 			if (castingActionInfo!=ACTIONINFO_NULL)
@@ -6345,7 +6345,7 @@ MCreature::AttachCastingEffect(TYPE_ACTIONINFO nUsedActionInfo, BOOL bForceAttac
 			}
 
 			//-------------------------------------------------------------
-			// casting µ¿ÀÛ¿¡ ¸Â´Â sound
+			// casting 동작에 맞는 sound
 			//-------------------------------------------------------------
 			PlaySound( GetCastingSoundID(nUsedActionInfo) ,
 						false,
@@ -6419,7 +6419,7 @@ void
 MCreature::ActionEffect()
 {	
 	//-------------------------------------------------------------
-	// »ç¿ë ±â¼úÀÌ Á¤ÇØÁ® ÀÖ´Â °æ¿ì..
+	// 사용 기술이 정해져 있는 경우..
 	//-------------------------------------------------------------
 	if (m_nUsedActionInfo!=ACTIONINFO_NULL)
 	{
@@ -6429,9 +6429,9 @@ MCreature::ActionEffect()
 		BOOL	bEndAction		= (m_ActionCount==actionCountMax_1) || bActionStand;
 		int		StartFrame		= (*g_pActionInfoTable)[m_nUsedActionInfo].GetStartFrame( m_WeaponSpeed );
 
-		// Effect°¡ ½ÃÀÛµÇ´Â °æ¿ì´Â..
-		// (1) StartFrameÀÎ °æ¿ì
-		// (2) ¸¶Áö¸· ActionFrameÀÎ °æ¿ì
+		// Effect가 시작되는 경우는..
+		// (1) StartFrame인 경우
+		// (2) 마지막 ActionFrame인 경우
 		BOOL bStartEffect = m_ActionCount==StartFrame || 
 							StartFrame >= GetActionCountMax() && bEndAction;
 
@@ -6443,12 +6443,12 @@ MCreature::ActionEffect()
 		//BOOL	bCastingEffect	= GetActionInfoCastingStartFrame(m_nUsedActionInfo)==m_ActionCount;
 
 		//-------------------------------------------------------------
-		// ½ÃÀÛ µ¿ÀÛ
+		// 시작 동작
 		//-------------------------------------------------------------
 		if (bStartAction)
 		{
 			//------------------------------------------------
-			// ±â¼úÀÇ µ¿ÀÛ¿¡ ¸Â´Â sound¸¦ Ãâ·ÂÇØÁØ´Ù.
+			// 기술의 동작에 맞는 sound를 출력해준다.
 			//------------------------------------------------
 			//g_Sound.Play( g_SoundTable[(*g_pActionInfoTable)[m_nUsedActionInfo].GetSoundID()].pDSBuffer );
 			//PlaySound( (*g_pActionInfoTable)[m_nUsedActionInfo].GetSoundID() ,
@@ -6456,7 +6456,7 @@ MCreature::ActionEffect()
 			//			m_X, m_Y);
 
 			//------------------------------------------------
-			// Ä³¸¯ÅÍÀÇ Action¿¡ ¸Â´Â Sound¸¦ Ãâ·ÂÇØÁØ´Ù.
+			// 캐릭터의 Action에 맞는 Sound를 출력해준다.
 			//------------------------------------------------
 			PlaySound( 
 				(*g_pCreatureTable)[m_CreatureType].GetActionSound( 
@@ -6481,8 +6481,8 @@ MCreature::ActionEffect()
 
 
 		//-------------------------------------------------------------
-		// Á¤Áö µ¿ÀÛÀÌ¸é..
-		// ¹Ù·Î effect¸¦ º¸¿©ÁØ´Ù.
+		// 정지 동작이면..
+		// 바로 effect를 보여준다.
 		//-------------------------------------------------------------
 		if (bActionStand)
 		{
@@ -6490,7 +6490,7 @@ MCreature::ActionEffect()
 		}
 
 		//-------------------------------------------------------------
-		// ±â¼úÀ» º¸¿©Áà¾ß ÇÏ´Â °æ¿ì
+		// 기술을 보여줘야 하는 경우
 		//-------------------------------------------------------------
 		if (bStartEffect)
 		{
@@ -6503,7 +6503,7 @@ MCreature::ActionEffect()
 		//if (m_ActionCount==m_ActionCountMax-1)		
 		{
 			//--------------------------------------------------------
-			// Action³¡
+			// Action끝
 			//--------------------------------------------------------	
 			//m_Action			= ACTION_STAND;
 		}
@@ -6512,7 +6512,7 @@ MCreature::ActionEffect()
 	m_ActionCount++;
 
 	//--------------------------------------------------------	
-	// ÀÓ½Ã·Î ÈíÇ÷µ¿ÀÛ ÁßÁöÇÏ´Â°Å..
+	// 임시로 흡혈동작 중지하는거..
 	//--------------------------------------------------------	
 	if (m_bStopBloodDrain)
 	{
@@ -6534,7 +6534,7 @@ MCreature::ActionEffect()
 //----------------------------------------------------------------------
 // Affect Used ActionInfo
 //----------------------------------------------------------------------
-// ±â¼ú »ç¿ëÇÑ°É Ç¥ÇöÇÑ´Ù.
+// 기술 사용한걸 표현한다.
 //----------------------------------------------------------------------
 void
 MCreature::AffectUsedActionInfo(TYPE_ACTIONINFO nUsedActionInfo)
@@ -6567,14 +6567,14 @@ MCreature::AffectUsedActionInfo(TYPE_ACTIONINFO nUsedActionInfo)
 		POINT point;	
 
 		//--------------------------------------------------------
-		// Casting ActionInfoÀÎ°¡?
+		// Casting ActionInfo인가?
 		//--------------------------------------------------------
 		BOOL bCastingAction = (*g_pActionInfoTable)[nUsedActionInfo].IsCastingAction();
 		DEBUG_ADD_FORMAT("[AffectUsedActionInfo] %d",__LINE__);
 
 
 		//--------------------------------------------------------
-		// ¸ñÇ¥ À§Ä¡ PixelÁÂÇ¥
+		// 목표 위치 Pixel좌표
 		//--------------------------------------------------------
 		point = MTopView::MapToPixel(m_TraceX, m_TraceY);
 		//point.x += m_sX;
@@ -6583,13 +6583,13 @@ MCreature::AffectUsedActionInfo(TYPE_ACTIONINFO nUsedActionInfo)
 
 		//--------------------------------------------------------
 		//
-		//					Effect ¸ñÇ¥ ¼³Á¤
+		//					Effect 목표 설정
 		//
 		//--------------------------------------------------------
 		MEffectTarget* pEffectTarget = NULL;
 
 		//--------------------------------------------------------
-		// casting actionÀÎ °æ¿ì
+		// casting action인 경우
 		//--------------------------------------------------------
 		if (bCastingAction)
 		{
@@ -6612,10 +6612,10 @@ MCreature::AffectUsedActionInfo(TYPE_ACTIONINFO nUsedActionInfo)
 
 			DEBUG_ADD_FORMAT("[AffectUsedActionInfo] %d",__LINE__);
 
-			// castingAction¿¡¼­´Â °á°úÃ³¸®°¡ ÇÊ¿ä¾ø´Ù.
+			// castingAction에서는 결과처리가 필요없다.
 		}
 		//--------------------------------------------------------
-		// casting actionÀÌ ¾Æ´Ñ.. ½ÇÁ¦ ±â¼úÀÎ °æ¿ì..
+		// casting action이 아닌.. 실제 기술인 경우..
 		//--------------------------------------------------------
 		else
 		{
@@ -6651,7 +6651,7 @@ MCreature::AffectUsedActionInfo(TYPE_ACTIONINFO nUsedActionInfo)
 			DEBUG_ADD_FORMAT("[AffectUsedActionInfo] %d",__LINE__);
 
 			//--------------------------------------------------------
-			// Áö¼Ó ½Ã°£ ¼³Á¤
+			// 지속 시간 설정
 			//--------------------------------------------------------
 
 			if (m_DelayActionInfo==nUsedActionInfo)
@@ -6664,24 +6664,24 @@ MCreature::AffectUsedActionInfo(TYPE_ACTIONINFO nUsedActionInfo)
 			}
 			
 			DEBUG_ADD_FORMAT("[AffectUsedActionInfo] %d",__LINE__);
-			// °á°ú ¼³Á¤ : °á°ú Ã³¸®´Â EffectGenerator¿¡ ¸Ã±ä´Ù.
+			// 결과 설정 : 결과 처리는 EffectGenerator에 맡긴다.
 			pEffectTarget->SetResult( m_pActionResult );
 			DEBUG_ADD_FORMAT("[AffectUsedActionInfo] %d",__LINE__);
 			
-			// ¼³Á¤µÈ °á°ú¸¦ ¾ø°Ô ÇÑ´Ù.
+			// 설정된 결과를 없게 한다.
 			m_pActionResult = NULL;
 		}
 
 		//--------------------------------------------------------
 		//
-		//					½ÃÀÛ À§Ä¡¸¦ °áÁ¤ÇÑ´Ù.
+		//					시작 위치를 결정한다.
 		//
 		//--------------------------------------------------------
 		int x,y,z, direction;
 
 		DEBUG_ADD_FORMAT("[AffectUsedActionInfo] %d",__LINE__);
 		//--------------------------------------------------------
-		// User À§Ä¡¿¡¼­ ½ÃÀÛÇÏ´Â °æ¿ì
+		// User 위치에서 시작하는 경우
 		//--------------------------------------------------------
 		if ((*g_pActionInfoTable)[nUsedActionInfo].IsStartUser())
 		{
@@ -6696,7 +6696,7 @@ MCreature::AffectUsedActionInfo(TYPE_ACTIONINFO nUsedActionInfo)
 			z			= m_Z;//+60;			
 		}
 		//--------------------------------------------------------
-		// Target À§Ä¡¿¡¼­ ½ÃÀÛÇÏ´Â °æ¿ì
+		// Target 위치에서 시작하는 경우
 		//--------------------------------------------------------
 		else if ((*g_pActionInfoTable)[nUsedActionInfo].IsStartTarget())
 		{
@@ -6707,7 +6707,7 @@ MCreature::AffectUsedActionInfo(TYPE_ACTIONINFO nUsedActionInfo)
 		}
 
 		//--------------------------------------------------------
-		// °øÁß¿¡¼­ ½ÃÀÛÇÏ´Â °æ¿ì
+		// 공중에서 시작하는 경우
 		//--------------------------------------------------------
 		if ((*g_pActionInfoTable)[nUsedActionInfo].IsStartSky())
 		{
@@ -6717,7 +6717,7 @@ MCreature::AffectUsedActionInfo(TYPE_ACTIONINFO nUsedActionInfo)
 			direction	= DIRECTION_DOWN;
 		}
 		//--------------------------------------------------------
-		// Áö»ó¿¡¼­ ½ÃÀÛÇÏ´Â °æ¿ì
+		// 지상에서 시작하는 경우
 		//--------------------------------------------------------
 		else
 		{
@@ -6727,18 +6727,18 @@ MCreature::AffectUsedActionInfo(TYPE_ACTIONINFO nUsedActionInfo)
 
 		//--------------------------------------------------------
 		//
-		//                   Effect»ý¼º		
+		//                   Effect생성		
 		//
 		//--------------------------------------------------------
 		
 		DEBUG_ADD_FORMAT("[AffectUsedActionInfo] %d",__LINE__);
 		(*g_pEffectGeneratorTable).Generate(
-				x,y,z,				// ½ÃÀÛ À§Ä¡
-				direction, 		// ¹æÇâ
+				x,y,z,				// 시작 위치
+				direction, 		// 방향
 		//		1,					// power
 				SpecialID ? bMonster ? 2 : 1 : 1,
-				nUsedActionInfo,		//	ActionInfoTableÁ¾·ù,
-				pEffectTarget,		// ¸ñÇ¥ Á¤º¸
+				nUsedActionInfo,		//	ActionInfoTable종류,
+				pEffectTarget,		// 목표 정보
 				GetActionGrade()	
 		);
 		DEBUG_ADD_FORMAT("[AffectUsedActionInfo] %d",__LINE__);
@@ -6749,13 +6749,13 @@ MCreature::AffectUsedActionInfo(TYPE_ACTIONINFO nUsedActionInfo)
 	else
 	{
 		//------------------------------------------------------------
-		// °á°ú¸¦ Ã³¸®ÇØ¾ßÇÏ´Â ½ÃÁ¡ÀÎ°¡? - ´ç¿¬ÇÏ´Ù°í º»´Ù *_*;
+		// 결과를 처리해야하는 시점인가? - 당연하다고 본다 *_*;
 		//------------------------------------------------------------				
 		DEBUG_ADD_FORMAT("[AffectUsedActionInfo] %d",__LINE__);
 		if (m_pActionResult != NULL)
 		{					
-			// (!) m_pActionResult°ªÀÌ Execute¿¡¼­ º¯ÇÒ ¼ö ÀÖ¾î¼­ 
-			//		ÀúÀåÇß´Ù°¡ Áö¿öÁà¾ß ÇÑ´Ù.
+			// (!) m_pActionResult값이 Execute에서 변할 수 있어서 
+			//		저장했다가 지워줘야 한다.
 			MActionResult* pOldResult = m_pActionResult;
 
 			m_pActionResult = NULL;
@@ -6770,7 +6770,7 @@ MCreature::AffectUsedActionInfo(TYPE_ACTIONINFO nUsedActionInfo)
 	}
 
 	//--------------------------------------------------------
-	// Action³¡
+	// Action끝
 	//--------------------------------------------------------	
 	//m_Action			= ACTION_STAND;	
 
@@ -6786,10 +6786,10 @@ MCreature::AffectUsedActionInfo(TYPE_ACTIONINFO nUsedActionInfo)
 //----------------------------------------------------------------------
 // Affect Buffered ActionInfo
 //----------------------------------------------------------------------
-// NextUsedActionInfo°¡ ÀÖ´Ù¸é
-// UsedActionInfo --> NextUsedActionInfo¸¦ ¸ðµÎ Àû¿ëÇÑ´Ù.
+// NextUsedActionInfo가 있다면
+// UsedActionInfo --> NextUsedActionInfo를 모두 적용한다.
 //
-// UsedActionInfo¸¸ ÀÖ´Â °æ¿ì´Â Ã³¸® ¾ÈÇÑ´Ù.
+// UsedActionInfo만 있는 경우는 처리 안한다.
 //----------------------------------------------------------------------
 void
 MCreature::AffectBufferedActionInfo()
@@ -6797,7 +6797,7 @@ MCreature::AffectBufferedActionInfo()
 	DEBUG_ADD_FORMAT("[AffectBufferedActionInfo] ai=%d, nai=%d, action=%d-%d/%d", m_nUsedActionInfo, m_nNextUsedActionInfo, (int)m_Action, (int)m_ActionCount, (int)GetActionCountMax());
 	
 	//--------------------------------------------------------
-	// ´ÙÀ½¿¡ »ç¿ëÇÒ·Á´Â ±â¼úÀÌ ÀÖ´Ù¸é... ¹Ù·Î Àû¿ë ½ÃÅ²´Ù.
+	// 다음에 사용할려는 기술이 있다면... 바로 적용 시킨다.
 	//--------------------------------------------------------
 	if (m_nNextUsedActionInfo!=ACTIONINFO_NULL)
 	{	
@@ -6805,7 +6805,7 @@ MCreature::AffectBufferedActionInfo()
 		DEBUG_ADD("[AffectBufferedActionInfo] Into Here");
 		
 		//--------------------------------------------------------
-		// ÇöÀç »ç¿ëÇØ¾ßÇÒ ±â¼úÀÌ ÀÖ´Â °æ¿ì 
+		// 현재 사용해야할 기술이 있는 경우 
 		//--------------------------------------------------------
 		if (m_nUsedActionInfo!=ACTIONINFO_NULL)
 		{
@@ -6813,10 +6813,10 @@ MCreature::AffectBufferedActionInfo()
 			
 			m_nNextUsedActionInfo = ACTIONINFO_NULL;
 		
-			// m_nUsedActionInfo Àû¿ë
-			// --> ³»ºÎ¿¡¼­ m_nNextUsedActionInfo°¡ ¹Ù²ð ¼ö ÀÖ´Ù.
+			// m_nUsedActionInfo 적용
+			// --> 내부에서 m_nNextUsedActionInfo가 바뀔 수 있다.
 
-	// ÀÌ °æ¿ì´Â ¹«Á¶°Ç(!) CastingEffect¸¦ ºÙ¿©¾ß ÇÑ´Ù.
+	// 이 경우는 무조건(!) CastingEffect를 붙여야 한다.
 			AttachCastingEffect( m_nUsedActionInfo, TRUE );
 
 			#ifdef OUTPUT_DEBUG					
@@ -6837,7 +6837,7 @@ MCreature::AffectBufferedActionInfo()
 
 			m_nUsedActionInfo	= ACTIONINFO_NULL;			
 
-			// affectÇÏ°í ³ª¼­.. »ç¿ëÇØ¾ßÇÒ ±â¼úÀÌ »ý±ä´Ù¸é..
+			// affect하고 나서.. 사용해야할 기술이 생긴다면..
 			if (m_nNextUsedActionInfo!=ACTIONINFO_NULL)
 			{	
 				#ifdef OUTPUT_DEBUG					
@@ -6866,17 +6866,17 @@ MCreature::AffectBufferedActionInfo()
 		}
 		
 		//--------------------------------------------------------
-		// ´ÙÀ½¿¡ »ç¿ëÇØ¾ßÇÒ ±â¼ú Àû¿ë
+		// 다음에 사용해야할 기술 적용
 		//--------------------------------------------------------
 		m_nNextUsedActionInfo = ACTIONINFO_NULL;
 
-		// --> ³»ºÎ¿¡¼­ m_nNextUsedActionInfo°¡ ¹Ù²ð ¼ö ÀÖ´Ù.
+		// --> 내부에서 m_nNextUsedActionInfo가 바뀔 수 있다.
 		DEBUG_ADD("~~~~~zzzz");
 		AttachCastingEffect( nextActionInfo, TRUE );
 		DEBUG_ADD("~~~~~zzzz2");
 		AffectUsedActionInfo( nextActionInfo );
 			
-		// affectÇÏ°í ³ª¼­.. »ç¿ëÇØ¾ßÇÒ ±â¼úÀÌ »ý±ä´Ù¸é..
+		// affect하고 나서.. 사용해야할 기술이 생긴다면..
 		if (m_nNextUsedActionInfo!=ACTIONINFO_NULL)
 		{	
 			DEBUG_ADD("~~~~~zzzz3");
@@ -6896,17 +6896,17 @@ MCreature::AffectBufferedActionInfo()
 		#endif
 	}
 	//--------------------------------------------------------
-	// ÇöÀç »ç¿ëÇØ¾ßÇÒ ±â¼ú¸¸ ÀÖ´Â °æ¿ìÀÎ°¡?
+	// 현재 사용해야할 기술만 있는 경우인가?
 	//--------------------------------------------------------
 	else if (m_nUsedActionInfo!=ACTIONINFO_NULL)
 	{
 		DEBUG_ADD("[AFFE] USEDACTIONINFO != NULL ");
 		m_nNextUsedActionInfo = ACTIONINFO_NULL;
 	
-		// m_nUsedActionInfo Àû¿ë
-		// --> ³»ºÎ¿¡¼­ m_nNextUsedActionInfo°¡ ¹Ù²ð ¼ö ÀÖ´Ù.
+		// m_nUsedActionInfo 적용
+		// --> 내부에서 m_nNextUsedActionInfo가 바뀔 수 있다.
 
-		// ÀÌ °æ¿ì´Â ¹«Á¶°Ç(!) CastingEffect¸¦ ºÙ¿©¾ß ÇÑ´Ù.
+		// 이 경우는 무조건(!) CastingEffect를 붙여야 한다.
 		DEBUG_ADD("[AFFE] CASTING EFF");
 		AttachCastingEffect( m_nUsedActionInfo, TRUE );
 		DEBUG_ADD("[AFFE] AFFECT USED");
@@ -6914,7 +6914,7 @@ MCreature::AffectBufferedActionInfo()
 
 		m_nUsedActionInfo	= ACTIONINFO_NULL;			
 
-		// affectÇÏ°í ³ª¼­.. »ç¿ëÇØ¾ßÇÒ ±â¼úÀÌ »ý±ä´Ù¸é..
+		// affect하고 나서.. 사용해야할 기술이 생긴다면..
 		if (m_nNextUsedActionInfo!=ACTIONINFO_NULL)
 		{			
 			DEBUG_ADD("[AFFE] ZZZZZZ ");
@@ -6923,7 +6923,7 @@ MCreature::AffectBufferedActionInfo()
 		}	
 
 		//--------------------------------------------------------
-		// ´ÙÀ½¿¡ »ç¿ëÇØ¾ßÇÒ ±â¼ú Àû¿ë
+		// 다음에 사용해야할 기술 적용
 		//--------------------------------------------------------
 		m_nUsedActionInfo = ACTIONINFO_NULL;
 		m_nNextUsedActionInfo = ACTIONINFO_NULL;
@@ -6953,16 +6953,16 @@ MCreature::IsRecoveryMP()
 //----------------------------------------------------------------------
 // Set Recovery
 //----------------------------------------------------------------------
-// amount¸¸Å­ times¹ø¾¿ delay¸¶´Ù È¸º¹ÇÑ´Ù.
+// amount만큼 times번씩 delay마다 회복한다.
 //----------------------------------------------------------------------
 void				
 MCreature::SetRecoveryHP(int amount, int times, DWORD delay)
 { 
 	if (times > 0)
 	{
-		// ¹Ù·Î ÇÑ¹ø È¸º¹
+		// 바로 한번 회복
 
-		if(! IsRecoveryHP() )					// ÇöÀç HP °¡ Â÷°í ÀÖÁö ¾ÊÀ¸¸é
+		if(! IsRecoveryHP() )					// 현재 HP 가 차고 있지 않으면
 		{
 			SetStatus( MODIFY_CURRENT_HP, GetHP()+amount );
 			m_RecoveryHPTimes = times - 1; 
@@ -6973,7 +6973,7 @@ MCreature::SetRecoveryHP(int amount, int times, DWORD delay)
 		m_RecoveryHPDelayTime = delay;
 		//m_RecoveryHPPart = MODIFY_CURRENT_HP;
 
-		// ´ÙÀ½ È¸º¹ÇÒ ½Ã°£ ¼³Á¤
+		// 다음 회복할 시간 설정
 		m_RecoveryHPNextTime = g_CurrentTime + m_RecoveryHPDelayTime;
 	}
 }
@@ -6981,18 +6981,18 @@ MCreature::SetRecoveryHP(int amount, int times, DWORD delay)
 //----------------------------------------------------------------------
 // Set Recovery
 //----------------------------------------------------------------------
-// amount¸¸Å­ times¹ø¾¿ delay¸¶´Ù È¸º¹ÇÑ´Ù.
+// amount만큼 times번씩 delay마다 회복한다.
 //----------------------------------------------------------------------
 void				
 MCreature::SetRecoveryMP(int amount, int times, DWORD delay)
 { 
-	// 2004, 9, 3, sobeit add start - ÇÃ·¹Á® ½ºÅ×ÀÌ¼Ç¿¡ ¸ÂÀ¸¸é MP°¡ ¾ÈÂù´Ù...-_-
+	// 2004, 9, 3, sobeit add start - 플레져 스테이션에 맞으면 MP가 안찬다...-_-
 	if(HasEffectStatus(EFFECTSTATUS_PLEASURE_EXPLOSION))
 		return;
 	// 2004, 9, 3, sobeit add end
 	if (times > 0)
 	{
-		// ¹Ù·Î ÇÑ¹ø È¸º¹
+		// 바로 한번 회복
 		if(! IsRecoveryMP() )
 		{
 			SetStatus( MODIFY_CURRENT_MP, GetMP()+amount );
@@ -7004,7 +7004,7 @@ MCreature::SetRecoveryMP(int amount, int times, DWORD delay)
 		m_RecoveryMPDelayTime = delay;
 		//m_RecoveryMPPart = MODIFY_CURRENT_MP;
 
-		// ´ÙÀ½ È¸º¹ÇÒ ½Ã°£ ¼³Á¤
+		// 다음 회복할 시간 설정
 		m_RecoveryMPNextTime = g_CurrentTime + m_RecoveryMPDelayTime;
 	}
 }
@@ -7012,7 +7012,7 @@ MCreature::SetRecoveryMP(int amount, int times, DWORD delay)
 //----------------------------------------------------------------------
 // Check Drop Blood
 //----------------------------------------------------------------------
-// HP ³·À» ¶§.. ÇÇ Èê¸®±â
+// HP 낮을 때.. 피 흘리기
 //----------------------------------------------------------------------
 void				
 MCreature::CheckDropBlood()
@@ -7020,7 +7020,7 @@ MCreature::CheckDropBlood()
 	if (!HasEffectStatus(EFFECTSTATUS_COMA))
 	{
 		//----------------------------------------------------------
-		// ÇÇ Èê¸± ½Ã°£ÀÌ µÇ¾ú´ÂÁö(-_-;) Ã¼Å©..
+		// 피 흘릴 시간이 되었는지(-_-;) 체크..
 		//----------------------------------------------------------
 		if (g_pUserOption->BloodDrop 
 			&& g_CurrentTime > m_NextBloodingTime)
@@ -7031,17 +7031,17 @@ MCreature::CheckDropBlood()
 			int percentHP = ((maxHP==0)? 0 : currentHP*100 / maxHP);
 
 			//----------------------------------------------------------
-			// HP 30% ÀÌÇÏÀÏ¶§ ÇÇ Èê¸°´Ù.
+			// HP 30% 이하일때 피 흘린다.
 			//----------------------------------------------------------
 			if (percentHP <= g_pClientConfig->BLOOD_DROP_HP_PERCENT)
 			{
 				ExecuteActionInfoFromMainNode(
-							BLOOD_DROP_GROUND,										// »ç¿ë ±â¼ú ¹øÈ£
+							BLOOD_DROP_GROUND,										// 사용 기술 번호
 						
 							m_X, m_Y, 0,
-							(int)m_Direction,														// »ç¿ë ¹æÇâ
+							(int)m_Direction,														// 사용 방향
 							
-							m_ID,												// ¸ñÇ¥¿¡ ´ëÇÑ Á¤º¸
+							m_ID,												// 목표에 대한 정보
 							m_X, m_Y, 0,
 							
 							80, //5*16, 
@@ -7054,18 +7054,18 @@ MCreature::CheckDropBlood()
 			}
 
 			//----------------------------------------------------------
-			// ´ÙÀ½ ÇÇ Èê¸®±â °¡´ÉÇÑ ½Ã°£ ¼³Á¤. 
-			// Á» ´Ê°Ô Ã¼Å©ÇØµµ °ü°è¾øÀ¸¹Ç·Î ÇÇ Èê¸®°Å³ª ¸»°Å³ª..½Ã°£ È®Àå
+			// 다음 피 흘리기 가능한 시간 설정. 
+			// 좀 늦게 체크해도 관계없으므로 피 흘리거나 말거나..시간 확장
 			//----------------------------------------------------------
 			DWORD timeGap = 300 //+ 1000	//g_pClientConfig->BLOOD_DROP_GAP_TIME 
 							+ (percentHP<<2) * rand()%20;//g_pClientConfig->BLOOD_DROP_RANDOM_TIME;
 
 			//----------------------------------------------------------
-			// ÈíÇ÷ ´çÇÑ »óÅÂÀÌ¸é ÇÇ¸¦ Á» ´ú Èê¸°´Ù.
+			// 흡혈 당한 상태이면 피를 좀 덜 흘린다.
 			//----------------------------------------------------------
 			if (HasEffectStatus(EFFECTSTATUS_BLOOD_DRAIN))
 			{
-				// 5¹è Á¤µµ ´ú Èê¸°´Ù.
+				// 5배 정도 덜 흘린다.
 				m_NextBloodingTime = g_CurrentTime + timeGap*5;
 			}
 			else
@@ -7089,18 +7089,18 @@ MCreature::AddCasketSoon(int type)
 
 	//SetInvisibleSoon();
 
-	// [»õ±â¼ú3] -_-; virtual·Î ÇÏ´Â°Ô ³ªÀ»ÅÙµ¥.. 
+	// [새기술3] -_-; virtual로 하는게 나을텐데.. 
 	if (GetClassType()==CLASS_PLAYER)
 	{		
 		g_pSkillAvailable->SetAvailableSkills();
 	}
 
-	// [»õ±â¼ú7]
+	// [새기술7]
 	m_bEffectStatus[EFFECTSTATUS_CASKET] = true;
 	
 	CheckRegen();
 
-	if(g_pPlayer == this)	// PlayerÀÎ °æ¿ì °ü¼ÒÈ¯ Áß¿¡´Â ¿Ê ¸ø°¥¾Æ ÀÔ´Â´Ù.
+	if(g_pPlayer == this)	// Player인 경우 관소환 중에는 옷 못갈아 입는다.
 	{
 		UI_LockGear();
 	}
@@ -7118,12 +7118,12 @@ MCreature::RemoveCasketSoon()
 
 	//SetVisibleSoon();
 
-	// [»õ±â¼ú7]
+	// [새기술7]
 	m_bEffectStatus[EFFECTSTATUS_CASKET] = false;
 	
 	CheckRegen();
 
-	if(g_pPlayer == this)	// PlayerÀÎ °æ¿ì °ü¼ÒÈ¯ Áß¿¡´Â ¿Ê ¸ø°¥¾Æ ÀÔ´Â°É Ç¬´Ù.
+	if(g_pPlayer == this)	// Player인 경우 관소환 중에는 옷 못갈아 입는걸 푼다.
 	{
 		UI_UnlockGear();;
 	}
@@ -7132,7 +7132,7 @@ MCreature::RemoveCasketSoon()
 //----------------------------------------------------------------------
 // Add Casket
 //----------------------------------------------------------------------
-// °üÀÌ ¼­¼­È÷ »ý±ä´Ù.
+// 관이 서서히 생긴다.
 //----------------------------------------------------------------------
 void				
 MCreature::AddCasket(int type)
@@ -7145,13 +7145,13 @@ MCreature::AddCasket(int type)
 //
 //	//SetInvisible();
 //
-//	// [»õ±â¼ú3] -_-; virtual·Î ÇÏ´Â°Ô ³ªÀ»ÅÙµ¥.. 
+//	// [새기술3] -_-; virtual로 하는게 나을텐데.. 
 //	if (GetClassType()==CLASS_PLAYER)
 //	{		
 //		g_pSkillAvailable->SetAvailableSkills();
 //	}
 //
-//	// [»õ±â¼ú7]
+//	// [새기술7]
 //	m_bEffectStatus[EFFECTSTATUS_CASKET] = true;
 //	
 //	CheckRegen();
@@ -7160,19 +7160,19 @@ MCreature::AddCasket(int type)
 //----------------------------------------------------------------------
 // Remove Casket
 //----------------------------------------------------------------------
-// °üÀÌ ¼­¼­È÷ »ç¶óÁø´Ù.
+// 관이 서서히 사라진다.
 //----------------------------------------------------------------------
 void				
 MCreature::RemoveCasket()
 {
 	RemoveCasketSoon();
-	m_bInCasket = true;		// 64µÇ¸é false·Î ¹Ù²ã¾ß ÇÑ´Ù.
+	m_bInCasket = true;		// 64되면 false로 바꿔야 한다.
 	m_CasketCount = 0;
 	m_CasketCountInc = 2;
 
 	//SetVisible();
 
-//	// [»õ±â¼ú7]
+//	// [새기술7]
 //	m_bEffectStatus[EFFECTSTATUS_CASKET] = false;
 //
 //	CheckRegen();
@@ -7214,7 +7214,7 @@ MCreature::UpdateCasket()
 			m_CasketCount = 64;
 			m_CasketCountInc = 0;
 
-			// [»õ±â¼ú3] - -;;
+			// [새기술3] - -;;
 			if (GetClassType()==CLASS_PLAYER)
 			{		
 				g_pSkillAvailable->SetAvailableSkills();
@@ -7228,13 +7228,13 @@ MCreature::UpdateCasket()
 //----------------------------------------------------------------------
 // Update Status
 //----------------------------------------------------------------------
-// ÀÏ´ÜÀº.. HP / MP º¯È­
+// 일단은.. HP / MP 변화
 //----------------------------------------------------------------------
 void
 MCreature::UpdateStatus()
 {
 	//--------------------------------------------------------
-	// coma »óÅÂ¿¡¼­´Â HP¸¦ ¿Ã¸®Áö ¾Ê´Â´Ù.
+	// coma 상태에서는 HP를 올리지 않는다.
 	//--------------------------------------------------------
 	if (!m_bAlive 
 		|| HasEffectStatus(EFFECTSTATUS_COMA))
@@ -7245,52 +7245,52 @@ MCreature::UpdateStatus()
 	bool bChangedHP = false;
 
 	//--------------------------------------------------------
-	// HP È¸º¹
+	// HP 회복
 	//--------------------------------------------------------
 	if (m_RecoveryHPTimes > 0 
 		&& g_CurrentTime >= m_RecoveryHPNextTime)
 	{		
 		m_RecoveryHPTimes--;
 
-		// È¸º¹
+		// 회복
 		SetStatus( MODIFY_CURRENT_HP, GetStatus(MODIFY_CURRENT_HP)+m_RecoveryHPAmount );
 
 		bChangedHP = true;
 		
-		// ´ÙÀ½ È¸º¹ÇÒ ½Ã°£ ¼³Á¤
+		// 다음 회복할 시간 설정
 		m_RecoveryHPNextTime += m_RecoveryHPDelayTime;		
 	}
 
 	//--------------------------------------------------------
-	// MP È¸º¹
+	// MP 회복
 	//--------------------------------------------------------
 	if (m_RecoveryMPTimes > 0 
 		&& g_CurrentTime >= m_RecoveryMPNextTime)
 	{		
 		m_RecoveryMPTimes--;
 
-		// È¸º¹
+		// 회복
 		SetStatus( MODIFY_CURRENT_MP, GetStatus(MODIFY_CURRENT_MP)+m_RecoveryMPAmount );
 
-		// ´ÙÀ½ È¸º¹ÇÒ ½Ã°£ ¼³Á¤
+		// 다음 회복할 시간 설정
 		m_RecoveryMPNextTime += m_RecoveryMPDelayTime;		
 	}
 
 	//--------------------------------------------------------
-	// ¹ìÆÄÀÌ¾îÀÎ °æ¿ì ÀÚµ¿ È¸º¹
+	// 뱀파이어인 경우 자동 회복
 	//--------------------------------------------------------
 	if (m_RegenAmount > 0)
 	{
 		//--------------------------------------------------------
-		// ±âº»ÀûÀÎ È¸º¹
+		// 기본적인 회복
 		//--------------------------------------------------------
 		if (g_CurrentTime >= m_RegenNextTime)
 		{		
-			// [»õ±â¼ú4] mephisto °É¸®¸é HP regen ¾ÈµÈ´Ù.
+			// [새기술4] mephisto 걸리면 HP regen 안된다.
 
 			//if ( !m_bEffectStatus[EFFECTSTATUS_MEPHISTO] || !m_bEffectStatus[EFFECTSTATUS_MEPHISTO]&&IsInCasket() )
 			{
-				// °ü¼Ó¿¡ ÀÖÀ» °æ¿ì Àºµ¥¹ÌÁöºÎÅÍ È¸º¹ÇÑ´Ù.
+				// 관속에 있을 경우 은데미지부터 회복한다.
 				if( IsInCasket() )
 				{
 					DWORD SilverDamage = GetStatus( MODIFY_SILVER_DAMAGE );
@@ -7317,7 +7317,7 @@ MCreature::UpdateStatus()
 			
 
 			//--------------------------------------------------------
-			// ºÎ°¡ÀûÀÎ È¸º¹ - -;
+			// 부가적인 회복 - -;
 			//--------------------------------------------------------
 			if (g_CurrentTime >= m_RegenBonusNextTime)
 			{		
@@ -7334,7 +7334,7 @@ MCreature::UpdateStatus()
 	}
 
 	//--------------------------------------------------------
-	// ÆÄÆ¼ÀÎ °æ¿ì´Â HP ´Ù½Ã ¼³Á¤ÇØÁØ´Ù.
+	// 파티인 경우는 HP 다시 설정해준다.
 	//--------------------------------------------------------
 	if (bChangedHP)
 	{	
@@ -7342,7 +7342,7 @@ MCreature::UpdateStatus()
 		{
 			PARTY_INFO* pInfo = g_pParty->GetMemberInfo( GetName() );
 				
-			// ÁÂÇ¥¸¦ ¼öÁ¤ÇØÁØ´Ù.
+			// 좌표를 수정해준다.
 			if (pInfo!=NULL)
 			{
 				pInfo->HP = m_Status[MODIFY_CURRENT_HP];
@@ -7370,7 +7370,7 @@ MCreature::UpdateInvisible()
 }
 
 //----------------------------------------------------------------------
-// ´ÙÀ½ µ¿ÀÛÀ» ÃëÇÑ´Ù.
+// 다음 동작을 취한다.
 //----------------------------------------------------------------------
 void
 MCreature::Action()
@@ -7386,7 +7386,7 @@ MCreature::Action()
 	#endif
 
 	//--------------------------------------------------------
-	// Ã¤ÆÃ String ¾îµÓ°Ô ÇÒ ½Ã°£
+	// 채팅 String 어둡게 할 시간
 	//--------------------------------------------------------
 	if (m_NextChatFadeTime < g_CurrentTime)
 	{
@@ -7394,17 +7394,17 @@ MCreature::Action()
 	}
 	
 	//--------------------------------------------------------
-	// Status »óÅÂ º¯È­	- HP, MP º¯È­
+	// Status 상태 변화	- HP, MP 변화
 	//--------------------------------------------------------
 	UpdateStatus();
 	
 //	// 2004, 08, 05 sobeit add start
-//	if( GetCreatureType() == 726 ||  GetCreatureType() == 727 || GetCreatureType() == 728 || GetCreatureType() == 729) // ¼º¹®
-//		return; // ¹ØÀ¸·Î ³»·Á°¡ ºÁ¾ß º°·Î ÇÒ°Ô ¾ø´Ù.
+//	if( GetCreatureType() == 726 ||  GetCreatureType() == 727 || GetCreatureType() == 728 || GetCreatureType() == 729) // 성문
+//		return; // 밑으로 내려가 봐야 별로 할게 없다.
 //	// 2004, 08, 05 sobeit add end
 
 	//--------------------------------------------------------
-	// Æ¯¼öÇÑ È¿°úµé
+	// 특수한 효과들
 	//--------------------------------------------------------
 //	if(UpDateInstallTurret())
 //		return;
@@ -7468,15 +7468,15 @@ MCreature::Action()
 	//UpdateDarkness();
 	
 	//--------------------------------------------------------
-	// ¹æÇâ ÀüÈ¯À» ÀÚ¿¬½º·´°Ô
+	// 방향 전환을 자연스럽게
 	//--------------------------------------------------------
 	if (!ChangeNearDirection())
 	{
 			//--------------------------------------------------------
-			// ¹æÇâÀ» ¹Ù²Ü ÇÊ¿ä°¡ ¾ø´ø °æ¿ì¿¡..
-			// ½É½ÉÇÒ¶§¸¶´Ù ÇÑ¹ø¾¿ ¹æÇâ ¹Ù²ãÁÖ±â.. - -;
+			// 방향을 바꿀 필요가 없던 경우에..
+			// 심심할때마다 한번씩 방향 바꿔주기.. - -;
 			//--------------------------------------------------------			
-			if (// Player°¡ ¾Æ´Ï°í
+			if (// Player가 아니고
 //				m_CreatureType >= 4
 				!IsCreatureTypeVampirePC(m_CreatureType)
 				&& m_CreatureType != CREATURETYPE_SLAYER_OPERATOR
@@ -7485,19 +7485,19 @@ MCreature::Action()
 				&& m_CreatureType != CREATURETYPE_SLAYER_MALE
 				&& m_CreatureType != CREATURETYPE_SLAYER_FEMALE
 				&& m_CreatureType != CREATURETYPE_OUSTERS
-				// °øÁß¹ÙÅä¸®°¡ ¾Æ´Ï°í
+				// 공중바토리가 아니고
 				&& m_CreatureType != 431
-				// NPC°¡ ¾Æ´Ï°í... (¹æÇâº°·Î ±×¸²ÀÌ ´Ù ¾ø¾î¼­¸® -_-;)
+				// NPC가 아니고... (방향별로 그림이 다 없어서리 -_-;)
 				&& !IsNPC()
-				// »ì¾Æ ÀÖ°í..
+				// 살아 있고..
 				&& m_bAlive
-				// Á¤Áö»óÅÂÀÌ°í
+				// 정지상태이고
 				&& m_Action==ACTION_STAND
-				// ¿òÁ÷ÀÏ°÷ÀÌ ¾ø°í
+				// 움직일곳이 없고
 				&& m_listMoveBuffer.size()==0
-				// Á¤Áöµ¿ÀÛÀÇ ³¡¿¡..
+				// 정지동작의 끝에..
 				&& m_ActionCount>=GetActionCountMax()-1
-				// randomÇÏ°Ô.. - -;
+				// random하게.. - -;
 				&& (rand() % 5)==0
 				&& !HasEffectStatus(EFFECTSTATUS_INSTALL_TURRET)
 				)
@@ -7508,7 +7508,7 @@ MCreature::Action()
 	//m_CurrentDirection = m_Direction;
 
 	//--------------------------------------------------------
-	// ¹«½¼ effect°¡ °É·ÁÀÖ´Ù¸é 2¹è ´À¸®°Ô ¿òÁ÷ÀÎ´Ù.
+	// 무슨 effect가 걸려있다면 2배 느리게 움직인다.
 	//--------------------------------------------------------
 	if (HasEffectStatus( EFFECTSTATUS_HAS_SLAYER_RELIC ) || HasEffectStatus( EFFECTSTATUS_HAS_VAMPIRE_RELIC ) || 
 		HasEffectStatus( EFFECTSTATUS_HAS_BLOOD_BIBLE_GREGORI )|| HasEffectStatus( EFFECTSTATUS_HAS_BLOOD_BIBLE_NEMA ) ||
@@ -7541,14 +7541,14 @@ MCreature::Action()
 //	BOOL bSlayer = IsSlayer();
 
 	//--------------------------------------------------------
-	// KnockBack Ã³¸® 2001.10.9
+	// KnockBack 처리 2001.10.9
 	//--------------------------------------------------------
 	if (m_bKnockBack > 0)
 	{
 		m_sX += m_cX;
 		m_sY += m_cY;
 
-		// knockBack ´Ùx µÆÀ¸¸é Á¤Áöµ¿ÀÛ.
+		// knockBack 다x 됐으면 정지동작.
 		if (--m_bKnockBack==0)
 		{
 			m_sX = 0;
@@ -7560,7 +7560,7 @@ MCreature::Action()
 		}			
 	}
 	//--------------------------------------------------------
-	// FastMoveÁß¿¡´Â actionÀ» ÃëÇÏÁö ¾Ê´Â´Ù. 
+	// FastMove중에는 action을 취하지 않는다. 
 	//--------------------------------------------------------
 	else if (!m_bFastMove)
 	{
@@ -7568,19 +7568,19 @@ MCreature::Action()
 		{	
 			int bOldNextAction = m_NextAction;
 
-			// affectUsedActionInfo¸¦ ½ÇÇàÇÏ°í ³ª¸é
-			// NextActionInfo°¡ ¹Ù²ð ¼ö°¡ ÀÖ´Ù.			
+			// affectUsedActionInfo를 실행하고 나면
+			// NextActionInfo가 바뀔 수가 있다.			
 			TYPE_ACTIONINFO nextUsedActionInfo = m_nNextUsedActionInfo;
 			TYPE_ACTIONINFO nextNextUsedActionInfo = ACTIONINFO_NULL;
 
 			//--------------------------------------------------------
-			// ÀÌÀü¿¡ »ç¿ë ÁßÀÎ ±â¼úÀÌ ÀÖ´Ù¸é... ¹Ù·Î Àû¿ë ½ÃÅ²´Ù.
+			// 이전에 사용 중인 기술이 있다면... 바로 적용 시킨다.
 			//--------------------------------------------------------
 			if (m_nUsedActionInfo!=ACTIONINFO_NULL)
 			{	
 				m_nNextUsedActionInfo = ACTIONINFO_NULL;
 
-				// castingEffect°¡ ¾ÆÁ÷ Ãâ·Â ¾ÈµÆÀ¸¸é Ãâ·Â½ÃÅ²´Ù.
+				// castingEffect가 아직 출력 안됐으면 출력시킨다.
 				if (GetActionInfoCastingStartFrame(m_nUsedActionInfo) >= m_ActionCount)
 				{
 					AttachCastingEffect( m_nUsedActionInfo, TRUE );
@@ -7595,13 +7595,13 @@ MCreature::Action()
 			m_nUsedActionInfo = nextUsedActionInfo;
 			m_nNextUsedActionInfo = nextNextUsedActionInfo;
 
-			// 2001.9.30ÀÏ Ãß°¡
+			// 2001.9.30일 추가
 			if (m_nUsedActionInfo!=ACTIONINFO_NULL)
 			{
 				int actionInfoAction = GetActionInfoAction(m_nUsedActionInfo);
 
-				// ¸Â´Â µ¿ÀÛÀÌ¸é.. ÇÇ Æ¢±è..
-				// 2002.3.19 ÁÖ¼® Á¦°Å.. ¾Æ¹« µ¿ÀÛÀÌ³ª ÀÏ´Ü ÀÌÆåÆ® º¸¿©ÁÖÀÚ
+				// 맞는 동작이면.. 피 튀김..
+				// 2002.3.19 주석 제거.. 아무 동작이나 일단 이펙트 보여주자
 				//if (actionInfoAction==ACTION_DAMAGED)
 				{
 					if //(m_Action!=ACTION_STAND 
@@ -7613,7 +7613,7 @@ MCreature::Action()
 
 						AffectUsedActionInfo( m_nUsedActionInfo );
 				
-						// ¼Ò¸® Ãâ·Â
+						// 소리 출력
 						PlaySound( 
 							(*g_pCreatureTable)[m_CreatureType].GetActionSound( 
 								GetActionInfoAction(m_nUsedActionInfo)
@@ -7626,8 +7626,8 @@ MCreature::Action()
 					}
 				}
 
-				// 2001.05.21 Ãß°¡
-				// ±â¼ú µ¿ÀÛ¿¡¼­ ACTION_STAND´Â º¸¿©ÁÖÁö ¾Ê´Â´Ù.
+				// 2001.05.21 추가
+				// 기술 동작에서 ACTION_STAND는 보여주지 않는다.
 				if (actionInfoAction!=ACTION_STAND)
 				{
 					SetAction( actionInfoAction );
@@ -7635,9 +7635,9 @@ MCreature::Action()
 			}				
 
 			//--------------------------------------------------------
-			// ÀÌµ¿ÇÒ·Á´Ù°¡ ¸Â°Å³ªÇØ¼­ ´Ù¸¥ actionÀ» ½ÇÇàÇÏ°Ô µÇ´Â °æ¿ì
-			// ÀÌµ¿ÀÌ ¾ÈµÇ´Â °æ¿ì°¡ ÀÖ¾ú´Ù.
-			// ´ëÃ¥ --> NextActionÀ» ±â¾ïÇß´Ù°¡ ÀÌµ¿ÀÌ¸é.. ÀÌµ¿½ÃÅ°±â
+			// 이동할려다가 맞거나해서 다른 action을 실행하게 되는 경우
+			// 이동이 안되는 경우가 있었다.
+			// 대책 --> NextAction을 기억했다가 이동이면.. 이동시키기
 			// 2001.9.24
 			//--------------------------------------------------------
 			if (bOldNextAction==m_MoveAction)
@@ -7646,7 +7646,7 @@ MCreature::Action()
 			}	 			
 		}
 		//--------------------------------------------------------
-		// ±â¾ïµÈ ´ÙÀ½ Çàµ¿... 
+		// 기억된 다음 행동... 
 		//--------------------------------------------------------
 		else if (m_bNextAction 
 				|| m_NextAction!=ACTION_STAND 
@@ -7658,12 +7658,12 @@ MCreature::Action()
 	}
 
 	//--------------------------------------------------------
-	// ¸¶ºñ µÆÀ» ¶§..
+	// 마비 됐을 때..
 	//--------------------------------------------------------
 	if(HasEffectStatus(EFFECTSTATUS_CAUSE_CRITICAL_WOUNDS) && !IsSlayer())
 	{
 		//--------------------------------------------------------
-		// ±â¼úÀ» »ç¿ëÇÏ·Á´Â °æ¿ì
+		// 기술을 사용하려는 경우
 		//--------------------------------------------------------
 		if (m_nUsedActionInfo!=ACTIONINFO_NULL)
 		{
@@ -7678,7 +7678,7 @@ MCreature::Action()
 		)
 	{			
 		//--------------------------------------------------------
-		// ±â¼úÀ» »ç¿ëÇÏ·Á´Â °æ¿ì
+		// 기술을 사용하려는 경우
 		//--------------------------------------------------------
 		if (m_nUsedActionInfo!=ACTIONINFO_NULL)
 		{
@@ -7689,9 +7689,9 @@ MCreature::Action()
 		if (m_ActionCount>=GetActionCountMax())
 		{			
 			//--------------------------------------------------------
-			// ¸ñÇ¥ Å¸ÀÏ¿¡ µµÂøÇÑ »óÅÂ¿¡¼­..
-			// °è¼Ó ¼­ ÀÖ°Å³ª.. ´Ù °ÉÀº °æ¿ì´Â.. 
-			// Á¦ÀÚ¸®¿¡¼­ Èçµé°Å¸®´Â ¸ð½ÀÀ» Ç¥ÇöÇØÁØ´Ù.
+			// 목표 타일에 도착한 상태에서..
+			// 계속 서 있거나.. 다 걸은 경우는.. 
+			// 제자리에서 흔들거리는 모습을 표현해준다.
 			//--------------------------------------------------------
 			if (m_MoveCount>=m_MoveCountMax)
 			{		
@@ -7716,33 +7716,33 @@ MCreature::Action()
 		}
 	}
 	//--------------------------------------------------------
-	// ÀÏ¹ÝÀûÀÎ °æ¿ì
+	// 일반적인 경우
 	//--------------------------------------------------------
 	else
 	{
 		//--------------------------------------------------------
-		// ÇÇ Èê¸®´Â°Å Ã¼Å©
+		// 피 흘리는거 체크
 		//--------------------------------------------------------
 		CheckDropBlood();
 
 		//--------------------------------------------------------
-		// Action Ã³¸®
+		// Action 처리
 		//--------------------------------------------------------
 		if (m_ActionCount < GetActionCountMax())
 		{		
 			//--------------------------------------------------------
-			// ±â¼úÀ» »ç¿ëÇÏ·Á´Â °æ¿ì
+			// 기술을 사용하려는 경우
 			//--------------------------------------------------------
 			if (m_nUsedActionInfo!=ACTIONINFO_NULL)
 			{
 				ActionEffect();
 			}
 			//--------------------------------------------------------
-			// Çàµ¿..
+			// 행동..
 			//--------------------------------------------------------
 			else
 			{
-				// ÀûÀýÇÑ Action ¼öÇà
+				// 적절한 Action 수행
 				//switch (m_Action)
 				if (m_Action==ACTION_STAND 
 					|| IsSlayer() && m_Action==ACTION_SLAYER_MOTOR_STAND)
@@ -7754,7 +7754,7 @@ MCreature::Action()
 				else if (m_Action==ACTION_MOVE
 					|| IsSlayer() && m_Action==ACTION_SLAYER_MOTOR_MOVE)
 				{
-						// °È´Â µ¿ÀÛÀº µû·Î Ã³¸®ÇÑ´Ù.
+						// 걷는 동작은 따로 처리한다.
 						//ActionMove();
 				}
 				*/
@@ -7768,25 +7768,25 @@ MCreature::Action()
 		}
 		
 		//--------------------------------------------------------
-		// »ì¾Æ ÀÖ´Â °æ¿ì¸¸
+		// 살아 있는 경우만
 		//--------------------------------------------------------
 		if (m_bAlive)
 		{
 			//--------------------------------------------------------
-			// ActionÀÌ ³¡³­ °æ¿ì...
+			// Action이 끝난 경우...
 			//--------------------------------------------------------
 			if (m_ActionCount>=GetActionCountMax())
 			{			
 				//--------------------------------------------------------
-				// ¸ñÇ¥ Å¸ÀÏ¿¡ µµÂøÇÑ »óÅÂ¿¡¼­..
-				// °è¼Ó ¼­ ÀÖ°Å³ª.. ´Ù °ÉÀº °æ¿ì´Â.. 
-				// Á¦ÀÚ¸®¿¡¼­ Èçµé°Å¸®´Â ¸ð½ÀÀ» Ç¥ÇöÇØÁØ´Ù.
+				// 목표 타일에 도착한 상태에서..
+				// 계속 서 있거나.. 다 걸은 경우는.. 
+				// 제자리에서 흔들거리는 모습을 표현해준다.
 				//--------------------------------------------------------
 				if (m_MoveCount>=m_MoveCountMax)
 				{		
 					//#ifdef CONNECT_SERVER
 					//--------------------------------------------------------
-					// ´ÙÀ½ ÀÌµ¿ÀÌ ¾ø´Ù¸é.. Á¤Áö½ÃÅ²´Ù.
+					// 다음 이동이 없다면.. 정지시킨다.
 					//--------------------------------------------------------
 					AffectMoveBuffer();
 
@@ -7811,8 +7811,8 @@ MCreature::Action()
 					//#endif
 				}
 				//--------------------------------------------------------
-				// °È´Ù°¡ ´Ù¸¥ actionÀ» º¸¿©Áá°Å³ª °è¼Ó °È´ø ÁßÀÌ´Ù.
-				// ´Ù½Ã °È´Â´Ù.
+				// 걷다가 다른 action을 보여줬거나 계속 걷던 중이다.
+				// 다시 걷는다.
 				//--------------------------------------------------------
 				else 
 				{			
@@ -7822,7 +7822,7 @@ MCreature::Action()
 
 					if (m_MoveCount>=m_MoveCountMax)
 					{
-						// ´ÙÀ½ ÀÌµ¿ÇÒ °÷ÀÌ ÀÖÀ¸¸é..
+						// 다음 이동할 곳이 있으면..
 						if (m_NextX != SECTORPOSITION_NULL
 							&& m_NextDirection != DIRECTION_NULL)
 						{		
@@ -7833,7 +7833,7 @@ MCreature::Action()
 							//#ifdef CONNECT_SERVER
 
 							//--------------------------------------------------------
-							// ´ÙÀ½ ÀÌµ¿
+							// 다음 이동
 							//--------------------------------------------------------
 							AffectMoveBuffer();
 
@@ -7861,14 +7861,14 @@ MCreature::Action()
 				}
 			}
 			//--------------------------------------------------------
-			// ActionÀ» º¸¿©ÁÖ´Â ÁßÀÌ¶óµµ.. 
-			// ÀÌµ¿ÇÒ ²¨¸®?°¡ ÀÖÀ¸¸é ÀÌµ¿µµ ½ÃÄÑÁØ´Ù. 2001.10.10
+			// Action을 보여주는 중이라도.. 
+			// 이동할 꺼리?가 있으면 이동도 시켜준다. 2001.10.10
 			//--------------------------------------------------------
 			else
 			{		
 				/*
-				// 2001.11.8 - ÁÖ¼®Ã³¸®.. º¸±â ¾È ÁÁ´Ù³ª.. - -;;
-				if (// KnockBackÀÌ³ª FastMove°¡ ¾Æ´Ñ °æ¿ì
+				// 2001.11.8 - 주석처리.. 보기 안 좋다나.. - -;;
+				if (// KnockBack이나 FastMove가 아닌 경우
 					!m_bFastMove && m_bKnockBack==0	&& m_MoveCount>0)
 				{
 					if (m_MoveCount<m_MoveCountMax)
@@ -7877,7 +7877,7 @@ MCreature::Action()
 					}
 					else if (m_MoveCount>=m_MoveCountMax)
 					{
-						// ´ÙÀ½ ÀÌµ¿ÇÒ °÷ÀÌ ÀÖÀ¸¸é..
+						// 다음 이동할 곳이 있으면..
 						if (m_NextX != SECTORPOSITION_NULL)
 						{		
 							MoveNextPosition();
@@ -7900,16 +7900,16 @@ MCreature::Action()
 //----------------------------------------------------------------------
 // Packet Move (x, y, d)
 //----------------------------------------------------------------------
-// this Creature´Â Move¸¦ ¹Þ¾ÒÀ¸¹Ç·Î
+// this Creature는 Move를 받았으므로
 //
-// //0. Player¿ÍÀÇ ÁÂÇ¥ Ãæµ¹À» °í·ÁÇØ¼­ ¿òÁ÷¿©ÁØ´Ù.
+// //0. Player와의 좌표 충돌을 고려해서 움직여준다.
 //
-// (x,y)¿¡¼­ d¹æÇâÀ¸·Î ÇÑ Ä­ ¿òÁ÷ÀÎ´Ù.
+// (x,y)에서 d방향으로 한 칸 움직인다.
 //----------------------------------------------------------------------
 void		
 MCreature::PacketMove(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y, BYTE direction)
 {
-//	// 2004, 9, 16, sobeit add start - ÅÍ·¿ ¹æÇâ ¹Ù²Ù±â, »¬±î..¤Ñ¤Ñ;
+//	// 2004, 9, 16, sobeit add start - 터렛 방향 바꾸기, 뺄까..ㅡㅡ;
 //	if(HasEffectStatus(EFFECTSTATUS_INSTALL_TURRET))
 //	{
 //		SetCurrentDirection(direction);
@@ -7917,7 +7917,7 @@ MCreature::PacketMove(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y, BYTE directi
 //	}
 //	// 2004, 9, 16, sobeit add end
 	//---------------------------------------------------
-	// »õ·Î¿î ÀÌµ¿ Á¤º¸¸¦ buffer¿¡ Ãß°¡½ÃÅ²´Ù.
+	// 새로운 이동 정보를 buffer에 추가시킨다.
 	//---------------------------------------------------
 	MoveNode* pNode = new MoveNode;
 	pNode->x = x;
@@ -7928,7 +7928,7 @@ MCreature::PacketMove(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y, BYTE directi
 	{
 		PARTY_INFO* pInfo = g_pParty->GetMemberInfo( GetName() );		
 			
-		// ÁÂÇ¥¸¦ ¼öÁ¤ÇØÁØ´Ù.
+		// 좌표를 수정해준다.
 		if (pInfo!=NULL)
 		{
 			pInfo->zoneID = (g_bZonePlayerInLarge?g_nZoneLarge : g_nZoneSmall);
@@ -7938,7 +7938,7 @@ MCreature::PacketMove(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y, BYTE directi
 	}
 
 	//---------------------------------------------------
-	// ServerÁÂÇ¥´Â ¹Ù·Î Àû¿ë½ÃÅ²´Ù.
+	// Server좌표는 바로 적용시킨다.
 	//---------------------------------------------------
 	///*
 	int oldX = m_X;
@@ -7953,9 +7953,9 @@ MCreature::PacketMove(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y, BYTE directi
 	m_X = oldX;
 	m_Y = oldY;
 
-	// serverÁÂÇ¥ ±â¾ï
+	// server좌표 기억
 	// 2001.8.6
-	// 2002.3.22 ´Ù½Ã »ì·È´Ù.
+	// 2002.3.22 다시 살렸다.
 	//m_ServerX	= next.x;
 	//m_ServerY	= next.y;
 	
@@ -7965,7 +7965,7 @@ MCreature::PacketMove(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y, BYTE directi
 	m_listMoveBuffer.push_back( pNode );
 
 	//-----------------------------------------------------------
-	// Á¤ÁöµÈ »óÅÂÀÌ¸é ¹Ù·Î Àû¿ëÇÑ´Ù.
+	// 정지된 상태이면 바로 적용한다.
 	//-----------------------------------------------------------
 	if (m_Action==ACTION_STAND 
 		|| IsSlayer() && m_Action==ACTION_SLAYER_MOTOR_STAND)
@@ -7975,7 +7975,7 @@ MCreature::PacketMove(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y, BYTE directi
 	else
 	{
 		//---------------------------------------------------
-		// ÇÑ°è¸¦ ³Ñ´Â MoveBuffer´Â ¸ðµÎ Àû¿ë½ÃÄÑ¹ö¸°´Ù.
+		// 한계를 넘는 MoveBuffer는 모두 적용시켜버린다.
 		//---------------------------------------------------
 		while (m_listMoveBuffer.size() > g_pClientConfig->MAX_CREATURE_MOVE_BUFFER)
 		{
@@ -7987,7 +7987,7 @@ MCreature::PacketMove(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y, BYTE directi
 //----------------------------------------------------------------------
 // Release MoveBuffer
 //----------------------------------------------------------------------
-// ±âÁ¸ÀÇ MoveBuffer¸¦ ´Ù Áö¿ò
+// 기존의 MoveBuffer를 다 지움
 //----------------------------------------------------------------------
 void
 MCreature::ReleaseMoveBuffer()
@@ -8009,7 +8009,7 @@ MCreature::ReleaseMoveBuffer()
 //----------------------------------------------------------------------
 // Affect MoveBuffer All
 //----------------------------------------------------------------------
-// ¸ðµç MoveBuffer¸¦ Àû¿ë½ÃÅ²´Ù.
+// 모든 MoveBuffer를 적용시킨다.
 //----------------------------------------------------------------------
 void
 MCreature::AffectMoveBufferAll()
@@ -8023,13 +8023,13 @@ MCreature::AffectMoveBufferAll()
 //----------------------------------------------------------------------
 // Affect Move Buffer
 //----------------------------------------------------------------------
-// BufferingµÈ ´ÙÀ½ÀÇ ÀÌµ¿ Á¤º¸¸¦ ÇÏ³ª ¼³Á¤ÇÑ´Ù.
+// Buffering된 다음의 이동 정보를 하나 설정한다.
 //----------------------------------------------------------------------
 bool	
 MCreature::AffectMoveBuffer()
 {
 	//-------------------------------------------
-	// ÀÌµ¿ÇÒ Á¤º¸°¡ ¾ø´Â °æ¿ì
+	// 이동할 정보가 없는 경우
 	//-------------------------------------------
 	if (m_listMoveBuffer.size()==0)
 	{
@@ -8037,17 +8037,17 @@ MCreature::AffectMoveBuffer()
 	}
 
 	//-------------------------------------------
-	// Á© ¾Õ¿¡²¬ ÀÐ¾î¿Â´Ù.
+	// 젤 앞에껄 읽어온다.
 	//-------------------------------------------
 	MoveNode* pNode = m_listMoveBuffer.front();
 	m_listMoveBuffer.pop_front();
 
 	//-------------------------------------------
-	// °ª ¼³Á¤
+	// 값 설정
 	//-------------------------------------------
-	// ¿ø·¡´Â PacketMove()¿¡ ÀÖ´ø°Çµ¥
-	// move buffering Ãß°¡ÇÏ¸é¼­ cut & paste - -;;
-	// Àß µ¹¾Æ°¥·Á³ª..
+	// 원래는 PacketMove()에 있던건데
+	// move buffering 추가하면서 cut & paste - -;;
+	// 잘 돌아갈려나..
 	//-------------------------------------------
 	int x = pNode->x;
 	int y = pNode->y;
@@ -8055,7 +8055,7 @@ MCreature::AffectMoveBuffer()
 
 	delete pNode;
 
-	// Á×Àº °æ¿ì
+	// 죽은 경우
 	if (!m_bAlive)
 	{
 		return false;
@@ -8064,19 +8064,19 @@ MCreature::AffectMoveBuffer()
 
 	LOG_DEBUG("AffectMoveBuffer : [ID=%d] From(%d,%d) Direction(%d)", m_ID, x,y, direction);
 
-	// ÀÌÀü ÁÂÇ¥¸¦ ±â¾ïÇØµÐ´Ù.		
+	// 이전 좌표를 기억해둔다.		
 	int oldX = m_X;
 	int oldY = m_Y;
 
-	// ÀÓ½Ã·Î.. »õ ÁÂÇ¥¸¦ ¼³Á¤
+	// 임시로.. 새 좌표를 설정
 	m_X = x;
 	m_Y = y;	// m_X=x; m_Y=y;  and.. Etc...
 		
-	// Server¿¡¼­ ³¯¾Æ¿Â ¹æÇâÀ¸·Î ¿òÁ÷ÀÎ ÁÂÇ¥¸¦ ±¸ÇÑ´Ù.
+	// Server에서 날아온 방향으로 움직인 좌표를 구한다.
 	POINT next;
 	GetNextPosition( direction, next );
 
-	// ¿µ¿ª ³Ñ¾î°¡´ÂÁö Ã¼Å© . 2001.10.7
+	// 영역 넘어가는지 체크 . 2001.10.7
 	if (next.x < 0 
 		|| next.y < 0 
 		|| next.x >= g_pZone->GetWidth() 
@@ -8088,37 +8088,37 @@ MCreature::AffectMoveBuffer()
 		return false;
 	}
 
-	// serverÁÂÇ¥ ±â¾ï
+	// server좌표 기억
 	// 2001.8.6
-	// ÁÖ¼® 2002.3.22... PacketMove·Î ¿Å°å´Ù.
+	// 주석 2002.3.22... PacketMove로 옮겼다.
 	//SetServerPositionWithBlock( next.x, next.y );	
 
-	// ¿ø·¡ ÁÂÇ¥·Î µÇµ¹¸°´Ù.
+	// 원래 좌표로 되돌린다.
 	m_X = oldX;
 	m_Y = oldY;
 
 	//-----------------------------------------------------
-	// °¥ ¼ö ¾ø´Â °÷ÀÎ °æ¿ì...
+	// 갈 수 없는 곳인 경우...
 	//-----------------------------------------------------
-	// Server¿¡¼­ Àß¸øµÈ Á¤º¸°¡ ¿Ô´Ù.. - -;;
-	// timing¹®Á¦¶ó°í ÇÒ±î?
+	// Server에서 잘못된 정보가 왔다.. - -;;
+	// timing문제라고 할까?
 	#ifdef OUTPUT_DEBUG
 		//if (!m_pZone->CanMove(m_MoveType, next.x, next.y))
 		{
 		//	DEBUG_ADD_FORMAT("[ Collide ] Creature[ID=%d] Can't Move to (%d,%d) - But, Go!", m_ID, next.x, next.y);				
 			
-			// ±×·¡µµ ¿òÁ÷¿©º¸ÀÚ~
+			// 그래도 움직여보자~
 			//return;
 		}
 	#endif
 
 	//--------------------------------------------------
-	// Server¿¡¼­ °ËÁõµÈ ÁÂÇ¥¸¦ ¼³Á¤ÇÑ´Ù.
+	// Server에서 검증된 좌표를 설정한다.
 	//--------------------------------------------------
 	//m_ServerX = x;//next.x;
 	//m_ServerY = y;//next.y;
 
-	// ¾ÆÁ÷ ÀÌÀü Á¤º¸°¡ updateµÇÁö ¾Ê¾ÒÀ¸¸é...
+	// 아직 이전 정보가 update되지 않았으면...
 	if (m_NextX != SECTORPOSITION_NULL)
 		// && m_NextY != SECTORPOSITION_NULL
 	{
@@ -8129,12 +8129,12 @@ MCreature::AffectMoveBuffer()
 							m_NextX, m_NextY, 
 							g_pPlayer->GetX(), g_pPlayer->GetY());			
 		
-		// ÀÌÀü Á¤º¸¸¦ ¹Ù·Î update½ÃÅ²´Ù.
+		// 이전 정보를 바로 update시킨다.
 		MovePosition(m_NextX, m_NextY);
 		m_Direction = m_NextDirection;
 		m_DirectionMove = m_NextDirection;
 
-		// (m_X, m_Y)¿¡¼­ m_CurrentDirectionÀ¸·Î ÀÌµ¿½ÃÅ²´Ù.
+		// (m_X, m_Y)에서 m_CurrentDirection으로 이동시킨다.
 		SetNextAction( m_MoveAction );
 
 		m_NextX = x;
@@ -8145,30 +8145,30 @@ MCreature::AffectMoveBuffer()
 	}
 
 	//--------------------------------------------------
-	// Player°¡ ÀÌ¹Ì °¥ ÀÚ¸®¿¡ ÀÖ´Ù¸é....
+	// Player가 이미 갈 자리에 있다면....
 	//--------------------------------------------------
-	// ¸ø °£´Ù~~
+	// 못 간다~~
 	/*
 	if (g_pPlayer->GetX()==next.x && g_pPlayer->GetY()==next.y)
 	{
-		// ¹æÇâ¸¸ ¼³Á¤..
+		// 방향만 설정..
 		//pCreature->SetDirection( pGCMove->getDir() );	
 		
-		// ÀÌÀü¿¡ ÀÖ´ø ÁÂÇ¥¿¡¼­ ¿òÁ÷ÀÌ·Á°í ÇÑ °æ¿ì..
+		// 이전에 있던 좌표에서 움직이려고 한 경우..
 		if (oldX==x && oldY==y)
 		{
-			// ±×³É ¼­ ÀÖÀ¸¸é µÈ´Ù.
+			// 그냥 서 있으면 된다.
 		}
 		else
 		{
-			// ÀÌÀü¿¡ ÀÖ´ø ÁÂÇ¥(oldX, oldY)¿¡¼­ »õÁÂÇ¥(x,y)·Î ÀÌµ¿ÇÑ´Ù.
+			// 이전에 있던 좌표(oldX, oldY)에서 새좌표(x,y)로 이동한다.
 			m_X = oldX;
 			m_Y = oldY;
 
 			MovePosition( x, y );			
 
-			// »õ ÁÂÇ¥¿¡¼­ ¹æÇâ(direction)À¸·Î ¿òÁ÷¿©¾ß ÇÏÁö¸¸
-			// ±×³É »õ ÁÂÇ¥¿¡ ¼­ ÀÖ¾î¾ß ÇÑ´Ù.
+			// 새 좌표에서 방향(direction)으로 움직여야 하지만
+			// 그냥 새 좌표에 서 있어야 한다.
 		}
 
 		// message		
@@ -8179,7 +8179,7 @@ MCreature::AffectMoveBuffer()
 	}
 	*/
 	//--------------------------------------------------
-	// ¸ñÀûÁö¿¡ ÀÌ¹Ì °¡ ÀÖ´Â °æ¿ì´Â ¿òÁ÷ÀÏ ÇÊ¿ä¾ø´Ù.
+	// 목적지에 이미 가 있는 경우는 움직일 필요없다.
 	//--------------------------------------------------		
 	//else 
 	if (m_X==next.x && m_Y==next.y)
@@ -8188,16 +8188,16 @@ MCreature::AffectMoveBuffer()
 		DEBUG_ADD_FORMAT("[ Stand ] [ID=%d] : Already Reached (%d, %d) ,  Player=(%d, %d)", m_ID, oldX, oldY, g_pPlayer->GetX(), g_pPlayer->GetY());						
 	}
 	//--------------------------------------------------
-	// ¸ñÀûÁö¿¡ °¡ ÀÖÁö ¾ÊÀº °æ¿ì --> ¿òÁ÷ÀÎ´Ù.
+	// 목적지에 가 있지 않은 경우 --> 움직인다.
 	//--------------------------------------------------
 	else
 	{		
 		//--------------------------------------------------
-		// ÀÌÀü¿¡ ÀÖ´ø À§Ä¡¿¡¼­ ¿òÁ÷ÀÌ´Â °ÍÀÌ¸é.. 
+		// 이전에 있던 위치에서 움직이는 것이면.. 
 		//--------------------------------------------------
 		if (m_X==x && m_Y==y)
 		{
-			// ¿òÁ÷ÀÌ´Â µ¿ÀÛÀÌ ³¡³­ »óÅÂÀÌ¸é..
+			// 움직이는 동작이 끝난 상태이면..
 			if (m_MoveCount>=m_MoveCountMax)
 			{
 				DEBUG_ADD_FORMAT("[ MoveSetting ] [ID=%d] From(%d, %d) to Direction(%d) ,  Player=(%d, %d)", m_ID, x,y, direction, g_pPlayer->GetX(), g_pPlayer->GetY());						
@@ -8207,7 +8207,7 @@ MCreature::AffectMoveBuffer()
 				SetNextAction( m_MoveAction );
 				//m_bNextAction = true;
 			}
-			// ¾ÆÁ÷ ¿òÁ÷ÀÌ°í ÀÖ´Â ÁßÀÌ¸é..
+			// 아직 움직이고 있는 중이면..
 			else
 			{
 				DEBUG_ADD_FORMAT("[ MoveBuffering ][ID=%d] Current(%d, %d), Next(%d, %d) to Direction(%d)", m_ID, m_X, m_Y, x,y, direction);						
@@ -8218,15 +8218,15 @@ MCreature::AffectMoveBuffer()
 			}
 		}
 		//--------------------------------------------------
-		// jumpÇÏ°Ô µÇ´Â °æ¿ì¿¡...
+		// jump하게 되는 경우에...
 		//--------------------------------------------------
-		// ÀÌÀü¿¡ ÀÖ´ø CreatureÀÇ À§Ä¡¸¦ Á¦°ÅÇÑ´Ù.
+		// 이전에 있던 Creature의 위치를 제거한다.
 		else
 		{
-			// ÀÌÀü¿¡ ÀÖ´ø ÁÂÇ¥(m_X, m_Y)¿¡¼­ »õÁÂÇ¥(x,y)·Î ÀÌµ¿ÇÑ´Ù.			
+			// 이전에 있던 좌표(m_X, m_Y)에서 새좌표(x,y)로 이동한다.			
 			MovePosition( x, y );			
 			
-			// »õ ÁÂÇ¥¿¡¼­ ¹æÇâ(direction)À¸·Î ¿òÁ÷¿©¾ß ÇÑ´Ù.
+			// 새 좌표에서 방향(direction)으로 움직여야 한다.
 			m_Direction = direction;
 			m_DirectionMove = direction;
 			m_NextDirection = direction;	// 2001.11.6
@@ -8236,7 +8236,7 @@ MCreature::AffectMoveBuffer()
 			DEBUG_ADD_FORMAT("[ Jump ] [ID=%d] : (%d, %d) --> (%d, %d),  Player=(%d, %d)", m_ID, m_X, m_Y, next.x, next.y, g_pPlayer->GetX(), g_pPlayer->GetY());
 		}			
 		
-		// ¹æÇâÀ» Á¤ÇÏ°í ¿òÁ÷ÀÌµµ·Ï ÇÑ´Ù.
+		// 방향을 정하고 움직이도록 한다.
 		//m_CurrentDirection = direction;
 		//SetNextAction( m_MoveAction );
 	}	
@@ -8247,7 +8247,7 @@ MCreature::AffectMoveBuffer()
 //----------------------------------------------------------------------
 // Get ActionInfo's Action
 //----------------------------------------------------------------------
-// nActionInfo¿¡ ÀûÀýÇÑ ACTIONÀ» Ã£´Â´Ù.
+// nActionInfo에 적절한 ACTION을 찾는다.
 //----------------------------------------------------------------------
 int
 MCreature::GetActionInfoAction(TYPE_ACTIONINFO nActionInfo, bool IsSelfAction)
@@ -8266,7 +8266,7 @@ MCreature::GetActionInfoAction(TYPE_ACTIONINFO nActionInfo, bool IsSelfAction)
 //		return ACTION_ATTACK;
 	// 2004, 11, 23, sobeit add end
 	//-------------------------------------------------------------
-	// ±âº» actionÀÇ Àû¿ëÀ» ¹Þ´Â°¡?
+	// 기본 action의 적용을 받는가?
 	//-------------------------------------------------------------
 	if ((*g_pActionInfoTable)[nActionInfo].IsAffectCurrentWeaponAction())
 	{
@@ -8291,7 +8291,7 @@ MCreature::GetActionInfoAction(TYPE_ACTIONINFO nActionInfo, bool IsSelfAction)
 		}
 	}
 	//-------------------------------------------------------------
-	// ¹«±â ¼Óµµ¿¡ µû¶ó¼­ actionÀÌ ´Þ¶óÁø´Ù.
+	// 무기 속도에 따라서 action이 달라진다.
 	//-------------------------------------------------------------
 	if (IsSlayer())
 	{
@@ -8305,7 +8305,7 @@ MCreature::GetActionInfoAction(TYPE_ACTIONINFO nActionInfo, bool IsSelfAction)
 		}
 		
 		//-----------------------------------------------------
-		// Lightning Hand´Â ¹«Á¶°Ç ACTION_SLAYER_SWORD_2ÀÌ´Ù. - -;d
+		// Lightning Hand는 무조건 ACTION_SLAYER_SWORD_2이다. - -;d
 		//-----------------------------------------------------
 		if (nActionInfo==SKILL_LIGHTNING_HAND || nActionInfo == SKILL_LARSLASH )
 		{
@@ -8357,7 +8357,7 @@ MCreature::GetActionInfoAction(TYPE_ACTIONINFO nActionInfo, bool IsSelfAction)
 		}		
 	}
 	// 2004, 7, 27 sobeit add start
-	if (m_CreatureType==717 || m_CreatureType==721 || m_CreatureType==723) // Áúµå·¹, Áúµå·¹ ºÐ½Å, °¢¼º Áúµå·¹
+	if (m_CreatureType==717 || m_CreatureType==721 || m_CreatureType==723) // 질드레, 질드레 분신, 각성 질드레
 	{
 		if(action <ACTION_MAX_OUSTERS)
 			return action;
@@ -8387,7 +8387,7 @@ MCreature::GetActionInfoAction(TYPE_ACTIONINFO nActionInfo, bool IsSelfAction)
 //----------------------------------------------------------------------
 // Get ActionInfo's CastingStartFrame
 //----------------------------------------------------------------------
-// nActionInfo¿¡ ÀûÀýÇÑ CastingStartFrameÀ» Ã£´Â´Ù.
+// nActionInfo에 적절한 CastingStartFrame을 찾는다.
 //----------------------------------------------------------------------
 int			
 MCreature::GetActionInfoCastingStartFrame(TYPE_ACTIONINFO nActionInfo)
@@ -8399,7 +8399,7 @@ MCreature::GetActionInfoCastingStartFrame(TYPE_ACTIONINFO nActionInfo)
 	}
 
 	//-------------------------------------------------------------
-	// ±âº» actionÀÇ Àû¿ëÀ» ¹Þ´Â°¡?
+	// 기본 action의 적용을 받는가?
 	//-------------------------------------------------------------
 	if ((*g_pActionInfoTable)[nActionInfo].IsAffectCurrentWeaponCastingStartFrame())
 	{
@@ -8434,7 +8434,7 @@ MCreature::GetActionInfoCastingStartFrame(TYPE_ACTIONINFO nActionInfo)
 //----------------------------------------------------------------------
 // Get ActionInfo's RepeatStartFrame
 //----------------------------------------------------------------------
-// nActionInfo¿¡ ÀûÀýÇÑ RepeatStartFrameÀ» Ã£´Â´Ù.
+// nActionInfo에 적절한 RepeatStartFrame을 찾는다.
 //----------------------------------------------------------------------
 int			
 MCreature::GetActionInfoRepeatStartFrame(TYPE_ACTIONINFO nActionInfo)
@@ -8448,7 +8448,7 @@ MCreature::GetActionInfoRepeatStartFrame(TYPE_ACTIONINFO nActionInfo)
 	int repeat;
 
 	//-------------------------------------------------------------
-	// ±âº» actionÀÇ Àû¿ëÀ» ¹Þ´Â°¡?
+	// 기본 action의 적용을 받는가?
 	//-------------------------------------------------------------
 	if ((*g_pActionInfoTable)[nActionInfo].IsAffectCurrentWeaponCastingStartFrame())
 	{
@@ -8500,7 +8500,7 @@ MCreature::GetActionInfoRepeatStartFrame(TYPE_ACTIONINFO nActionInfo)
 //----------------------------------------------------------------------
 // Get ActionInfo's RepeatEndFrame
 //----------------------------------------------------------------------
-// nActionInfo¿¡ ÀûÀýÇÑ RepeatEndFrameÀ» Ã£´Â´Ù.
+// nActionInfo에 적절한 RepeatEndFrame을 찾는다.
 //----------------------------------------------------------------------
 int			
 MCreature::GetActionInfoRepeatEndFrame(TYPE_ACTIONINFO nActionInfo)
@@ -8513,7 +8513,7 @@ MCreature::GetActionInfoRepeatEndFrame(TYPE_ACTIONINFO nActionInfo)
 
 	int repeat;
 	//-------------------------------------------------------------
-	// ±âº» actionÀÇ Àû¿ëÀ» ¹Þ´Â°¡?
+	// 기본 action의 적용을 받는가?
 	//-------------------------------------------------------------
 	if ((*g_pActionInfoTable)[nActionInfo].IsAffectCurrentWeaponCastingStartFrame())
 	{
@@ -8564,7 +8564,7 @@ MCreature::GetActionInfoRepeatEndFrame(TYPE_ACTIONINFO nActionInfo)
 //----------------------------------------------------------------------
 // Get ActionInfo's CastingFrames
 //----------------------------------------------------------------------
-// nActionInfo¿¡ ÀûÀýÇÑ CastingFramesÀ» Ã£´Â´Ù.
+// nActionInfo에 적절한 CastingFrames을 찾는다.
 //----------------------------------------------------------------------
 int			
 MCreature::GetActionInfoCastingFrames(TYPE_ACTIONINFO nActionInfo)
@@ -8576,7 +8576,7 @@ MCreature::GetActionInfoCastingFrames(TYPE_ACTIONINFO nActionInfo)
 	}
 
 	//-------------------------------------------------------------
-	// ±âº» actionÀÇ Àû¿ëÀ» ¹Þ´Â°¡?
+	// 기본 action의 적용을 받는가?
 	//-------------------------------------------------------------
 	if ((*g_pActionInfoTable)[nActionInfo].IsAffectCurrentWeaponCastingFrames())
 	{
@@ -8589,7 +8589,7 @@ MCreature::GetActionInfoCastingFrames(TYPE_ACTIONINFO nActionInfo)
 //----------------------------------------------------------------------
 // Get ActionInfo's Delay
 //----------------------------------------------------------------------
-// nActionInfo¿¡ ÀûÀýÇÑ Delay¸¦ Ã£´Â´Ù.
+// nActionInfo에 적절한 Delay를 찾는다.
 //----------------------------------------------------------------------
 int
 MCreature::GetActionInfoDelay(TYPE_ACTIONINFO nActionInfo)
@@ -8614,7 +8614,7 @@ MCreature::GetActionInfoDelay(TYPE_ACTIONINFO nActionInfo)
 //		}
 //	} 
 	//-------------------------------------------------------------
-	// ±âº» actionÀÇ Àû¿ëÀ» ¹Þ´Â°¡?
+	// 기본 action의 적용을 받는가?
 	//-------------------------------------------------------------
 	if ((*g_pActionInfoTable)[nActionInfo].IsAffectCurrentWeaponDelay())
 	{
@@ -8627,13 +8627,13 @@ MCreature::GetActionInfoDelay(TYPE_ACTIONINFO nActionInfo)
 //----------------------------------------------------------------------
 // Get Casting SoundID
 //----------------------------------------------------------------------
-// nActionInfo¿¡ ÀûÀýÇÑ ACTIONÀ» Ã£´Â´Ù.
+// nActionInfo에 적절한 ACTION을 찾는다.
 //----------------------------------------------------------------------
 TYPE_SOUNDID
 MCreature::GetCastingSoundID(TYPE_ACTIONINFO nActionInfo)
 {
 	//-------------------------------------------------------------
-	// ±âº» ¹«±âÀÇ Àû¿ëÀ» ¹Þ´Â°¡?
+	// 기본 무기의 적용을 받는가?
 	//-------------------------------------------------------------
 	if ((*g_pActionInfoTable)[nActionInfo].IsAffectCurrentWeaponSound())
 	{
@@ -8646,7 +8646,7 @@ MCreature::GetCastingSoundID(TYPE_ACTIONINFO nActionInfo)
 //----------------------------------------------------------------------
 // Get ActionInfo ActionEffectSpriteType
 //----------------------------------------------------------------------
-// nActionInfo¿¡ ÀûÀýÇÑ ActionEffectSpriteTypeÀ» Ã£´Â´Ù.
+// nActionInfo에 적절한 ActionEffectSpriteType을 찾는다.
 //----------------------------------------------------------------------
 int
 MCreature::GetActionInfoActionEffectSpriteType(TYPE_ACTIONINFO nActionInfo)
@@ -8661,7 +8661,7 @@ MCreature::GetActionInfoActionEffectSpriteType(TYPE_ACTIONINFO nActionInfo)
 
 
 	//-------------------------------------------------------------
-	// ±âº» ¹«±âÀÇ Àû¿ëÀ» ¹Þ´Â°¡?
+	// 기본 무기의 적용을 받는가?
 	//-------------------------------------------------------------
 	if ((*g_pActionInfoTable)[nActionInfo].IsAffectCurrentWeaponActionEffectSpriteType())
 	{
@@ -8672,15 +8672,15 @@ MCreature::GetActionInfoActionEffectSpriteType(TYPE_ACTIONINFO nActionInfo)
 		useActionInfo = nActionInfo;
 	}
 
-	// plus¸¸Å­ ´õÇÑ´Ù.
-	// ÀÓ½Ã ¶«»§~~ ±×·¯³ª.. ¾ÕÀ¸·Îµµ °íÄ¡Áö ¾Ê°ÚÁö - -;
+	// plus만큼 더한다.
+	// 임시 땜빵~~ 그러나.. 앞으로도 고치지 않겠지 - -;
 	useActionInfo += (*g_pActionInfoTable)[nActionInfo].GetAffectCurrentWeaponActionInfoPlus();
 
 
 	TYPE_EFFECTSPRITETYPE re_est = EFFECTSPRITETYPE_NULL;
 
 	//------------------------------------------------------------
-	// ³²ÀÚÀÎ °æ¿ì
+	// 남자인 경우
 	//------------------------------------------------------------
 	if (IsMale())
 	{
@@ -8729,7 +8729,7 @@ MCreature::GetActionInfoActionEffectSpriteType(TYPE_ACTIONINFO nActionInfo)
 	}
 	
 	//------------------------------------------------------------
-	// ¿©ÀÚ¿ë Effect check
+	// 여자용 Effect check
 	//------------------------------------------------------------	
 	TYPE_EFFECTSPRITETYPE effectSpriteTypeFemale = (*g_pActionInfoTable)[useActionInfo].GetActionEffectSpriteTypeFemale();
 
@@ -8779,7 +8779,7 @@ MCreature::GetActionInfoActionEffectSpriteType(TYPE_ACTIONINFO nActionInfo)
 		return re_est;
 	}
 	
-	// ¾ø´Â °æ¿ì´Â ³²ÀÚ²¨ »ç¿ë..
+	// 없는 경우는 남자꺼 사용..
 	re_est = (*g_pActionInfoTable)[useActionInfo].GetActionEffectSpriteType();
 	if(nActionInfo == SKILL_BULLET_OF_LIGHT)
 	{
@@ -8827,33 +8827,33 @@ MCreature::GetActionInfoActionEffectSpriteType(TYPE_ACTIONINFO nActionInfo)
 //----------------------------------------------------------------------
 // Packet SpecialAction Result
 //----------------------------------------------------------------------
-// this Creature´Â Damage¸¦ ¹Þ¾ÒÀ¸¹Ç·Î
+// this Creature는 Damage를 받았으므로
 //
-// 0. ¸ðµç µ¿ÀÛÀ» ÁßÁöÇÏ°í..
-// 1. Action --> Damage¹Þ´Â µ¿ÀÛ
-// 2. Damage Ç¥½Ã
+// 0. 모든 동작을 중지하고..
+// 1. Action --> Damage받는 동작
+// 2. Damage 표시
 //----------------------------------------------------------------------
 void		
 MCreature::PacketSpecialActionResult(TYPE_ACTIONINFO nResultActionInfo, TYPE_OBJECTID id, TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY, BYTE temp)
 {
 	//--------------------------------------------------
-	// Á×¾úÀ¸¸é return
+	// 죽었으면 return
 	//--------------------------------------------------
 	/*
-	// ¿©±â¼­ returnÇØ¹ö¸®¸é Á×À»¶§ ¸Â´Â ÀÌÆåÆ®°¡ ¾È º¸ÀÎ´Ù.
+	// 여기서 return해버리면 죽을때 맞는 이펙트가 안 보인다.
 	if (!m_bAlive)
 	{
-		// Á×¾úÀ»¶§´Â Á×´Â effect¸»°í´Â º¸¿©ÁÖ¸é ¾ÈµÈ´Ù.
+		// 죽었을때는 죽는 effect말고는 보여주면 안된다.
 		if (nResultActionInfo!=(*g_pCreatureTable)[m_CreatureType].DeadActionInfo)
 			return;
 	}
 	*/
 
 	//----------------------------------------------------------------------
-	// °á°ú actionÀÌ ¾Æ´Ñ °æ¿ì..  - ÀÇ¹Ì°¡ ÀÖ³ª?? Èì..
+	// 결과 action이 아닌 경우..  - 의미가 있나?? 흠..
 	//----------------------------------------------------------------------
 	if (nResultActionInfo < (*g_pActionInfoTable).GetMinResultActionInfo()
-		// fast move, knockbackÁß¿¡´Â actionÀ» º¸¿©ÁÖÁö ¾Ê´Â´Ù... // 2001.10.9
+		// fast move, knockback중에는 action을 보여주지 않는다... // 2001.10.9
 		|| m_bFastMove || m_bKnockBack || nResultActionInfo == ACTIONINFO_NULL)
 	{
 		return;
@@ -8861,12 +8861,12 @@ MCreature::PacketSpecialActionResult(TYPE_ACTIONINFO nResultActionInfo, TYPE_OBJ
 
 
 	//----------------------------------------------------------------------
-	// ¹æ¾î¸· È¿°ú.. - -;
+	// 방어막 효과.. - -;
 	//----------------------------------------------------------------------
 	if (GetActionInfoAction( nResultActionInfo )==ACTION_DAMAGED)
 	{
-		// Á×¾úÀ»¶§ ¸Â´Â µ¿ÀÛ ¾È º¸¿©ÁÖ±â..
-		// Å¸ÀÏ ±â¼ú¶§¹®¿¡ ¸Â±âµµ ÇÏ´õ¶ó´Â.. - -;
+		// 죽었을때 맞는 동작 안 보여주기..
+		// 타일 기술때문에 맞기도 하더라는.. - -;
 		// 2002.3.9
 		if (!m_bAlive)
 		{
@@ -8895,21 +8895,21 @@ MCreature::PacketSpecialActionResult(TYPE_ACTIONINFO nResultActionInfo, TYPE_OBJ
 	}
 
 
-	// ÀÌµ¿À» ÁßÁöÇÑ´Ù.
+	// 이동을 중지한다.
 	////m_sX = 0;	
 	////m_sY = 0;	
 	//SetStop();
 
 	//m_ActionCount = 0; 
 	//------------------------------------------------------
-	// ÀÌ¹Ì NextUsedACtionInfo°¡ ÀÖ´Â °æ¿ì Ã¼Å©
+	// 이미 NextUsedACtionInfo가 있는 경우 체크
 	//------------------------------------------------------
 	AffectBufferedActionInfo();
 	
 	ActionMoveNextPosition();
 
-	// nResultActionInfo¿¡ ÇØ´çÇÏ´Â ActionInfo¸¦ Ã£¾Æ¾ß ÇÑ´Ù.
-	// ¿ø·¡ActionInfo + MIN_RESULT_ACTIONINFO¸¦ ÇÏ¸é µÈ´Ù.
+	// nResultActionInfo에 해당하는 ActionInfo를 찾아야 한다.
+	// 원래ActionInfo + MIN_RESULT_ACTIONINFO를 하면 된다.
 	m_nNextUsedActionInfo	= nResultActionInfo; // +(*g_pActionInfoTable).GetMinResultActionInfo()
 
 	if( temp != 0)
@@ -8926,7 +8926,7 @@ MCreature::PacketSpecialActionResult(TYPE_ACTIONINFO nResultActionInfo, TYPE_OBJ
 		}
 	}
 
-	// ÀÚ½Å¿¡°Ô »ç¿ë?..
+	// 자신에게 사용?..
 	SetTraceID( id );
 	m_TraceX	= sX;
 	m_TraceY	= sY;
@@ -8944,29 +8944,29 @@ MCreature::PacketSpecialActionResult(TYPE_ACTIONINFO nResultActionInfo, TYPE_OBJ
 //----------------------------------------------------------------------
 // Packet AttackNormal (x,y, d)
 //----------------------------------------------------------------------
-// this Creature´Â Attack µ¿ÀÛÀ» ÃëÇÑ´Ù.
+// this Creature는 Attack 동작을 취한다.
 //
-// 0. ¸ðµç µ¿ÀÛÀ» ÁßÁöÇÏ°í..
+// 0. 모든 동작을 중지하고..
 // 1. Action Attack
 //----------------------------------------------------------------------
 void		
 MCreature::PacketAttackNormal(TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY, BYTE direction)
 {
 	//--------------------------------------------------
-	// Á×¾úÀ¸¸é return
+	// 죽었으면 return
 	//--------------------------------------------------
 	if (!m_bAlive)
 		return;
 
-	// ÀÌµ¿À» ÁßÁöÇÑ´Ù.
+	// 이동을 중지한다.
 	m_sX = 0;	
 	m_sY = 0;
 	
-	// server¿¡¼­ ³¯¾Æ¿Â~ Á¤º¸ ¼³Á¤..
+	// server에서 날아온~ 정보 설정..
 	//--------------------------------------------------
-	// Player°¡ ÀÌ¹Ì ±× ÀÚ¸®¿¡ ÀÖ´Ù¸é....
+	// Player가 이미 그 자리에 있다면....
 	//--------------------------------------------------
-	// ¸ø °£´Ù~~
+	// 못 간다~~
 	/*
 	if (g_pPlayer->GetX()==sX && g_pPlayer->GetY()==sY)
 	{
@@ -8976,14 +8976,14 @@ MCreature::PacketAttackNormal(TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY, BY
 			g_pDebugMessage->Next();
 		#endif
 
-		// ÇöÀç Player°¡ ÀÖ´Â À§Ä¡·Î ¹Ù¶óº»´Ù.
+		// 현재 Player가 있는 위치로 바라본다.
 		SetDirectionToPosition( g_pPlayer->GetX(), g_pPlayer->GetY() );
 	}	
 	else
 	*/
 	{
 		//--------------------------------------------------
-		// ´Ù¸¥ Creature°¡ ÀÌ¹Ì ÀÖ´Ù¸é?
+		// 다른 Creature가 이미 있다면?
 		//--------------------------------------------------
 		/*
 		bool bIsExistCreature;
@@ -9003,27 +9003,27 @@ MCreature::PacketAttackNormal(TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY, BY
 		}
 		*/	
 
-		// ÇöÀç ÁÂÇ¥¿Í °°Àº °æ¿ì.. ¿òÁ÷ÀÏ ÇÊ¿ä°¡ ¾ø´Ù.
+		// 현재 좌표와 같은 경우.. 움직일 필요가 없다.
 		if (m_X==sX && m_Y==sY)
 		{
 		}
-		// ÁÂÇ¥°¡ ´Ù¸£¸é.. ÀÏ´Ü ¿òÁ÷¿©ÁÖ°í AttackÇØ¾ß ÇÑ´Ù.
+		// 좌표가 다르면.. 일단 움직여주고 Attack해야 한다.
 		else
 		{
-			// ÀÌµ¿
+			// 이동
 			MovePosition(sX, sY);
 			
 			// message
 			DEBUG_ADD_FORMAT("[ Move To Attack ] : (%d, %d) --> (%d, %d),  Player=(%d, %d)", m_X, m_Y, sX, sY, g_pPlayer->GetX(), g_pPlayer->GetY());								
 		}	
 
-		// Server¿¡¼­ ³¯¾Æ¿Â Á¤º¸ ¼³Á¤..		
+		// Server에서 날아온 정보 설정..		
 		m_Direction = direction;
 	}		
 
 	m_ActionCount = 0; 
 
-	// °ø°ÝÇÏ´Â motion
+	// 공격하는 motion
 	m_nNextUsedActionInfo	= SKILL_ATTACK_MELEE;
 	SetNextAction( GetActionInfoAction(m_nNextUsedActionInfo) );	
 }
@@ -9031,9 +9031,9 @@ MCreature::PacketAttackNormal(TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY, BY
 //----------------------------------------------------------------------
 // Packet SpecialAction To Sector
 //----------------------------------------------------------------------
-// this Creature´Â nActionInfo¿¡ µû¸¥ µ¿ÀÛÀ» ÃëÇÑ´Ù.
+// this Creature는 nActionInfo에 따른 동작을 취한다.
 //
-// 0. ¸ðµç µ¿ÀÛÀ» ÁßÁöÇÏ°í..
+// 0. 모든 동작을 중지하고..
 // 1. SpecialAction
 //----------------------------------------------------------------------
 void		
@@ -9042,7 +9042,7 @@ MCreature::PacketSpecialActionToSector(TYPE_ACTIONINFO nActionInfo, TYPE_SECTORP
 {
 	DEBUG_ADD_FORMAT("PacketSpecialActionToSector ai : %d", nActionInfo );
 	//--------------------------------------------------
-	// Á×¾úÀ¸¸é return
+	// 죽었으면 return
 	//--------------------------------------------------
 	if (!m_bAlive || (
 		nActionInfo>=(*g_pActionInfoTable).GetMinResultActionInfo() &&
@@ -9061,7 +9061,7 @@ MCreature::PacketSpecialActionToSector(TYPE_ACTIONINFO nActionInfo, TYPE_SECTORP
 	}
 
 	//------------------------------------------------------
-	// Sector¿¡ »ç¿ëÇÏ´Â ±â¼úÀÌ ¸Â´Â °æ¿ì
+	// Sector에 사용하는 기술이 맞는 경우
 	//------------------------------------------------------
 	//DEBUG_ADD("fuck");
 	if ((*g_pActionInfoTable)[nActionInfo].IsTargetZone() ||
@@ -9073,7 +9073,7 @@ MCreature::PacketSpecialActionToSector(TYPE_ACTIONINFO nActionInfo, TYPE_SECTORP
 	{
 	//	DEBUG_ADD("hmhm");
 		//---------------------------------------------------------------
-		// ³È³È.. 2001.10.28
+		// 냠냠.. 2001.10.28
 		//---------------------------------------------------------------
 		AffectMoveBufferAll();
 	//	DEBUG_ADD("3");
@@ -9081,7 +9081,7 @@ MCreature::PacketSpecialActionToSector(TYPE_ACTIONINFO nActionInfo, TYPE_SECTORP
 		ActionMoveNextPosition();
 	//	DEBUG_ADD("2");
 
-		// ÀÌµ¿À» ÁßÁöÇÑ´Ù.
+		// 이동을 중지한다.
 	//	m_sX = 0;	
 	//	m_sY = 0;
 		if (nActionInfo==m_nSpecialActionInfo && m_nSpecialActionInfo!=ACTIONINFO_NULL)
@@ -9096,17 +9096,17 @@ MCreature::PacketSpecialActionToSector(TYPE_ACTIONINFO nActionInfo, TYPE_SECTORP
 
 		m_nSpecialActionInfo = nActionInfo;
 		//------------------------------------------------------
-		// ÀÌ¹Ì NextUsedACtionInfo°¡ ÀÖ´Â °æ¿ì Ã¼Å©
+		// 이미 NextUsedACtionInfo가 있는 경우 체크
 		//------------------------------------------------------
 		AffectBufferedActionInfo();
 	//	DEBUG_ADD("1");
 
-		// Server¿¡¼­ ³¯¾Æ¿Â Á¤º¸ ¼³Á¤..	
+		// Server에서 날아온 정보 설정..	
 		m_nNextUsedActionInfo	= nActionInfo;
 		m_TraceX		= sX;
 		m_TraceY		= sY;
-		m_TraceZ		= 0;	// z°ªÀº.. ÀÇ¹Ì°¡ ÀÖÀ»±î..
-		// 2004, 11, 4, sobeit modify start - ±×·¹ÀÌÆ® ·¯ÇÇ¾ð ¶«¿¡...
+		m_TraceZ		= 0;	// z값은.. 의미가 있을까..
+		// 2004, 11, 4, sobeit modify start - 그레이트 러피언 땜에...
 		if(GetCreatureType() == 764 || GetCreatureType() == 765)
 		{
 			SetTraceID( GetID() );
@@ -9118,7 +9118,7 @@ MCreature::PacketSpecialActionToSector(TYPE_ACTIONINFO nActionInfo, TYPE_SECTORP
 		// 2004, 11, 4, sobeit modify end
 
 		
-		// ¸ñÇ¥¸¦ ÇâÇØ¼­ ¹Ù¶óº»´Ù.
+		// 목표를 향해서 바라본다.
 		//SetDirectionToPosition(sX, sY);
 		
 	//	m_ActionCount = 0;
@@ -9137,19 +9137,19 @@ MCreature::PacketSpecialActionToSector(TYPE_ACTIONINFO nActionInfo, TYPE_SECTORP
 		}
 
 		//---------------------------------------------------------------
-		// ÀÌ¹Ì Ç¥ÇöÇØ¾ßÇÒ °á°ú°¡ ÀÖ´Â °æ¿ì..
+		// 이미 표현해야할 결과가 있는 경우..
 		//---------------------------------------------------------------
 	//	DEBUG_ADD("7");
 		if (m_pActionResult != NULL)
 		{
 			DEBUG_ADD("Execute Old Result");
 
-			// ÀÌ¹Ì ÀÖ´ø °á°ú¸¦ Ã³¸®ÇØÁØ´Ù.	
+			// 이미 있던 결과를 처리해준다.	
 			// [ TEST CODE ]
-			// °á°ú Ã³¸®..
+			// 결과 처리..
 			//
-			// (!) m_pActionResult°ªÀÌ Execute¿¡¼­ º¯ÇÒ ¼ö ÀÖ¾î¼­ 
-			//		ÀúÀåÇß´Ù°¡ Áö¿öÁà¾ß ÇÑ´Ù.
+			// (!) m_pActionResult값이 Execute에서 변할 수 있어서 
+			//		저장했다가 지워줘야 한다.
 			MActionResult* pOldResult = m_pActionResult;
 
 			m_pActionResult = NULL;
@@ -9160,13 +9160,13 @@ MCreature::PacketSpecialActionToSector(TYPE_ACTIONINFO nActionInfo, TYPE_SECTORP
 		}
 
 	//	DEBUG_ADD("6");
-		// °á°ú¸¦ ¼³Á¤
+		// 결과를 설정
 		m_pActionResult = pActionResult;
 
 	//	DEBUG_ADD("5");
 	}
 	//------------------------------------------------------
-	// ¾Æ´Ñ °æ¿ì
+	// 아닌 경우
 	//------------------------------------------------------
 	else
 	{
@@ -9181,16 +9181,16 @@ MCreature::PacketSpecialActionToSector(TYPE_ACTIONINFO nActionInfo, TYPE_SECTORP
 //----------------------------------------------------------------------
 // Packet SpecialAction To Other
 //----------------------------------------------------------------------
-// this Creature´Â nActionInfo¿¡ µû¸¥ µ¿ÀÛÀ» ÃëÇÑ´Ù.
+// this Creature는 nActionInfo에 따른 동작을 취한다.
 //
-// 0. ¸ðµç µ¿ÀÛÀ» ÁßÁöÇÏ°í..
+// 0. 모든 동작을 중지하고..
 // 1. SpecialAction
 //----------------------------------------------------------------------
 void		
 MCreature::PacketSpecialActionToOther(TYPE_ACTIONINFO nActionInfo, TYPE_OBJECTID id, MActionResult* pActionResult)
 {
 	//--------------------------------------------------
-	// Á×¾úÀ¸¸é return
+	// 죽었으면 return
 	//--------------------------------------------------
 	if (!m_bAlive || 
 		nActionInfo>=(*g_pActionInfoTable).GetMinResultActionInfo() &&
@@ -9204,16 +9204,16 @@ MCreature::PacketSpecialActionToOther(TYPE_ACTIONINFO nActionInfo, TYPE_OBJECTID
 		return;
 	}
 	//------------------------------------------------------
-	// Å¸ÀÎ¿¡°Ô »ç¿ëÇÏ´Â ±â¼úÀÌ ¸Â´Â °æ¿ì
+	// 타인에게 사용하는 기술이 맞는 경우
 	//------------------------------------------------------
 	if ((*g_pActionInfoTable)[nActionInfo].IsTargetOther())
 	{
-		// ´ë»óÀÌ µÇ´Â creature¸¦ ¾ò´Â´Ù.
+		// 대상이 되는 creature를 얻는다.
 		MCreature* pCreature = g_pZone->GetCreature( id );
 		
 		if (pCreature==NULL)
 		{
-			// ±×·± creature°¡ ¾øÀ» °æ¿ì
+			// 그런 creature가 없을 경우
 			DEBUG_ADD_FORMAT("[Skill : %s] There's no such creature(%d)", (*g_pActionInfoTable)[nActionInfo].GetName(), id);
 
 			if (pActionResult!=NULL)
@@ -9225,19 +9225,19 @@ MCreature::PacketSpecialActionToOther(TYPE_ACTIONINFO nActionInfo, TYPE_OBJECTID
 		}
 
 		//---------------------------------------------------------------
-		// ³È³È.. 2001.10.28
+		// 냠냠.. 2001.10.28
 		//---------------------------------------------------------------
 		AffectMoveBufferAll();
 
 		ActionMoveNextPosition();
 
-		// ÀÌµ¿À» ÁßÁöÇÑ´Ù.
+		// 이동을 중지한다.
 		//m_sX = 0;	
 		//m_sY = 0;
 
 		//------------------------------------------------------
-		// ÀÌÀü µ¿ÀÛÀÌ¶û °°Àº °æ¿ì
-		// 2001.7.23 Ãß°¡
+		// 이전 동작이랑 같은 경우
+		// 2001.7.23 추가
 		//------------------------------------------------------
 		if (nActionInfo==m_nSpecialActionInfo && m_nSpecialActionInfo!=ACTIONINFO_NULL)
 		{
@@ -9252,18 +9252,18 @@ MCreature::PacketSpecialActionToOther(TYPE_ACTIONINFO nActionInfo, TYPE_OBJECTID
 		m_nSpecialActionInfo = nActionInfo;
 
 		//------------------------------------------------------
-		// ÀÌ¹Ì NextUsedACtionInfo°¡ ÀÖ´Â °æ¿ì Ã¼Å©
+		// 이미 NextUsedACtionInfo가 있는 경우 체크
 		//------------------------------------------------------
 		AffectBufferedActionInfo();
 				
-		// Server¿¡¼­ ³¯¾Æ¿Â Á¤º¸ ¼³Á¤..	
+		// Server에서 날아온 정보 설정..	
 		m_nNextUsedActionInfo	= nActionInfo;
 		m_TraceX		= pCreature->GetX();
 		m_TraceY		= pCreature->GetY();
 		m_TraceZ		= pCreature->GetZ();
 		SetTraceID ( id );
 
-		// ¸ñÇ¥¸¦ ÇâÇØ¼­ ¹Ù¶óº»´Ù.		
+		// 목표를 향해서 바라본다.		
 		//SetDirectionToPosition(pCreature->GetX(), pCreature->GetY());
 		
 		//m_ActionCount = 0;
@@ -9278,17 +9278,17 @@ MCreature::PacketSpecialActionToOther(TYPE_ACTIONINFO nActionInfo, TYPE_OBJECTID
 		}
 
 		//---------------------------------------------------------------
-		// ÀÌ¹Ì Ç¥ÇöÇØ¾ßÇÒ °á°ú°¡ ÀÖ´Â °æ¿ì..
+		// 이미 표현해야할 결과가 있는 경우..
 		//---------------------------------------------------------------		
 		if (m_pActionResult != NULL)
 		{
 			DEBUG_ADD("Execute Old Result");
 
-			// ÀÌ¹Ì ÀÖ´ø °á°ú¸¦ Ã³¸®ÇØÁØ´Ù.	
+			// 이미 있던 결과를 처리해준다.	
 			// [ TEST CODE ]
-			// °á°ú Ã³¸®..			
-			// (!) m_pActionResult°ªÀÌ Execute¿¡¼­ º¯ÇÒ ¼ö ÀÖ¾î¼­ 
-			//		ÀúÀåÇß´Ù°¡ Áö¿öÁà¾ß ÇÑ´Ù.
+			// 결과 처리..			
+			// (!) m_pActionResult값이 Execute에서 변할 수 있어서 
+			//		저장했다가 지워줘야 한다.
 			MActionResult* pOldResult = m_pActionResult;
 
 			m_pActionResult = NULL;
@@ -9298,12 +9298,12 @@ MCreature::PacketSpecialActionToOther(TYPE_ACTIONINFO nActionInfo, TYPE_OBJECTID
 			delete pOldResult;	
 		}
 
-		// °á°ú¸¦ ¼³Á¤
+		// 결과를 설정
 		m_pActionResult = pActionResult;
 
 	}
 	//------------------------------------------------------
-	// ¾Æ´Ñ °æ¿ì
+	// 아닌 경우
 	//------------------------------------------------------
 	else
 	{
@@ -9319,28 +9319,28 @@ MCreature::PacketSpecialActionToOther(TYPE_ACTIONINFO nActionInfo, TYPE_OBJECTID
 //----------------------------------------------------------------------
 // Packet SpecialAction To InventoryItem
 //----------------------------------------------------------------------
-// castingµ¿ÀÛ¸¸ º¸¿©ÁÖ°Ô µÈ´Ù.
+// casting동작만 보여주게 된다.
 //----------------------------------------------------------------------
 void		
 MCreature::PacketSpecialActionToInventoryItem(TYPE_ACTIONINFO nActionInfo)
 {
 	//--------------------------------------------------
-	// Á×¾úÀ¸¸é return
+	// 죽었으면 return
 	//--------------------------------------------------
 	if (!m_bAlive || nActionInfo>=(*g_pActionInfoTable).GetMinResultActionInfo())
 		return;
 
 	//------------------------------------------------------
-	// Å¸ÀÎ¿¡°Ô »ç¿ëÇÏ´Â ±â¼úÀÌ ¸Â´Â °æ¿ì
+	// 타인에게 사용하는 기술이 맞는 경우
 	//------------------------------------------------------
 	if ((*g_pActionInfoTable)[nActionInfo].IsTargetItem())
 	{		
 		//------------------------------------------------------
-		// ÀÌ¹Ì NextUsedACtionInfo°¡ ÀÖ´Â °æ¿ì Ã¼Å©
+		// 이미 NextUsedACtionInfo가 있는 경우 체크
 		//------------------------------------------------------
 		AffectBufferedActionInfo();
 				
-		// Server¿¡¼­ ³¯¾Æ¿Â Á¤º¸ ¼³Á¤..	
+		// Server에서 날아온 정보 설정..	
 		m_nNextUsedActionInfo	= nActionInfo;
 		m_TraceX		= m_X;
 		m_TraceY		= m_Y;
@@ -9356,17 +9356,17 @@ MCreature::PacketSpecialActionToInventoryItem(TYPE_ACTIONINFO nActionInfo)
 		}
 
 		//---------------------------------------------------------------
-		// ÀÌ¹Ì Ç¥ÇöÇØ¾ßÇÒ °á°ú°¡ ÀÖ´Â °æ¿ì..
+		// 이미 표현해야할 결과가 있는 경우..
 		//---------------------------------------------------------------
 		if (m_pActionResult != NULL)
 		{
 			DEBUG_ADD("Execute Old Result");
 
-			// ÀÌ¹Ì ÀÖ´ø °á°ú¸¦ Ã³¸®ÇØÁØ´Ù.	
+			// 이미 있던 결과를 처리해준다.	
 			// [ TEST CODE ]
-			// °á°ú Ã³¸®..			
-			// (!) m_pActionResult°ªÀÌ Execute¿¡¼­ º¯ÇÒ ¼ö ÀÖ¾î¼­ 
-			//		ÀúÀåÇß´Ù°¡ Áö¿öÁà¾ß ÇÑ´Ù.
+			// 결과 처리..			
+			// (!) m_pActionResult값이 Execute에서 변할 수 있어서 
+			//		저장했다가 지워줘야 한다.
 			MActionResult* pOldResult = m_pActionResult;
 
 			m_pActionResult = NULL;
@@ -9377,7 +9377,7 @@ MCreature::PacketSpecialActionToInventoryItem(TYPE_ACTIONINFO nActionInfo)
 		}
 	}
 	//------------------------------------------------------
-	// ¾Æ´Ñ °æ¿ì
+	// 아닌 경우
 	//------------------------------------------------------
 	else
 	{
@@ -9389,43 +9389,43 @@ MCreature::PacketSpecialActionToInventoryItem(TYPE_ACTIONINFO nActionInfo)
 // Packet SpecialAction To Nobody
 //----------------------------------------------------------------------
 //
-// ´ë»óÀÌ Zone¿¡ ¾ø´Â °æ¿ì...
+// 대상이 Zone에 없는 경우...
 //
 //----------------------------------------------------------------------
 void		
 MCreature::PacketSpecialActionToNobody(TYPE_ACTIONINFO nActionInfo, TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y)
 {
 	//--------------------------------------------------
-	// Á×¾úÀ¸¸é return
+	// 죽었으면 return
 	//--------------------------------------------------
 	if (!m_bAlive || nActionInfo>=(*g_pActionInfoTable).GetMinResultActionInfo())
 		return;
 
 	//------------------------------------------------------
-	// Å¸ÀÎ¿¡°Ô »ç¿ëÇÏ´Â ±â¼úÀÌ ¸Â´Â °æ¿ì
+	// 타인에게 사용하는 기술이 맞는 경우
 	//------------------------------------------------------
 	if ((*g_pActionInfoTable)[nActionInfo].IsTargetOther())
 	{
 		//---------------------------------------------------------------
-		// ³È³È.. 2001.10.28
+		// 냠냠.. 2001.10.28
 		//---------------------------------------------------------------
 		AffectMoveBufferAll();
 
 		ActionMoveNextPosition();
 
 		//------------------------------------------------------
-		// ÀÌ¹Ì NextUsedACtionInfo°¡ ÀÖ´Â °æ¿ì Ã¼Å©
+		// 이미 NextUsedACtionInfo가 있는 경우 체크
 		//------------------------------------------------------
 		AffectBufferedActionInfo();
 				
-		// Server¿¡¼­ ³¯¾Æ¿Â Á¤º¸ ¼³Á¤..	
+		// Server에서 날아온 정보 설정..	
 		m_nNextUsedActionInfo	= nActionInfo;
 		m_TraceX		= x;
 		m_TraceY		= y;
 		m_TraceZ		= 0;
 		SetTraceID( OBJECTID_NULL );
 
-		// ¸ñÇ¥¸¦ ÇâÇØ¼­ ¹Ù¶óº»´Ù.		
+		// 목표를 향해서 바라본다.		
 		//SetDirectionToPosition(pCreature->GetX(), pCreature->GetY());
 		
 		//m_ActionCount = 0;
@@ -9440,7 +9440,7 @@ MCreature::PacketSpecialActionToNobody(TYPE_ACTIONINFO nActionInfo, TYPE_SECTORP
 		}
 	}
 	//------------------------------------------------------
-	// ¾Æ´Ñ °æ¿ì
+	// 아닌 경우
 	//------------------------------------------------------
 	else
 	{
@@ -9451,16 +9451,16 @@ MCreature::PacketSpecialActionToNobody(TYPE_ACTIONINFO nActionInfo, TYPE_SECTORP
 //----------------------------------------------------------------------
 // Packet SpecialAction To Self
 //----------------------------------------------------------------------
-// this Creature´Â nActionInfo¿¡ µû¸¥ µ¿ÀÛÀ» ÃëÇÑ´Ù.
+// this Creature는 nActionInfo에 따른 동작을 취한다.
 //
-// 0. ¸ðµç µ¿ÀÛÀ» ÁßÁöÇÏ°í..
+// 0. 모든 동작을 중지하고..
 // 1. SpecialAction
 //----------------------------------------------------------------------
 void		
 MCreature::PacketSpecialActionToSelf(TYPE_ACTIONINFO nActionInfo, MActionResult* pActionResult)
 {
 	//--------------------------------------------------
-	// Á×¾úÀ¸¸é return
+	// 죽었으면 return
 	//--------------------------------------------------
 	if (!m_bAlive || nActionInfo>=(*g_pActionInfoTable).GetMinResultActionInfo() || nActionInfo == ACTIONINFO_NULL)
 	{
@@ -9472,30 +9472,30 @@ MCreature::PacketSpecialActionToSelf(TYPE_ACTIONINFO nActionInfo, MActionResult*
 	}
 
 	//------------------------------------------------------
-	// ÀÚ½ÅÇÑÅ× »ç¿ëÇÏ´Â ±â¼úÀÌ ¸Â´Â °æ¿ì
+	// 자신한테 사용하는 기술이 맞는 경우
 	//------------------------------------------------------
 	if ((*g_pActionInfoTable)[nActionInfo].IsTargetSelf())
 	{
 		//---------------------------------------------------------------
-		// ³È³È.. 2001.10.28
+		// 냠냠.. 2001.10.28
 		//---------------------------------------------------------------
 		AffectMoveBufferAll();
 
 		ActionMoveNextPosition();
 
-		// ÀÌµ¿À» ÁßÁöÇÑ´Ù.
+		// 이동을 중지한다.
 	//	m_sX = 0;	
 	//	m_sY = 0;
 		//------------------------------------------------------
-		// ÀÌ¹Ì NextUsedACtionInfo°¡ ÀÖ´Â °æ¿ì Ã¼Å©
+		// 이미 NextUsedACtionInfo가 있는 경우 체크
 		//------------------------------------------------------
 		AffectBufferedActionInfo();
 				
-		// Server¿¡¼­ ³¯¾Æ¿Â Á¤º¸ ¼³Á¤..	
+		// Server에서 날아온 정보 설정..	
 		m_nNextUsedActionInfo	= nActionInfo;
 		m_TraceX		= m_X;
 		m_TraceY		= m_Y;
-		m_TraceZ		= m_Z;	// z°ªÀº.. ÀÇ¹Ì°¡ ÀÖÀ»±î..
+		m_TraceZ		= m_Z;	// z값은.. 의미가 있을까..
 		SetTraceID( m_ID ) ;
 		
 	//	m_ActionCount = 0;
@@ -9510,17 +9510,17 @@ MCreature::PacketSpecialActionToSelf(TYPE_ACTIONINFO nActionInfo, MActionResult*
 		}
 
 		//---------------------------------------------------------------
-		// ÀÌ¹Ì Ç¥ÇöÇØ¾ßÇÒ °á°ú°¡ ÀÖ´Â °æ¿ì..
+		// 이미 표현해야할 결과가 있는 경우..
 		//---------------------------------------------------------------
 		if (m_pActionResult != NULL)
 		{
 			DEBUG_ADD("Execute Old Result");
 
-			// ÀÌ¹Ì ÀÖ´ø °á°ú¸¦ Ã³¸®ÇØÁØ´Ù.	
+			// 이미 있던 결과를 처리해준다.	
 			// [ TEST CODE ]
-			// °á°ú Ã³¸®..			
-			// (!) m_pActionResult°ªÀÌ Execute¿¡¼­ º¯ÇÒ ¼ö ÀÖ¾î¼­ 
-			//		ÀúÀåÇß´Ù°¡ Áö¿öÁà¾ß ÇÑ´Ù.
+			// 결과 처리..			
+			// (!) m_pActionResult값이 Execute에서 변할 수 있어서 
+			//		저장했다가 지워줘야 한다.
 			MActionResult* pOldResult = m_pActionResult;
 
 			m_pActionResult = NULL;
@@ -9530,11 +9530,11 @@ MCreature::PacketSpecialActionToSelf(TYPE_ACTIONINFO nActionInfo, MActionResult*
 			delete pOldResult;	
 		}
 
-		// °á°ú¸¦ ¼³Á¤
+		// 결과를 설정
 		m_pActionResult = pActionResult;
 	}
 	//------------------------------------------------------
-	// ¾Æ´Ñ °æ¿ì
+	// 아닌 경우
 	//------------------------------------------------------
 	else
 	{
@@ -9562,7 +9562,7 @@ MCreature::SetStatus(DWORD n, DWORD value)
 	switch (n)
 	{
 		//--------------------------------------------------
-		// Guild ID ¹Ù²ñ
+		// Guild ID 바뀜
 		//--------------------------------------------------
 		case MODIFY_GUILDID :
 		{
@@ -9580,12 +9580,12 @@ MCreature::SetStatus(DWORD n, DWORD value)
 
 		// 2004, 10, 19, sobeit add end
 		//--------------------------------------------------
-		// ¼ºÇâ ¹Ù²ñ
+		// 성향 바뀜
 		//--------------------------------------------------
-		case MODIFY_ALIGNMENT :			// ¼ºÇâ
+		case MODIFY_ALIGNMENT :			// 성향
 		{
 			//--------------------------------------------------
-			// -10000 ~ 10000À» 0~4·Î ¹Ù²Û´Ù.
+			// -10000 ~ 10000을 0~4로 바꾼다.
 			//--------------------------------------------------
 			value = ConvertAlignment( value );
 			m_Status[n] = value;	
@@ -9593,22 +9593,22 @@ MCreature::SetStatus(DWORD n, DWORD value)
 		break;
 
 		//--------------------------------------------------
-		// HP ¹Ù²î´Â °æ¿ì
+		// HP 바뀌는 경우
 		//--------------------------------------------------
 		case MODIFY_CURRENT_HP :
 			{
 				const int localValue = min(GetMAX_HP()-GetSilverDamage(), value);
 				AddHPModify( localValue - oldValue );
 
-				// max¸¦ ¾È ³Ñ°Ô
+				// max를 안 넘게
 				m_Status[n] = localValue;	
 
-				// ÆÄÆ¼ÀÎ °æ¿ì´Â HP ´Ù½Ã ¼³Á¤ÇØÁØ´Ù.
+				// 파티인 경우는 HP 다시 설정해준다.
 				if (IsPlayerParty())
 				{
 					PARTY_INFO* pInfo = g_pParty->GetMemberInfo( GetName() );
 						
-					// ÁÂÇ¥¸¦ ¼öÁ¤ÇØÁØ´Ù.
+					// 좌표를 수정해준다.
 					if (pInfo!=NULL)
 					{
 						pInfo->HP = localValue;
@@ -9618,15 +9618,15 @@ MCreature::SetStatus(DWORD n, DWORD value)
 		break;
 
 		//--------------------------------------------------
-		// MaxHP ¹Ù²î´Â °æ¿ì
+		// MaxHP 바뀌는 경우
 		//--------------------------------------------------
 		case MODIFY_MAX_HP :
-			// ÆÄÆ¼ÀÎ °æ¿ì´Â HP ´Ù½Ã ¼³Á¤ÇØÁØ´Ù.
+			// 파티인 경우는 HP 다시 설정해준다.
 			if (IsPlayerParty())
 			{
 				PARTY_INFO* pInfo = g_pParty->GetMemberInfo( GetName() );
 					
-				// ÁÂÇ¥¸¦ ¼öÁ¤ÇØÁØ´Ù.
+				// 좌표를 수정해준다.
 				if (pInfo!=NULL)
 				{
 					pInfo->MaxHP = value;
@@ -9635,7 +9635,7 @@ MCreature::SetStatus(DWORD n, DWORD value)
 		break;
 
 //		//--------------------------------------------------
-//		// Armageddon HP ¹Ù²î´Â °æ¿ì
+//		// Armageddon HP 바뀌는 경우
 //		//--------------------------------------------------
 //		case MODIFY_ARMAGEDDON_HP :
 //		{
@@ -9646,17 +9646,17 @@ MCreature::SetStatus(DWORD n, DWORD value)
 //			{
 //				RemoveEffectStatus(EFFECTSTATUS_ARMAGEDDON);
 //
-//				// ´Ù½Ã Ãß°¡				
+//				// 다시 추가				
 //				if (value!=0)
 //				{
 //					AddEffectStatus(EFFECTSTATUS_ARMAGEDDON, 0xFFFF);
 //				}
 //
-//				// ºÎ¼­Áö´Â ºÎºÐ Ç¥½Ã
+//				// 부서지는 부분 표시
 //				int skillID = ARMAGEDDON_CRASH_1 + (changeValue-1);
 //				
 //				//--------------------------------------------------
-//				// ºÎ¼­Áö´Â Effect
+//				// 부서지는 Effect
 //				//--------------------------------------------------		
 //				ExecuteActionInfoFromMainNode(
 //					skillID,
@@ -9664,10 +9664,10 @@ MCreature::SetStatus(DWORD n, DWORD value)
 //					m_X, m_Y, 0,
 //					m_Direction,
 //					
-//					m_ID,												// ¸ñÇ¥¿¡ ´ëÇÑ Á¤º¸
+//					m_ID,												// 목표에 대한 정보
 //					m_X, m_Y, 0, 
 //					
-//					0,													// ±â¼úÀÇ (³²Àº) Áö¼Ó ½Ã°£		
+//					0,													// 기술의 (남은) 지속 시간		
 //					
 //					NULL,
 //					
@@ -9681,14 +9681,14 @@ MCreature::SetStatus(DWORD n, DWORD value)
 //----------------------------------------------------------------------
 // Change To Slayer
 //----------------------------------------------------------------------
-// slayer·Î º¯½ÅÇÏ´Âµ¥..
-// ÀÌ¹Ì slayerÀÌ¸é.. return false
+// slayer로 변신하는데..
+// 이미 slayer이면.. return false
 //----------------------------------------------------------------------
 bool	
 MCreature::ChangeToSlayer()
 {
 	//-----------------------------------------------------
-	// ÀÌ¹Ì slayerÀÌ¸é..
+	// 이미 slayer이면..
 	//-----------------------------------------------------
 	if (IsSlayer())
 	{
@@ -9698,18 +9698,18 @@ MCreature::ChangeToSlayer()
 	ClearAttachEffect();
 
 	//-----------------------------------------------------
-	// Á¤º¸ ¼³Á¤
+	// 정보 설정
 	//-----------------------------------------------------
 	SetMoveDevice( MOVE_DEVICE_WALK );
 	SetBasicActionInfo( SKILL_ATTACK_MELEE );
 
 	//-----------------------------------------------------
-	// Á¤Áö ½ÃÅ²´Ù.
+	// 정지 시킨다.
 	//-----------------------------------------------------
 	SetStop();
 
 	//-----------------------------------------------------
-	// ³², ¿© ?
+	// 남, 여 ?
 	//-----------------------------------------------------
 	if (IsMale())
 	{
@@ -9721,7 +9721,7 @@ MCreature::ChangeToSlayer()
 	}
 
 	//-----------------------------------------------------
-	// ¹øÂ½
+	// 번쩍
 	//-----------------------------------------------------
 	//g_pTopView->SetFadeStart(1, 31, 6,  5,5,31);
 
@@ -9731,14 +9731,14 @@ MCreature::ChangeToSlayer()
 //----------------------------------------------------------------------
 // Change To Vampire
 //----------------------------------------------------------------------
-// vampire·Î º¯½ÅÇÏ´Âµ¥..
-// ÀÌ¹Ì vampireÀÌ¸é.. return false
+// vampire로 변신하는데..
+// 이미 vampire이면.. return false
 //----------------------------------------------------------------------
 bool
 MCreature::ChangeToVampire()
 {
 	//-----------------------------------------------------
-	// ÀÌ¹Ì vampireÀÌ¸é..
+	// 이미 vampire이면..
 	//-----------------------------------------------------
 	if (IsVampire())
 	{
@@ -9750,22 +9750,22 @@ MCreature::ChangeToVampire()
 	DEBUG_ADD("MCreature::ChangeToVampire - RemoveEffectStatus OK");
 	
 	//-----------------------------------------------------
-	// Á¤º¸ ¼³Á¤
+	// 정보 설정
 	//-----------------------------------------------------
 	SetMoveDevice( MOVE_DEVICE_WALK );
 	SetBasicActionInfo( SKILL_ATTACK_MELEE );
 
 	//-----------------------------------------------------
-	// Á¤Áö ½ÃÅ²´Ù.
+	// 정지 시킨다.
 	//-----------------------------------------------------
 	SetStop();
 
 	//-----------------------------------------------------
-	// ³², ¿© ?
+	// 남, 여 ?
 	//-----------------------------------------------------
 	if (IsMale())
 	{
-		// º¯½Å ¼Ò¸®
+		// 변신 소리
 		PlaySound(SOUND_VAMPIRE_CHANGE_MALE, 
 					false,
 					m_X,
@@ -9775,7 +9775,7 @@ MCreature::ChangeToVampire()
 	}
 	else
 	{
-		// º¯½Å ¼Ò¸®
+		// 변신 소리
 		PlaySound(SOUND_VAMPIRE_CHANGE_FEMALE, 
 					false,
 					m_X,
@@ -9785,16 +9785,16 @@ MCreature::ChangeToVampire()
 	}
 
 	//-----------------------------------------------------
-	// º¹Àå Á¦°Å
+	// 복장 제거
 	//-----------------------------------------------------
-	// ¾ÈÇØµµ µÈ´Ù.
+	// 안해도 된다.
 	//for (int i=0; i<ADDON_MAX; i++)
 	//{
 	//	ClearAddonInfo( i );
 	//}
 
 	//-----------------------------------------------------
-	// ¹øÂ½
+	// 번쩍
 	//-----------------------------------------------------
 	//g_pTopView->SetFadeStart(1, 31, 6,  31,0,0);
 
@@ -9814,7 +9814,7 @@ MCreature::FastMovePosition(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y,bool se
 	//if (m_X!=x || m_Y!=y)
 	{
 		//------------------------------------------------
-		// Á¤Áö
+		// 정지
 		//------------------------------------------------
 		SetStop();
 
@@ -9822,7 +9822,7 @@ MCreature::FastMovePosition(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y,bool se
 		m_bNextAction = false;
 		
 		//------------------------------------------------
-		// fast move ¼³Á¤
+		// fast move 설정
 		//------------------------------------------------	
 		SetAction( m_MoveAction );
 
@@ -9832,13 +9832,13 @@ MCreature::FastMovePosition(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y,bool se
 		m_NextY = y;
 		SetServerPositionWithBlock( x, y );
 
-		// SetActionÇÏ°í ³ª¼­ ¼³Á¤ÇØÁà¾ß ÇÑ´Ù.
+		// SetAction하고 나서 설정해줘야 한다.
 		m_bFastMove = true;
 
 		return true;
 	}
 
-	// ¾îÂ¶µç ¼­¹öÁÂÇ¥´Â °ËÁõµÆ´Ù°í º»´Ù.
+	// 어쨋든 서버좌표는 검증됐다고 본다.
 	//m_ServerX = x;
 	//m_ServerY = y;
 
@@ -9853,7 +9853,7 @@ MCreature::KnockBackPosition(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y, BYTE 
 {
 	//if (m_X!=x || m_Y!=y)
 	{
-		// ¶ß¾Æ ÀÌ°Å bool¾Æ´Ñµ­.. m_b·Î ½ÃÀÛÇÏ³× - -; ÄÄÆÄÀÏ ´Ù½Ã ÇÏ±â ±ÍÂ÷³ª¼­  --;
+		// 뜨아 이거 bool아닌뎅.. m_b로 시작하네 - -; 컴파일 다시 하기 귀차나서  --;
 
 		if( Action == 0 )
 		{
@@ -9862,12 +9862,12 @@ MCreature::KnockBackPosition(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y, BYTE 
 			
 			if (knockBackCount<=0)
 			{
-				// ¸Â±â µ¿ÀÛÀÌ ¾ø´ç - -;
+				// 맞기 동작이 없당 - -;
 				return false;
 			}
 			
 			//------------------------------------------------
-			// Á¤Áö
+			// 정지
 			//------------------------------------------------
 			SetStop();
 			
@@ -9875,12 +9875,12 @@ MCreature::KnockBackPosition(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y, BYTE 
 			m_bNextAction = false;
 
 			//------------------------------------------------
-			// KnockBack µ¿ÀÛÀ¸·Î damaged¸¦ ¼³Á¤
+			// KnockBack 동작으로 damaged를 설정
 			//------------------------------------------------	
 			SetAction( ACTION_DAMAGED );
 			
 			//------------------------------------------------
-			// Ä³¸¯ÅÍÀÇ Action¿¡ ¸Â´Â Sound¸¦ Ãâ·ÂÇØÁØ´Ù.
+			// 캐릭터의 Action에 맞는 Sound를 출력해준다.
 			//------------------------------------------------
 			TYPE_SOUNDID soundID = (*g_pCreatureTable)[m_CreatureType].GetActionSound( ACTION_DAMAGED );
 			
@@ -9901,9 +9901,9 @@ MCreature::KnockBackPosition(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y, BYTE 
 		
 		
 		//------------------------------------------------	
-		// sx, sy·Î ÁÂÇ¥ º¸Á¤
+		// sx, sy로 좌표 보정
 		//
-		// ÇöÀçÀ§Ä¡(m_X, m_Y)¿¡¼­ KnockBackÀ§Ä¡(x, y)·Î ÀÌµ¿.
+		// 현재위치(m_X, m_Y)에서 KnockBack위치(x, y)로 이동.
 		// 
 		//------------------------------------------------	
 		int oldX = m_X;
@@ -9913,29 +9913,29 @@ MCreature::KnockBackPosition(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y, BYTE 
 		POINT	oldPoint = g_pTopView->MapToPixel(oldX, oldY);
 		POINT	newPoint = g_pTopView->MapToPixel(newX, newY);
 		
-		// ÀÌµ¿ÇØ¾ßÇÒ pixel¼ö °è»ê
+		// 이동해야할 pixel수 계산
 		int gapX = newPoint.x - oldPoint.x; //+ m_sX);
 		int gapY = newPoint.y - oldPoint.y; //+ m_sY);
 
 		m_sX = -gapX;
 		m_sY = -gapY;
 
-		// ÇÑ¹ø¿¡ ÀÌµ¿ÇØ¾ßÇÒ pixel¼ö --> (m_cX, m_cY)¿¡ ³Ö¾îµÐ´Ù.
+		// 한번에 이동해야할 pixel수 --> (m_cX, m_cY)에 넣어둔다.
 		m_cX = gapX / m_bKnockBack;
 		m_cY = gapY / m_bKnockBack;
 
 		
-		// ÁÂÇ¥°¡ ´Þ¶óÁ³À» °æ¿ì¸¸..
+		// 좌표가 달라졌을 경우만..
 		if (newX!=oldX || newY!=oldY)
 		{
 			//------------------------------------------------	
-			// KnockBackµÇ´Â ¹æÇâ ¼³Á¤
-			// »õÁÂÇ¥¿¡¼­ ¿¹ÀüÁÂÇ¥¸¦ ¹Ù¶óº¸´Â ¹æÇâ
+			// KnockBack되는 방향 설정
+			// 새좌표에서 예전좌표를 바라보는 방향
 			//------------------------------------------------	
 			m_Direction = MTopView::GetDirectionToPosition(newX, newY, oldX, oldY);
 		
 			//------------------------------------------------	
-			// ÁÂÇ¥´Â ¹Ù·Î ÀÌµ¿.
+			// 좌표는 바로 이동.
 			//------------------------------------------------			
 			MovePosition( x, y );
 		}
@@ -9945,7 +9945,7 @@ MCreature::KnockBackPosition(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y, BYTE 
 		if( Action == 0 )
 		{
 			//------------------------------------------------			
-			// ¸ö¿¡ ºÙ´Â ÇÇ
+			// 몸에 붙는 피
 			//------------------------------------------------			
 			MAttachEffect* pEffect = NULL;
 			if(g_pUserInformation->GoreLevel == false)
@@ -9964,7 +9964,7 @@ MCreature::KnockBackPosition(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y, BYTE 
 			}						
 			
 			//------------------------------------------------			
-			// ¹Ù´Ú¿¡ Èê¸®´Â ÇÇ 3¹æ¿ï(-_-;)
+			// 바닥에 흘리는 피 3방울(-_-;)
 			//------------------------------------------------			
 			if (g_pUserOption->BloodDrop)
 			{
@@ -9972,12 +9972,12 @@ MCreature::KnockBackPosition(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y, BYTE 
 				for (int i=0; i<num; i++)
 				{
 					ExecuteActionInfoFromMainNode(
-						BLOOD_CRITICAL_HIT,										// »ç¿ë ±â¼ú ¹øÈ£
+						BLOOD_CRITICAL_HIT,										// 사용 기술 번호
 						
 						oldX, oldY, 0,
-						(int)m_Direction,														// »ç¿ë ¹æÇâ
+						(int)m_Direction,														// 사용 방향
 						
-						m_ID,												// ¸ñÇ¥¿¡ ´ëÇÑ Á¤º¸
+						m_ID,												// 목표에 대한 정보
 						oldX, oldY, 0,
 						
 						50 + rand()%30, //5*16, 
@@ -9993,7 +9993,7 @@ MCreature::KnockBackPosition(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y, BYTE 
 		return true;
 	}
 
-	// ¾îÂ¶µç ¼­¹öÁÂÇ¥´Â °ËÁõµÆ´Ù°í º»´Ù.
+	// 어쨋든 서버좌표는 검증됐다고 본다.
 	//m_ServerX = x;
 	//m_ServerY = y;
 
@@ -10010,8 +10010,8 @@ MCreature::StopFastMove()
 	m_sY = 0;
 	m_bFastMove = false;
 
-	// 2001.8.10¿¡ Ãß°¡
-	// ÄÀ..±Ùµ¥ ÀÌ ÇÔ¼ö ¾²ÀÌÁöµµ ¾Ê´Â±º.. - -;;
+	// 2001.8.10에 추가
+	// 컥..근데 이 함수 쓰이지도 않는군.. - -;;
 	m_MoveCount = m_MoveCountMax;
 }
 
@@ -10021,8 +10021,8 @@ MCreature::StopFastMove()
 int
 MCreature::FindEnemy()
 {
-	// Áö±ÝÀº MPlayer¿¡¼­¸¸ »ç¿ëÇÑ´Ù.
-	// ¹Ì·¡¸¦ À§ÇØ¼­...
+	// 지금은 MPlayer에서만 사용한다.
+	// 미래를 위해서...
 	return OBJECTID_NULL;
 }
 
@@ -10032,14 +10032,14 @@ MCreature::FindEnemy()
 void				
 MCreature::SetShadowCount(int n)
 { 
-	// 5°³±îÁö.. - -;
+	// 5개까지.. - -;
 	m_ShadowCount = min(5, n); 
 }
 
 //----------------------------------------------------------------------
 // Stop Blood Drain
 //----------------------------------------------------------------------
-// m_bStopBloodDrainÀÌ¸é ÀÌ°É È£ÃâÇØ¾ß ÇÑ´Ù.
+// m_bStopBloodDrain이면 이걸 호출해야 한다.
 //----------------------------------------------------------------------
 void	
 MCreature::StopBloodDrain()
@@ -10069,7 +10069,7 @@ MCreature::StopBloodDrain()
 //----------------------------------------------------------------------
 // Stop Absorb Soul
 //----------------------------------------------------------------------
-// m_bStopAbsorbSoulÀÌ¸é ÀÌ°É È£ÃâÇØ¾ß ÇÑ´Ù.
+// m_bStopAbsorbSoul이면 이걸 호출해야 한다.
 //----------------------------------------------------------------------
 void	
 MCreature::StopAbsorbSoul()
@@ -10093,10 +10093,10 @@ MCreature::StopAbsorbSoul()
 				{
 					bool bUseEffectSprite = pEffect->IsEffectSprite();
 					
-					// flagÁ¦°Å
+					// flag제거
 					if (bUseEffectSprite)
 					{
-						m_bAttachEffect[pEffect->GetEffectSpriteType()] = false;	// flagÁ¦°Å
+						m_bAttachEffect[pEffect->GetEffectSpriteType()] = false;	// flag제거
 					}
 
 					delete pEffect;
@@ -10118,7 +10118,7 @@ MCreature::StopAbsorbSoul()
 //----------------------------------------------------------------------
 // Update Darkness
 //----------------------------------------------------------------------
-// ´Ü¼øÈ÷ count¸¸ ¹Ù²ãÁØ´Ù.
+// 단순히 count만 바꿔준다.
 //----------------------------------------------------------------------
 void	
 MCreature::UpdateDarkness()
@@ -10141,13 +10141,13 @@ MCreature::UpdateDarkness()
 		{
 			m_DarknessCount += m_DarknessCountInc;
 
-			// darkness¿¡ µé¾î°¡´Â °æ¿ì
+			// darkness에 들어가는 경우
 			if (m_DarknessCount < 0)
 			{
 				m_DarknessCount = 0;
 				m_DarknessCountInc = 0;
 			}
-			// darkness¿¡¼­ ºüÁ®³ª¿À´Â °æ¿ì
+			// darkness에서 빠져나오는 경우
 			else if (m_DarknessCount >= MAX_DARKNESS_COUNT)
 			{
 				m_DarknessCount = -1;
@@ -10157,8 +10157,8 @@ MCreature::UpdateDarkness()
 	}
 	else
 	{
-		// Slayer°¡ ¾Æ´Ñ °æ¿ì´Â Darkness¶û °ü°è¾ø´Ù.
-		// È®ÀÎ¿ë
+		// Slayer가 아닌 경우는 Darkness랑 관계없다.
+		// 확인용
 		m_DarknessCount = -1;
 		m_DarknessCountInc = 0;
 	}
@@ -10167,10 +10167,10 @@ MCreature::UpdateDarkness()
 //----------------------------------------------------------------------
 // Check In Darkness
 //----------------------------------------------------------------------
-// darkness°¡ ³ªÅ¸³ª°í/»ç¶óÁö´Â ¼ø°£
-//            player°¡ ¿òÁ÷ÀÌ´Â ¼ø°£À» Ã¼Å©ÇÏ¸é µÈ´Ù.
+// darkness가 나타나고/사라지는 순간
+//            player가 움직이는 순간을 체크하면 된다.
 //
-// player°¡ ¾Æ´Ï¹Ç·Î  ½Ã¾ß °ü°è¾ø´ç.
+// player가 아니므로  시야 관계없당.
 //----------------------------------------------------------------------
 void
 MCreature::CheckInDarkness()
@@ -10180,9 +10180,9 @@ MCreature::CheckInDarkness()
 		//if (IsSlayer())
 		{
 			//-------------------------------------------------------
-			// Darkness¿¡ µé¾î¿Ô´ÂÁö Ã¼Å©
+			// Darkness에 들어왔는지 체크
 			//-------------------------------------------------------
-			// ¼­¹ö ÁÂÇ¥º¸´Ù´Â ÇöÀç ÁÂÇ¥°¡ º¸±â¿¡ ÁÁ´Ù.. ¤»¤»..
+			// 서버 좌표보다는 현재 좌표가 보기에 좋다.. ㅋㅋ..
 			if (m_X >=0 && m_X < g_pZone->GetWidth()
 				&& m_Y >= 0 && m_Y < g_pZone->GetHeight())
 			{
@@ -10190,14 +10190,14 @@ MCreature::CheckInDarkness()
 
 				if (m_bAlive && (sector.HasDarkness()))
 				{
-					// darkness¿¡ ÀÖ´Â °æ¿ì
+					// darkness에 있는 경우
 					//PlaceInDarkness();
 					m_DarknessCount = MAX_DARKNESS_COUNT;
 					m_DarknessCountInc = 0;
 				}
 				else
 				{		
-					// darkness´Â »ç¶óÁ³´Ù.
+					// darkness는 사라졌다.
 					//PlaceNotInDarkness();
 					m_DarknessCount = -1;
 					m_DarknessCountInc = 0;
@@ -10215,9 +10215,9 @@ MCreature::IsInGroundElemental() const
 		//if (IsSlayer())
 		{
 			//-------------------------------------------------------
-			// Darkness¿¡ µé¾î¿Ô´ÂÁö Ã¼Å©
+			// Darkness에 들어왔는지 체크
 			//-------------------------------------------------------
-			// ¼­¹ö ÁÂÇ¥º¸´Ù´Â ÇöÀç ÁÂÇ¥°¡ º¸±â¿¡ ÁÁ´Ù.. ¤»¤»..
+			// 서버 좌표보다는 현재 좌표가 보기에 좋다.. ㅋㅋ..
 			if (m_X >=0 && m_X < g_pZone->GetWidth()
 				&& m_Y >= 0 && m_Y < g_pZone->GetHeight())
 			{
@@ -10241,9 +10241,9 @@ MCreature::IsInFuryOfGnome() const
 		//if (IsSlayer())
 		{
 			//-------------------------------------------------------
-			// Fury Of Gnome¿¡ µé¾î¿Ô´ÂÁö Ã¼Å©
+			// Fury Of Gnome에 들어왔는지 체크
 			//-------------------------------------------------------
-			// ¼­¹ö ÁÂÇ¥º¸´Ù´Â ÇöÀç ÁÂÇ¥°¡ º¸±â¿¡ ÁÁ´Ù.. ¤»¤»..
+			// 서버 좌표보다는 현재 좌표가 보기에 좋다.. ㅋㅋ..
 			if (m_X >=0 && m_X < g_pZone->GetWidth()
 				&& m_Y >= 0 && m_Y < g_pZone->GetHeight())
 			{
@@ -10262,7 +10262,7 @@ MCreature::IsInFuryOfGnome() const
 //----------------------------------------------------------------------
 // Place In Darkness
 //----------------------------------------------------------------------
-// player´Â darkness¿¡ ÀÖ´Ù.
+// player는 darkness에 있다.
 //----------------------------------------------------------------------
 void
 MCreature::PlaceInDarkness(bool IsBlindness)
@@ -10279,7 +10279,7 @@ MCreature::PlaceInDarkness(bool IsBlindness)
 #endif
 		)
 	{
-		// darkness¿¡ ÀÖÁö ¾Ê´ø °æ¿ì
+		// darkness에 있지 않던 경우
 		if (m_DarknessCount < 0)
 		{
 			m_DarknessCount = MAX_DARKNESS_COUNT;		
@@ -10299,7 +10299,7 @@ MCreature::PlaceInDarkness(bool IsBlindness)
 //----------------------------------------------------------------------
 // Move In Darkness
 //----------------------------------------------------------------------
-// player´Â darkness¿¡ ÀÖÁö ¾Ê´Ù.
+// player는 darkness에 있지 않다.
 //----------------------------------------------------------------------
 void
 MCreature::PlaceNotInDarkness()
@@ -10311,7 +10311,7 @@ MCreature::PlaceNotInDarkness()
 #endif
 		)
 	{
-		// darkness¿¡ ÀÖ´ø °æ¿ì
+		// darkness에 있던 경우
 		if (m_DarknessCount >= 0 && m_DarknessCount < MAX_DARKNESS_COUNT)
 		{
 			m_DarknessCountInc = 1;
@@ -10322,15 +10322,15 @@ MCreature::PlaceNotInDarkness()
 //----------------------------------------------------------------------
 // Show In Darkness
 //----------------------------------------------------------------------
-// darkness¿¡ ÀÖÁö ¾Ê¾Æ¼­ Àß º¸ÀÌ°Å³ª
-// darkness¿¡ ÀÖ´õ¶óµµ °Å¸®¿¡ ÀÇÇØ¼­ º¸ÀÌ´Â°¡?
+// darkness에 있지 않아서 잘 보이거나
+// darkness에 있더라도 거리에 의해서 보이는가?
 //----------------------------------------------------------------------
 BOOL	
 MCreature::ShowInDarkness(int sX, int sY) const
 {
 
 //	DEBUG_ADD_FORMAT("[ShowInDarkness] g_bLight %d", g_bLight);
-	// ÀÌ¹Ì darkness¿¡ ÀÖ´Â °æ¿ì
+	// 이미 darkness에 있는 경우
 	if (//!(m_CreatureType >= 526 && m_CreatureType <= 549 || m_CreatureType >= 371 && m_CreatureType <= 376 || m_CreatureType >= 560 && m_CreatureType <= 563) &&
 //		!IsNPC() &&
 		m_DarknessCount >= 0 &&
@@ -10341,7 +10341,7 @@ MCreature::ShowInDarkness(int sX, int sY) const
 #endif
 	)
 	{
-		// darknessCount¾È¿¡´Â º¼ ¼ö ÀÖ´Ù.
+		// darknessCount안에는 볼 수 있다.
 		if ((max(abs(m_X-sX), abs(m_Y-sY))) <= m_DarknessCount)
 		{
 			return TRUE;
@@ -10356,12 +10356,12 @@ MCreature::ShowInDarkness(int sX, int sY) const
 //----------------------------------------------------------------------
 // Set HalluCreature
 //----------------------------------------------------------------------
-// halluÀÎ °æ¿ì... ¾î¶² ¸÷À¸·Î º¸¿©Áö°Ô µÈ´Ù.
+// hallu인 경우... 어떤 몹으로 보여지게 된다.
 //----------------------------------------------------------------------
 void				
 MCreature::SetHalluCreature(TYPE_CREATURETYPE type)
 {
-	// NPC´Â Hallu°É·Áµµ Á¦´ë·Î º¸ÀÎ´Ù.
+	// NPC는 Hallu걸려도 제대로 보인다.
 	if (IsNPC())
 	{
 		m_bHallu = false;
@@ -10372,7 +10372,7 @@ MCreature::SetHalluCreature(TYPE_CREATURETYPE type)
 	
 	m_HalluCreatureFrameID	= (*g_pCreatureSpriteTable)[(*g_pCreatureTable)[type].SpriteTypes[0]].FrameID;
 	
-	// »ö±ò - ¸÷ÀÎ °æ¿ì¸¸.. ¼³Á¤ÇØÁØ´Ù.
+	// 색깔 - 몹인 경우만.. 설정해준다.
 	m_HalluColorBody	= (*g_pCreatureTable)[m_CreatureType].ColorSet;
 
 //	m_HalluName = rand()%g_pMonsterNameTable->GetLastNameSize();
@@ -10387,7 +10387,7 @@ void
 MCreature::DetermineHalluActionFrame()
 {
 	//------------------------------------------------------
-	// ÀûÀýÇÑ actionÀ» ¼±ÅÃÇÑ´Ù.
+	// 적절한 action을 선택한다.
 	//------------------------------------------------------
 	if (m_Action <= ACTION_DIE)
 	{
@@ -10409,13 +10409,13 @@ MCreature::DetermineHalluActionFrame()
 	BYTE frame = GetFrame();
 
 	//------------------------------------------------------
-	// µ¿ÀÛÀÇ frame ¼ö¸¦ °áÁ¤ÇÑ´Ù.
+	// 동작의 frame 수를 결정한다.
 	//------------------------------------------------------
 	int countMax = (*g_pCreatureTable)[m_HalluCreatureType].GetActionCount( m_HalluAction );
 
 	if (countMax==0)
 	{
-		// µ¿ÀÛÀÌ ¾ø´Ù¸é..
+		// 동작이 없다면..
 		if (m_HalluAction!=ACTION_ATTACK)
 		{
 			m_HalluAction = ACTION_ATTACK;
@@ -10423,7 +10423,7 @@ MCreature::DetermineHalluActionFrame()
 			countMax = (*g_pCreatureTable)[m_HalluCreatureType].GetActionCount( m_HalluAction );
 		}
 
-		// µ¿ÀÛÀÌ ¾ø´Ù¸é Á¤Áö..
+		// 동작이 없다면 정지..
 		if (countMax==0)
 		{
 			m_HalluAction = ACTION_STAND;
@@ -10432,7 +10432,7 @@ MCreature::DetermineHalluActionFrame()
 		}
 	}
 	
-	if (countMax==0)	// ºñ±³ ºñ±³.. - -;
+	if (countMax==0)	// 비교 비교.. - -;
 	{
 		m_HalluFrame = 0;
 	}
@@ -10449,7 +10449,7 @@ const char*
 MCreature::GetHalluName() const
 { 
 	if( strncmp( GetName(), (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetString(), (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetLength() ) == 0 )
-//		strstr(GetName(), "¿î¿µÀÚ") != NULL)
+//		strstr(GetName(), "운영자") != NULL)
 		return GetName();
 	return g_pMonsterNameTable->GetLastName(m_HalluName);
 }
@@ -10504,13 +10504,13 @@ MCreature::SetRegenBonus(int amount, DWORD delay)
 }
 
 //----------------------------------------------------------------------
-// CheckRegen - Regen¼³Á¤
+// CheckRegen - Regen설정
 //----------------------------------------------------------------------
 void
 MCreature::CheckRegen()
 {
 	//-------------------------------------------------------
-	// ¹ìÆÄÀÌ¾î°¡ ¾Æ´Ï¸é RegenÇÏÁö ¾Ê´Â´Ù.
+	// 뱀파이어가 아니면 Regen하지 않는다.
 	//-------------------------------------------------------
 	if (!IsVampire())
 	{
@@ -10519,7 +10519,7 @@ MCreature::CheckRegen()
 	}
 
 	//-------------------------------------------------------
-	// Burrow»óÅÂ
+	// Burrow상태
 	//-------------------------------------------------------
 	if (IsUndergroundCreature())
 	{
@@ -10528,7 +10528,7 @@ MCreature::CheckRegen()
 	}
 
 	//-------------------------------------------------------
-	// Casket »óÅÂ
+	// Casket 상태
 	//-------------------------------------------------------
 	if (IsInCasket())
 	{
@@ -10537,12 +10537,12 @@ MCreature::CheckRegen()
 	}
 
 	//-------------------------------------------------------
-	// Creature Type¿¡ µû¶ó¼­..
+	// Creature Type에 따라서..
 	//-------------------------------------------------------
 	switch (m_CreatureType)
 	{
 		//---------------------------------------------------------------
-		// ¹ìÆÄÀÌ¾î, ´Á´ë
+		// 뱀파이어, 늑대
 		//---------------------------------------------------------------
 		case CREATURETYPE_VAMPIRE_MALE1 :
 		case CREATURETYPE_VAMPIRE_FEMALE1 :
@@ -10562,19 +10562,19 @@ MCreature::CheckRegen()
 		case CREATURETYPE_VAMPIRE_MALE6:
 		case CREATURETYPE_VAMPIRE_FEMALE6:
 		// add end
-			SetRegen( g_pClientConfig->REGEN_AMOUNT_VAMPIRE, 1000 );	// 2¾¿ 1ÃÊ¸¶´Ù			
+			SetRegen( g_pClientConfig->REGEN_AMOUNT_VAMPIRE, 1000 );	// 2씩 1초마다			
 		break;
 
 		//---------------------------------------------------------------
-		// µý °æ¿ì..
+		// 딴 경우..
 		//---------------------------------------------------------------
 		default :
-			SetRegen( 0, 0 );	// regen ¾ÈÇÑ´Ù.		
+			SetRegen( 0, 0 );	// regen 안한다.		
 	}
 }
 
 //----------------------------------------------------------------------
-// ³ª¸¦ ÈíÇ÷ÇÏ°í ÀÖ´ø CreatureÀÇ ÈíÇ÷µ¿ÀÛÀ» ¸ØÃá´Ù
+// 나를 흡혈하고 있던 Creature의 흡혈동작을 멈춘다
 //----------------------------------------------------------------------
 void 
 MCreature::StopDrain()
@@ -10590,7 +10590,7 @@ MCreature::StopDrain()
 }
 
 //----------------------------------------------------------------------
-// ³ª¸¦ Èí¿µÇÏ°í ÀÖ´ø CreatureÀÇ Èí¿µµ¿ÀÛÀ» ¸ØÃá´Ù
+// 나를 흡영하고 있던 Creature의 흡영동작을 멈춘다
 //----------------------------------------------------------------------
 void 
 MCreature::StopAbsorb()
@@ -10806,13 +10806,13 @@ MCreature::RemoveCauseCriticalWoundsEffect()
 			||EFFECTSPRITETYPE_CAUSE_CRITICAL_WOUND_4 == Type 
 			)
 		{
-			// ¸Þ¸ð¸® Á¦°Å
+			// 메모리 제거
 			delete pEffect;
 
 			ATTACHEFFECT_LIST::iterator dEffect = iEffect;
 			iEffect--;
 
-			// list¿¡¼­ Á¦°Å
+			// list에서 제거
 			m_listEffect.erase( dEffect );
 
 			m_bAttachEffect[Type] = false;
@@ -10836,13 +10836,13 @@ MCreature::RemoveCauseCriticalWoundsEffect()
 			||EFFECTSPRITETYPE_CAUSE_CRITICAL_WOUND_4 == Type 
 			)
 		{
-			// ¸Þ¸ð¸® Á¦°Å
+			// 메모리 제거
 			delete pEffect;
 
 			ATTACHEFFECT_LIST::iterator dEffect = iEffect;
 			iEffect--;
 
-			// list¿¡¼­ Á¦°Å
+			// list에서 제거
 			m_listGroundEffect.erase( dEffect );
 
 			m_bAttachEffect[Type] = false;
@@ -10864,7 +10864,7 @@ MCreature::GetActionMax() const
 	if(!IsAdvancementClass())
 		 return (*g_pCreatureTable)[m_CreatureType].GetActionMax(); 
 
-	// ½ÂÁ÷ Ä³¸¯ÅÍ ÀÏ¶§
+	// 승직 캐릭터 일때
 	if(IsSlayer())
 		return ACTION_ADVANCEMENT_SLAYER_MAX/* - ACTION_ADVANCEMENT_SLAYER_STOP_SWORD*/;
 	else if(IsVampire())
@@ -10910,7 +10910,7 @@ MCreature::GetMasterEffectType(DWORD Status)
 		case EFFECTSTATUS_GRAND_MASTER_SLAYER_130:
 			{
 				RemoveEffectStatus(EFFECTSTATUS_GRAND_MASTER_SLAYER);
-				if(IsDead()) return 0; //Á×Àº³ÑÇÑÅÙ ÀÌÆåÆ® ¹«½Ã
+				if(IsDead()) return 0; //죽은넘한텐 이펙트 무시
 				if(MarketType) 
 					type =  EFFECTSPRITETYPE_MARKET_MASTER_SLAYER_130_FEAR + MarketType - 1;
 			}
@@ -10932,12 +10932,12 @@ MCreature::GetMasterEffectType(DWORD Status)
 						type =  EFFECTSPRITETYPE_MARKET_MASTER_SLAYER_150_ADVANCE_NEW_4;
 						break;
 					}
-					// ½ÂÁ÷ Ä³¸¯ÅÍ´Â Market Master Effect Àû¿ë ÇÏÁö ¸»¶ó°í ÇØ¼­ ÁÖ¼® Ã³¸® ÇÔ..
-					// ³ªÁß¿¡ ¶Ç ¸» ¹Ù²Ù¸é ÁÖ¼® Ç®¾îÁÖ¸é µÊ.
+					// 승직 캐릭터는 Market Master Effect 적용 하지 말라고 해서 주석 처리 함..
+					// 나중에 또 말 바꾸면 주석 풀어주면 됨.
 //					if(MarketType) 
 //						type =  EFFECTSPRITETYPE_MARKET_MASTER_SLAYER_150_ADVANCE_FEAR + MarketType - 1;
 //					else
-					// edit By Sonic 2006.10.28 È¥³ý¶þ×ªºó½ÇÉ«ÉíÉÏµÄ¹âÎÞÐ§¹û
+					// edit By Sonic 2006.10.28 去除二转后角色身上的光无效果
 
 					//	type = EFFECTSPRITETYPE_ADVANCEMENT_MASTER_SLAYER;
 // 					if(MarketType)
@@ -10975,12 +10975,12 @@ MCreature::GetMasterEffectType(DWORD Status)
 						type =  EFFECTSPRITETYPE_MARKET_MASTER_VAMPIRE_150_ADVANCE_NEW_4;
 						break;	
 					}
-					// ½ÂÁ÷ Ä³¸¯ÅÍ´Â Market Master Effect Àû¿ë ÇÏÁö ¸»¶ó°í ÇØ¼­ ÁÖ¼® Ã³¸® ÇÔ..
-					// ³ªÁß¿¡ ¶Ç ¸» ¹Ù²Ù¸é ÁÖ¼® Ç®¾îÁÖ¸é µÊ.
+					// 승직 캐릭터는 Market Master Effect 적용 하지 말라고 해서 주석 처리 함..
+					// 나중에 또 말 바꾸면 주석 풀어주면 됨.
 //					if(MarketType) 
 //						type =  EFFECTSPRITETYPE_MARKET_MASTER_VAMPIRE_150_FRONT_ADVANCE_FEAR + MarketType - 1;
 //					else
-						// edit by sonic 2006.10.28   È¥³ý¶þ×ªºó¿´²»µ½ÉíÉÏ»ðÑÕÉ«Ð§¹û
+						// edit by sonic 2006.10.28   去除二转后看不到身上火颜色效果
 							//type =  EFFECTSPRITETYPE_ADVANCEMENT_MASTER_VAMPIRE_BACK;
 // 							if(MarketType)
 // 								type =  EFFECTSPRITETYPE_MARKET_MASTER_VAMPIRE_150_FRONT_FEAR + MarketType - 1;
@@ -11019,12 +11019,12 @@ MCreature::GetMasterEffectType(DWORD Status)
 						type =  EFFECTSPRITETYPE_MARKET_MASTER_OUSTERS_150_ADVANCE_NEW_4;
 						break;	
 					}	
-					// ½ÂÁ÷ Ä³¸¯ÅÍ´Â Market Master Effect Àû¿ë ÇÏÁö ¸»¶ó°í ÇØ¼­ ÁÖ¼® Ã³¸® ÇÔ..
-					// ³ªÁß¿¡ ¶Ç ¸» ¹Ù²Ù¸é ÁÖ¼® Ç®¾îÁÖ¸é µÊ.
+					// 승직 캐릭터는 Market Master Effect 적용 하지 말라고 해서 주석 처리 함..
+					// 나중에 또 말 바꾸면 주석 풀어주면 됨.
 //					if(MarketType) 
 //						type =  EFFECTSPRITETYPE_MARKET_MASTER_OUSTERS_150_ADVANCE_FEAR + MarketType - 1;
 //					else
-					// edit by sonic 2006.10.28  ÐÞÕý¶þ×ªºó½ÇÉ«»ðÑÕÉ«ÎÊÌâ
+					// edit by sonic 2006.10.28  修正二转后角色火颜色问题
 						//type =  EFFECTSPRITETYPE_ADVANCEMENT_MASTER_OUSTER;
 // 					if(MarketType)
 // 					type =  EFFECTSPRITETYPE_MARKET_MASTER_OUSTERS_150_FEAR + MarketType - 1;
@@ -11091,13 +11091,13 @@ MCreature::ChangeMasterEffectType(int MarketEffect)
 //			|| Type >= EFFECTSPRITETYPE_MARKET_MASTER_VAMPIRE_100_FEAR && Type <= EFFECTSPRITETYPE_MARKET_MASTER_OUSTERS_150_ADVANCE_HOPE
 //			)
 //		{
-//			// ¸Þ¸ð¸® Á¦°Å
+//			// 메모리 제거
 //			delete pEffect;
 //
 //			ATTACHEFFECT_LIST::iterator dEffect = iEffect;
 //			iEffect--;
 //
-//			// list¿¡¼­ Á¦°Å
+//			// list에서 제거
 //			m_listEffect.erase( dEffect );
 //
 //			m_bAttachEffect[Type] = false;
@@ -11120,13 +11120,13 @@ MCreature::ChangeMasterEffectType(int MarketEffect)
 //			|| Type >= EFFECTSPRITETYPE_MARKET_MASTER_VAMPIRE_100_FEAR && Type <= EFFECTSPRITETYPE_MARKET_MASTER_OUSTERS_150_ADVANCE_HOPE
 //			)
 //		{
-//			// ¸Þ¸ð¸® Á¦°Å
+//			// 메모리 제거
 //			delete pEffect;
 //
 //			ATTACHEFFECT_LIST::iterator dEffect = iEffect;
 //			iEffect--;
 //
-//			// list¿¡¼­ Á¦°Å
+//			// list에서 제거
 //			m_listGroundEffect.erase( dEffect );
 //
 //			m_bAttachEffect[Type] = false;

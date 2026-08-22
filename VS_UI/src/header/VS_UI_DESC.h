@@ -1,4 +1,4 @@
-// VS_UI_DESC.h: interface for the C_VS_UI_DESC class.
+﻿// VS_UI_DESC.h: interface for the C_VS_UI_DESC class.
 //
 //////////////////////////////////////////////////////////////////////
 

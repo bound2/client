@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 // CSpriteSurface_Effects.cpp
 //
 // Pure pixel manipulation effect functions extracted from CSpriteSurface.cpp

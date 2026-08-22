@@ -1,4 +1,4 @@
-////////////////////////////////////////////////////////////////////////
+﻿////////////////////////////////////////////////////////////////////////
 //
 // SocketImpl.cpp
 //
@@ -277,14 +277,14 @@ uint SocketImpl::send ( const void * buf , uint len , uint flags )
      throw ( IOException , Error )
 {
 	__BEGIN_TRY 
-#ifdef __USE_ENCRY__  //Ê¹ÓÃ¼ÓÃÜÐ­Òé
+#ifdef __USE_ENCRY__  //使用加密协议
 
 	DWORD enlen =len+5;
 	char* enbuf = new char[enlen];
 	
-	//ÉèÖÃ·â°üKey
+	//设置封包Key
 	enbuf[4]=m_key;
-	// ÉèÖÃ·â°ü³¤¶È
+	// 设置封包长度
 	memcpy(enbuf,&enlen,4);
 
 	memcpy(&enbuf[5],buf,len);
@@ -295,7 +295,7 @@ uint SocketImpl::send ( const void * buf , uint len , uint flags )
 	enbuf =NULL;
 	return len;
 	//return SocketAPI::send_ex( m_SocketID , buf , len , flags );
-#else //²»Ê¹ÓÃ¼ÓÃÜ 
+#else //不使用加密 
 	return SocketAPI::send_ex( m_SocketID , buf , len , flags );
 #endif
 	__END_CATCH

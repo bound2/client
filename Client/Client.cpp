@@ -1,7 +1,7 @@
-#include "Client_PCH.h"
+﻿#include "Client_PCH.h"
 #define __NPROTECT__
 // EXECryptor include removed (SDL2) - Copy protection no longer needed
-/* add by sonic 2006.9.14 start Ôö¼Ó¶ÔWPEÆÁ±Î*/
+/* add by sonic 2006.9.14 start 增加对WPE屏蔽*/
 #include "APICheck.h"
 APICheck _APICheck;
 /* ***************************************** */
@@ -137,8 +137,8 @@ int					g_Dimension = 0;
 DWORD				g_TimerNPMON = 0;
 
 // FPS
-DWORD				g_CurrentTime		= 0;		// ½Ã°£
-DWORD				g_CurrentFrame		= 0;		// frame¼ö
+DWORD				g_CurrentTime		= 0;		// 시간
+DWORD				g_CurrentFrame		= 0;		// frame수
 
 int					g_FrameCount		= 0;
 int					g_StartFrameCount	= 0;
@@ -152,7 +152,7 @@ const int			g_FrameGood			= 15;
 // minimize | anotherWnd click--> !ActiveGame
 BOOL				g_bActiveApp			= FALSE; // Is application active?
 BOOL				g_bActiveGame			= FALSE; // Is Game Active?
-BOOL				g_bNeedUpdate			= FALSE; // updateÇØ¾ßµÇ³ª?
+BOOL				g_bNeedUpdate			= FALSE; // update해야되나?
 
 DWORD				g_double_click_time = 0;
 
@@ -178,7 +178,7 @@ WORD g_wAuthKeyMap = 0x5154;
 //void SizeOfObjects();
 //#define				__WEB_BROWSER__
 IWebBrowser2*			g_pWebBrowser = NULL; 
-// [Futec¼öÁ¤]
+// [Futec수정]
 char g_FutecIP[20] = { 0, };
 unsigned int g_FutecPort = 0;
 BYTE g_AdvanceVampireActionMaxCount[ ACTION_ADVANCEMENT_MAX - ACTION_ADVANCEMENT_STOP ];
@@ -209,8 +209,8 @@ struct NETMARBLE_INFO
 struct REALSERVER_INFO
 {
 	REALSERVER_INFO() { bMode = false;WorldID = 0;}
-	bool bMode;		// 0: ¼öµ¿Á¢¼Ó, 1:Á¤»óÁ¢¼Ó
-	int WorldID;	// 0: ºê¶õ, 1: Æç·¹½º
+	bool bMode;		// 0: 수동접속, 1:정상접속
+	int WorldID;	// 0: 브란, 1: 펠레스
 	MString ID;		// id
 	MString Key;	// Key
 };
@@ -220,7 +220,7 @@ BYTE g_macAddress[6];
 extern void CheckMacScreenMode();
 extern BOOL GetMacAddressFromSock();
 extern BOOL InitDebugInfo();
-// add by Sonic 2006.9.26 ¼ì²â1024 * 768°æ±¾È«¾Ö±äÁ¿
+// add by Sonic 2006.9.26 检测1024 * 768版本全局变量
 BOOL g_MyFull=TRUE;
 RECT g_GameRect={799,599,800,600};
 LONG	g_SECTOR_WIDTH           =16 ;
@@ -245,7 +245,7 @@ LONG	g_TILE_Y_HALF = 12;
 // define function
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-// addFileÀ» ÀÐ¾î¼­ originalFileÀÇ ³¡¿¡ ºÙÀÎ´Ù.
+// addFile을 읽어서 originalFile의 끝에 붙인다.
 //-----------------------------------------------------------------------------			
 #define WRITE_FROM_FILE(originalFile, patchFile)		\
 		{												\
@@ -267,7 +267,7 @@ LONG	g_TILE_Y_HALF = 12;
 				}										\
 			}											\
 		}
-//Ëæ»ú×Ö·û´®
+//随机字符串
 void get_rand_str(char s[],int number);
 void get_rand_str(char s[],int number)
 {
@@ -283,7 +283,7 @@ void get_rand_str(char s[],int number)
         }
 }
 //-----------------------------------------------------------------------
-// Get Futec Address [Futec¼öÁ¤]
+// Get Futec Address [Futec수정]
 //-----------------------------------------------------------------------
 // DarkEden.exe Futec(IP:Port)
 //              01234567890123
@@ -365,7 +365,7 @@ ParsingRealServer(const char* pCommandLine, int Dimention, REALSERVER_INFO &info
 //-----------------------------------------------------------------------------
 HRESULT InitFail(LPCTSTR szError,...)
 {
-	// ÇÁ·Î±×·¥ Áß´Ü..
+	// 프로그램 중단..
 	g_bActiveApp = FALSE;
 
 	ShowCursor( TRUE );
@@ -397,7 +397,7 @@ bool g_bUseProgressBar = true;
 HWND g_hWndProgress = NULL;
 const int progressBarWidth = 300;
 const int progressBarHeight = 40;
-const int g_numAppendFiles = 16;		// AppendPatch.infÀÇ fileµé °³¼ö
+const int g_numAppendFiles = 16;		// AppendPatch.inf의 file들 개수
 
 std::map<DWORD,std::string> g_nProtectMessage;
 
@@ -590,7 +590,7 @@ UpdateProgressBar()
 //-----------------------------------------------------------------------------
 HWND		g_hPatchLogWnd = NULL;
 HWND		g_hPatchLogEdit = NULL;
-char*		g_pPatchLogBuffer = NULL;	// ¾ó¸¶³ª Å¬Áö ¸ô¶ó¼­¸® global¿¡ µ×´Ù.
+char*		g_pPatchLogBuffer = NULL;	// 얼마나 클지 몰라서리 global에 뒀다.
 
 long FAR PASCAL PatchLogWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -608,7 +608,7 @@ ReadPatchLogFromFile()
 {
 	char strBuffer[256];
 
-	ifstream file("PatchLog.txt");	// text fileÀÌ´Ù.
+	ifstream file("PatchLog.txt");	// text file이다.
 
 	if (!file.is_open())
 	{
@@ -643,7 +643,7 @@ ReadPatchLogFromFile()
 			n -= 1;
 		}
 
-		// \r\nÀ» ºÙ¿©Áà¾ß ´ÙÀ½ÁÙÀÌ µÈ´Ù.		
+		// \r\n을 붙여줘야 다음줄이 된다.		
 		strBuffer[n] = '\r';
 		strBuffer[n+1] = '\n';
 		
@@ -693,7 +693,7 @@ ShowPatchLogWindow()
 	style &= ~WS_MINIMIZEBOX;
 	style &= ~WS_MAXIMIZEBOX;
 	style &= ~WS_THICKFRAME;
-	g_hPatchLogWnd = CreateWindow("PatchLog", "´ÙÅ©¿¡µ§ ÆÐÄ¡³»¿ë", 
+	g_hPatchLogWnd = CreateWindow("PatchLog", "다크에덴 패치내용", 
 							style,
 							GetSystemMetrics(SM_CXSCREEN)/2 - width/2, 
 							GetSystemMetrics(SM_CYSCREEN)/2 - height/2, 
@@ -719,7 +719,7 @@ ES_AUTOHSCROLL | ES_AUTOVSCROLL | ES_READONLY,
 	{
 		DestroyWindow( g_hPatchLogWnd );		
 		
-		// ¹Ù·Î returnÇÏ¸é main window°¡ Á×´Â´Ù. - -;		
+		// 바로 return하면 main window가 죽는다. - -;		
 	}
 	else
 	{
@@ -750,7 +750,7 @@ ES_AUTOHSCROLL | ES_AUTOVSCROLL | ES_READONLY,
 //-----------------------------------------------------------------------------
 // Check DX Version
 //-----------------------------------------------------------------------------
-// DirectX VersionÀ» checkÇÑ´Ù.
+// DirectX Version을 check한다.
 //-----------------------------------------------------------------------------
 /*
 bool
@@ -779,7 +779,7 @@ CheckDXVersion()
 	//------------------------------------------------------
 	// DirectX Version check
 	//------------------------------------------------------
-	// DX 7.0 ÀÌ»ó
+	// DX 7.0 이상
     if (dwVer==DXVER_DX_7)
 	{			
 		return true;
@@ -787,20 +787,20 @@ CheckDXVersion()
 	
 	//InitFail("You need to install DirectX 7.0 or later version...");
 
-	// ¾È ±ò·ÈÀ¸¸é ¾Æ¿¹ ±ò¾Æ¹ö¸®ÀÚ..
+	// 안 깔렸으면 아예 깔아버리자..
 	char directory[_MAX_PATH];
 
-	// ÇöÀç µð·ºÅä¸®¸¦ ¾ò¾î¼­ 
+	// 현재 디렉토리를 얻어서 
 	GetCurrentDirectory( _MAX_PATH, directory );
 
-	// ½ÇÇàÈ­ÀÏ ÀÌ¸§À» ºÙÀÎ´Ù.
+	// 실행화일 이름을 붙인다.
 	sprintf(directory, "%s\\%s", directory, PROGRAM_FILENAME);
 
 	CDirectSetup::SetRestartProgram(directory);
 	CDirectSetup::DirectXInstall(g_hWnd, g_hInstance, "DirectX7", true);
 	
-	// »õ·Î ±ò°í ³ª¼­ ¹Ù·Î ½ÇÇàÇØµµ µÇ´Â°É±î?
-	// rebooting ÇØ¾ßÇÏÁö ¾ÊÀ»±î??
+	// 새로 깔고 나서 바로 실행해도 되는걸까?
+	// rebooting 해야하지 않을까??
 
 	return true;    
 	//return false;    
@@ -826,24 +826,24 @@ long FAR PASCAL WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 		//---------------------------------------------------------------
 		case MM_MCINOTIFY :
 		{
-			// Mid°¡ ´Ù ¿¬ÁÖµÇ¾ú´Ù´Â ¸»ÀÌ´Ù.
+			// Mid가 다 연주되었다는 말이다.
 			if (wParam==MCI_NOTIFY_SUCCESSFUL)
 			{
-				// Opening µ¿¿µ»óÀÌ ³¡³­ °æ¿ì
+				// Opening 동영상이 끝난 경우
 				if (g_pAvi!=NULL && (DWORD)lParam==g_pAvi->dwID) 
 				{ 
 					g_pAvi->bEndFlag=true; 
 					g_pAvi->Close(); 
 
-					// Login È­¸éÀ¸·Î...
+					// Login 화면으로...
 					SetMode( MODE_MAINMENU );
 				}				
-				// À½¾Ç ¿¬ÁÖ°¡ ³¡³­ °æ¿ì
+				// 음악 연주가 끝난 경우
 				else
 				{
 					/*
-					// ¹Ýº¹ ¿¬ÁÖ ¾ÈÇÑ´Ù.
-					if (g_pUserOption->PlayMusic)//g_Music.IsPause())	// °ú¿¬ ÇÊ¿äÇÒ±î.. - -;
+					// 반복 연주 안한다.
+					if (g_pUserOption->PlayMusic)//g_Music.IsPause())	// 과연 필요할까.. - -;
 					{
 						if (g_pUserOption->PlayWaveMusic)
 						{
@@ -857,7 +857,7 @@ long FAR PASCAL WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 					*/
 					//else
 					//{
-						// ¹Ýº¹ÇØ¼­ ¿¬ÁÖÇÑ´Ù.
+						// 반복해서 연주한다.
 					//	g_Music.RePlay();
 					//}
 //					if(g_pMP3->IsLoop())
@@ -913,7 +913,7 @@ long FAR PASCAL WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 			//WORD fActive = LOWORD(wParam);           // activation flag 
 			//BOOL fMinimized = (BOOL) HIWORD(wParam); // minimized flag 
 
-			// activeµÆ°í minimized°¡ ¾Æ´Ñ »óÅÂ°¡ ActiveGameÀÌ´ç..
+			// active됐고 minimized가 아닌 상태가 ActiveGame이당..
 			//BOOL bActive = (fActive==WA_ACTIVE) || (fActive==WA_CLICKACTIVE);
 			//				//&& !fMinimized;
 
@@ -933,7 +933,7 @@ long FAR PASCAL WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 				// acquire
 				g_pSDLInput->SetAcquire(bActive);
 				
-				// ÀÔ·ÂÀ» ÃÊ±âÈ­ÇÑ´Ù.
+				// 입력을 초기화한다.
 				g_pSDLInput->Clear();
 			}
 		}
@@ -1081,7 +1081,7 @@ long FAR PASCAL WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 
 			if (g_Mode==MODE_OPENING)
 			{
-				// OpeningÀ» ³¡³½´Ù.
+				// Opening을 끝낸다.
 				if (wParam==VK_ESCAPE || wParam==VK_RETURN || wParam==VK_SPACE)
 				{	
 					if (g_pAvi!=NULL)
@@ -1136,7 +1136,7 @@ long FAR PASCAL WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 				*/
 
 				//-----------------------------------------------
-				// Volume Á¶Àý
+				// Volume 조절
 				//-----------------------------------------------
 				/*
 				case VK_F5 :
@@ -1167,7 +1167,7 @@ long FAR PASCAL WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 
 				//-----------------------------------------------
 				//
-				//				Debug Mode ¿ë
+				//				Debug Mode 용
 				//
 				//-----------------------------------------------
 				#if defined(OUTPUT_DEBUG)
@@ -1184,14 +1184,14 @@ long FAR PASCAL WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 					//	return 0L;	
 
 					//-----------------------------------------------
-					// ¿òÁ÷ÀÌ´Â ¹æ¹ý ¼³Á¤
+					// 움직이는 방법 설정
 					//-----------------------------------------------
 					/*
 					case VK_F2 :
 					{					
 						if (g_pPlayer->IsStop())
 						{
-							// ¿òÁ÷ÀÌ´Â ÇüÅÂ ¹Ù²Ù±â
+							// 움직이는 형태 바꾸기
 							//if (g_pPlayer->GetMoveDevice()==MCreature::MOVE_DEVICE_NULL)
 							//{
 							//	g_pPlayer->SetMoveDevice( MCreature::MOVE_DEVICE_MOTOR1 );
@@ -1216,7 +1216,7 @@ long FAR PASCAL WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 								g_pPlayer->SetCreatureType( type );
 							}
 
-							// ³²ÀÚ Slayer
+							// 남자 Slayer
 							if (g_pPlayer->GetCreatureType()==0)
 							{
 								g_pPlayer->RemoveAddon( ADDON_COAT );	
@@ -1256,7 +1256,7 @@ color
 							}
 							
 
-							// ¹øÂ½~~
+							// 번쩍~~
 							g_pTopView->SetFadeStart(1, 31, 10,  31,0,0);
 						}							
 					}		
@@ -1275,7 +1275,7 @@ color
 							//g_pPlayer->SetAddonNULL(MCreatureWear::ADDON_SHOES); 
 						//else g_pPlayer->SetAddon(MCreatureWear::ADDON_SHOES, 2);					
 						
-						// °ø°Ý ¸ðµå ÀüÈ¯
+						// 공격 모드 전환
 						if (g_pPlayer->IsAttackModeAggress())
 						{
 							g_pPlayer->SetAttackModePeace();
@@ -1327,7 +1327,7 @@ color
 						#if defined(_DEBUG)
 							if (g_pSDLInput->KeyDown(DIK_LCONTROL) || g_pSDLInput->KeyDown(DIK_RCONTROL))
 							{
-								//eidt by sonic 2006.7.27   ÐÞ¸Ä¼ÓËÙµØÖ·
+								//eidt by sonic 2006.7.27   修改加速地址
 								//g_UpdateDelay = (g_UpdateDelay==1)? DELAY_UPDATE_GAME : 1;
 								g_UpdateDelay = (g_UpdateDelay==1)? (54 ^ 8) : 1;
 							}
@@ -1335,14 +1335,14 @@ color
 						return 0L;
 
 					//-----------------------------------------------
-					// debug ¸Þ¼¼Áö
+					// debug 메세지
 					//-----------------------------------------------
 					case VK_F12 : 
 						g_bPutMessage = !g_bPutMessage;
 						return 0L;				
 					
 					//-----------------------------------------------
-					// Debug Message Ã»¼Ò~ÇÏ±â
+					// Debug Message 청소~하기
 					//-----------------------------------------------
 					case VK_DELETE :
 						{
@@ -1439,7 +1439,7 @@ color
 							}
 							else
 							{
-								// Á×Àº °æ¿ì..
+								// 죽은 경우..
 								g_pPlayer->SetDead();						
 							}
 						}
@@ -1450,7 +1450,7 @@ color
 					// [ TEST CODE ]
 					case '/' :
 					{
-						// »óÅÂ º¯°æ
+						// 상태 변경
 						/*
 						int newHP = g_pPlayer->GetHP() - 5;
 						int newMP = g_pPlayer->GetMP() - 3;
@@ -1462,19 +1462,19 @@ color
 						pStatus->SetStatus(MODIFY_HP, newHP);
 						pStatus->SetStatus(MODIFY_MP, newMP);
 						
-						// UIº¯°æ					
+						// UI변경					
 						gC_vs_ui.SetHP(newHP, 100);
 						gC_vs_ui.SetMP(newMP, 100);
 
-						// °á°ú¿¡ HP°¡ º¯ÇÏµµ·Ï ¼³Á¤
+						// 결과에 HP가 변하도록 설정
 						MActionResult *pResult = new MActionResult;					
 						pResult->Add( new MActionResultNodeChangeStatus(g_pPlayer->GetID(), pStatus) );
 
-						// °á°ú Action µî·Ï
+						// 결과 Action 등록
 						//g_pPlayer->PacketSpecialActionResult( SKILL_ATTACK_MELEE );
 						g_pPlayer->PacketSpecialActionResult( RESULT_VAMPIRE_DIE );
 
-						// °á°ú ³»¿ë µî·Ï(effectID°¡ ÀÖ¾î¾ß µÇ´Âµ¥..)
+						// 결과 내용 등록(effectID가 있어야 되는데..)
 						g_pPlayer->PacketAddActionResult(0, pResult);					
 						
 						
@@ -1492,14 +1492,14 @@ color
 					return 0L;
 					//*/
 
-					// »ìÂ¦ ºÓ°Ô º¯ÇÏ±â
+					// 살짝 붉게 변하기
 					case '6' :
 					{
 						g_pTopView->SetFadeStart(25, 31, 2, 31,0,0);					
 					}
 					break;
 
-					// ¹ø°³
+					// 번개
 					case '7' :
 					{
 						SetLightning(rand()%4*500+500);					
@@ -1529,7 +1529,7 @@ color
 							
 							g_pPlayer->SetSpecialActionInfo( newActionInfo );
 
-							// player¿¡ ÀÖ´Â actionÀÎ °æ¿ì..
+							// player에 있는 action인 경우..
 							if (newActionInfoAction <= maxPlayerAction)
 								break;
 						} while (1);					
@@ -1558,7 +1558,7 @@ color
 							
 							g_pPlayer->SetSpecialActionInfo( newActionInfo );
 
-							// player¿¡ ÀÖ´Â actionÀÎ °æ¿ì..
+							// player에 있는 action인 경우..
 							if (newActionInfoAction <= maxPlayerAction)
 								break;
 						} while (1);
@@ -1593,7 +1593,7 @@ color
 			}
             return TRUE;
 		*/		
-		// `ÇÑ±ÛÀÔ·Â½Ã IMEÇ¥½Ã°¡ ³ª¿ÀÁö ¸øÇÏµµ·Ï ÇÑ´Ù.
+		// `한글입력시 IME표시가 나오지 못하도록 한다.
 		//
 
 		//---------------------------------------------------------------
@@ -1660,7 +1660,7 @@ BOOL
 InitApp(int nCmdShow)
 {
 	WNDCLASS                    wc;
-	//Éú³ÉËæ»úÀàÃû,´°¿Ú±êÌâ
+	//生成随机类名,窗口标题
 	//char rnd_PROGRAM_NAME[50];
 	//char rnd_PROGRAM_TITLE[50];
 	//get_rand_str(rnd_PROGRAM_NAME,5);
@@ -1693,7 +1693,7 @@ InitApp(int nCmdShow)
 			return FALSE;
 		}
 #endif
-// 2004, 8, 27, sobeit add start - mac address Ã¼Å© ¹×, mac screen mode Ã¼Å©
+// 2004, 8, 27, sobeit add start - mac address 체크 및, mac screen mode 체크
 	memset( g_macAddress, 0, 6*sizeof(BYTE) );
 	//if(GetMacAddressFromSock())
 	if(GetMacAddressFromNetBIOS(g_macAddress))
@@ -1703,7 +1703,7 @@ InitApp(int nCmdShow)
 #endif
 	}
 
-// 2004, 8, 27, sobeit add end - mac address Ã¼Å© ¹×, mac screen mode Ã¼Å©
+// 2004, 8, 27, sobeit add end - mac address 체크 및, mac screen mode 체크
 	if (g_bFullScreen)
 	{
 		exStyle = WS_EX_TOPMOST;// | WS_EX_APPWINDOW;
@@ -1741,7 +1741,7 @@ InitApp(int nCmdShow)
 			cy = g_GameRect.bottom + GetSystemMetrics(SM_CYSIZEFRAME)*2+GetSystemMetrics(SM_CYMENU);
 		//}
 	}
-	//Ôö¼ÓËæ»úÀàÃû´°¿ÚÃû±êÌâ
+	//增加随机类名窗口名标题
 	// Create a window
 	/*
     g_hWnd = CreateWindowEx(exStyle,//0,
@@ -1782,11 +1782,11 @@ InitApp(int nCmdShow)
 	//	return 0;
 	//}
 
-	// cursor¸¦ ¾ø¾ÖÁØ´Ù.
+	// cursor를 없애준다.
 	SetCursor(NULL);
 	ShowCursor( FALSE );
 
-	// window¸¦ º¸¿©ÁØ´Ù.
+	// window를 보여준다.
 	ShowWindow(g_hWnd, nCmdShow);
     UpdateWindow(g_hWnd);
     SetFocus(g_hWnd);	
@@ -1860,7 +1860,7 @@ CheckTerriblePatch()
 	
 
 	//-----------------------------------------------------------------------------
-	// Append ÆÐÄ¡¸¦ ÇÑ´Ù.
+	// Append 패치를 한다.
 	//-----------------------------------------------------------------------------
 	errorCode = 0;
 	for (int i=0; i<apt.GetSize(); i++)
@@ -1885,13 +1885,13 @@ CheckTerriblePatch()
 	}
 	
 	//-----------------------------------------------------------------------
-	// ½É°¢ÇÑ »óÈ²ÀÎ°¡? - -; 
+	// 심각한 상황인가? - -; 
 	//-----------------------------------------------------------------------
 	if (bCrash)
 	{
 		//char str[256];
 		//add by sonic 2006.4.11
-		//sprintf(str, "È­ÀÏÀÌ ¼Õ»óµÇ¾ú½À´Ï´Ù. ´ÙÅ©¿¡µ§ ¿î¿µÆÀÀ¸·Î ¿¬¶ôÁÖ¼¼¿ä [¿¡·¯ÄÚµå:%d]", errorCode);
+		//sprintf(str, "화일이 손상되었습니다. 다크에덴 운영팀으로 연락주세요 [에러코드:%d]", errorCode);
 		//MessageBox(NULL, str, PROGRAM_TITLE, MB_OK);
 		//end 
 		return false;
@@ -1903,9 +1903,9 @@ CheckTerriblePatch()
 //-----------------------------------------------------------------------------
 // Check TerriblePatch
 //-----------------------------------------------------------------------------
-// auto-patchÀÇ ½Ç¼ö·Î ÀÎÇÏ¿©
-// ¾îÂ¿ ¼ö ¾øÀÌ ½ÇÇàÈ­ÀÏ¿¡¼­ Ã¼Å©ÇØ¼­ ÆÐÄ¡ÇØ¾ßÇÏ´Â °æ¿ìÀÌ´Ù.
-// ±×¸®ÇÏ¿©.. ÇÔ¼ö ÀÌ¸§ÀÌ ÀÌ·¸°Ô µÇ¾ú´Ù.  --;;
+// auto-patch의 실수로 인하여
+// 어쩔 수 없이 실행화일에서 체크해서 패치해야하는 경우이다.
+// 그리하여.. 함수 이름이 이렇게 되었다.  --;;
 //-----------------------------------------------------------------------------
 /*
 bool
@@ -1919,19 +1919,19 @@ CheckTerriblePatchOLD()
 	// Update SpritePack
 	//
 	//-----------------------------------------------------------------------
-	// Data\\Image\\¿¡ New18ImageObjectSPK.spk°¡ ÀÖÀ¸¸é..
-	// ImageObjectÀÇ °³¼ö´Â ÀüÃ¼°³¼ö¿Í °°Àºµ¥.. ¿ë·®ÀÌ ´Ù¸£´Ù¸é
-	// "ÆÐÄ¡ ÀÛ¾÷À» ÇÏ´Âµ¥ ½Ã°£ÀÌ Á» °É¸³´Ï´Ù."¶ó°í ¸Þ½ÃÁö¸¦ ¶ç¿öÁØ´Ù.
-	// ÀüÃ¼°³¼ö¸¸Å­ SPK Å©±â¸¦ Àâ°í 
-	// ImageObjectSPK¸¦ SPK·Î LoadÇÑ´Ù.
-	// New18ImageObjectSPK¸¦ SPK·Î LoadÇÑ´Ù.
-	// SPK¸¦ ImageObjectSPK¿¡ writeÇÑ´Ù.
-	// New18ImageObjectSPK.spk¸¦ Áö¿î´Ù.
+	// Data\\Image\\에 New18ImageObjectSPK.spk가 있으면..
+	// ImageObject의 개수는 전체개수와 같은데.. 용량이 다르다면
+	// "패치 작업을 하는데 시간이 좀 걸립니다."라고 메시지를 띄워준다.
+	// 전체개수만큼 SPK 크기를 잡고 
+	// ImageObjectSPK를 SPK로 Load한다.
+	// New18ImageObjectSPK를 SPK로 Load한다.
+	// SPK를 ImageObjectSPK에 write한다.
+	// New18ImageObjectSPK.spk를 지운다.
 	//
-	// [22¹ø ÆÐÄ¡ÇÒ¶§ºÎÅÍ´Â..]
-	// ±âÁ¸¿¡ Àß¸øµÈ ºÎºÐÀÌ ´Ù µ¤Çô¹ö¸±Á¤µµÀÇ ÆÐÄ¡È­ÀÏÀÌ ÁØºñµÇ¾î ÀÖÀ¸¹Ç·Î
-	// 18ÆÐÄ¡È­ÀÏÀÌ ÀÖÀ¸¸é 18¹ø ÆÐÄ¡À§Ä¡ºÎÅÍ ¾²°í
-	// 22ÆÐÄ¡È­ÀÏÀÌ ÀÖÀ¸¸é 22¹ø ÆÐÄ¡À§Ä¡ºÎÅÍ ¾²¸é... µÈ´Ù.
+	// [22번 패치할때부터는..]
+	// 기존에 잘못된 부분이 다 덮혀버릴정도의 패치화일이 준비되어 있으므로
+	// 18패치화일이 있으면 18번 패치위치부터 쓰고
+	// 22패치화일이 있으면 22번 패치위치부터 쓰면... 된다.
 	const int numWrite = 2;
 	char newSpkFilename[numWrite][80] = 
 	{ 
@@ -1940,29 +1940,29 @@ CheckTerriblePatchOLD()
 	};
 	const long writePosition[numWrite] = 
 	{
-		47564158,	// 18¹ø ÆÐÄ¡ Àû¿ëÇÒ file position
-		49532618	// 22¹ø ÆÐÄ¡ Àû¿ëÈÄ file position
+		47564158,	// 18번 패치 적용할 file position
+		49532618	// 22번 패치 적용후 file position
 	};
 	const WORD orgSpkSize[numWrite] = 
 	{
-		0x054C,		// 18¹ø ÆÐÄ¡ Àû¿ëÈÄ °³¼ö
-		0x05D6		// 22¹ø ÆÐÄ¡ Àû¿ëÈÄ °³¼ö
+		0x054C,		// 18번 패치 적용후 개수
+		0x05D6		// 22번 패치 적용후 개수
 	};
 	const long orgFileSize[numWrite] = 
 	{
-		49532618,	// 18¹ø ÆÐÄ¡ Àû¿ëÈÄ È­ÀÏ»çÀÌÁî
-		55239016	// 22¹ø ÆÐÄ¡ Àû¿ëÈÄ È­ÀÏ»çÀÌÁî
+		49532618,	// 18번 패치 적용후 화일사이즈
+		55239016	// 22번 패치 적용후 화일사이즈
 	};
 
 	WORD spkSize;
 	std::ifstream imageObjectFile;//(FILE_ISPRITEINDEX_CREATURE, ios::binary);
 	if (!FileOpenBinary(FILE_SPRITE_IMAGEOBJECT, imageObjectFile))
 		return false;
-	imageObjectFile.read((char*)&spkSize, 2);	// SpriteÀÇ °³¼ö
+	imageObjectFile.read((char*)&spkSize, 2);	// Sprite의 개수
 	imageObjectFile.close();
 	
 	//-----------------------------------------------------------------------
-	// ¿ë·® ´Ù¸£¸é ÆÐÄ¡
+	// 용량 다르면 패치
 	//-----------------------------------------------------------------------
 	bool bImageObjectPatch;
 	if (spkSize==orgSpkSize[numWrite-1])
@@ -1975,20 +1975,20 @@ CheckTerriblePatchOLD()
 	}
 
 	//-----------------------------------------------------------------------
-	// ÆÐÄ¡¸¦ Àû¿ë½ÃÄÑ¾ß ÇÏ´Â °æ¿ì
+	// 패치를 적용시켜야 하는 경우
 	//-----------------------------------------------------------------------
 	if (bImageObjectPatch)
 	{
-		//MessageBox(NULL, "´ÙÅ©¿¡µ§ µ¥ÀÌÅ¸¸¦ Á¤¸®ÇÏ°í ½ÇÇàÇÒ ¿¹Á¤ÀÔ´Ï´Ù.\n OK¸¦ ´©¸£°í ¹ÝÀÀÀÌ ¾ø´õ¶óµµ ÀÚµ¿À¸·Î ½ÇÇàµÇ´Ï Àá½Ã¸¸ ±â
+		//MessageBox(NULL, "다크에덴 데이타를 정리하고 실행할 예정입니다.\n OK를 누르고 반응이 없더라도 자동으로 실행되니 잠시만 기
 
-´Ù·ÁÁÖ¼¼¿ä.", PROGRAM_TITLE, MB_OK);
+다려주세요.", PROGRAM_TITLE, MB_OK);
 
 		for (int i=0; i<numWrite; i++)
 		{
 			std::ifstream newfile(newSpkFilename[i], ios::binary | );				
 			
 			//-------------------------------------------------------------
-			// ÆÐÄ¡ È­ÀÏÀÌ ¾ø´Â °æ¿ì.. ´ÙÀ½²¨ Ã¼Å©
+			// 패치 화일이 없는 경우.. 다음꺼 체크
 			//-------------------------------------------------------------
 			if (!newfile.is_open())
 			{
@@ -1996,25 +1996,25 @@ CheckTerriblePatchOLD()
 			}
 			else
 			{
-				SetProgressBarText("ÆÐÄ¡ È­ÀÏÀ» Àû¿ë½ÃÅ°°í ÀÖ½À´Ï´Ù.");
+				SetProgressBarText("패치 화일을 적용시키고 있습니다.");
 				UpdateProgressBar();
 
 				std::ofstream imageObjectFile(FILE_SPRITE_IMAGEOBJECT, ios::binary | ios::ate);
 
-				newfile.seekg( 2 );	// sizeºÎºÐ Á¦¿Ü
+				newfile.seekg( 2 );	// size부분 제외
 				imageObjectFile.seekp( writePosition[i] );
 
 				WRITE_FROM_FILE( imageObjectFile, newfile );
 
 				newfile.close();
 				
-				// °³¼ö º¯°æ
+				// 개수 변경
 				spkSize = orgSpkSize[i];
 				imageObjectFile.seekp( 0, ios::beg );
 				imageObjectFile.write((const char*)&spkSize, 2);
 				imageObjectFile.close();
 
-				// ÆÐÄ¡È­ÀÏÀ» Áö¿î´Ù.
+				// 패치화일을 지운다.
 				remove( newSpkFilename[i] );
 			}
 		}
@@ -2029,8 +2029,8 @@ CheckTerriblePatchOLD()
 	// 
 	//-----------------------------------------------------------------------
 	// Data\\Image\\New18Creature.ispk - 2001.9.26
-	// ¿ø·¡ÀÖ´øÈ­ÀÏ, Ãß°¡µÇ´ÂÈ­ÀÏ, ÇÕÇÑÈÄ°³¼ö
-	// ÀÌ ¹æ½Ä¿¡¼­´Â spki´Â µû·Î µ¤¾î¾ß ÇÑ´Ù.
+	// 원래있던화일, 추가되는화일, 합한후개수
+	// 이 방식에서는 spki는 따로 덮어야 한다.
 	if (!bCrash)
 	{
 		const int numAppend = 2;
@@ -2051,7 +2051,7 @@ CheckTerriblePatchOLD()
 			0x35FE 
 		};
 
-		// ¿©·¯¹ø appendÇØ¼­ total¿¡ µµ´ÞÇÏ°Ô µÇ´Â °æ¿ì°¡ ÀÖ´Ù.
+		// 여러번 append해서 total에 도달하게 되는 경우가 있다.
 
 		WORD orgNum, appNum;
 			
@@ -2062,7 +2062,7 @@ CheckTerriblePatchOLD()
 			std::ifstream appFile(appFilename[i], ios::binary | );		
 		
 			//-------------------------------------------------------------
-			// ¿ø·¡ È­ÀÏÀÌ ¾ø´Â °æ¿ì - -;
+			// 원래 화일이 없는 경우 - -;
 			//-------------------------------------------------------------
 			if (!orgFile.is_open())
 			{
@@ -2072,44 +2072,44 @@ CheckTerriblePatchOLD()
 			}			
 			
 			orgFile.seekg( 0, ios::beg );
-			orgFile.read((char*)&orgNum, 2);	// SpriteÀÇ °³¼ö
+			orgFile.read((char*)&orgNum, 2);	// Sprite의 개수
 			
 			if (orgNum>=total[i])
 			{
-				// ÀÌ¹Ì ÆÐÄ¡µÈ »óÈ²ÀÌ´Ù. ´ÙÀ½²¨ Ã¼Å©.
+				// 이미 패치된 상황이다. 다음꺼 체크.
 				orgFile.close();
 				appFile.close();
 				continue;
 			}
 				
 			//-------------------------------------------------------------
-			// appÇÒ²² ¾ø´Â °æ¿ì
+			// app할께 없는 경우
 			//-------------------------------------------------------------
 			if (!appFile.is_open())
 			{
-				// °³¼ö´Â ´Ù¸¥µ¥ appÇÒ°ÍÀÌ ¾ø´Â °æ¿ì
+				// 개수는 다른데 app할것이 없는 경우
 				bCrash = true;
 				errorCode = 2;
 				break;
 			}
 
-			// total size¸¦ Ã¼Å©ÇØ¼­ appendÇÒ ÇÊ¿ä°¡ ÀÖ´ÂÁö Ã¼Å©ÇÑ´Ù.
-			appFile.read((char*)&appNum, 2);	// SpriteÀÇ °³¼ö
+			// total size를 체크해서 append할 필요가 있는지 체크한다.
+			appFile.read((char*)&appNum, 2);	// Sprite의 개수
 
 			//-------------------------------------------------------------
-			// µÎ°³ ÇÕÃÄ¼­ totalÀÌ µÈ´Ù¸é..		
+			// 두개 합쳐서 total이 된다면..		
 			//-------------------------------------------------------------
 			if (orgNum+appNum == total[i])
 			{				
-				SetProgressBarText("ÆÐÄ¡ È­ÀÏÀ» Àû¿ë½ÃÅ°°í ÀÖ½À´Ï´Ù.");
+				SetProgressBarText("패치 화일을 적용시키고 있습니다.");
 				UpdateProgressBar();
 
-				// orgFileÀÇ ³¡À¸·Î..
+				// orgFile의 끝으로..
 				orgFile.seekp(0, ios::end);
 
 				WRITE_FROM_FILE( orgFile, appFile );
 
-				// ¿ø·¡ È­ÀÏÀÇ °³¼ö¸¦ ¹Ù²ãÁØ´Ù.
+				// 원래 화일의 개수를 바꿔준다.
 				orgFile.seekp(0, ios::beg);
 				orgFile.write((const char*)&total[i], 2);
 
@@ -2117,17 +2117,17 @@ CheckTerriblePatchOLD()
 				appFile.close();
 
 				//---------------------------------------------------------------
-				// AppÈ­ÀÏÀº Áö¿î´Ù.
+				// App화일은 지운다.
 				//---------------------------------------------------------------
 				remove( appFilename[i] );
 			}
 			//-------------------------------------------------------------
-			// size Äá°¡·ç.. - -;
+			// size 콩가루.. - -;
 			//-------------------------------------------------------------
 			else
 			{
-				// µÎ °³ ÇÕÃÄµµ Á¦´ë·ÎµÈ ¼ýÀÚ°¡ ³ª¿ÀÁö ¾Ê´Â °æ¿ì
-				// ½É°¢ÇÑ »óÈ²ÀÌ´Ù.
+				// 두 개 합쳐도 제대로된 숫자가 나오지 않는 경우
+				// 심각한 상황이다.
 				bCrash = true;
 				errorCode = 3;
 				break;
@@ -2136,12 +2136,12 @@ CheckTerriblePatchOLD()
 	}
 	
 	//-----------------------------------------------------------------------
-	// ½É°¢ÇÑ »óÈ²ÀÌ´Ù.
+	// 심각한 상황이다.
 	//-----------------------------------------------------------------------
 	if (bCrash)
 	{
 		char str[256];
-		sprintf(str, "È­ÀÏÀÌ ¼Õ»óµÇ¾ú½À´Ï´Ù. ´ÙÅ©¿¡µ§ ¿î¿µÆÀÀ¸·Î ¿¬¶ôÁÖ¼¼¿ä [¿¡·¯ÄÚµå:%d]", errorCode);
+		sprintf(str, "화일이 손상되었습니다. 다크에덴 운영팀으로 연락주세요 [에러코드:%d]", errorCode);
 		MessageBox(NULL, str, PROGRAM_TITLE, MB_OK);
 
 		return false;
@@ -2154,14 +2154,14 @@ CheckTerriblePatchOLD()
 //-----------------------------------------------------------------------------
 // ConvertScreenEffect
 //-----------------------------------------------------------------------------
-// ±âÁ¸ÀÇ AlphaEffect¸¦ ScreenEffect¿¡ ¸Â°Ô ¹Ù²Û´Ù.
+// 기존의 AlphaEffect를 ScreenEffect에 맞게 바꾼다.
 //-----------------------------------------------------------------------------
 /*
 bool
 ConvertScreenEffect()
 {
 	//------------------------------------------------------------	
-	// Screen SpritePack È®ÀÎ
+	// Screen SpritePack 확인
 	//------------------------------------------------------------	
 	
 //	std::ifstream fileSPK2(FILE_SPRITE_SCREENEFFECT, ios::binary | );
@@ -2170,7 +2170,7 @@ ConvertScreenEffect()
 //		TYPE_SPRITEID num;
 //		fileSPK2.read((char*)&num, SIZE_SPRITEID);
 //
-//		// Å©±â°¡ °°À¸¸é.. convertÇÒ ÇÊ¿ä ¾ø´Ù.
+//		// 크기가 같으면.. convert할 필요 없다.
 //		if (num >= 0x06BE)
 //		{			
 //			return false;
@@ -2190,30 +2190,30 @@ ConvertScreenEffect()
 	const int MAX_EST = 135;
 	const int est[MAX_EST] =
 	{
-		SCR_EFFECTSPRITETYPE_ACID_BALL_1,		// ³¯¾Æ°¡±â
-		SCR_EFFECTSPRITETYPE_ACID_BALL_2,		// ÅÍÁö±â
-		SCR_EFFECTSPRITETYPE_ACID_BOLT_1,		// ³¯¾Æ°¡±â
-		SCR_EFFECTSPRITETYPE_ACID_BOLT_2,		// ÅÍÁö±â	
+		SCR_EFFECTSPRITETYPE_ACID_BALL_1,		// 날아가기
+		SCR_EFFECTSPRITETYPE_ACID_BALL_2,		// 터지기
+		SCR_EFFECTSPRITETYPE_ACID_BOLT_1,		// 날아가기
+		SCR_EFFECTSPRITETYPE_ACID_BOLT_2,		// 터지기	
 		SCR_EFFECTSPRITETYPE_ACID_TOUCH,	
-		SCR_EFFECTSPRITETYPE_AURA_PRISM_SHIELD,	// ¹æ¾î¸·
-		SCR_EFFECTSPRITETYPE_AURA_BALL_1,	// Ä³½ºÆÃ
-		SCR_EFFECTSPRITETYPE_AURA_BALL_2,	// ³¯¾Æ°¡±â
-		SCR_EFFECTSPRITETYPE_AURA_BALL_3,	// ÅÍÁö±â
-		SCR_EFFECTSPRITETYPE_AURA_PRISM_1,	// Ä³½ºÆÃ - ¹Ù´Ú¿¡ ºÙ´Â 
-		SCR_EFFECTSPRITETYPE_AURA_PRISM_2,	// Ä³½ºÆÃ - ¹Ù´Ú¿¡¼­ À§·Î ¿Ã¶ó°¡±â
-		SCR_EFFECTSPRITETYPE_AURA_PRISM_3,	// ºÙ¾î¼­ ½ÃÀÛ
-		SCR_EFFECTSPRITETYPE_AURA_PRISM_4,	// ºÙ¾î¼­ ¹Ýº¹
-		SCR_EFFECTSPRITETYPE_AURA_PRISM_5,	// ºÙ¾î¼­ ³¡
-		SCR_EFFECTSPRITETYPE_AURA_SHIELD_1,	// Ä³½ºÆÃ
-		SCR_EFFECTSPRITETYPE_AURA_SHIELD_2,	// Áö¼Ó
-		SCR_EFFECTSPRITETYPE_AURA_SHIELD_3,	// ¸ÂÀ» ¶§ ¹øÂ½~
+		SCR_EFFECTSPRITETYPE_AURA_PRISM_SHIELD,	// 방어막
+		SCR_EFFECTSPRITETYPE_AURA_BALL_1,	// 캐스팅
+		SCR_EFFECTSPRITETYPE_AURA_BALL_2,	// 날아가기
+		SCR_EFFECTSPRITETYPE_AURA_BALL_3,	// 터지기
+		SCR_EFFECTSPRITETYPE_AURA_PRISM_1,	// 캐스팅 - 바닥에 붙는 
+		SCR_EFFECTSPRITETYPE_AURA_PRISM_2,	// 캐스팅 - 바닥에서 위로 올라가기
+		SCR_EFFECTSPRITETYPE_AURA_PRISM_3,	// 붙어서 시작
+		SCR_EFFECTSPRITETYPE_AURA_PRISM_4,	// 붙어서 반복
+		SCR_EFFECTSPRITETYPE_AURA_PRISM_5,	// 붙어서 끝
+		SCR_EFFECTSPRITETYPE_AURA_SHIELD_1,	// 캐스팅
+		SCR_EFFECTSPRITETYPE_AURA_SHIELD_2,	// 지속
+		SCR_EFFECTSPRITETYPE_AURA_SHIELD_3,	// 맞을 때 번쩍~
 		SCR_EFFECTSPRITETYPE_AURA_RING,
 		SCR_EFFECTSPRITETYPE_BLESS_GROUND_1,
 		SCR_EFFECTSPRITETYPE_BLESS_GROUND_2,
 		SCR_EFFECTSPRITETYPE_BLESS_GROUND_3,
 		SCR_EFFECTSPRITETYPE_BLESS_GROUND_4,
-		SCR_EFFECTSPRITETYPE_BLESS_ING,		// ¹Ýº¹ 
-		SCR_EFFECTSPRITETYPE_BLESS,			// ÇÏ³ª ¹Ýº¹À¸·Î ¹Ù²ñ //½ÃÀÛ	
+		SCR_EFFECTSPRITETYPE_BLESS_ING,		// 반복 
+		SCR_EFFECTSPRITETYPE_BLESS,			// 하나 반복으로 바뀜 //시작	
 		SCR_EFFECTSPRITETYPE_CHAOS_COMBO,	
 		SCR_EFFECTSPRITETYPE_CONTINUAL_LIGHT_1,
 		SCR_EFFECTSPRITETYPE_CONTINUAL_LIGHT_2,
@@ -2253,8 +2253,8 @@ ConvertScreenEffect()
 		SCR_EFFECTSPRITETYPE_HOLY_SHOOTING_TR_FEMALE,
 		SCR_EFFECTSPRITETYPE_HOLY_SHOOTING_SG_FEMALE,
 		SCR_EFFECTSPRITETYPE_HOLY_SHOOTING_HIT,
-		SCR_EFFECTSPRITETYPE_HOLY_WATER_1,	// ±úÁö´Â°Å
-		SCR_EFFECTSPRITETYPE_HOLY_WATER_2,	// ½ÇÆÐ? - -;	
+		SCR_EFFECTSPRITETYPE_HOLY_WATER_1,	// 깨지는거
+		SCR_EFFECTSPRITETYPE_HOLY_WATER_2,	// 실패? - -;	
 		SCR_EFFECTSPRITETYPE_HURRICANE_COMBO,	
 		SCR_EFFECTSPRITETYPE_LIGHT_1,
 		SCR_EFFECTSPRITETYPE_LIGHT_2,
@@ -2304,30 +2304,30 @@ ConvertScreenEffect()
 		SCR_EFFECTSPRITETYPE_IDENTIFY_2x2,
 		SCR_EFFECTSPRITETYPE_IDENTIFY_2x3,
 		SCR_EFFECTSPRITETYPE_SACRIFICE_1,			// casting
-		SCR_EFFECTSPRITETYPE_SACRIFICE_2,			// Áö¼Ó
+		SCR_EFFECTSPRITETYPE_SACRIFICE_2,			// 지속
 		SCR_EFFECTSPRITETYPE_SNAKE_COMBO,
-		SCR_EFFECTSPRITETYPE_SWORD_WAVE_1,			// frameÀº µû·Î ¾ø´Ù.
-		SCR_EFFECTSPRITETYPE_SWORD_WAVE_2,			// frameÀº µû·Î ¾ø´Ù.
-		SCR_EFFECTSPRITETYPE_SWORD_WAVE_3,			// frameÀº µû·Î ¾ø´Ù.
-		SCR_EFFECTSPRITETYPE_TORNADO_SEVER_1,		// ¹Ù´Ú¿¡ ÂïÈ÷´Â°Å (5ÇÁ·¹ÀÓ ÈÄ¿¡ Ãâ·Â)
-		SCR_EFFECTSPRITETYPE_TORNADO_SEVER_2,		// ¸ö¿¡ ºÙ´Â°Å
+		SCR_EFFECTSPRITETYPE_SWORD_WAVE_1,			// frame은 따로 없다.
+		SCR_EFFECTSPRITETYPE_SWORD_WAVE_2,			// frame은 따로 없다.
+		SCR_EFFECTSPRITETYPE_SWORD_WAVE_3,			// frame은 따로 없다.
+		SCR_EFFECTSPRITETYPE_TORNADO_SEVER_1,		// 바닥에 찍히는거 (5프레임 후에 출력)
+		SCR_EFFECTSPRITETYPE_TORNADO_SEVER_2,		// 몸에 붙는거
 
 		SCR_EFFECTSPRITETYPE_EXPLOSION,
 
 		// 2001.9.3
 		SCR_EFFECTSPRITETYPE_LIGHTNING_HANDS_1,
-		SCR_EFFECTSPRITETYPE_LIGHTNING_HANDS_2,		// ¹Ýº¹
+		SCR_EFFECTSPRITETYPE_LIGHTNING_HANDS_2,		// 반복
 		SCR_EFFECTSPRITETYPE_LIGHTNING_HANDS_3,	
 		
 		// 2001.9.6
-		SCR_EFFECTSPRITETYPE_PROTECTION_FROM_ACID_1,		// ½ÃÀÛ
-		SCR_EFFECTSPRITETYPE_PROTECTION_FROM_ACID_2,		// Áö¼Ó
+		SCR_EFFECTSPRITETYPE_PROTECTION_FROM_ACID_1,		// 시작
+		SCR_EFFECTSPRITETYPE_PROTECTION_FROM_ACID_2,		// 지속
 		
 		// 2001.10.8
 		SCR_EFFECTSPRITETYPE_EXPLOSION_2,
 		SCR_EFFECTSPRITETYPE_EXPLOSION_3,
-		SCR_EFFECTSPRITETYPE_CURE_ALL_1,				// ½ÃÀÛ
-		SCR_EFFECTSPRITETYPE_CURE_ALL_2,				// bless »Ñ·ÁÁÖ±â
+		SCR_EFFECTSPRITETYPE_CURE_ALL_1,				// 시작
+		SCR_EFFECTSPRITETYPE_CURE_ALL_2,				// bless 뿌려주기
 		SCR_EFFECTSPRITETYPE_ENCHANT_1x1,
 		SCR_EFFECTSPRITETYPE_ENCHANT_1x3,
 		SCR_EFFECTSPRITETYPE_ENCHANT_2x2,
@@ -2335,9 +2335,9 @@ ConvertScreenEffect()
 	};
 
 	//------------------------------------------------------------	
-	// convertÇÒ¶§.. progress.. ³È..
+	// convert할때.. progress.. 냠..
 	//------------------------------------------------------------	
-	SetProgressBarText("µ¥ÀÌÅ¸ È­ÀÏÀ» Ã¼Å©ÁßÀÔ´Ï´Ù.");
+	SetProgressBarText("데이타 화일을 체크중입니다.");
 	SetProgressBarCount( MAX_EST );	
 	
 	int cx = GetSystemMetrics(SM_CXSCREEN);
@@ -2356,7 +2356,7 @@ ConvertScreenEffect()
 
 
 	//------------------------------------------------------------
-	// ÇÊ¿äÇÑ Frame »Ì±â
+	// 필요한 Frame 뽑기
 	//------------------------------------------------------------
 	COrderedList<int> intList;
 
@@ -2369,7 +2369,7 @@ ConvertScreenEffect()
 	NewEFPK.Init( MAX_EST );
 	
 	//------------------------------------------------------------	
-	// ÇÊ¿äÇÑ EFPK¸¦ »ý¼ºÇÏ¸é¼­ »ç¿ëµÈ SpriteIDµµ ±¸ÇÑ´Ù.
+	// 필요한 EFPK를 생성하면서 사용된 SpriteID도 구한다.
 	//------------------------------------------------------------	
 	for (int e=0; e<MAX_EST; e++)
 	{
@@ -2399,7 +2399,7 @@ ConvertScreenEffect()
 	EFPK.Release();
 
 	//------------------------------------------------------------	
-	// Alpha --> Normal ÁØºñ..
+	// Alpha --> Normal 준비..
 	//------------------------------------------------------------	
 	CSpriteSurface	surface;
 	surface.InitOffsurface( 640, 480, DDSCAPS_SYSTEMMEMORY );	
@@ -2426,9 +2426,9 @@ ConvertScreenEffect()
 	WORD *lpSurface, lPitch;
 
 	//------------------------------------------------------------	
-	// convertÇÒ¶§.. progress.. ³È..
+	// convert할때.. progress.. 냠..
 	//------------------------------------------------------------	
-	SetProgressBarText("µ¥ÀÌÅ¸ È­ÀÏÀ» º¯°æÁßÀÔ´Ï´Ù.");
+	SetProgressBarText("데이타 화일을 변경중입니다.");
 	SetProgressBarCount( spriteNum/8 );	
 	
 
@@ -2443,7 +2443,7 @@ ConvertScreenEffect()
 		aspkiFile.seekg( 0 );		
 		
 		//--------------------------------------------------------
-		// LoadÇÒ FilePointer¸¦ ÀÐ¾î¿Â´Ù.
+		// Load할 FilePointer를 읽어온다.
 		//--------------------------------------------------------
 		long fp;	
 		aspkiFile.seekg( 2 + spriteID*4 );		// 2(num) + spriteID * (4 bytes)
@@ -2456,14 +2456,14 @@ ConvertScreenEffect()
 		ASPR.LoadFromFile( aspkFile );
 
 		//--------------------------------------------------------
-		// Å©±â °è»ê.. °Á - -
+		// 크기 계산.. 걍 - -
 		//--------------------------------------------------------
 		int width = ASPR.GetWidth();
 		int height = ASPR.GetHeight();
 		
 		//--------------------------------------------------------
-		// AlphaSprite¸¦ Ãâ·ÂÇÑ ÈÄ¿¡ 
-		// Sprite¸¦ »ý¼ºÇÑ´Ù.
+		// AlphaSprite를 출력한 후에 
+		// Sprite를 생성한다.
 		//--------------------------------------------------------
 		surface.FillSurface( 0 );
 
@@ -2473,7 +2473,7 @@ ConvertScreenEffect()
 
 		surface.Unlock();
 	
-		// ¿ø·¡´Â ID°¡ spriteID¿´´ø°Ô sid·Î ¹Ù²î°Ô µÈ´Ù.
+		// 원래는 ID가 spriteID였던게 sid로 바뀌게 된다.
 		pNewID[ spriteID ] = sid;
 
 		if ((sid & 0x00000007)==0x00000007)
@@ -2488,7 +2488,7 @@ ConvertScreenEffect()
 	aspkFile.close();
 
 	//------------------------------------------------------------
-	// SpriteID¸¦ ¼öÁ¤ÇÑ´Ù.
+	// SpriteID를 수정한다.
 	//------------------------------------------------------------
 	int numFPK = NewEFPK.GetSize();
 	for (e=0; e<numFPK; e++)
@@ -2516,7 +2516,7 @@ ConvertScreenEffect()
 	delete [] pNewID;
 
 	//------------------------------------------------------------	
-	// FramePackÀúÀå
+	// FramePack저장
 	//------------------------------------------------------------	
 	std::ofstream fileFPK(FILE_EFRAME_SCREENEFFECT, ios::binary);
 	std::ofstream fileFPKI(FILE_EFRAMEINDEX_SCREENEFFECT, ios::binary);
@@ -2525,7 +2525,7 @@ ConvertScreenEffect()
 	fileFPKI.close();
 	
 	//------------------------------------------------------------	
-	// SpritePack ÀúÀå
+	// SpritePack 저장
 	//------------------------------------------------------------	
 	std::ofstream fileSPK(FILE_SPRITE_SCREENEFFECT, ios::binary);
 	std::ofstream fileSPKI(FILE_SPRITEINDEX_SCREENEFFECT, ios::binary);
@@ -2547,7 +2547,7 @@ ConvertScreenEffect()
 	ShowWindow(g_hWndProgress, SW_SHOW);
 
 	//------------------------------------------------------------	
-	// º¯È¯ Ã¼Å©
+	// 변환 체크
 	//------------------------------------------------------------	
 	std::ofstream fileCheck("Data\\Info\\EffectScreenConvert.inf", ios::binary);	
 	int a = 1;
@@ -2560,13 +2560,13 @@ ConvertScreenEffect()
 //------------------------------------------------------------------------
 // ApplyPatch 
 //------------------------------------------------------------------------
-// °©ÀÚ±â ¾ÐÃàÀ» ÇÏ°Ô µÇ´Â ¹Ù¶÷¿¡... - -;
+// 갑자기 압축을 하게 되는 바람에... - -;
 //------------------------------------------------------------------------
 bool
 ApplyPatch()
 {	
 	//-----------------------------------------------------------------
-	// ÇöÀç version
+	// 현재 version
 	//-----------------------------------------------------------------
 //	std::ifstream versionFile(FILE_INFO_VERSION, ios::binary);
 //	int version;
@@ -2574,7 +2574,7 @@ ApplyPatch()
 //	versionFile.close();
 
 	//-----------------------------------------------------------------
-	// ÆÐÄ¡¾ÐÃàÈ­ÀÏÀÌ ÀÖ³ª È®ÀÎ
+	// 패치압축화일이 있나 확인
 	//-----------------------------------------------------------------
 //	char packFilename[256];
 //	char infoFilename[256];
@@ -2583,7 +2583,7 @@ ApplyPatch()
 //	long				hFile;
 
 	//-----------------------------------------------------------------
-	// *.mpk fileÀ» Ã£´Â´Ù.
+	// *.mpk file을 찾는다.
 	//-----------------------------------------------------------------
 //	if ( (hFile = _findfirst( "*.mpk", &FileData )) != -1L )
 //	{		
@@ -2598,30 +2598,30 @@ ApplyPatch()
 //		_findclose( hFile );			
 
 		//-----------------------------------------------------------------
-		// ÆÐÄ¡¾ÐÃàÈ­ÀÏÀÇ ¾ÐÃà ÇØÁ¦ 
+		// 패치압축화일의 압축 해제 
 		//-----------------------------------------------------------------
 //		_mkdir( "Update" );
 //
-//		SetProgressBarText("ÆÐÄ¡ È­ÀÏÀÇ ¾ÐÃàÀ» ÇØÁ¦ÇÏ°í ÀÖ½À´Ï´Ù.");
+//		SetProgressBarText("패치 화일의 압축을 해제하고 있습니다.");
 //
 //		MZLib mzlib;
 //
-//		// ¾ÐÃàÇÒ¶§ Updater°æ·Î¸¦ °°ÀÌ ÀúÀåÇßÀ¸¹Ç·Î °°ÀÌ Ç®¸°´Ù.
+//		// 압축할때 Updater경로를 같이 저장했으므로 같이 풀린다.
 //		mzlib.Uncompress( packFilename );	
 //
 //		//-----------------------------------------------------------------
-//		// infofileÀÌ¸§ °áÁ¤ - packFilename¿¡ µû¶ó¼­..
+//		// infofile이름 결정 - packFilename에 따라서..
 //		//-----------------------------------------------------------------
 //		int len = strlen(packFilename);
 //		char str[256];
-//		strncpy(str, packFilename, len-4);	// °Á .±îÁö »©ÁØ´Ù.
+//		strncpy(str, packFilename, len-4);	// 걍 .까지 빼준다.
 //		str[len-4] = '\0';
 //		sprintf(infoFilename, "Update\\%s.inf", str);
 //
 //	}
 	//-----------------------------------------------------------------
-	// mpkÈ­ÀÏÀÌ ¾ø´Â °æ¿ì´Â ¼öµ¿ÆÐÄ¡ÀÎ °æ¿ì¸¦ Ã¼Å©ÇØºÁ¾ßÇÑ´Ù.
-	// packFilenameÀÌ ¸î¹ø version¿¡ Àû¿ëµÇ´Â°ÇÁö ¾Ë¾Æ³½´Ù.
+	// mpk화일이 없는 경우는 수동패치인 경우를 체크해봐야한다.
+	// packFilename이 몇번 version에 적용되는건지 알아낸다.
 	//-----------------------------------------------------------------
 //	else
 //	{
@@ -2635,7 +2635,7 @@ ApplyPatch()
 //		}
 //		*/
 //		
-//		// ÇöÀç ¹öÀü¿¡ ¸Â´Â ÆÐÄ¡È­ÀÏÀ» Ã£´Â´Ù.
+//		// 현재 버전에 맞는 패치화일을 찾는다.
 //		sprintf(infoFilename, "Update\\Patch%d_*.inf", version);
 //
 //		if ( (hFile = _findfirst( infoFilename, &FileData )) != -1L )
@@ -2652,25 +2652,25 @@ ApplyPatch()
 //		}
 //		else
 //		{
-//			// ¼öµ¿ÆÐÄ¡µµ ¾ø´Â °æ¿ì == ÇöÀç ¹öÀü
+//			// 수동패치도 없는 경우 == 현재 버전
 //			return false;
 //		}
 //	}
 //
 //	//-----------------------------------------------------------------
-//	// info ÀÐ±â
+//	// info 읽기
 //	//-----------------------------------------------------------------	
-//	CreateProgressBar("ÆÐÄ¡ Á¤º¸¸¦ Ã¼Å© ÁßÀÔ´Ï´Ù.");
+//	CreateProgressBar("패치 정보를 체크 중입니다.");
 //	
 //	UpdateManager	UM;
 //	UM.load( infoFilename );
 //
 //	SetProgressBarCount( UM.getNum()+g_numAppendFiles );	
 //
-//	SetProgressBarText("ÆÐÄ¡ È­ÀÏÀ» Àû¿ë½ÃÅ°°í ÀÖ½À´Ï´Ù.");
+//	SetProgressBarText("패치 화일을 적용시키고 있습니다.");
 //	
 //	//-----------------------------------------------------------------
-//	// ÆÐÄ¡È­ÀÏ Àû¿ë
+//	// 패치화일 적용
 //	//-----------------------------------------------------------------
 //	int newVersion = 0;
 //	while (!UM.empty())
@@ -2683,7 +2683,7 @@ ApplyPatch()
 //			// -_-;;
 //		}	
 //
-//		// version upÀÎ°¡?
+//		// version up인가?
 //		if (pUpdate->getVersion() > newVersion)
 //		{
 //			newVersion = pUpdate->getVersion();
@@ -2693,19 +2693,19 @@ ApplyPatch()
 //	}
 //
 //	//-----------------------------------------------------------------
-//	// »õ versionÀúÀå
+//	// 새 version저장
 //	//-----------------------------------------------------------------
 //	std::ofstream versionFile2(FILE_INFO_VERSION, ios::binary);
 //	versionFile2.write((const char*)&newVersion, 4);
 //	versionFile2.close();
 //	
 //	//-----------------------------------------------------------------
-//	// ÆÐÄ¡¾ÐÃàÈ­ÀÏ Á¦°Å
+//	// 패치압축화일 제거
 //	//-----------------------------------------------------------------
 //	remove( packFilename );
 //
 //	//-----------------------------------------------------------------
-//	// ÆÐÄ¡È­ÀÏ Á¦°Å - Updater µð·ºÅä¸® Áö¿ì¸é¼­ µÇ¹Ç·Î .. ½Å°æ ¾È ½áµµ µÈ´Ù.
+//	// 패치화일 제거 - Updater 디렉토리 지우면서 되므로 .. 신경 안 써도 된다.
 //	//-----------------------------------------------------------------
 //
 	return true;
@@ -2729,7 +2729,7 @@ ApplyPatch()
 //		long				hFile;
 //
 //		//-----------------------------------------------------------------
-//		// *.spk fileÀ» Ã£´Â´Ù.
+//		// *.spk file을 찾는다.
 //		//-----------------------------------------------------------------
 //		if ( (hFile = _findfirst( "Data\\UI\\txt\\Log*.txt", &FileData )) != -1L )
 //		{
@@ -2757,7 +2757,7 @@ ApplyPatch()
 //						GetComputerName( computerName,  &numSize );
 //					}
 //					
-//					sprintf(buffer, "\\\\¾¦°«\\Log\\%s-%s", computerName, FileData.name);
+//					sprintf(buffer, "\\\\쑥갓\\Log\\%s-%s", computerName, FileData.name);
 //					
 //					_chmod( filename, _S_IREAD | _S_IWRITE );
 //					rename(filename, buffer);						
@@ -2787,7 +2787,7 @@ ApplyPatch()
 		_mkdir( "Log" );
 		
 		//-----------------------------------------------------------------
-		// *.spk fileÀ» Ã£´Â´Ù.
+		// *.spk file을 찾는다.
 		//-----------------------------------------------------------------
 		if ( (hFile = _findfirst( "Log\\Log*.txt", &FileData )) != -1L )
 		{
@@ -2826,7 +2826,7 @@ ApplyPatch()
 //							GetComputerName( computerName,  &numSize );
 //						}
 //						
-//						sprintf(buffer, "\\\\¾¦°«\\Log\\%s-%s", computerName, FileData.name);
+//						sprintf(buffer, "\\\\쑥갓\\Log\\%s-%s", computerName, FileData.name);
 //						
 //						_chmod( filename, _S_IREAD | _S_IWRITE );
 //						rename(filename, buffer);						
@@ -2874,7 +2874,7 @@ ApplyPatch()
 					DEBUG_ADD_FORMAT("[Time = %d]", g_CurrentTime);
 				}
 
-				// 3ºÐ ÈÄ
+				// 3분 후
 				flushTime = g_CurrentTime + flushDelay;
 			}
 		//#endif
@@ -2892,7 +2892,7 @@ ApplyPatch()
 //    {
 //        KBDLLHOOKSTRUCT* kbhook = (KBDLLHOOKSTRUCT*)lParam;
 //
-//// ¾ËÆ®Å°°¡ ´­¸°°ÍÀÎÁö....
+//// 알트키가 눌린것인지....
 //        if(kbhook->flags & LLKHF_ALTDOWN)
 //        {
 //            switch(kbhook->vkCode)
@@ -2904,7 +2904,7 @@ ApplyPatch()
 //                break;
 //            }
 //        }
-//// Control + ESCµµ ¸·Àð
+//// Control + ESC도 막쟈
 //		else if(((GetAsyncKeyState( VK_CONTROL ) & 0x8000) || g_pSDLInput != NULL && (g_pSDLInput->KeyDown(DIK_LCONTROL) || g_pSDLInput->KeyDown(DIK_RCONTROL))) && kbhook->vkCode == VK_ESCAPE)
 //		{
 //			SHORT control = GetAsyncKeyState( VK_CONTROL );
@@ -3053,9 +3053,9 @@ WinMain(HINSTANCE hInstance,
 
 	
 	//----------------------------------------------------------
-	// ÇÏ³ªÀÇ application¸¸ ½ÇÇà½ÃÅ²´Ù.
+	// 하나의 application만 실행시킨다.
 	//----------------------------------------------------------
-	// °ª ´ëÃæ ³Ö±â.. --;
+	// 값 대충 넣기.. --;
 	SECURITY_ATTRIBUTES sa;
 	sa.nLength = sizeof(sa);
     sa.lpSecurityDescriptor = NULL;
@@ -3063,7 +3063,7 @@ WinMain(HINSTANCE hInstance,
 
 
 #ifndef OUTPUT_DEBUG
-	// 2006.11.07 edit Coffee  ÐÞÕýÎª³ÌÐò¿ÉÒÔË«¿ª
+	// 2006.11.07 edit Coffee  修正为程序可以双开
 	HANDLE hMutex = CreateMutex(&sa, FALSE, "<<<DarkEden>>>");  
 	/*
 	HANDLE hMutex = CreateMutex(&sa, FALSE, "<<<DarkEden>>>");   
@@ -3113,7 +3113,7 @@ WinMain(HINSTANCE hInstance,
 
 #endif
 	
-		// ÇöÀç directory¸¦ ÀúÀåÇØµÐ´Ù.
+		// 현재 directory를 저장해둔다.
 //	strcpy(g_CWD, __argv[0]);
  	GetModuleFileName(NULL, g_CWD, _MAX_PATH);
 	char *tempCut = strrchr(g_CWD, '\\');
@@ -3127,21 +3127,21 @@ WinMain(HINSTANCE hInstance,
 	
 	SetCurrentDirectory(g_CWD);
 	
-// 	//	// »õ·Î¿î updater½ÇÇàÈ­ÀÏÀÌ Á¸ÀçÇÏ¸é..
+// 	//	// 새로운 updater실행화일이 존재하면..
 //	if (_access(UPDATER_NEW_FILENAME, 0) == 0/* && _access(UPDATER_FILENAME, 0)*/)//updaterNewFile)
 //	{	
-//		// ¿¹Àü Patcher¸¦ Áö¿ì°í..
+//		// 예전 Patcher를 지우고..
 //		if (remove( UPDATER_FILENAME )==0)
 //		{
-//			// »õ°ÍÀ» ¿¹Àü°É·Î rename
+//			// 새것을 예전걸로 rename
 //			if (rename( UPDATER_NEW_FILENAME, UPDATER_FILENAME )==0)
 //			{
 //				DEBUG_ADD("Update Updater.exe OK"); 
 //			}
 //		}
-////		// ¿¹Àü updater¸¦ Áö¿ì°í..
+////		// 예전 updater를 지우고..
 ////		//remove( UPDATER_FILENAME );
-////		// »õ°ÍÀ» ¿¹Àü°É·Î rename
+////		// 새것을 예전걸로 rename
 ////		if (rename( UPDATER_NEW_FILENAME, UPDATER_FILENAME )==0)
 ////		{
 ////			DEBUG_ADD("Update Updater.exe OK"); 
@@ -3283,12 +3283,12 @@ WinMain(HINSTANCE hInstance,
 	/*
 #include "packet\ServerSocket.h"
 
-	// ÇÑ Client´Â µ¿½Ã¿¡ ´Ù¸¥ ÇÑ Client¿Í Åë½ÅÇÑ´Ù.
-	// ¿©·¯±ºµ¥ÀÇ resource(±æµå¸¶Å©, profile...)°¡ ÇÊ¿äÇÑ °æ¿ì 
-	//		ResourceQueue¿¡ ÀúÀåÇß´Ù°¡ Æ´Æ´È÷ ¹Þµµ·Ï ÇÑ´Ù.
-	// while(1)ºÎºÐÀº ´Ù¸¥ thread·Î »©¾ßµÈ´Ù.
-	// RequestManager Á¢±ÙÇÒ¶§´Â mutex¾²µçÁö ÇØ¾ßµÈ´Ù.
-	// RequestManagerÀÇ Update()´Â main thread¿¡¼­ ÇÑ´Ù.
+	// 한 Client는 동시에 다른 한 Client와 통신한다.
+	// 여러군데의 resource(길드마크, profile...)가 필요한 경우 
+	//		ResourceQueue에 저장했다가 틈틈히 받도록 한다.
+	// while(1)부분은 다른 thread로 빼야된다.
+	// RequestManager 접근할때는 mutex쓰든지 해야된다.
+	// RequestManager의 Update()는 main thread에서 한다.
 	//
 	ServerSocket* pServerSocket = new ServerSocket( 9650 );
 
@@ -3299,11 +3299,11 @@ WinMain(HINSTANCE hInstance,
 	{
 		Socket* pSocket = pServerSocket->accept();
 
-		// request¿¡ µî·Ï
+		// request에 등록
 		RequestServerPlayer* pRequestServerPlayer = new RequestServerPlayer( pSocket );
 		g_pRequestManager->AddPlayer( pRequestServerPlayer );
 
-		// g_pRequestManager´Â µî·ÏµÈ RequestServerPlayer¿¡ ´ëÇØ¼­ processInput/Command/Output Ã³¸®
+		// g_pRequestManager는 등록된 RequestServerPlayer에 대해서 processInput/Command/Output 처리
 
 		strcpy(strClient, pSocket->getHost().c_str());
 		port = pSocket->getPort();
@@ -3371,7 +3371,7 @@ WinMain(HINSTANCE hInstance,
 	*/
 	
 	//-----------------------------------------------------------------------
-	// Client ½ÃÀÛ..
+	// Client 시작..
 	//-----------------------------------------------------------------------
 	g_bNeedUpdate = FALSE;
 //	OutPutClassSize();
@@ -3449,7 +3449,7 @@ WinMain(HINSTANCE hInstance,
 	g_pFileDef = new Properties;
 	g_pFileDef->load(FILE_INFO_FILEDEF);
 
-	// ³Ý¸¶ºí¿ë
+	// 넷마블용
 	bool bNetmarble = false;
 	Properties NetmarbleConfig;
 
@@ -3472,7 +3472,7 @@ WinMain(HINSTANCE hInstance,
 	//MessageBox(g_hWnd, lpCmdLine, NULL, MB_OK);
 		
 	//------------------------------------------------------
-	// Server IP°¡ ¼³Á¤µÇ¾î ÀÖÁö ¾ÊÀº °æ¿ì --> Launcher½ÇÇà
+	// Server IP가 설정되어 있지 않은 경우 --> Launcher실행
 	//------------------------------------------------------
 	if (strlen(lpCmdLine)==0)
 	{
@@ -3508,7 +3508,7 @@ WinMain(HINSTANCE hInstance,
 
 			//_spawnl(_P_NOWAIT, "Updater.exe", "Updater.exe", NULL);
 			_chdir( g_CWD );
-			//::MessageBox(0,"¶ÁÈ¡ÏµÍ³DLL³ö´í£¬´íÎóID£º8001,Çë¼°Ê±ÏòÎÒÃÇÌá½»´íÎó¡£","´íÎó",MB_OK);
+			//::MessageBox(0,"读取系统DLL出错，错误ID：8001,请及时向我们提交错误。","错误",MB_OK);
 			_spawnl(_P_OVERLAY, UPDATER_FILENAME, UPDATER_FILENAME, lpCmdLine, NULL);
 
 //			ShellExecute(g_hWnd, NULL, UPDATER_FILENAME, lpCmdLine, NULL, SW_SHOW);
@@ -3534,7 +3534,7 @@ WinMain(HINSTANCE hInstance,
 		#endif
 	}
 	//------------------------------------------------------
-	// Server IP°¡ ¼³Á¤µÇ¾î ÀÖ´Â °æ¿ì
+	// Server IP가 설정되어 있는 경우
 	//------------------------------------------------------
 	else
 	{
@@ -3565,7 +3565,7 @@ WinMain(HINSTANCE hInstance,
 
 			//_spawnl(_P_NOWAIT, "Updater.exe", "Updater.exe", NULL);	
 			_chdir( g_CWD );
-			//::MessageBox(0,"¶ÁÈ¡ÏµÍ³DLL³ö´í£¬´íÎóID£º8002,Çë¼°Ê±ÏòÎÒÃÇÌá½»´íÎó¡£","´íÎó",MB_OK);
+			//::MessageBox(0,"读取系统DLL出错，错误ID：8002,请及时向我们提交错误。","错误",MB_OK);
 			_spawnl(_P_OVERLAY, UPDATER_FILENAME, UPDATER_FILENAME, lpCmdLine, NULL);
 //			ShellExecute(g_hWnd, NULL, UPDATER_FILENAME, lpCmdLine, NULL, SW_SHOW);
 
@@ -3577,10 +3577,10 @@ WinMain(HINSTANCE hInstance,
 		//char checkStr[9] = "NEWSTART";
 		//char checkStr[9] = "START";
 
-		//add by sonic 2006.4.9  ÉèÖÃ¼ÓÃÜº¯Êý
+		//add by sonic 2006.4.9  设置加密函数
 		DWORD GetCommand;
 		// EXECryptor_GetHardwareID() removed (SDL2) - Copy protection no longer needed
-		GetCommand = 0x00000000;  //ÓÃÓÚµ÷ÊÔ
+		GetCommand = 0x00000000;  //用于调试
 		char checkStr[9];
 		memset(checkStr,0,9);
 		sprintf(checkStr, "%X" ,GetCommand);
@@ -3610,7 +3610,7 @@ WinMain(HINSTANCE hInstance,
 		if (memcmp(checkStr,T_checkStr,strlen(checkStr)))
 		{
 			//MessageBox(0,checkStr,str,MB_OK);
-			//´«Èë²ÎÊý´íÎó///
+			//传入参数错误///
 			return false;
 			bRunUpdater = true;
 			//break;
@@ -3660,11 +3660,11 @@ WinMain(HINSTANCE hInstance,
 		}
 #endif
 //add by Sonic 2006.7.26
-	//Ôö¼Ó¹ÜµÀ¼ì²â
+	//增加管道检测
 		/*
 	if (GetSystem())
 	{
-		HANDLE hClient = CreateFile("\\\\.\\pipe\\¡¡¡¡¡¡\\",GENERIC_WRITE |	GENERIC_READ,0,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
+		HANDLE hClient = CreateFile("\\\\.\\pipe\\　　　\\",GENERIC_WRITE |	GENERIC_READ,0,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
 		if(hClient == INVALID_HANDLE_VALUE)
 		{
 			//MessageBox(0,"Error","Error",MB_OK);
@@ -3674,7 +3674,7 @@ WinMain(HINSTANCE hInstance,
 	}
 	*/
 		#ifdef OUTPUT_DEBUG
-			// Ã¢¸ðµå ½ÃÀÛ..
+			// 창모드 시작..
 			g_bTestMode = true;
 			char checkTestMode[] = "TestMode";
 			for (int i=0; i<strlen(checkTestMode); i++)
@@ -3696,7 +3696,7 @@ WinMain(HINSTANCE hInstance,
 		if (memcmp(checkStr,str,strlen(checkStr)))
 		{
 			//MessageBox(0,checkStr,str,MB_OK);
-			//´«Èë²ÎÊý´íÎó///
+			//传入参数错误///
 			return FALSE;
 			bRunUpdater = true;
 			//break;
@@ -3731,8 +3731,8 @@ WinMain(HINSTANCE hInstance,
 			//_spawnl(_P_NOWAIT, "Updater.exe", "Updater.exe", NULL);	
 			_chdir( g_CWD );
 
-			// ¿©±â
-			// [Futec¼öÁ¤]
+			// 여기
+			// [Futec수정]
 //			char szTemp[512];
 //			sprintf(szTemp, "%s %s", UPDATER_FILENAME, lpCmdLine);
 //			DWORD error = WinExec(szTemp, SW_SHOW);
@@ -3754,7 +3754,7 @@ WinMain(HINSTANCE hInstance,
 //				MessageBox(NULL, "The specified path was not found. ", PROGRAM_TITLE, MB_OK);
 //				break;
 //			}
-			//::MessageBox(0,"¶ÁÈ¡ÏµÍ³DLL³ö´í£¬´íÎóID£º8003,Çë¼°Ê±ÏòÎÒÃÇÌá½»´íÎó¡£","´íÎó",MB_OK);
+			//::MessageBox(0,"读取系统DLL出错，错误ID：8003,请及时向我们提交错误。","错误",MB_OK);
 			_spawnl(_P_OVERLAY, UPDATER_FILENAME, UPDATER_FILENAME, lpCmdLine, NULL);
 //			ShellExecute(g_hWnd, NULL, UPDATER_FILENAME, lpCmdLine, NULL, SW_SHOW);
 
@@ -3786,29 +3786,29 @@ WinMain(HINSTANCE hInstance,
 		//g_bFullScreen	= true;
 	#endif
 
-	// [Futec¼öÁ¤]
+	// [Futec수정]
 	GetFutecAddress(lpCmdLine);
 
 
 
 	//------------------------------------------------------------------------
-	// Á¤»óÀûÀÎ Patch 
-	// °©ÀÚ±â ¾ÐÃàÀ» ÇÏ°Ô µÇ´Â ¹Ù¶÷¿¡... - -;
+	// 정상적인 Patch 
+	// 갑자기 압축을 하게 되는 바람에... - -;
 	//------------------------------------------------------------------------
 //	bool bPatched = ApplyPatch();
 
 	//------------------------------------------------------------------------
-	// ScreenEffect »ý¼º
+	// ScreenEffect 생성
 	//------------------------------------------------------------------------
 //	ConvertScreenEffect();
 
 	//------------------------------------------------------------------------
-	// ÀÌÁ¦ºÎÅÍ EffectScreen¿¡ AppendµÇ´Â SPK´Â 
-	// ÀÌ ½ÃÁ¡¿¡¼­ AppendÇØ¾ß ÇÑ´Ù.
-	// CheckTerriblePatch¿¡ °°ÀÌ ³Ö¾îµµ µÈ´Ù. - -;;
+	// 이제부터 EffectScreen에 Append되는 SPK는 
+	// 이 시점에서 Append해야 한다.
+	// CheckTerriblePatch에 같이 넣어도 된다. - -;;
 	//------------------------------------------------------------------------
 	//AppendScreenEffect();
-//add by sonic 2006.4.10 ÅÐ¶Ï³ÌÐòÆô¶¯Ä£Ê½
+//add by sonic 2006.4.10 判断程序启动模式
 	if ( cmpFullScreen )
 		{
 			g_bFullScreen = true;
@@ -3845,19 +3845,19 @@ WinMain(HINSTANCE hInstance,
 	
 
 	//----------------------------------------------------------------
-	// Updater.exe¸¦ update ½ÃÅ²´Ù.
+	// Updater.exe를 update 시킨다.
 	//----------------------------------------------------------------
 //	std::ifstream updaterNewFile(UPDATER_NEW_FILENAME, ios::binary | );
 
-	// »õ·Î¿î updater½ÇÇàÈ­ÀÏÀÌ Á¸ÀçÇÏ¸é..
+	// 새로운 updater실행화일이 존재하면..
 	if (!_access(UPDATER_NEW_FILENAME, 0))//updaterNewFile)
 	{	
 //		updaterNewFile.close();
 
-		// ¿¹Àü updater¸¦ Áö¿ì°í..
+		// 예전 updater를 지우고..
 		if (remove( UPDATER_FILENAME )==0)
 		{
-			// »õ°ÍÀ» ¿¹Àü°É·Î rename
+			// 새것을 예전걸로 rename
 			if (rename( UPDATER_NEW_FILENAME, UPDATER_FILENAME )==0)
 			{
 				//MessageBox(0,"Error:[rename( UPDATER_NEW_FILENAME, UPDATER_FILENAME )==0]","Error",MB_OK);
@@ -3868,13 +3868,13 @@ WinMain(HINSTANCE hInstance,
 
 	//strcpy(g_ServerIP, SERVER_IP);
 	//---------------------------------------------------
-	// Update µð·ºÅä¸®¸¦ Áö¿öÁØ´Ù.
+	// Update 디렉토리를 지워준다.
 	//---------------------------------------------------
-	// updater¿¡¼­ Áö¿ö¾ß ÇÏ´Âµ¥..»©¸Ô´Â ¹Ù¶÷¿¡.. T_T;;
+	// updater에서 지워야 하는데..빼먹는 바람에.. T_T;;
 	//---------------------------------------------------
 	char CWD[_MAX_PATH];
 
-	// ÇöÀç pathÀÐ±â
+	// 현재 path읽기
 	if (_getcwd( CWD, _MAX_PATH )!=NULL)
 	{	
 		char UpdateDir[_MAX_PATH];
@@ -3894,35 +3894,35 @@ WinMain(HINSTANCE hInstance,
 		
 		if (_rmdir( UpdateDir )!=0)
 		{			
-			// PATH°¡ Àß¸øµÈ °æ¿ì
+			// PATH가 잘못된 경우
 			if (errno==ENOENT)
 			{				
 			}
-			// ¹º°¡ ÀÖ¾î¼­ ¾È Áö¿öÁø °æ¿ì..		
+			// 뭔가 있어서 안 지워진 경우..		
 			else //if (errno==ENOTEMPTY)
 			{
-				// ÇöÀç directory¸¦ ±â¾ïÇØµÐ´Ù.				
+				// 현재 directory를 기억해둔다.				
 				if (_chdir( UpdateDir ) == 0)
 				{
 					//---------------------------------------------------
-					// fileÇÏ³ªÇÏ³ª¸¦ Áö¿öÁØ´Ù. T_T;
+					// file하나하나를 지워준다. T_T;
 					//---------------------------------------------------
 					struct _finddata_t	FileData;
 					long				hFile;
 
-					// ¸ðµç È­ÀÏÀ» ÀÐ¾î¿Â´Ù.
+					// 모든 화일을 읽어온다.
 					if( (hFile = _findfirst( "*.*", &FileData )) != -1L )					
 					{
 						while (_findnext( hFile, &FileData ) == 0)
 						{
-							// .À¸·Î ½ÃÀÛÇÏ´Â °Ç Áö¿ï ÇÊ¿ä ¾ø´ç..
+							// .으로 시작하는 건 지울 필요 없당..
 							if (FileData.name[0] != '.')
 							{
 								remove( FileData.name );
 							}
 						}
 
-						// ³¡
+						// 끝
 						_findclose( hFile );			
 					}
 					
@@ -3930,7 +3930,7 @@ WinMain(HINSTANCE hInstance,
 
 					if (_rmdir( UpdateDir )==0)
 					{
-						// Àß Áö¿öÁ³´Ù.
+						// 잘 지워졌다.
 					}
 				}				
 			}
@@ -3941,7 +3941,7 @@ WinMain(HINSTANCE hInstance,
 	RemoveProgressBar();
 
 	//-----------------------------------------------------------------
-	// ÆÐÄ¡ ³»¿ë Âï¾îÁØ´Ù.
+	// 패치 내용 찍어준다.
 	//-----------------------------------------------------------------
 //	if (bPatched)
 //	{
@@ -3962,7 +3962,7 @@ WinMain(HINSTANCE hInstance,
 			if(NetmarbleConfig.getPropertyInt("Netmarble") == 1)
 			{
 				//add by sonic 2006.4.11
-				//MessageBox(NULL, "³Ý¸¶ºí¿ë ´ÙÅ©¿¡µ§Àº ³Ý¸¶ºí È¨ÆäÀÌÁö¸¦ ÅëÇØ¼­¸¸ ½ÇÇàÀÌ °¡´ÉÇÕ´Ï´Ù.", PROGRAM_TITLE, MB_OK);
+				//MessageBox(NULL, "넷마블용 다크에덴은 넷마블 홈페이지를 통해서만 실행이 가능합니다.", PROGRAM_TITLE, MB_OK);
 				//end
 
 				return -1;
@@ -3979,15 +3979,15 @@ WinMain(HINSTANCE hInstance,
 		if(ParsingRealServer(lpCmdLine, g_Dimension, RealServerInfo) == false)
 		{
 //#ifndef OUTPUT_DEBUG
-//			MessageBox(NULL, "À¥ ÆäÀÌÁö ¿¡¼­ ´Ù½Ã ½ÇÇàÇØÁÖ½Ã±â ¹Ù¶ø´Ï´Ù.", PROGRAM_TITLE, MB_OK);
+//			MessageBox(NULL, "웹 페이지 에서 다시 실행해주시기 바랍니다.", PROGRAM_TITLE, MB_OK);
 //			ShellExecute(NULL, NULL, "www.darkeden.com", NULL, NULL, SW_SHOW);
 //			return -1;
 //
 //#endif
 		}
 	}
-	//Ôö¼Ó¼ì²â
-/* Add by sonic 2006.9.14 Ôö¼Ó¶ÔWPE ¼ì²â */
+	//增加检测
+/* Add by sonic 2006.9.14 增加对WPE 检测 */
 _APICheck.init();
 /* ************************************* */
 //	FILE *fp = fopen("Data\\Info\\SuperUser.inf","rt");	
@@ -4139,14 +4139,14 @@ _APICheck.init();
 
 		g_bActiveApp = TRUE;
 		//g_bActiveGame = TRUE;
-		DEBUG_CMD(MIN_CLRSCR, "½ÃÀÛ");
+		DEBUG_CMD(MIN_CLRSCR, "시작");
 		DEBUG_CMD(MIN_SHOWWND, "------------------------------");
 		
 
 		while (TRUE)
 		{
 //			Sleep(1);	//add by viva
-			/* add by sonic Ôö¼Ó¶Ôsock¼ì²â */
+			/* add by sonic 增加对sock检测 */
 				_APICheck.CheckApi();
 			/* *************************** */
 			if (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
@@ -4209,7 +4209,7 @@ _APICheck.init();
 					
 							g_FrameRate = (g_FrameCount - g_StartFrameCount) * 1000 / timeGap;
 
-							// 15 fps ÀÌ»ó
+							// 15 fps 이상
 							g_bGoodFPS = (g_FrameRate >= g_FrameGood);
 							
 							g_StartTime = g_CurrentTime;
@@ -4396,27 +4396,27 @@ BOOL GetSystem()
 		{
 		case VER_PLATFORM_WIN32_WINDOWS:
 			if(OsInfo.dwMajorVersion == 3)
-				//MessageBox(0,"²Ù×÷ÏµÍ³:WIN95","ÐÅÏ¢",MB_OK);
-				//strcpy(sys.chSystem,"²Ù×÷ÏµÍ³:WIN95");
+				//MessageBox(0,"操作系统:WIN95","信息",MB_OK);
+				//strcpy(sys.chSystem,"操作系统:WIN95");
 				return FALSE;
 			else if(OsInfo.dwMajorVersion == 4)
-				//MessageBox(0,"²Ù×÷ÏµÍ³:WIN98","ÐÅÏ¢",MB_OK);
+				//MessageBox(0,"操作系统:WIN98","信息",MB_OK);
 				return FALSE;
-				//strcpy(sys.chSystem,"²Ù×÷ÏµÍ³:WIN98");
+				//strcpy(sys.chSystem,"操作系统:WIN98");
 			break;
 		case VER_PLATFORM_WIN32_NT:
 			if(OsInfo.dwMajorVersion == 5)
-				//MessageBox(0,"²Ù×÷ÏµÍ³:WIN2000","ÐÅÏ¢",MB_OK);
+				//MessageBox(0,"操作系统:WIN2000","信息",MB_OK);
 				return TRUE;
-				//strcpy(sys.chSystem,"²Ù×÷ÏµÍ³:WIN2000");
+				//strcpy(sys.chSystem,"操作系统:WIN2000");
 			else
 				return TRUE;
-				//MessageBox(0,"²Ù×÷ÏµÍ³:WINNT","ÐÅÏ¢",MB_OK);
-				//strcpy(sys.chSystem,"²Ù×÷ÏµÍ³:WINNT");
+				//MessageBox(0,"操作系统:WINNT","信息",MB_OK);
+				//strcpy(sys.chSystem,"操作系统:WINNT");
 			break;
 		default:
 			return FALSE;
-			//strcpy(sys.chSystem,"Î´ÖªÏµÍ³!!");
+			//strcpy(sys.chSystem,"未知系统!!");
 			break;
 		}
 		// version and language

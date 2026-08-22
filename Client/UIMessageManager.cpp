@@ -1,8 +1,8 @@
-//-----------------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------------
 // UIMessageManager.cpp
 //-----------------------------------------------------------------------------
-// QuickSlot¿¡ ¹º°¡ ÇÒ·Á´Â °æ¿ì¿¡.. QuickSlotÀÌ ¾ø¾îÁú ¼ö°¡ ÀÖ´Ù... 
-// Áö±Ý UI¿¡¼­ Å¸ÀÌ¹Ö ¹®Á¦°¡ ÀÖ¾î¼­ ¸ø °íÄ¡°í ÀÖÀ½.
+// QuickSlot에 뭔가 할려는 경우에.. QuickSlot이 없어질 수가 있다... 
+// 지금 UI에서 타이밍 문제가 있어서 못 고치고 있음.
 //-----------------------------------------------------------------------------
 #include "Client_PCH.h"
 #ifdef PLATFORM_WINDOWS
@@ -77,7 +77,7 @@
 #include "packet/CPackets/CGTypeStringList.h"
 #include "packet/CPackets/CGLotterySelect.h"
 #include "packet/CPackets/CGTakeOutGood.h"
-#include "packet/CPackets/CGMixItem.h"					// -_- ºñ¢O ¾î½Ã½ºÆ®¿¡¼­ ÀÌ·¸°Ô ÇÏ¸é ³ª¿Â´Ù°íÇÏ±æ·¡
+#include "packet/CPackets/CGMixItem.h"					// -_- 비줠 어시스트에서 이렇게 하면 나온다고하길래
 #include "packet/CPackets/CGDownSkill.h"
 #include "packet/GPackets/GCMiniGameScores.h"
 #include "packet/CPackets/CGSubmitScore.h"
@@ -171,21 +171,21 @@
 //end
 
 //-----------------------------------------------------------------------------
-// Chat¿¡¼­ »ç¿ëÇÏ´Â Æ¯¼öÇÑ ¹®ÀÚ
+// Chat에서 사용하는 특수한 문자
 //-----------------------------------------------------------------------------
-#define	SYMBOL_GLOBALCHAT			'!'			// zone Ã¤ÆÃ
-#define	SYMBOL_WHISPER				'/'			// ±Ó¼Ó¸»
-#define	SYMBOL_COMMAND				'@'			// Æ¯¼ö ¸í·É¾î
-#define SYMBOL_MASTER_COMMAND		'*'			// ¿î¿µÀÚ¿ë Æ¯¼ö ¸í·É¾î
+#define	SYMBOL_GLOBALCHAT			'!'			// zone 채팅
+#define	SYMBOL_WHISPER				'/'			// 귓속말
+#define	SYMBOL_COMMAND				'@'			// 특수 명령어
+#define SYMBOL_MASTER_COMMAND		'*'			// 운영자용 특수 명령어
 
-#define	STRING_IGNORE				"°ÅºÎ"		// ´ëÈ­ °ÅºÎ
-#define	STRING_IGNORE_ENG			"ignore"	// ´ëÈ­ °ÅºÎ
-#define	STRING_ACCEPT				"Çã¿ë"		// ´ëÈ­ Çã¿ë
-#define	STRING_ACCEPT_ENG			"accept"	// ´ëÈ­ Çã¿ë
-#define	STRING_ACCEPT_CURSE			"¹¹¶ó°í?"	// ³ª»Û¸» º¸±â
-#define	STRING_ACCEPT_CURSE_ENG		"what?"		// ³ª»Û¸» º¸±â
-#define	STRING_FILTER_CURSE			"¹Ù¸¥¸»"	// ¹Ù¸¥¸»¸¸ º¸±â
-#define	STRING_FILTER_CURSE_ENG		"filter"	// ¹Ù¸¥¸»¸¸ º¸±â
+#define	STRING_IGNORE				"거부"		// 대화 거부
+#define	STRING_IGNORE_ENG			"ignore"	// 대화 거부
+#define	STRING_ACCEPT				"허용"		// 대화 허용
+#define	STRING_ACCEPT_ENG			"accept"	// 대화 허용
+#define	STRING_ACCEPT_CURSE			"뭐라고?"	// 나쁜말 보기
+#define	STRING_ACCEPT_CURSE_ENG		"what?"		// 나쁜말 보기
+#define	STRING_FILTER_CURSE			"바른말"	// 바른말만 보기
+#define	STRING_FILTER_CURSE_ENG		"filter"	// 바른말만 보기
 
 int g_C2G = 0;
 
@@ -226,7 +226,7 @@ void
 ExecuteLogout()
 {
 	//--------------------------------------------------
-	// »ì¾ÆÀÖ´Â °æ¿ì
+	// 살아있는 경우
 	//--------------------------------------------------
 	if (g_Mode==MODE_GAME)
 	{
@@ -234,11 +234,11 @@ ExecuteLogout()
 
 		UI_SaveUserOption();
 
-		// ³¯¾¾ ¸ØÃã
+		// 날씨 멈춤
 		SetWeather(WEATHER_CLEAR, 0);
 
-		// Á×¾úÀ¸¸é ºÎÈ° ÆÐÅ¶À» º¸³»°í LogoutÇÑ´Ù.
-		// ±Ùµ¥.. ½ÇÁ¦ Ã³¸®µÉ¶§ º° ÀÇ¹Ì°¡ ¾ø³×.. - -;
+		// 죽었으면 부활 패킷을 보내고 Logout한다.
+		// 근데.. 실제 처리될때 별 의미가 없네.. - -;
 		if (!g_pPlayer->IsAlive())
 		{
 				CGResurrect _CGResurrect;
@@ -253,7 +253,7 @@ ExecuteLogout()
 		if (1)//g_pPlayer->IsAlive())
 		{
 			//--------------------------------------------------
-			// À½¾Ç ¸ØÃá´Ù.
+			// 음악 멈춘다.
 			//--------------------------------------------------
 			if (g_pUserOption->PlayWaveMusic)
 			{
@@ -273,15 +273,15 @@ ExecuteLogout()
 			}
 
 			//--------------------------------------------------
-			// Thread Loading Á¾·á..
+			// Thread Loading 종료..
 			//--------------------------------------------------
 			StopLoadingThread();
 
 			//
-			// Client, Server¿¡ logout packet º¸³¿.
+			// Client, Server에 logout packet 보냄.
 			//
 			//--------------------------------------------------
-			// °ÔÀÓ ¼­¹ö·Î CGLogout ÆÐÅ¶À» º¸³½´Ù.
+			// 게임 서버로 CGLogout 패킷을 보낸다.
 			//--------------------------------------------------
 				UI_SaveHotKeyToServer();
 
@@ -297,7 +297,7 @@ ExecuteLogout()
 				
 				//g_pSocket->disconnect();
 
-				// 2001.6.12 : releaseÇÏÁö ¾Ê°í ÀçÁ¢ÇÑ´Ù.
+				// 2001.6.12 : release하지 않고 재접한다.
 				//ReleaseSocket();
 
 			/*
@@ -306,11 +306,11 @@ ExecuteLogout()
 				g_pZone->RemovePlayer();
 				g_pPlayer->SetStop();
 				g_pPlayer->SetAction( ACTION_STAND );
-				//g_pZone->UnSetLight(g_pPlayer->GetX(), g_pPlayer->GetY(), g_pPlayer->GetLightSight());	// ½Ã¾ß Á¦°Å
+				//g_pZone->UnSetLight(g_pPlayer->GetX(), g_pPlayer->GetY(), g_pPlayer->GetLightSight());	// 시야 제거
 			}
 			*/
 
-			// Ä³¸¯ÅÍ ¼±ÅÃÃ¢À¸·Î °£´Ù´Â message
+			// 캐릭터 선택창으로 간다는 message
 			/*
 			if (g_pCGameUpdate!=NULL)
 			{
@@ -326,17 +326,17 @@ ExecuteLogout()
 			}
 			*/
 
-			// ³¯¾¾ ¸ØÃã..
+			// 날씨 멈춤..
 			//SetWeather(WEATHER_CLEAR, 0);
 			ReleaseGameObject();
 
-			// 2001.6.12 : ÀçÁ¢¼Ó~
+			// 2001.6.12 : 재접속~
 			//SetMode( MODE_MAINMENU );	
 			SetMode( MODE_WAIT_RECONNECT_LOGIN );
 
 			//------------------------------------------------------
 			// [ TEST CODE ]
-			// ¿©±â¼­ sound¸¦ ÃÊ±âÈ­ÇØµµ µÇ³²??
+			// 여기서 sound를 초기화해도 되남??
 			//------------------------------------------------------
 			//InitSound();
 			g_CurrentFrame		= 0;
@@ -351,7 +351,7 @@ ExecuteLogout()
 
 
 			//------------------------------------------------------
-			// ¸ðµÎ ´ëÈ­ Çã¿ë
+			// 모두 대화 허용
 			//------------------------------------------------------
 			g_pChatManager->ClearID();
 			g_pChatManager->SetAcceptMode();
@@ -359,7 +359,7 @@ ExecuteLogout()
 //			gC_vs_ui.ServerDisconnectMessage();
 //			gC_vs_ui.CloseAllDialog();
 
-			// TitleÈ­¸é UI½ÃÀÛ
+			// Title화면 UI시작
 			//gC_vs_ui.EndTitle();
 			gC_vs_ui.StartTitle();	
 		
@@ -367,18 +367,18 @@ ExecuteLogout()
 
 			g_bUIInput = FALSE;
 
-			// ±Ó¼Ó¸» ´ë»óÀ» Áö¿öÁØ´Ù.
+			// 귓속말 대상을 지워준다.
 			g_pUserInformation->WhisperID.Release();
 
 			//----------------------------------------------
-			// message Á¦°Å
+			// message 제거
 			//----------------------------------------------
 			g_pSystemMessage->Clear();
 			g_pGameMessage->Clear();
 			g_pNoticeMessage->Clear();
 
 			//------------------------------------------------------
-			// À½¾Ç ½ÃÀÛ
+			// 음악 시작
 			//------------------------------------------------------
 			if (g_pUserOption->PlayWaveMusic)
 			{
@@ -461,7 +461,7 @@ void
 PlayTitleMusic()
 {
 	//----------------------------------------------------------------
-	// WAV Ãâ·Â
+	// WAV 출력
 	//----------------------------------------------------------------
 	if (g_pUserOption->PlayWaveMusic)
 	{
@@ -523,7 +523,7 @@ PlayTitleMusic()
 		}
 	}
 	//----------------------------------------------------------------
-	// MID Ãâ·Â
+	// MID 출력
 	//----------------------------------------------------------------
 	else
 	{
@@ -588,7 +588,7 @@ void
 PlayGameMusic()
 {
 	//----------------------------------------------------------------
-	// WAV Ãâ·Â
+	// WAV 출력
 	//----------------------------------------------------------------
 	if (g_pUserOption->PlayWaveMusic)
 	{
@@ -627,7 +627,7 @@ PlayGameMusic()
 		}
 	}
 	//----------------------------------------------------------------
-	// MID Ãâ·Â
+	// MID 출력
 	//----------------------------------------------------------------
 	else
 	{
@@ -693,7 +693,7 @@ UIMessageManager::UIMessageManager()
 
 UIMessageManager::~UIMessageManager()
 {
-	// ´ÜÁö Å×½ºÆ®¿ë.. - -;
+	// 단지 테스트용.. - -;
 	for (int i=0; i<MAX_UI_MESSAGE; i++)
 	{
 		m_UIMessageFunction[i] = NULL;
@@ -733,24 +733,24 @@ UIMessageManager::Init()
 	//
 	// PDS
 	//
-//	m_UIMessageFunction[UI_CHANGE_PCS_CONNECTED_SLOT] = Execute_UI_CHANGE_PCS_CONNECTED_SLOT;		// ÀÌ¹Ì ¿¬°áµÈ ´Ù¸¥ »ç¶÷À» clickÇÏ¿´´Ù.
-//	m_UIMessageFunction[UI_PLEASE_PCS_CONNECT_ME] = Execute_UI_PLEASE_PCS_CONNECT_ME;			// »ç¶÷ÀÌ ÀÖ´Â wait roomÀ» clickÇÏ¿´´Ù.
-	//m_UIMessageFunction[UI_PCS_CONNECTOR_GRANTED] = Execute_UI_PCS_CONNECTOR_GRANTED;			// wait room¿¡ ÀÖ´Â connector¿Í ¿¬°áÀ» ½Â³«ÇÏ¿´´Ù.
-//	m_UIMessageFunction[UI_QUIT_PCS_ONLINE_MODE] = Execute_UI_QUIT_PCS_ONLINE_MODE;			// PCS online mode¿¡¼­ quit ¹öÆ°À» ´­·¶´Ù.
-//	m_UIMessageFunction[UI_END_PCS] = Execute_UI_END_PCS;								// sending ÇÏ°í ÀÖÀ» ¶§, end¸¦ ´­·¶´Ù.
+//	m_UIMessageFunction[UI_CHANGE_PCS_CONNECTED_SLOT] = Execute_UI_CHANGE_PCS_CONNECTED_SLOT;		// 이미 연결된 다른 사람을 click하였다.
+//	m_UIMessageFunction[UI_PLEASE_PCS_CONNECT_ME] = Execute_UI_PLEASE_PCS_CONNECT_ME;			// 사람이 있는 wait room을 click하였다.
+	//m_UIMessageFunction[UI_PCS_CONNECTOR_GRANTED] = Execute_UI_PCS_CONNECTOR_GRANTED;			// wait room에 있는 connector와 연결을 승낙하였다.
+//	m_UIMessageFunction[UI_QUIT_PCS_ONLINE_MODE] = Execute_UI_QUIT_PCS_ONLINE_MODE;			// PCS online mode에서 quit 버튼을 눌렀다.
+//	m_UIMessageFunction[UI_END_PCS] = Execute_UI_END_PCS;								// sending 하고 있을 때, end를 눌렀다.
 //	m_UIMessageFunction[UI_SEND_PCS_NUMBER] = Execute_UI_SEND_PCS_NUMBER;
-//	m_UIMessageFunction[UI_PDS_CLOSED] = Execute_UI_PDS_CLOSED;							// slayer pds°¡ ´ÝÇû´Ù. !ÇöÀç ¿¬°áÀº À¯ÁöÇÑ´Ù.
+//	m_UIMessageFunction[UI_PDS_CLOSED] = Execute_UI_PDS_CLOSED;							// slayer pds가 닫혔다. !현재 연결은 유지한다.
 
-//	m_UIMessageFunction[UI_PLEASE_SET_SLAYER_VALUE] = Execute_UI_PLEASE_SET_SLAYER_VALUE;		// slayer pds¿¡¼­ gage menu¸¦ ½ÇÇàÇÏ¿´´Ù.
+//	m_UIMessageFunction[UI_PLEASE_SET_SLAYER_VALUE] = Execute_UI_PLEASE_SET_SLAYER_VALUE;		// slayer pds에서 gage menu를 실행하였다.
 
-//	m_UIMessageFunction[UI_LEARN_SLAYER_SKILL] = Execute_UI_LEARN_SLAYER_SKILL;				// skill tree¿¡¼­ ¹è¿ï ¼ö ÀÖ´Â skillÀ» ¼±ÅÃÇÏ¿´´Ù.
+//	m_UIMessageFunction[UI_LEARN_SLAYER_SKILL] = Execute_UI_LEARN_SLAYER_SKILL;				// skill tree에서 배울 수 있는 skill을 선택하였다.
 //	m_UIMessageFunction[UI_CLOSE_SKILL_VIEW] = Execute_UI_CLOSE_SKILL_VIEW;
 
-	m_UIMessageFunction[UI_BACKGROUND_MOUSE_FOCUS] = Execute_UI_BACKGROUND_MOUSE_FOCUS;			// Mouse pointer°¡ UI Window¿¡¼­ ÀÌµ¿¾øÀÌ ÀÏÀ» ¶§, ±× Window°¡ »ç¶óÁú °æ¿ì Client¿¡ Àü´Þ.
-	m_UIMessageFunction[UI_REMOVE_BACKGROUND_MOUSE_FOCUS] = Execute_UI_REMOVE_BACKGROUND_MOUSE_FOCUS;// Game Menu¿Í °°Àº topmost Window°¡ Ãâ·ÂµÇ¾úÀ» ¶§´Â background focus¸¦ Á¦°ÅÇÏ´Â °ÍÀÌ ÁÁ´Ù.
+	m_UIMessageFunction[UI_BACKGROUND_MOUSE_FOCUS] = Execute_UI_BACKGROUND_MOUSE_FOCUS;			// Mouse pointer가 UI Window에서 이동없이 일을 때, 그 Window가 사라질 경우 Client에 전달.
+	m_UIMessageFunction[UI_REMOVE_BACKGROUND_MOUSE_FOCUS] = Execute_UI_REMOVE_BACKGROUND_MOUSE_FOCUS;// Game Menu와 같은 topmost Window가 출력되었을 때는 background focus를 제거하는 것이 좋다.
 
 	//
-	// »óÁ¡ Message
+	// 상점 Message
 	//
 	m_UIMessageFunction[UI_BUY_ITEM] = Execute_UI_BUY_ITEM;
 
@@ -768,30 +768,30 @@ UIMessageManager::Init()
 	m_UIMessageFunction[UI_CANCEL_EXCHANGE] = Execute_UI_CANCEL_EXCHANGE;
 	m_UIMessageFunction[UI_OK_EXCHANGE] = Execute_UI_OK_EXCHANGE;
 
-	m_UIMessageFunction[UI_CHARACTER_MANAGER_FINISHED] = Execute_UI_CHARACTER_MANAGER_FINISHED;	// Characters Window¿¡¼­ ÃÊ±âÈ­¸éÀ¸·Î °¥ ¶§ ¾Ë·ÁÁØ´Ù.
-	m_UIMessageFunction[UI_TERMINATION] = Execute_UI_TERMINATION;						// Á¾·á
-	m_UIMessageFunction[UI_LOGIN] = Execute_UI_LOGIN;								// »ç¿ëÀÚ login ¿äÃ»
+	m_UIMessageFunction[UI_CHARACTER_MANAGER_FINISHED] = Execute_UI_CHARACTER_MANAGER_FINISHED;	// Characters Window에서 초기화면으로 갈 때 알려준다.
+	m_UIMessageFunction[UI_TERMINATION] = Execute_UI_TERMINATION;						// 종료
+	m_UIMessageFunction[UI_LOGIN] = Execute_UI_LOGIN;								// 사용자 login 요청
 	m_UIMessageFunction[UI_LOGOUT] = Execute_UI_LOGOUT;								
-	//m_UIMessageFunction[UI_NEW_USER_REGISTRATION] = Execute_UI_NEW_USER_REGISTRATION;			// »õ »ç¿ëÀÚ µî·Ï ¿äÃ»
+	//m_UIMessageFunction[UI_NEW_USER_REGISTRATION] = Execute_UI_NEW_USER_REGISTRATION;			// 새 사용자 등록 요청
 	m_UIMessageFunction[UI_CONNECT] = Execute_UI_CONNECT;							   // Game connection.
-	m_UIMessageFunction[UI_CHAT_RETURN] = Execute_UI_CHAT_RETURN;						// Ã¤ÆÃÃ¢ ÀÔ·Â.
-//	m_UIMessageFunction[UI_CHAT_SELECT_NAME] = Execute_UI_CHAT_SELECT_NAME;						// Ã¤ÆÃÃ¢ ÀÌ¸§ ¼±ÅÃ.
+	m_UIMessageFunction[UI_CHAT_RETURN] = Execute_UI_CHAT_RETURN;						// 채팅창 입력.
+//	m_UIMessageFunction[UI_CHAT_SELECT_NAME] = Execute_UI_CHAT_SELECT_NAME;						// 채팅창 이름 선택.
 	m_UIMessageFunction[UI_SELECT_SKILL] = Execute_UI_SELECT_SKILL;						// Skill selection.
-	m_UIMessageFunction[UI_CANCEL_SELECT_SKILL] = Execute_UI_CANCEL_SELECT_SKILL;				// Skill ¼±ÅÃÀÌ Ãë¼ÒµÇ¾ú´Ù.
+	m_UIMessageFunction[UI_CANCEL_SELECT_SKILL] = Execute_UI_CANCEL_SELECT_SKILL;				// Skill 선택이 취소되었다.
 
 	//
 	// Item message
 	//
 
 	// drop
-	m_UIMessageFunction[UI_ITEM_DROP_TO_CLIENT] = Execute_UI_ITEM_DROP_TO_CLIENT;				// ItemÀ» ¹Ù´Ú¿¡ ¶³¾î¶ß·È´Ù.
-	m_UIMessageFunction[UI_ITEM_DROP_TO_INVENTORY] = Execute_UI_ITEM_DROP_TO_INVENTORY; 		// Inventory¿¡ ³õ´Â´Ù.
-	//m_UIMessageFunction[UI_ITEM_DROP_TO_TRADEGRID] = Execute_UI_ITEM_DROP_TO_TRADEGRID;			// ±³È¯Ã¢ ±×¸®µå¿¡ ³õ´Â´Ù.
-	m_UIMessageFunction[UI_ITEM_DROP_TO_GEAR] = Execute_UI_ITEM_DROP_TO_GEAR;				// Gear¿¡ ³õ´Â´Ù.
-	m_UIMessageFunction[UI_ITEM_DROP_TO_QUICKSLOT] = Execute_UI_ITEM_DROP_TO_QUICKSLOT;			// Quick Slot¿¡ ³õ´Â´Ù.
+	m_UIMessageFunction[UI_ITEM_DROP_TO_CLIENT] = Execute_UI_ITEM_DROP_TO_CLIENT;				// Item을 바닥에 떨어뜨렸다.
+	m_UIMessageFunction[UI_ITEM_DROP_TO_INVENTORY] = Execute_UI_ITEM_DROP_TO_INVENTORY; 		// Inventory에 놓는다.
+	//m_UIMessageFunction[UI_ITEM_DROP_TO_TRADEGRID] = Execute_UI_ITEM_DROP_TO_TRADEGRID;			// 교환창 그리드에 놓는다.
+	m_UIMessageFunction[UI_ITEM_DROP_TO_GEAR] = Execute_UI_ITEM_DROP_TO_GEAR;				// Gear에 놓는다.
+	m_UIMessageFunction[UI_ITEM_DROP_TO_QUICKSLOT] = Execute_UI_ITEM_DROP_TO_QUICKSLOT;			// Quick Slot에 놓는다.
 
 	// pick up
-	// Client¿¡¼­ ÁýÀ» ¶§´Â Client -> UI ÀÌ´Ù.
+	// Client에서 집을 때는 Client -> UI 이다.
 	//m_UIMessageFunction[UI_ITEM_PICKUP_FROM_TRADEGRID] = Execute_UI_ITEM_PICKUP_FROM_TRADEGRID;
 	m_UIMessageFunction[UI_ITEM_PICKUP_FROM_INVENTORY] = Execute_UI_ITEM_PICKUP_FROM_INVENTORY;
 	m_UIMessageFunction[UI_ITEM_PICKUP_FROM_GEAR] = Execute_UI_ITEM_PICKUP_FROM_GEAR;
@@ -801,11 +801,11 @@ UIMessageManager::Init()
 	//m_UIMessageFunction[UI_ITEM_INSERT_FROM_TRADEGRID] = Execute_UI_ITEM_INSERT_FROM_TRADEGRID;
 	m_UIMessageFunction[UI_ITEM_INSERT_FROM_INVENTORY] = Execute_UI_ITEM_INSERT_FROM_INVENTORY;
 	m_UIMessageFunction[UI_ITEM_INSERT_FROM_GEAR] = Execute_UI_ITEM_INSERT_FROM_GEAR;
-	m_UIMessageFunction[UI_ITEM_INSERT_FROM_QUICKSLOT] = Execute_UI_ITEM_INSERT_FROM_QUICKSLOT;  // ½×ÀÌ´Â °æ¿ì - ¾ÆÁ÷ Áö¿ø¾ÈÇÔ -
+	m_UIMessageFunction[UI_ITEM_INSERT_FROM_QUICKSLOT] = Execute_UI_ITEM_INSERT_FROM_QUICKSLOT;  // 쌓이는 경우 - 아직 지원안함 -
 
 	// use
-	m_UIMessageFunction[UI_ITEM_USE] = Execute_UI_ITEM_USE;							// Inventory¿¡¼­ »ç¿ë.
-	m_UIMessageFunction[UI_ITEM_USE_QUICKSLOT] = Execute_UI_ITEM_USE_QUICKSLOT;				// Quick Item Slot¿¡¼­ »ç¿ë.
+	m_UIMessageFunction[UI_ITEM_USE] = Execute_UI_ITEM_USE;							// Inventory에서 사용.
+	m_UIMessageFunction[UI_ITEM_USE_QUICKSLOT] = Execute_UI_ITEM_USE_QUICKSLOT;				// Quick Item Slot에서 사용.
 
 	//
 	// Character management
@@ -877,8 +877,8 @@ UIMessageManager::Init()
 	m_UIMessageFunction[UI_JOIN_READY_TEAM] = Execute_UI_JOIN_READY_TEAM;				// void_ptr = TEAM_NAME
 	m_UIMessageFunction[UI_JOIN_REGIST_TEAM] = Execute_UI_JOIN_REGIST_TEAM;			// void_ptr = TEAM_NAME
 
-	m_UIMessageFunction[UI_REGIST_GUILD_MEMBER] = Execute_UI_REGIST_GUILD_MEMBER;			// void_ptr = introduction max:150byte Ã¢ ´Ý¾ÆÁÙ°Í!
-	m_UIMessageFunction[UI_REGIST_GUILD_TEAM] = Execute_UI_REGIST_GUILD_TEAM;			// left = TEAM_NAME, void_ptr = introduction max:150byte Ã¢ ´Ý¾ÆÁÙ°Í!
+	m_UIMessageFunction[UI_REGIST_GUILD_MEMBER] = Execute_UI_REGIST_GUILD_MEMBER;			// void_ptr = introduction max:150byte 창 닫아줄것!
+	m_UIMessageFunction[UI_REGIST_GUILD_TEAM] = Execute_UI_REGIST_GUILD_TEAM;			// left = TEAM_NAME, void_ptr = introduction max:150byte 창 닫아줄것!
 
 	m_UIMessageFunction[UI_CLOSE_FILE_DIALOG] = Execute_UI_CLOSE_FILE_DIALOG;
 
@@ -971,15 +971,15 @@ UIMessageManager::Init()
 	m_UIMessageFunction[UI_PET_GAMBLE] = Execute_UI_PET_GAMBLE;
 	m_UIMessageFunction[UI_CLOSE_USE_PET_FOOD] = Execute_UI_CLOSE_USE_PET_FOOD;
 
-	// 2004, 5, 11 sobeit add start - Æê º¸°ü¼Ò
+	// 2004, 5, 11 sobeit add start - 펫 보관소
 	m_UIMessageFunction[UI_CLOSE_PETSTORAGE] = Execute_UI_CLOSE_PETSTORAGE;
 	m_UIMessageFunction[UI_CLOSE_KEEP_PETITEM] = Execute_UI_CLOSE_KEEP_PETITEM;
 	m_UIMessageFunction[UI_CLOSE_GET_KEEP_PETITEM] = Execute_UI_CLOSE_GET_KEEP_PETITEM;
 	m_UIMessageFunction[UI_KEEP_PETITEM] = Execute_UI_KEEP_PETITEM;
 	m_UIMessageFunction[UI_GET_KEEP_PETITEM] = Execute_UI_GET_KEEP_PETITEM;
-	// 2004, 5, 11 sobeit add end - Æê º¸°ü¼Ò
+	// 2004, 5, 11 sobeit add end - 펫 보관소
 
-	// 2004, 5, 28 sobeit add start - sms °ü·Ã
+	// 2004, 5, 28 sobeit add start - sms 관련
 	m_UIMessageFunction[UI_CLOSE_SMS_MESSAGE] = Execute_UI_CLOSE_SMS_MESSAGE;
 	m_UIMessageFunction[UI_SEND_SMS_MESSAGE] = Execute_UI_SEND_SMS_MESSAGE;
 	m_UIMessageFunction[UI_SMS_OPEN_LIST] = Execute_UI_SMS_OPEN_LIST;
@@ -990,7 +990,7 @@ UIMessageManager::Init()
 	m_UIMessageFunction[UI_SMS_ADD_SEND_LIST] = Execute_UI_SMS_ADD_SEND_LIST;
 	// 2004, 5, 28 sobeit add end
 
-	// 2004, 6, 15 sobeit add start - nameing °ü·Ã
+	// 2004, 6, 15 sobeit add start - nameing 관련
 	m_UIMessageFunction[UI_CLOSE_NAMING] = Execute_UI_CLOSE_NAMING;
 	m_UIMessageFunction[UI_CHANGE_CUSTOM_NAMING] = Execute_UI_CHANGE_CUSTOM_NAMING;
 	m_UIMessageFunction[UI_SELECT_NAMING] = Execute_UI_SELECT_NAMING;
@@ -998,7 +998,7 @@ UIMessageManager::Init()
 	m_UIMessageFunction[UI_RUN_NAMING_CHANGE] = Execute_UI_RUN_NAMING_CHANGE;
 	// 2004, 6, 15 sobeit add end
 
-	// 2004, 7, 12 sobeit add start - quest °ü·Ã
+	// 2004, 7, 12 sobeit add start - quest 관련
 	m_UIMessageFunction[UI_CLOSE_QUEST_MANAGER] = Execute_UI_CLOSE_QUEST_MANAGER;
 	m_UIMessageFunction[UI_CLOSE_QUEST_LIST] = Execute_UI_CLOSE_QUEST_LIST;
 	m_UIMessageFunction[UI_CLOSE_QUEST_DETAIL] = Execute_UI_CLOSE_QUEST_DETAIL;
@@ -1008,11 +1008,11 @@ UIMessageManager::Init()
 	m_UIMessageFunction[UI_GQUEST_ACCEPT] = Execute_UI_GQUEST_ACCEPT;
 	m_UIMessageFunction[UI_GQUEST_GIVEUP] = Execute_UI_GQUEST_GIVEUP;
 
-	// 2004, 7, 12 sobeit add end - quest °ü·Ã
+	// 2004, 7, 12 sobeit add end - quest 관련
 
 	m_UIMessageFunction[UI_ITEM_USE_GQUEST_ITEM] = Execute_UI_ITEM_USE_GQUEST_ITEM;
 
-	// 2004,10.9 csm guild °ü·Ã 
+	// 2004,10.9 csm guild 관련 
 	m_UIMessageFunction[UI_REQUEST_UNION] =	 Execute_UI_ITEM_USE_REQUEST_UNION;
 	m_UIMessageFunction[UI_REQUEST_UNION_QUIT] =	 Execute_UI_ITEM_USE_QUIT;
 	m_UIMessageFunction[UI_REQUEST_UNION_EXPERGUILD] =	 Execute_UI_ITEM_USE_EXPER;
@@ -1062,7 +1062,7 @@ UIMessageManager::Init()
 
 	m_UIMessageFunction[UI_REQUEST_EVENT_ITEM] =	 Execute_UI_REQUEST_EVENT_ITEM;
 
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
+	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 		m_UIMessageFunction[UI_CLOSE_INVENTORY_SUB]			=	 Execute_UI_CLOSE_INVENTORY_SUB;
 		m_UIMessageFunction[UI_ITEM_DROP_TO_INVENTORY_SUB]		=	 Execute_UI_ITEM_DROP_TO_INVENTORY_SUB;
 		m_UIMessageFunction[UI_ITEM_PICKUP_FROM_INVENTORY_SUB]	=	 Execute_UI_ITEM_PICKUP_FROM_INVENTORY_SUB;
@@ -1074,13 +1074,13 @@ UIMessageManager::Init()
 //-----------------------------------------------------------------------------
 // Execute
 //-----------------------------------------------------------------------------
-// message¿Í ¿¬°áµÇ¾î ÀÖ´Â ÀûÀýÇÑ Ã³¸® ÇÔ¼ö¸¦ È£ÃâÇÑ´Ù.
+// message와 연결되어 있는 적절한 처리 함수를 호출한다.
 //-----------------------------------------------------------------------------
 void			
 UIMessageManager::Execute(DWORD message, int left, int right, void* void_ptr)
 {
-	// ±âº»ÀûÀ¸·Î MODE_GAMEÀÌ¸é
-	// NULLÀÌ ¾Æ´Ï¾î¾ß ÇÏ´Â °ªµéÀÌ ÀÖ´Ù..
+	// 기본적으로 MODE_GAME이면
+	// NULL이 아니어야 하는 값들이 있다..
 	if (g_Mode==MODE_GAME
 		&& (g_pZone==NULL
 			|| g_pPlayer==NULL
@@ -1115,7 +1115,7 @@ UIMessageManager::Execute(DWORD message, int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// »õ Ä³¸¯ÅÍ ¸¸µé±â
+// 새 캐릭터 만들기
 //
 //-----------------------------------------------------------------------------
 void
@@ -1148,7 +1148,7 @@ UIMessageManager::Execute_UI_NEW_CHARACTER(int left, int right, void* void_ptr)
 	BOOL bAllOK = TRUE;
 
 	//---------------------------------------------
-	// ÀÌ¸§ ±æÀÌ Ã¼Å©
+	// 이름 길이 체크
 	//---------------------------------------------
 	int len = strlen(pChar->sz_name);	
 	
@@ -1165,7 +1165,7 @@ UIMessageManager::Execute_UI_NEW_CHARACTER(int left, int right, void* void_ptr)
 		if (!IsValidID(pChar->sz_name, "-_"))
 		{
 			//---------------------------------------------
-			// Àß¸øµÈ IDÀÎ °æ¿ì
+			// 잘못된 ID인 경우
 			//---------------------------------------------						
 			g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_USER_REGISTER_INVALID_ID].GetString() );
 			bAllOK = FALSE;
@@ -1175,7 +1175,7 @@ UIMessageManager::Execute_UI_NEW_CHARACTER(int left, int right, void* void_ptr)
 			char strName[80];
 			strcpy(strName, pChar->sz_name);
 
-			// ¾È ÁÁÀº ¸»ÀÌ µé¾îÀÖ´Â °æ¿ì´Â Çã¿ëÀÌ ¾ÈµÈ´Ù
+			// 안 좋은 말이 들어있는 경우는 허용이 안된다
 			if (g_pChatManager->RemoveCurse(strName))
 			{
 				g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_USER_REGISTER_INVALID_ID].GetString() );
@@ -1196,7 +1196,7 @@ UIMessageManager::Execute_UI_NEW_CHARACTER(int left, int right, void* void_ptr)
 	}
 
 	//---------------------------------------------
-	// ¸ðµç data°¡ Á¤»óÀûÀÌ¸é...
+	// 모든 data가 정상적이면...
 	//---------------------------------------------
 	if (bAllOK)
 	{
@@ -1204,7 +1204,7 @@ UIMessageManager::Execute_UI_NEW_CHARACTER(int left, int right, void* void_ptr)
 			//char wansungName[16];
 
 			//---------------------------------------------
-			// Á¶ÇÕÇü --> ¿Ï¼ºÇü
+			// 조합형 --> 완성형
 			//---------------------------------------------
 			//UI_JohapToWansung( pChar->sz_name, wansungName );
 
@@ -1221,7 +1221,7 @@ UIMessageManager::Execute_UI_NEW_CHARACTER(int left, int right, void* void_ptr)
 				HAIR_STYLE3
 			};
 
-			// »ö±ò È®ÀÎ
+			// 색깔 확인
 			pChar->hair_color = max(0, min(pChar->hair_color, MAX_COLORSET-1));
 			pChar->skin_color = max(0, min(pChar->skin_color, MAX_COLORSET-1));
 			
@@ -1263,7 +1263,7 @@ UIMessageManager::Execute_UI_RUN_NEWUSER_REGISTRATION(int left, int right, void*
 	switch (g_pClientConfig->NEW_USER_REGISTERATION_MODE)
 	{
 		//-----------------------------------------------------------
-		// CLIENT - »õ »ç¿ëÀÚ µî·Ï °¡´É
+		// CLIENT - 새 사용자 등록 가능
 		//-----------------------------------------------------------
 		case ClientConfig::NUR_CLIENT :
 		{
@@ -1272,13 +1272,13 @@ UIMessageManager::Execute_UI_RUN_NEWUSER_REGISTRATION(int left, int right, void*
 //		break;
 
 		//-----------------------------------------------------------
-		// HOMEPAGE - È¨ÆäÀÌÁö¸¦ ¶ç¿öÁÖ¸é¼­ µî·Ï
+		// HOMEPAGE - 홈페이지를 띄워주면서 등록
 		//-----------------------------------------------------------
 		case ClientConfig::NUR_HOMEPAGE :		
 		{
 			g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_USER_REGISTER_HOMEPAGE].GetString() );			
 
-			// Á¾·á..
+			// 종료..
 			SetMode( MODE_QUIT );
 
 #ifdef PLATFORM_WINDOWS
@@ -1308,7 +1308,7 @@ UIMessageManager::Execute_UI_RUN_NEWUSER_REGISTRATION(int left, int right, void*
 		break;
 
 		//-----------------------------------------------------------
-		// MESSAGE_HOMEPAGE - È¨ÆäÀÌÁö¿¡¼­ µî·ÏÇÏ¶ó´Â message
+		// MESSAGE_HOMEPAGE - 홈페이지에서 등록하라는 message
 		//-----------------------------------------------------------
 		case ClientConfig::NUR_MESSAGE_HOMEPAGE :	
 		{
@@ -1317,7 +1317,7 @@ UIMessageManager::Execute_UI_RUN_NEWUSER_REGISTRATION(int left, int right, void*
 		break;
 		
 		//-----------------------------------------------------------
-		// DENY - »õ »ç¿ëÀÚ µî·Ï ºÒ°¡		
+		// DENY - 새 사용자 등록 불가		
 		//-----------------------------------------------------------
 		case ClientConfig::NUR_DENY :				
 		{
@@ -1364,7 +1364,7 @@ UIMessageManager::Execute_UI_CHECK_EXIST_ID(int left, int right, void* void_ptr)
 	const char* pName = (const char*)void_ptr;
 
 	//--------------------------------------------------
-	// ID Ã¼Å©
+	// ID 체크
 	//--------------------------------------------------
 	if (IsValidID(pName, NULL))
 	{
@@ -1373,13 +1373,13 @@ UIMessageManager::Execute_UI_CHECK_EXIST_ID(int left, int right, void* void_ptr)
 		if (len<PlayerInfo::minIDLength || len>PlayerInfo::maxIDLength)
 		{
 			char strTemp[128];
-			sprintf(strTemp, "ID´Â %d~%dÀÚÀÔ´Ï´Ù", PlayerInfo::minIDLength, PlayerInfo::maxIDLength);
+			sprintf(strTemp, "ID는 %d~%d자입니다", PlayerInfo::minIDLength, PlayerInfo::maxIDLength);
 			g_pUIDialog->PopupFreeMessageDlg( strTemp );						
 		}
 		else
 		{
 			//--------------------------------------------------
-			// socket ÃÊ±âÈ­
+			// socket 초기화
 			//--------------------------------------------------
 			if (!InitSocket())
 			{						
@@ -1396,8 +1396,8 @@ UIMessageManager::Execute_UI_CHECK_EXIST_ID(int left, int right, void* void_ptr)
 				g_pSocket->setPlayerStatus( CPS_AFTER_SENDING_CL_QUERY_PLAYER_ID );
 
 
-			//gC_vs_ui.AleadyExistIdMessage(); // »ç¿ëºÒ°¡
-			//gC_vs_ui.NoAleadyExistIdMessage(); // »ç¿ë°¡´É						
+			//gC_vs_ui.AleadyExistIdMessage(); // 사용불가
+			//gC_vs_ui.NoAleadyExistIdMessage(); // 사용가능						
 		}
 	}
 	else
@@ -1405,14 +1405,14 @@ UIMessageManager::Execute_UI_CHECK_EXIST_ID(int left, int right, void* void_ptr)
 		g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_USER_REGISTER_INVALID_ID].GetString() );
 	}
 
-	// Áö¿öµµ µÇ´Â°Ô ¸Â´ÂÁö.. Èì *_*;
+	// 지워도 되는게 맞는지.. 흠 *_*;
 	DeleteNewArray( void_ptr );
 }
 
 
 //-----------------------------------------------------------------------------
 //
-//		Ä³¸¯ÅÍ »èÁ¦
+//		캐릭터 삭제
 //
 //-----------------------------------------------------------------------------
 void
@@ -1429,9 +1429,9 @@ UIMessageManager::Execute_UI_DELETE_CHARACTER(int left, int right, void* void_pt
 	DELETE_CHARACTER *pChar = (DELETE_CHARACTER*)void_ptr;
 
 	//--------------------------------------------------
-	// ÁÖ¹Îµî·Ï¹øÈ£ Ã¼Å©
+	// 주민등록번호 체크
 	//--------------------------------------------------
-	// ³Ý¸¶ºí¿ë
+	// 넷마블용
 	if (g_pUserInformation->IsNetmarble || g_pUserInformation->bChinese || IsValidSSN( pChar->sz_part1, pChar->sz_part2 ))
 	{
 		char strTemp[20];
@@ -1442,7 +1442,7 @@ UIMessageManager::Execute_UI_DELETE_CHARACTER(int left, int right, void* void_pt
 		} else
 		if(!g_pUserInformation->IsNetmarble)
 		{
-			// xxxxxx-xxxxxxx Çü½ÄÀ¸·Î ¸¸µç´Ù.
+			// xxxxxx-xxxxxxx 형식으로 만든다.
 			sprintf(strTemp, "%s-%s", pChar->sz_part1, pChar->sz_part2);
 		}
 		else
@@ -1460,21 +1460,21 @@ UIMessageManager::Execute_UI_DELETE_CHARACTER(int left, int right, void* void_pt
 			g_pSocket->setPlayerStatus( CPS_AFTER_SENDING_CL_DELETE_PC );
 			
 
-		// ÁÖ¹Îµî·Ï¹øÈ£
+		// 주민등록번호
 		//pChar->sz_part1
 		//pChar->sz_part2					
 
-		// ÁÖ¹Îµî·Ï¹øÈ£°¡ Æ²·ÈÀ» ¶§ÀÇ message
+		// 주민등록번호가 틀렸을 때의 message
 		//gC_vs_ui.Invalid_SSN_Message();
 
-		// Ä³¸¯ÅÍ »èÁ¦
+		// 캐릭터 삭제
 		//gC_vs_ui.DeleteCharacter(slot);
 
 		//
 		// ((DELETE_CHARACTER *)void_ptr) = sz_part1, sz_part2, slot
 		//
 
-		// ³Ý¸¶ºí¿ë
+		// 넷마블용
 		if(!g_pUserInformation->IsNetmarble)
 		{
 			DeleteNewArray( pChar->sz_part1 );
@@ -1485,7 +1485,7 @@ UIMessageManager::Execute_UI_DELETE_CHARACTER(int left, int right, void* void_pt
 		//gC_vs_ui.DeleteCharacter( pChar->slot );
 
 		//--------------------------------------------
-		// »èÁ¦ÇÒ·Á´Â slotÀúÀå
+		// 삭제할려는 slot저장
 		//--------------------------------------------
 		g_pUserInformation->Slot = pChar->slot;
 
@@ -1500,7 +1500,7 @@ UIMessageManager::Execute_UI_DELETE_CHARACTER(int left, int right, void* void_pt
 	
 //-----------------------------------------------------------------------------
 //
-//		ÇÁ·Î±×·¥ Á¾·á
+//		프로그램 종료
 //
 //-----------------------------------------------------------------------------
 void
@@ -1519,7 +1519,7 @@ UIMessageManager::Execute_UI_TERMINATION(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// »õ »ç¿ëÀÚ µî·Ï
+// 새 사용자 등록
 //
 //-----------------------------------------------------------------------------
 /*
@@ -1531,7 +1531,7 @@ UIMessageManager::Execute_UI_NEW_USER_REGISTRATION(int left, int right, void* vo
 	//
 	// ((NEW_REGISTRATION *)void_ptr) = ...
 	//
-	// // !string ptrÀ» ÀúÀåÇÏ¸é ¾ÈµÈ´Ù.
+	// // !string ptr을 저장하면 안된다.
 	//
 	//struct NEW_REGISTRATION
 	//{
@@ -1541,8 +1541,8 @@ UIMessageManager::Execute_UI_NEW_USER_REGISTRATION(int left, int right, void* vo
 	//	char *	sz_name;
 	//	char *	sz_email;
 	//	char *	sz_address;
-	//	char *	sz_ssn_number_part1; // ÁÖ¹Î¹øÈ£
-	//	char *	sz_ssn_number_part2; // ÁÖ¹Î¹øÈ£
+	//	char *	sz_ssn_number_part1; // 주민번호
+	//	char *	sz_ssn_number_part2; // 주민번호
 	//	char *	sz_homepage;
 	//	char *	sz_woo;
 	//	char *	sz_phone;
@@ -1556,7 +1556,7 @@ UIMessageManager::Execute_UI_NEW_USER_REGISTRATION(int left, int right, void* vo
 	BOOL AllOK = TRUE;
 
 	//--------------------------------------------------
-	// string ±æÀÌ Ã¼Å©
+	// string 길이 체크
 	//--------------------------------------------------
 	if (pReg->sz_id==NULL 
 		|| pReg->sz_password==NULL
@@ -1565,7 +1565,7 @@ UIMessageManager::Execute_UI_NEW_USER_REGISTRATION(int left, int right, void* vo
 		|| pReg->sz_ssn_number_part2==NULL
 		|| pReg->sz_email==NULL)
 	{
-		// ÇÊ¼öÇ×¸ñÀÌ ÀÔ·Â ¾ÈµÈ °æ¿ì
+		// 필수항목이 입력 안된 경우
 		AllOK = FALSE;
 
 		g_pUIDialog->PopupFreeMessageDlg((*g_pGameStringTable)[STRING_USER_REGISTER_EMPTY_FIELD].GetString());
@@ -1577,7 +1577,7 @@ UIMessageManager::Execute_UI_NEW_USER_REGISTRATION(int left, int right, void* vo
 			
 		
 		//--------------------------------------------------
-		// ID ±æÀÌ Ã¼Å©
+		// ID 길이 체크
 		//--------------------------------------------------
 		len = strlen(pReg->sz_id);	
 		
@@ -1589,7 +1589,7 @@ UIMessageManager::Execute_UI_NEW_USER_REGISTRATION(int left, int right, void* vo
 		}
 
 		//---------------------------------------------
-		// Àß¸øµÈ IDÀÎÁö Ã¼Å©ÇÑ´Ù.
+		// 잘못된 ID인지 체크한다.
 		//---------------------------------------------						
 		if (AllOK)
 		{
@@ -1603,7 +1603,7 @@ UIMessageManager::Execute_UI_NEW_USER_REGISTRATION(int left, int right, void* vo
 				char strName[80];
 				strcpy(strName, pReg->sz_id);
 
-				// ¾È ÁÁÀº ¸»ÀÌ µé¾îÀÖ´Â °æ¿ì´Â Çã¿ëÀÌ ¾ÈµÈ´Ù.
+				// 안 좋은 말이 들어있는 경우는 허용이 안된다.
 				if (g_pChatManager->RemoveCurse(strName))
 				{
 					g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_USER_REGISTER_INVALID_ID].GetString() );
@@ -1613,7 +1613,7 @@ UIMessageManager::Execute_UI_NEW_USER_REGISTRATION(int left, int right, void* vo
 		}
 		
 		//--------------------------------------------------
-		// Password ±æÀÌ Ã¼Å©
+		// Password 길이 체크
 		//--------------------------------------------------
 		if (AllOK)
 		{
@@ -1626,23 +1626,23 @@ UIMessageManager::Execute_UI_NEW_USER_REGISTRATION(int left, int right, void* vo
 				AllOK = FALSE;
 			}
 			else if (!IsValidPassword(pReg->sz_id))
-			//else if (!IsValidID(pReg->sz_id))	// ¿ø·¡´Â ÀÌ°Å ½á¾ßµÇ´Âµ¥
-			// ÀÌ¹Ì ¸¸µé¾îÁø ¾ÆÀÌµð Áß¿¡..  ID»ý¼º·ê¿¡ ÀûÇÕÇÏÁö ¾ÊÀº °Íµµ ÀÖ¾î¼­..
+			//else if (!IsValidID(pReg->sz_id))	// 원래는 이거 써야되는데
+			// 이미 만들어진 아이디 중에..  ID생성룰에 적합하지 않은 것도 있어서..
 			{
-				// ID¿¡ Æ¯¼ö¹®ÀÚ°¡ µé¾î°£ °æ¿ì
+				// ID에 특수문자가 들어간 경우
 				g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_USER_REGISTER_ID_SPECIAL].GetString() );
 				AllOK = FALSE;
 			}			
 			else if (!IsValidPassword(pReg->sz_password))
 			{
-				// ÆÐ½º¿öµå°¡ Àß¸øµÈ °æ¿ì
+				// 패스워드가 잘못된 경우
 				g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_USER_REGISTER_PASSWORD_SPECIAL].GetString() );
 				AllOK = FALSE;
 			}
 			else
 			{
 				//--------------------------------------------------
-				// ¼ýÀÚ¸¸ »ç¿ëÇÏ¸é ¾ÈµÈ´Ù.
+				// 숫자만 사용하면 안된다.
 				//--------------------------------------------------
 				char* str = pReg->sz_password;
 				
@@ -1659,7 +1659,7 @@ UIMessageManager::Execute_UI_NEW_USER_REGISTRATION(int left, int right, void* vo
 					}
 				}
 
-				if (AllNumber)	// ÀüºÎ ¼ýÀÚÀÎ °æ¿ì..
+				if (AllNumber)	// 전부 숫자인 경우..
 				{
 					g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_USER_REGISTER_PASSWORD_NUMBER].GetString() );
 					AllOK = FALSE;
@@ -1669,7 +1669,7 @@ UIMessageManager::Execute_UI_NEW_USER_REGISTRATION(int left, int right, void* vo
 		}
 
 		//--------------------------------------------------
-		// ÀÌ¸§
+		// 이름
 		//--------------------------------------------------
 		if (AllOK)
 		{
@@ -1684,11 +1684,11 @@ UIMessageManager::Execute_UI_NEW_USER_REGISTRATION(int left, int right, void* vo
 		}
 
 		//--------------------------------------------------
-		// ÀÌ¸§
+		// 이름
 		//--------------------------------------------------
 		if (AllOK)
 		{
-			// Á¦´ë·Î ÀÔ·ÂµÈ °æ¿ì
+			// 제대로 입력된 경우
 			if (//strlen(pReg->sz_ssn_number) == 6+1+7
 				//&& pReg->sz_ssn_number[6]=='-')
 				1)
@@ -1707,7 +1707,7 @@ UIMessageManager::Execute_UI_NEW_USER_REGISTRATION(int left, int right, void* vo
 				strcpy(ssn2, pReg->sz_ssn_number_part2);
 
 				//--------------------------------------------------
-				// ÁÖ¹Îµî·Ï¹øÈ£ Ã¼Å©
+				// 주민등록번호 체크
 				//--------------------------------------------------
 				if (!IsValidSSN( ssn1, ssn2 ))
 				{
@@ -1727,7 +1727,7 @@ UIMessageManager::Execute_UI_NEW_USER_REGISTRATION(int left, int right, void* vo
 	}
 
 	//--------------------------------------------------
-	// ¸ðµÎ Á¤»óÀÌ¸é..
+	// 모두 정상이면..
 	//--------------------------------------------------
 	if (AllOK)
 	{
@@ -1771,7 +1771,7 @@ UIMessageManager::Execute_UI_NEW_USER_REGISTRATION(int left, int right, void* vo
 			CLRegisterPlayer	_CLRegisterPlayer;
 			
 			//--------------------------------------------------
-			// ÇÊ¼öÇ×¸ñ
+			// 필수항목
 			//--------------------------------------------------
 			_CLRegisterPlayer.setID( pReg->sz_id );
 			_CLRegisterPlayer.setPassword( pReg->sz_password );
@@ -1787,7 +1787,7 @@ UIMessageManager::Execute_UI_NEW_USER_REGISTRATION(int left, int right, void* vo
 
 
 			//--------------------------------------------------
-			// ÇÊ¼öÇ×¸ñÀÌ ¾Æ´Ñ °Íµé
+			// 필수항목이 아닌 것들
 			//--------------------------------------------------
 			if (pReg->sz_address!=NULL)
 			{
@@ -1835,7 +1835,7 @@ UIMessageManager::Execute_UI_NEW_USER_REGISTRATION(int left, int right, void* vo
 			}
 
 			//--------------------------------------------------
-			// Áö±Ý ¾ø´Ù.. 
+			// 지금 없다.. 
 			//--------------------------------------------------
 			_CLRegisterPlayer.setProfile( "profile" );
 
@@ -1845,7 +1845,7 @@ UIMessageManager::Execute_UI_NEW_USER_REGISTRATION(int left, int right, void* vo
 			
 		#endif	
 
-		// id±â¾ï
+		// id기억
 		g_pUserInformation->UserID = pReg->sz_id;
 
 		SetMode( MODE_WAIT_REGISTERPLAYEROK );
@@ -1891,7 +1891,7 @@ UIMessageManager::Execute_UI_LOGIN(int left, int right, void* void_ptr)
 	//
 	// ((C_VS_UI::LOGIN *)void_ptr) = id, password
 	//
-	// !string ptrÀ» ÀúÀåÇÏ¸é ¾ÈµÈ´Ù.
+	// !string ptr을 저장하면 안된다.
 	//
 	LOGIN*	login = (LOGIN*)void_ptr;
 
@@ -1904,14 +1904,14 @@ UIMessageManager::Execute_UI_LOGIN(int left, int right, void* void_ptr)
 		return;
 	}	
 
-	// ½½·¹ÀÌ¾î ±×¸² ÀÏºÎ ·Îµù - 2001.8.20
+	// 슬레이어 그림 일부 로딩 - 2001.8.20
 	LoadingAddonSPK( false );
 
 	if (login->sz_id!=NULL && login->sz_password!=NULL)
 	{
 		//if (IsValidID(login->sz_id, NULL))
 		{
-			// ID±â¾ï
+			// ID기억
 			//UI_BackupLoginID(((LOGIN *)void_ptr)->sz_id);
 			
 			if (IsValidPassword(login->sz_password))
@@ -1931,15 +1931,15 @@ UIMessageManager::Execute_UI_LOGIN(int left, int right, void* void_ptr)
 					//char wansungID[16];
 
 					//---------------------------------------------
-					// Á¶ÇÕÇü --> ¿Ï¼ºÇü
+					// 조합형 --> 완성형
 					//---------------------------------------------
 					//UI_JohapToWansung( login->sz_id, wansungID );
 	
 					//--------------------------------------------------
-					// ·Î±×ÀÎ ¼­¹ö¿¡ ¿¬°áÇÑ ÈÄ 
-					// °¡Àå ¸ÕÀú º¸³»¾ß ÇÏ´Â ÆÐÅ¶Àº CLLogin ÆÐÅ¶ÀÌ´Ù.
-					// ±Ùµ¥,
-					// VersionÃ¼Å© packetÀÌ ¸ÕÀú´Ù. - -;
+					// 로그인 서버에 연결한 후 
+					// 가장 먼저 보내야 하는 패킷은 CLLogin 패킷이다.
+					// 근데,
+					// Version체크 packet이 먼저다. - -;
 					//--------------------------------------------------
 					//--------------------------------------------------
 					// CLVersionCheck
@@ -1979,7 +1979,7 @@ UIMessageManager::Execute_UI_LOGIN(int left, int right, void* void_ptr)
 					//clLogin.setID("Reiot");
 					//clLogin.setPassword("fpdldhxm");
 
-					// ³Ý¸¶ºí¿ë
+					// 넷마블용
 					std::string temp_id;
 					DEBUG_ADD("[Execute_UI_LOGIN] #");
 					#ifdef __METROTECH_TEST__
@@ -2011,7 +2011,7 @@ UIMessageManager::Execute_UI_LOGIN(int left, int right, void* void_ptr)
 					DEBUG_ADD("[Execute_UI_LOGIN] SendPacket OK");
 
 					//----------------------------------------------------
-					// UserInformation¿¡ ÀúÀåÇÑ´Ù.
+					// UserInformation에 저장한다.
 					//----------------------------------------------------
 					g_pUserInformation->UserID = login->sz_id;
 					//g_pUserInformation->UserIDW = wansungID;
@@ -2026,12 +2026,12 @@ UIMessageManager::Execute_UI_LOGIN(int left, int right, void* void_ptr)
 			}
 			else
 			{
-				// ÆÐ½º¿öµå°¡ Àß¸øµÈ °æ¿ì
+				// 패스워드가 잘못된 경우
 				g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_USER_REGISTER_PASSWORD_SPECIAL].GetString() );
 			}
 		}
 		//---------------------------------------------
-		// Àß¸øµÈ IDÀÎ °æ¿ì
+		// 잘못된 ID인 경우
 		//---------------------------------------------
 		//else
 		//{
@@ -2040,7 +2040,7 @@ UIMessageManager::Execute_UI_LOGIN(int left, int right, void* void_ptr)
 	}
 	
 
-	// (!) ¿ø·¡´Â Ä³¸¯ÅÍ ¼±ÅÃ Ã¢À» ¶ç¿ö¾ß ÇÑ´Ù.
+	// (!) 원래는 캐릭터 선택 창을 띄워야 한다.
 
 	//gC_vs_ui.StartGame();
 	//gC_vs_ui.StartCharacterManager();
@@ -2052,7 +2052,7 @@ UIMessageManager::Execute_UI_LOGIN(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// Ä³¸¯ÅÍ ¼±ÅÃ Ã¢¿¡¼­ main menu·Î µ¹¾Æ°¥¶§
+// 캐릭터 선택 창에서 main menu로 돌아갈때
 //
 //-----------------------------------------------------------------------------
 void
@@ -2067,7 +2067,7 @@ UIMessageManager::Execute_UI_CHARACTER_MANAGER_FINISHED(int left, int right, voi
 		return;
 	}
 
-	// ³Ý¸¶ºí¿ë
+	// 넷마블용
 	if(g_pUserInformation->IsNetmarble)
 	{
 		SetMode( MODE_MAINMENU );
@@ -2075,15 +2075,15 @@ UIMessageManager::Execute_UI_CHARACTER_MANAGER_FINISHED(int left, int right, voi
 	}
 
 	//
-	// Client, Server¿¡ logout packet º¸³¿.
+	// Client, Server에 logout packet 보냄.
 	//
 	//--------------------------------------------------
-	// Login ¼­¹ö·Î CLLogout ÆÐÅ¶À» º¸³½´Ù.
+	// Login 서버로 CLLogout 패킷을 보낸다.
 	//--------------------------------------------------
 	/*
 	#ifdef	CONNECT_SERVER		
 		
-		// hot key saveÇÑ´Ù.
+		// hot key save한다.
 		//UI_SaveHotKeyToServer();
 
 		CLLogout clLogout;
@@ -2106,10 +2106,10 @@ UIMessageManager::Execute_UI_CHARACTER_MANAGER_FINISHED(int left, int right, voi
 
 //-----------------------------------------------------------------------------
 //
-// UI_CONNECT - Ä³¸¯ÅÍ ¼±ÅÃ ÇßÀ» ¶§
+// UI_CONNECT - 캐릭터 선택 했을 때
 //
 //-----------------------------------------------------------------------------
-// °ÔÀÓ ½ÃÀÛÇÏ·Á°í ÇÒ¶§...
+// 게임 시작하려고 할때...
 void
 UIMessageManager::Execute_UI_CONNECT(int left, int right, void* void_ptr)
 {
@@ -2122,7 +2122,7 @@ UIMessageManager::Execute_UI_CONNECT(int left, int right, void* void_ptr)
 	}
 
 	//------------------------------------------------------------
-	// À½¾Ç ÁßÁö - 2001.8.20
+	// 음악 중지 - 2001.8.20
 	//------------------------------------------------------------
 	if (g_pUserOption!=NULL)
 	{
@@ -2155,7 +2155,7 @@ UIMessageManager::Execute_UI_CONNECT(int left, int right, void* void_ptr)
 	}
 
 	//------------------------------------------------------------
-	// Á¢¼ÓÇØ¾ßµÈ´Ù°í Ãâ·ÂÇØÁØ´Ù.
+	// 접속해야된다고 출력해준다.
 	//------------------------------------------------------------
 	if (g_pUIDialog!=NULL)
 	{
@@ -2180,7 +2180,7 @@ UIMessageManager::Execute_UI_CONNECT(int left, int right, void* void_ptr)
 			//gC_vs_ui.DrawMousePointer();
 
 			//-----------------------------------------------------------------
-			// Last¸¦ BackÀ¸·Î copy - 3D HALÀÌ ¾Æ´Ñ °æ¿ì¸¸..
+			// Last를 Back으로 copy - 3D HAL이 아닌 경우만..
 			//-----------------------------------------------------------------		
 			point.x = 0;
 			point.y = 0;
@@ -2189,7 +2189,7 @@ UIMessageManager::Execute_UI_CONNECT(int left, int right, void* void_ptr)
 		}
 		CSDLGraphics::Flip();
 
-		// È­¸é¿¡ ±×·ÁÁÖ°í Áö¿ì¸é µÈ´ç.. ¤»¤»
+		// 화면에 그려주고 지우면 된당.. ㅋㅋ
 		DEBUG_ADD("close msg dlg");
 		g_pUIDialog->CloseMessageDlg();
 	}
@@ -2199,15 +2199,15 @@ UIMessageManager::Execute_UI_CONNECT(int left, int right, void* void_ptr)
 	//------------------------------------------------------------
 	// Test 2001.8.20
 	//------------------------------------------------------------
-	// Ä³¸¯ ¼±ÅÃ ÈÄ¿¡ ¹Ù·Î
-	// ½½·¹ÀÌ¾î ±×¸² ÀÏºÎ ·Îµù - 2001.8.20
+	// 캐릭 선택 후에 바로
+	// 슬레이어 그림 일부 로딩 - 2001.8.20
 	LoadingAddonSPK( false );
 	
 
 	DEBUG_ADD_FORMAT("CLSelectPC(%d)", left);
 
 	CLSelectPC clSelectPC;
-	// CGConnect ¶§ »ç¿ëÇÏ·Á¸é ¿©±â¼­ ÀúÀåÇØµÖ¾ß ÇÑ´Ù.					
+	// CGConnect 때 사용하려면 여기서 저장해둬야 한다.					
 	//clSelectPC.setPCName( (const char *)g_pUserInformation->CharacterW[left] );//"sigi");
 	clSelectPC.setPCName( (const char *)g_pUserInformation->Character[left] );//"sigi");
 	clSelectPC.setPCType( (PCType)(g_pUserInformation->Race[left]));
@@ -2223,11 +2223,11 @@ UIMessageManager::Execute_UI_CONNECT(int left, int right, void* void_ptr)
 	g_pUserInformation->FaceStyle = g_pUserInformation->FaceStyleSlot[left];	
 	g_pUserInformation->IsMaster = 
 		strncmp( g_pUserInformation->CharacterID, (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetString(), (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetLength() ) == 0 
-//		(strstr(g_pUserInformation->CharacterID, "¿î¿µÀÚ")!=NULL)
+//		(strstr(g_pUserInformation->CharacterID, "운영자")!=NULL)
 		|| g_pInventory->FindItem(ITEM_CLASS_ETC, 0);
 //		|| g_pPlayer->GetCreatureType()==CREATURETYPE_SLAYER_OPERATOR
 //		|| g_pPlayer->GetCreatureType()==CREATURETYPE_VAMPIRE_OPERATOR;
-//		g_pPlayer °¡ ¾ø¾î¼­ »¶³ª³× °Ë»çÇÒ±î...»ý°¢ÇßÁö¸¸..½ß~
+//		g_pPlayer 가 없어서 뻑나네 검사할까...생각했지만..쌩~
 
 	#ifdef OUTPUT_DEBUG
 		DEBUG_ADD("MasterCheck");
@@ -2257,7 +2257,7 @@ UIMessageManager::Execute_UI_CONNECT(int left, int right, void* void_ptr)
 	g_pSocket->sendPacket( &clSelectPC );
 	g_pSocket->setPlayerStatus( CPS_AFTER_SENDING_CL_SELECT_PC );
 
-	// ¹Ù·Î º¸³½´Ù.
+	// 바로 보낸다.
 	UpdateSocketOutput();
 
 	SaveLastSelectedCharacter( left );
@@ -2266,12 +2266,12 @@ UIMessageManager::Execute_UI_CONNECT(int left, int right, void* void_ptr)
 	SetMode(MODE_WAIT_RECONNECT);
 #endif
 	//------------------------------
-	// °ÔÀÓ UI
+	// 게임 UI
 	//------------------------------
 	//gC_vs_ui.StartGame();
 					
 	//
-	// SkillÀº StartGame()ÀÌ ½ÇÇàµÈ ÀÌÈÄ¿¡ Ãß°¡ÇØ¾ß ÇÑ´Ù.
+	// Skill은 StartGame()이 실행된 이후에 추가해야 한다.
 	//
 	//gC_vs_ui.AddSlayerSkill(SKILL_FLASH_SLASHER);
 }
@@ -2279,19 +2279,19 @@ UIMessageManager::Execute_UI_CONNECT(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// Chat¿¡¼­ Enter´­·¶À» ¶§
+// Chat에서 Enter눌렀을 때
 //
 //-----------------------------------------------------------------------------
-// Ã¤ÆÃÃ¢ ÀÔ·Â
+// 채팅창 입력
 void
 UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 {
 	//
-	// left = trueÀÌ¸é pcs¿¡¼­ ÀÔ·ÂÇÑ °ÍÀÌ°í, false¸®¸é ÀÏ¹ÝÃ¤ÆÃÀÓ.
+	// left = true이면 pcs에서 입력한 것이고, false리면 일반채팅임.
 	//
-	// ! pcs¿¡¼­ ÀÔ·ÂµÈ °æ¿ì slot ¹øÈ£¸¦ ¾Ë±â À§ÇØ¼­´Â ´ÙÀ½ ÇÔ¼ö¸¦ ½ÇÇàÇÑ´Ù.
+	// ! pcs에서 입력된 경우 slot 번호를 알기 위해서는 다음 함수를 실행한다.
 	//   => gC_vs_ui.GetSendPossibleSlot();
-	//      À¯È¿ÇÑ ¼ýÀÚ´Â 0, 1, 2 ÀÌ¸ç, NOT_SELECTEDÀÌ¸é ¾î¶°ÇÑ slotµµ ¾Æ´Ï´Ù.
+	//      유효한 숫자는 0, 1, 2 이며, NOT_SELECTED이면 어떠한 slot도 아니다.
 	//
 	// void_ptr = input string
 	//	right = color
@@ -2310,10 +2310,10 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 	char* chatString = (char*)void_ptr; 
 //	g_pChatManager->RemoveCurse(chatString);
 	//-------------------------------------------------------------
-	// ÆÄÆ¼ Ã¤ÆÃÀÎ °æ¿ì
+	// 파티 채팅인 경우
 	//-------------------------------------------------------------
 	if (chatString!=NULL 
-		&& chatString[0]!=SYMBOL_WHISPER	// ±Ó¼Ó¸»ÀÌ ¾Æ´Ñ °æ¿ì¿¡..
+		&& chatString[0]!=SYMBOL_WHISPER	// 귓속말이 아닌 경우에..
 		//&& chatString[0]!=SYMBOL_MASTER_COMMAND
 		&& left==CLD_PARTY)
 	{
@@ -2327,9 +2327,9 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 
 		}
 	}
-	// ±æµå Ã¤ÆÃ
+	// 길드 채팅
 	else if (chatString!=NULL 
-		&& chatString[0]!=SYMBOL_WHISPER	// ±Ó¼Ó¸»ÀÌ ¾Æ´Ñ °æ¿ì¿¡..
+		&& chatString[0]!=SYMBOL_WHISPER	// 귓속말이 아닌 경우에..
 		&& chatString[0]!=SYMBOL_MASTER_COMMAND
 		&& (left==CLD_GUILD || left == CLD_UNION))
 	{
@@ -2349,7 +2349,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 		}
 	}
 	//-------------------------------------------------------------
-	// Player°¡ »ì¾ÆÀÖ´Â °æ¿ì¸¸... chatting°¡´É.. Çß¾úÁö¸¸..   --;
+	// Player가 살아있는 경우만... chatting가능.. 했었지만..   --;
 	//-------------------------------------------------------------
 	else //if (g_pPlayer->IsAlive())
 	{
@@ -2359,7 +2359,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 		#ifdef __GAME_CLIENT__
 			if (g_pSystemMessage!=NULL)
 			{
-				// ¼­ºñ½º.. - -;;
+				// 서비스.. - -;;
 				g_pSystemMessage->Add((*g_pGameStringTable)[STRING_MESSAGE_CHAT_BE_GOOD].GetString());
 			}
 		#endif
@@ -2397,17 +2397,17 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 		//}
 		//-------------------------------------------------------------
 		//
-		// ÀÏ¹Ý Ã¤ÆÃ
+		// 일반 채팅
 		//
 		//-------------------------------------------------------------
 		//else
 		{
 			//
-			// chat history Window¿¡ º¸³»±â... ÀÏ´Ü ¹Ù·Î º¸³»º¸ÀÚ.
+			// chat history Window에 보내기... 일단 바로 보내보자.
 			//
 			//break;
 
-			// server·Î message º¸³»±â
+			// server로 message 보내기
 			//g_Socket.Send(g_String);
 			char* strUI = chatString;
 			char* strOrg = new char[128];
@@ -2423,7 +2423,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 					
 				if (str!=NULL && str[0]!=NULL)
 				{
-					// 2004, 10, 25, sobeit add start - µå·¹°ï ¾ÆÀÌ °ü·Ã
+					// 2004, 10, 25, sobeit add start - 드레곤 아이 관련
 					if(g_pPlayer->HasEffectStatus(EFFECTSTATUS_DRAGON_EYES))
 					{
 						if(0 == strncmp(str, (*g_pGameStringTable)[UI_STRING_MESSAGE_RANGER_SAY].GetString(),(*g_pGameStringTable)[UI_STRING_MESSAGE_RANGER_SAY].GetLength()))
@@ -2435,10 +2435,10 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 
 							g_pSocket->sendPacket( &_CGRangerSay );
 										
-							// PlayerÀÇ Chat pWansungStringing¿¡ Ãß°¡
+							// Player의 Chat pWansungStringing에 추가
 							g_pPlayer->SetChatString( str );//+1 );
 
-							// history¿¡ Ãß°¡
+							// history에 추가
 							char temp[128];
 							strcpy(temp, str );//+1);
 							//sprintf(temp, "[%s] %s", g_pUserInformation->CharacterID.GetString(), str+1);
@@ -2447,20 +2447,20 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 							return;
 						}
 					}
-					// ×Ô¶¯Ê¹ÓÃÈ«¾ÖÁÄÌì
+					// 自动使用全局聊天
 					//UI_STRING_MESSAGE_PLAYER_SAY
 					if(0 == strncmp(str, (*g_pGameStringTable)[UI_STRING_MESSAGE_PLAYER_SAY].GetString(),(*g_pGameStringTable)[UI_STRING_MESSAGE_PLAYER_SAY].GetLength()))
 					{
-						// ²éÕÒÎïÆ·
-						// ²éÕÒÂÌÉ«
+						// 查找物品
+						// 查找绿色
 						MItem* pItem = g_pInventory->FindItem(ITEM_CLASS_EFFECT_ITEM,10);
 						if (pItem == NULL)
 						{
-							// ²éÕÒÀ¶É«
+							// 查找蓝色
 							pItem = g_pInventory->FindItem(ITEM_CLASS_EFFECT_ITEM,11);
 							if (pItem == NULL)
 							{
-								// ²éÕÒ»ÆÉ«
+								// 查找黄色
 								pItem = g_pInventory->FindItem(ITEM_CLASS_EFFECT_ITEM,12);
 							}
 						}
@@ -2490,14 +2490,14 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 						}
 						return;
 					}
-					// 2004, 10, 25, sobeit add end - µå·¹°ï ¾ÆÀÌ °ü·Ã
+					// 2004, 10, 25, sobeit add end - 드레곤 아이 관련
 					if (bZoneChat && str[0]!=SYMBOL_WHISPER
 						&& str[0]!=SYMBOL_COMMAND && str[0]!=SYMBOL_MASTER_COMMAND)			
 					{
 						// system message test
 						//------------------------------------------------------------
 						//
-						// '!'¸¦ ÀÔ·ÂÇÏ¸é globalÃ¤ÆÃÀÌ´Ù.
+						// '!'를 입력하면 global채팅이다.
 						//
 						//------------------------------------------------------------
 						//case SYMBOL_GLOBALCHAT :	//if (str[0]=='!')//pWansungString[0]=='/')
@@ -2505,8 +2505,8 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 							//if (strlen(str) > 1 )	//pWansungString) > 1)
 							{		
 								//---------------------------------------------------------
-								// ¼û¾î ÀÖÀ»¶§´Â ¸» ¸øÇÑ´Ù.
-								// ´Á´ë³ª ¹ÚÁãÀÎ °æ¿ì ¸» ¸øÇÑ´Ù.
+								// 숨어 있을때는 말 못한다.
+								// 늑대나 박쥐인 경우 말 못한다.
 								//---------------------------------------------------------
 								if (g_pPlayer->IsUndergroundCreature()
 									|| g_pPlayer->IsInCasket()
@@ -2514,7 +2514,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 									|| g_pPlayer->GetCreatureType()==CREATURETYPE_WOLF
 									|| g_pPlayer->GetCreatureType()==CREATURETYPE_WER_WOLF)
 								{
-									// history¿¡ Ãß°¡
+									// history에 추가
 									//char temp[128];
 									//sprintf(temp, "[%s] .....", g_pUserInformation->CharacterID.GetString());
 									//UI_AddChatToHistory( temp );								
@@ -2526,7 +2526,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 								else
 								{
 									//---------------------------------------------------------
-									// delay°¡ ¾È ³¡³µÀ¸¸é ¸» ¸øÇÑ´Ù.
+									// delay가 안 끝났으면 말 못한다.
 									//---------------------------------------------------------
 									if (1)//g_CurrentTime > g_pUserInformation->GlobalSayTime+g_pClientConfig->DELAY_GLOBAL_SAY
 										//#if defined(OUTPUT_DEBUG) && defined(_DEBUG)
@@ -2540,27 +2540,27 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 										g_pSocket->sendPacket( &_CGGlobalChat );
 
 										
-										// PlayerÀÇ Chat pWansungStringing¿¡ Ãß°¡
+										// Player의 Chat pWansungStringing에 추가
 										g_pPlayer->SetChatString( str, right );//+1 );
 
-										// history¿¡ Ãß°¡
+										// history에 추가
 										char temp[128];
 										strcpy(temp, str );//+1);
 										//sprintf(temp, "[%s] %s", g_pUserInformation->CharacterID.GetString(), str+1);
 										//UI_AddChatToHistory( temp );								
 										UI_AddChatToHistory( temp, g_pUserInformation->CharacterID.GetString(), CLD_ZONECHAT, right );
 
-										// ÇöÀç ½Ã°£À» ¼³Á¤ÇØµÐ´Ù.
+										// 현재 시간을 설정해둔다.
 										//g_pUserInformation->GlobalSayTime = g_CurrentTime;
 
-										// [µµ¿ò¸»] ¿ÜÄ¡±â ÇÒ ¶§
+										// [도움말] 외치기 할 때
 //										__BEGIN_HELP_EVENT
 ////											ExecuteHelpEvent( HE_CHAT_SHOUT );	
 //										__END_HELP_EVENT
 									}
 									//else
 									//{
-										// Áö±ÝÀº ¿ÜÄ¡±â ÇÒ ¼ö ¾ø´Ù°í Ç¥½Ã
+										// 지금은 외치기 할 수 없다고 표시
 									//	UI_AddChatToHistory( (*g_pGameStringTable)[STRING_MESSAGE_CANNOT_GLOBAL_SAY].GetString(), NULL, CLD_INFO );
 									//}
 								}
@@ -2569,11 +2569,11 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 						//break;
 
 					}					
-					else // À¸À½.. ÀÌ ºÎºÐ ÄÚµå°¡ ¾È ÀÌ»Ú³×.. - -;;
+					else // 으음.. 이 부분 코드가 안 이쁘네.. - -;;
 					switch ( str[0] )
 					{
 						//------------------------------
-						// Á¶ÇÕÇü --> ¿Ï¼ºÇü
+						// 조합형 --> 완성형
 						//------------------------------
 						//char* pWansungString = new char [strlen(str)+1];
 
@@ -2582,21 +2582,21 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 						
 						//------------------------------------------------------------
 						//
-						// '/'¸¦ ÀÔ·ÂÇÏ¸é whisper´Ù.
+						// '/'를 입력하면 whisper다.
 						//
 						//------------------------------------------------------------
 						case SYMBOL_WHISPER :						
 						{
-							// VampireÀÎ °æ¿ì¿¡						
+							// Vampire인 경우에						
 							//else if (//g_pPlayer->IsVampire() && 
 									//str[0]=='/')
 
 							if (strlen(str) > 1 )
 							{
-								// '/'»©°í ³ª¸ÓÁö Ãß°¡..
+								// '/'빼고 나머지 추가..
 								CToken strToken(str+1);
 
-								// [ÀÌ¸§]+[ ]+[ÇÒ¸»] ·Î ÀÌ·ç¾îÁ®ÀÖ´Ù°í º¸¸é µÈ´Ù.										
+								// [이름]+[ ]+[할말] 로 이루어져있다고 보면 된다.										
 								const char* pName = strToken.GetToken();
 								const char* pMessage = strToken.GetEnd();										
 								
@@ -2605,7 +2605,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 									int nameLen = strlen(pName);
 									
 									//------------------------------------------------------
-									// ID±æÀÌ°¡ Àß¸øµÈ °æ¿ì										
+									// ID길이가 잘못된 경우										
 									//------------------------------------------------------
 									if (nameLen<PlayerInfo::minIDLength || nameLen>PlayerInfo::maxIDLength)
 									{
@@ -2617,18 +2617,18 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 										UI_AddChatToHistory( strTemp, NULL, CLD_INFO, right );
 									}
 									//------------------------------------------------------
-									// Á¤»óÀûÀÎ ±Ó¼Ó¸»...ÀÏ±î?
+									// 정상적인 귓속말...일까?
 									//------------------------------------------------------
 									else
 									{
 										if (g_pUserInformation->CharacterID==pName)
 										{
-											// ÀÚ½Å¿¡°Ô ±Ó¼Ó¸»ÇÏ´Â °æ¿ì
+											// 자신에게 귓속말하는 경우
 											UI_AddChatToHistory( (*g_pGameStringTable)[STRING_MESSAGE_WHISPER_SELF].GetString(), NULL, CLD_INFO, right );
 										}
 										else
 										{
-											// ±Ó¼Ó¸» ´ë»ó ¼³Á¤ : ID + ' '
+											// 귓속말 대상 설정 : ID + ' '
 											char strWhisperID[128];
 											sprintf(strWhisperID, "%s ", pName);
 											g_pUserInformation->WhisperID = strWhisperID;
@@ -2648,11 +2648,11 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 											//sprintf(temp, "[%s] <%s> %s", g_pUserInformation->CharacterID.GetString(), pName, pMessage);
 											//UI_AddChatToHistory( temp );
 											strcpy(strMessage, pMessage);
-											// "[³»°¡] ´©±¸¿¡°Ô> ¹¹¶ó°í"¶ó´Â ½ÄÀ¸·Î Ç¥ÇöµÈ´Ù.
+											// "[내가] 누구에게> 뭐라고"라는 식으로 표현된다.
 											sprintf(strName, "[%s] %s", g_pUserInformation->CharacterID.GetString(), pName);
 											UI_AddChatToHistory( strMessage, strName, CLD_WHISPER, right );
 
-											// [µµ¿ò¸»] ±Ó¼Ó¸» ÇÒ ¶§
+											// [도움말] 귓속말 할 때
 //											__BEGIN_HELP_EVENT
 ////												ExecuteHelpEvent( HE_CHAT_WHISPER );	
 //											__END_HELP_EVENT
@@ -2665,7 +2665,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 
 						//------------------------------------------------------------
 						//
-						// '@'¸¦ ÀÔ·ÂÇÏ¸é Æ¯¼ö ¸í·É¾î´Ù.
+						// '@'를 입력하면 특수 명령어다.
 						//
 						//------------------------------------------------------------
 						case SYMBOL_COMMAND :
@@ -2674,10 +2674,10 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 						{
 							if (strlen(str) > 1 )
 							{
-								// '@'»©°í ³ª¸ÓÁö Ãß°¡..
+								// '@'빼고 나머지 추가..
 								CToken strToken(str+1);
 
-								// [¸í·É]+[ ]+[³»¿ë] À¸·Î ÀÌ·ç¾îÁ®ÀÖ´Ù°í º¸¸é µÈ´Ù.
+								// [명령]+[ ]+[내용] 으로 이루어져있다고 보면 된다.
 								const char* pCommand = strToken.GetToken();
 								const char* pData = strToken.GetEnd();
 
@@ -2696,40 +2696,40 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 								DEBUG_ADD_FORMAT("[Command] %s %s", pCommand, pData);
 								
 								//-------------------------------------------------------
-								// ´ëÈ­ °ÅºÎ
+								// 대화 거부
 								//-------------------------------------------------------
 								if (strcmp(pCommand, STRING_IGNORE)==0
 									|| strcmp(pLwrCommand, STRING_IGNORE_ENG)==0)
 								{
 									//-------------------------------------------------------
-									// ¸ðµç »ç¶÷ÀÇ ´ëÈ­¸¦ °ÅºÎÇÑ´Ù.
+									// 모든 사람의 대화를 거부한다.
 									//-------------------------------------------------------
 									if (pData==NULL)
 									{
 										g_pChatManager->ClearID();
 										g_pChatManager->SetIgnoreMode();	
 
-										// ÀÚ±â ID´Â Ãß°¡ÇØµÐ´Ù.
+										// 자기 ID는 추가해둔다.
 										g_pChatManager->AddID( g_pUserInformation->CharacterID.GetString() );
 
 										char strTemp[128];
 										sprintf(strTemp, (*g_pGameStringTable)[STRING_MESSAGE_CHAT_IGNORE_ALL].GetString(), pData);
 										UI_AddChatToHistory( strTemp, NULL, CLD_INFO, right );
 
-										// [µµ¿ò¸»] ´ëÈ­°ÅºÎ
+										// [도움말] 대화거부
 //										__BEGIN_HELP_EVENT
 ////											ExecuteHelpEvent( HE_CHAT_REJECT );	
 //										__END_HELP_EVENT
 									}
 									//-------------------------------------------------------
-									// ÇÑ »ç¶÷ÀÇ ´ëÈ­¸¦ °ÅºÎÇÑ´Ù.
+									// 한 사람의 대화를 거부한다.
 									//-------------------------------------------------------
 									else
 									{
 										int nameLen = strlen( pData );
 
 										//------------------------------------------------------
-										// ID±æÀÌ°¡ Àß¸øµÈ °æ¿ì										
+										// ID길이가 잘못된 경우										
 										//------------------------------------------------------
 										if (nameLen<PlayerInfo::minIDLength || nameLen>PlayerInfo::maxIDLength)
 										{
@@ -2741,7 +2741,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 											UI_AddChatToHistory( strTemp, NULL, CLD_INFO, right );
 										}
 										//------------------------------------------------------
-										// Á¤»ó
+										// 정상
 										//------------------------------------------------------
 										else
 										{
@@ -2758,7 +2758,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 											sprintf(strTemp, (*g_pGameStringTable)[STRING_MESSAGE_CHAT_IGNORE].GetString(), pData);
 											UI_AddChatToHistory( strTemp, NULL, CLD_INFO, right );
 
-											// [µµ¿ò¸»] ´ëÈ­°ÅºÎ ÇÑ ¸í
+											// [도움말] 대화거부 한 명
 //											__BEGIN_HELP_EVENT
 ////												ExecuteHelpEvent( HE_CHAT_REJECT_USER );	
 //											__END_HELP_EVENT
@@ -2766,13 +2766,13 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 									}
 								}
 								//-------------------------------------------------------
-								// ´ëÈ­ Çã¿ë
+								// 대화 허용
 								//-------------------------------------------------------
 								else if (strcmp(pCommand, STRING_ACCEPT)==0
 										|| strcmp(pLwrCommand, STRING_ACCEPT_ENG)==0)
 								{
 									//-------------------------------------------------------
-									// ¸ðµç »ç¶÷ÀÇ ´ëÈ­¸¦ Çã¿ëÇÑ´Ù.
+									// 모든 사람의 대화를 허용한다.
 									//-------------------------------------------------------
 									if (pData==NULL)
 									{
@@ -2784,14 +2784,14 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 										UI_AddChatToHistory( strTemp, NULL, CLD_INFO, right );
 									}
 									//-------------------------------------------------------
-									// ÇÑ »ç¶÷ÀÇ ´ëÈ­¸¦ Çã¿ëÇÑ´Ù.
+									// 한 사람의 대화를 허용한다.
 									//-------------------------------------------------------
 									else
 									{
 										int nameLen = strlen( pData );
 
 										//------------------------------------------------------
-										// ID±æÀÌ°¡ Àß¸øµÈ °æ¿ì										
+										// ID길이가 잘못된 경우										
 										//------------------------------------------------------
 										if (nameLen<PlayerInfo::minIDLength || nameLen>PlayerInfo::maxIDLength)
 										{
@@ -2803,7 +2803,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 											UI_AddChatToHistory( strTemp, NULL, CLD_INFO, right );
 										}
 										//------------------------------------------------------
-										// Á¤»ó
+										// 정상
 										//------------------------------------------------------
 										else
 										{
@@ -2823,7 +2823,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 									}
 								}
 								//-------------------------------------------------------
-								// ³ª»Û¸»µµ º¸±â
+								// 나쁜말도 보기
 								//-------------------------------------------------------
 								else if (strcmp(pCommand, STRING_ACCEPT_CURSE)==0
 										|| strcmp(pLwrCommand, STRING_ACCEPT_CURSE_ENG)==0)
@@ -2835,7 +2835,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 									UI_AddChatToHistory( strTemp, NULL, CLD_INFO, right );
 								}
 								//-------------------------------------------------------
-								// ¹Ù¸¥¸»¸¸ º¸±â
+								// 바른말만 보기
 								//-------------------------------------------------------
 								else if (strcmp(pCommand, STRING_FILTER_CURSE)==0
 										|| strcmp(pLwrCommand, STRING_FILTER_CURSE_ENG)==0)
@@ -2849,7 +2849,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 
 								#if defined(OUTPUT_DEBUG) //&& defined(_DEBUG)
 									//-------------------------------------------------------
-									// Á¢¼ÓÇÏ±â
+									// 접속하기
 									//-------------------------------------------------------
 									else if (strcmp(pCommand, "connect")==0
 											|| strcmp(pLwrCommand, "connect")==0)
@@ -2872,7 +2872,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 										}
 									}
 									//-------------------------------------------------------
-									// Á¢¼Ó²÷±â
+									// 접속끊기
 									//-------------------------------------------------------
 									else if (strcmp(pCommand, "disconnect")==0
 											|| strcmp(pLwrCommand, "disconnect")==0)
@@ -2890,7 +2890,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 										}
 									}
 									//-------------------------------------------------------
-									// Profile ¿äÃ» Å×½ºÆ®
+									// Profile 요청 테스트
 									//-------------------------------------------------------
 									else if (strcmp(pCommand, "profile")==0
 											|| strcmp(pLwrCommand, "profile")==0)
@@ -2904,7 +2904,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 										}
 									}
 									//-------------------------------------------------------
-									// ¸»ÇÏ±â
+									// 말하기
 									//-------------------------------------------------------
 									else if (strcmp(pCommand, "say")==0
 											|| strcmp(pLwrCommand, "say")==0)
@@ -2942,7 +2942,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 										}
 									}
 									//-------------------------------------------------------
-									// npc ¼ö ¼³Á¤
+									// npc 수 설정
 									//-------------------------------------------------------
 									else if (strcmp(pCommand, "npc")==0
 											|| strcmp(pLwrCommand, "npc")==0)
@@ -2950,7 +2950,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 										g_MaxNPC = atoi( pData );
 									}									
 									//-------------------------------------------------------
-									// ProfilerInfoName ¼³Á¤
+									// ProfilerInfoName 설정
 									//-------------------------------------------------------
 									else if (strcmp(pCommand, "profileName")==0
 											|| strcmp(pLwrCommand, "profilename")==0)
@@ -2961,7 +2961,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 										}
 									}
 									//-------------------------------------------------------
-									// ProfilerInfoName ¼³Á¤
+									// ProfilerInfoName 설정
 									//-------------------------------------------------------
 									else if (strcmp(pCommand, "profileClear")==0
 											|| strcmp(pLwrCommand, "profileclear")==0)
@@ -2972,7 +2972,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 										}
 									}
 									//-------------------------------------------------------
-									// °¨¸¶ ¼³Á¤
+									// 감마 설정
 									//-------------------------------------------------------
 									else if (strcmp(pCommand, "gamma")==0
 											|| strcmp(pLwrCommand, "gamma")==0)
@@ -3004,7 +3004,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 							char *pMessage = str;
 							static bool bInvincible = false;
 
-							if(strcmp(str, "*iddqd") == 0 || strcmp(str, "*Tnrrkt") == 0 || strcmp(str, "*¾¦°«") == 0)
+							if(strcmp(str, "*iddqd") == 0 || strcmp(str, "*Tnrrkt") == 0 || strcmp(str, "*쑥갓") == 0)
 							{
 								if(bInvincible == true)
 									strTempCommand = "*command invincible off";
@@ -3014,7 +3014,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 
 								pMessage = const_cast<char*>(strTempCommand.c_str());
 							}
-							else if(strcmp(str, "*gaonashi") == 0 || strcmp(str, "*gaonasi") == 0 || strcmp(str, "*rkdhsktl") == 0 || strcmp(str, "*°¡¿À³ª½Ã") == 0 || strcmp(str,"*ghost") == 0)
+							else if(strcmp(str, "*gaonashi") == 0 || strcmp(str, "*gaonasi") == 0 || strcmp(str, "*rkdhsktl") == 0 || strcmp(str, "*가오나시") == 0 || strcmp(str,"*ghost") == 0)
 							{
 								if(g_pPlayer->HasEffectStatus(EFFECTSTATUS_GHOST))
 									strTempCommand = "*command ghost off";
@@ -3141,14 +3141,14 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 
 						//------------------------------------------------------------
 						//
-						//	ÀÏ¹Ý ´ëÈ­
+						//	일반 대화
 						//
 						//------------------------------------------------------------
 						default :
 						{
 							//------------------------------
-							// ¼û¾î ÀÖÀ»¶§´Â ¸» ¸øÇÑ´Ù.
-							// ´Á´ë³ª ¹ÚÁãÀÎ °æ¿ì ¸» ¸øÇÑ´Ù.
+							// 숨어 있을때는 말 못한다.
+							// 늑대나 박쥐인 경우 말 못한다.
 							//------------------------------
 							if (g_pPlayer->IsUndergroundCreature()
 								|| g_pPlayer->IsInCasket()
@@ -3156,7 +3156,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 								|| g_pPlayer->GetCreatureType()==CREATURETYPE_WOLF
 								|| g_pPlayer->GetCreatureType()==CREATURETYPE_WER_WOLF)
 							{
-								// history¿¡ Ãß°¡
+								// history에 추가
 								//char temp[128];
 								//sprintf(temp, "[%s] .....", g_pUserInformation->CharacterID.GetString());
 								//UI_AddChatToHistory( temp );
@@ -3170,10 +3170,10 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 								g_pSocket->sendPacket( &_CGSay );
 
 									
-								// PlayerÀÇ Chat pWansungStringing¿¡ Ãß°¡
+								// Player의 Chat pWansungStringing에 추가
 								g_pPlayer->SetChatString( str, right );
 
-								// history¿¡ Ãß°¡
+								// history에 추가
 								//char temp[256];
 								//sprintf(temp, "%s> %s", g_pUserInformation->CharacterID.GetString(), str);
 								//UI_AddChatToHistory( temp );
@@ -3223,22 +3223,22 @@ UIMessageManager::Execute_UI_LOGOUT(int left, int right, void* void_ptr)
 	}
 	
 	//-------------------------------------------------------------------
-	// Logout ½Ã°£ÀÌ ¼³Á¤µÇ¾î ÀÖÁö ¾ÊÀ¸¸é ¼³Á¤ÇÏ°í
-	// ¼³Á¤µÇ¾îÀÖ´Ù¸é ³²Àº ½Ã°£À» Ãâ·ÂÇØÁØ´Ù.
+	// Logout 시간이 설정되어 있지 않으면 설정하고
+	// 설정되어있다면 남은 시간을 출력해준다.
 	//-------------------------------------------------------------------
 	int zoneID	= (g_bZonePlayerInLarge?g_nZoneLarge : g_nZoneSmall);
 
 	//ZONETABLE_INFO* pZoneInfo = g_pZoneTable->Get( zoneID );
 	
 	//-------------------------------------------------------------------
-	// ¾ÈÀüÁö´ë¸é ¹Ù·Î logout½ÃÅ²´Ù.
-	// ÀÚ±â È¥ÀÚ ÀÖÀ»¶§..
+	// 안전지대면 바로 logout시킨다.
+	// 자기 혼자 있을때..
 	//-------------------------------------------------------------------
 	if (g_bZoneSafe //pZoneInfo!=NULL	&& pZoneInfo->Safety
-		// ¾ÈÀüÁö´ë Å¸ÀÏÀÌ¸é..
+		// 안전지대 타일이면..
 		|| g_pPlayer->IsInSafeSector()
-		|| g_pZone->GetID() == 8000				// ÀÌº¥Æ®°æ±âÀå ÓÞ¸é ¹Ù·Î Á¾·á
-		// Á×¾î¼­ ¸îÃÊ Áö³µÀ¸¸é...
+		|| g_pZone->GetID() == 8000				// 捞亥飘版扁厘 愚搁 官肺 辆丰
+		// 죽어서 몇초 지났으면...
 //		|| g_pPlayer->IsDead() && g_pPlayer->GetDeadDelayLast() < 4)
 		//|| g_pZone->GetCreatureNumber()==1)
 #ifdef __METROTECH_TEST__
@@ -3249,13 +3249,13 @@ UIMessageManager::Execute_UI_LOGOUT(int left, int right, void* void_ptr)
 		ExecuteLogout();
 	}
 	//-------------------------------------------------------------------
-	// ¾Æ´Ï¸é 5ÃÊÈÄ logout ½ÃÅ²´Ù.
+	// 아니면 5초후 logout 시킨다.
 	//-------------------------------------------------------------------
 	else if (g_pPlayer!=NULL && g_pPlayer->IsAlive())
 	{		
 		if (g_pUserInformation->LogoutTime == 0)
 		{
-			// 5ÃÊ ÈÄ °­Á¦ Logout ½ÃÅ²´Ù.
+			// 5초 후 강제 Logout 시킨다.
 			
 			#ifdef _DEBUG
 				g_pUserInformation->LogoutTime = g_CurrentTime + 2000;
@@ -3298,7 +3298,7 @@ UIMessageManager::Execute_UI_LOGOUT(int left, int right, void* void_ptr)
 		gC_vs_ui.HotKey_ESC();
 	}
 	//-------------------------------------------------------------------
-	// Á×Àº °æ¿ì..
+	// 죽은 경우..
 	//-------------------------------------------------------------------
 	else
 	{
@@ -3311,7 +3311,7 @@ UIMessageManager::Execute_UI_LOGOUT(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// SkillÀÌ ¼±ÅÃµÇ¾úÀ» ¶§
+// Skill이 선택되었을 때
 //
 //-----------------------------------------------------------------------------
 void
@@ -3332,12 +3332,12 @@ UIMessageManager::Execute_UI_SELECT_SKILL(int left, int right, void* void_ptr)
 	{
 		g_pPlayer->SetSpecialActionInfo( left );
 		
-		// ¹Ýº¹µ¿ÀÛÁß¿¡ actionCount°¡ ÀÌ»óÇØÁö´Â °æ¿ì°¡ ÀÖ¾î¼­
-		// ÀÌ°Å ÇØ¾ßµÇ´Âµ¥.. ±â¼ú¾µ¶§ ´ä´äÇÏ´Ù´Â ÀÌÀ¯·Î.. ÀÏ´Ü.. - -;
+		// 반복동작중에 actionCount가 이상해지는 경우가 있어서
+		// 이거 해야되는데.. 기술쓸때 답답하다는 이유로.. 일단.. - -;
 		//g_pPlayer->UnSetRepeatAction();
 	}
 
-	// [µµ¿ò¸»] Skill icon¹Ù²ð ¶§
+	// [도움말] Skill icon바뀔 때
 //	__BEGIN_HELP_EVENT
 ////		ExecuteHelpEvent( HE_SKILL_ICON_CHANGE );
 //	__END_HELP_EVENT
@@ -3345,7 +3345,7 @@ UIMessageManager::Execute_UI_SELECT_SKILL(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// Skill ¼±ÅÃ Ãë¼Ò
+// Skill 선택 취소
 //
 //-----------------------------------------------------------------------------
 void
@@ -3360,7 +3360,7 @@ UIMessageManager::Execute_UI_CANCEL_SELECT_SKILL(int left, int right, void* void
 	}
 
 	//
-	// Skill ¼±ÅÃ Ãë¼Ò.
+	// Skill 선택 취소.
 	//
 	if (g_pPlayer!=NULL)
 	{
@@ -3368,7 +3368,7 @@ UIMessageManager::Execute_UI_CANCEL_SELECT_SKILL(int left, int right, void* void
 	}
 }
 
-// ÇØ´ç Å©¸®ÃÄÀÇ ÁÖº¯¿¡ ¿øÇÏ´Â ½ÃÃ¼°¡ ÀÖ´ÂÁö °Ë»çÇÑ´Ù.
+// 해당 크리쳐의 주변에 원하는 시체가 있는지 검사한다.
 bool IsExistCorpseFromPlayer(MCreature* OriginCreature, int creature_type)
 {
 	int sx, sy;
@@ -3400,7 +3400,7 @@ bool IsExistCorpseFromPlayer(MCreature* OriginCreature, int creature_type)
 
 //-----------------------------------------------------------------------------
 //
-// mouse¿¡¼­ ZoneÀ¸·Î ItemÀ» ¶³¾î¶ß¸± ¶§,
+// mouse에서 Zone으로 Item을 떨어뜨릴 때,
 //
 //-----------------------------------------------------------------------------
 void
@@ -3416,9 +3416,9 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_CLIENT(int left, int right, void* void
 
 	MItem* pItem = UI_GetMouseItem();//(MItem*)void_ptr;		
 
-	// Capture The Flag ¿ë ÇÏµåÄÚµù
-	// ³ª¸¦ ÁÖº¯À¸·Î 3Å¸ÀÏÀ» °Ë»çÇÑ´Ù.		
-	// ±ê¹ß ¾ÆÀÌÅÛÀÌ ¾Æ´Ï¸é °Ë»çÇÑ´Ù.
+	// Capture The Flag 용 하드코딩
+	// 나를 주변으로 3타일을 검사한다.		
+	// 깃발 아이템이 아니면 검사한다.
 
 	if(!( pItem != NULL && pItem->GetItemClass() == ITEM_CLASS_EVENT_ITEM && pItem->GetItemType() == 27 ) )
 	{
@@ -3430,9 +3430,9 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_CLIENT(int left, int right, void* void
 	}
 				
 	if (!g_bWatchMode
-		// ±³È¯ Áß¿¡´Â ¹ö¸± ¼ö ¾ø´Ù.
+		// 교환 중에는 버릴 수 없다.
 		&& !UI_IsRunningExchange()
-		// ±³È¯ Ã¢ÀÌ ¶á ÈÄ.. ÀÏÁ¤ ½Ã°£ µ¿¾ÈÀº ¹ö¸± ¼ö ¾ø´Ù.
+		// 교환 창이 뜬 후.. 일정 시간 동안은 버릴 수 없다.
 		&& g_pUserInformation->ItemDropEnableTime < g_CurrentTime)
 	{
 		//void_ptr = MItem *
@@ -3452,7 +3452,7 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_CLIENT(int left, int right, void* void
 			pItem->GetItemClass() == ITEM_CLASS_SWEEPER || pItem->GetItemClass() == ITEM_CLASS_PET_FOOD
 			))
 		{
-			// ¼º¹°À» ¼º¹° º¸°ü´ë¿¡ Å¬¸¯ÇÏ¸é ??-_-;
+			// 성물을 성물 보관대에 클릭하면 ??-_-;
 			int CreatureID = g_pTopView->GetSelectedCreature();
 
 			MCreature *pCreature = NULL;
@@ -3481,12 +3481,12 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_CLIENT(int left, int right, void* void
 
 			if(g_pPlayer->IsItemCheckBufferNULL() && pCreature != NULL)
 			{
-				if(bCorpse)	// ½ÃÃ¼¿¡ ¾ÆÀÌÅÛÀ» ³ÖÀð
+				if(bCorpse)	// 시체에 아이템을 넣쟈
 				{
 					if(pCreature->GetCreatureType() >= 371 && pCreature->GetCreatureType() <= 376 || 
 						pCreature->GetCreatureType() >= 560 && pCreature->GetCreatureType() <= 563 ||
 						pCreature->GetCreatureType() >= 526 && pCreature->GetCreatureType() <= 549 ||
-						pCreature->GetCreatureType() == 670	&& pItem->GetItemClass() == ITEM_CLASS_EVENT_ITEM || // ±ê¹ßÀÏ°æ¿ì
+						pCreature->GetCreatureType() == 670	&& pItem->GetItemClass() == ITEM_CLASS_EVENT_ITEM || // 깃발일경우
 						pCreature->GetCreatureType() == 672 && pItem->GetItemClass() == ITEM_CLASS_SWEEPER
 					)
 					{
@@ -3505,10 +3505,10 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_CLIENT(int left, int right, void* void
 						return;
 					}
 				}
-				else	// ¸ó½ºÅÍ¿¡ ¾ÆÀÌÅÛÀ» ³ÖÀð
+				else	// 몬스터에 아이템을 넣쟈
 				{
 					if(pItem->GetItemClass() == ITEM_CLASS_PET_FOOD &&
-						pCreature->GetCreatureType() == 687 && pItem->GetNumber() == 1)	// ³ªÁß¿¡ Å©¸®ÃÄ Å¸ÀÔÀ» ³Ö¾îÁÖÀð
+						pCreature->GetCreatureType() == 687 && pItem->GetNumber() == 1)	// 나중에 크리쳐 타입을 넣어주쟈
 					{
 						if(abs(g_pPlayer->GetX()-pCreature->GetX()) < 3 && abs(g_pPlayer->GetY()-pCreature->GetY()) < 3)
 						{
@@ -3523,7 +3523,7 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_CLIENT(int left, int right, void* void
 						}
 						return;
 					}
-					// Äù½ºÆ®¿ë »ý¸íÀÇ ³ª¼± ¾ÆÀÌÅÛ ÀÏ ¶§
+					// 퀘스트용 생명의 나선 아이템 일 때
 					else if(pItem->GetItemClass() == ITEM_CLASS_EVENT_ITEM && pItem->GetItemType() == 31 &&
 						(pCreature->GetCreatureType() == 793 || pCreature->GetCreatureType() == 794 || pCreature->GetCreatureType() == 795))
 					{
@@ -3541,12 +3541,12 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_CLIENT(int left, int right, void* void
 		}
 
 		//-----------------------------------------------------------------
-		// °ËÁõ¹ÞÀ» °Ô ¾ø´Â °æ¿ì
+		// 검증받을 게 없는 경우
 		//-----------------------------------------------------------------
 		if (pItem!=NULL 
 			&& !pItem->IsQuestItem()
 			&& g_pPlayer->IsItemCheckBufferNULL()
-			// »¡°£»ö Event GiftBox ¾ÆÀÌÅÛÀÎ °æ¿ì ¸ø ¹ö¸°´Ù.
+			// 빨간색 Event GiftBox 아이템인 경우 못 버린다.
 			&& !(pItem->GetItemClass()==ITEM_CLASS_EVENT_GIFT_BOX&& pItem->GetItemType()==1)
 			&& !(pItem->GetItemClass()==ITEM_CLASS_COUPLE_RING)
 			&& !(pItem->GetItemClass()==ITEM_CLASS_VAMPIRE_COUPLE_RING 
@@ -3557,19 +3557,19 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_CLIENT(int left, int right, void* void
 			)
 		{
 			//-----------------------------------------------------------------------
-			// ±³È¯ÁßÀÌ ¾Æ´Ò ¶§¸¸ ¶³¾î¶ß¸°´Ù.
+			// 교환중이 아닐 때만 떨어뜨린다.
 			//-----------------------------------------------------------------------
 			if (g_pTradeManager==NULL)
 			{
 					//---------------------------------------------------
-					// itemÀ» °¡Áö°í °ËÁõ¹ÞÀ» ÀÏÀÌ ¾ø´Â °æ¿ì..
+					// item을 가지고 검증받을 일이 없는 경우..
 					//---------------------------------------------------
 					//if (g_pPlayer->IsItemCheckBufferNULL())
 					{
 						//---------------------------------------------------
-						// Server·Î itemÀ» ¶³¾î¶ß¸°´Ù´Â packetÀ» º¸³½´Ù.
-						// ½ÇÁ¦·Î ¶³¾îÁö´Â °ÍÀº.. 
-						// server¿¡¼­ itemÀ» zoneÀ¸·Î Ãß°¡ÇÑ °æ¿ìÀÌ´Ù.
+						// Server로 item을 떨어뜨린다는 packet을 보낸다.
+						// 실제로 떨어지는 것은.. 
+						// server에서 item을 zone으로 추가한 경우이다.
 						//---------------------------------------------------
 						CGAddMouseToZone _CGAddMouseToZone;
 						_CGAddMouseToZone.setObjectID( pItem->GetID() );
@@ -3578,22 +3578,22 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_CLIENT(int left, int right, void* void
 
 						
 						//---------------------------------------------------
-						// ÀÌ ºÎºÐÀº.. ³ªÁß¿¡ AddNewItemÀ» ¹Þ°í ÇØ¾ßÇÏ´Â°Ô ¾Æ´Ò±î..
-						// timing ¹®Á¦°¡ ¾Ö¸ÅÇÏ´Ù.
+						// 이 부분은.. 나중에 AddNewItem을 받고 해야하는게 아닐까..
+						// timing 문제가 애매하다.
 						//---------------------------------------------------
-						// mouse¿¡¼­ itemÀ» ¾ø¾Ö°í
+						// mouse에서 item을 없애고
 						//gC_vs_ui.DropItem();
 
-						// buffer¿¡ itemÀ» ÀúÀåÇØµÐ´Ù. (»õ·Î¿î itemÀ» »ý¼ºÇÑ´Ù)
+						// buffer에 item을 저장해둔다. (새로운 item을 생성한다)
 						g_pPlayer->SetItemCheckBuffer( pItem, MPlayer::ITEM_CHECK_BUFFER_DROP_TO_ZONE );
 
-						// itemÀ» »èÁ¦ÇÑ´Ù.
+						// item을 삭제한다.
 						//delete pItem;
 					}
 
 			}
 			//-----------------------------------------------------------------------
-			// ±³È¯ÁßÀÏ¶§´Â ¾ÆÀÌÅÛÀ» ¶³¾î¶ß¸®Áö ¾Ê´Â´Ù.
+			// 교환중일때는 아이템을 떨어뜨리지 않는다.
 			//-----------------------------------------------------------------------
 			else
 			{
@@ -3601,7 +3601,7 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_CLIENT(int left, int right, void* void
 			}
 		}
 		//-----------------------------------------------------------------
-		// °ËÁõ ¹Þ¾Æ¾ßÇÒ ´Ù¸¥ ¾ÆÀÌÅÛÀÌ ÀÖ´Â °æ¿ì
+		// 검증 받아야할 다른 아이템이 있는 경우
 		//-----------------------------------------------------------------
 		else
 		{
@@ -3617,7 +3617,7 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_CLIENT(int left, int right, void* void
 
 //-----------------------------------------------------------------------------
 //
-// mouseÀÇ ItemÀ» Inventory¿¡ Ãß°¡ÇÑ °æ¿ì
+// mouse의 Item을 Inventory에 추가한 경우
 //
 //-----------------------------------------------------------------------------
 void
@@ -3632,33 +3632,33 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_INVENTORY(int left, int right, void* v
 	}
 	//
 	// left = grid_x, right = grid_y
-	// void_ptr = MItem *		// Ãß°¡µÈ item
-	//							// bAcceptMyTradeÀÌ¸é inventoryÀÇ itemÀÌ´Ù.
+	// void_ptr = MItem *		// 추가된 item
+	//							// bAcceptMyTrade이면 inventory의 item이다.
 	//
-	MItem* pItem = (MItem*)void_ptr;		// inventory¿¡ ÀÖ´Â ¾ÆÀÌÅÛ(NULLÀÏ ¼öµµ ÀÖ´Ù)
-	MItem* pMouseItem = UI_GetMouseItem();	// ÇöÀç mouseÀÇ item
+	MItem* pItem = (MItem*)void_ptr;		// inventory에 있는 아이템(NULL일 수도 있다)
+	MItem* pMouseItem = UI_GetMouseItem();	// 현재 mouse의 item
 
-	// pMouseItemÀ» pItem°ú ¹Ù²Ù´øÁö..
-	// pMouseItemÀÌ ±×³É µé¾î°¡´øÁö...
+	// pMouseItem을 pItem과 바꾸던지..
+	// pMouseItem이 그냥 들어가던지...
 	
 	BOOL bAcceptMyTrade = (g_pTradeManager!=NULL && g_pTradeManager->IsAcceptMyTrade());
 	BOOL bAcceptOtherTrade = (g_pTradeManager!=NULL && g_pTradeManager->IsAcceptOtherTrade());
 
 	//-----------------------------------------------------------------
-	// °ËÁõ¹ÞÀ»°Ô ¾ø´Â °æ¿ì
+	// 검증받을게 없는 경우
 	//-----------------------------------------------------------------
 	if (g_pPlayer->IsItemCheckBufferNULL() && pMouseItem!=NULL
 		&& g_pTempInformation->GetMode()==TempInformation::MODE_NULL)
 	{		
-		BOOL bSendPacketTradeRemove = FALSE;	// ±âÁ¸¿¡²¨ Á¦°Å
+		BOOL bSendPacketTradeRemove = FALSE;	// 기존에꺼 제거
 		BOOL bSendPacket = TRUE;				// mouse --> inventory
-		BOOL bSendPacketTradeAdd = FALSE;		// Ãß°¡µÈ°Å ±³È¯ÇÒ°É·Î ¼³Á¤
+		BOOL bSendPacketTradeAdd = FALSE;		// 추가된거 교환할걸로 설정
 		
 		TYPE_OBJECTID removeItemID = OBJECTID_NULL;
 		TYPE_OBJECTID toInventoryItemID = (pMouseItem==NULL)? OBJECTID_NULL : pMouseItem->GetID();
 
 		//---------------------------------------------------
-		// ±³È¯ »óÅÂ¿¡¼­´Â °ËÁõ¹Þ¾Æ¾ß ÇÑ´Ù.
+		// 교환 상태에서는 검증받아야 한다.
 		//---------------------------------------------------
 		if (bAcceptMyTrade)
 		{
@@ -3676,7 +3676,7 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_INVENTORY(int left, int right, void* v
 				//toInventoryItemID = pMouseItem->GetID();
 
 				//-------------------------------------------------------------
-				// inventory¿¡ ÀÖ´Â itemÀÌ ±³È¯ÇÒ·Á°í ¼±ÅÃµÈ °ÍÀÌ¸é Á¦°ÅÇÑ´Ù.
+				// inventory에 있는 item이 교환할려고 선택된 것이면 제거한다.
 				//-------------------------------------------------------------
 				if (pItem!=NULL && pItem->IsTrade())
 				{
@@ -3693,12 +3693,12 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_INVENTORY(int left, int right, void* v
 			}
 		}	
 		//---------------------------------------------------
-		// ³õÀº ¾ÆÀÌÅÛÀÌ ±³È¯ÇÒ·Á°í ¼±ÅÃµÈ °ÍÀÎ °æ¿ì
+		// 놓은 아이템이 교환할려고 선택된 것인 경우
 		//---------------------------------------------------
 		else if (gC_vs_ui.IsRunningExchange())
 		{
 			//---------------------------------------------------
-			// ±âÁ¸¿¡ ÀÖ´ø ¾ÆÀÌÅÛ ±³È¯ÇÒ °Í¿¡¼­ Á¦°Å..
+			// 기존에 있던 아이템 교환할 것에서 제거..
 			//---------------------------------------------------
 			if (pItem!=NULL && pItem->IsTrade())
 			{
@@ -3708,20 +3708,20 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_INVENTORY(int left, int right, void* v
 			}
 
 			//---------------------------------------------------
-			// ±³È¯¿¡¼­ ¼±ÅÃµÈ ¾ÆÀÌÅÛ
+			// 교환에서 선택된 아이템
 			//---------------------------------------------------
 			if (pMouseItem->IsTrade())
 			{
 				bSendPacketTradeAdd = TRUE;
 
-				// ´Ù¸¥ »ç¶÷ÀÌ OK´©¸¥ »óÅÂ¶ó¸é..
+				// 다른 사람이 OK누른 상태라면..
 				if (bAcceptOtherTrade)
 				{
 					g_pTradeManager->RefuseOtherTrade();
 				}
 			}
 			//---------------------------------------------------
-			// ¾Æ´Ï¸é.. ¼öµ¿À¸·Î OKÃë¼Ò¸¦ º¸³½´Ù.
+			// 아니면.. 수동으로 OK취소를 보낸다.
 			//---------------------------------------------------
 			else
 			{
@@ -3753,15 +3753,15 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_INVENTORY(int left, int right, void* v
 		}
 
 		//---------------------------------------------------
-		// packetÀ» º¸³¾ ÇÊ¿ä°¡ ÀÖ´Â °æ¿ì
+		// packet을 보낼 필요가 있는 경우
 		//---------------------------------------------------
 		if (bSendPacket)
 		{
 
 				//---------------------------------------------------
-				// mouse¿¡ ÀÖ´ø itemÀ» Inventory¿¡ Ãß°¡Çß´Ù°í
-				// server·Î packetÀ» º¸³½´Ù.
-				// pItemÀÇ gridÁÂÇ¥°¡ inventory¿¡¼­ÀÇ ÁÂÇ¥ÀÌ´Ù.
+				// mouse에 있던 item을 Inventory에 추가했다고
+				// server로 packet을 보낸다.
+				// pItem의 grid좌표가 inventory에서의 좌표이다.
 				//---------------------------------------------------
 				CGAddMouseToInventory _CGAddMouseToInventory;
 				_CGAddMouseToInventory.setObjectID( toInventoryItemID );
@@ -3773,7 +3773,7 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_INVENTORY(int left, int right, void* v
 		}
 
 		//---------------------------------------------------
-		// ±³È¯¿¡¼­ ¼±ÅÃÇÏ´Â ¾ÆÀÌÅÛ...
+		// 교환에서 선택하는 아이템...
 		//---------------------------------------------------
 		if (bSendPacketTradeAdd)
 		{
@@ -3786,16 +3786,16 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_INVENTORY(int left, int right, void* v
 		}
 
 		//---------------------------------------------------
-		// ½ÇÁ¦·Î Ã³¸®ÇÑ´Ù.
+		// 실제로 처리한다.
 		//---------------------------------------------------
 		if (!bAcceptMyTrade)
 		{
 			MItem* pOldItem = NULL;
-			if (g_pInventory->ReplaceItem(pMouseItem,		// Ãß°¡ÇÒ item
-												left, right,	// Ãß°¡ÇÒ À§Ä¡ 
-												pOldItem))		// ¿ø·¡ÀÖ´ø item
+			if (g_pInventory->ReplaceItem(pMouseItem,		// 추가할 item
+												left, right,	// 추가할 위치 
+												pOldItem))		// 원래있던 item
 			{
-				if (pOldItem != NULL) // replace µÇ¾ú´Â°¡?
+				if (pOldItem != NULL) // replace 되었는가?
 				{				
 					UI_PickUpItem( pOldItem );
 				}
@@ -3805,7 +3805,7 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_INVENTORY(int left, int right, void* v
 				}
 			}
 
-			// Å©¸®½º¸¶½º Æ®¸®¿ë ÇÏµåÄÚµù
+			// 크리스마스 트리용 하드코딩
 			if(pMouseItem->GetItemClass() == ITEM_CLASS_EVENT_TREE 
 				&& pMouseItem->GetItemType() != 12
 				&& pMouseItem->GetItemType() != 25
@@ -3863,7 +3863,7 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_INVENTORY(int left, int right, void* v
 		}
 	}
 	//-----------------------------------------------------------------
-	// °ËÁõ ¹Þ¾Æ¾ßÇÒ ´Ù¸¥ ¾ÆÀÌÅÛÀÌ ÀÖ´Â °æ¿ì
+	// 검증 받아야할 다른 아이템이 있는 경우
 	//-----------------------------------------------------------------
 	else
 	{
@@ -3877,13 +3877,13 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_INVENTORY(int left, int right, void* v
 			DEBUG_ADD_FORMAT("[ITEMPDROP] g_pTempInformation->Mode!=TempInformation::MODE_NULL %d", g_pTempInformation->Mode);
 	}
 
-	// Áö¿ö¾ß µÇ´Â codeÀÌ´Ù. *_*;
+	// 지워야 되는 code이다. *_*;
 	//gC_vs_ui.DropItem();
 }
 
 //-----------------------------------------------------------------------------
 //
-// QuickSlot¿¡ ItemÀ» ³ÖÀº °æ¿ì
+// QuickSlot에 Item을 넣은 경우
 //
 //-----------------------------------------------------------------------------
 void
@@ -3925,10 +3925,10 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_QUICKSLOT(int left, int right, void* v
 	// void_ptr = MItem *
 	//
 	//---------------------------------------------------
-	// Áö±Ý UI¿¡¼­´Â ¹Ù·Î Ãß°¡ÇÏ°Å³ª..
-	// ¹Ù·Î ±³È¯ÇØ¹ö¸°´Ù.
-	// ±×·¯¹Ç·Î, µÎ °³¸¦ ¹Ù²ã¼­ ÀÐ¾î¾ß ÇÑ´Ù. - -;
-	// ¿´À¸³ª Å¬¶óÀÌ¾ðÆ®¿¡¼­ Ã³¸®ÇØÁÖ´Â°É·Î ¹Ù²Þ by larosel
+	// 지금 UI에서는 바로 추가하거나..
+	// 바로 교환해버린다.
+	// 그러므로, 두 개를 바꿔서 읽어야 한다. - -;
+	// 였으나 클라이언트에서 처리해주는걸로 바꿈 by larosel
 	//---------------------------------------------------
 	MItem* pSlotItem = NULL ;// = (MItem*)g_pQuickSlot->GetItem( left );;//gpC_mouse_pointer->GetPickUpItem();
 	if( g_pPlayer->IsSlayer() )
@@ -3947,7 +3947,7 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_QUICKSLOT(int left, int right, void* v
 
 	if (Replace)
 	{
-		if (pSlotItem) // replace µÇ¾ú´Â°¡?
+		if (pSlotItem) // replace 되었는가?
 		{
 			gpC_mouse_pointer->PickUpItem((MItem *)pSlotItem);
 		}
@@ -3959,19 +3959,19 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_QUICKSLOT(int left, int right, void* v
 	}
 	
 	//-----------------------------------------------------------------
-	// °ËÁõ¹ÞÀ»°Ô ¾ø´Â °æ¿ì
+	// 검증받을게 없는 경우
 	//-----------------------------------------------------------------
 	if (g_pTempInformation->GetMode()==TempInformation::MODE_NULL)//g_pPlayer->IsItemCheckBufferNULL())
 	{
-		// ¹«Á¶°Ç packetÀ» º¸³»¸é µÈ´Ù.
+		// 무조건 packet을 보내면 된다.
 		if (1)//g_pQuickSlot->GetItem( left )==NULL)
 		{
 
 				//MItem* pItem = (MItem*)void_ptr;
 
 				//---------------------------------------------------
-				// mouse¿¡ ÀÖ´ø itemÀ» QuickSlot¿¡ Ãß°¡Çß´Ù°í
-				// server·Î packetÀ» º¸³½´Ù.
+				// mouse에 있던 item을 QuickSlot에 추가했다고
+				// server로 packet을 보낸다.
 				//---------------------------------------------------
 				CGAddMouseToQuickSlot _CGAddMouseToQuickSlot;
 				_CGAddMouseToQuickSlot.setObjectID( pMouseItem->GetID() );
@@ -3989,9 +3989,9 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_QUICKSLOT(int left, int right, void* v
 				g_pSocket->sendPacket( &_CGAddMouseToQuickSlot );
 		
 				//---------------------------------------------------
-				// UI¿¡¼­ ÇÏ±â ¶§¹®¿¡.. ÇÏ¸é ¾ÈµÈ´Ù.
+				// UI에서 하기 때문에.. 하면 안된다.
 				//---------------------------------------------------
-				// ¹Ù·Î QuickSlot¿¡ Ãß°¡ÇÑ´Ù.
+				// 바로 QuickSlot에 추가한다.
 				//g_pQuickSlot->AddItem( pItem, left );
 				
 				//UI_DropItem();
@@ -3999,7 +3999,7 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_QUICKSLOT(int left, int right, void* v
 			PlaySound( pMouseItem->GetInventorySoundID() );
 		}
 		//---------------------------------------------------
-		// ¹º°¡ ÀÌ¹Ì ÀÖ´Â °æ¿ì.. 
+		// 뭔가 이미 있는 경우.. 
 		//---------------------------------------------------
 		else
 		{						
@@ -4007,7 +4007,7 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_QUICKSLOT(int left, int right, void* v
 		}
 	}
 	//-----------------------------------------------------------------
-	// °ËÁõ ¹Þ¾Æ¾ßÇÒ ´Ù¸¥ ¾ÆÀÌÅÛÀÌ ÀÖ´Â °æ¿ì
+	// 검증 받아야할 다른 아이템이 있는 경우
 	//-----------------------------------------------------------------
 	else
 	{
@@ -4018,7 +4018,7 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_QUICKSLOT(int left, int right, void* v
 
 //-----------------------------------------------------------------------------
 //
-// Gear¿¡ ItemÀ» Âø¿ëÇÑ °æ¿ì
+// Gear에 Item을 착용한 경우
 //
 //-----------------------------------------------------------------------------				
 void
@@ -4033,27 +4033,27 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_GEAR(int left, int right, void* void_p
 	}
 	//
 	// left = slot enum
-	// void_ptr = MItem * ±³È¯µÉ item(NULLÀÏ¼ö ÀÖ´Ù.)
+	// void_ptr = MItem * 교환될 item(NULL일수 있다.)
 	//
 
 	if (!g_bWatchMode)
 	{
 		//-----------------------------------------------------------------
-		// °ËÁõ¹ÞÀ»°Ô ¾ø´Â °æ¿ì
+		// 검증받을게 없는 경우
 		//-----------------------------------------------------------------
 		if (g_pPlayer->IsItemCheckBufferNULL()
 			&& g_pTempInformation->GetMode()==TempInformation::MODE_NULL)
 		{
-			MItem* pMouseItem = (MItem*)gpC_mouse_pointer->GetPickUpItem();	// µé°í ÀÖ´Â item
-			MItem* pGearItem = (MItem*)void_ptr;	// gear¿¡ ÀÖ´Ù¸é.. ±³È¯µÉ ¾ÆÀÌÅÛ
+			MItem* pMouseItem = (MItem*)gpC_mouse_pointer->GetPickUpItem();	// 들고 있는 item
+			MItem* pGearItem = (MItem*)void_ptr;	// gear에 있다면.. 교환될 아이템
 			
 			//-----------------------------------------------------------------
-			// mouse¿¡ ¹º°¡¸¦ µé°í ÀÖ¾î¾ß ÇÑ´Ù.
+			// mouse에 뭔가를 들고 있어야 한다.
 			//-----------------------------------------------------------------
 			if (pMouseItem!=NULL)
 			{
 				//-----------------------------------------------------------------
-				// Âø¿ëÇÒ ¼ö ÀÖ´Â »óÈ²ÀÌ µÇ¸é..
+				// 착용할 수 있는 상황이 되면..
 				//-----------------------------------------------------------------
 				if (g_pPlayer->SetAddonItem( pMouseItem ))
 				{				
@@ -4066,7 +4066,7 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_GEAR(int left, int right, void* void_p
 						g_pSlayerGear->ReplaceItem( pMouseItem, (MSlayerGear::GEAR_SLAYER)left, pRemovedItem );
 						
 						//-----------------------------------------------------------
-						// belt¸¦ ³õ°Å³ª Áý¾úÀ» °æ¿ì´Â quick itemÀ» resetÇØ¾ß ÇÑ´Ù.
+						// belt를 놓거나 집었을 경우는 quick item을 reset해야 한다.
 						//-----------------------------------------------------------
 						if ((MSlayerGear::GEAR_SLAYER)left == MSlayerGear::GEAR_SLAYER_BELT)
 						{
@@ -4086,7 +4086,7 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_GEAR(int left, int right, void* void_p
 					UI_DropItem();
 
 					//-----------------------------------------------------------
-					// ±³È¯µÇ´Â °æ¿ì
+					// 교환되는 경우
 					//-----------------------------------------------------------
 					if (pRemovedItem!=NULL)
 					{
@@ -4094,13 +4094,13 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_GEAR(int left, int right, void* void_p
 					}								
 
 					//----------------------------------------------------
-					// Skill Ã¼Å©
+					// Skill 체크
 					//----------------------------------------------------
 					g_pSkillAvailable->SetAvailableSkills();
 
 						//---------------------------------------------------
-						// mouse¿¡ ÀÖ´ø item1À» Gear¿¡ Ãß°¡Çß´Ù°í
-						// server·Î packetÀ» º¸³½´Ù.
+						// mouse에 있던 item1을 Gear에 추가했다고
+						// server로 packet을 보낸다.
 						//---------------------------------------------------
 						CGAddMouseToGear _CGAddMouseToGear;
 						_CGAddMouseToGear.setObjectID( pMouseItem->GetID() );
@@ -4110,57 +4110,57 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_GEAR(int left, int right, void* void_p
 						
 
 					//----------------------------------------------------
-					// Âø¿ëÇÑ ¾ÆÀÌÅÛ¿¡ µû¸¥ µµ¿ò¸»
+					// 착용한 아이템에 따른 도움말
 					//----------------------------------------------------
 //					__BEGIN_HELP_EVENT
 //						ITEM_CLASS itemClass = pMouseItem->GetItemClass();
 //
 //						//----------------------------------------------------
-//						// ÃÑ
+//						// 총
 //						//----------------------------------------------------
 //						if (pMouseItem->IsGunItem())
 //						{
-//							// [µµ¿ò¸»] ÃÑ Âø¿ëÇÑ °æ¿ì
+//							// [도움말] 총 착용한 경우
 ////							ExecuteHelpEvent( HE_ITEM_WEAR_GUN );
 //						}
 //						//----------------------------------------------------
-//						// º§Æ®
+//						// 벨트
 //						//----------------------------------------------------
 //						else if (itemClass==ITEM_CLASS_BELT)
 //						{
-//							// [µµ¿ò¸»] º§Æ® Âø¿ëÇÑ °æ¿ì
+//							// [도움말] 벨트 착용한 경우
 ////							ExecuteHelpEvent( HE_ITEM_WEAR_BELT );
 //						}
 //						//----------------------------------------------------
-//						// °Ë
+//						// 검
 //						//----------------------------------------------------
 //						else if (itemClass==ITEM_CLASS_SWORD)
 //						{
-//							// [µµ¿ò¸»] °Ë Âø¿ëÇÑ °æ¿ì
+//							// [도움말] 검 착용한 경우
 ////							ExecuteHelpEvent( HE_ITEM_WEAR_SWORD );
 //						}
 //						//----------------------------------------------------
-//						// µµ
+//						// 도
 //						//----------------------------------------------------
 //						else if (itemClass==ITEM_CLASS_BLADE)
 //						{
-//							// [µµ¿ò¸»] µµ Âø¿ëÇÑ °æ¿ì
+//							// [도움말] 도 착용한 경우
 ////							ExecuteHelpEvent( HE_ITEM_WEAR_BLADE );
 //						}
 //						//----------------------------------------------------
-//						// ½ÊÀÚ°¡
+//						// 십자가
 //						//----------------------------------------------------
 //						else if (itemClass==ITEM_CLASS_CROSS)
 //						{
-//							// [µµ¿ò¸»] ½ÊÀÚ°¡ Âø¿ëÇÑ °æ¿ì
+//							// [도움말] 십자가 착용한 경우
 ////							ExecuteHelpEvent( HE_ITEM_WEAR_CROSS );
 //						}
 //						//----------------------------------------------------
-//						// ¸ÞÀÌ½º
+//						// 메이스
 //						//----------------------------------------------------
 //						else if (itemClass==ITEM_CLASS_MACE)
 //						{
-//							// [µµ¿ò¸»] ¸ÞÀÌ½º Âø¿ëÇÑ °æ¿ì
+//							// [도움말] 메이스 착용한 경우
 ////							ExecuteHelpEvent( HE_ITEM_WEAR_MACE );
 //						}				
 //					__END_HELP_EVENT
@@ -4172,7 +4172,7 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_GEAR(int left, int right, void* void_p
 			}
 		}
 		//-----------------------------------------------------------------
-		// °ËÁõ ¹Þ¾Æ¾ßÇÒ ´Ù¸¥ ¾ÆÀÌÅÛÀÌ ÀÖ´Â °æ¿ì
+		// 검증 받아야할 다른 아이템이 있는 경우
 		//-----------------------------------------------------------------
 		else
 		{
@@ -4185,17 +4185,17 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_GEAR(int left, int right, void* void_p
 	}
 
 	//-------------------------------------------------
-	// Player°¡ Á¤ÁöÇØ ÀÖ´Â °æ¿ì¿¡¸¸ °¡´ÉÇÏ´Ù..
+	// Player가 정지해 있는 경우에만 가능하다..
 	//-------------------------------------------------
 	//if (g_pPlayer->IsStop())
 	{
 		//-----------------------------------------
-		// player°¡ pItemÀ» ÀåÂøÇÑ´Ù.
+		// player가 pItem을 장착한다.
 		//-----------------------------------------
 		//g_pPlayer->SetAddonItem( pItem );
 
 		//-----------------------------------------
-		// UI¿¡¼­ ItemÀ» Gear¿¡ ÀåÂøÇÑ´Ù.
+		// UI에서 Item을 Gear에 장착한다.
 		//-----------------------------------------
 		//gC_vs_ui.DropItem();
 	}
@@ -4208,7 +4208,7 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_GEAR(int left, int right, void* void_p
 
 //-----------------------------------------------------------------------------
 //
-// QuickSlot¿¡ ÀÖ´ø itemÀ» mouse·Î ÁýÀº °æ¿ì
+// QuickSlot에 있던 item을 mouse로 집은 경우
 //
 //-----------------------------------------------------------------------------
 void
@@ -4248,8 +4248,8 @@ UIMessageManager::Execute_UI_ITEM_PICKUP_FROM_QUICKSLOT(int left, int right, voi
 		MItem* pItem = (MItem*)void_ptr;
 
 			//---------------------------------------------------
-			// QuickSlot¿¡ ÀÖ´ø itemÀ» mouse¿¡ ºÙ¿´´Ù(-_-;)°í
-			// server·Î packetÀ» º¸³½´Ù.
+			// QuickSlot에 있던 item을 mouse에 붙였다(-_-;)고
+			// server로 packet을 보낸다.
 			//---------------------------------------------------
 			CGAddQuickSlotToMouse _CGAddQuickSlotToMouse;
 			_CGAddQuickSlotToMouse.setObjectID( pItem->GetID() );
@@ -4265,7 +4265,7 @@ UIMessageManager::Execute_UI_ITEM_PICKUP_FROM_QUICKSLOT(int left, int right, voi
 			g_pSocket->sendPacket( &_CGAddQuickSlotToMouse );
 			
 
-		// ¹Ù·Î QuickSlot¿¡¼­ Á¦°ÅÇÏ°í mouse¿¡ µé°Ô ÇÑ´Ù.
+		// 바로 QuickSlot에서 제거하고 mouse에 들게 한다.
 		
 		if( g_pPlayer->IsSlayer() )
 			g_pQuickSlot->RemoveItem( pItem->GetID() );
@@ -4282,7 +4282,7 @@ UIMessageManager::Execute_UI_ITEM_PICKUP_FROM_QUICKSLOT(int left, int right, voi
 
 //-----------------------------------------------------------------------------
 //
-// Inventory¿¡ ÀÖ´ø itemÀ» mouse·Î ÁýÀº °æ¿ì
+// Inventory에 있던 item을 mouse로 집은 경우
 //
 //-----------------------------------------------------------------------------				
 void
@@ -4312,7 +4312,7 @@ UIMessageManager::Execute_UI_ITEM_PICKUP_FROM_INVENTORY(int left, int right, voi
 		BOOL bAcceptOtherTrade = (g_pTradeManager!=NULL && g_pTradeManager->IsAcceptOtherTrade());
 
 		//---------------------------------------------------------
-		// ±³È¯Áß¿¡ OK ´­·¶À»¶§´Â °ËÁõÀ» ¹Þ¾Æ¾ß ÇÑ´Ù.
+		// 교환중에 OK 눌렀을때는 검증을 받아야 한다.
 		//---------------------------------------------------------
 		if (bAcceptMyTrade)
 		{
@@ -4338,12 +4338,12 @@ UIMessageManager::Execute_UI_ITEM_PICKUP_FROM_INVENTORY(int left, int right, voi
 			}
 		}
 		//---------------------------------------------------------
-		// ±³È¯ÇÒ·Á°í Ã¼Å©µÈ itemÀ» µé ¶§,
+		// 교환할려고 체크된 item을 들 때,
 		//---------------------------------------------------------
 		else if (gC_vs_ui.IsRunningExchange())
 		{
 			//---------------------------------------------------
-			// ¼±ÅÃµÇ¾î ÀÖ´ø ¾ÆÀÌÅÛÀÌ¸é.. Á¦°Å
+			// 선택되어 있던 아이템이면.. 제거
 			//---------------------------------------------------
 			if (pItem->IsTrade())
 			{
@@ -4351,14 +4351,14 @@ UIMessageManager::Execute_UI_ITEM_PICKUP_FROM_INVENTORY(int left, int right, voi
 
 				bSendPacketTradeRemove = TRUE;
 				
-				// ´Ù¸¥ »ç¶÷ÀÌ OK´©¸¥ »óÅÂ¶ó¸é..
+				// 다른 사람이 OK누른 상태라면..
 				if (bAcceptOtherTrade)
 				{
 					g_pTradeManager->RefuseOtherTrade();
 				}
 			}
 			//---------------------------------------------------
-			// ¾Æ´Ï¸é.. ¼öµ¿À¸·Î OKÃë¼Ò¸¦ º¸³½´Ù.
+			// 아니면.. 수동으로 OK취소를 보낸다.
 			//---------------------------------------------------
 			else
 			{
@@ -4403,8 +4403,8 @@ UIMessageManager::Execute_UI_ITEM_PICKUP_FROM_INVENTORY(int left, int right, voi
 		if (bSendPacket)
 		{
 				//---------------------------------------------------
-				// Inventory¿¡ ÀÖ´ø itemÀ» mouse¿¡ ºÙ¿´´Ù(-_-;)°í
-				// server·Î packetÀ» º¸³½´Ù.
+				// Inventory에 있던 item을 mouse에 붙였다(-_-;)고
+				// server로 packet을 보낸다.
 				//---------------------------------------------------
 				CGAddInventoryToMouse _CGAddInventoryToMouse;
 				_CGAddInventoryToMouse.setObjectID( pItem->GetID() );
@@ -4419,7 +4419,7 @@ UIMessageManager::Execute_UI_ITEM_PICKUP_FROM_INVENTORY(int left, int right, voi
 
 //-----------------------------------------------------------------------------
 //
-// Gear¿¡ Âø¿ëÇÏ°í ÀÖ´ø itemÀ» mouse·Î ÁýÀº °æ¿ì
+// Gear에 착용하고 있던 item을 mouse로 집은 경우
 //
 //-----------------------------------------------------------------------------				
 void
@@ -4440,24 +4440,24 @@ UIMessageManager::Execute_UI_ITEM_PICKUP_FROM_GEAR(int left, int right, void* vo
 	if (!g_bWatchMode)
 	{
 		int itemSlot = left;
-		MItem* pItem = (MItem*)void_ptr;	// gear¿¡ ÀÖ´Â item
+		MItem* pItem = (MItem*)void_ptr;	// gear에 있는 item
 
 		if (pItem!=NULL)
 		{
 			//-------------------------------------------------
-			// Player°¡ Á¤ÁöÇØ ÀÖ´Â °æ¿ì¿¡¸¸.
+			// Player가 정지해 있는 경우에만.
 			//-------------------------------------------------
 			//if (g_pPlayer->IsStop())
 			{
 				//---------------------------------------------
-				// AddonItemÀ» ÀåÂø ÇØÁ¦ÇÑ´Ù.
+				// AddonItem을 장착 해제한다.
 				//---------------------------------------------
 				if (g_pPlayer->RemoveAddonItem( pItem ))
 				{
 					MItem* pRemovedItem = NULL;
 
 					//---------------------------------------------
-					// gear¿¡¼­ Á¦°ÅÇÑ´Ù.
+					// gear에서 제거한다.
 					//---------------------------------------------
 					switch(g_pPlayer->GetRace())
 					{
@@ -4465,7 +4465,7 @@ UIMessageManager::Execute_UI_ITEM_PICKUP_FROM_GEAR(int left, int right, void* vo
 						pRemovedItem = g_pSlayerGear->RemoveItem( (MSlayerGear::GEAR_SLAYER)itemSlot );
 						
 						//-----------------------------------------------------------
-						// belt¸¦ ³õ°Å³ª Áý¾úÀ» °æ¿ì´Â quick itemÀ» resetÇØ¾ß ÇÑ´Ù.
+						// belt를 놓거나 집었을 경우는 quick item을 reset해야 한다.
 						//-----------------------------------------------------------
 						if (pRemovedItem!=NULL 
 							&& pRemovedItem->GetItemSlot() == MSlayerGear::GEAR_SLAYER_BELT)
@@ -4485,15 +4485,15 @@ UIMessageManager::Execute_UI_ITEM_PICKUP_FROM_GEAR(int left, int right, void* vo
 
 
 					//---------------------------------------------
-					// UI¿¡¼­ GearÀÇ ItemÀ» pickupÇÏ°Ô ÇÑ´Ù.
+					// UI에서 Gear의 Item을 pickup하게 한다.
 					//---------------------------------------------
 					if (pRemovedItem!=NULL)
 					{
 						UI_PickUpItem( pRemovedItem );
 						
 							//---------------------------------------------------
-							// Inventory¿¡ ÀÖ´ø itemÀ» mouse¿¡ ºÙ¿´´Ù(-_-;)°í
-							// server·Î packetÀ» º¸³½´Ù.
+							// Inventory에 있던 item을 mouse에 붙였다(-_-;)고
+							// server로 packet을 보낸다.
 							//---------------------------------------------------
 							CGAddGearToMouse _CGAddGearToMouse;
 							_CGAddGearToMouse.setObjectID( pRemovedItem->GetID() );
@@ -4503,7 +4503,7 @@ UIMessageManager::Execute_UI_ITEM_PICKUP_FROM_GEAR(int left, int right, void* vo
 					}
 
 					//----------------------------------------------------
-					// Skill Ã¼Å©
+					// Skill 체크
 					//----------------------------------------------------
 					g_pSkillAvailable->SetAvailableSkills();
 				}			
@@ -4522,7 +4522,7 @@ UIMessageManager::Execute_UI_ITEM_PICKUP_FROM_GEAR(int left, int right, void* vo
 
 //-----------------------------------------------------------------------------
 //
-// Inventory¿¡¼­ ItemÀ» »ç¿ëÇÑ °æ¿ì
+// Inventory에서 Item을 사용한 경우
 //
 //-----------------------------------------------------------------------------
 void
@@ -4542,7 +4542,7 @@ UIMessageManager::Execute_UI_ITEM_USE(int left, int right, void* void_ptr)
 
 	if (pItem!=NULL && g_pPlayer->IsItemCheckBufferNULL())
 	{
-		// ÀÚ±âÁ¾Á· ¾ÆÀÌÅÛ¸¸ ¾²Àð-¤µ-;
+		// 자기종족 아이템만 쓰쟈-ㅅ-;
 		if(g_pPlayer->IsSlayer() && pItem->IsSlayerItem() ||
 			g_pPlayer->IsVampire() && pItem->IsVampireItem() ||
 			g_pPlayer->IsOusters() && pItem->IsOustersItem())
@@ -4570,7 +4570,7 @@ UIMessageManager::Execute_UI_ITEM_USE(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// QuickSlot¿¡¼­ ItemÀ» »ç¿ëÇÑ °æ¿ì
+// QuickSlot에서 Item을 사용한 경우
 //
 //-----------------------------------------------------------------------------
 void
@@ -4630,12 +4630,12 @@ UIMessageManager::Execute_UI_ITEM_USE_QUICKSLOT(int left, int right, void* void_
 //				__BEGIN_HELP_EVENT
 //					if (bByFunctionKey)
 //					{
-//						// [µµ¿ò¸»] functionKey·Î »ç¿ëÇÑ ¾ÆÀÌÅÛÀÎ°¡?
+//						// [도움말] functionKey로 사용한 아이템인가?
 ////						ExecuteHelpEvent( HE_PRESSED_FUNCTION_KEY_FOR_QUICKITEM );
 //					}
 //				__END_HELP_EVENT
 
-				// ÀÚ±âÁ¾Á· ¾ÆÀÌÅÛ¸¸ ¾²Àð-¤µ-;
+				// 자기종족 아이템만 쓰쟈-ㅅ-;
 				if(g_pPlayer->IsSlayer() && pItem->IsSlayerItem() ||
 					g_pPlayer->IsVampire() && pItem->IsVampireItem() ||
 					g_pPlayer->IsOusters() && pItem->IsOustersItem())
@@ -4665,12 +4665,12 @@ UIMessageManager::Execute_UI_ITEM_USE_QUICKSLOT(int left, int right, void* void_
 
 //-----------------------------------------------------------------------------
 //
-// mouseÀÇ ItemÀ» InventoryÀÇ Item¿¡ Ãß°¡ÇÒ ¶§
+// mouse의 Item을 Inventory의 Item에 추가할 때
 //
 //-----------------------------------------------------------------------------
-// ½×ÀÌ´Â ºÎºÐÀº °ËÁõ¹ÞÁö ¾Ê°í Ã³¸®ÇÑ´Ù.
-// max °³¼ö¸¦ ÃÊ°úÇÏ¸é °³¼ö¸¸ ¹Ù²ãÁÖ°í
-// ¾Æ´Ï¸é.. µé°í ÀÖ´ø °ÍÀº ¾ø¾îÁø´Ù.
+// 쌓이는 부분은 검증받지 않고 처리한다.
+// max 개수를 초과하면 개수만 바꿔주고
+// 아니면.. 들고 있던 것은 없어진다.
 //-----------------------------------------------------------------------------
 void
 UIMessageManager::Execute_UI_ITEM_INSERT_FROM_INVENTORY(int left, int right, void* void_ptr)
@@ -4683,9 +4683,9 @@ UIMessageManager::Execute_UI_ITEM_INSERT_FROM_INVENTORY(int left, int right, voi
 		return;
 	}
 
-	// gpC_mouse_pointer->GetPickUpItem()		// µé°í ÀÖ´Â °Í
-	//void_ptr = MItem *		// µé¾î°¥ °÷
-	// InventoryÁÂÇ¥(left,right)
+	// gpC_mouse_pointer->GetPickUpItem()		// 들고 있는 것
+	//void_ptr = MItem *		// 들어갈 곳
+	// Inventory좌표(left,right)
 	MItem* pItem = (MItem*)void_ptr;
 	MItem* pMouseItem = gpC_mouse_pointer->GetPickUpItem();
 
@@ -4700,7 +4700,7 @@ UIMessageManager::Execute_UI_ITEM_INSERT_FROM_INVENTORY(int left, int right, voi
 		DEBUG_ADD("[Error] InvenItem is NULL");
 		return;
 	}
-	// add by Coffee 2006.11.4  ÐÞÕýÈÎÎñÎïÆ·²»ÄÜµþ¼Ó
+	// add by Coffee 2006.11.4  修正任务物品不能叠加
 	if (pItem->IsQuestItem())
 	{
 		return;
@@ -4720,12 +4720,12 @@ UIMessageManager::Execute_UI_ITEM_INSERT_FROM_INVENTORY(int left, int right, voi
 			BOOL bAcceptOtherTrade = (g_pTradeManager!=NULL && g_pTradeManager->IsAcceptOtherTrade());
 
 			//---------------------------------------------------------
-			// ±³È¯Áß¿¡ OK ´­·¶À»¶§´Â °ËÁõÀ» ¹Þ¾Æ¾ß ÇÑ´Ù.
+			// 교환중에 OK 눌렀을때는 검증을 받아야 한다.
 			//---------------------------------------------------------
 			if (bAcceptMyTrade)
 			{	
-				// ÀÌ »óÅÂ¿¡¼­´Â UI¿¡¼­ ¹Ù·Î ³ÖÁö ¾Ê´Â´Ù.
-				// pItemÀº µé°í ÀÖ´Â itemÀÌ´Ù.
+				// 이 상태에서는 UI에서 바로 넣지 않는다.
+				// pItem은 들고 있는 item이다.
 				if (g_pTempInformation->GetMode() == TempInformation::MODE_NULL
 					&& g_pPlayer->IsItemCheckBufferNULL())
 				{	
@@ -4748,7 +4748,7 @@ UIMessageManager::Execute_UI_ITEM_INSERT_FROM_INVENTORY(int left, int right, voi
 				MItem* pMouseItem = gpC_mouse_pointer->GetPickUpItem();
 
 				//----------------------------------------------------
-				// pMouseItemÀ» pItem¿¡ Ãß°¡½ÃÅ²´Ù.
+				// pMouseItem을 pItem에 추가시킨다.
 				//----------------------------------------------------
 				int total = pMouseItem->GetNumber() + pItem->GetNumber();
 				//yckou
@@ -4761,7 +4761,7 @@ UIMessageManager::Execute_UI_ITEM_INSERT_FROM_INVENTORY(int left, int right, voi
 					}
 					else
 					{
-						// ¸ðµÎ pItem¿¡ Ãß°¡µÉ ¼ö ÀÖ´Â °æ¿ì
+						// 모두 pItem에 추가될 수 있는 경우
 						pItem->SetNumber( total );
 						UI_DropItem();
 						
@@ -4773,13 +4773,13 @@ UIMessageManager::Execute_UI_ITEM_INSERT_FROM_INVENTORY(int left, int right, voi
 				
 				if ( total > pItem->GetMaxNumber())
 				{
-					// ÇÑ°è ¼öÄ¡¸¦ ³Ñ¾î°¥ °æ¿ì
+					// 한계 수치를 넘어갈 경우
 					pMouseItem->SetNumber( total - pItem->GetMaxNumber() );
 					pItem->SetNumber( pItem->GetMaxNumber() );
 				}
 				else
 				{
-					// ¸ðµÎ pItem¿¡ Ãß°¡µÉ ¼ö ÀÖ´Â °æ¿ì
+					// 모두 pItem에 추가될 수 있는 경우
 					pItem->SetNumber( total );
 					UI_DropItem();
 
@@ -4787,13 +4787,13 @@ UIMessageManager::Execute_UI_ITEM_INSERT_FROM_INVENTORY(int left, int right, voi
 				}
 
 				//----------------------------------------------------
-				// ±³È¯Áß¿¡ ¼±ÅÃµÈ ¾ÆÀÌÅÛÀÎ °æ¿ì
+				// 교환중에 선택된 아이템인 경우
 				//----------------------------------------------------
 				// Remove and Add - -;
 				if (gC_vs_ui.IsRunningExchange() && pItem->IsTrade())
 				{
 						//----------------------------------------------------
-						// ³õ¿© ÀÖ´ø°Å Á¦°Å
+						// 놓여 있던거 제거
 						//----------------------------------------------------
 						CGTradeRemoveItem _CGTradeRemoveItem;
 						_CGTradeRemoveItem.setTargetObjectID( g_pTradeManager->GetOtherID() );
@@ -4805,7 +4805,7 @@ UIMessageManager::Execute_UI_ITEM_INSERT_FROM_INVENTORY(int left, int right, voi
 
 						
 						//----------------------------------------------------
-						// ¾ÆÀÌÅÛ Ãß°¡ --> °³¼ö Áõ°¡
+						// 아이템 추가 --> 개수 증가
 						//----------------------------------------------------
 						CGAddMouseToInventory _CGAddMouseToInventory;
 						_CGAddMouseToInventory.setObjectID( mouseItemID );
@@ -4818,7 +4818,7 @@ UIMessageManager::Execute_UI_ITEM_INSERT_FROM_INVENTORY(int left, int right, voi
 
 						
 						//----------------------------------------------------
-						// ´Ù½Ã ±³È¯Ã¢¿¡ ¾ÆÀÌÅÛ Ãß°¡
+						// 다시 교환창에 아이템 추가
 						//----------------------------------------------------
 						CGTradeAddItem _CGTradeAddItem;
 						_CGTradeAddItem.setTargetObjectID( g_pTradeManager->GetOtherID() );
@@ -4827,7 +4827,7 @@ UIMessageManager::Execute_UI_ITEM_INSERT_FROM_INVENTORY(int left, int right, voi
 						g_pSocket->sendPacket( &_CGTradeAddItem );
 						
 
-					// ´Ù¸¥ »ç¶÷ÀÌ OK´©¸¥ »óÅÂ¶ó¸é..
+					// 다른 사람이 OK누른 상태라면..
 					if (bAcceptOtherTrade)
 					{
 						g_pTradeManager->RefuseOtherTrade();
@@ -4838,7 +4838,7 @@ UIMessageManager::Execute_UI_ITEM_INSERT_FROM_INVENTORY(int left, int right, voi
 			}
 
 			//----------------------------------------------------
-			// Server¿¡ Á¢¼ÓÇÑ °æ¿ì
+			// Server에 접속한 경우
 			//----------------------------------------------------
 				if (bSendPacket)
 				{
@@ -4851,7 +4851,7 @@ UIMessageManager::Execute_UI_ITEM_INSERT_FROM_INVENTORY(int left, int right, voi
 
 					
 					//----------------------------------------------------
-					// °¢ Item class¿¡ µû¸¥ Ã³¸®
+					// 각 Item class에 따른 처리
 					//----------------------------------------------------
 					//if (pItem->GetItemClass()==ITEM_CLASS_MONEY)
 					//{
@@ -4864,7 +4864,7 @@ UIMessageManager::Execute_UI_ITEM_INSERT_FROM_INVENTORY(int left, int right, voi
 
 //-----------------------------------------------------------------------------
 //
-// mouseÀÇ ItemÀ» GearÀÇ Item¿¡ Ãß°¡ÇÒ ¶§
+// mouse의 Item을 Gear의 Item에 추가할 때
 //
 //-----------------------------------------------------------------------------
 void
@@ -4878,8 +4878,8 @@ UIMessageManager::Execute_UI_ITEM_INSERT_FROM_GEAR(int left, int right, void* vo
 		return;
 	}
 
-	// gpC_mouse_pointer->GetPickUpItem()		// µé°í ÀÖ´Â °Í
-	//void_ptr = MItem *		// µé¾î°¥ °÷
+	// gpC_mouse_pointer->GetPickUpItem()		// 들고 있는 것
+	//void_ptr = MItem *		// 들어갈 곳
 	// Gear Slot(left)
 
 	if (!g_bWatchMode
@@ -4894,11 +4894,11 @@ UIMessageManager::Execute_UI_ITEM_INSERT_FROM_GEAR(int left, int right, void* vo
 		if (pItem->GetItemClass()==ITEM_CLASS_MAGAZINE)
 		{
 			//----------------------------------------------------
-			// Server¿¡ Á¢¼ÓÇÑ °æ¿ì
+			// Server에 접속한 경우
 			//----------------------------------------------------
 				//---------------------------------------------------
-				// mouse¿¡ ÀÖ´ø itemÀ» Gear¿¡ Ãß°¡Çß´Ù°í
-				// server·Î packetÀ» º¸³½´Ù.
+				// mouse에 있던 item을 Gear에 추가했다고
+				// server로 packet을 보낸다.
 				//---------------------------------------------------
 				CGAddMouseToGear _CGAddMouseToGear;
 				_CGAddMouseToGear.setObjectID( pMouseItem->GetID() );
@@ -4907,17 +4907,17 @@ UIMessageManager::Execute_UI_ITEM_INSERT_FROM_GEAR(int left, int right, void* vo
 				g_pSocket->sendPacket( &_CGAddMouseToGear );
 
 				
-				// °ËÁõ¹Þ±â¸¦ ±â´Ù·Á¾ßÇÑ´Ù.
+				// 검증받기를 기다려야한다.
 				g_pPlayer->SetItemCheckBuffer( pItem, MPlayer::ITEM_CHECK_BUFFER_INSERT_FROM_GEAR );
 
-				// °ËÁõ¹ÞÀ¸¸é m_p_current_pickup_itemÀ» pItemÀ» Ãß°¡ÇØ¾ßÇÑ´Ù.
+				// 검증받으면 m_p_current_pickup_item을 pItem을 추가해야한다.
 		}
 		//----------------------------------------------------
-		// ¾Æ´Ñ °æ¿ì.
+		// 아닌 경우.
 		//----------------------------------------------------
 		else
 		{
-			// »ç¿ë¾ÈÇÔ.. - -;
+			// 사용안함.. - -;
 		}
 	}
 	else
@@ -4929,7 +4929,7 @@ UIMessageManager::Execute_UI_ITEM_INSERT_FROM_GEAR(int left, int right, void* vo
 
 //-----------------------------------------------------------------------------
 //
-// mouseÀÇ ItemÀ» QuickSlotÀÇ Item¿¡ Ãß°¡ÇÒ ¶§
+// mouse의 Item을 QuickSlot의 Item에 추가할 때
 //
 //-----------------------------------------------------------------------------
 void
@@ -4946,9 +4946,9 @@ UIMessageManager::Execute_UI_ITEM_INSERT_FROM_QUICKSLOT(int left, int right, voi
 	
 	if (g_pPlayer->IsItemCheckBufferNULL())
 	{
-		// gpC_mouse_pointer->GetPickUpItem()		// µé°í ÀÖ´Â °Í
-		//void_ptr = MItem *		// µé¾î°¥ °÷
-		// QuickSlotÁÂÇ¥(left)
+		// gpC_mouse_pointer->GetPickUpItem()		// 들고 있는 것
+		//void_ptr = MItem *		// 들어갈 곳
+		// QuickSlot좌표(left)
 		MItem* pItem = (MItem*)void_ptr;
 		MItem* pMouseItem = (MItem*)gpC_mouse_pointer->GetPickUpItem();
 
@@ -4956,7 +4956,7 @@ UIMessageManager::Execute_UI_ITEM_INSERT_FROM_QUICKSLOT(int left, int right, voi
 			&& pItem->GetItemType()==pMouseItem->GetItemType())
 		{
 			//----------------------------------------------------
-			// Server¿¡ Á¢¼ÓÇÑ °æ¿ì
+			// Server에 접속한 경우
 			//----------------------------------------------------
 				CGAddMouseToQuickSlot _CGAddMouseToQuickSlot;
 				_CGAddMouseToQuickSlot.setObjectID( pMouseItem->GetID() );
@@ -4977,24 +4977,24 @@ UIMessageManager::Execute_UI_ITEM_INSERT_FROM_QUICKSLOT(int left, int right, voi
 				g_pSocket->sendPacket( &_CGAddMouseToQuickSlot );
 
 				
-				// °ËÁõ¹Þ±â À§ÇØ¼­ ±â´Ù·Á¾ß ÇÑ´Ù.
-				// °ËÁõ¹ÞÀ¸¸é m_p_current_pickup_itemÀ» pItemÀ» Ãß°¡ÇØ¾ßÇÑ´Ù.
+				// 검증받기 위해서 기다려야 한다.
+				// 검증받으면 m_p_current_pickup_item을 pItem을 추가해야한다.
 				//g_pPlayer->SetItemCheckBuffer( pItem, MPlayer::ITEM_CHECK_BUFFER_INSERT_FROM_INVENTORY );
 				//MItem* pMouseItem = (MItem*)gpC_mouse_pointer->GetPickUpItem();
 
 				//----------------------------------------------------
-				// pMouseItemÀ» pItem¿¡ Ãß°¡½ÃÅ²´Ù.
+				// pMouseItem을 pItem에 추가시킨다.
 				//----------------------------------------------------
 				int total = pMouseItem->GetNumber() + pItem->GetNumber();
 				if ( total > pItem->GetMaxNumber() )
 				{
-					// ÇÑ°è ¼öÄ¡¸¦ ³Ñ¾î°¥ °æ¿ì
+					// 한계 수치를 넘어갈 경우
 					pMouseItem->SetNumber( total - pItem->GetMaxNumber() );
 					pItem->SetNumber( pItem->GetMaxNumber() );
 				}
 				else
 				{
-					// ¸ðµÎ pItem¿¡ Ãß°¡µÉ ¼ö ÀÖ´Â °æ¿ì
+					// 모두 pItem에 추가될 수 있는 경우
 					pItem->SetNumber( total );
 					UI_DropItem();
 
@@ -5004,7 +5004,7 @@ UIMessageManager::Execute_UI_ITEM_INSERT_FROM_QUICKSLOT(int left, int right, voi
 				PlaySound( pItem->GetInventorySoundID() );
 
 				//----------------------------------------------------
-				// °¢ Item class¿¡ µû¸¥ Ã³¸®
+				// 각 Item class에 따른 처리
 				//----------------------------------------------------
 				//if (pItem->GetItemClass()==ITEM_CLASS_MONEY)
 				//{
@@ -5017,7 +5017,7 @@ UIMessageManager::Execute_UI_ITEM_INSERT_FROM_QUICKSLOT(int left, int right, voi
 
 //-----------------------------------------------------------------------------
 //
-// »óÁ¡ ´ÝÀ» ¶§,
+// 상점 닫을 때,
 //
 //-----------------------------------------------------------------------------
 void
@@ -5036,18 +5036,18 @@ UIMessageManager::Execute_UI_CLOSE_SHOP(int left, int right, void* void_ptr)
 	{
 		gC_vs_ui.CloseShop();
 
-		// shopÀ» ¾ø¾Ø´Ù.
+		// shop을 없앤다.
 		gC_vs_ui.SetShop( NULL );
 
 
-		// ´Ù½Ã ¹º°¡¸¦?¼±ÅÃÇÒ ¼ö ÀÖ°Ô ÇÑ´Ù.
+		// 다시 뭔가를?선택할 수 있게 한다.
 		g_pUIDialog->ShowPCTalkDlg();
 	}
 }
 
 //-----------------------------------------------------------------------------
 //
-// »óÁ¡¿¡¼­ »ì·Á´Â ¹°°ÇÀ» ¼±ÅÃÇßÀ» ¶§,
+// 상점에서 살려는 물건을 선택했을 때,
 //
 //-----------------------------------------------------------------------------
 //
@@ -5066,12 +5066,12 @@ UIMessageManager::Execute_UI_BUY_ITEM(int left, int right, void* void_ptr)
 		return;
 	}
 
-	// °ËÁõÇÒ°Ô ¾ø´Â °æ¿ì
+	// 검증할게 없는 경우
 	if (g_pTempInformation->GetMode()==TempInformation::MODE_NULL)
 	{
-		int index = left;					// »ì·Á´Â ¾ÆÀÌÅÛÀÇ À§Ä¡
-		int number = right;					// »ì·Á´Â °³¼ö
-		MShop* pShop = (MShop*)void_ptr;	// »óÁ¡
+		int index = left;					// 살려는 아이템의 위치
+		int number = right;					// 살려는 개수
+		MShop* pShop = (MShop*)void_ptr;	// 상점
 		int npcID = (*g_pPCTalkBox).GetNPCID();					
 
 		if (pShop!=NULL)
@@ -5089,7 +5089,7 @@ UIMessageManager::Execute_UI_BUY_ITEM(int left, int right, void* void_ptr)
 					int oldNumber = pItem->GetNumber();					
 
 					//-------------------------------------------------
-					// »ì ¼ö ÀÖ´ÂÁö Ã¼Å©ÇÑ´Ù.
+					// 살 수 있는지 체크한다.
 					//-------------------------------------------------							
 					bool bBuyPossible = false;
 					//GAME_STRINGID buyImpossibleMessage = STRING_MESSAGE_CANNOT_BUY;
@@ -5098,7 +5098,7 @@ UIMessageManager::Execute_UI_BUY_ITEM(int left, int right, void* void_ptr)
 					switch (pShop->GetShopType())
 					{
 						//-------------------------------------------------
-						// º¸Åë »óÁ¡
+						// 보통 상점
 						//-------------------------------------------------
 						case MShop::SHOP_NORMAL :
 						{
@@ -5112,7 +5112,7 @@ UIMessageManager::Execute_UI_BUY_ITEM(int left, int right, void* void_ptr)
 						break;
 
 						//-------------------------------------------------
-						// ÀÌº¥Æ®º° »óÁ¡
+						// 이벤트별 상점
 						//-------------------------------------------------
 						case MShop::SHOP_EVENT_STAR :
 						{
@@ -5122,14 +5122,14 @@ UIMessageManager::Execute_UI_BUY_ITEM(int left, int right, void* void_ptr)
 
 							if (starPrice.type!=-1 && starPrice.number!=0)
 							{
-								// ¸î°³³ª ÀÖ´ÂÁö Ã£¾Æº»´Ù.
+								// 몇개나 있는지 찾아본다.
 								MItemClassTypeNumberFinder starFinder(ITEM_CLASS_EVENT_STAR, 
 																		starPrice.type);
 
 
 								((MItemManager*)g_pInventory)->FindItem( starFinder );
 
-								// °¡Áö°í ÀÖ´Â°Ô ´õ ¸¹¾Æ¾ß ÇÑ´Ù.
+								// 가지고 있는게 더 많아야 한다.
 								bBuyPossible = (starFinder.GetTotalNumber() >= starPrice.number);
 
 								buyImpossibleMessage = STRING_MESSAGE_CANNOT_BUY_NO_STAR;
@@ -5140,12 +5140,12 @@ UIMessageManager::Execute_UI_BUY_ITEM(int left, int right, void* void_ptr)
 					}
 
 					//-------------------------------------------------
-					// µ·ÀÌ ÃæºÐÇÑ °æ¿ì
+					// 돈이 충분한 경우
 					//-------------------------------------------------
 					if (bBuyPossible)
 					{								
 						//-------------------------------------------------
-						// inventory¿¡ ³ÖÀ» À§Ä¡¸¦ Ã£´Â´Ù.
+						// inventory에 넣을 위치를 찾는다.
 						//-------------------------------------------------
 						pItem->SetNumber( number );
 
@@ -5166,7 +5166,7 @@ UIMessageManager::Execute_UI_BUY_ITEM(int left, int right, void* void_ptr)
 
 								
 								//-------------------------------------------------
-								// °ËÁõÀ» À§ÇÑ Temp Information¼³Á¤
+								// 검증을 위한 Temp Information설정
 								//-------------------------------------------------
 								(*g_pTempInformation).Mode	= TempInformation::MODE_SHOP_BUY;
 								(*g_pTempInformation).Value1 = pShop->GetCurrent();
@@ -5176,16 +5176,16 @@ UIMessageManager::Execute_UI_BUY_ITEM(int left, int right, void* void_ptr)
 								(*g_pTempInformation).pValue = (void*)pShop;
 
 								//-------------------------------------------------
-								// ´Ù¸¥ ¾ÆÀÌÅÛ¿¡ Á¢±Ù ¸øÇÏµµ·Ï..
+								// 다른 아이템에 접근 못하도록..
 								//-------------------------------------------------
 								UI_LockItemTrade();
 						}
 						else
 						{
-							// inventory°¡ ²ËÂ÷¼­ ¸ø »ê´Ù!
+							// inventory가 꽉차서 못 산다!
 							g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_MESSAGE_CANNOT_BUY_NO_SPACE ].GetString());
 							
-							// 2004, 5, 7 , sobeit add start - ÀÎº¥¿¡ ÀÚ¸®°¡ ¾øÀ¸¸é º¸°üÇÔ »ç¶ó°í µµ¿ò¸» º¸¿©ÁÜ
+							// 2004, 5, 7 , sobeit add start - 인벤에 자리가 없으면 보관함 사라고 도움말 보여줌
 							ExecuteHelpEvent( HELP_EVENT_STORAGE_BUY );
 							// 2004, 5, 6, sobeit add end
 						}
@@ -5194,7 +5194,7 @@ UIMessageManager::Execute_UI_BUY_ITEM(int left, int right, void* void_ptr)
 
 					}
 					//-------------------------------------------------
-					// µ· È¤Àº º°ÀÌ.. ºÎÁ·ÇÑ °æ¿ì
+					// 돈 혹은 별이.. 부족한 경우
 					//-------------------------------------------------					
 					else
 					{
@@ -5203,19 +5203,19 @@ UIMessageManager::Execute_UI_BUY_ITEM(int left, int right, void* void_ptr)
 				}
 				else
 				{
-					// ¼±¹ÝÀÇ index À§Ä¡¿¡ ¾ÆÀÌÅÛÀÌ ¾ø´Â °æ¿ì
+					// 선반의 index 위치에 아이템이 없는 경우
 					DEBUG_ADD_FORMAT("[Error] There is NO Item in index=%d", index);
 				}
 			}
 			else
 			{
-				// ¼±¹ÝÀÌ ¼³Á¤ ¾È µÈ °æ¿ì
+				// 선반이 설정 안 된 경우
 				DEBUG_ADD_FORMAT("[Error] There is NO Shelf type=%d", (int)pShop->GetCurrent());
 			}
 		}
 		else
 		{
-			// shopÀÌ ¼³Á¤ ¾È µÈ °æ¿ì
+			// shop이 설정 안 된 경우
 			DEBUG_ADD_FORMAT("[Error] There is NO Shop. npc id=%d", npcID);
 		}
 	}
@@ -5223,7 +5223,7 @@ UIMessageManager::Execute_UI_BUY_ITEM(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// ¹°°Ç ÆÈ±â dialog ´ÝÀ» ¶§
+// 물건 팔기 dialog 닫을 때
 //
 //-----------------------------------------------------------------------------
 void
@@ -5243,14 +5243,14 @@ UIMessageManager::Execute_UI_ITEM_SELL_FINISHED(int left, int right, void* void_
 	{
 		gC_vs_ui.FinishItemSelling();
 
-		// ´Ù½Ã ¹º°¡¸¦?¼±ÅÃÇÒ ¼ö ÀÖ°Ô ÇÑ´Ù.
+		// 다시 뭔가를?선택할 수 있게 한다.
 		g_pUIDialog->ShowPCTalkDlg();
 	}
 }
 
 //-----------------------------------------------------------------------------
 //
-// ÆÈ·Á´Â ¹°°ÇÀ» ¼±ÅÃÇßÀ» ¶§,
+// 팔려는 물건을 선택했을 때,
 //
 //-----------------------------------------------------------------------------
 //
@@ -5270,20 +5270,20 @@ UIMessageManager::Execute_UI_SELL_ITEM(int left, int right, void* void_ptr)
 
 	
 	//MItem* pItem = (MItem*)void_ptr;
-	// °ËÁõÇÒ°Ô ¾ø´Â °æ¿ì
+	// 검증할게 없는 경우
 	if (g_pTempInformation->GetMode()==TempInformation::MODE_NULL)
 	{
 		const MItem* pItem = g_pInventory->GetItem( left, right );
 
 		if (pItem!=NULL && g_pTempInformation->GetMode()==TempInformation::MODE_NULL)
 		{
-			// Event GiftBox ¾ÆÀÌÅÛÀÎ °æ¿ì ¸ø ³õ´Â´Ù.
+			// Event GiftBox 아이템인 경우 못 놓는다.
 			
 			if (//pItem->GetItemClass()!=ITEM_CLASS_EVENT_GIFT_BOX &&
 				!pItem->IsUniqueItem() || (g_pTimeItemManager->IsExist( pItem->GetID())))
 			{
 				//-----------------------------------------------------
-				// ¾ÆÀÌÅÛÀ» ÆÈ±â À§ÇÑ packetÀ» º¸³½´Ù.
+				// 아이템을 팔기 위한 packet을 보낸다.
 				//-----------------------------------------------------
 					CGShopRequestSell	_CGShopRequestSell;
 
@@ -5295,13 +5295,13 @@ UIMessageManager::Execute_UI_SELL_ITEM(int left, int right, void* void_ptr)
 			
 						
 					//-------------------------------------------------
-					// °ËÁõÀ» À§ÇÑ Temp Information¼³Á¤
+					// 검증을 위한 Temp Information설정
 					//-------------------------------------------------
 					(*g_pTempInformation).Mode	= TempInformation::MODE_SHOP_SELL;
 					(*g_pTempInformation).pValue = (void*)pItem;
 
 					//-------------------------------------------------
-					// ´Ù¸¥ ¾ÆÀÌÅÛ¿¡ Á¢±Ù ¸øÇÏµµ·Ï..
+					// 다른 아이템에 접근 못하도록..
 					//-------------------------------------------------
 					UI_LockItemTrade();
 			}
@@ -5320,7 +5320,7 @@ UIMessageManager::Execute_UI_SELL_ITEM(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// ÆÈ·Á´Â ¹°°ÇÀ» ¼±ÅÃÇßÀ» ¶§,
+// 팔려는 물건을 선택했을 때,
 //
 //-----------------------------------------------------------------------------
 //
@@ -5340,11 +5340,11 @@ UIMessageManager::Execute_UI_SELL_ALL_ITEM(int left, int right, void* void_ptr)
 
 	
 	//MItem* pItem = (MItem*)void_ptr;
-	// °ËÁõÇÒ°Ô ¾ø´Â °æ¿ì
+	// 검증할게 없는 경우
 	if (g_pTempInformation->GetMode()==TempInformation::MODE_NULL)
 	{
 		//-----------------------------------------------------
-		// ¾ÆÀÌÅÛÀ» ÆÈ±â À§ÇÑ packetÀ» º¸³½´Ù.
+		// 아이템을 팔기 위한 packet을 보낸다.
 		//-----------------------------------------------------
 			CGShopRequestSell	_CGShopRequestSell;
 
@@ -5356,12 +5356,12 @@ UIMessageManager::Execute_UI_SELL_ALL_ITEM(int left, int right, void* void_ptr)
 	
 				
 			//-------------------------------------------------
-			// °ËÁõÀ» À§ÇÑ Temp Information¼³Á¤
+			// 검증을 위한 Temp Information설정
 			//-------------------------------------------------
 			(*g_pTempInformation).Mode	= TempInformation::MODE_SHOP_SELL_ALL_SKULL;
 			
 			//-------------------------------------------------
-			// ´Ù¸¥ ¾ÆÀÌÅÛ¿¡ Á¢±Ù ¸øÇÏµµ·Ï..
+			// 다른 아이템에 접근 못하도록..
 			//-------------------------------------------------
 			UI_LockItemTrade();
 	}
@@ -5399,7 +5399,7 @@ UIMessageManager::Execute_UI_BACKGROUND_MOUSE_FOCUS(int left, int right, void* v
 /*
 //-----------------------------------------------------------------------------
 //
-// Skill View¸¦ ´ÝÀ» ¶§,
+// Skill View를 닫을 때,
 //
 //-----------------------------------------------------------------------------
 void
@@ -5416,17 +5416,17 @@ UIMessageManager::Execute_UI_CLOSE_SKILL_VIEW(int left, int right, void* void_pt
 	
 	gC_vs_ui.CloseSkillView();
 
-	// ´Ù½Ã ¹º°¡¸¦?¼±ÅÃÇÒ ¼ö ÀÖ°Ô ÇÑ´Ù.
+	// 다시 뭔가를?선택할 수 있게 한다.
 	//g_pUIDialog->ShowPCTalkDlg();
 
-	// mode Á¦°Å
+	// mode 제거
 	//(*g_pTempInformation).Mode = TempInformation::MODE_NULL;
 }
 
 
 //-----------------------------------------------------------------------------
 //
-//	SkillÀ» ¹è¿î´Ù°í ÇßÀ» ¶§,
+//	Skill을 배운다고 했을 때,
 //
 //-----------------------------------------------------------------------------
 void
@@ -5465,7 +5465,7 @@ UIMessageManager::Execute_UI_LEARN_SLAYER_SKILL(int left, int right, void* void_
 */
 //-----------------------------------------------------------------------------
 //
-// PDS¸¦ ´ÝÀ» ¶§,
+// PDS를 닫을 때,
 //
 //-----------------------------------------------------------------------------
 /*
@@ -5480,7 +5480,7 @@ UIMessageManager::Execute_UI_PDS_CLOSED(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// Slayer Á¤º¸ º¸±â Àü¿¡ °ª ¼³Á¤ÇØÁÖ±â..
+// Slayer 정보 보기 전에 값 설정해주기..
 //
 //-----------------------------------------------------------------------------
 /*
@@ -5510,7 +5510,7 @@ UIMessageManager::Execute_UI_PLEASE_SET_SLAYER_VALUE(int left, int right, void* 
 
 //-----------------------------------------------------------------------------
 //
-// PCS ¹øÈ£¸¦ ¹ÞÀ» ¶§ --> ´Ù¸¥ »ç¶÷°ú ÅëÈ­ÇÒ·Á°í..
+// PCS 번호를 받을 때 --> 다른 사람과 통화할려고..
 //
 //-----------------------------------------------------------------------------
 /*
@@ -5526,7 +5526,7 @@ UIMessageManager::Execute_UI_SEND_PCS_NUMBER(int left, int right, void* void_ptr
 
 
 	//-------------------------------------------
-	// Server¿¡ Á¢¼ÓÇØ ÀÖÀ» ¶§,
+	// Server에 접속해 있을 때,
 	//-------------------------------------------
 	#ifdef CONNECT_SERVER
 		CGDialUp _CGDialUp;
@@ -5544,19 +5544,19 @@ UIMessageManager::Execute_UI_SEND_PCS_NUMBER(int left, int right, void* void_ptr
 		UI_OnLinePCS(str, left);
 	#endif
 
-	//gC_vs_ui.OnLinePCS(); // PCS°¡ ¿¬°áµÇ¾úÀ» ¶§ ÇØÁà¾ß ÇÑ´Ù!
+	//gC_vs_ui.OnLinePCS(); // PCS가 연결되었을 때 해줘야 한다!
 }
  */
 
 //-----------------------------------------------------------------------------
 //
-// Á¢¼Ó µÆÀ» ¶§
+// 접속 됐을 때
 //
 //-----------------------------------------------------------------------------
 /*
 case UI_PCS_CONNECTOR_GRANTED:
 //
-// ´ë±â¹æ¿¡ ÀÖ´Â »ç¶÷°ú ¿¬°áÇÔ.
+// 대기방에 있는 사람과 연결함.
 //
 // left = pcs number
 //
@@ -5568,10 +5568,10 @@ break;
 
 //-----------------------------------------------------------------------------
 //
-// PCS Á¢¼ÓÁß¿¡ ³¡³¾¶§..
+// PCS 접속중에 끝낼때..
 //
 //-----------------------------------------------------------------------------
-// PCS Ã¢¿¡¼­ PCS number¸¦ sendÇÏ°í connecting Áß¿¡ END¸¦ ´­·¶´Ù.
+// PCS 창에서 PCS number를 send하고 connecting 중에 END를 눌렀다.
 /*
 void
 UIMessageManager::Execute_UI_END_PCS(int left, int right, void* void_ptr) 
@@ -5579,7 +5579,7 @@ UIMessageManager::Execute_UI_END_PCS(int left, int right, void* void_ptr)
 	DEBUG_ADD("[UI] UI_END_PCS");
 	
 	//------------------------------------------------
-	// ¸ðµç Á¢¼ÓÀ» ´Ù ²÷´Â´Ù.
+	// 모든 접속을 다 끊는다.
 	//------------------------------------------------
 	#ifdef	CONNECT_SERVER			
 		CGPhoneDisconnect _CGPhoneDisconnect;
@@ -5600,7 +5600,7 @@ UIMessageManager::Execute_UI_END_PCS(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// Online »óÅÂ¿¡¼­ PCS³¡³¾¶§
+// Online 상태에서 PCS끝낼때
 //
 //-----------------------------------------------------------------------------
 /*
@@ -5608,12 +5608,12 @@ void
 UIMessageManager::Execute_UI_QUIT_PCS_ONLINE_MODE(int left, int right, void* void_ptr)
 {
 	//
-	// PCS online mode¿¡¼­ quit ¹öÆ°À» ´­·¶´Ù.
+	// PCS online mode에서 quit 버튼을 눌렀다.
 	//
 	DEBUG_ADD("[UI] UI_QUIT_PCS_ONLINE_MODE");
 	
 	//------------------------------------------------
-	// ¸ðµç Á¢¼ÓÀ» ´Ù ²÷´Â´Ù.
+	// 모든 접속을 다 끊는다.
 	//------------------------------------------------
 	#ifdef	CONNECT_SERVER			
 		CGPhoneDisconnect _CGPhoneDisconnect;
@@ -5636,7 +5636,7 @@ UIMessageManager::Execute_UI_QUIT_PCS_ONLINE_MODE(int left, int right, void* voi
 
 //-----------------------------------------------------------------------------
 //
-// ´Ù¸¥ »ç¶÷À¸·Î ¹Ù²Þ.
+// 다른 사람으로 바꿈.
 //
 //-----------------------------------------------------------------------------
 /*
@@ -5644,7 +5644,7 @@ void
 UIMessageManager::Execute_UI_CHANGE_PCS_CONNECTED_SLOT(int left, int right, void* void_ptr)
 {
 	//
-	// ¶Ç ´Ù¸¥ ¿¬°áµÈ »ç¶÷À¸·Î ¹Ù²Þ.
+	// 또 다른 연결된 사람으로 바꿈.
 	//
 	// left = pcs number
 	// right = slot 
@@ -5659,16 +5659,16 @@ UIMessageManager::Execute_UI_CHANGE_PCS_CONNECTED_SLOT(int left, int right, void
 
 //-----------------------------------------------------------------------------
 //
-// Online »óÅÂ¿¡¼­ PCS³¡³¾¶§
+// Online 상태에서 PCS끝낼때
 //
 //-----------------------------------------------------------------------------
-// ´ë±â¹æ click! (ÀÌ¹Ì ¿¬°á-duplex-µÇÁö ¾Ê¾ÒÀ½)
+// 대기방 click! (이미 연결-duplex-되지 않았음)
 /*
 void
 UIMessageManager::Execute_UI_PLEASE_PCS_CONNECT_ME(int left, int right, void* void_ptr)
 {
 	//
-	// »ç¶÷ÀÌ ÀÖ´Â ´ë±â¹æÀ» Å¬¸¯ÇÏ¿´´Ù. (¸Þ½ÃÁö¸¦ ¼Û½Å ÇÏ±â À§ÇØ¼­)
+	// 사람이 있는 대기방을 클릭하였다. (메시지를 송신 하기 위해서)
 	//
 	// left = pcs number
 	// right = slot 
@@ -5677,7 +5677,7 @@ UIMessageManager::Execute_UI_PLEASE_PCS_CONNECT_ME(int left, int right, void* vo
 	
 	int slot = right;
 
-	// Å¬¸¯µÈ slot°ú ¿¬°áÇÔ.
+	// 클릭된 slot과 연결함.
 	gC_vs_ui.GrantPCSWaitRoomToDuplex( slot );
 }
 */
@@ -5728,7 +5728,7 @@ UIMessageManager::Execute_UI_DROP_MONEY(int left, int right, void* void_ptr)
 {
 	return;
 	//
-	// ÀÎº¥Åä¸®¿¡¼­ µ·À» dropÇÑ´Ù.
+	// 인벤토리에서 돈을 drop한다.
 	//
 	// left = money
 	//
@@ -5743,7 +5743,7 @@ UIMessageManager::Execute_UI_DROP_MONEY(int left, int right, void* void_ptr)
 
 	
 	//-----------------------------------------------------------------------------
-	// µ·ÀÌ 0ÀÌ¸é ¾ÈµÈ´Ù.
+	// 돈이 0이면 안된다.
 	//-----------------------------------------------------------------------------
 	if (left > 0)
 	{
@@ -5757,7 +5757,7 @@ UIMessageManager::Execute_UI_DROP_MONEY(int left, int right, void* void_ptr)
 				
 
 			//-----------------------------------------------
-			// µ· ÁÙ¿©¹ö¸°´Ù.
+			// 돈 줄여버린다.
 			//-----------------------------------------------
 			g_pMoneyManager->UseMoney( left );
 		}
@@ -5770,16 +5770,16 @@ UIMessageManager::Execute_UI_DROP_MONEY(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// Click Bonus Point - º¸³Ê½º Æ÷ÀÎÆ® ¿Ã¸±¶§,
+// Click Bonus Point - 보너스 포인트 올릴때,
 //
 //-----------------------------------------------------------------------------
 void
 UIMessageManager::Execute_UI_CLICK_BONUS_POINT(int left, int right, void* void_ptr)
 {
 	//
-	// vampire bonus point¸¦ ¿Ã¸®±â À§ÇØ ¹öÆ°À» ´­·¶´Ù.
+	// vampire bonus point를 올리기 위해 버튼을 눌렀다.
 	//
-	// g_char_slot_ingameÀÇ bonus point¸¦ °Ë»öÇÏ¸é ¾ó¸¶³ª ³²¾Ò´ÂÁö ¾Ë ¼ö ÀÖ´Ù.
+	// g_char_slot_ingame의 bonus point를 검색하면 얼마나 남았는지 알 수 있다.
 	//
 	// left = { 0:STR, 1:DEX, 2:INT }
 	//
@@ -5800,19 +5800,19 @@ UIMessageManager::Execute_UI_CLICK_BONUS_POINT(int left, int right, void* void_p
 		INC_INT
 	};
 
-	// ±â¾ïÇØµÎ±â À§ÇØ¼­...
+	// 기억해두기 위해서...
 	if ((*g_pTempInformation).Mode==TempInformation::MODE_NULL)
 	{
 		int bonusPoint = g_pPlayer->GetBonusPoint();
 
 		//----------------------------------------------
-		// vampireÀÌ°í bonuspoint°¡ ÀÖÀ» ¶§,
+		// vampire이고 bonuspoint가 있을 때,
 		//----------------------------------------------
-		// 2005, 1, 18, sobeit modify start - ½ÂÁ÷ ½½·¹´Â º¸³Ê½º Æ÷ÀÎÆ®°¡ ÀÖ´Ù.
+		// 2005, 1, 18, sobeit modify start - 승직 슬레는 보너스 포인트가 있다.
 //		if (!g_pPlayer->IsSlayer()// || g_pPlayer->IsOusters()
 //			&& bonusPoint > 0)
 		if(bonusPoint > 0)
-		// 2005, 1, 18, sobeit modify end - ½ÂÁ÷ ½½·¹´Â º¸³Ê½º Æ÷ÀÎÆ®°¡ ÀÖ´Ù.
+		// 2005, 1, 18, sobeit modify end - 승직 슬레는 보너스 포인트가 있다.
 		{
 			
 				CGUseBonusPoint _CGUseBonusPoint;
@@ -5823,7 +5823,7 @@ UIMessageManager::Execute_UI_CLICK_BONUS_POINT(int left, int right, void* void_p
 
 				
 				//----------------------------------------------
-				// ¼±ÅÃÇÑ ºÎºÐ ±â¾ï
+				// 선택한 부분 기억
 				//----------------------------------------------
 				(*g_pTempInformation).Mode = TempInformation::MODE_BONUSPOINT_USE;
 				(*g_pTempInformation).Value1 = bonusPart[left];				
@@ -5836,14 +5836,14 @@ UIMessageManager::Execute_UI_CLICK_BONUS_POINT(int left, int right, void* void_p
 
 //-----------------------------------------------------------------------------
 //
-// CharInfo ¹öÆ°À» ´­·¶À» ¶§,
+// CharInfo 버튼을 눌렀을 때,
 //
 //-----------------------------------------------------------------------------
 void
 UIMessageManager::Execute_UI_INFO(int left, int right, void* void_ptr)
 {
 	//
-	// character info buttonÀ» ´­·¶´Ù. ÀÚ½ÅÀÇ Á¤º¸¸¦ º¸¿©Áà¾ß ÇÑ´Ù!
+	// character info button을 눌렀다. 자신의 정보를 보여줘야 한다!
 	//
 //	DEBUG_ADD("[UI] UI_CHARINFO");
 //	
@@ -5861,20 +5861,20 @@ UIMessageManager::Execute_UI_INFO(int left, int right, void* void_ptr)
 //	}
 //
 //	//----------------------------------------------
-//	// ¿­·ÁÀÖÀ¸¸é ´Ý´Â´Ù.
+//	// 열려있으면 닫는다.
 //	//----------------------------------------------
 //	if (gC_vs_ui.IsRunningCharInfo())
 //	{
 //		gC_vs_ui.CloseCharInfo();
 //	}
 //	//----------------------------------------------
-//	// ¶ç¿î´Ù.
+//	// 띄운다.
 //	//----------------------------------------------
 //	else
 //	{
 //		// set slot
 //
-//		// g_char_slot_ingame °ÔÀÓ½ÇÇà Áß °Ô¼Ó ¼³Á¤ÇØÁà¾ß ÇÑ´Ù.
+//		// g_char_slot_ingame 게임실행 중 게속 설정해줘야 한다.
 //		/*
 //		g_char_slot_ingame.sz_name = "yaho";
 //		g_char_slot_ingame.bl_vampire = true;//false;
@@ -5996,7 +5996,7 @@ UIMessageManager::Execute_UI_INFO(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// ¼ö¸®ÇÒ·Á´Â ¹°°ÇÀ» ¼±ÅÃÇßÀ» ¶§,
+// 수리할려는 물건을 선택했을 때,
 //
 //-----------------------------------------------------------------------------
 //
@@ -6015,19 +6015,19 @@ UIMessageManager::Execute_UI_REPAIR_ITEM(int left, int right, void* void_ptr)
 	}
 
 	
-	// °ËÁõÇÒ°Ô ¾ø´Â °æ¿ì
+	// 검증할게 없는 경우
 	if (g_pTempInformation->GetMode()==TempInformation::MODE_NULL)
 	{
 		MItem* pItem = NULL;// = (MItem*)void_ptr;
 		int itemID = left;
 
 		//-------------------------------------------------------------
-		// itemID°¡ 0ÀÎ °æ¿ì´Â ÀüÃ¼ ´Ù ¼ö¸®
+		// itemID가 0인 경우는 전체 다 수리
 		//-------------------------------------------------------------
 		if (itemID==0)
 		{
 			//-----------------------------------------------------
-			// ¾ÆÀÌÅÛÀ» ¼ö¸®ÇÏ±â À§ÇÑ packetÀ» º¸³½´Ù.
+			// 아이템을 수리하기 위한 packet을 보낸다.
 			//-----------------------------------------------------
 				CGRequestRepair	_CGRequestRepair;
 
@@ -6036,20 +6036,20 @@ UIMessageManager::Execute_UI_REPAIR_ITEM(int left, int right, void* void_ptr)
 				g_pSocket->sendPacket( &_CGRequestRepair );
 			
 				//-------------------------------------------------
-				// °ËÁõÀ» À§ÇÑ Temp Information¼³Á¤
+				// 검증을 위한 Temp Information설정
 				//-------------------------------------------------
 				(*g_pTempInformation).Mode		= TempInformation::MODE_SHOP_REPAIR;
-				(*g_pTempInformation).Value1	= false;	// inventory¿¡ ÀÖ´Â itemÀÎ°¡?
-				(*g_pTempInformation).Value2	= true;		// gear¿¡ ÀÖ´Â itemÀÎ°¡?
+				(*g_pTempInformation).Value1	= false;	// inventory에 있는 item인가?
+				(*g_pTempInformation).Value2	= true;		// gear에 있는 item인가?
 				(*g_pTempInformation).pValue	= NULL;
 
 				//-------------------------------------------------
-				// ´Ù¸¥ ¾ÆÀÌÅÛ¿¡ Á¢±Ù ¸øÇÏµµ·Ï..
+				// 다른 아이템에 접근 못하도록..
 				//-------------------------------------------------
 				UI_LockItemTrade();
 		}
 		//-------------------------------------------------------------
-		// item ÇÏ³ª¸¸ ¼ö¸®
+		// item 하나만 수리
 		//-------------------------------------------------------------
 		else
 		{
@@ -6057,14 +6057,14 @@ UIMessageManager::Execute_UI_REPAIR_ITEM(int left, int right, void* void_ptr)
 			BOOL bInGear = FALSE;
 
 			//------------------------------------------------------------------------------
-			// inventory¿¡¼­ Ã£´Â´Ù.
+			// inventory에서 찾는다.
 			//------------------------------------------------------------------------------
 			pItem = g_pInventory->GetItemToModify( itemID );
 
 			if (pItem==NULL)
 			{
 				//------------------------------------------------------------------------------
-				// gear¿¡¼­ Ã£´Â´Ù.
+				// gear에서 찾는다.
 				//------------------------------------------------------------------------------
 				switch(g_pPlayer->GetRace())
 				{
@@ -6102,13 +6102,13 @@ UIMessageManager::Execute_UI_REPAIR_ITEM(int left, int right, void* void_ptr)
 			}
 
 			//-------------------------------------------------
-			// inventory³ª gear¿¡ ÀÖ´Ù¸é ¼ö¸®ÇÑ´Ù.
+			// inventory나 gear에 있다면 수리한다.
 			//-------------------------------------------------
 			if (bInInventory || bInGear)
 			{
 				//-------------------------------------------------
-				// ¼ö¸®ÇÒ ¼ö ÀÖ´Â itemÀÎÁö Ã¼Å©ÇÑ´Ù.
-				// ¿­¼è´Â ¿ÀÅä¹ÙÀÌ ¼ö¸®¸¦ ÀÇ¹ÌÇÑ´Ù.
+				// 수리할 수 있는 item인지 체크한다.
+				// 열쇠는 오토바이 수리를 의미한다.
 				//-------------------------------------------------
 				if (pItem->GetItemClass() != ITEM_CLASS_VAMPIRE_AMULET
 					|| !pItem->IsUniqueItem()
@@ -6118,24 +6118,24 @@ UIMessageManager::Execute_UI_REPAIR_ITEM(int left, int right, void* void_ptr)
 					|| pItem->IsChargeItem())
 				{
 					//-------------------------------------------------
-					// µ·ÀÌ ÃæºÐÇÑÁö Ã¼Å©ÇÑ´Ù.
+					// 돈이 충분한지 체크한다.
 					//-------------------------------------------------
 					int price = g_pPriceManager->GetItemPrice(pItem, MPriceManager::REPAIR);
 					int money = g_pMoneyManager->GetMoney();
 
 					//-------------------------------------------------					
-					// °¡°ÝÀÌ 0ÀÌ¸é ¼ö¸®ÇÒ ÇÊ¿ä°¡ ¾ø´Ù.
-					// ´Ü, key´Â ¿ÀÅä¹ÙÀÌ ¼ö¸®¿¡ ÀÌ¿ëµÈ´Ù.
+					// 가격이 0이면 수리할 필요가 없다.
+					// 단, key는 오토바이 수리에 이용된다.
 					//-------------------------------------------------					
 					if (price!=0 || pItem->GetItemClass()==ITEM_CLASS_KEY)
 					{
 						//-------------------------------------------------
-						// µ·ÀÌ ÃæºÐÇÑ °æ¿ì
+						// 돈이 충분한 경우
 						//-------------------------------------------------
 						if (money!=0 && price <= money)
 						{														
 							//-----------------------------------------------------
-							// ¾ÆÀÌÅÛÀ» ¼ö¸®ÇÏ±â À§ÇÑ packetÀ» º¸³½´Ù.
+							// 아이템을 수리하기 위한 packet을 보낸다.
 							//-----------------------------------------------------
 								CGRequestRepair	_CGRequestRepair;
 
@@ -6144,20 +6144,20 @@ UIMessageManager::Execute_UI_REPAIR_ITEM(int left, int right, void* void_ptr)
 								g_pSocket->sendPacket( &_CGRequestRepair );
 							
 								//-------------------------------------------------
-								// °ËÁõÀ» À§ÇÑ Temp Information¼³Á¤
+								// 검증을 위한 Temp Information설정
 								//-------------------------------------------------
 								(*g_pTempInformation).Mode		= TempInformation::MODE_SHOP_REPAIR;
-								(*g_pTempInformation).Value1	= bInInventory;	// inventory¿¡ ÀÖ´Â itemÀÎ°¡?
-								(*g_pTempInformation).Value2	= bInGear;		// gear¿¡ ÀÖ´Â itemÀÎ°¡?
+								(*g_pTempInformation).Value1	= bInInventory;	// inventory에 있는 item인가?
+								(*g_pTempInformation).Value2	= bInGear;		// gear에 있는 item인가?
 								(*g_pTempInformation).pValue	= (void*)pItem;
 
 								//-------------------------------------------------
-								// ´Ù¸¥ ¾ÆÀÌÅÛ¿¡ Á¢±Ù ¸øÇÏµµ·Ï..
+								// 다른 아이템에 접근 못하도록..
 								//-------------------------------------------------
 								UI_LockItemTrade();
 						}
 						//-------------------------------------------------
-						// µ·ÀÌ ºÎÁ·ÇÑ °æ¿ì
+						// 돈이 부족한 경우
 						//-------------------------------------------------					
 						else
 						{
@@ -6165,7 +6165,7 @@ UIMessageManager::Execute_UI_REPAIR_ITEM(int left, int right, void* void_ptr)
 						}
 					}
 					//-------------------------------------------------
-					// ¼ö¸®ÇÒ ÇÊ¿ä°¡ ¾ø´Â °æ¿ì
+					// 수리할 필요가 없는 경우
 					//-------------------------------------------------
 					else
 					{
@@ -6173,7 +6173,7 @@ UIMessageManager::Execute_UI_REPAIR_ITEM(int left, int right, void* void_ptr)
 					}
 				}
 				//-------------------------------------------------
-				// ¼ö¸®ÇÒ ÇÊ¿ä°¡ ¾ø´Â °æ¿ì
+				// 수리할 필요가 없는 경우
 				//-------------------------------------------------
 				else
 				{
@@ -6186,7 +6186,7 @@ UIMessageManager::Execute_UI_REPAIR_ITEM(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// Silvering ¹°°ÇÀ» ¼±ÅÃÇßÀ» ¶§,
+// Silvering 물건을 선택했을 때,
 //
 //-----------------------------------------------------------------------------
 //
@@ -6205,7 +6205,7 @@ UIMessageManager::Execute_UI_SILVERING_ITEM(int left, int right, void* void_ptr)
 	}
 
 	
-	// °ËÁõÇÒ°Ô ¾ø´Â °æ¿ì
+	// 검증할게 없는 경우
 	if (g_pTempInformation->GetMode()==TempInformation::MODE_NULL)
 	{
 		MItem* pItem = NULL;// = (MItem*)void_ptr;
@@ -6215,14 +6215,14 @@ UIMessageManager::Execute_UI_SILVERING_ITEM(int left, int right, void* void_ptr)
 		BOOL bInGear = FALSE;
 
 		//------------------------------------------------------------------------------
-		// inventory¿¡¼­ Ã£´Â´Ù.
+		// inventory에서 찾는다.
 		//------------------------------------------------------------------------------
 		pItem = g_pInventory->GetItemToModify( itemID );
 
 		if (pItem==NULL)
 		{
 			//------------------------------------------------------------------------------
-			// gear¿¡¼­ Ã£´Â´Ù.
+			// gear에서 찾는다.
 			//------------------------------------------------------------------------------
 			switch(g_pPlayer->GetRace())
 			{
@@ -6260,33 +6260,33 @@ UIMessageManager::Execute_UI_SILVERING_ITEM(int left, int right, void* void_ptr)
 		}
 
 		//-------------------------------------------------
-		// inventory³ª gear¿¡ ÀÖ´Ù¸é silveringÇÑ´Ù..
+		// inventory나 gear에 있다면 silvering한다..
 		//-------------------------------------------------
 		if (bInInventory || bInGear)
 		{
 			//-------------------------------------------------
-			// Silvering ÇÒ ¼ö ÀÖ´Â itemÀÎÁö Ã¼Å©ÇÑ´Ù.
+			// Silvering 할 수 있는 item인지 체크한다.
 			//-------------------------------------------------
 			if (pItem->GetSilverMax() > 0)
 			{
 				//-------------------------------------------------
-				// µ·ÀÌ ÃæºÐÇÑÁö Ã¼Å©ÇÑ´Ù.
+				// 돈이 충분한지 체크한다.
 				//-------------------------------------------------
 				int price = (*g_pPriceManager).GetItemPrice(pItem, MPriceManager::SILVERING);
 				int money = (*g_pMoneyManager).GetMoney();
 
 				//-------------------------------------------------					
-				// °¡°ÝÀÌ 0ÀÌ¸é silvering ÇÒ ÇÊ¿ä°¡ ¾ø´Ù.
+				// 가격이 0이면 silvering 할 필요가 없다.
 				//-------------------------------------------------					
 				if (price!=0)
 				{
 					//-------------------------------------------------
-					// µ·ÀÌ ÃæºÐÇÑ °æ¿ì
+					// 돈이 충분한 경우
 					//-------------------------------------------------
 					if (money!=0 && price <= money)
 					{														
 						//-----------------------------------------------------
-						// ¾ÆÀÌÅÛÀ» silverigÇÏ±â À§ÇÑ packetÀ» º¸³½´Ù.
+						// 아이템을 silverig하기 위한 packet을 보낸다.
 						//-----------------------------------------------------
 							CGSilverCoating	_CGSilverCoating;
 
@@ -6295,20 +6295,20 @@ UIMessageManager::Execute_UI_SILVERING_ITEM(int left, int right, void* void_ptr)
 							g_pSocket->sendPacket( &_CGSilverCoating );
 						
 							//-------------------------------------------------
-							// °ËÁõÀ» À§ÇÑ Temp Information¼³Á¤
+							// 검증을 위한 Temp Information설정
 							//-------------------------------------------------
 							(*g_pTempInformation).Mode		= TempInformation::MODE_SHOP_SILVERING;
-							(*g_pTempInformation).Value1	= bInInventory;	// inventory¿¡ ÀÖ´Â itemÀÎ°¡?
-							(*g_pTempInformation).Value2	= bInGear;		// gear¿¡ ÀÖ´Â itemÀÎ°¡?
+							(*g_pTempInformation).Value1	= bInInventory;	// inventory에 있는 item인가?
+							(*g_pTempInformation).Value2	= bInGear;		// gear에 있는 item인가?
 							(*g_pTempInformation).pValue	= (void*)pItem;
 
 							//-------------------------------------------------
-							// ´Ù¸¥ ¾ÆÀÌÅÛ¿¡ Á¢±Ù ¸øÇÏµµ·Ï..
+							// 다른 아이템에 접근 못하도록..
 							//-------------------------------------------------
 							UI_LockItemTrade();
 					}
 					//-------------------------------------------------
-					// µ·ÀÌ ºÎÁ·ÇÑ °æ¿ì
+					// 돈이 부족한 경우
 					//-------------------------------------------------					
 					else
 					{
@@ -6316,7 +6316,7 @@ UIMessageManager::Execute_UI_SILVERING_ITEM(int left, int right, void* void_ptr)
 					}
 				}
 				//-------------------------------------------------
-				// SilveringÇÒ ÇÊ¿ä°¡ ¾ø´Â °æ¿ì
+				// Silvering할 필요가 없는 경우
 				//-------------------------------------------------
 				else
 				{
@@ -6324,7 +6324,7 @@ UIMessageManager::Execute_UI_SILVERING_ITEM(int left, int right, void* void_ptr)
 				}
 			}
 			//-------------------------------------------------
-			// ¼ö¸®ÇÒ ÇÊ¿ä°¡ ¾ø´Â °æ¿ì
+			// 수리할 필요가 없는 경우
 			//-------------------------------------------------
 			else
 			{
@@ -6336,7 +6336,7 @@ UIMessageManager::Execute_UI_SILVERING_ITEM(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// ¼ö¸® ±×¸¸µÎ±â
+// 수리 그만두기
 //
 //-----------------------------------------------------------------------------
 void
@@ -6356,14 +6356,14 @@ UIMessageManager::Execute_UI_ITEM_REPAIR_FINISHED(int left, int right, void* voi
 	{
 		gC_vs_ui.FinishItemRepairing();
 
-		// ´Ù½Ã ¹º°¡¸¦?¼±ÅÃÇÒ ¼ö ÀÖ°Ô ÇÑ´Ù.
+		// 다시 뭔가를?선택할 수 있게 한다.
 		g_pUIDialog->ShowPCTalkDlg();
 	}
 }
 
 //-----------------------------------------------------------------------------
 //
-// silvering ±×¸¸µÎ±â
+// silvering 그만두기
 //
 //-----------------------------------------------------------------------------
 void
@@ -6384,14 +6384,14 @@ UIMessageManager::Execute_UI_ITEM_SILVERING_FINISHED(int left, int right, void* 
 	{
 		gC_vs_ui.FinishItemSilvering();
 
-		// ´Ù½Ã ¹º°¡¸¦?¼±ÅÃÇÒ ¼ö ÀÖ°Ô ÇÑ´Ù.
+		// 다시 뭔가를?선택할 수 있게 한다.
 		g_pUIDialog->ShowPCTalkDlg();
 	}
 }
 
 //-----------------------------------------------------------------------------
 //
-// ´É·ÂÄ¡
+// 능력치
 //
 //-----------------------------------------------------------------------------
 void
@@ -6412,7 +6412,7 @@ UIMessageManager::Execute_UI_FINISH_LEVELUP_BUTTON(int left, int right, void* vo
 
 //-----------------------------------------------------------------------------
 //
-// °ÔÀÓ¸Þ´º ¶ç¿ï¶§, ´Ù¸¥ °Å ´Ù ´Ý´Â´Ù.
+// 게임메뉴 띄울때, 다른 거 다 닫는다.
 //
 //-----------------------------------------------------------------------------
 void
@@ -6435,10 +6435,10 @@ UIMessageManager::Execute_UI_RUNNING_GAMEMENU(int left, int right, void* void_pt
 
 //-----------------------------------------------------------------------------
 //
-// º¸°üÇÔ »ç±â
+// 보관함 사기
 //
 //-----------------------------------------------------------------------------
-// left = »ê´Ù(TRUE), ¾È»ê´Ù(FALSE)
+// left = 산다(TRUE), 안산다(FALSE)
 void
 UIMessageManager::Execute_UI_STORAGE_BUY(int left, int right, void* void_ptr)
 {
@@ -6455,14 +6455,14 @@ UIMessageManager::Execute_UI_STORAGE_BUY(int left, int right, void* void_ptr)
 	BOOL buy = (BOOL)left;
 
 	//-----------------------------------------------------------------------------
-	// º¸°üÇÔÀ» »ì·Á´Â »óÅÂ..
+	// 보관함을 살려는 상태..
 	//-----------------------------------------------------------------------------
 	if (buy)
 	{
 		if (g_pTempInformation->GetMode()==TempInformation::MODE_STORAGE_BUY)
 		{		
 			//--------------------------------------------------------
-			// µ· Ã¼Å©
+			// 돈 체크
 			//--------------------------------------------------------
 			if (g_pMoneyManager->GetMoney() >= g_pTempInformation->Value1)
 			{
@@ -6470,16 +6470,16 @@ UIMessageManager::Execute_UI_STORAGE_BUY(int left, int right, void* void_ptr)
 					
 					g_pSocket->sendPacket( &_CGStashRequestBuy );					
 
-				// mode ¼³Á¤
+				// mode 설정
 				g_pTempInformation->SetMode(TempInformation::MODE_STORAGE_BUY_WAIT);
 
 			}
 			//--------------------------------------------------------
-			// µ·ÀÌ ºÎÁ·ÇÑ °æ¿ì
+			// 돈이 부족한 경우
 			//--------------------------------------------------------
 			else
 			{
-				// ´Ù½Ã ¹º°¡¸¦?¼±ÅÃÇÒ ¼ö ÀÖ°Ô ÇÑ´Ù.
+				// 다시 뭔가를?선택할 수 있게 한다.
 				g_pUIDialog->ShowPCTalkDlg();
 
 				g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_MESSAGE_CANNOT_BUY_NO_MONEY ].GetString());
@@ -6492,15 +6492,15 @@ UIMessageManager::Execute_UI_STORAGE_BUY(int left, int right, void* void_ptr)
 			DEBUG_ADD("[Error] Mode is Not MODE_STORAGE_BUY");
 		}
 
-		// »ç´Â °æ¿ì´Â.. °á°ú packetÀ» ¹ÞÀ»¶§±îÁö
-		// NPC´ëÈ­ dialog¸¦ ¾È ¶ç¿î´Ù.
+		// 사는 경우는.. 결과 packet을 받을때까지
+		// NPC대화 dialog를 안 띄운다.
 	}
 	//-----------------------------------------------------------------------------
-	// º¸°üÇÔ ¾È »ê´Ù.
+	// 보관함 안 산다.
 	//-----------------------------------------------------------------------------
 	else
 	{
-		// ´Ù½Ã ¹º°¡¸¦?¼±ÅÃÇÒ ¼ö ÀÖ°Ô ÇÑ´Ù.
+		// 다시 뭔가를?선택할 수 있게 한다.
 		g_pUIDialog->ShowPCTalkDlg();
 
 		g_pTempInformation->SetMode(TempInformation::MODE_NULL);
@@ -6509,7 +6509,7 @@ UIMessageManager::Execute_UI_STORAGE_BUY(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// º¸°üÇÔÀÇ slotÀ» ¼±ÅÃÇÏ¿´´Ù.
+// 보관함의 slot을 선택하였다.
 //
 //-----------------------------------------------------------------------------
 // left = tab (0, 1, 2)
@@ -6530,7 +6530,7 @@ UIMessageManager::Execute_UI_SELECT_STORAGE_SLOT(int left, int right, void* void
 	if(g_pStorage == NULL)
 		return;
 
-	g_pStorage->SetCurrent( left );	// È®ÀÎ¿ë
+	g_pStorage->SetCurrent( left );	// 확인용
 
 	int slot = right;
 
@@ -6538,12 +6538,12 @@ UIMessageManager::Execute_UI_SELECT_STORAGE_SLOT(int left, int right, void* void
 	const MItem* pStorageItem = g_pStorage->GetItem( slot );
 
 	//-----------------------------------------------------------------------------
-	// º¸°üÇÔ¿¡¼­ ¹º°¡¸¦ ÁýÀ»·Á´Â °æ¿ì
+	// 보관함에서 뭔가를 집을려는 경우
 	//-----------------------------------------------------------------------------
 	if (pMouseItem==NULL)
 	{
 		//---------------------------------------------------
-		// ¼±ÅÃÇÑ slot¿¡ itemÀÌ ÀÖÀ¸¸é Áý´Â´Ù.
+		// 선택한 slot에 item이 있으면 집는다.
 		//---------------------------------------------------
 		if (pStorageItem!=NULL)
 		{
@@ -6563,7 +6563,7 @@ UIMessageManager::Execute_UI_SELECT_STORAGE_SLOT(int left, int right, void* void
 		}
 	}
 	//-----------------------------------------------------------------------------
-	// µé°í ÀÖ´Â itemÀ» º¸°üÇÔ¿¡ ³õÀ»·Á´Â °æ¿ì
+	// 들고 있는 item을 보관함에 놓을려는 경우
 	//-----------------------------------------------------------------------------
 	else 
 	{
@@ -6571,7 +6571,7 @@ UIMessageManager::Execute_UI_SELECT_STORAGE_SLOT(int left, int right, void* void
 
 		TYPE_OBJECTID mouseItemID = pMouseItem->GetID();		
 	
-		// Event GiftBox ¾ÆÀÌÅÛÀÎ °æ¿ì ¸ø ³õ´Â´Ù.
+		// Event GiftBox 아이템인 경우 못 놓는다.
 		if (pMouseItem->GetItemClass()!=ITEM_CLASS_EVENT_GIFT_BOX
 			&& pMouseItem->GetItemClass()!=ITEM_CLASS_VAMPIRE_AMULET
 			&& pMouseItem->GetItemClass()!=ITEM_CLASS_COUPLE_RING
@@ -6585,28 +6585,28 @@ UIMessageManager::Execute_UI_SELECT_STORAGE_SLOT(int left, int right, void* void
 			)
 		{
 			//---------------------------------------------------
-			// ±× ÀÚ¸®¿¡ ¾Æ¹«°Íµµ ¾øÀ¸¸é item ³Ö´Â´Ù.
+			// 그 자리에 아무것도 없으면 item 넣는다.
 			//---------------------------------------------------
 			if (pStorageItem==NULL)
 			{
-				UI_DropItem();	// mouse¿¡¼­ item¶¾´Ù.
+				UI_DropItem();	// mouse에서 item뗀다.
 
 				g_pStorage->SetItem( slot, pMouseItem );							
 			}
 			//---------------------------------------------------
-			// ¹º°¡ ÀÖ´Ù¸é...
+			// 뭔가 있다면...
 			//---------------------------------------------------
 			else
 			{
 				//---------------------------------------------------
-				// ½×ÀÏ ¼ö ÀÖ´Â ¾ÆÀÌÅÛÀÎ °æ¿ì
+				// 쌓일 수 있는 아이템인 경우
 				//---------------------------------------------------
 				if (pStorageItem->IsPileItem()
 					&& pStorageItem->GetItemClass()==pMouseItem->GetItemClass()
 					&& pStorageItem->GetItemType()==pMouseItem->GetItemType())
 				{
 					//---------------------------------------------------
-					// ´õ ½×ÀÏ ¼ö ÀÖ´Ù¸é
+					// 더 쌓일 수 있다면
 					//---------------------------------------------------
 					if (pStorageItem->GetNumber() < pStorageItem->GetMaxNumber())
 					{
@@ -6615,18 +6615,18 @@ UIMessageManager::Execute_UI_SELECT_STORAGE_SLOT(int left, int right, void* void
 						MItem* pModifyStorageItem = g_pStorage->RemoveItem( slot );
 
 						//----------------------------------------------------
-						// pMouseItemÀ» pStorageItem¿¡ Ãß°¡½ÃÅ²´Ù.
+						// pMouseItem을 pStorageItem에 추가시킨다.
 						//----------------------------------------------------
 						int total = pMouseItem->GetNumber() + pStorageItem->GetNumber();
 						if ( total > pStorageItem->GetMaxNumber() )
 						{
-							// ÇÑ°è ¼öÄ¡¸¦ ³Ñ¾î°¥ °æ¿ì
+							// 한계 수치를 넘어갈 경우
 							pMouseItem->SetNumber( total - pStorageItem->GetMaxNumber() );
 							pModifyStorageItem->SetNumber( pStorageItem->GetMaxNumber() );
 						}
 						else
 						{
-							// ¸ðµÎ pItem¿¡ Ãß°¡µÉ ¼ö ÀÖ´Â °æ¿ì
+							// 모두 pItem에 추가될 수 있는 경우
 							pModifyStorageItem->SetNumber( total );
 							UI_DropItem();
 
@@ -6634,13 +6634,13 @@ UIMessageManager::Execute_UI_SELECT_STORAGE_SLOT(int left, int right, void* void
 						}	
 
 						//----------------------------------------------------
-						// ¹Ù²Û°Å¸¦ ´Ù½Ã ¼³Á¤ÇÑ´Ù.
+						// 바꾼거를 다시 설정한다.
 						//----------------------------------------------------
 						g_pStorage->SetItem( slot, pModifyStorageItem );					
 						
 					}
 					//---------------------------------------------------
-					// ´õ ½×ÀÏ ¼ö ¾ø´Ù¸é.. ±â³É µÐ´Ù.
+					// 더 쌓일 수 없다면.. 기냥 둔다.
 					//---------------------------------------------------				
 					else
 					{
@@ -6648,7 +6648,7 @@ UIMessageManager::Execute_UI_SELECT_STORAGE_SLOT(int left, int right, void* void
 					}
 				}
 				//---------------------------------------------------				
-				// ½×ÀÏ ¼ö ¾ø´Â ¾ÆÀÌÅÛÀÎ °æ¿ì --> ¹Ù²Û´Ù.
+				// 쌓일 수 없는 아이템인 경우 --> 바꾼다.
 				//---------------------------------------------------				
 				else
 				{				
@@ -6656,7 +6656,7 @@ UIMessageManager::Execute_UI_SELECT_STORAGE_SLOT(int left, int right, void* void
 					
 					UI_PickUpItem( (MItem*)pStorageItem );
 
-					g_pStorage->RemoveItem( slot );	// ÀÌ°Ô ½ÇÆÐÇÏ¸é.. - -;
+					g_pStorage->RemoveItem( slot );	// 이게 실패하면.. - -;
 
 					g_pStorage->SetItem( slot, pTempItem );
 				}
@@ -6683,7 +6683,7 @@ UIMessageManager::Execute_UI_SELECT_STORAGE_SLOT(int left, int right, void* void
 
 //-----------------------------------------------------------------------------
 //
-// º¸°üÇÔ¿¡ µ· ÀúÀåÇÒ¶§,
+// 보관함에 돈 저장할때,
 //
 //-----------------------------------------------------------------------------
 // left = money
@@ -6702,7 +6702,7 @@ UIMessageManager::Execute_UI_DEPOSIT_MONEY(int left, int right, void* void_ptr)
 
 	
 	//-----------------------------------------------------------------------------
-	// µ·ÀÌ 0ÀÌ¸é ¾ÈµÈ´Ù.
+	// 돈이 0이면 안된다.
 	//-----------------------------------------------------------------------------
 	if (left > 0)
 	{
@@ -6714,7 +6714,7 @@ UIMessageManager::Execute_UI_DEPOSIT_MONEY(int left, int right, void* void_ptr)
 				g_pSocket->sendPacket( &_CGStashDeposit );				
 
 			//-----------------------------------------------
-			// µ·À» º¸°üÇÔÀ¸·Î ¿Å±ä´Ù.
+			// 돈을 보관함으로 옮긴다.
 			//-----------------------------------------------
 			g_pMoneyManager->UseMoney( left );
 			g_pStorage->GetMoneyManager()->AddMoney( left );
@@ -6728,7 +6728,7 @@ UIMessageManager::Execute_UI_DEPOSIT_MONEY(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// º¸°üÇÔÀÇ µ·À» Ã£À»¶§,
+// 보관함의 돈을 찾을때,
 //
 //-----------------------------------------------------------------------------
 // left = money
@@ -6747,7 +6747,7 @@ UIMessageManager::Execute_UI_WITHDRAW_MONEY(int left, int right, void* void_ptr)
 
 	
 	//-----------------------------------------------------------------------------
-	// µ·ÀÌ 0ÀÌ¸é ¾ÈµÈ´Ù.
+	// 돈이 0이면 안된다.
 	//-----------------------------------------------------------------------------
 	if (left > 0)
 	{
@@ -6759,7 +6759,7 @@ UIMessageManager::Execute_UI_WITHDRAW_MONEY(int left, int right, void* void_ptr)
 				g_pSocket->sendPacket( &_CGStashWithdraw );				
 
 			//-----------------------------------------------
-			// º¸°üÇÔÀÇ µ·À» player¿¡°Ô ¿Å±ä´Ù.
+			// 보관함의 돈을 player에게 옮긴다.
 			//-----------------------------------------------
 			g_pStorage->GetMoneyManager()->UseMoney( left );
 			g_pMoneyManager->AddMoney( left );						
@@ -6773,7 +6773,7 @@ UIMessageManager::Execute_UI_WITHDRAW_MONEY(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-//	º¸°üÇÔ ´ÝÀ» ¶§
+//	보관함 닫을 때
 //
 //-----------------------------------------------------------------------------
 void
@@ -6790,16 +6790,16 @@ UIMessageManager::Execute_UI_CLOSE_STORAGE(int left, int right, void* void_ptr)
 	
 	UI_CloseStorage();		
 
-	// ´Ù½Ã ¹º°¡¸¦?¼±ÅÃÇÒ ¼ö ÀÖ°Ô ÇÑ´Ù.
+	// 다시 뭔가를?선택할 수 있게 한다.
 	g_pUIDialog->ShowPCTalkDlg();
 }
 
 //-----------------------------------------------------------------------------
 //
-// ±³È¯Ã¢¿¡ µ·À» ³Ö´Â´Ù.
+// 교환창에 돈을 넣는다.
 //
 //-----------------------------------------------------------------------------
-// left = bGive - ³²ÇÑÅ× ÁÖ´Â µ·ÀÎ°¡?
+// left = bGive - 남한테 주는 돈인가?
 // right = money
 //
 void
@@ -6824,7 +6824,7 @@ UIMessageManager::Execute_UI_EXCHANGE_MONEY(int left, int right, void* void_ptr)
 		int code;		
 
 		//---------------------------------------------------------
-		// ±³È¯Áß¿¡ OK ´­·¶À»¶§´Â °ËÁõÀ» ¹Þ¾Æ¾ß ÇÑ´Ù.
+		// 교환중에 OK 눌렀을때는 검증을 받아야 한다.
 		//---------------------------------------------------------
 		if (bAcceptMyTrade)
 		{	
@@ -6845,19 +6845,19 @@ UIMessageManager::Execute_UI_EXCHANGE_MONEY(int left, int right, void* void_ptr)
 			}
 		}
 		//---------------------------------------------------------
-		// OK ¾È ´­·ÁÀÖ´Â º¸Åë ¶§..
+		// OK 안 눌려있는 보통 때..
 		//---------------------------------------------------------
 		else
 		{
 			/*
 			//-----------------------------------------------------------
-			// ¹º°¡ ¹Ù²ï´Ù¸é... OKÃë¼Ò
+			// 뭔가 바뀐다면... OK취소
 			//-----------------------------------------------------------
 			g_pTradeManager->RefuseOtherTrade();
 			g_pTradeManager->RefuseMyTrade();
 		
 			//-----------------------------------------------------------
-			// client µ· ÀÌµ¿
+			// client 돈 이동
 			//-----------------------------------------------------------
 			if (bGive)
 			{
@@ -6883,7 +6883,7 @@ UIMessageManager::Execute_UI_EXCHANGE_MONEY(int left, int right, void* void_ptr)
 		}	
 
 		//-----------------------------------------------------------
-		// client µ· ÀÌµ¿
+		// client 돈 이동
 		//-----------------------------------------------------------
 		if (bGive)
 		{
@@ -6895,7 +6895,7 @@ UIMessageManager::Execute_UI_EXCHANGE_MONEY(int left, int right, void* void_ptr)
 		}
 		
 		//-----------------------------------------------------------
-		// server¿¡ ¾Ë¸²
+		// server에 알림
 		//-----------------------------------------------------------
 			CGTradeMoney _CGTradeMoney;
 			_CGTradeMoney.setTargetObjectID( g_pTradeManager->GetOtherID() );
@@ -6916,18 +6916,18 @@ UIMessageManager::Execute_UI_EXCHANGE_MONEY(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// ±³È¯Ã¢ÀÇ ¾ÆÀÌÅÛÀ» ¼±ÅÃÇÒ¶§ 
+// 교환창의 아이템을 선택할때 
 //
 //-----------------------------------------------------------------------------
 // gridXY = (left,right)
-// µé·Á´Â item = (MItem*)void_ptr
+// 들려는 item = (MItem*)void_ptr
 /*
 void
 UIMessageManager::Execute_UI_ITEM_PICKUP_FROM_TRADEGRID(int left, int right, void* void_ptr)
 {
 	//
-	// hi/low dw_left´Â grid (x, y)°ªÀÌ´Ù.
-	//        dw_right´Â itemÀÇ screen ÁÂÇ¥ÀÌ´Ù.
+	// hi/low dw_left는 grid (x, y)값이다.
+	//        dw_right는 item의 screen 좌표이다.
 	//
 	DEBUG_ADD("[UI] UI_ITEM_PICKUP_FROM_TRADEGRID");
 	
@@ -6941,11 +6941,11 @@ UIMessageManager::Execute_UI_ITEM_PICKUP_FROM_TRADEGRID(int left, int right, voi
 
 //-----------------------------------------------------------------------------
 //
-// ±³È¯Ã¢ÀÇ ¾ÆÀÌÅÛ¿¡ Ãß°¡µÉ¶§,
+// 교환창의 아이템에 추가될때,
 //
 //-----------------------------------------------------------------------------
 // gridXY = (left, right)
-// ³õ¿©ÀÖ´ø item = (MItem*)void_ptr
+// 놓여있던 item = (MItem*)void_ptr
 /*
 void
 UIMessageManager::Execute_UI_ITEM_INSERT_FROM_TRADEGRID(int left, int right, void* void_ptr)
@@ -6961,11 +6961,11 @@ UIMessageManager::Execute_UI_ITEM_INSERT_FROM_TRADEGRID(int left, int right, voi
 
 //-----------------------------------------------------------------------------
 //
-// ±³È¯Ã¢¿¡ ¾ÆÀÌÅÛ ³õÀ» ¶§,
+// 교환창에 아이템 놓을 때,
 //
 //-----------------------------------------------------------------------------
 // gridXY = (left, right)
-// ³õ±â ¹Ù·Î Àü¿¡ µé°í ÀÖ´ø item = (MItem*)void_ptr
+// 놓기 바로 전에 들고 있던 item = (MItem*)void_ptr
 /*
 void
 UIMessageManager::Execute_UI_ITEM_DROP_TO_TRADEGRID(int left, int right, void* void_ptr)
@@ -6980,11 +6980,11 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_TRADEGRID(int left, int right, void* v
 
 //-----------------------------------------------------------------------------
 //
-// ±³È¯Ã¢¿¡ ¾ÆÀÌÅÛ ³õÀ» ¶§,
+// 교환창에 아이템 놓을 때,
 //
 //-----------------------------------------------------------------------------
 // gridXY = (left, right)
-// ³õ±â ¹Ù·Î Àü¿¡ µé°í ÀÖ´ø item = (MItem*)void_ptr
+// 놓기 바로 전에 들고 있던 item = (MItem*)void_ptr
 void
 UIMessageManager::Execute_UI_ITEM_SELECT_EXCHANGE(int left, int right, void* void_ptr)
 {
@@ -7004,21 +7004,21 @@ UIMessageManager::Execute_UI_ITEM_SELECT_EXCHANGE(int left, int right, void* voi
 
 		BOOL bAcceptMyTrade = g_pTradeManager->IsAcceptMyTrade();		
 
-		// ¼±¹° »óÀÚ ÇÏµå ÄÚµù-¤µ-;
+		// 선물 상자 하드 코딩-ㅅ-;
 		if(pItem->GetItemClass() == ITEM_CLASS_EVENT_GIFT_BOX && pItem->GetItemType() > 1 && pItem->IsTrade() == false)	//
 		{
 			MEventGiftBoxItemFinder finder;
 			MItem* pFindItem = ((MItemManager*)g_pInventory)->FindItem( finder );
 			if(pFindItem != NULL)
 			{
-				// ÀÌ¹Ì ±³È¯¿¡ ¿Ã¶ó°£°Ô ÀÖ´Ù
+				// 이미 교환에 올라간게 있다
 				return;
 			}
 		}
 	
 
 		//---------------------------------------------------------
-		// ±³È¯Áß¿¡ OK ´­·¶À»¶§´Â °ËÁõÀ» ¹Þ¾Æ¾ß ÇÑ´Ù.
+		// 교환중에 OK 눌렀을때는 검증을 받아야 한다.
 		//---------------------------------------------------------
 		if (bAcceptMyTrade)
 		{	
@@ -7031,7 +7031,7 @@ UIMessageManager::Execute_UI_ITEM_SELECT_EXCHANGE(int left, int right, void* voi
 				g_pTempInformation->pValue = pItem;
 
 				//-----------------------------------------------------------
-				// ¼±ÅÃµÇ¾î ÀÖ´ø ¾ÆÀÌÅÛ --> Ãë¼Ò
+				// 선택되어 있던 아이템 --> 취소
 				//-----------------------------------------------------------
 				if (pItem->IsTrade())
 				{
@@ -7047,13 +7047,13 @@ UIMessageManager::Execute_UI_ITEM_SELECT_EXCHANGE(int left, int right, void* voi
 
 						g_pTradeManager->SetNextAcceptTime();
 
-					// [µµ¿ò¸»] ±³È¯ Áß - ¾ÆÀÌÅÛ Ãë¼Ò
+					// [도움말] 교환 중 - 아이템 취소
 //					__BEGIN_HELP_EVENT
 ////						ExecuteHelpEvent( HE_TRADE_ITEM_REMOVE );	
 //					__END_HELP_EVENT
 				}
 				//-----------------------------------------------------------
-				// ¾ÆÀÌÅÛ ¼±ÅÃ
+				// 아이템 선택
 				//-----------------------------------------------------------
 				else
 				{
@@ -7068,7 +7068,7 @@ UIMessageManager::Execute_UI_ITEM_SELECT_EXCHANGE(int left, int right, void* voi
 						g_pSocket->sendPacket( &_CGTradeAddItem );
 						
 
-					// [µµ¿ò¸»] ±³È¯ Áß - ¾ÆÀÌÅÛ ¼±ÅÃ
+					// [도움말] 교환 중 - 아이템 선택
 //					__BEGIN_HELP_EVENT
 ////						ExecuteHelpEvent( HE_TRADE_ITEM_ADD );	
 //					__END_HELP_EVENT
@@ -7076,17 +7076,17 @@ UIMessageManager::Execute_UI_ITEM_SELECT_EXCHANGE(int left, int right, void* voi
 			}			
 		}
 		//---------------------------------------------------------
-		// OK ¾È ´­·ÁÀÖ´Â º¸Åë ¶§..
+		// OK 안 눌려있는 보통 때..
 		//---------------------------------------------------------
 		else
 		{		
 			//-----------------------------------------------------------
-			// ¼±ÅÃµÇ¾î ÀÖ´ø ¾ÆÀÌÅÛ --> Ãë¼Ò
+			// 선택되어 있던 아이템 --> 취소
 			//-----------------------------------------------------------
 			if (pItem->IsTrade())
 			{
 				//-----------------------------------------------------------
-				// ¹º°¡ ¹Ù²ï´Ù¸é... OKÃë¼Ò
+				// 뭔가 바뀐다면... OK취소
 				//-----------------------------------------------------------
 				g_pTradeManager->RefuseOtherTrade();
 				g_pTradeManager->RefuseMyTrade();
@@ -7101,24 +7101,24 @@ UIMessageManager::Execute_UI_ITEM_SELECT_EXCHANGE(int left, int right, void* voi
 
 					g_pTradeManager->SetNextAcceptTime();
 
-				// [µµ¿ò¸»] ±³È¯ Áß - ¾ÆÀÌÅÛ Ãë¼Ò
+				// [도움말] 교환 중 - 아이템 취소
 //				__BEGIN_HELP_EVENT
 ////					ExecuteHelpEvent( HE_TRADE_ITEM_REMOVE );	
 //				__END_HELP_EVENT
 			}
 			//-----------------------------------------------------------
-			// ¼±ÅÃµÇ¾î ÀÖÁö ¾Ê´ø ¾ÆÀÌÅÛ --> ¼±ÅÃ
+			// 선택되어 있지 않던 아이템 --> 선택
 			//-----------------------------------------------------------
 			else
 			{
-				// »¡°£»ö ¼±¹°»óÀÚ´Â ±³È¯µÇÁö ¾Ê´Â´Ù.
+				// 빨간색 선물상자는 교환되지 않는다.
 				if (pItem->GetItemClass()==ITEM_CLASS_EVENT_GIFT_BOX
 					&& pItem->GetItemType()==1)
 				{
 				}
 				else
 				{
-					// ¼±¹°»óÀÚÀÎ °æ¿ì´Â °ËÁõÀÌ ÇÊ¿äÇÏ´Ù.
+					// 선물상자인 경우는 검증이 필요하다.
 					if (pItem->GetItemClass()==ITEM_CLASS_EVENT_GIFT_BOX)// && pItem->GetItemClass() < 2)
 					{
 						g_pTempInformation->SetMode(TempInformation::MODE_TRADE_VERIFY_ADD_ITEM);
@@ -7126,11 +7126,11 @@ UIMessageManager::Execute_UI_ITEM_SELECT_EXCHANGE(int left, int right, void* voi
 						
 						g_pPlayer->SetItemCheckBuffer( pItem, MPlayer::ITEM_CHECK_BUFFER_TRADE_ADD );
 					}
-					// ±× ¿Ü¿¡´Â ±×³É ³ÖÀ¸¸é µÈ´Ù.
+					// 그 외에는 그냥 넣으면 된다.
 					else
 					{
 						//-----------------------------------------------------------
-						// ¹º°¡ ¹Ù²ï´Ù¸é... OKÃë¼Ò
+						// 뭔가 바뀐다면... OK취소
 						//-----------------------------------------------------------
 						g_pTradeManager->RefuseOtherTrade();
 						g_pTradeManager->RefuseMyTrade();
@@ -7145,7 +7145,7 @@ UIMessageManager::Execute_UI_ITEM_SELECT_EXCHANGE(int left, int right, void* voi
 						g_pSocket->sendPacket( &_CGTradeAddItem );
 						
 
-					// [µµ¿ò¸»] ±³È¯ Áß - ¾ÆÀÌÅÛ ¼±ÅÃ
+					// [도움말] 교환 중 - 아이템 선택
 //					__BEGIN_HELP_EVENT
 ////						ExecuteHelpEvent( HE_TRADE_ITEM_ADD );	
 //					__END_HELP_EVENT
@@ -7162,7 +7162,7 @@ UIMessageManager::Execute_UI_ITEM_SELECT_EXCHANGE(int left, int right, void* voi
 
 //-----------------------------------------------------------------------------
 //
-// ±³È¯ È®ÀÎ
+// 교환 확인
 //
 //-----------------------------------------------------------------------------
 void
@@ -7183,8 +7183,8 @@ UIMessageManager::Execute_UI_OK_EXCHANGE(int left, int right, void* void_ptr)
 		MItem* pMouseItem = UI_GetMouseItem();
 
 		//--------------------------------------------------------
-		// ±³È¯ÀÌ °¡´ÉÇÑ °æ¿ì
-		// ¼±¹°»óÀÚ¸¦ µé°í ÀÖÀ¸¸é ±³È¯ÀÌ ¾ÈµÈ´Ù.
+		// 교환이 가능한 경우
+		// 선물상자를 들고 있으면 교환이 안된다.
 		//--------------------------------------------------------
 		if ((pMouseItem==NULL || pMouseItem->GetItemClass()!=ITEM_CLASS_EVENT_GIFT_BOX)
 			&& g_pTradeManager->CanTrade())
@@ -7199,12 +7199,12 @@ UIMessageManager::Execute_UI_OK_EXCHANGE(int left, int right, void* void_ptr)
 				
 		}
 		//--------------------------------------------------------
-		// ±³È¯ÀÌ ºÒ°¡´ÉÇÑ °æ¿ì
+		// 교환이 불가능한 경우
 		//--------------------------------------------------------
 		else
 		{
-			// ±³È¯ÇÒ ¼ö ¾ø´Ù¸é..
-			// ÀÏ´ÜÀº.. °ø°£ ºÎÁ·ÀÌ¶ó°í º»´Ù.
+			// 교환할 수 없다면..
+			// 일단은.. 공간 부족이라고 본다.
 			g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_MESSAGE_CANNOT_TRADE_NO_SPACE].GetString() );
 		}
 	}
@@ -7216,7 +7216,7 @@ UIMessageManager::Execute_UI_OK_EXCHANGE(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// ±³È¯ Ãë¼Ò
+// 교환 취소
 //
 //-----------------------------------------------------------------------------
 void
@@ -7238,7 +7238,7 @@ UIMessageManager::Execute_UI_CANCEL_EXCHANGE(int left, int right, void* void_ptr
 		BOOL bAcceptMyTrade = g_pTradeManager->IsAcceptMyTrade();
 
 		//---------------------------------------------------------------
-		// OK ´©¸¥ »óÅÂ¿¡¼­´Â °ËÁõÀ» ¹Þ¾Æ¾ß ÇÑ´Ù.
+		// OK 누른 상태에서는 검증을 받아야 한다.
 		//---------------------------------------------------------------
 		if (bAcceptMyTrade)
 		{
@@ -7254,12 +7254,12 @@ UIMessageManager::Execute_UI_CANCEL_EXCHANGE(int left, int right, void* void_ptr
 			}
 		}
 		//---------------------------------------------------------------
-		// ±×³É °ÅºÎ (ÀÖÀ» ¼ö ¾ø´Â °æ¿ìÀÝ¾Æ - -;;)
+		// 그냥 거부 (있을 수 없는 경우잖아 - -;;)
 		//---------------------------------------------------------------
 		else
 		{		
 			//---------------------------------------------------------------
-			// ±³È¯ °ÅºÎ´ç..
+			// 교환 거부당..
 			//---------------------------------------------------------------
 			g_pTradeManager->RefuseMyTrade();
 			
@@ -7272,7 +7272,7 @@ UIMessageManager::Execute_UI_CANCEL_EXCHANGE(int left, int right, void* void_ptr
 	}
 
 	//---------------------------------------------------------------
-	// ³» OK¸¦ Ãë¼ÒÇÏ´Â packet
+	// 내 OK를 취소하는 packet
 	//---------------------------------------------------------------
 	if (bSendPacket)
 	{
@@ -7287,7 +7287,7 @@ UIMessageManager::Execute_UI_CANCEL_EXCHANGE(int left, int right, void* void_ptr
 
 //-----------------------------------------------------------------------------
 //
-// ±³È¯Ã¢ ´Ý±â
+// 교환창 닫기
 //
 //-----------------------------------------------------------------------------
 void
@@ -7309,7 +7309,7 @@ UIMessageManager::Execute_UI_CLOSE_EXCHANGE(int left, int right, void* void_ptr)
 	int otherID;
 
 	//---------------------------------------------------------------
-	// OK ´©¸¥ »óÅÂ¿¡¼­´Â °ËÁõÀ» ¹Þ¾Æ¾ß ÇÑ´Ù.
+	// OK 누른 상태에서는 검증을 받아야 한다.
 	//---------------------------------------------------------------
 	if (bAcceptMyTrade)
 	{
@@ -7327,7 +7327,7 @@ UIMessageManager::Execute_UI_CLOSE_EXCHANGE(int left, int right, void* void_ptr)
 		}
 	}
 	//---------------------------------------------------------------
-	// ±×³É Ãë¼Ò..
+	// 그냥 취소..
 	//---------------------------------------------------------------
 	else
 	{		
@@ -7341,13 +7341,13 @@ UIMessageManager::Execute_UI_CLOSE_EXCHANGE(int left, int right, void* void_ptr)
 		}
 
 		//---------------------------------------------------------------
-		// ±³È¯ ¾È ÇØ~~ ³¡~ÀÌ´ç
+		// 교환 안 해~~ 끝~이당
 		//---------------------------------------------------------------
 		UI_CloseExchange();	
 	}
 	
 	//---------------------------------------------------------------
-	// ±³È¯À» ³¡³»´Â packet
+	// 교환을 끝내는 packet
 	//---------------------------------------------------------------
 	if (bSendPacket)
 	{
@@ -7361,11 +7361,11 @@ UIMessageManager::Execute_UI_CLOSE_EXCHANGE(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// Ã¤ÆÃÃ¢¿¡¼­ ÀÌ¸§ ¼±ÅÃ
+// 채팅창에서 이름 선택
 //
 //-----------------------------------------------------------------------------
-// left = ÀÔ·ÂÀÇ Á¾·ù
-// void_ptr = Ä³¸¯ÅÍÀÌ¸§(!=NULL)
+// left = 입력의 종류
+// void_ptr = 캐릭터이름(!=NULL)
 /*
 void
 UIMessageManager::Execute_UI_CHAT_SELECT_NAME(int left, int right, void* void_ptr)
@@ -7397,10 +7397,10 @@ UIMessageManager::Execute_UI_CHAT_SELECT_NAME(int left, int right, void* void_pt
 
 //-----------------------------------------------------------------------------
 //
-// ±³È¯ÇÒ·¡? Y/N¿¡ ´ëÇÑ ÀÀ´ä
+// 교환할래? Y/N에 대한 응답
 //
 //-----------------------------------------------------------------------------
-// left = (BOOL)±³È¯¿©ºÎ
+// left = (BOOL)교환여부
 //
 void
 UIMessageManager::Execute_UI_EXCHANGE_ACCEPT(int left, int right, void* void_ptr)
@@ -7419,24 +7419,24 @@ UIMessageManager::Execute_UI_EXCHANGE_ACCEPT(int left, int right, void* void_ptr
 	int code;
 
 	//---------------------------------------------------------
-	// ±³È¯ÇÒ·¡? Y/N¿¡ ´ëÇÑ ÀÀ´ä
+	// 교환할래? Y/N에 대한 응답
 	//---------------------------------------------------------
 	if (g_pTempInformation->GetMode() == TempInformation::MODE_TRADE_REQUEST)
 	{
 		//---------------------------------------------------------
-		// Çã¿ë
+		// 허용
 		//---------------------------------------------------------
 		if (accept)
 		{
 			code = CG_TRADE_PREPARE_CODE_ACCEPT;
 
 			//---------------------------------------------------------
-			// ±³È¯Ã¢À» ¶ç¿î´Ù.
+			// 교환창을 띄운다.
 			//---------------------------------------------------------
-			UI_RunExchange( g_pTempInformation->Value1 );	// otherID ¼³Á¤
+			UI_RunExchange( g_pTempInformation->Value1 );	// otherID 설정
 		}
 		//---------------------------------------------------------
-		// °ÅºÎ
+		// 거부
 		//---------------------------------------------------------
 		else
 		{	
@@ -7460,7 +7460,7 @@ UIMessageManager::Execute_UI_EXCHANGE_ACCEPT(int left, int right, void* void_ptr
 
 //-----------------------------------------------------------------------------
 //
-// ±³È¯Ãë¼ÒÇÒ·¡?
+// 교환취소할래?
 //
 //-----------------------------------------------------------------------------
 void
@@ -7476,7 +7476,7 @@ UIMessageManager::Execute_UI_EXCHANGE_REQUEST_CANCEL(int left, int right, void* 
 
 	
 	//---------------------------------------------------------
-	// ±³È¯ÇÒ·¡? Y/N¿¡ ´ëÇÑ ÀÀ´ä
+	// 교환할래? Y/N에 대한 응답
 	//---------------------------------------------------------
 	if (g_pTempInformation->GetMode() == TempInformation::MODE_TRADE_REQUEST)
 	{	
@@ -7493,7 +7493,7 @@ UIMessageManager::Execute_UI_EXCHANGE_REQUEST_CANCEL(int left, int right, void* 
 	
 		g_pTempInformation->SetMode(TempInformation::MODE_NULL);
 		
-		// ±³È¯ Ãë¼ÒÇÒ·¡?¸¦ Á¦°ÅÇÑ´Ù.
+		// 교환 취소할래?를 제거한다.
 		UI_CloseExchangeCancel();
 	}	
 }
@@ -7501,11 +7501,11 @@ UIMessageManager::Execute_UI_EXCHANGE_REQUEST_CANCEL(int left, int right, void* 
 /*
 //-----------------------------------------------------------------------------
 //
-// Game Option ¹Ù²Ù±â
+// Game Option 바꾸기
 //
 //-----------------------------------------------------------------------------
-// left = ¹Ù²î´Â option
-// right = °ª
+// left = 바뀌는 option
+// right = 값
 void
 UIMessageManager::Execute_UI_CHANGE_GAME_OPTION(int left, int right, void* void_ptr)
 {
@@ -7630,7 +7630,7 @@ UIMessageManager::Execute_UI_CHANGE_GAME_OPTION(int left, int right, void* void_
 					//g_SDLAudio.AddVolume( g_pSDLStream->GetBuffer(), 0 );
 					g_pSDLStream->SetVolumeLimit( volume );
 
-					// ¿ø·¡ÀÇ max volumeÀ¸·Î µ¹¸°´Ù.
+					// 원래의 max volume으로 돌린다.
 					//g_SDLAudio.SetVolumeLimit( maxVolume );
 				}
 				else
@@ -7652,7 +7652,7 @@ UIMessageManager::Execute_UI_CHANGE_GAME_OPTION(int left, int right, void* void_
 		break;
 
 		//-------------------------------------------------------------------
-		// Ä³¸¯ÅÍ HP¹Ù Åõ¸í/ºÒÅõ¸í 
+		// 캐릭터 HP바 투명/불투명 
 		//-------------------------------------------------------------------
 		case C_VS_UI_GAMEMENU_OPTION::PARTY_HPBAR_ALPHA :
 			g_pUserOption->DrawTransHPBar = (BOOL)value;
@@ -7664,7 +7664,7 @@ UIMessageManager::Execute_UI_CHANGE_GAME_OPTION(int left, int right, void* void_
 
 //-----------------------------------------------------------------------------
 //
-// GameOption ´Ý±â
+// GameOption 닫기
 //
 //-----------------------------------------------------------------------------
 void
@@ -7682,7 +7682,7 @@ UIMessageManager::Execute_UI_CLOSE_GAME_OPTION(int left, int right, void* void_p
 	gC_vs_ui.CloseGameMenuOption();
 
 	//---------------------------------------------------------------
-	// ±×³É ÀúÀåÇØ¹ö¸°´Ù. - -;
+	// 그냥 저장해버린다. - -;
 	//---------------------------------------------------------------
 	g_pUserOption->SaveToFile( FILE_INFO_USEROPTION );
 }
@@ -7690,11 +7690,11 @@ UIMessageManager::Execute_UI_CLOSE_GAME_OPTION(int left, int right, void* void_p
 
 //-----------------------------------------------------------------------------
 //
-// Title Option ¹Ù²Ù±â
+// Title Option 바꾸기
 //
 //-----------------------------------------------------------------------------
-// left = ¹Ù²î´Â option
-// right = °ª
+// left = 바뀌는 option
+// right = 값
 void
 UIMessageManager::Execute_UI_CHANGE_OPTION(int left, int right, void* void_ptr)
 {
@@ -7830,7 +7830,7 @@ UIMessageManager::Execute_UI_CHANGE_OPTION(int left, int right, void* void_ptr)
 					g_SDLAudio.SetVolumeLimit( volume );
 					g_SDLAudio.AddVolume( g_pSDLStream->GetBuffer(), 0 );
 
-					// ¿ø·¡ÀÇ max volumeÀ¸·Î µ¹¸°´Ù.
+					// 원래의 max volume으로 돌린다.
 					g_SDLAudio.SetVolumeLimit( maxVolume );
 					*/
 //					LONG volume = value*16*257;//*SOUND_DEGREE + SOUND_MIN;
@@ -7871,7 +7871,7 @@ UIMessageManager::Execute_UI_CHANGE_OPTION(int left, int right, void* void_ptr)
 		break;
 
 		//-------------------------------------------------------------------
-		// Ä³¸¯ÅÍ HP¹Ù Åõ¸í/ºÒÅõ¸í 
+		// 캐릭터 HP바 투명/불투명 
 		//-------------------------------------------------------------------
 //		case C_VS_UI_OPTION::PARTY_HPBAR_ALPHA :
 //			g_pUserOption->DrawTransHPBar = (BOOL)value;
@@ -7882,7 +7882,7 @@ UIMessageManager::Execute_UI_CHANGE_OPTION(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// Option ´Ý±â
+// Option 닫기
 //
 //-----------------------------------------------------------------------------
 void
@@ -7900,7 +7900,7 @@ UIMessageManager::Execute_UI_CLOSE_OPTION(int left, int right, void* void_ptr)
 	gC_vs_ui.CloseOption();
 
 	//---------------------------------------------------------------
-	// ±×³É ÀúÀåÇØ¹ö¸°´Ù. - -;
+	// 그냥 저장해버린다. - -;
 	//---------------------------------------------------------------
 	g_pClientConfig->SaveToFile( g_pFileDef->getProperty("FILE_INFO_CLIENTCONFIG").c_str());
 	g_pUserOption->SaveToFile( g_pFileDef->getProperty("FILE_INFO_USEROPTION").c_str());
@@ -7911,7 +7911,7 @@ UIMessageManager::Execute_UI_CLOSE_OPTION(int left, int right, void* void_ptr)
 #ifdef PLATFORM_WINDOWS
 		if (true)
 		{
-			// 3D°¡¼Ó ÁßÀÎµ¥.. °¡¼Ó ²ô´Â °æ¿ì
+			// 3D가속 중인데.. 가속 끄는 경우
 			if (!g_pUserOption->Use3DHAL)
 			{
 				g_Mode = MODE_CHANGE_OPTION;
@@ -7920,7 +7920,7 @@ UIMessageManager::Execute_UI_CLOSE_OPTION(int left, int right, void* void_ptr)
 		else
 #endif
 		{
-			// 3D°¡¼Ó ¾Æ´Ñµ¥.. °¡¼Ó ÇÏ´Â °æ¿ì
+			// 3D가속 아닌데.. 가속 하는 경우
 			if (g_bEnable3DHAL && g_pUserOption->Use3DHAL)
 			{
 				g_Mode = MODE_CHANGE_OPTION;
@@ -7931,7 +7931,7 @@ UIMessageManager::Execute_UI_CLOSE_OPTION(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// Bookcase ´Ý±â
+// Bookcase 닫기
 //
 //-----------------------------------------------------------------------------
 void
@@ -7952,7 +7952,7 @@ UIMessageManager::Execute_UI_CLOSE_BOOKCASE(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// Briefing ´Ý±â
+// Briefing 닫기
 //
 //-----------------------------------------------------------------------------
 void
@@ -7973,7 +7973,7 @@ UIMessageManager::Execute_UI_CLOSE_BRIEFING(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// Computer ´Ý±â
+// Computer 닫기
 //
 //-----------------------------------------------------------------------------
 void
@@ -7993,7 +7993,7 @@ UIMessageManager::Execute_UI_CLOSE_COMPUTER(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// Tutorial¿¡¼­ ºüÁ®³ª°¥¶§, ¹«±â ÇÏ³ª ¼±ÅÃ
+// Tutorial에서 빠져나갈때, 무기 하나 선택
 //
 //-----------------------------------------------------------------------------
 void
@@ -8011,7 +8011,7 @@ UIMessageManager::Execute_UI_CLOSE_TUTORIAL_EXIT(int left, int right, void* void
 	
 	UI_CloseTutorialExit();
 
-	int arms = left;	// 0: µµ 1: °Ë 2: ¸ÞÀÌ½º 3: ½ÊÀÚ°¡ 4: AR 5: TR 6: SMG 7:SG
+	int arms = left;	// 0: 도 1: 검 2: 메이스 3: 십자가 4: AR 5: TR 6: SMG 7:SG
 
 	if (arms >= 0 && arms <=7)
 	{
@@ -8040,7 +8040,7 @@ UIMessageManager::Execute_UI_CLOSE_TUTORIAL_EXIT(int left, int right, void* void
 
 //-----------------------------------------------------------------------------
 //
-// Desc Dialog ´ÝÀ» ¶§
+// Desc Dialog 닫을 때
 //
 //-----------------------------------------------------------------------------
 void	
@@ -8061,7 +8061,7 @@ UIMessageManager::Execute_UI_CLOSE_DESC_DIALOG(int left, int right, void* void_p
 
 //-----------------------------------------------------------------------------
 //
-// Elevator´ÝÀ» ¶§
+// Elevator닫을 때
 //
 //-----------------------------------------------------------------------------
 void	
@@ -8082,7 +8082,7 @@ UIMessageManager::Execute_UI_CLOSE_ELEVATOR(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// Elevator ¼±ÅÃÇÒ ¶§
+// Elevator 선택할 때
 //
 //-----------------------------------------------------------------------------
 void	
@@ -8098,11 +8098,11 @@ UIMessageManager::Execute_UI_SELECT_ELEVATOR(int left, int right, void* void_ptr
 	}
 
 	
-	// left 0 : 4Ãþ ....
+	// left 0 : 4층 ....
 	//		1 : 3
 	//		2 : 2
 	//		3 : 1
-	//		4 : ÁöÇÏ 1Ãþ
+	//		4 : 지하 1층
 	int selectPortal = 4-left;
 
 	if (selectPortal <= 4)
@@ -8126,9 +8126,9 @@ UIMessageManager::Execute_UI_SELECT_ELEVATOR(int left, int right, void* void_ptr
 
 			int zoneID = portalInfo.ZoneID;
 
-			// zoneID·Î ÀÌµ¿ÇÑ´Ù.
+			// zoneID로 이동한다.
 			//-----------------------------------------------------
-			// Packet º¸³»±â
+			// Packet 보내기
 			//-----------------------------------------------------
 				CGSelectPortal _CGSelectPortal;
 
@@ -8143,7 +8143,7 @@ UIMessageManager::Execute_UI_SELECT_ELEVATOR(int left, int right, void* void_ptr
 
 //-----------------------------------------------------------------------------
 //
-// Server ¼±ÅÃÇÒ ¶§
+// Server 선택할 때
 //
 //-----------------------------------------------------------------------------
 /*
@@ -8165,12 +8165,12 @@ UIMessageManager::Execute_UI_SELECT_SERVER(int left, int right, void* void_ptr)
 
 
 	//-----------------------------------------------------
-	// ServerÁ¤º¸ °»½Å
+	// Server정보 갱신
 	//-----------------------------------------------------
 	if (g_pServerInformation!=NULL)
 	{
 		//-----------------------------------------------------
-		// ¼­¹ö ÀÌ¸§ ÀÐ¾î¿À±â
+		// 서버 이름 읽어오기
 		//-----------------------------------------------------
 		const ServerGroup* pGroup = g_pServerInformation->GetData( selectedGroup );
 
@@ -8179,19 +8179,19 @@ UIMessageManager::Execute_UI_SELECT_SERVER(int left, int right, void* void_ptr)
 			const char* pGroupName = pGroup->GetGroupName();
 
 			//-----------------------------------------------------
-			// ÇöÀç ¼±ÅÃµÇ¾î ÀÖ´Â server¶û ´Ù¸£¸é...
+			// 현재 선택되어 있는 server랑 다르면...
 			//-----------------------------------------------------
 			if (pGroupName != g_pServerInformation->GetServerGroupName())
 			{
 				char str[80];
 				strcpy(str, pGroupName);	
 				
-				// UI¿¡ ¼³Á¤
+				// UI에 설정
 				//gC_vs_ui.SetServerDefault( str, selectedGroup );
 
 			
 				//-----------------------------------------------------
-				// Packet º¸³»±â
+				// Packet 보내기
 				//-----------------------------------------------------
 				#ifdef CONNECT_SERVER
 					CLChangeServer _CLChangeServer;
@@ -8203,7 +8203,7 @@ UIMessageManager::Execute_UI_SELECT_SERVER(int left, int right, void* void_ptr)
 					gC_vs_ui.CharManagerDisable();
 				#endif
 
-				// ServerÁ¤º¸¿¡ ¼³Á¤
+				// Server정보에 설정
 				g_pServerInformation->SetServerGroupName( pGroupName );			
 			}
 		}
@@ -8213,7 +8213,7 @@ UIMessageManager::Execute_UI_SELECT_SERVER(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// Server ¼±ÅÃÇÒ ¶§
+// Server 선택할 때
 //
 //-----------------------------------------------------------------------------
 /*
@@ -8262,14 +8262,14 @@ UIMessageManager::Execute_UI_ITEM_TO_QUICKITEMSLOT(int left, int right, void* vo
 //	}
 //				
 //	//-----------------------------------------------------------------
-//	// °ËÁõ¹ÞÀ»°Ô ¾ø´Â °æ¿ì
+//	// 검증받을게 없는 경우
 //	//-----------------------------------------------------------------
 //	if (g_pTempInformation->GetMode()==TempInformation::MODE_NULL
 //		&& g_pPlayer->IsItemCheckBufferNULL())
 //	{
 //		if (gC_vs_ui.IsRunningExchange())
 //		{
-//			// ±³È¯ Áß¿¡´Â ±×³É Mouse¿¡ ºÙÀÎ´Ù.
+//			// 교환 중에는 그냥 Mouse에 붙인다.
 //			Execute_UI_ITEM_PICKUP_FROM_INVENTORY(left, right, void_ptr);
 //		}
 //		else
@@ -8277,8 +8277,8 @@ UIMessageManager::Execute_UI_ITEM_TO_QUICKITEMSLOT(int left, int right, void* vo
 //			MItem* pItem = (MItem*)void_ptr;
 //
 //			//---------------------------------------------------------
-//			// ½×ÀÏ ¼ö ÀÖ´Â ¾ÆÀÌÅÛÀÌ°í..
-//			// QuickSlotÀÌ ÀÖ´ÂÁö È®ÀÎ
+//			// 쌓일 수 있는 아이템이고..
+//			// QuickSlot이 있는지 확인
 //			//---------------------------------------------------------
 //			if (pItem->IsQuickItem() && g_pQuickSlot!=NULL)
 //			{		
@@ -8292,14 +8292,14 @@ UIMessageManager::Execute_UI_ITEM_TO_QUICKITEMSLOT(int left, int right, void* vo
 //				int addIndex = -1;
 //
 //				//---------------------------------------------------------
-//				// QuickSlotÀÇ ¾îµð¿¡ µé¾î°¥ ¼ö ÀÖÀ»±î?
+//				// QuickSlot의 어디에 들어갈 수 있을까?
 //				//---------------------------------------------------------
 //				for (int i=0; i<num; i++)
 //				{
 //					MItem* pQuickItem = g_pQuickSlot->GetItem( i );
 //
 //					//---------------------------------------------------------
-//					// ¾Æ¹«°Íµµ ¾ø´Â °÷ÀÌ¸é ±×³É ³ÖÀ¸¸é µÈ´Ù.
+//					// 아무것도 없는 곳이면 그냥 넣으면 된다.
 //					//---------------------------------------------------------
 //					if (pQuickItem==NULL)
 //					{						
@@ -8314,27 +8314,27 @@ UIMessageManager::Execute_UI_ITEM_TO_QUICKITEMSLOT(int left, int right, void* vo
 //						break;
 //					}
 //					//---------------------------------------------------------
-//					// ¹º°¡ ÀÖÀ¸¸é.. ±×°÷¿¡ ½×ÀÏ ¼ö ÀÖ´ÂÁö ¾Ë¾Æº»´Ù.
+//					// 뭔가 있으면.. 그곳에 쌓일 수 있는지 알아본다.
 //					//---------------------------------------------------------
 //					else
 //					{
 //						//--------------------------------------------------------
-//						// ½×ÀÏ ¼ö ÀÖ´Â itemÀÎÁö °ËÁõÇØ ÁØ´Ù.
+//						// 쌓일 수 있는 item인지 검증해 준다.
 //						//--------------------------------------------------------
 //						if (pQuickItem->GetItemClass()==pItem->GetItemClass()
 //							&& pQuickItem->GetItemType()==pItem->GetItemType())
 //						{
 //							//----------------------------------------------------
-//							// ´õÇÑ °³¼ö°¡ max¸¦ ³ÑÁö ¾Ê¾Æ¾ß ÇÑ´Ù.
+//							// 더한 개수가 max를 넘지 않아야 한다.
 //							//----------------------------------------------------
 //							addTotal = pQuickItem->GetNumber() + pItem->GetNumber();
 //							if ( addTotal <= pQuickItem->GetMaxNumber() )
 //							{
-//								// i¹øÂ°¿¡ Ãß°¡ °¡´ÉÇÏ´Ù°í ÆÇ´ÜÇÑ´Ù.								
+//								// i번째에 추가 가능하다고 판단한다.								
 //								addIndex = i;
 //
 //								//---------------------------------------------------
-//								// InventoryÀÇ ¾ÆÀÌÅÛÀº Á¦°ÅÇÑ´Ù.
+//								// Inventory의 아이템은 제거한다.
 //								//---------------------------------------------------
 //								MItem* pRemoveItem = g_pInventory->RemoveItem( itemX, itemY );
 //								if (pRemoveItem!=NULL)
@@ -8357,11 +8357,11 @@ UIMessageManager::Execute_UI_ITEM_TO_QUICKITEMSLOT(int left, int right, void* vo
 //				{
 //					//---------------------------------------------------------
 //					// SendPacket - Inventory to QuickItem
-//					// ½ÇÁ¦·Î´Â Inventory --> Mouse --> QuickItemÀÌ´Ù.
+//					// 실제로는 Inventory --> Mouse --> QuickItem이다.
 //					//---------------------------------------------------------
 //						//---------------------------------------------------
-//						// Inventory¿¡ ÀÖ´ø itemÀ» mouse¿¡ ºÙ¿´´Ù(-_-;)°í
-//						// server·Î packetÀ» º¸³½´Ù.
+//						// Inventory에 있던 item을 mouse에 붙였다(-_-;)고
+//						// server로 packet을 보낸다.
 //						//---------------------------------------------------
 //						CGAddInventoryToMouse _CGAddInventoryToMouse;
 //						_CGAddInventoryToMouse.setObjectID( itemID );
@@ -8371,8 +8371,8 @@ UIMessageManager::Execute_UI_ITEM_TO_QUICKITEMSLOT(int left, int right, void* vo
 //						g_pSocket->sendPacket( &_CGAddInventoryToMouse );
 //
 //						//---------------------------------------------------
-//						// mouse¿¡ ÀÖ´ø itemÀ» QuickSlot¿¡ Ãß°¡Çß´Ù°í
-//						// server·Î packetÀ» º¸³½´Ù.
+//						// mouse에 있던 item을 QuickSlot에 추가했다고
+//						// server로 packet을 보낸다.
 //						//---------------------------------------------------
 //						CGAddMouseToQuickSlot _CGAddMouseToQuickSlot;
 //						_CGAddMouseToQuickSlot.setObjectID( itemID );
@@ -8384,13 +8384,13 @@ UIMessageManager::Execute_UI_ITEM_TO_QUICKITEMSLOT(int left, int right, void* vo
 //
 //			}
 //			//---------------------------------------------------------
-//			// Quick slot¿¡ ¾È µé¾î°¡´Â °Å¸é..
-//			// Gear·Î ³Ö¾î¹ö¸®ÀÚ. -_-;
+//			// Quick slot에 안 들어가는 거면..
+//			// Gear로 넣어버리자. -_-;
 //			//---------------------------------------------------------
 //			else
 //			{
 //				//---------------------------------------------------------
-//				// ÀÏ´Ü..  mouse·Î µé°í..
+//				// 일단..  mouse로 들고..
 //				//---------------------------------------------------------
 //				g_pInventory->RemoveItem( pItem->GetID() );
 //				Execute_UI_ITEM_PICKUP_FROM_INVENTORY(left, right, void_ptr);
@@ -8398,7 +8398,7 @@ UIMessageManager::Execute_UI_ITEM_TO_QUICKITEMSLOT(int left, int right, void* vo
 //				int maxSlot;
 //
 //				//---------------------------------------------------------
-//				// gear¿¡ µé¾î°¥ ¼ö ÀÖ´ÂÁö Ã¼Å©
+//				// gear에 들어갈 수 있는지 체크
 //				//---------------------------------------------------------
 //				if (g_pPlayer->IsSlayer())
 //				{
@@ -8424,8 +8424,8 @@ UIMessageManager::Execute_UI_ITEM_TO_QUICKITEMSLOT(int left, int right, void* vo
 //						addSlot = slot;
 //						pChangeItem = pGearItem;
 //
-//						// ºó °÷ÀÌ¸é ¹Ù·Î ³Ö¾î¹ö¸®¸é µÈ´Ù.
-//						// ºó °÷ÀÌ ¾Æ´Ï¶ó¸é.. ´ÙÀ½°É Ã£´Â´Ù.
+//						// 빈 곳이면 바로 넣어버리면 된다.
+//						// 빈 곳이 아니라면.. 다음걸 찾는다.
 //						if (pGearItem==NULL)
 //						{
 //							break;
@@ -8434,7 +8434,7 @@ UIMessageManager::Execute_UI_ITEM_TO_QUICKITEMSLOT(int left, int right, void* vo
 //				}
 //				
 //				//---------------------------------------------------------
-//				// gear¿¡ ³ÖÀÚ..
+//				// gear에 넣자..
 //				//---------------------------------------------------------
 //				if (addSlot != -1)
 //				{
@@ -8444,7 +8444,7 @@ UIMessageManager::Execute_UI_ITEM_TO_QUICKITEMSLOT(int left, int right, void* vo
 //		}		
 //	}
 //	//-----------------------------------------------------------------
-//	// °ËÁõ ¹Þ¾Æ¾ßÇÒ ´Ù¸¥ ¾ÆÀÌÅÛÀÌ ÀÖ´Â °æ¿ì
+//	// 검증 받아야할 다른 아이템이 있는 경우
 //	//-----------------------------------------------------------------
 //	else
 //	{
@@ -8534,7 +8534,7 @@ UIMessageManager::Execute_UI_SLAYER_PORTAL(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// ÆÄÆ¼ ¿äÃ»¹ÞÀº°Å ´ÝÀ»¶§
+// 파티 요청받은거 닫을때
 //
 //-----------------------------------------------------------------------------
 void	
@@ -8556,7 +8556,7 @@ UIMessageManager::Execute_UI_FINISH_REQUEST_PARTY_BUTTON(int left, int right, vo
 
 	if (bTimeout)
 	{
-			// ÆÄÆ¼ ÃÊ´ë¸¦ °ÅºÎÇÑ´Ù.
+			// 파티 초대를 거부한다.
 			CGPartyInvite _CGPartyInvite;
 			_CGPartyInvite.setTargetObjectID( g_pTempInformation->PartyInviter );
 			_CGPartyInvite.setCode( CG_PARTY_INVITE_REJECT );	
@@ -8567,7 +8567,7 @@ UIMessageManager::Execute_UI_FINISH_REQUEST_PARTY_BUTTON(int left, int right, vo
 
 //-----------------------------------------------------------------------------
 //
-// ÆÄÆ¼ ¿äÃ»¹ÞÀº°Å Ãë¼Ò
+// 파티 요청받은거 취소
 //
 //-----------------------------------------------------------------------------
 void	
@@ -8585,7 +8585,7 @@ UIMessageManager::Execute_UI_PARTY_REQUEST_CANCEL(int left, int right, void* voi
 
 	
 	//---------------------------------------------------------
-	// ÆÄÆ¼ÇÒ·¡? Y/N¿¡ ´ëÇÑ ÀÀ´ä
+	// 파티할래? Y/N에 대한 응답
 	//---------------------------------------------------------
 	if (g_pTempInformation->GetMode() == TempInformation::MODE_PARTY_REQUEST)
 	{	
@@ -8602,14 +8602,14 @@ UIMessageManager::Execute_UI_PARTY_REQUEST_CANCEL(int left, int right, void* voi
 	
 		g_pTempInformation->SetMode(TempInformation::MODE_NULL);
 		
-		// ÆÄÆ¼ Ãë¼ÒÇÒ·¡?¸¦ Á¦°ÅÇÑ´Ù.
+		// 파티 취소할래?를 제거한다.
 		UI_ClosePartyCancel();
 	}	
 }
 
 //-----------------------------------------------------------------------------
 //
-// ÆÄÆ¼ ¿äÃ» ÀÀ´ä
+// 파티 요청 응답
 //
 //-----------------------------------------------------------------------------
 void	
@@ -8630,19 +8630,19 @@ UIMessageManager::Execute_UI_PARTY_ACCEPT(int left, int right, void* void_ptr)
 	int code;
 
 	//---------------------------------------------------------
-	// ±³È¯ÇÒ·¡? Y/N¿¡ ´ëÇÑ ÀÀ´ä
+	// 교환할래? Y/N에 대한 응답
 	//---------------------------------------------------------
 	//if (g_pTempInformation->Mode == TempInformation::MODE_PARTY_REQUEST)
 	{
 		//---------------------------------------------------------
-		// Çã¿ë
+		// 허용
 		//---------------------------------------------------------
 		if (accept)
 		{
 			code = CG_PARTY_INVITE_ACCEPT;
 		}
 		//---------------------------------------------------------
-		// °ÅºÎ
+		// 거부
 		//---------------------------------------------------------
 		else
 		{	
@@ -8687,7 +8687,7 @@ UIMessageManager::Execute_UI_CLOSE_PARTY_MANAGER(int left, int right, void* void
 
 //-----------------------------------------------------------------------------
 //
-// ÆÄÆ¼ Å»Åð/Ãß¹æ
+// 파티 탈퇴/추방
 //
 //-----------------------------------------------------------------------------
 void	
@@ -8703,14 +8703,14 @@ UIMessageManager::Execute_UI_AWAY_PARTY(int left, int right, void* void_ptr)
 	}
 
 
-	// ÆÄÆ¼ Å»Åð Ãß¹æ 
-	// left :: -1 == Å»Åð, 0~4 == Ãß¹æ
+	// 파티 탈퇴 추방 
+	// left :: -1 == 탈퇴, 0~4 == 추방
 	BOOL bLeftParty = (left==-1);
 
 	if (g_pPlayer->IsWaitVerifyNULL())
 	{
 		//-----------------------------------------------------------------
-		// ³»°¡ ÆÄÆ¼¸¦ ¶°³ª´Â °æ¿ì
+		// 내가 파티를 떠나는 경우
 		//-----------------------------------------------------------------
 		if (bLeftParty)
 		{
@@ -8726,7 +8726,7 @@ UIMessageManager::Execute_UI_AWAY_PARTY(int left, int right, void* void_ptr)
 			}
 		}
 		//-----------------------------------------------------------------
-		// ³»°¡ ´Ù¸¥ ´©±¸¸¦ Ãß¹æÇÏ´Â °æ¿ì
+		// 내가 다른 누구를 추방하는 경우
 		//-----------------------------------------------------------------
 		else
 		{
@@ -8758,7 +8758,7 @@ UIMessageManager::Execute_UI_AWAY_PARTY(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// ÆÄÆ¼ Å»Åð/Ãß¹æ
+// 파티 탈퇴/추방
 //
 //-----------------------------------------------------------------------------
 void	
@@ -8774,7 +8774,7 @@ UIMessageManager::Execute_UI_FINISH_REQUEST_DIE_BUTTON(int left, int right, void
 	}
 
 
-	// ´ÙÀÌ-_-¿äÃ» ´Ý±â left == TRUE : timeout
+	// 다이-_-요청 닫기 left == TRUE : timeout
 	BOOL bTimeout = left;
 
 	if (g_pPlayer->IsDead() && !g_pPlayer->IsWaitVerify())
@@ -8798,8 +8798,8 @@ UIMessageManager::Execute_UI_FINISH_REQUEST_DIE_BUTTON(int left, int right, void
 			
 			g_pSocket->sendPacket( &_CGResurrect );
 		}	
-			// ÀÌ°Å¸»°í Verify¸¦ ÇÏ³ª ¸¸µé¾î¾ß µÇ´Âµ¥
-			// ÄÄÆÄÀÏ ÇÏ±â ½È¾î¼­ ÀÏ´Ü... - -;
+			// 이거말고 Verify를 하나 만들어야 되는데
+			// 컴파일 하기 싫어서 일단... - -;
 		g_pPlayer->SetWaitVerify( MPlayer::WAIT_VERIFY_RESURRECT );
 
 		gC_vs_ui.FinishRequestDie();
@@ -8810,7 +8810,7 @@ UIMessageManager::Execute_UI_FINISH_REQUEST_DIE_BUTTON(int left, int right, void
 
 //-----------------------------------------------------------------------------
 //
-// ¼­¹ö ¼±ÅÃÇÒ ¶§
+// 서버 선택할 때
 //
 //-----------------------------------------------------------------------------
 void	
@@ -8829,7 +8829,7 @@ UIMessageManager::Execute_UI_CONNECT_SERVER(int left, int right, void* void_ptr)
 	int	selectID = right;
 
 	//-------------------------------------------------------
-	// World¸¦ ¼±ÅÃÇÑ °æ¿ì
+	// World를 선택한 경우
 	//-------------------------------------------------------
 	if (bSelectGroup)
 	{
@@ -8853,7 +8853,7 @@ UIMessageManager::Execute_UI_CONNECT_SERVER(int left, int right, void* void_ptr)
 		}
 	}
 	//-------------------------------------------------------
-	// Server¸¦ ¼±ÅÃÇÑ °æ¿ì
+	// Server를 선택한 경우
 	//-------------------------------------------------------
 	else
 	{
@@ -8883,7 +8883,7 @@ UIMessageManager::Execute_UI_CONNECT_SERVER(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
-// server ¼±ÅÃ ´ÝÀ» ¶§
+// server 선택 닫을 때
 //
 //-----------------------------------------------------------------------------
 void	
@@ -8896,14 +8896,14 @@ UIMessageManager::Execute_UI_CLOSE_SERVER_SELECT(int left, int right, void* void
 	BOOL bSelectGroup = left;
 
 	//------------------------------------------------------------
-	// group¼±ÅÃ¿¡¼­ backÇÏ¸é ÃÊ±âÈ­¸éÀ¸·Î
+	// group선택에서 back하면 초기화면으로
 	//------------------------------------------------------------
 	if (bSelectGroup)
 	{
 		SetMode( MODE_MAINMENU );
 	}
 	//------------------------------------------------------------
-	// server¼±ÅÃ¿¡¼­ backÇÏ¸é group¼±ÅÃÀ¸·Î..
+	// server선택에서 back하면 group선택으로..
 	//------------------------------------------------------------
 	else
 	{
@@ -8915,7 +8915,7 @@ UIMessageManager::Execute_UI_CLOSE_SERVER_SELECT(int left, int right, void* void
 
 //-----------------------------------------------------------------------------
 //
-// Ä³¸¯ÅÍ ÀÌ¸§ È®ÀÎÇÒ¶§
+// 캐릭터 이름 확인할때
 //
 //-----------------------------------------------------------------------------
 void	
@@ -8930,7 +8930,7 @@ UIMessageManager::Execute_UI_NEWCHARACTER_CHECK(int left, int right, void* void_
 		if (g_pUserInformation->WhisperID.GetLength()==0)
 		{
 			//---------------------------------------------
-			// ÀÌ¸§ ±æÀÌ Ã¼Å©
+			// 이름 길이 체크
 			//---------------------------------------------
 			BOOL bAllOK = TRUE;
 
@@ -8949,7 +8949,7 @@ UIMessageManager::Execute_UI_NEWCHARACTER_CHECK(int left, int right, void* void_
 				if (!IsValidID(pName, "-_"))
 				{
 					//---------------------------------------------
-					// Àß¸øµÈ IDÀÎ °æ¿ì
+					// 잘못된 ID인 경우
 					//---------------------------------------------						
 					g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_USER_REGISTER_INVALID_ID].GetString() );
 					bAllOK = FALSE;
@@ -8959,7 +8959,7 @@ UIMessageManager::Execute_UI_NEWCHARACTER_CHECK(int left, int right, void* void_
 					char strName[80];
 					strcpy(strName, pName);
 
-					// ¾È ÁÁÀº ¸»ÀÌ µé¾îÀÖ´Â °æ¿ì´Â Çã¿ëÀÌ ¾ÈµÈ´Ù
+					// 안 좋은 말이 들어있는 경우는 허용이 안된다
 					if (g_pChatManager->RemoveCurse(strName))
 					{
 						g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_USER_REGISTER_INVALID_ID].GetString() );
@@ -8987,7 +8987,7 @@ UIMessageManager::Execute_UI_NEWCHARACTER_CHECK(int left, int right, void* void_
 
 					g_pSocket->sendPacket( &clQueryCharacterName );
 
-					// ÀÓ½Ã·Î.. -_-;;
+					// 임시로.. -_-;;
 					g_pUserInformation->WhisperID = pName;
 			}
 		}
@@ -8997,7 +8997,7 @@ UIMessageManager::Execute_UI_NEWCHARACTER_CHECK(int left, int right, void* void_
 
 //-----------------------------------------------------------------------------
 //
-// Áö·Ú/ÆøÅº ¸¸µé²¨ ¼±ÅÃÇÒ¶§
+// 지뢰/폭탄 만들꺼 선택할때
 //
 //-----------------------------------------------------------------------------
 /*
@@ -9006,18 +9006,18 @@ UIMessageManager::Execute_UI_SELECT_EXPLOSIVE(int left, int right, void* void_pt
 {
 	DEBUG_ADD("[UI] Execute_UI_SELECT_EXPLOSIVE");
 	
-	int type = left;		// Áö·Ú(2) / ÆøÅº(3)
-	int itemType = right;	// Á¾·ù(Áö·Ú:0~3, ÆøÅº:0~5)
+	int type = left;		// 지뢰(2) / 폭탄(3)
+	int itemType = right;	// 종류(지뢰:0~3, 폭탄:0~5)
 
 
 	//--------------------------------------------------------
-	// °ËÁõ¹ÞÀ»°Ô ¾ø´Â °æ¿ì
+	// 검증받을게 없는 경우
 	//--------------------------------------------------------
 	if (g_pPlayer->IsItemCheckBufferNULL()
 		&& g_pTempInformation->Mode==TempInformation::MODE_NULL)
 	{
 		//--------------------------------------------------------
-		// Á¤»óÀûÀÎ °æ¿ì
+		// 정상적인 경우
 		//--------------------------------------------------------
 		if (type==2 && itemType>=0 && itemType<6
 			|| type==3 && itemType>=0 && itemType<4)
@@ -9034,23 +9034,23 @@ UIMessageManager::Execute_UI_SELECT_EXPLOSIVE(int left, int right, void* void_pt
 				
 			#endif	
 
-			// item ±â¾ï
+			// item 기억
 			g_pTempInformation->Mode = TempInformation::MODE_SKILL_MAKE_ITEM;
 			g_pTempInformation->Value1 = itemClass;
 			g_pTempInformation->Value2 = itemType;
 
-			// ¸ø ¿òÁ÷ÀÌ°Ô ¸·±â
+			// 못 움직이게 막기
 			UI_LockItem();
 			
-			// ¼±ÅÃÃ¢À» ´Ý´Â´Ù.
+			// 선택창을 닫는다.
 			UI_CloseSelectExplosive();
 		}
 		//--------------------------------------------------------
-		// ¹º°¡ Àß¸øµÈ °æ¿ì
+		// 뭔가 잘못된 경우
 		//--------------------------------------------------------
 		else
 		{
-			// ¸¸µé²¨¸®¸¦ Á¦´ë·Î ¼±ÅÃÇÏ½Ã¶ó~~
+			// 만들꺼리를 제대로 선택하시라~~
 			g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_ERROR_ETC_ERROR].GetString() );
 		}
 	}
@@ -9063,7 +9063,7 @@ UIMessageManager::Execute_UI_SELECT_EXPLOSIVE(int left, int right, void* void_pt
 
 //-----------------------------------------------------------------------------
 //
-// Áö·Ú/ÆøÅº ¼±ÅÃÇÏ´Â°Å ´ÝÀ» ¶§
+// 지뢰/폭탄 선택하는거 닫을 때
 //
 //-----------------------------------------------------------------------------
 /*
@@ -9095,7 +9095,7 @@ UIMessageManager::Execute_UI_CLOSE_TEAM_LIST(int left, int right, void* void_ptr
 		g_pUIDialog->UnSetLockInputPCTalk();
 //		g_pUIDialog->ClosePCTalkDlg();
 //		g_pPlayer->SetWaitVerifyNULL();
-		// ´Ù½Ã ¹º°¡¸¦?¼±ÅÃÇÒ ¼ö ÀÖ°Ô ÇÑ´Ù.
+		// 다시 뭔가를?선택할 수 있게 한다.
 		//g_pUIDialog->ShowPCTalkDlg();
 	}
 }
@@ -9126,7 +9126,7 @@ UIMessageManager::Execute_UI_CLOSE_TEAM_REGIST(int left, int right, void* void_p
 	
 	if (g_pTempInformation->GetMode()==TempInformation::MODE_NULL)
 	{
-		// ´Ù½Ã ¹º°¡¸¦?¼±ÅÃÇÒ ¼ö ÀÖ°Ô ÇÑ´Ù.
+		// 다시 뭔가를?선택할 수 있게 한다.
 		if(!gC_vs_ui.ReturnTeamRegistMember())
 			g_pUIDialog->ShowPCTalkDlg();
 
@@ -9150,7 +9150,7 @@ UIMessageManager::Execute_UI_CLOSE_TEAM_MEMBER_LIST(int left, int right, void* v
 //	if (g_pTempInformation->GetMode()==TempInformation::MODE_NULL)
 //	{
 //
-//		// ´Ù½Ã ¹º°¡¸¦?¼±ÅÃÇÒ ¼ö ÀÖ°Ô ÇÑ´Ù.
+//		// 다시 뭔가를?선택할 수 있게 한다.
 //		g_pUIDialog->ShowPCTalkDlg();
 //	}
 }
@@ -9354,12 +9354,12 @@ UIMessageManager::Execute_UI_JOIN_REGIST_TEAM(int left, int right, void* void_pt
 
 	
 void
-UIMessageManager::Execute_UI_REGIST_GUILD_MEMBER(int left, int right, void* void_ptr)			// void_ptr = introduction max:150byte Ã¢ ´Ý¾ÆÁÙ°Í!
+UIMessageManager::Execute_UI_REGIST_GUILD_MEMBER(int left, int right, void* void_ptr)			// void_ptr = introduction max:150byte 창 닫아줄것!
 {
 
 	if(void_ptr == NULL)
 	{
-		// ¿¡·¯¸Þ¼¼Áö Ãâ·Â
+		// 에러메세지 출력
 		g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_MESSAGE_GUILD_REGIST_FAIL_INTRO].GetString() );
 		return;
 	}
@@ -9375,12 +9375,12 @@ UIMessageManager::Execute_UI_REGIST_GUILD_MEMBER(int left, int right, void* void
 }
 
 void
-UIMessageManager::Execute_UI_REGIST_GUILD_TEAM(int left, int right, void* void_ptr)			// left = TEAM_NAME, void_ptr = introduction max:150byte Ã¢ ´Ý¾ÆÁÙ°Í!
+UIMessageManager::Execute_UI_REGIST_GUILD_TEAM(int left, int right, void* void_ptr)			// left = TEAM_NAME, void_ptr = introduction max:150byte 창 닫아줄것!
 {
 
 	if(void_ptr == NULL || (char *)left == NULL)
 	{
-		// ¿¡·¯¸Þ¼¼Áö Ãâ·Â
+		// 에러메세지 출력
 		g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_MESSAGE_GUILD_REGIST_FAIL_INTRO].GetString() );
 		return;
 	}
@@ -9419,8 +9419,8 @@ UIMessageManager::Execute_UI_CLOSE_FILE_DIALOG(int left, int right, void* void_p
 				
 				if (LoadImageToSurface(p_str, bmpSurface))
 				{
-					// surfaceÀÇ Å©±â°¡ default ProfileÅ©±â¿Í ´Ù¸£´Ù¸é
-					// size¸¦ º¯°æ½ÃÄÑÁà¾ß ÇÑ´Ù..	
+					// surface의 크기가 default Profile크기와 다르다면
+					// size를 변경시켜줘야 한다..	
 					RECT bmpRect = { 0, 0, bmpSurface.GetWidth(), bmpSurface.GetHeight() };
 
 					// BigSize
@@ -9448,7 +9448,7 @@ UIMessageManager::Execute_UI_CLOSE_FILE_DIALOG(int left, int right, void* void_p
 
 //-----------------------------------------------------------------------------
 //
-// mouseÀÇ Item(EVENT_STAR)À¸·Î InventoryÀÇ ItemÀ» EnchantÇÒ ¶§
+// mouse의 Item(EVENT_STAR)으로 Inventory의 Item을 Enchant할 때
 //
 //-----------------------------------------------------------------------------
 void
@@ -9462,9 +9462,9 @@ UIMessageManager::Execute_UI_ENCHANT_ACCEPT(int left, int right, void* void_ptr)
 		return;
 	}
 
-	// gpC_mouse_pointer->GetPickUpItem()		// µé°í ÀÖ´Â °Í
-	//void_ptr = MItem *		// µé¾î°¥ °÷
-	// InventoryÁÂÇ¥(left,right)
+	// gpC_mouse_pointer->GetPickUpItem()		// 들고 있는 것
+	//void_ptr = MItem *		// 들어갈 곳
+	// Inventory좌표(left,right)
 	MItem* pItem = (MItem*)void_ptr;
 	MItem* pMouseItem = gpC_mouse_pointer->GetPickUpItem();
 
@@ -9482,14 +9482,14 @@ UIMessageManager::Execute_UI_ENCHANT_ACCEPT(int left, int right, void* void_ptr)
 
 	TYPE_OBJECTID mouseItemID = ((pMouseItem==NULL)?OBJECTID_NULL : pMouseItem->GetID());
 
-	// ±³È¯ÁßÀÏ¶§´Â EnchantÇÒ ¼ö ¾ø´Ù!
+	// 교환중일때는 Enchant할 수 없다!
 	if (g_pTradeManager!=NULL)
 		return;
 	
 	//g_pPlayer->SetItemCheckBuffer( pItem, MPlayer::ITEM_CHECK_BUFFER_INSERT_FROM_INVENTORY );
 	
 	//----------------------------------------------------
-	// Server¿¡ Á¢¼ÓÇÑ °æ¿ì
+	// Server에 접속한 경우
 	//----------------------------------------------------
 	if(g_pTempInformation->GetMode() == TempInformation::MODE_NULL && g_pPlayer->IsItemCheckBufferNULL())
 	{
@@ -9553,7 +9553,7 @@ void UIMessageManager::Execute_UI_MODIFY_GUILD_MEMBER_INTRO(int left, int right,
 
 void UIMessageManager::Execute_UI_SEND_NAME_FOR_SOUL_CHAIN(int left, int right, void* void_ptr)
 {
-	// ÀÌ¹Ì ÃßÀû¹öÆ°À» ´©¸¥»óÅÂÀÏ°æ¿ì
+	// 이미 추적버튼을 누른상태일경우
 	if(g_pPlayer->IsWaitVerify())
 		return;
 
@@ -9574,7 +9574,7 @@ void UIMessageManager::Execute_UI_SEND_NAME_FOR_SOUL_CHAIN(int left, int right, 
 void UIMessageManager::Execute_UI_CLOSE_TRACE_WINDOW(int left, int right, void* void_ptr)
 {
 //	//------------------------------------------------------------------
-//	// Player°¡ ±â´Ù¸®´ø skillÀÇ ¼º°øÀ¯¹«¸¦ °ËÁõ¹Þ¾Ò´Ù.
+//	// Player가 기다리던 skill의 성공유무를 검증받았다.
 //	//------------------------------------------------------------------	
 //	if (g_pPlayer->GetWaitVerify()==MPlayer::WAIT_VERIFY_SKILL_SUCCESS)
 //	{		
@@ -9586,7 +9586,7 @@ void UIMessageManager::Execute_UI_CLOSE_TRACE_WINDOW(int left, int right, void* 
 //	}
 //
 //	//------------------------------------------------------------------
-//	// Item LockÀ» Ç¬´Ù.
+//	// Item Lock을 푼다.
 //	//------------------------------------------------------------------
 //	if (g_pPlayer->GetItemCheckBufferStatus()==MPlayer::ITEM_CHECK_BUFFER_SKILL_TO_INVENTORY)
 //	{
@@ -9596,7 +9596,7 @@ void UIMessageManager::Execute_UI_CLOSE_TRACE_WINDOW(int left, int right, void* 
 	gC_vs_ui.CloseTraceWindow();
 }
 
-// ³Ý¸¶ºí¿ë ¼öÁ¤
+// 넷마블용 수정
 void UIMessageManager::Execute_UI_RUN_CONNECT(int left, int right, void* void_ptr)
 {
 	UI_RunConnect();
@@ -9627,7 +9627,7 @@ void UIMessageManager::Excute_UI_USE_XMAS_TREE(int left, int right, void* void_p
 
 	if(sz_ptr == NULL)
 	{
-		// ºóÇ×¸ñÀÌ ÀÖ½À´Ï´Ù.
+		// 빈항목이 있습니다.
 		g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_MESSAGE_XMAS_CARD_CANNOT_USE].GetString() );
 		return;
 	}
@@ -9658,15 +9658,15 @@ void UIMessageManager::Excute_UI_CLOSE_XMAS_CARD_WINDOW(int left, int right, voi
 
 void UIMessageManager::Excute_UI_SEND_BRING_FEE(int left,int right, void* void_ptr)
 {
-	// °ËÁõÇÒ°Ô ÀÖÀ¸¸é ¸®ÅÏ.
+	// 검증할게 있으면 리턴.
 	if(g_pTempInformation->GetMode() != TempInformation::MODE_NULL)
 	{
 		DEBUG_ADD("Excute_UI_SEND_BRING_FEE TempInformation is not NULL");
 		return;
 	}
-	// ¼¼±Ý °¡Á®¿À±â
+	// 세금 가져오기
 	DEBUG_ADD("Excute_UI_SEND_BRING_FEE");
-	// °¡Á®¿À±â ÇßÀ»¶© °ËÁõ ÆÐÅ¶ ³¯¶ó¿À±âÀü±îÁø ³ÀµÎÀÚ.
+	// 가져오기 했을땐 검증 패킷 날라오기전까진 냅두자.
 
 	g_pTempInformation->SetMode(TempInformation::MODE_WAIT_BRING_FEE);
 	g_pTempInformation->Value1 = left;
@@ -9681,7 +9681,7 @@ void UIMessageManager::Excute_UI_SEND_BRING_FEE(int left,int right, void* void_p
 
 void UIMessageManager::Excute_UI_CLOSE_BRING_FEE_WINDOW(int left,int right, void* void_ptr)
 {
-	// °ËÁõÇÒ°Ô ¾øÀ»°æ¿ì
+	// 검증할게 없을경우
 	if (g_pTempInformation->GetMode()==TempInformation::MODE_NULL)
 	{
 		gC_vs_ui.CloseBringFeeWindow();
@@ -9753,7 +9753,7 @@ void UIMessageManager::Execute_UI_CLOSE_INPUT_NAME_WINDOW(int left, int right, v
 
 //-----------------------------------------------------------------------------
 //
-// Gear¿¡¼­ ItemÀ» »ç¿ëÇÑ °æ¿ì
+// Gear에서 Item을 사용한 경우
 //
 //-----------------------------------------------------------------------------
 void
@@ -9780,7 +9780,7 @@ UIMessageManager::Execute_UI_ITEM_USE_GEAR(int left, int right, void* void_ptr)
 
 			if (g_pPlayer->IsItemCheckBufferNULL())
 			{
-				// ÀÚ±âÁ¾Á· ¾ÆÀÌÅÛ¸¸ ¾²Àð-¤µ-;
+				// 자기종족 아이템만 쓰쟈-ㅅ-;
 				if(g_pPlayer->IsSlayer() && pSlotItem->IsSlayerItem() ||
 					g_pPlayer->IsVampire() && pSlotItem->IsVampireItem() ||
 					g_pPlayer->IsOusters() && pSlotItem->IsOustersItem())
@@ -9813,7 +9813,7 @@ UIMessageManager::Execute_GO_BILING_PAGE(int left, int right, void* void_ptr)
 {
 	if(left == TRUE)
 	{
-		// Á¾·á..
+		// 종료..
 		SetMode( MODE_QUIT );
 
 #ifdef PLATFORM_WINDOWS
@@ -9876,7 +9876,7 @@ UIMessageManager::Execute_UI_CLOSE_LOTTERY_CARD(int left, int right, void *void_
 void 
 UIMessageManager::Execute_UI_LOTTERY_CARD_STATUS(int left, int right, void *void_ptr)
 {
-	// left = step, right = »óÇ° ID
+	// left = step, right = 상품 ID
 	
 	CGLotterySelect _CGLotterySelect;
 	
@@ -9943,9 +9943,9 @@ UIMessageManager::Execute_UI_TRANS_ITEM_ACCEPT(int left, int right, void *void_p
 		DEBUG_ADD("Not Mode MODE_GAME or Dead");
 		return;
 	}
-	// gpC_mouse_pointer->GetPickUpItem()		// µé°í ÀÖ´Â °Í
-	//void_ptr = MItem *		// µé¾î°¥ °÷
-	// InventoryÁÂÇ¥(left,right)
+	// gpC_mouse_pointer->GetPickUpItem()		// 들고 있는 것
+	//void_ptr = MItem *		// 들어갈 곳
+	// Inventory좌표(left,right)
 	MItem* pItem = (MItem*)void_ptr;
 	MItem* pMouseItem = gpC_mouse_pointer->GetPickUpItem();
 
@@ -9961,14 +9961,14 @@ UIMessageManager::Execute_UI_TRANS_ITEM_ACCEPT(int left, int right, void *void_p
 	}
 	TYPE_OBJECTID mouseItemID = ((pMouseItem==NULL)?OBJECTID_NULL : pMouseItem->GetID());
 
-	// ±³È¯ÁßÀÏ¶§´Â EnchantÇÒ ¼ö ¾ø´Ù!
+	// 교환중일때는 Enchant할 수 없다!
 	if (g_pTradeManager!=NULL)
 		return;
 	
 	//g_pPlayer->SetItemCheckBuffer( pItem, MPlayer::ITEM_CHECK_BUFFER_INSERT_FROM_INVENTORY );
 	
 	//----------------------------------------------------
-	// Server¿¡ Á¢¼ÓÇÑ °æ¿ì
+	// Server에 접속한 경우
 	//----------------------------------------------------
 	if(g_pTempInformation->GetMode() == TempInformation::MODE_NULL && g_pPlayer->IsItemCheckBufferNULL())
 	{
@@ -10179,7 +10179,7 @@ UIMessageManager::Execute_UI_OUSTERS_DOWN_SKILL(int left, int right, void *void_
 
 	int curLevel = (*g_pSkillInfoTable)[left].GetExpLevel();
 
-	// 2004, 11, 8, sobeit modify start - ¾Æ¿ì½ºÅÍÁî ½ºÅ³¿¡ µû¶ó 0·¹º§·Îµµ ¸¸µé¼ö ÀÖ´Ù.
+	// 2004, 11, 8, sobeit modify start - 아우스터즈 스킬에 따라 0레벨로도 만들수 있다.
 	if( curLevel > 30 || (curLevel == 1 && (*g_pSkillInfoTable)[left].CanDelete == 0) )
 		return;	
 	// 2004, 11, 8, sobeit modify end
@@ -10199,7 +10199,7 @@ UIMessageManager::Execute_UI_CLEAR_ALL_STAGE(int left, int right, void *void_ptr
 	// LEFT = GAMETYPE
 	switch( left )
 	{
-	case 0 :				// ´ÙÚ´Ù!!!!
+	case 0 :				// 다꺴다!!!!
 		break;
 	case 1 :
 		break;
@@ -10273,18 +10273,18 @@ UIMessageManager::Execute_UI_CLEAR_STAGE(int left, int right, void *void_ptr)
 void
 UIMessageManager::Execute_UI_FORCE_DIE(int left, int right, void *void_ptr)
 {
-	// ³ª¸¦ Á×¿©ÁÒ
+	// 나를 죽여죠
 	gC_vs_ui.CloseAllDialog();
 	
 	switch(left)
 	{
-	case 10 :						// ArrowTile ÇÏ´Ù°¡ Á×¾úÀ»¶§
+	case 10 :						// ArrowTile 하다가 죽었을때
 		break;
-	case 11 :						// CrazyMine ÇÏ´Ù°¡ Á×¾úÀ»¶§			
+	case 11 :						// CrazyMine 하다가 죽었을때			
 		break;
 	}
 	
-	// ¼­¹ö¿¡ ³ª Á×¿©ÁÒ ÆÐÅ¶À» º¸³½´Ù.
+	// 서버에 나 죽여죠 패킷을 보낸다.
 	CGFailQuest		_CGFailQuest;
 	
 	_CGFailQuest.setFail( true );
@@ -10349,7 +10349,7 @@ UIMessageManager::Execute_UI_POPUP_MESSAGE_OK(int left, int right, void* void_pt
 
 	switch(recvID)
 	{
-	// ÃÊº¸Á¸
+	// 초보존
 	case 1:
 		zoneID = 1122;
 		break;
@@ -10358,12 +10358,12 @@ UIMessageManager::Execute_UI_POPUP_MESSAGE_OK(int left, int right, void* void_pt
 		zoneID = 1122;
 		break;
 		
-	// ·¹º§ ÀüÀï ½ÃÀÛ
+	// 레벨 전쟁 시작
 	case 4:
 		zoneID = 1131;
 		break;
 
-	// Á¾Á· ÀüÀï ½ÃÀÛ
+	// 종족 전쟁 시작
 	case 6:
 		zoneID = 72;
 		break;
@@ -10382,7 +10382,7 @@ UIMessageManager::Execute_UI_POPUP_MESSAGE_OK(int left, int right, void* void_pt
 void 
 UIMessageManager::Execute_UI_CLOSE_SHRINE_MINIMAP(int left, int right, void* void_ptr)
 {
-	// Random-_- À¸·Î º¸³»ÀÚ. °­Á¦·Î ´ÝÀº °æ¿ìÀÌ´Ù. 
+	// Random-_- 으로 보내자. 강제로 닫은 경우이다. 
 
 	bool bSended = false;
 
@@ -10444,7 +10444,7 @@ UIMessageManager::Execute_UI_PET_GAMBLE(int left, int right, void* void_ptr)
 {
 	CGPetGamble _CGPetGamble;
 	g_pSocket->sendPacket( &_CGPetGamble );
-	// °×ºíÇÏ´Âµ¿¾È ¾ÆÀÌÅÛ ¸ø»©°Ô
+	// 겜블하는동안 아이템 못빼게
 	UI_LockItem();
 }
 
@@ -10470,17 +10470,17 @@ UIMessageManager::Execute_UI_CLOSE_PETSTORAGE(int left, int right, void* void_pt
 
 	gC_vs_ui.ClosePetStorage();
 	
-	// º¸°üÇÔ ÁßÁö
+	// 보관함 중지
 	if (g_pStorage!=NULL)
 	{
 		delete g_pStorage;
 		g_pStorage = NULL;
 	}
 
-	// storage¸¦ ¾ø¾Ø´Ù.
+	// storage를 없앤다.
 	gC_vs_ui.SetPetStorage( NULL );
 
-//	// ´Ù½Ã ¹º°¡¸¦?¼±ÅÃÇÒ ¼ö ÀÖ°Ô ÇÑ´Ù.
+//	// 다시 뭔가를?선택할 수 있게 한다.
 //	g_pUIDialog->ShowPCTalkDlg();
 
 	g_pTempInformation->SetMode(TempInformation::MODE_NULL);
@@ -10631,7 +10631,7 @@ UIMessageManager::Execute_UI_SMS_OPEN_LIST(int left, int right, void* void_ptr)
 	if (g_pTempInformation->GetMode()==TempInformation::MODE_NULL)
 	{
 		gC_vs_ui.RunSMSList();
-		// sms ÁÖ¼Ò ¿äÃ» ÆÐÅ¶ º¸³¿
+		// sms 주소 요청 패킷 보냄
 		CGSMSAddressList _CGSMSAddressList;
 		g_pSocket->sendPacket( &_CGSMSAddressList );
 	}
@@ -10673,7 +10673,7 @@ UIMessageManager::Execute_UI_SMS_DELETE(int left, int right, void* void_ptr)
 		return;
 	}
 
-	// µî·Ï ¿äÃ» ÆÐÅ¶ º¸³¿
+	// 등록 요청 패킷 보냄
 	if (g_pTempInformation->GetMode()==TempInformation::MODE_NULL)
 	{
 		CGDeleteSMSAddress	_CGDeleteSMSAddress;
@@ -10790,9 +10790,9 @@ UIMessageManager::Execute_UI_CHANGE_CUSTOM_NAMING(int left, int right, void* voi
 		DEBUG_ADD("Not Mode MODE_GAME");
 		return;
 	}
-	// ¼­¹ö ¼¼ÆÃ ³¡³ª°í Å×½ºÆ® ÈÄ return Ç®ÀÚ..
+	// 서버 세팅 끝나고 테스트 후 return 풀자..
 //	return;
-	// left : name, right : item ID(0=¿ï¹ö¸°) void_ptr:penitem pointer
+	// left : name, right : item ID(0=울버린) void_ptr:penitem pointer
 	if (g_pTempInformation->GetMode()==TempInformation::MODE_NULL)
 	{
 		char szTemp[22];
@@ -10809,7 +10809,7 @@ UIMessageManager::Execute_UI_CHANGE_CUSTOM_NAMING(int left, int right, void* voi
 //			char strName[80];
 //			strcpy(strName, pChar->sz_name);
 //
-//			// ¾È ÁÁÀº ¸»ÀÌ µé¾îÀÖ´Â °æ¿ì´Â Çã¿ëÀÌ ¾ÈµÈ´Ù
+//			// 안 좋은 말이 들어있는 경우는 허용이 안된다
 //			if (g_pChatManager->RemoveCurse(strName))
 //			{
 //				g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_USER_REGISTER_INVALID_ID].GetString() );
@@ -10818,7 +10818,7 @@ UIMessageManager::Execute_UI_CHANGE_CUSTOM_NAMING(int left, int right, void* voi
 //		}
 		g_pChatManager->RemoveCurse(szTemp );
 
-		// ÀÌÂë¿¡¼­ effect status¸¦ °Ë»ö ÇØ¼­ ¾ÆÀÌÅÛ »ç¿ë ÆÐÅ¶À» º¸³»´Â°Ô ÁÁÀ»µí..
+		// 이쯤에서 effect status를 검색 해서 아이템 사용 패킷을 보내는게 좋을듯..
 		MItem* pItem = NULL;	
 		
 		if(right != 0)
@@ -10831,26 +10831,26 @@ UIMessageManager::Execute_UI_CHANGE_CUSTOM_NAMING(int left, int right, void* voi
 
 			if(right != 0)
 			{ 
-				// ¸ÕÀú ¾ÆÀÌÅÛ ½è´Ù°í ÆÐÅ¶ º¸³»°í - ¾Èº¸³»±â·ç ¼³Á¤
+				// 먼저 아이템 썼다고 패킷 보내고 - 안보내기루 설정
 			//	Execute_UI_ITEM_USE(pItem->GetID(), 0, (void*)pItem);
-				// ´Ð³×ÀÓ Ã¼ÀÎÁö ÆÐÅ¶À» º¸³»Àå..
+				// 닉네임 체인지 패킷을 보내장..
 				_CGModifyNickname.setNicknameID(pItem->GetID());
 				g_pSocket->sendPacket( &_CGModifyNickname );
 
 				g_pTempInformation->SetMode(TempInformation::MODE_NICKNAME_CHANGE_CUSTOM);
-				g_pTempInformation->Value1 = left;					// ¹Ù²ï ´Ð³×ÀÓ ¾ÆÀÌµð
-				g_pTempInformation->Value2 = pItem->GetItemType();  // ¾ÆÀÌÅÛ Å¸ÀÔ
+				g_pTempInformation->Value1 = left;					// 바뀐 닉네임 아이디
+				g_pTempInformation->Value2 = pItem->GetItemType();  // 아이템 타입
 
-				if(25 != g_pTempInformation->Value2)  // ½Ã°£Á¦ ¤¿¤·ÀÌÅÛ
+				if(25 != g_pTempInformation->Value2)  // 시간제 ㅏㅇ이템
 					g_pPlayer->SetItemCheckBuffer( pItem, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY);
 			}
 			else
 			{
-				// ¿ï¹ö¸°ÀÏ¶© ¾ÆÀÌÅÛ ¾øÀÌ ¹Ù²Û´ç..
+				// 울버린일땐 아이템 없이 바꾼당..
 				_CGModifyNickname.setNicknameID(0);
 				g_pSocket->sendPacket( &_CGModifyNickname );
 				g_pTempInformation->SetMode(TempInformation::MODE_NICKNAME_CHANGE_CUSTOM);
-				g_pTempInformation->Value1 = left;					// ¹Ù²ï ´Ð³×ÀÓ ¾ÆÀÌµð
+				g_pTempInformation->Value1 = left;					// 바뀐 닉네임 아이디
 				g_pTempInformation->Value2 = 0;  // 
 			}
 		}
@@ -10873,21 +10873,21 @@ UIMessageManager::Execute_UI_RUN_NAMING_CHANGE(int left, int right, void* void_p
 		MItem* pItem = (MItem*)left;
 		if(pItem->GetItemClass() != ITEM_CLASS_EVENT_GIFT_BOX)
 			return;
-		// pItem ÀÌ Ä³¸¯ÅÍ ´Ð³×ÀÓ ¹Ù²Ù´Â ¾ÆÀÌÅÛ ÀÌ¸é
-			// 1È¸¿ë (2°¡Áö) - ±âÁ¸´Ð³×ÀÓ ¼öÁ¤, »õ·Î¿î ´Ð³×ÀÓ Ãß°¡
-			// ½Ã°£Á¦ (1°¡Áö) - Æ¯Á¤ ½Ã°£µ¿¾È ±âÁ¸ ´Ð³×ÀÓ ¹«Á¦ÇÑ ¼öÁ¤°¡´É
-		// pItemÀÌ Æê ´Ð³×ÀÓ ¹Ù²Ù´Â ¾ÆÀÌÅÛÀÌ¸é ÆêÀÌ ¼ÒÈ¯ »óÅÂ¿©¾ß¸¸ »ç¿ë °¡´É
-			// ¿ï¹ö¸°ÀÇ °æ¿ì ¾ÆÀÌÅÛÀÌ ÇÊ¿ä ¾øÀ½
+		// pItem 이 캐릭터 닉네임 바꾸는 아이템 이면
+			// 1회용 (2가지) - 기존닉네임 수정, 새로운 닉네임 추가
+			// 시간제 (1가지) - 특정 시간동안 기존 닉네임 무제한 수정가능
+		// pItem이 펫 닉네임 바꾸는 아이템이면 펫이 소환 상태여야만 사용 가능
+			// 울버린의 경우 아이템이 필요 없음
 		
-		if(pItem->GetItemType() == 22 || pItem->GetItemType() == 25) // À¯Àú ´Ð³×ÀÓ ¼öÁ¤
+		if(pItem->GetItemType() == 22 || pItem->GetItemType() == 25) // 유저 닉네임 수정
 			gC_vs_ui.RunNamingChange(pItem, (char*)g_pPlayer->GetNickName().c_str());
-//		// ´Ð³×ÀÓ Ãß°¡
-		else if(pItem->GetItemType() == 24) // extra naming pen // ³×ÀÌ¹Ö Ãß°¡ ¾ÆÀÌÅÛ
+//		// 닉네임 추가
+		else if(pItem->GetItemType() == 24) // extra naming pen // 네이밍 추가 아이템
 			gC_vs_ui.RunNamingChange(pItem, (char*)(*g_pGameStringTable)[UI_STRING_MESSAGE_ADD_PLAYER_NICKNAME].GetString());
-//		// ½Ã°£Á¦ ¾ÆÀÌÅÛ
-//		else if(pItem->GetItemType() == 25) // limited naming pen // ³×ÀÌ¹Ö º¯°æ ½Ã°£ ¾ÆÀÌÅÛ
+//		// 시간제 아이템
+//		else if(pItem->GetItemType() == 25) // limited naming pen // 네이밍 변경 시간 아이템
 //			gC_vs_ui.RunNamingChange(pItem, (char*)g_pPlayer->GetNickName().c_str());
-		else if(pItem->GetItemType() == 23) // Æê ´Ð³×ÀÓ ¼öÁ¤
+		else if(pItem->GetItemType() == 23) // 펫 닉네임 수정
 		{
 			MFakeCreature *pFakeCreature = (MFakeCreature *)g_pZone->GetFakeCreature(g_pPlayer->GetPetID());
 			if(NULL != pFakeCreature)
@@ -10895,7 +10895,7 @@ UIMessageManager::Execute_UI_RUN_NAMING_CHANGE(int left, int right, void* void_p
 				MPetItem *pPetItem = pFakeCreature->GetPetItem();
 				if(pPetItem != NULL)
 				{
-					if(2 == pPetItem->GetItemType()) // ¿ï¹ö¸° ÀÏ¶© Ææ ¾ÆÀÌÅÛ ÇÊ¿ä ¾øÀ½
+					if(2 == pPetItem->GetItemType()) // 울버린 일땐 펜 아이템 필요 없음
 						UI_PopupMessage( UI_STRING_MESSAGE_PET_NAMING_WOLVERINE );
 					else
 						gC_vs_ui.RunNamingChange(pItem, (char*)pFakeCreature->GetNickName().c_str());
@@ -11027,7 +11027,7 @@ UIMessageManager::Execute_UI_GQUEST_GIVEUP(int left, int right, void* void_ptr)
 }
 //-----------------------------------------------------------------------------
 //
-// GQuest Inventory¿¡¼­ ItemÀ» »ç¿ëÇÑ °æ¿ì
+// GQuest Inventory에서 Item을 사용한 경우
 //
 //-----------------------------------------------------------------------------
 void
@@ -11082,7 +11082,7 @@ UIMessageManager::Execute_UI_ITEM_USE_REQUEST_UNION(int left, int right, void* v
 {
 	DEBUG_ADD("[UI] Execute_UI_ITEM_USE_REQUEST_UNION");
 	
-	if(g_pUserInformation->GuildGrade != 1) // ±æµå¸¶½ºÅÍ°¡ ¾Æ´Ï¶ó¸é
+	if(g_pUserInformation->GuildGrade != 1) // 길드마스터가 아니라면
 	{
 		UI_PopupMessage(UI_STRING_MESSAGE_REQUEST_UNION_ERROR_1);
 		return;
@@ -11103,7 +11103,7 @@ UIMessageManager::Execute_UI_ITEM_USE_QUIT(int left, int right, void* void_ptr)
 {	
 	DEBUG_ADD("[UI] Execute_UI_ITEM_USE_REQUEST_DENY");
 
-	if(g_pUserInformation->GuildGrade != 1) // ±æµå¸¶½ºÅÍ°¡ ¾Æ´Ï¶ó¸é
+	if(g_pUserInformation->GuildGrade != 1) // 길드마스터가 아니라면
 	{
 		UI_PopupMessage(UI_STRING_MESSAGE_REQUEST_UNION_ERROR_1);
 		return;
@@ -11121,7 +11121,7 @@ void
 UIMessageManager::Execute_UI_ITEM_USE_EXPER(int left, int right, void* void_ptr)
 {
 	DEBUG_ADD("[UI] Execute_UI_ITEM_USE_EXPER"); 
-	if(g_pUserInformation->GuildGrade != 1) // ±æµå¸¶½ºÅÍ°¡ ¾Æ´Ï¶ó¸é
+	if(g_pUserInformation->GuildGrade != 1) // 길드마스터가 아니라면
 	{
 		UI_PopupMessage(UI_STRING_MESSAGE_REQUEST_UNION_ERROR_1);
 		return;
@@ -11246,7 +11246,7 @@ UIMessageManager::Execute_UI_DISPLAY_ITEM(int left, int right, void* void_ptr)
 
 
 	MItem* pItem = (MItem*)void_ptr;
-	g_pStorage2->SetCurrent( 0 );	// È®ÀÎ¿ë
+	g_pStorage2->SetCurrent( 0 );	// 확인용
  
  	int slot = right;
 
@@ -11254,7 +11254,7 @@ UIMessageManager::Execute_UI_DISPLAY_ITEM(int left, int right, void* void_ptr)
 	const MItem* pStorageItem = g_pStorage2->GetItem( slot );
 	//TYPE_OBJECTID mouseItemID = pMouseItem->GetID();		
 	
-	// Event GiftBox ¾ÆÀÌÅÛÀÎ °æ¿ì ¸ø ³õ´Â´Ù.
+	// Event GiftBox 아이템인 경우 못 놓는다.
 	if (pItem->GetItemClass()!=ITEM_CLASS_EVENT_GIFT_BOX
 		//&& pItem->GetItemClass()!=ITEM_CLASS_VAMPIRE_AMULET
 //		&& pItem->GetItemClass()!=ITEM_CLASS_COUPLE_RING
@@ -11276,7 +11276,7 @@ UIMessageManager::Execute_UI_DISPLAY_ITEM(int left, int right, void* void_ptr)
 			{
 				const MItem *p_slot_item = g_pStorage2->GetItem(i);
 				
-				// ½½¶ùÀÌ ºñ¾úÀ¸¸é °Á~ ³Ö´Â´Ù
+				// 슬랏이 비었으면 걍~ 넣는다
 				if(p_slot_item == NULL)
 				{
 					CGDisplayItem _CGDisplayItem;
@@ -11407,7 +11407,7 @@ UIMessageManager::Execute_UI_REQUEST_STORE_INFO(int left, int right, void* void_
 UIMessageManager::Execute_UI_MY_STORE_INFO(int left, int right, void* void_ptr)
  {
 
-	 DEBUG_ADD("[UI] Execute_UI_MY_STORE_INFO"); // ¾ÆÀÌÅÛ Á¤º¸ ¸®½ºÆ® 
+	 DEBUG_ADD("[UI] Execute_UI_MY_STORE_INFO"); // 아이템 정보 리스트 
 	 
 	 GCMyStoreInfo _GCMyStoreInfo;
 	 _GCMyStoreInfo.getStoreInfo();
@@ -11444,7 +11444,7 @@ UIMessageManager::Execute_UI_BUY_STORE_ITEM(int left, int right, void* void_ptr)
 	
 	if(g_pTopView->GetSelectedCreature() == NULL)
 		return;
-	MItem* pItem = (MItem*)void_ptr;		// inventory¿¡ ÀÖ´Â ¾ÆÀÌÅÛ(NULLÀÏ ¼öµµ ÀÖ´Ù)
+	MItem* pItem = (MItem*)void_ptr;		// inventory에 있는 아이템(NULL일 수도 있다)
 	
 	if(pItem != NULL)		
 	{
@@ -11547,12 +11547,12 @@ UIMessageManager::Execute_UI_SWAPADVANCEMENTITEM(int left, int right, void* void
 
 		if (pItem!=NULL && g_pTempInformation->GetMode()==TempInformation::MODE_NULL)
 		{
-			// Event GiftBox ¾ÆÀÌÅÛÀÎ °æ¿ì ¸ø ³õ´Â´Ù.
+			// Event GiftBox 아이템인 경우 못 놓는다.
 			
 			if (!pItem->IsUniqueItem() && !pItem->IsQuestItem())
 			{
 				//-----------------------------------------------------
-				// ¾ÆÀÌÅÛÀ» ÆÈ±â À§ÇÑ packetÀ» º¸³½´Ù.
+				// 아이템을 팔기 위한 packet을 보낸다.
 				//-----------------------------------------------------
 					CGShopRequestSell	_CGShopRequestSell;
 
@@ -11564,13 +11564,13 @@ UIMessageManager::Execute_UI_SWAPADVANCEMENTITEM(int left, int right, void* void
 			
 						
 					//-------------------------------------------------
-					// °ËÁõÀ» À§ÇÑ Temp Information¼³Á¤
+					// 검증을 위한 Temp Information설정
 					//-------------------------------------------------
 					(*g_pTempInformation).Mode	= TempInformation::MODE_SHOP_SELL;
 					(*g_pTempInformation).pValue = (void*)pItem;
 
 					//-------------------------------------------------
-					// ´Ù¸¥ ¾ÆÀÌÅÛ¿¡ Á¢±Ù ¸øÇÏµµ·Ï..
+					// 다른 아이템에 접근 못하도록..
 					//-------------------------------------------------
 					UI_LockItemTrade();
 			}
@@ -11598,13 +11598,13 @@ UIMessageManager::Execute_UI_LEARN_ADVANCE_SKILL(int left, int right, void* void
 	g_pSocket->sendPacket( &_CGLearnSkill );
 }
 
-// 2005, 1, 11, sobeit add start - ºÒ¿ìÀÌ¿ô µ½±â ¼º±Ý °ü·Ã
+// 2005, 1, 11, sobeit add start - 불우이웃 돕기 성금 관련
 void
 UIMessageManager::Execute_UI_CAMPAIGN_HELP(int left, int right, void* void_ptr)
 {
 	DEBUG_ADD("[UI] Execute_UI_CAMPAIGN_HELP");
 	
-	// ¼º±Ý °ü·Ã ÆÐÅ¶ º¸³»±â - ±Ý¾× * 10000
+	// 성금 관련 패킷 보내기 - 금액 * 10000
 
 	if(left>0)
 	{
@@ -11613,14 +11613,14 @@ UIMessageManager::Execute_UI_CAMPAIGN_HELP(int left, int right, void* void_ptr)
 		_CGDonationMoney.setDonationType(right);
 		g_pSocket->sendPacket( &_CGDonationMoney );
 	}
-// 2005, 1, 11, sobeit add end - ºÒ¿ìÀÌ¿ô µ½±â ¼º±Ý °ü·Ã
+// 2005, 1, 11, sobeit add end - 불우이웃 돕기 성금 관련
 }
 
-// 2005, 1, 20, sobeit add start - Äù½ºÆ® °ü·Ã 
+// 2005, 1, 20, sobeit add start - 퀘스트 관련 
 void
 UIMessageManager::Execute_UI_RUN_NEXT_GQUEST_EXCUTE_ELEMENT(int left, int right, void* void_ptr)
 {
-	// quest element List¿¡ ÀúÀåµÈ ´ÙÀ½ element¸¦ ½ÇÇà ÇÑ´Ù.
+	// quest element List에 저장된 다음 element를 실행 한다.
 	DEBUG_ADD("[UI] Execute_UI_RUN_NEXT_GQUEST_EXCUTE_ELEMENT");
 	gC_vs_ui.RunNextGQuestExcuteElement();
 }
@@ -11629,7 +11629,7 @@ void
 UIMessageManager::Execute_UI_GQUEST_SET_ACTION(int left, int right, void* void_ptr)
 {
 	DEBUG_ADD("[UI] Execute_UI_GQUEST_SET_ACTION");
-	// Æ¯Á¤ element ½ÇÇà ½Ã Æ¯Á¤ µ¿ÀÛÀ» ÇÑ´Ù.
+	// 특정 element 실행 시 특정 동작을 한다.
 	if(left == 1) // dead
 	{
 		g_pPlayer->SetDead();
@@ -11641,24 +11641,24 @@ void
 UIMessageManager::Execute_UI_GQUEST_ENDING_EVENT(int left, int right, void* void_ptr)
 {
 	DEBUG_ADD("[UI] Execute_UI_GQUEST_ENDING_EVENT");
-	// Æ¯Á¤ Äù½ºÆ® ¿Ï·á½Ã °ü·Ã ÀÌº¥Æ®¸¦ ÁøÇà ÇÑ´Ù.
+	// 특정 퀘스트 완료시 관련 이벤트를 진행 한다.
 	MEvent event;
 	event.eventID = EVENTID_ADVANCEMENT_QUEST_ENDING;
 	event.eventType = EVENTTYPE_ZONE;
 	event.eventFlag = EVENTFLAG_ONLY_EVENT_BACKGROUND | EVENTFLAG_NOT_DRAW_UI | EVENTFLAG_NOT_DRAW_CREATURE | EVENTFLAG_NOT_DRAW_INFORMATION | EVENTFLAG_NOT_DRAW_CREATURE_SHADOW | EVENTFLAG_NOT_DRAW_ITEM | EVENTFLAG_NOT_DRAW_MOUSE_POINTER | EVENTFLAG_NOT_DRAW_EFFECT | EVENTFLAG_DENY_INPUT | EVENTFLAG_NOT_FADE_SCREEN | EVENTFLAG_NOT_PLAY_SOUND;
 	switch(left)
 	{
-	case 1: // ½½·¹ÀÌ¾î ½ÂÁ÷ Äù½ºÆ® ¿£µù ÀÌº¥Æ®
+	case 1: // 슬레이어 승직 퀘스트 엔딩 이벤트
 		event.parameter1 = 0;
 		event.parameter4 = 1;
 		g_pEventManager->AddEvent(event);
 		break;
-	case 2: // ¹ìÆÄÀÌ¾î ½ÂÁ÷ Äù½ºÆ® ¿£µù ÀÌº¥Æ®
+	case 2: // 뱀파이어 승직 퀘스트 엔딩 이벤트
 		event.parameter1 = 0;
 		event.parameter4 = 3;
 		g_pEventManager->AddEvent(event);
 		break;
-	case 3: // ¾Æ¿ì½ºÅÍÁî ½ÂÁ÷ Äù½ºÆ® ¿£µù ÀÌº¥Æ®
+	case 3: // 아우스터즈 승직 퀘스트 엔딩 이벤트
 		event.parameter1 = 0;
 		event.parameter4 = 5;
 		g_pEventManager->AddEvent(event);
@@ -11666,9 +11666,9 @@ UIMessageManager::Execute_UI_GQUEST_ENDING_EVENT(int left, int right, void* void
 	}
 	
 }
-// 2005, 1, 20, sobeit add end - Äù½ºÆ® °ü·Ã 
+// 2005, 1, 20, sobeit add end - 퀘스트 관련 
 
-// 2005, 1, 24, sobeit add start - ¾ÆÀÌÅÛ ¹Þ±â ÀÌº¥Æ® °ü·Ã
+// 2005, 1, 24, sobeit add start - 아이템 받기 이벤트 관련
 void
 UIMessageManager::Execute_UI_REQUEST_EVENT_ITEM(int left, int right, void* void_ptr)
 {
@@ -11679,9 +11679,9 @@ UIMessageManager::Execute_UI_REQUEST_EVENT_ITEM(int left, int right, void* void_
 		g_pSocket->sendPacket( &_CGGetEventItem );
 	}
 }
-// 2005, 1, 24, sobeit add end - ¾ÆÀÌÅÛ ¹Þ±â ÀÌº¥Æ® °ü·Ã
-#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 Ôö¼Ó°üÖÐ°ü
-	// 2005, 2, 25, sobeit add start - ¼­ºê ÀÎº¥Åä¸®¸¦ ´Ý´Â´Ù.
+// 2005, 1, 24, sobeit add end - 아이템 받기 이벤트 관련
+#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
+	// 2005, 2, 25, sobeit add start - 서브 인벤토리를 닫는다.
 	void
 	UIMessageManager::Execute_UI_CLOSE_INVENTORY_SUB(int left, int right, void* void_ptr)
 	{
@@ -11707,11 +11707,11 @@ UIMessageManager::Execute_UI_REQUEST_EVENT_ITEM(int left, int right, void* void_
 		if(NULL == pMultiPackItem)
 			return;
 
-		MItem* pMouseItem = UI_GetMouseItem();	// ÇöÀç mouseÀÇ item
+		MItem* pMouseItem = UI_GetMouseItem();	// 현재 mouse의 item
 
 
 		//-----------------------------------------------------------------
-		// °ËÁõ¹ÞÀ»°Ô ¾ø´Â °æ¿ì
+		// 검증받을게 없는 경우
 		//-----------------------------------------------------------------
 		if (g_pPlayer->IsItemCheckBufferNULL() && pMouseItem!=NULL
 			&& g_pTempInformation->GetMode()==TempInformation::MODE_NULL)
@@ -11729,11 +11729,11 @@ UIMessageManager::Execute_UI_REQUEST_EVENT_ITEM(int left, int right, void* void_
 			g_pSocket->sendPacket( &_CGAddMouseToInventory );
 
 			MItem* pOldItem = NULL;
-			if (gC_vs_ui.ReplaceSubInventoryItem(pMouseItem,		// Ãß°¡ÇÒ item
-												left, right,	// Ãß°¡ÇÒ À§Ä¡ 
-												pOldItem))		// ¿ø·¡ÀÖ´ø item
+			if (gC_vs_ui.ReplaceSubInventoryItem(pMouseItem,		// 추가할 item
+												left, right,	// 추가할 위치 
+												pOldItem))		// 원래있던 item
 			{
-				if (pOldItem != NULL) // replace µÇ¾ú´Â°¡?
+				if (pOldItem != NULL) // replace 되었는가?
 				{				
 					UI_PickUpItem( pOldItem );
 				}
@@ -11744,7 +11744,7 @@ UIMessageManager::Execute_UI_REQUEST_EVENT_ITEM(int left, int right, void* void_
 			}
 		}
 		//-----------------------------------------------------------------
-		// °ËÁõ ¹Þ¾Æ¾ßÇÒ ´Ù¸¥ ¾ÆÀÌÅÛÀÌ ÀÖ´Â °æ¿ì
+		// 검증 받아야할 다른 아이템이 있는 경우
 		//-----------------------------------------------------------------
 		else
 		{
@@ -11778,8 +11778,8 @@ UIMessageManager::Execute_UI_REQUEST_EVENT_ITEM(int left, int right, void* void_
 
 		UI_PickUpItem( pItem );
 		//---------------------------------------------------
-		// Inventory¿¡ ÀÖ´ø itemÀ» mouse¿¡ ºÙ¿´´Ù(-_-;)°í
-		// server·Î packetÀ» º¸³½´Ù.
+		// Inventory에 있던 item을 mouse에 붙였다(-_-;)고
+		// server로 packet을 보낸다.
 		//---------------------------------------------------
 		CGAddInventoryToMouse _CGAddInventoryToMouse;
 		_CGAddInventoryToMouse.setObjectID( pItem->GetID() );
@@ -11790,7 +11790,7 @@ UIMessageManager::Execute_UI_REQUEST_EVENT_ITEM(int left, int right, void* void_
 		g_pSocket->sendPacket( &_CGAddInventoryToMouse );				
 	}
 
-	// 2005, 2, 25, sobeit add end - ¼­ºê ÀÎº¥Åä¸®¸¦ ´Ý´Â´Ù.
+	// 2005, 2, 25, sobeit add end - 서브 인벤토리를 닫는다.
 
 
 	// 2005, 3, 2, sobeit add start
@@ -11813,7 +11813,7 @@ UIMessageManager::Execute_UI_REQUEST_EVENT_ITEM(int left, int right, void* void_
 
 		if (pItem!=NULL && g_pPlayer->IsItemCheckBufferNULL())
 		{
-			// ÀÚ±âÁ¾Á· ¾ÆÀÌÅÛ¸¸ ¾²Àð-¤µ-;
+			// 자기종족 아이템만 쓰쟈-ㅅ-;
 			if(g_pPlayer->IsSlayer() && pItem->IsSlayerItem() ||
 				g_pPlayer->IsVampire() && pItem->IsVampireItem() ||
 				g_pPlayer->IsOusters() && pItem->IsOustersItem())

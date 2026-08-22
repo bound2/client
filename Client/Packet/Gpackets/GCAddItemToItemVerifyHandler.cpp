@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------
+﻿//--------------------------------------------------------------------------------
 //
 // Filename    : GCAddItemToItemVerifyHandler.cpp
 // Written By  : elca, Reiot
@@ -69,13 +69,13 @@ void GCAddItemToItemVerifyHandler::execute ( GCAddItemToItemVerify * pPacket , P
 
 		case ADD_ITEM_TO_ITEM_VERIFY_ENCHANT_FAIL_CRASH:
 			//----------------------------------------------------
-			// ±â¼ú »ç¿ë ½Ãµµ µ¿ÀÛ
+			// 기술 사용 시도 동작
 			//----------------------------------------------------
 			AddNewInventoryEffect( pInventoryItem->GetID(),
 				MAGIC_ENCHANT_REMOVE_ITEM,
 				0
 				);
-			// »ç¿îµå??
+			// 사운드??
 			PlaySound(SOUND_XMAS_STAR);
 			UI_DropItem();
 			break;
@@ -85,14 +85,14 @@ void GCAddItemToItemVerifyHandler::execute ( GCAddItemToItemVerify * pPacket , P
 				DWORD OptionType = pPacket->getParameter();
 				
 				//----------------------------------------------------
-				// ±â¼ú »ç¿ë ½Ãµµ µ¿ÀÛ
+				// 기술 사용 시도 동작
 				//----------------------------------------------------
 				AddNewInventoryEffect( pInventoryItem->GetID(),
 					MAGIC_ENCHANT_OPTION_NULL,
 					0, OptionType
 					);
 				
-				// »ç¿îµå??
+				// 사운드??
 				PlaySound(SOUND_XMAS_STAR);
 				UI_DropItem();
 			}
@@ -102,7 +102,7 @@ void GCAddItemToItemVerifyHandler::execute ( GCAddItemToItemVerify * pPacket , P
 			{
 				DWORD OptionType = pPacket->getParameter();
 				//----------------------------------------------------
-				// ±â¼ú »ç¿ë ½Ãµµ µ¿ÀÛ
+				// 기술 사용 시도 동작
 				//----------------------------------------------------
 				AddNewInventoryEffect( pInventoryItem->GetID(),
 					MAGIC_ENCHANT_OPTION_PLUS,
@@ -115,13 +115,13 @@ void GCAddItemToItemVerifyHandler::execute ( GCAddItemToItemVerify * pPacket , P
 
 			}
 			break;
-			// add  by sonic 2006.11.3  ÈýÊôÐÔ
+			// add  by sonic 2006.11.3  三属性
 		case ADD_ITEM_TO_ITEM_VERIFY_THREE_ENCHANT_OK:
 			{
 				DWORD OptionType = pPacket->getParameter();
 				DWORD OptionType2= pPacket->getParameter2();
 				//----------------------------------------------------
-				// ±â¼ú »ç¿ë ½Ãµµ µ¿ÀÛ
+				// 기술 사용 시도 동작
 				//----------------------------------------------------
 				TYPE_ITEM_OPTION Option1;
 				TYPE_ITEM_OPTION Option2;
@@ -163,7 +163,7 @@ void GCAddItemToItemVerifyHandler::execute ( GCAddItemToItemVerify * pPacket , P
 			UI_UnlockItem();
 			g_pPlayer->ClearItemCheckBuffer();
 			break;
-		case ADD_ITEM_TO_ITEM_VERIFY_TRANS_OK :				// ¼ºÀüÈ¯ ¼º°ø
+		case ADD_ITEM_TO_ITEM_VERIFY_TRANS_OK :				// 성전환 성공
 			{
 				AddNewInventoryEffect( pInventoryItem->GetID() ,
 					MAGIC_TRANS_ITEM_OK,
@@ -171,7 +171,7 @@ void GCAddItemToItemVerifyHandler::execute ( GCAddItemToItemVerify * pPacket , P
 				UI_DropItem();
 			}
 			break;
-		case ADD_ITEM_TO_ITEM_VERIFY_TRANS_IMPOSSIBLE :		// ¼ºÀüÈ¯ ½ÇÆÐ
+		case ADD_ITEM_TO_ITEM_VERIFY_TRANS_IMPOSSIBLE :		// 성전환 실패
 			{
 			}
 			break;
@@ -244,7 +244,7 @@ void GCAddItemToItemVerifyHandler::execute ( GCAddItemToItemVerify * pPacket , P
 			}
 			break;
 
-		// add by svi 2009-06-24 Ôö¼ÓÉý¼¶³É¹¦È·ÈÏ
+		// add by svi 2009-06-24 增加升级成功确认
 		
 		case ADD_ITEM_TO_ITEM_VERIFY_UP_GRADE_OK:
 			{
@@ -266,7 +266,7 @@ void GCAddItemToItemVerifyHandler::execute ( GCAddItemToItemVerify * pPacket , P
 			}
 			break;
 
-		// add by svi 2009-07-15 Ôö¼ÓÉ¾³ýÊôÐÔÈ·ÈÏ
+		// add by svi 2009-07-15 增加删除属性确认
 		
 		case ADD_ITEM_TO_ITEM_REMOVE_OPTION_OK:
 			{

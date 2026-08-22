@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 // MEffectStatusDef.h
 //----------------------------------------------------------------------
 
@@ -8,10 +8,10 @@
 enum EFFECTSTATUS {
 		
 	////////////////////////////////////////////////////////////
-	// »õ·Î Ãß°¡µÇ´Â ±â¼úÀº Á¦ÀÏ ¹Ø¿¡ ³Ö¾îÁÖ¼¼¿ä!!!!!!!!!!!
+	// 새로 추가되는 기술은 제일 밑에 넣어주세요!!!!!!!!!!!
 	////////////////////////////////////////////////////////////
 	//
-	// ¼ºÁ÷ °ü·Ã ÀÌÆåÆ®
+	// 성직 관련 이펙트
 	EFFECTSTATUS_LIGHT,
 	EFFECTSTATUS_DETECT_HIDDEN,
 	EFFECTSTATUS_PROTECTION_FROM_POISON,
@@ -19,14 +19,14 @@ enum EFFECTSTATUS {
 	EFFECTSTATUS_PROTECTION_FROM_ACID,
 	EFFECTSTATUS_BLESS,
 	EFFECTSTATUS_STRIKING,
-	EFFECTSTATUS_CONTINUAL_LIGHT,        // Continual Light¸¦ °É¾úÀ»¶§.
-	EFFECTSTATUS_DETECT_INVISIBILITY,    // DetectInvisibility À» °É¾úÀ» ¶§.
+	EFFECTSTATUS_CONTINUAL_LIGHT,        // Continual Light를 걸었을때.
+	EFFECTSTATUS_DETECT_INVISIBILITY,    // DetectInvisibility 을 걸었을 때.
 	EFFECTSTATUS_REGENERATION,
 	EFFECTSTATUS_AURA_SHIELD,
 	EFFECTSTATUS_SAINT_AURA,
 	EFFECTSTATUS_FLARE,
 
-	// ¹«»ç °ü·Ã ÀÌÆåÆ®
+	// 무사 관련 이펙트
 	EFFECTSTATUS_CROSS_COUNTER,          // final blow & cross counter
 	EFFECTSTATUS_CHARGING_POWER,
 	EFFECTSTATUS_LIGHTNING_HAND,
@@ -34,42 +34,42 @@ enum EFFECTSTATUS {
 	EFFECTSTATUS_DANCING_SWORD,
 	EFFECTSTATUS_GHOST_BLADE,
 
-	// ¹ìÇÁ °ü·Ã ÀÌÆåÆ®
-	EFFECTSTATUS_HIDE ,					// Hide ¸¦ °É¾úÀ»¶§.
-	EFFECTSTATUS_ACID_TOUCH,			// AcidTouch ¸¦ °É¾úÀ»¶§.
-	EFFECTSTATUS_POISON ,				// Poisonous HandsÀÇ °ø°ÝÀ» ´çÇßÀ»¶§.
-	EFFECTSTATUS_POISONOUS_HANDS ,		// Poisonous Hands ¸¦ °É°í ÀÖÀ»¶§.
-	EFFECTSTATUS_BLOOD_DRAIN,			// ÈíÇ÷ ´çÇßÀ»¶§.
+	// 뱀프 관련 이펙트
+	EFFECTSTATUS_HIDE ,					// Hide 를 걸었을때.
+	EFFECTSTATUS_ACID_TOUCH,			// AcidTouch 를 걸었을때.
+	EFFECTSTATUS_POISON ,				// Poisonous Hands의 공격을 당했을때.
+	EFFECTSTATUS_POISONOUS_HANDS ,		// Poisonous Hands 를 걸고 있을때.
+	EFFECTSTATUS_BLOOD_DRAIN,			// 흡혈 당했을때.
 	EFFECTSTATUS_CURSE_PARALYSIS,
 	EFFECTSTATUS_CURSE_DOOM,
 	EFFECTSTATUS_GREEN_POISON,
 	EFFECTSTATUS_YELLOW_POISON,
-	EFFECTSTATUS_YELLOW_POISON_TO_CREATURE,	// Ä³¸¯ÅÍ¿¡ °É·ÁÀÖ´Â Yellow Poison È¿°ú
+	EFFECTSTATUS_YELLOW_POISON_TO_CREATURE,	// 캐릭터에 걸려있는 Yellow Poison 효과
 	EFFECTSTATUS_DARKNESS,
-	EFFECTSTATUS_INVISIBILITY,           // Invisibility ¸¦ °É¾úÀ»¶§.
+	EFFECTSTATUS_INVISIBILITY,           // Invisibility 를 걸었을때.
 	EFFECTSTATUS_ACID_SWAMP,
-	EFFECTSTATUS_ACID_BALL,              // AcidBallÀÌ ¹Ù´Ú¿¡ .
+	EFFECTSTATUS_ACID_BALL,              // AcidBall이 바닥에 .
 	EFFECTSTATUS_GREEN_STALKER,
 	EFFECTSTATUS_DARKBLUE_POISON,
 	EFFECTSTATUS_DARKBLUE_POISON_TO_CREATURE,
 	EFFECTSTATUS_TRANSFORM_TO_WOLF,
 	EFFECTSTATUS_TRANSFORM_TO_BAT,
 
-	// ±ºÀÎ °ü·Ã ÀÌÆåÆ®
-	EFFECTSTATUS_RELOAD_TIMER,			// passive skill "FAST RELOAD"¸¦ À§ÇØ¼­..
+	// 군인 관련 이펙트
+	EFFECTSTATUS_RELOAD_TIMER,			// passive skill "FAST RELOAD"를 위해서..
 	EFFECTSTATUS_DETECT_MINE,
-	EFFECTSTATUS_INSTALL,                // mine install( installµÇ¸é ¾Èº¸ÀÎ´Ù)
+	EFFECTSTATUS_INSTALL,                // mine install( install되면 안보인다)
 	EFFECTSTATUS_FADE_OUT,
 	EFFECTSTATUS_SNIPPING_MODE,
 
 	// etc
-	EFFECTSTATUS_DECAY_CORPSE,			// ÀÏÁ¤ ½Ã°£ÀÌ Áö³ª¸é ½ÃÃ¼°¡ »ç¶óÁü
-	EFFECTSTATUS_DEAD_CREATURE, 		// ÀÏÁ¤ ½Ã°£ÀÌ Áö³ª¸é Á×À½ Ã³¸®¸¦ ÇØÁÜ.
-	EFFECTSTATUS_SHUT_DOWN, 			// ÀÏÁ¤ ½Ã°£ÀÌ Áö³ª¸é ¼­¹ö¸¦ Á¾·áÇÑ´Ù.
+	EFFECTSTATUS_DECAY_CORPSE,			// 일정 시간이 지나면 시체가 사라짐
+	EFFECTSTATUS_DEAD_CREATURE, 		// 일정 시간이 지나면 죽음 처리를 해줌.
+	EFFECTSTATUS_SHUT_DOWN, 			// 일정 시간이 지나면 서버를 종료한다.
 	EFFECTSTATUS_DECAY_ITEM, 			// 
 
 	////////////////////////////////////////////////////////////
-	// »õ·Î Ãß°¡µÇ´Â ±â¼úÀº Á¦ÀÏ ¹Ø¿¡ ³Ö¾îÁÖ¼¼¿ä!!!!!!!!!!!
+	// 새로 추가되는 기술은 제일 밑에 넣어주세요!!!!!!!!!!!
 	////////////////////////////////////////////////////////////
 
 	// Increase HP
@@ -78,7 +78,7 @@ enum EFFECTSTATUS {
 
 	EFFECTSTATUS_SACRIFICE,
 
-	// ¼­¹ö Àü¿ë
+	// 서버 전용
 	EFFECTSTATUS_AFTER_MATH,
 	EFFECTSTATUS_ALIGNMENT_RECOVERY,
 	EFFECTSTATUS_ENEMY_ERASE,
@@ -105,7 +105,7 @@ enum EFFECTSTATUS {
 	EFFECTSTATUS_PRECEDENCE,						// 69
 	EFFECTSTATUS_RESTORE,							// 70
 
-	// 2002.3.23 Ãß°¡
+	// 2002.3.23 추가
 	EFFECTSTATUS_CURE_CRITICAL_WOUNDS,				// 71
 	EFFECTSTATUS_EXTREME,							// 72
 	EFFECTSTATUS_HYPNOSIS,							// 73
@@ -127,10 +127,10 @@ enum EFFECTSTATUS {
 	EFFECTSTATUS_VIGOR_DROP,						// 86
 	EFFECTSTATUS_VIGOR_DROP_TO_CREATURE,			// 87
 
-	// 2002.4.17 Ãß°¡ by larosel
+	// 2002.4.17 추가 by larosel
 	EFFECTSTATUS_CAUSE_CRITICAL_WOUNDS,				// 88
 
-	// 2002.6.12 ÀüÀï °ü·Ã ÀÌÆåÆ®
+	// 2002.6.12 전쟁 관련 이펙트
 	EFFECTSTATUS_TRANSPORT_ITEM,					// 89
 	EFFECTSTATUS_ADD_ITEM,							// 90
 
@@ -265,8 +265,8 @@ enum EFFECTSTATUS {
 	EFFECTSTATUS_SHRINE_HOLY_AROSA,					// 185
 	EFFECTSTATUS_SHRINE_HOLY_CHASPA,				// 186
 
-	EFFECTSTATUS_SHRINE_GUARD_WARP,					// 187		¼öÈ£¼º´Ü¿¡¼­ ¿öÇÁµÉ¶§
-	EFFECTSTATUS_SHRINE_HOLY_WARP,					// 188		¼ºÁö¼º´Ü¿¡¼­ ¿öÇÁµÉ¶§
+	EFFECTSTATUS_SHRINE_GUARD_WARP,					// 187		수호성단에서 워프될때
+	EFFECTSTATUS_SHRINE_HOLY_WARP,					// 188		성지성단에서 워프될때
 	EFFECTSTATUS_CHANGE_CASTLE_CHANGED,				// 189
 
 	EFFECTSTATUS_SHRINE_SHIELD,						// 190
@@ -274,11 +274,11 @@ enum EFFECTSTATUS {
 
 	EFFECTSTATUS_TRANSPORT_ITEM_TO_CORPSE,          // 192
 	EFFECTSTATUS_ADD_ITEM_TO_CORPSE,                // 193
-	EFFECTSTATUS_WARP_BLOOD_BIBLE_FROM_ME,			// 194 ³»°¡ °¡Áö°íÀÖ´ø ÇÇÀÇ¼º¼­°¡ ¿öÇÁµÉ¶§ ¸Ó¸®¿¡ Âï¾îÁÖ´Â-_- ÀÌÆåÆ®
-	EFFECTSTATUS_WARP_BLOOD_BIBLE_FROM_TILE,		// 195 ¶¥¿¡ ¶³¾îÁ®ÀÖ´ø ÇÇÀÇ¼º¼­°¡ ¿öÇÁµÉ¶§ ±× Å¸ÀÏ¿¡ Âï¾îÁÖ´Â ÀÌÆåÆ®
+	EFFECTSTATUS_WARP_BLOOD_BIBLE_FROM_ME,			// 194 내가 가지고있던 피의성서가 워프될때 머리에 찍어주는-_- 이펙트
+	EFFECTSTATUS_WARP_BLOOD_BIBLE_FROM_TILE,		// 195 땅에 떨어져있던 피의성서가 워프될때 그 타일에 찍어주는 이펙트
 
-	EFFECTSTATUS_WARP_HOLY_LAND_VAMPIRE,			// 196 ¹ìÆÄÀÌ¾î°¡ Æ÷Å»·Î ÀÌµ¿ÇÒ¶§
-	EFFECTSTATUS_WARP_HOLY_LAND_SLAYER,				// 197 ½½·¹ÀÌ¾î°¡ Æ÷Å»·Î ÀÌµ¿ÇÒ¶§
+	EFFECTSTATUS_WARP_HOLY_LAND_VAMPIRE,			// 196 뱀파이어가 포탈로 이동할때
+	EFFECTSTATUS_WARP_HOLY_LAND_SLAYER,				// 197 슬레이어가 포탈로 이동할때
 
 	EFFECTSTATUS_AMBER_OF_GUARD,					// 198
 	EFFECTSTATUS_AMBER_OF_AVENGER,					// 199
@@ -298,10 +298,10 @@ enum EFFECTSTATUS {
 	EFFECTSTATUS_PK_ZONE_RESURRECTION,				// 210
 
 	// 2003.3.31		by sonee
-	EFFECTSTATUS_MAGIC_ELUSION,						// 211		Tile		¿ÁÅ¸ºÎ½º		ÈæÇ¥¹ü
-	EFFECTSTATUS_POISON_MESH,						// 212		Object		Å×¸£Æ¼¿ì½º		¿ë
-	EFFECTSTATUS_ILLUSION_OF_AVENGE,				// 213		Object		¼ÁÆ¼¹«½º		¼Ò
-	EFFECTSTATUS_WILL_OF_LIFE,						// 214		Object		Äí¾Æ¸£Åõ½º		ºÒ»çÁ¶
+	EFFECTSTATUS_MAGIC_ELUSION,						// 211		Tile		옥타부스		흑표범
+	EFFECTSTATUS_POISON_MESH,						// 212		Object		테르티우스		용
+	EFFECTSTATUS_ILLUSION_OF_AVENGE,				// 213		Object		셉티무스		소
+	EFFECTSTATUS_WILL_OF_LIFE,						// 214		Object		쿠아르투스		불사조
 
 	EFFECTSTATUS_DENIAL_MAGIC,                      // 215
 	EFFECTSTATUS_DENIAL_MAGIC_DAMAGED,              // 216
@@ -400,7 +400,7 @@ enum EFFECTSTATUS {
 
 	EFFECTSTATUS_ACID_ERUPTION,                     // 290
 
-	EFFECTSTATUS_JUST_LOGIN,                        // 291			Å¬¶óÀÌ¾ðÆ® »ç¿ë ¾ÈÇÔ.
+	EFFECTSTATUS_JUST_LOGIN,                        // 291			클라이언트 사용 안함.
 
 	EFFECTSTATUS_HAS_SWEEPER,                       // 292
 	EFFECTSTATUS_HAS_SWEEPER_2,                     // 293
@@ -576,19 +576,19 @@ enum EFFECTSTATUS {
 	EFFECTSTATUS_SIEGE_ATTACKER_4,					// 417
 	EFFECTSTATUS_SIEGE_ATTACKER_5,					// 418
 	
-	EFFECTSTATUS_SHARE_HP,                      // 419  // HP °øÀ¯ÇÏ±â~
-	EFFECTSTATUS_LAND_MINE_EXPLOSION,           // 420  // ·£µå¸¶ÀÎ ÅÍÁö´Â ÀÌÆåÆ®
-    EFFECTSTATUS_CLAYMORE_EXPLOTION,            // 421  // Å©·¹¸ð¾î ÅÍÁö´Â ÀÌÆåÆ®
-    EFFECTSTATUS_PLEASURE_EXPLOSION,            // 422  // ÇÃ·¹Á® ½ºÅ×ÀÌ¼Ç ÅÍÁö´Â ÀÌÆåÆ®
-    EFFECTSTATUS_TURRET_LASER,                  // 423  // ÅÍ·¿ ·¹ÀÌÀú 1Å¸ÀÏ
-    EFFECTSTATUS_TURRET_LASER_ATTACK,           // 424  // ÅÍ·¿ ·¹ÀÌÀú °ø°Ý 1Å¸ÀÏ (°ø°ÝÃø¿¡µµ º¸ÀÓ)
-	EFFECTSTATUS_AUTO_TURRET,                   // 425  // ¿ÀÅä ÅÍ·¿ ¼­ÀÖ´Â°Å
-	EFFECTSTATUS_HIDE_TO_ATTACKER,              // 426  // °ø¼º °ø°ÝÃø¿¡´Â ¾È º¸ÀÎ´Ù.
+	EFFECTSTATUS_SHARE_HP,                      // 419  // HP 공유하기~
+	EFFECTSTATUS_LAND_MINE_EXPLOSION,           // 420  // 랜드마인 터지는 이펙트
+    EFFECTSTATUS_CLAYMORE_EXPLOTION,            // 421  // 크레모어 터지는 이펙트
+    EFFECTSTATUS_PLEASURE_EXPLOSION,            // 422  // 플레져 스테이션 터지는 이펙트
+    EFFECTSTATUS_TURRET_LASER,                  // 423  // 터렛 레이저 1타일
+    EFFECTSTATUS_TURRET_LASER_ATTACK,           // 424  // 터렛 레이저 공격 1타일 (공격측에도 보임)
+	EFFECTSTATUS_AUTO_TURRET,                   // 425  // 오토 터렛 서있는거
+	EFFECTSTATUS_HIDE_TO_ATTACKER,              // 426  // 공성 공격측에는 안 보인다.
 
-	EFFECTSTATUS_REPUTO_FACTUM,                 // 427  // ¸Â¾ÒÀ»¶§ ÀÌÆåÆ®
-	EFFECTSTATUS_REPUTO_FACTUM_LAST,            // 428  // Áö¼ÓÀÌÆåÆ®
+	EFFECTSTATUS_REPUTO_FACTUM,                 // 427  // 맞았을때 이펙트
+	EFFECTSTATUS_REPUTO_FACTUM_LAST,            // 428  // 지속이펙트
 
-	EFFECTSTATUS_SWORD_OF_THOR,                 // 429  // Å¸ÀÏ¿¡ ºÙ¾î¼­ ÅÍÁö´Â Ä®
+	EFFECTSTATUS_SWORD_OF_THOR,                 // 429  // 타일에 붙어서 터지는 칼
 
     EFFECTSTATUS_BURNING_SOL_CHARGE_1,          // 430
     EFFECTSTATUS_BURNING_SOL_CHARGE_2,          // 431
@@ -603,14 +603,14 @@ enum EFFECTSTATUS {
 
 	EFFECTSTATUS_ROCKET_LUNCHER,                // 437
 
-	EFFECTSTATUS_PLASMA_ROCKET_LAUNCHER,        // 438 - Èì..³» È­¸é¿¡ ¾î¶² ³ÑÀÌ µé¾î¿Ô´Âµ¥..±×³ÑÇÑÅ× ¹Ì»çÀÏÀÌ ºÙ¾ú´Ù³×..
+	EFFECTSTATUS_PLASMA_ROCKET_LAUNCHER,        // 438 - 흠..내 화면에 어떤 넘이 들어왔는데..그넘한테 미사일이 붙었다네..
     EFFECTSTATUS_INTIMATE_GRAIL,                // 439
 
 	EFFECTSTATUS_ICE_HORIZON,					// 440
 	EFFECTSTATUS_SET_AFIRE_ATTACK,				// 441
 	
-	EFFECTSTATUS_FURY_OF_GNOME,                 // 442 // ´ÜÁö Å¸ÀÏ »óÅÂ
-	EFFECTSTATUS_FURY_OF_GNOME_MARK,            // 443 // ÀÌÆåÆ®..
+	EFFECTSTATUS_FURY_OF_GNOME,                 // 442 // 단지 타일 상태
+	EFFECTSTATUS_FURY_OF_GNOME_MARK,            // 443 // 이펙트..
 
 	EFFECTSTATUS_SUMMON_MIGA_FIRE,				// 444
 
@@ -642,34 +642,34 @@ enum EFFECTSTATUS {
 
 	EFFECTSTATUS_TILE_PORTAL,                   // 464
 	// add by Coffee 2007-5-20
-	EFFECTSTATUS_BLOOD_BLLODY_SCARIFY,			// ÑªÖ®ÀÓÓ¡(ÎüÑª¹í)
-	EFFECTSTATUS_BLOOD_CURSE,					// ÑªÖ®Ô{Öä(ÎüÑª¹í)
-	// add by Coffee 2007-3-6 ¾ÞÅÚºäÕ¨  ÈËÎïÉËº¦Ð§¹û // 465
+	EFFECTSTATUS_BLOOD_BLLODY_SCARIFY,			// 血之烙印(吸血鬼)
+	EFFECTSTATUS_BLOOD_CURSE,					// 血之詛咒(吸血鬼)
+	// add by Coffee 2007-3-6 巨炮轰炸  人物伤害效果 // 465
 	EFFECTSTATUS_BOMB_CRASH_WALK_TO_ENEMY,
-	EFFECTSTATUS_SATELLITE_BOMB_AIM,		//ÎÀÐÇºä»÷ Ð§¹û¶¨Òå (ÈËÀà)
-	EFFECTSTATUS_SATELLITE_BOMB_POINT,		//ÎÀÐÇºä»÷ Ð§¹û¶¨Òå (ÈËÀà)
+	EFFECTSTATUS_SATELLITE_BOMB_AIM,		//卫星轰击 效果定义 (人类)
+	EFFECTSTATUS_SATELLITE_BOMB_POINT,		//卫星轰击 效果定义 (人类)
 	EFFECTSTATUS_SATELLITE_BOMB_FIRE,
-	EFFECTSTATUS_HEAVEN_GROUND,				//·¨Ê¦ÌìÉñ½µÁÙ
+	EFFECTSTATUS_HEAVEN_GROUND,				//法师天神降临
 	// add by Coffee 2007-5-2
-	EFFECTSTATUS_DUMMY_DRAKE,				//µÂÀ×¿Ë¿þÀÜ(Ä§Áé»ð·¨)
-	EFFECTSTATUS_HYDRO_CONVERGENCE,			//¸´ºÏË®ÁÆ(Ä§ÁéË®·¨)
-	EFFECTSTATUS_SUMMON_CLAY,				//  Summon Clay  Õ³ÍÁÕÙ»½    (Ä§ÁéÐÂ¼¼ÄÜ ÍÁ·¨)
-	EFFECTSTATUS_HETER_CHAKRAM,	//475			//  Heter Chakram ÏÄ²¼Àû»ùÒò  (Ä§ÁéÐÂ¼¼ÄÜ  Õ½Ê¿)
+	EFFECTSTATUS_DUMMY_DRAKE,				//돠잉옹웨잔(침쥣삽랬)
+	EFFECTSTATUS_HYDRO_CONVERGENCE,			//复合水疗(魔灵水法)
+	EFFECTSTATUS_SUMMON_CLAY,				//  Summon Clay  粘土召唤    (魔灵新技能 土法)
+	EFFECTSTATUS_HETER_CHAKRAM,	//475			//  Heter Chakram 夏布利基因  (魔灵新技能  战士)
 
 	//add by viva
-	EFFECTSTATUS_SLAYER_GUN_BOMB_XRL_MISSILE,	//XRL Õ¨ÁÑµ¼µ¯
+	EFFECTSTATUS_SLAYER_GUN_BOMB_XRL_MISSILE,	//XRL 炸裂导弹
 	EFFECTSTATUS_UNKOWN_VIVA2,
 	EFFECTSTATUS_UNKOWN_VIVA3,
 	EFFECTSTATUS_UNKOWN_VIVA4,
 
-	EFFECTSTATUS_SLAYER_ENCHANT_BRAMBLE_HALO,//Original Action:390 //¾£¼¬¹â»· //×£¸£
+	EFFECTSTATUS_SLAYER_ENCHANT_BRAMBLE_HALO,//Original Action:390 //荆棘光环 //祝福
 	EFFECTSTATUS_UNKOWN_VIVA5, //EffectSpriteType:1134
 	EFFECTSTATUS_OUSTERS_WATER_RAPID_FREEZE,	//Original Action:396
 	EFFECTSTATUS_OUSTERS_COMBAT_PENETRATE_WHEEL,	//Orginal Action : 393
 	EFFECTSTATUS_UNKOWN_VIVA6,
 	EFFECTSTATUS_VAMPIRE_TRANSFORM_TO_D_BAT,//Original Action : 409
 	EFFECTSTATUS_VAMPIRE_TRANSFORM_TO_D_ANGEL,//Original Action : 410
-	EFFECTSTATUS_SUMMON_SYLPH1,//ÕÙ»½¾«Áé//ousters//Original Action : 247
+	EFFECTSTATUS_SUMMON_SYLPH1,//召唤精灵//ousters//Original Action : 247
 	EFFECTSTATUS_SUMMON_SYLPH2,
 	EFFECTSTATUS_UNKOWN_VIVA7,
 	

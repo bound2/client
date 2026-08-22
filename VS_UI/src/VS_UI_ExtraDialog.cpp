@@ -1,4 +1,4 @@
-// VS_UI_ExtraDialog.cpp
+﻿// VS_UI_ExtraDialog.cpp
 
 #include "client_PCH.h"
 #define assert(e) ((void)(e))
