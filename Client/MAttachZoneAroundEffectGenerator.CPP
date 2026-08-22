@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------
 // MAttachZoneEffectGenerator.cpp
 //----------------------------------------------------------------------
-// Tileéé²å½ æ¯æè»æ¯é²è¶çèºè Effectæ¯è¯éçèºè çèèºçèå¤éè²è¹æ¯è¥é.
+// Tile과 맞붙은 Effect들을 생성한다.
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "MAttachZoneAroundEffectGenerator.h"
@@ -37,7 +37,7 @@ MAttachZoneAroundEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 			MEffect*		pEffect;
 			pEffect = new MEffect(bltType);
 			pEffect->SetFrameID( frameID, maxFrame );
-			pEffect->SetStepPixel(egInfo.step);		// çè¥éçè½è¹æ¯éè¹ çè¸èçæèçèºéºçæèæ¯è¤è° çè²è¤çæèæ¯æè¦, æ¯è¥éçèºè¦ Effectæ¯æ¥¼å½ çè¹èéè²éºçèè¹ æ¯è¦èçè»èéè²éºçéèæ¯è¥é.
+			pEffect->SetStepPixel(egInfo.step);		// 실제로 움직이지는 않지만, 다음 Effect를 위해서 대입해준다.
 			if(i>0)
 				pEffect->SetPosition( tX + TempX[egInfo.direction][i-1], tY + TempY[egInfo.direction][i-1]);
 			else
@@ -92,7 +92,7 @@ MAttachZoneAroundEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 
 			pEffect = new MEffect(bltType);
 			pEffect->SetFrameID( frameID, maxFrame );
-			pEffect->SetStepPixel(egInfo.step);		// çè¥éçè½è¹æ¯éè¹ çè¸èçæèçèºéºçæèæ¯è¤è° çè²è¤çæèæ¯æè¦, æ¯è¥éçèºè¦ Effectæ¯æ¥¼å½ çè¹èéè²éºçèè¹ æ¯è¦èçè»èéè²éºçéèæ¯è¥é.
+			pEffect->SetStepPixel(egInfo.step);		// 실제로 움직이지는 않지만, 다음 Effect를 위해서 대입해준다.
 			pEffect->SetPosition( tX + x, tY + y );
 //			pEffect->SetPixelPosition( egInfo.x0 + x * 24 , egInfo.y0 + y * 12 , egInfo.z0);
 			pEffect->SetCount( egInfo.count, egInfo.linkCount );
