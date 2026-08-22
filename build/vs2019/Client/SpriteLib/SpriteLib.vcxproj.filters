@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\SpriteLibBackendSDL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\CSpriteSurface_SDL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\CSpriteSurface_Effects.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\CSprite_SDL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\CSprite.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\CIndexSprite.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\CAlphaSprite.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\CSprite555.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\CSprite565.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\CAlphaSprite555.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\CAlphaSprite565.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\CAlphaSpritePal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\CIndexSprite555.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\CIndexSprite565.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\CSpritePalBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\CSpritePack.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\CSpritePackList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\CAlphaSpritePack.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\CShadowSprite.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\CFileIndexTable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\CFilter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\CFilterPack.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\CStorageSurface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\DebugLog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\CSpriteDef.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\CSpriteOutlineManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\CSpriteSet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\CSpriteSetManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\CSpritePal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\MPalette.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\MPalettePack.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="H:\Source\GithubDesktop\dk_client\Client\SpriteLib\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{833B6411-8ED5-306E-9EF2-F3024B8C908E}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

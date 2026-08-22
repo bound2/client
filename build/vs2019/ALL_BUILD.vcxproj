@@ -1,0 +1,241 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ResolveNugetPackages>false</ResolveNugetPackages>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{37DD782F-A80C-3D2F-9BBB-58EB9020086C}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.28000.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>ALL_BUILD</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="H:\Source\GithubDesktop\dk_client\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule H:/Source/GithubDesktop/dk_client/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SH:/Source/GithubDesktop/dk_client -BH:/Source/GithubDesktop/dk_client/build/vs2019 --check-stamp-file H:/Source/GithubDesktop/dk_client/build/vs2019/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeDependentOption.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeFindDependencyMacro.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakePushCheckState.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FeatureSummary.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindIconv.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindJPEG.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindPNG.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindZLIB.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CMakeCLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CheckCommon.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CheckSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Linker\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Linker\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Linker\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\SelectLibraryConfigurations.cmake;H:\Source\GithubDesktop\dk_client\build\vs2019\CMakeFiles\4.4.2\CMakeCCompiler.cmake;H:\Source\GithubDesktop\dk_client\build\vs2019\CMakeFiles\4.4.2\CMakeCXXCompiler.cmake;H:\Source\GithubDesktop\dk_client\build\vs2019\CMakeFiles\4.4.2\CMakeRCCompiler.cmake;H:\Source\GithubDesktop\dk_client\build\vs2019\CMakeFiles\4.4.2\CMakeSystem.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_image\SDL2_image-shared-targets-debug.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_image\SDL2_image-shared-targets-release.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_image\SDL2_image-shared-targets.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_image\SDL2_imageConfig.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_image\SDL2_imageConfigVersion.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_ttf\SDL2_ttf-shared-targets-debug.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_ttf\SDL2_ttf-shared-targets-release.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_ttf\SDL2_ttf-shared-targets.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_ttf\SDL2_ttfConfig.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_ttf\SDL2_ttfConfigVersion.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\iconv\vcpkg-cmake-wrapper.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\jpeg\vcpkg-cmake-wrapper.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\png\vcpkg-cmake-wrapper.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2Config.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2ConfigVersion.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2Targets-debug.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2Targets-release.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2Targets.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2mainTargets-debug.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2mainTargets-release.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2mainTargets.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\sdlfind.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\zlib\vcpkg-cmake-wrapper.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\scripts\buildsystems\vcpkg.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">H:\Source\GithubDesktop\dk_client\build\vs2019\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule H:/Source/GithubDesktop/dk_client/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SH:/Source/GithubDesktop/dk_client -BH:/Source/GithubDesktop/dk_client/build/vs2019 --check-stamp-file H:/Source/GithubDesktop/dk_client/build/vs2019/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeDependentOption.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeFindDependencyMacro.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakePushCheckState.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FeatureSummary.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindIconv.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindJPEG.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindPNG.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindZLIB.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CMakeCLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CheckCommon.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CheckSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Linker\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Linker\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Linker\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\SelectLibraryConfigurations.cmake;H:\Source\GithubDesktop\dk_client\build\vs2019\CMakeFiles\4.4.2\CMakeCCompiler.cmake;H:\Source\GithubDesktop\dk_client\build\vs2019\CMakeFiles\4.4.2\CMakeCXXCompiler.cmake;H:\Source\GithubDesktop\dk_client\build\vs2019\CMakeFiles\4.4.2\CMakeRCCompiler.cmake;H:\Source\GithubDesktop\dk_client\build\vs2019\CMakeFiles\4.4.2\CMakeSystem.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_image\SDL2_image-shared-targets-debug.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_image\SDL2_image-shared-targets-release.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_image\SDL2_image-shared-targets.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_image\SDL2_imageConfig.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_image\SDL2_imageConfigVersion.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_ttf\SDL2_ttf-shared-targets-debug.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_ttf\SDL2_ttf-shared-targets-release.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_ttf\SDL2_ttf-shared-targets.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_ttf\SDL2_ttfConfig.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_ttf\SDL2_ttfConfigVersion.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\iconv\vcpkg-cmake-wrapper.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\jpeg\vcpkg-cmake-wrapper.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\png\vcpkg-cmake-wrapper.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2Config.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2ConfigVersion.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2Targets-debug.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2Targets-release.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2Targets.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2mainTargets-debug.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2mainTargets-release.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2mainTargets.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\sdlfind.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\zlib\vcpkg-cmake-wrapper.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\scripts\buildsystems\vcpkg.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">H:\Source\GithubDesktop\dk_client\build\vs2019\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule H:/Source/GithubDesktop/dk_client/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SH:/Source/GithubDesktop/dk_client -BH:/Source/GithubDesktop/dk_client/build/vs2019 --check-stamp-file H:/Source/GithubDesktop/dk_client/build/vs2019/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeDependentOption.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeFindDependencyMacro.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakePushCheckState.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FeatureSummary.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindIconv.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindJPEG.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindPNG.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindZLIB.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CMakeCLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CheckCommon.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CheckSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Linker\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Linker\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Linker\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\SelectLibraryConfigurations.cmake;H:\Source\GithubDesktop\dk_client\build\vs2019\CMakeFiles\4.4.2\CMakeCCompiler.cmake;H:\Source\GithubDesktop\dk_client\build\vs2019\CMakeFiles\4.4.2\CMakeCXXCompiler.cmake;H:\Source\GithubDesktop\dk_client\build\vs2019\CMakeFiles\4.4.2\CMakeRCCompiler.cmake;H:\Source\GithubDesktop\dk_client\build\vs2019\CMakeFiles\4.4.2\CMakeSystem.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_image\SDL2_image-shared-targets-debug.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_image\SDL2_image-shared-targets-release.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_image\SDL2_image-shared-targets.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_image\SDL2_imageConfig.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_image\SDL2_imageConfigVersion.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_ttf\SDL2_ttf-shared-targets-debug.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_ttf\SDL2_ttf-shared-targets-release.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_ttf\SDL2_ttf-shared-targets.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_ttf\SDL2_ttfConfig.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_ttf\SDL2_ttfConfigVersion.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\iconv\vcpkg-cmake-wrapper.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\jpeg\vcpkg-cmake-wrapper.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\png\vcpkg-cmake-wrapper.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2Config.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2ConfigVersion.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2Targets-debug.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2Targets-release.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2Targets.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2mainTargets-debug.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2mainTargets-release.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2mainTargets.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\sdlfind.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\zlib\vcpkg-cmake-wrapper.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\scripts\buildsystems\vcpkg.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">H:\Source\GithubDesktop\dk_client\build\vs2019\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule H:/Source/GithubDesktop/dk_client/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SH:/Source/GithubDesktop/dk_client -BH:/Source/GithubDesktop/dk_client/build/vs2019 --check-stamp-file H:/Source/GithubDesktop/dk_client/build/vs2019/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeDependentOption.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeFindDependencyMacro.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakePushCheckState.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FeatureSummary.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindIconv.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindJPEG.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindPNG.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindZLIB.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CMakeCLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CheckCommon.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CheckSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Linker\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Linker\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Linker\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\SelectLibraryConfigurations.cmake;H:\Source\GithubDesktop\dk_client\build\vs2019\CMakeFiles\4.4.2\CMakeCCompiler.cmake;H:\Source\GithubDesktop\dk_client\build\vs2019\CMakeFiles\4.4.2\CMakeCXXCompiler.cmake;H:\Source\GithubDesktop\dk_client\build\vs2019\CMakeFiles\4.4.2\CMakeRCCompiler.cmake;H:\Source\GithubDesktop\dk_client\build\vs2019\CMakeFiles\4.4.2\CMakeSystem.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_image\SDL2_image-shared-targets-debug.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_image\SDL2_image-shared-targets-release.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_image\SDL2_image-shared-targets.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_image\SDL2_imageConfig.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_image\SDL2_imageConfigVersion.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_ttf\SDL2_ttf-shared-targets-debug.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_ttf\SDL2_ttf-shared-targets-release.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_ttf\SDL2_ttf-shared-targets.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_ttf\SDL2_ttfConfig.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\SDL2_ttf\SDL2_ttfConfigVersion.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\iconv\vcpkg-cmake-wrapper.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\jpeg\vcpkg-cmake-wrapper.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\png\vcpkg-cmake-wrapper.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2Config.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2ConfigVersion.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2Targets-debug.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2Targets-release.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2Targets.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2mainTargets-debug.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2mainTargets-release.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\SDL2mainTargets.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\sdl2\sdlfind.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\installed\x64-windows\share\zlib\vcpkg-cmake-wrapper.cmake;H:\Source\GithubDesktop\vcpkg_download\vcpkg\scripts\buildsystems\vcpkg.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">H:\Source\GithubDesktop\dk_client\build\vs2019\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="H:\Source\GithubDesktop\dk_client\build\vs2019\ZERO_CHECK.vcxproj">
+      <Project>{F078BB08-87A6-3B65-B0B2-F1FA3EBE691E}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="H:\Source\GithubDesktop\dk_client\build\vs2019\DarkEden.vcxproj">
+      <Project>{3E4C4F63-02D7-397F-BAB1-7A0F1B35A812}</Project>
+      <Name>DarkEden</Name>
+    </ProjectReference>
+    <ProjectReference Include="H:\Source\GithubDesktop\dk_client\build\vs2019\Client\SpriteLib\SpriteLib.vcxproj">
+      <Project>{DC70C0D4-7CEF-3A6D-97AE-45F19328702B}</Project>
+      <Name>SpriteLib</Name>
+    </ProjectReference>
+    <ProjectReference Include="H:\Source\GithubDesktop\dk_client\build\vs2019\TextSystem.vcxproj">
+      <Project>{8AB0FF0C-A492-3284-AD7C-BB7C43D75F1E}</Project>
+      <Name>TextSystem</Name>
+    </ProjectReference>
+    <ProjectReference Include="H:\Source\GithubDesktop\dk_client\build\vs2019\VS_UI.vcxproj">
+      <Project>{5253C006-B9D6-38EA-A9CC-FB834E5D7C08}</Project>
+      <Name>VS_UI</Name>
+    </ProjectReference>
+    <ProjectReference Include="H:\Source\GithubDesktop\dk_client\build\vs2019\basic\basic.vcxproj">
+      <Project>{7154A78D-51D0-32E8-86C4-EE1D74C5C18A}</Project>
+      <Name>basic</Name>
+    </ProjectReference>
+    <ProjectReference Include="H:\Source\GithubDesktop\dk_client\build\vs2019\creature_viewer.vcxproj">
+      <Project>{7A2B6757-11A3-3D2B-ACCB-4574645AADD8}</Project>
+      <Name>creature_viewer</Name>
+    </ProjectReference>
+    <ProjectReference Include="H:\Source\GithubDesktop\dk_client\build\vs2019\Client\DXLib\dxlib.vcxproj">
+      <Project>{8C0316CA-73BB-37A8-A4B4-25F58D4367E5}</Project>
+      <Name>dxlib</Name>
+    </ProjectReference>
+    <ProjectReference Include="H:\Source\GithubDesktop\dk_client\build\vs2019\effect_viewer.vcxproj">
+      <Project>{00078F1F-3BCC-3434-B80D-4DCF1AE01B4A}</Project>
+      <Name>effect_viewer</Name>
+    </ProjectReference>
+    <ProjectReference Include="H:\Source\GithubDesktop\dk_client\build\vs2019\Client\framelib\framelib.vcxproj">
+      <Project>{75C44069-4EAA-3DCC-BB7B-8A64F7FDF7E4}</Project>
+      <Name>framelib</Name>
+    </ProjectReference>
+    <ProjectReference Include="H:\Source\GithubDesktop\dk_client\build\vs2019\item_viewer.vcxproj">
+      <Project>{0436C826-996B-35E8-9996-2AE3F7D5B9BF}</Project>
+      <Name>item_viewer</Name>
+    </ProjectReference>
+    <ProjectReference Include="H:\Source\GithubDesktop\dk_client\build\vs2019\map_viewer.vcxproj">
+      <Project>{D66E3D4E-489C-3785-B613-1E34626A949B}</Project>
+      <Name>map_viewer</Name>
+    </ProjectReference>
+    <ProjectReference Include="H:\Source\GithubDesktop\dk_client\build\vs2019\resource_validator.vcxproj">
+      <Project>{50124C58-A5D4-372A-87A5-AE24DE129511}</Project>
+      <Name>resource_validator</Name>
+    </ProjectReference>
+    <ProjectReference Include="H:\Source\GithubDesktop\dk_client\build\vs2019\tools\engine\sprite\sprite.vcxproj">
+      <Project>{A733B635-DB12-312F-BFA6-B42A87F35604}</Project>
+      <Name>sprite</Name>
+    </ProjectReference>
+    <ProjectReference Include="H:\Source\GithubDesktop\dk_client\build\vs2019\sprite_viewer.vcxproj">
+      <Project>{B747121A-1F0B-3340-8958-CD016A794FCC}</Project>
+      <Name>sprite_viewer</Name>
+    </ProjectReference>
+    <ProjectReference Include="H:\Source\GithubDesktop\dk_client\build\vs2019\zone_parser.vcxproj">
+      <Project>{442D2AB6-B80F-371D-B856-7A46AF18980D}</Project>
+      <Name>zone_parser</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

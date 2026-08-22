@@ -1,4 +1,41 @@
-# CMake generated files
+# ==========================================
+# Visual Studio 2019 & MSVC
+# ==========================================
+.vs/
+*.user
+*.userosv
+*.suo
+*.sln.docstates
+*.vcxproj.user
+
+# Visual Studio Build Outputs & Folders
+Debug/
+Release/
+RelWithDebInfo/
+MinSizeRel/
+x64/
+x86/
+out/
+#[Bb]uild/
+
+# MSVC Compiled Artifacts
+*.obj
+*.exe
+*.dll
+*.lib
+*.pdb
+*.idb
+*.ilk
+*.exp
+*.res
+*.pch
+*.tlog
+*.lastbuildstate
+*.log
+
+# ==========================================
+# CMake Generated Files
+# ==========================================
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
@@ -8,20 +45,23 @@ Makefile
 !CMakeLists.txt
 .cache
 
-# Build directory
-build/
-
+# ==========================================
+# OS & Backup Files
+# ==========================================
 # macOS
 .DS_Store
-*.dSYM
 *.dSYM/
+
+# Windows
+Thumbs.db
+desktop.ini
 
 # Backup files
 *.bak
 *_bak*
 *.old
 
-# Temporary files
+# General Compiled Binaries
 *.o
 *.a
 *.so
