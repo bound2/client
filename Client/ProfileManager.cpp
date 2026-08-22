@@ -423,6 +423,8 @@ ProfileManager::InitProfiles()
 	//-----------------------------------------------------------------
 	char CWD[_MAX_PATH];
 
+	std::string sTest = g_pFileDef->getProperty("DIR_PROFILE");
+
 	if (_getcwd( CWD, _MAX_PATH )!=NULL)
 	{	
 		if (_chdir( g_pFileDef->getProperty("DIR_PROFILE").c_str()) == 0)
@@ -447,7 +449,7 @@ ProfileManager::InitProfiles()
 	char bmpFilename[256];
 
 	struct _finddata_t	FileData;
-	long				hFile;
+	intptr_t			hFile;	// _findfirst/_findnext는 intptr_t를 주고받는다 - x64에서 long(4byte)에 담으면 상위 32bit가 잘려서 핸들이 깨진다.
 
 	//-----------------------------------------------------------------
 	// *.spr file을 찾는다.
@@ -561,7 +563,7 @@ ProfileManager::DeleteProfiles()
 	char spkFilename[256];
 
 	struct _finddata_t	FileData;
-	long				hFile;
+	intptr_t			hFile;	// _findfirst/_findnext는 intptr_t를 주고받는다 - x64에서 long(4byte)에 담으면 상위 32bit가 잘려서 핸들이 깨진다.
 
 	//-----------------------------------------------------------------
 	// *.spk file을 찾는다.

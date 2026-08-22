@@ -4068,11 +4068,12 @@ _APICheck.init();
 #endif
 	if (InitApp(nCmdShow))
 	{
-		// SDL2 doesn't provide video memory queries like DirectX
-		// Use a reasonable default value for all platforms
+		// SDL2는 DirectX처럼 비디오 메모리 쿼리를 제공하지 않습니다.
+		// 모든 플랫폼에 대해 적절한 기본값을 사용하십시오.
+
 		g_dwVideoMemory = 256 * 1024 * 1024;  // 256 MB default
 
-		// ³Ý¸¶ºí¿ë
+		// 넷마블용
 		if(bNetmarble)
 		{
 			g_pUserInformation->NetmarbleID = NetmarbleInfo.ID;
@@ -4128,7 +4129,7 @@ _APICheck.init();
 
 		//static DWORD lastTime=1;
 		//------------------------------
-		// ÃÊ±âÈ­ µÇÁö ¾Ê¾ÒÀ¸¸é ÃÊ±âÈ­ÇÑ´Ù.
+		// 초기화 되지 않았으면 초기화한다.
 		//------------------------------
 		if (!g_pTopView->IsInit())
 		{
@@ -4173,7 +4174,7 @@ _APICheck.init();
 #ifdef PLATFORM_WINDOWS
 						if (g_pUpdate!=NULL)
 						{
-							// 노파식.. 으이으.. --;;
+							// 노파심.. 으흠.. --;;
 							CWinUpdate*	pCurrentUpdate = g_pUpdate;
 
 							pCurrentUpdate->Update();
@@ -4235,7 +4236,7 @@ _APICheck.init();
 	ChangeDisplaySettings( &DevMode, CDS_RESET );
 	//end
 	//-----------------------------------------------------------------------------
-	// Å¸ÀÌ¸Ó ÀÌ»óÀ¸·Î Á¾·áÇÏ´Â °æ¿ì
+	// 타이머 이상으로 종료하는 경우
 	//-----------------------------------------------------------------------------
 	if (bBadTimer)
 	{
@@ -4246,7 +4247,7 @@ _APICheck.init();
 			{
 				g_pUIDialog->PopupFreeMessageDlg( g_nProtectMessage[g_nProtectSTATUS].c_str() );
 			} else
-				g_pUIDialog->PopupFreeMessageDlg( "¸ÅÅ©·Î³ª ¹ÙÀÌ·¯½º°¡ ¹ß°ßµÇ¾î ´ÙÅ©¿¡µ§ÀÌ Á¾·áµË´Ï´Ù. ¹ÙÀÌ·¯½º °Ë»ç¸¦ ÇØº¸½Ã°í, Á¤»óÀûÀ¸·Î °ÔÀÓ ÁøÇàÀ» ÇÏ´Âµ¥ ÀÌ·¯ÇÑ ¹®Á¦°¡ ¶Ç ¹ß»ýµÈ´Ù¸é bug@darkeden.comÀ¸·Î ¸ÞÀÏÀ» º¸³»ÁÖ¼¼¿ä.", -1, -1, 0 );
+				g_pUIDialog->PopupFreeMessageDlg("매크로나 바이러스가 발견되어 다크에덴이 종료됩니다. 바이러스 검사를 해보시고, 정상적으로 게임 진행을 하는데 이러한 문제가 또 발생된다면 bug@darkeden.com으로 메일을 보내주세요.", -1, -1, 0);
 #endif
 
 #if defined(__NPROTECT__)&&!defined(__NPROTECT_OLD_VERSION__)
@@ -4261,23 +4262,23 @@ _APICheck.init();
 				else
 				{
 					char szTemp[256];
-					wsprintf(szTemp,"nProtectÀÇ ¾Ë ¼ö ¾ø´Â ¿À·ù ¿¡·¯ÄÚµå[%d][%d]ÀÔ´Ï´Ù. ´ÙÅ©¿¡µ§À» Á¾·áÇÕ´Ï´Ù.",g_nProtectErrorMessage, g_nProtectErrorMessage2);
+					wsprintf(szTemp, "nProtect의 알 수 없는 오류 에러코드[%d][%d]입니다. 다크에덴을 종료합니다.", g_nProtectErrorMessage, g_nProtectErrorMessage2);
 					g_pUIDialog->PopupFreeMessageDlg( szTemp );
 				}
 			}
 #endif
 				
-//			if(g_bForceExitBynProtect2)
-//			{
-//				g_pUIDialog->PopupFreeMessageDlg( "nProtect °ü·Ã ÆÄÀÏ ÃÊ±âÈ­ ¿¡·¯°¡ ¹ß»ýÇß½À´Ï´Ù. °ü¸®ÀÚ °èÁ¤À¸·Î ·Î±×ÀÎÇÏ¿© °ÔÀÓÀ» ½ÇÇàÇÏ½Ã±â ¹Ù¶ø´Ï´Ù.", -1, -1, 0 );
-//			}else
-//			{
-//				if(g_bForceExitBynProtect)
-//					g_pUIDialog->PopupFreeMessageDlg( "¹ÙÀÌ·¯½º ¹× ÇØÅ· Â÷´Ü±â¿¡ ÀÇÇØ ´ÙÅ©¿¡µ§ÀÌ Á¾·áµË´Ï´Ù. ¹ÙÀÌ·¯½º °Ë»ç¸¦ ÇØº¸½Ã°í, Á¤»óÀûÀ¸·Î °ÔÀÓ ÁøÇàÀ» ÇÏ´Âµ¥ ÀÌ·¯ÇÑ ¹®Á¦°¡ ¶Ç ¹ß»ýµÈ´Ù¸é, bug@darkeden.com À¸·Î ¸ÞÀÏÀ» º¸³»ÁÖ¼¼¿ä.", -1, -1, 0 );
-//				else
-//					g_pUIDialog->PopupFreeMessageDlg( "¸ÅÅ©·Î³ª ¹ÙÀÌ·¯½º°¡ ¹ß°ßµÇ¾î ´ÙÅ©¿¡µ§ÀÌ Á¾·áµË´Ï´Ù. ¹ÙÀÌ·¯½º °Ë»ç¸¦ ÇØº¸½Ã°í, Á¤»óÀûÀ¸·Î °ÔÀÓ ÁøÇàÀ» ÇÏ´Âµ¥ ÀÌ·¯ÇÑ ¹®Á¦°¡ ¶Ç ¹ß»ýµÈ´Ù¸é bug@darkeden.comÀ¸·Î ¸ÞÀÏÀ» º¸³»ÁÖ¼¼¿ä.", -1, -1, 0 );
-//			}
-//			//MessageBox(NULL, "Timer Error!", PROGRAM_TITLE, MB_OK | MB_TOPMOST);
+			//			if(g_bForceExitBynProtect2)
+			//			{
+			//				g_pUIDialog->PopupFreeMessageDlg( "nProtect 관련 파일 초기화 에러가 발생했습니다. 관리자 계정으로 로그인하여 게임을 실행하시기 바랍니다.", -1, -1, 0 );
+			//			}else
+			//			{
+			//				if(g_bForceExitBynProtect)
+			//					g_pUIDialog->PopupFreeMessageDlg( "바이러스 및 해킹 차단기에 의해 다크에덴이 종료됩니다. 바이러스 검사를 해보시고, 정상적으로 게임 진행을 하는데 이러한 문제가 또 발생된다면, bug@darkeden.com 으로 메일을 보내주세요.", -1, -1, 0 );
+			//				else
+			//					g_pUIDialog->PopupFreeMessageDlg( "매크로나 바이러스가 발견되어 다크에덴이 종료됩니다. 바이러스 검사를 해보시고, 정상적으로 게임 진행을 하는데 이러한 문제가 또 발생된다면 bug@darkeden.com으로 메일을 보내주세요.", -1, -1, 0 );
+			//			}
+			//			//MessageBox(NULL, "Timer Error!", PROGRAM_TITLE, MB_OK | MB_TOPMOST);
 			
 			while (1)
 			{
@@ -4312,7 +4313,7 @@ _APICheck.init();
 	}
 
 	//-----------------------------------------------------------------------------
-	// ¸ðµç objectµé Á¦°Å
+	// 모든 object들 제거
 	//-----------------------------------------------------------------------------	
 	ReleaseAllObjects();
 #ifdef __WEB_BROWSER__
@@ -4369,17 +4370,17 @@ _APICheck.init();
 	#endif
 	
 	//----------------------------------------------------------------
-	// Updater¸¦ ½ÇÇà½ÃÅ²´Ù.
+	// Updater를 실행시킨다.
 	//----------------------------------------------------------------
 	if (g_bNeedUpdate)
 	{
 		//_spawnl(_P_NOWAIT, UPDATER_FILENAME, UPDATER_FILENAME, "UPDATE", NULL);
 		char szTemp[512];
 		sprintf(szTemp, "UPDATE %s", lpCmdLine);
-		_chdir( g_CWD );
-		//::MessageBox(0,"¶ÁÈ¡ÏµÍ³DLL³ö´í£¬´íÎóID£º8004,Çë¼°Ê±ÏòÎÒÃÇÌá½»´íÎó¡£","´íÎó",MB_OK);
-		_spawnl(_P_OVERLAY, UPDATER_FILENAME, UPDATER_FILENAME, szTemp, NULL);		
-//		ShellExecute(g_hWnd, NULL, UPDATER_FILENAME, szTemp, NULL, SW_SHOW);
+		_chdir(g_CWD);
+		//::MessageBox(0,"뗍혤溝固DLL놔댄，댄轎ID：8004,헝섟珂蕨乖쳬瓊슥댄轎。","댄轎",MB_OK);
+		_spawnl(_P_OVERLAY, UPDATER_FILENAME, UPDATER_FILENAME, szTemp, NULL);
+		//		ShellExecute(g_hWnd, NULL, UPDATER_FILENAME, szTemp, NULL, SW_SHOW);
 	}	
 
 	return 0;
