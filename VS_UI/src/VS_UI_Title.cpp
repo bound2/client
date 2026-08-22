@@ -6969,23 +6969,32 @@ void C_VS_UI_OPTION::Show()
 				"Logitech IFeel Mouse Force Feedback",
 			};
 
-			// Text must be drawn before the sprite Lock()/BltLocked()/Unlock()
-			// block below, same as TAB_GRAPHIC/TAB_SOUND/TAB_GAME - drawing it
-			// after (as this used to) left the radio/checkbox labels and the
-			// whole accelerator key list blank.
+			// HOTKEY_WINDOW is an opaque background panel that covers this
+			// whole tab's content area (including where the accelerator list
+			// below is drawn), so it must be blitted BEFORE the text - not
+			// after, or it paints over everything just drawn (this is the
+			// order every other tab uses too, since none of them have an
+			// opaque panel graphic sitting on top of their text).
+			if(gpC_base->m_p_DDSurface_back->Lock())
+			{
+				m_pC_main_spk->BltLocked(x+m_vampire_plus_x+125+TitleOffset, y+m_vampire_plus_y+80, HOTKEY_WINDOW);
+				m_pC_control_button_group->Show();
+				gpC_base->m_p_DDSurface_back->Unlock();
+			}
+
 			g_FL2_GetDC();
 //			g_PrintColorStr(x+m_vampire_plus_x+130, y+m_vampire_plus_y+56, "Input Style : ", gpC_base->m_user_id_pi, RGB_BLACK);
 			g_PrintColorStr(x+m_vampire_plus_x+m_check_x+30, y+m_vampire_plus_y+m_check_y, 
-				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_NORMAL_CHATTING].GetString(), gpC_base->m_user_id_pi, RGB_BLACK);
+				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_NORMAL_CHATTING].GetString(), gpC_base->m_user_id_pi, RGB_WHITE);
 			
 			g_PrintColorStr(x+m_vampire_plus_x+m_check_x+140, y+m_vampire_plus_y+m_check_y, 
-				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_ENTER_CHATTING].GetString(), gpC_base->m_user_id_pi, RGB_BLACK);
+				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_ENTER_CHATTING].GetString(), gpC_base->m_user_id_pi, RGB_WHITE);
 
 //			m_pC_etc_spk->Blt(x+m_vampire_plus_x+230, y+m_vampire_plus_y+53, HOTKEY_BACK);
 //			m_pC_etc_spk->Blt(x+m_vampire_plus_x+230+m_pC_etc_spk->GetWidth(HOTKEY_BACK), y+m_vampire_plus_y+53, HOTKEY_BACK_RIGHT);
 			
 			for(i = 0; i < CHECK_CONTROL_MAX; i++)
-				g_PrintColorStr(x+m_vampire_plus_x+m_check_x+15, y+m_vampire_plus_y+m_check_y+m_check_gap*(8+i), check_string[i].c_str(), gpC_base->m_user_id_pi, RGB_BLACK);
+				g_PrintColorStr(x+m_vampire_plus_x+m_check_x+15, y+m_vampire_plus_y+m_check_y+m_check_gap*(8+i), check_string[i].c_str(), gpC_base->m_user_id_pi, RGB_WHITE);
 			
 //			m_pC_etc_spk->Blt(x+m_vampire_plus_x+m_rt_value[RECT_MOUSE_SPEED].x, y+m_vampire_plus_y+m_rt_value[RECT_MOUSE_SPEED].y+5, VOLUME_BAR);
 //			if(m_check[CHECK_MOUSE_SPEED])
@@ -7037,13 +7046,6 @@ void C_VS_UI_OPTION::Show()
 
 			}
 			g_FL2_ReleaseDC();
-
-			if(gpC_base->m_p_DDSurface_back->Lock())
-			{
-				m_pC_main_spk->BltLocked(x+m_vampire_plus_x+125+TitleOffset, y+m_vampire_plus_y+80, HOTKEY_WINDOW);
-				m_pC_control_button_group->Show();
-				gpC_base->m_p_DDSurface_back->Unlock();
-			}
 
 			if(false == m_IsTitle)
 				m_pC_scroll_bar->Show(x+m_vampire_plus_x, y+m_vampire_plus_y);
