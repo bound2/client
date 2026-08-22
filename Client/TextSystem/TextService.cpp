@@ -326,7 +326,12 @@ std::vector<std::string> TextService::WrapText(const std::string& text, const Te
 		}
 
 		if (maxWidth > 0 && lineWidth + metrics.advance > maxWidth && !line.empty()) {
-			if (lastBreakIndex >= 0) {
+			// lastBreakIndex may have just been set to line.size() on this very
+			// iteration (codepoint == ' ' above, before the space is appended
+			// below), so lastBreakIndex + lastBreakSkip can exceed line.size()
+			// here - substr() would throw std::out_of_range in that case, so
+			// treat it the same as "no break point recorded".
+			if (lastBreakIndex >= 0 && lastBreakIndex + lastBreakSkip <= static_cast<int>(line.size())) {
 				lines.push_back(line.substr(0, lastBreakIndex));
 				line = line.substr(lastBreakIndex + lastBreakSkip);
 				lineWidth = MeasureLineWidth(line, style.font);
@@ -336,6 +341,8 @@ std::vector<std::string> TextService::WrapText(const std::string& text, const Te
 				lines.push_back(line);
 				line.clear();
 				lineWidth = 0;
+				lastBreakIndex = -1;
+				lastBreakSkip = 0;
 			}
 		}
 
