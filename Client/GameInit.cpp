@@ -677,8 +677,11 @@ InitSurface()
 		delete g_pBack;
 	}
 	g_pBack = new CSpriteSurface;
-	// SDL2: Unified surface initialization
-	g_pBack->Init(800, 600);
+	// g_pBack is the final present-to-screen buffer (see SDLMain.cpp's
+	// g_pBack->Blt(&origin, g_pLast, NULL) frame flip). It must match
+	// g_pLast's size (g_GameRect), not a hardcoded 800x600, or any mode
+	// larger than 800x600 (e.g. 1024x768) gets cropped on screen.
+	g_pBack->Init(g_GameRect.right, g_GameRect.bottom);
 
 	//--------------------------------------------------------
 	// 임시로 로딩화면 구성..
