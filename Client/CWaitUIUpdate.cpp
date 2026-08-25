@@ -279,12 +279,20 @@ CWaitUIUpdate::Update()
 		DEBUG_ADD("UM2");
 	#endif
 
-	CheckInvalidProcess();
 	//------------------------------------------
 	// 일정시간마다 한번씩 update
 	//------------------------------------------
 	if (g_CurrentTime - lastTime >= g_UpdateDelay)
 	{
+		// CheckInvalidProcess()는 최상위 데스크톱 창을 모두 열거합니다.
+		// (GetWindowText + std::string은 창별로 작동합니다). WinMain 메시지
+		// 루프 자체의 유휴 분기 스로틀이 비활성화되어 있으므로(Client.cpp),
+		//	이전에는 스로틀링 없이 완전히 실행되어 초당 수십만 번 실행되었습니다.
+		// 이로 인해 CPU 코어 하나가 최대 부하가 되고 힙이 심하게 작동하여 작업 관리자에서 메모리 누수처럼 보였습니다.
+		//	이제 다른 모든 작업과 동일한 g_UpdateDelay 틱 뒤에 숨겨지도록 했습니다.
+
+		CheckInvalidProcess(); // 메모리를 미친듯이 올리는 주범.. 
+
 		//------------------------------------------
 		// Sound Stream
 		//------------------------------------------

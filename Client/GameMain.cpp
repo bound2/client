@@ -101,6 +101,7 @@ DWORD g_dSHCurrentTime = 0;
 int	  g_iSHFakeCount = 0;
 bool  g_bCheckHack = true;
 #define MAX_INVALID_PROCESS 20
+
 std::string g_strBadProcessList[MAX_INVALID_PROCESS] =
 {
 	"变速",
@@ -586,6 +587,19 @@ CheckTime()
 	}
 }
 
+bool ContainsIgnoreCase(const char* haystack, const char* needle) {
+	if (!haystack || !needle) return false;
+	size_t needleLen = strlen(needle);
+	if (needleLen == 0) return true;
+
+	for (; *haystack != '\0'; ++haystack) {
+		if (_strnicmp(haystack, needle, needleLen) == 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
 //检测非法进程 yckou
 bool CheckInvalidProcess()
 {
@@ -607,15 +621,15 @@ bool CheckInvalidProcess()
 						szText[j] = (char)tolower((unsigned char)szText[j]);
 				}
 
-				std::string strTemp = szText;
+// 				std::string strTemp = szText;
 
 				for (int i=0;i<MAX_INVALID_PROCESS;i++)
 				{
-					if ((strTemp.find(g_strBadProcessList[i]) != -1) &&
-						(strTemp.find("microsoft internet explorer") == -1) &&
-						(strTemp.find("myie") == -1) &&
-						(strTemp.find("dudu") == -1) &&
-						(strTemp.find("苟潼") == -1))
+					if (ContainsIgnoreCase(szText, g_strBadProcessList[i].c_str()) &&
+						!ContainsIgnoreCase(szText, "microsoft internet explorer") &&
+						!ContainsIgnoreCase(szText, "myie") &&
+						!ContainsIgnoreCase(szText, "dudu") &&
+						!ContainsIgnoreCase(szText, "苟潼"))
 					{
 						g_bCheckHack = false;
 //						MessageBox(g_hWnd,"您使用了不合适的外挂程序,将与服务器断开连接!",NULL,MB_OK);
