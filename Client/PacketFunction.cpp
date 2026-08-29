@@ -5688,7 +5688,7 @@ CheckMacScreenMode()
 		std::string MyIPAddress = GetLocalIP();
 		if(0 == stricmp(MyIPAddress.c_str(), CheckIP.c_str()))
 		{
-			if(IDYES == MessageBox(g_hWnd, "윈도우 모드로 접속하시겠습니까?", "QUESTION", MB_YESNO|MB_ICONQUESTION))
+			if(IDYES == MessageBox(g_hWnd, "Connect in window mode?", "QUESTION", MB_YESNO|MB_ICONQUESTION))
 				g_bFullScreen = false;
 			else
 			g_bFullScreen = true;

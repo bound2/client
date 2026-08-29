@@ -418,26 +418,22 @@ std::string g_GetNumberString(int number)
 }
 
 // Money formatting
+//
+// The Korean original grouped the amount into 억/만 (10^8 / 10^4) units, which
+// has no English equivalent, so group the digits in threes instead.
 std::string g_GetStringByMoney(DWORD money)
 {
-    static char buffer[64];
+    char buffer[32];
+    snprintf(buffer, sizeof(buffer), "%lu", (unsigned long)money);
 
-    if (money >= 100000000) // 1亿
+    std::string sstr = buffer;
+
+    for (int i = (int)sstr.size() - 3; i > 0; i -= 3)
     {
-        snprintf(buffer, sizeof(buffer), "%d.%02d亿", (int)(money / 100000000),
-                 (int)((money % 100000000) / 1000000));
-    }
-    else if (money >= 10000) // 1万
-    {
-        snprintf(buffer, sizeof(buffer), "%d.%04d万", (int)(money / 10000),
-                 (int)(money % 10000));
-    }
-    else
-    {
-        snprintf(buffer, sizeof(buffer), "%lu", money);
+        sstr.insert(i, ",");
     }
 
-    return std::string(buffer);
+    return sstr;
 }
 
 // g_BasicException and g_SetNewHandler are defined in BasicException.cpp and GameHelpers.cpp
