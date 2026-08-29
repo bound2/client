@@ -168,10 +168,27 @@ template <class DataType, class SizeType>
 void
 TArray<DataType, SizeType>::operator += (const TArray<DataType, SizeType>& array)
 {
-	SizeType newSize = m_Size + array.m_Size;
+	//------------------------------------------------
+	// The combined count is worked out in a wider type first.
+	// Assigning the sum straight into SizeType truncates it for narrow
+	// instantiations - for a BYTE, 200 + 100 becomes 44 - which would
+	// size the allocation below smaller than the number of elements the
+	// copy loops go on to write.
+	//------------------------------------------------
+	const unsigned long long	combinedSize	=
+		(unsigned long long)m_Size + (unsigned long long)array.m_Size;
+
+	const SizeType			newSize		= (SizeType)combinedSize;
 
 	//------------------------------------------------
-	// 두 Array를 더한 개수만큼의 memory를 잡는다.
+	// Refuse the append rather than overrun the allocation when the
+	// result cannot be represented in SizeType. *this is left unchanged.
+	//------------------------------------------------
+	if ((unsigned long long)newSize != combinedSize)
+		return;
+
+	//------------------------------------------------
+	// Allocate room for the elements of both arrays.
 	//------------------------------------------------
 	DataType*	pTempData = new DataType [newSize];
 	
