@@ -60,7 +60,7 @@ A subsystem-by-subsystem review surfaced **197 findings**. Every area graded **D
 
 ## Remediation Status
 
-**Updated 2026-08-29.** 11 of the 197 findings have been fixed on branch `harden/library-code-fixes` ([PR #1](https://github.com/bound2/client/pull/1)), across 32 commits. Fixed findings carry a ✅ marker in the sections below, naming the commit and the tests covering them.
+**Updated 2026-08-29.** 11 of the 197 findings have been fixed on branch `harden/library-code-fixes` ([PR #1](https://github.com/bound2/client/pull/1)), across 34 commits. Fixed findings carry a ✅ marker in the sections below, naming the commit and the tests covering them.
 
 The test-driven work is confined to code compiled into a static library, since that is the only code a test binary can link against. A second phase has since fixed seven defects in the `DarkEden` executable itself, listed under Runtime defects below; those were found by running the client rather than by this review, and none of them are among the 197 findings. The network attack surface this review rated most serious remains open: the packet parsers in `Client/Packet/Gpackets/` are untouched apart from one corrected format-string argument count.
 
