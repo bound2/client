@@ -60,9 +60,9 @@ A subsystem-by-subsystem review surfaced **197 findings**. Every area graded **D
 
 ## Remediation Status
 
-**Updated 2026-08-29.** 11 of the 197 findings have been fixed on branch `harden/library-code-fixes` ([PR #1](https://github.com/bound2/client/pull/1)), across 20 commits. Fixed findings carry a ✅ marker in the sections below, naming the commit and the tests covering them.
+**Updated 2026-08-29.** 11 of the 197 findings have been fixed on branch `harden/library-code-fixes` ([PR #1](https://github.com/bound2/client/pull/1)), across 32 commits. Fixed findings carry a ✅ marker in the sections below, naming the commit and the tests covering them.
 
-Work so far is confined to code compiled into a static library, since that is the only code a test binary can link against. Nothing in `Client/Packet/` or the game logic compiled directly into the `DarkEden` executable has been touched, which leaves the network attack surface — the area this review rated most serious — entirely open.
+The test-driven work is confined to code compiled into a static library, since that is the only code a test binary can link against. A second phase has since fixed seven defects in the `DarkEden` executable itself, listed under Runtime defects below; those were found by running the client rather than by this review, and none of them are among the 197 findings. The network attack surface this review rated most serious remains open: the packet parsers in `Client/Packet/Gpackets/` are untouched apart from one corrected format-string argument count.
 
 ### Fixed
 
@@ -103,11 +103,31 @@ The remediation was itself put through an adversarial review (single Opus review
 
 The reviewer independently verified the bound arithmetic in `CSprite555`, `CAlphaSprite555`, `CIndexSprite555` and `CAlphaSpritePal::Blt` as correct and not over-strict, confirmed `CAlphaSpritePal::SetPixel` really does emit two bytes per pixel, and could not construct any input to either in-tree encoder that the new scanline validation rejects.
 
+### Runtime defects
+
+Eight defects in the `DarkEden` executable, found by running the client against a live server rather than by this review. None are among the 197 findings, and none were reachable from a test binary. Each one blocked login, ended the session, or produced visibly wrong behaviour in play.
+
+| Defect | Symptom | Commit |
+|---|---|---|
+| `WSAStartup` never called | every login attempt reported itself as an immediate disconnect | `e3dd23e` |
+| Counting `Lock`/`Unlock` semantics on `CSpriteSurface`, plus a `GetSurfacePointer` that took a lock nobody released | one leaked lock per frame: the UI's `assert(!IsLock())` guards fired, and SDL refused the `g_pLast` to `g_pBack` frame flip | `d0d3417` |
+| `std::vector` iterator used after `erase`, never advanced | debug-build crash on shutdown, and whenever the server sent a nickname list | `b1bc394` |
+| Speed-hack check counting each frame as 72ms of elapsed time | above ~23 fps the client set `MODE_QUIT` on itself about 23 seconds into the game | `50306d9` |
+| `__LINE__` passed to a `%s` conversion | crash inside `vsnprintf` the first time a turn carried more packets than `MAX_PROCESS_PACKET`, which is what entering the world does | `6bd26fa` |
+| `bool` read on a switch path that never assigns it | `/RTC1` failure on hovering the info panel's grade tabs | `aac4b76` |
+| A percentage believed from a stale `ClientConfig.inf` record | every creature bleeding permanently at full health | `7660574` |
+| Quest XML parsed without checking that the file opened | null pointer walked as a character buffer | `d31bf57` |
+
 ### Caveats
 
 - **`CAlphaSprite555` and `CIndexSprite555` still desynchronise the stream on rejection.** They share the defect fixed in `CSprite555` but have no `m_bLoading` flag; restructuring them is a follow-up.
 - **The 555 fixes are latent in this build.** `ColorDraw::Is565()` returns a hardcoded `true`, and the 555 sprite variants are only constructed on the false branch, so the `CSprite555` family and `Convert565to555` fixes have no runtime effect today. They matter if a 5:5:5 surface is ever supported again.
 - **Not validated against real game art.** The sprite validation matches what the encoder in `SetPixel` guarantees, but only running the client against actual `.spr` data proves no shipped asset trips it. The failure mode would be artwork silently vanishing. Note also that a rejected sprite is dropped with no log line and an ignored return value, so there is no signal when it happens.
+
+  The runtime fixes above mean the client now reaches the world and can be played, so this is finally checkable. It has not been checked deliberately yet, and because a rejection is silent, an incidental play session would not reveal it either. Adding a log line to the rejection path would turn this from an open question into an answered one.
+- **Half the shipped data is still packed, and this port cannot unpack it.** `CRarFile` no longer reads archives at all: `SetRAR()` keeps only the directory containing the `.rpk` and `Open()` does a plain `fopen(directory + filename)`, so it needs each archive's contents extracted flat beside it. `Data/Info` and `Data/ui/spk` are extracted; `Data/ui/txt` holds nothing but `Help.rpk`, `TutorialEtc.rpk`, `Item.rpk`, `Skill.rpk`, `Book.rpk`, `progress.rpk` and `title.rpk`, and `Data/ui/xml` is empty. Every lookup into those directories fails with `[RARFile ERROR]`, so quest data (`SimpleGQuest.xml`), chat help (`commoningame.txt`, `<race>ingame.txt`) and everything else inside them is simply absent at runtime.
+
+  The client tolerates it now that `LoadQuestXML` checks its opens (`d31bf57`) instead of walking a null pointer as a character buffer, but the features stay empty until the archives are unpacked. There is no extractor in the tree; the archives are password-protected RARs and the password is the `RPK_PASSWORD` macro in `VS_UI/src/header/VS_UI_filepath.h`.
 - **The scanline validation enforces an upper bound, not an exact one.** The encoder normally emits exactly `width` pixels per row, but its per-row segment count is stored in a byte, so a row needing more than 255 segments truncates and decodes to fewer.
 - **Two fixes are regression guards rather than reproductions**, and say so in their commit messages: the out-of-range `CTypePack::Get` read did not fault when tested, and `LoadFromFilePart(CSpriteSetManager)` has no observable effect without a running load.
 - **`USE_ASAN` still only applies to GCC and Clang**, so `make debug-asan` and the new `make test-asan` are no-ops under MSVC. This remains the highest-leverage unfixed item for the memory-safety findings still open — see the build area below.
