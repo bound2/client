@@ -93,19 +93,21 @@ public:
 			"Data/Font/DejaVuSans.ttf",
 			"Data/Font/Hiragino Sans GB.ttc",
 #ifdef _WIN32
-			// None of the paths above ever ship in Data/Font (no font is
-			// bundled with the game data at all - see SPRITELIB_BACKEND_README
-			// / the macOS-only /System/Library/Fonts fallbacks below), so on
-			// Windows every AcquireFont() call fell through all of them and
-			// failed: TextService::m_initialized stayed false forever, and
-			// EnsureInitialized() (called at the top of DrawLine/MeasureText/
-			// etc.) made every text call a silent no-op - no game text drew
-			// anywhere, not just in this dialog. Fall back to fonts that
-			// ship with every Windows install; Malgun Gothic has broad
-			// Hangul+CJK+Latin coverage (this client's text mixes Korean
-			// dev strings and Chinese game-string-table data), Microsoft
-			// YaHei covers Simplified Chinese specifically, Arial is the
-			// last-resort Latin-only fallback.
+
+
+			// 위의 경로 중 어느 것도 Data/Font에 포함되지 않습니다(폰트가 게임 데이터에 전혀 포함되지 않습니다.
+			// SPRITELIB_BACKEND_README 참조 - 아래의 macOS 전용 /System/Library/Fonts 대체 경로 참조). 따라서
+			// Windows에서는 모든 AcquireFont() 호출이 위의 모든 경로를 거치지만 실패합니다.
+			// TextService::m_initialized는 영원히 false로 유지되고,
+			// EnsureInitialized()(DrawLine/MeasureText 등의 시작 부분에서 호출됨)는 모든 텍스트 호출을 아무 작업도 수행하지 않는 조용한 무작업으로 만들었습니다. 게임 텍스트가 어디에도 그려지지 않았습니다.
+			// 이 대화 상자뿐만 아니라 어디에도 표시되지 않았습니다.
+			// 따라서 모든 Windows 설치에 포함된 폰트로 대체합니다.
+			// Malgun Gothic은 광범위한
+			// 한글+중국어+라틴어 지원(이 클라이언트의 텍스트는 한국어 개발 문자열과 중국어 게임 문자열 테이블 데이터를 혼합하여 사용함), Microsoft
+			// YaHei는 간체 중국어를 전문적으로 지원하며, Arial은
+			// 최후의 수단으로 라틴어만 지원하는 대체 폰트입니다.
+
+
 			"C:\\Windows\\Fonts\\malgun.ttf",
 			"C:\\Windows\\Fonts\\msyh.ttc",
 			"C:\\Windows\\Fonts\\simsun.ttc",

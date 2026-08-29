@@ -947,7 +947,7 @@ CWaitUIUpdate::UpdateDraw()
 		//-----------------------------------------------------------------
 		// Mouse 그리기
 		//-----------------------------------------------------------------
-		gC_vs_ui.DrawMousePointer();
+		gC_vs_ui.DrawMousePointer(); // 메모리 누수 아님!
 
 		#ifdef OUTPUT_DEBUG
 			if (g_pUserOption->DrawFPS)

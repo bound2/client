@@ -7070,10 +7070,10 @@ void C_VS_UI_OPTION::Show()
 				(*g_pGameStringTable)[UI_STRING_MESSAGE_DO_NOT_SHOW_PERSNALSHOP_MSG].GetString(),				
 				
 			};
-			
+
 			g_FL2_GetDC();
-			for(i = 0; i < CHECK_GRAPHIC_MAX; i++)
-				g_PrintColorStr(x+m_vampire_plus_x+m_check_x+15, y+m_vampire_plus_y+m_check_y+m_check_gap*i, check_string[i], gpC_base->m_user_id_pi, RGB_BLACK);
+			for (i = 0; i < CHECK_GRAPHIC_MAX; i++)
+				g_PrintColorStr(x + m_vampire_plus_x + m_check_x + 15, y + m_vampire_plus_y + m_check_y + m_check_gap * i, check_string[i], gpC_base->m_user_id_pi, RGB_BLACK);
 			g_FL2_ReleaseDC();
 
 			if(gpC_base->m_p_DDSurface_back->Lock())
