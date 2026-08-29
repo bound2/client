@@ -140,6 +140,16 @@ Type &CTypePack<Type>::operator [] (WORD n)
 template <class Type>
 Type &CTypePack<Type>::Get(WORD n)
 {
+	// Get returns a reference, so it cannot report a bad index back to
+	// the caller. An out of range index, or any index at all before
+	// Init() has allocated the array, is answered with a shared empty
+	// element instead of indexing past the end of the array or through a
+	// null pointer.
+	static Type	s_OutOfRange;
+
+	if(m_pData == NULL || n >= m_Size)
+		return s_OutOfRange;
+
 	if(m_bRunningLoad && !m_pData[n].IsInit())
 	{
 		m_file->seekg(m_file_index[n]);
@@ -546,20 +556,26 @@ TypeBase &CTypePack2<TypeBase, Type1, Type2>::operator [] (WORD n)
 template <class TypeBase, class Type1, class Type2>
 TypeBase &CTypePack2<TypeBase, Type1, Type2>::Get(WORD n)
 {
+	// Get returns a reference, so it cannot report a bad index back to
+	// the caller. An out of range index, or any index at all before
+	// Init() has allocated the array, is answered with a shared empty
+	// element instead of indexing past the end of the array or through a
+	// null pointer.
+	//
+	// This has to happen before anything touches m_pData: the range
+	// check that used to live further down ran after the element had
+	// already been read once to test IsInit(), and only covered the
+	// running-load path.
+	static Type1	s_OutOfRange;
+
+	if(m_pData == NULL || n >= m_Size)
+		return s_OutOfRange;
+
 	if(m_bRunningLoad && !m_pData[n].IsInit())
 	{
 		// Safety check: disable lazy loading if file pointer is invalid
 		if (m_file == NULL)
 		{
-			m_bRunningLoad = false;
-			return m_pData[n];
-		}
-
-		// Validate sprite index
-		if (n >= m_Size)
-		{
-			printf("WARNING Get[%d]: this=%p, sprite index %d out of range (size=%d)\n",
-			       n, this, n, m_Size);
 			m_bRunningLoad = false;
 			return m_pData[n];
 		}
