@@ -72,3 +72,8 @@ desktop.ini
 *.a
 *.so
 *.dylib
+
+# Scratch file written by the TArray file I/O tests. It is created in the
+# working directory, which is the build directory under CTest but the
+# repository root when the test binary is run by hand.
+tarray_loadfromfile_test.bin
