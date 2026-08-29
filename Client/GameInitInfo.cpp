@@ -277,7 +277,7 @@ InitInfomation()
 #ifdef __SANITIZE_ADDRESS__
 		// Update shadow copies for corruption detection
 		extern EFFECTSPRITETYPE_TABLE* g_pEffectSpriteTypeTable_shadow;
-		extern EFFECTSPRITETYPE_TABLE::TYPE* g_pEffectSpriteTypeTable_m_pTypeInfo_shadow;
+		extern EFFECTSPRITETYPETABLE_INFO* g_pEffectSpriteTypeTable_m_pTypeInfo_shadow;
 		g_pEffectSpriteTypeTable_shadow = g_pEffectSpriteTypeTable;
 		g_pEffectSpriteTypeTable_m_pTypeInfo_shadow = g_pEffectSpriteTypeTable->GetInternalPointer();
 #endif
@@ -309,7 +309,7 @@ InitInfomation()
 #ifdef __SANITIZE_ADDRESS__
 		// Update shadow copies for corruption detection
 		extern EFFECTSPRITETYPE_TABLE* g_pEffectSpriteTypeTable_shadow;
-		extern EFFECTSPRITETYPE_TABLE::TYPE* g_pEffectSpriteTypeTable_m_pTypeInfo_shadow;
+		extern EFFECTSPRITETYPETABLE_INFO* g_pEffectSpriteTypeTable_m_pTypeInfo_shadow;
 		g_pEffectSpriteTypeTable_shadow = g_pEffectSpriteTypeTable;
 		g_pEffectSpriteTypeTable_m_pTypeInfo_shadow = g_pEffectSpriteTypeTable->GetInternalPointer();
 #endif
@@ -860,7 +860,7 @@ InitInfomation()
 	// LoadFromFile calls Init() which reallocates the internal array
 	// Without updating shadows, corruption detection gives false positives
 	extern EFFECTSPRITETYPE_TABLE* g_pEffectSpriteTypeTable_shadow;
-	extern EFFECTSPRITETYPE_TABLE::TYPE* g_pEffectSpriteTypeTable_m_pTypeInfo_shadow;
+	extern EFFECTSPRITETYPETABLE_INFO* g_pEffectSpriteTypeTable_m_pTypeInfo_shadow;
 	g_pEffectSpriteTypeTable_shadow = g_pEffectSpriteTypeTable;
 	g_pEffectSpriteTypeTable_m_pTypeInfo_shadow = g_pEffectSpriteTypeTable->GetInternalPointer();
 #endif
