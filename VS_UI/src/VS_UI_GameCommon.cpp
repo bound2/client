@@ -15463,7 +15463,13 @@ bool C_VS_UI_INFO::MouseControl(UINT message, int _x, int _y)
 			str[1] = temp_str[1];
 			str[2] = temp_str[2];
 			
-			bool Result;
+			// GRADE1_INFO_MODE and GRADE2_INFO_MODE fall through the switch below
+			// without assigning this, and there is no default label, so the test
+			// after the switch read an uninitialised bool and tripped /RTC1.
+			// The test is a no-op either way - its break and the one that follows
+			// the enclosing block both leave the same case - so true keeps the
+			// handled modes behaving exactly as before.
+			bool Result = true;
 			switch(m_info_mode)
 			{
 			case SKILL_INFO_MODE :
