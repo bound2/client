@@ -62,6 +62,16 @@ void GCShopList::read (SocketInputStream & iStream)
 	{
 		iStream.read(index);
 
+		// index picks a slot in m_pBuffer[SHOP_RACK_INDEX_MAX] and arrives as a
+		// raw BYTE from the server, so it can name a slot up to 235 elements past
+		// the end. Everything below writes through a reference to that slot, and
+		// one of the writes is optionType.push_back(), which would run
+		// std::vector's members over whatever happens to lie there. The packet
+		// size check in ClientPlayer does not help: a packet of legal declared
+		// size can carry index=255.
+		if (index >= SHOP_RACK_INDEX_MAX)
+			throw InvalidProtocolException("GCShopList: shop rack index out of range");
+
 		_SHOPLISTITEM& item = m_pBuffer[index];
 		
 		iStream.read(item.objectID);
