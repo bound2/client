@@ -7,6 +7,9 @@
 *.suo
 *.sln.docstates
 *.vcxproj.user
+# Written by Visual Studio when it opens the folder directly; local IntelliSense
+# configuration, not part of the build.
+CppProperties.json
 
 # Visual Studio Build Outputs & Folders
 Debug/
