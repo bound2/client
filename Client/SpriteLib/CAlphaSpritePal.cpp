@@ -470,6 +470,12 @@ CAlphaSpritePal::Blt(WORD *pDest, WORD pitch, MPalette &pal)
 	register int j;
 	int rectBottom = m_Height;
 
+	// The run lengths read below are sprite file data. Drawing stops at
+	// the sprite's own width, so the destination pointer cannot leave
+	// the scanline it was handed, and reading stops at the end of the
+	// pixel data, so a malformed sprite cannot walk off its allocation.
+	const BYTE* const	pDataEnd = m_pData + m_Size;
+
 	if (rectBottom > 0)
 	{
 		i = rectBottom-1;
@@ -480,26 +486,55 @@ CAlphaSpritePal::Blt(WORD *pDest, WORD pitch, MPalette &pal)
 			pPixels		= m_pPixels[i];
 			pDestTemp	= pDest;
 
-			// (투명수,색깔수,색깔들)의 반복 수		
-			count	= *pPixels++;		
+			// Pixels emitted so far on this scanline.
+			int	x = 0;
 
-			// 한 줄 출력
-			if (count > 0)
-			{			
-				j = count;
-				do
+			if (pPixels < pDataEnd)
+			{
+				// Number of (transparent run, colour run, colours)
+				// repeats.
+				count	= *pPixels++;
+
+				// Draw one scanline.
+				if (count > 0)
 				{
-					pDestTemp += *pPixels++;		// 투명색만큼 건너 뛴다.
-					colorCount = *pPixels++;		// 투명 아닌 색 수				
+					j = count;
+					do
+					{
+						// Both counts have to be readable.
+						if (pPixels+1 >= pDataEnd)
+							break;
 
-					// 투명이 아닌 색들을 Surface에 출력한다.
-					memcpyAlpha(pDestTemp, pPixels, colorCount, pal);
-					
-					pDestTemp	+= colorCount;
+						// Transparent pixels to skip.
+						const int	transparentCount = *pPixels++;
 
-					// 실제 점 개수는 alpha값 때문에 2배이다.
-					pPixels		+= (colorCount<<1);
-				} while (--j);
+						// Number of non-transparent colours.
+						colorCount = *pPixels++;
+
+						// The segment has to fit in what is left of
+						// the scanline being drawn.
+						if (x + transparentCount + colorCount > (int)m_Width)
+							break;
+
+						// Its colours have to lie inside the pixel
+						// data, two bytes per pixel for the alpha.
+						if (pPixels + (colorCount<<1) > pDataEnd)
+							break;
+
+						pDestTemp	+= transparentCount;
+						x		+= transparentCount;
+
+						// Draw the non-transparent colours into the
+						// surface.
+						memcpyAlpha(pDestTemp, pPixels, colorCount, pal);
+
+						pDestTemp	+= colorCount;
+						x		+= colorCount;
+
+						// Two bytes per pixel because of the alpha.
+						pPixels		+= (colorCount<<1);
+					} while (--j);
+				}
 			}
 
 			pDest = (WORD*)((BYTE*)pDest - pitch);
