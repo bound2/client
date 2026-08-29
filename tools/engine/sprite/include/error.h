@@ -25,11 +25,15 @@ typedef struct {
 static inline void
 err_push(Error *e, const char *func, const char *file, int line) {   
     if (e->depth < ERR_STACK_MAX) {
-        e->stack[e->depth++] = (ErrFrame){
-            .func = func,
-            .file = file,
-            .line = line,
-        };
+        /* Assign the fields one by one rather than through a compound literal
+         * with designated initializers. That form is C99, but this header is
+         * also included from C++ translation units (the viewer tools), where
+         * compound literals are not standard at all and designated
+         * initializers need C++20. This spelling compiles as both. */
+        ErrFrame *frame = &e->stack[e->depth++];
+        frame->func = func;
+        frame->file = file;
+        frame->line = line;
     }
 }
 

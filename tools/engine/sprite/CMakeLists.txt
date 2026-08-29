@@ -38,6 +38,15 @@ endif()
 
 set_property(TARGET sprite PROPERTY POSITION_INDEPENDENT_CODE ON)
 
+# The generic container macros in include/vector.h and include/map.h are built
+# on typeof, which was a GNU extension until C23 standardised it. MSVC only
+# accepts it in C23 mode, so without this the whole library fails to compile
+# under Visual Studio ("'typeof' undefined; assuming extern returning int",
+# followed by a cascade of syntax errors). GCC and Clang accept it as-is.
+if(MSVC)
+    target_compile_options(sprite PRIVATE /std:clatest)
+endif()
+
 # Install
 install(TARGETS sprite
     ARCHIVE DESTINATION lib
