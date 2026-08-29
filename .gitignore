@@ -16,7 +16,10 @@ MinSizeRel/
 x64/
 x86/
 out/
-#[Bb]uild/
+# CMake-generated build trees. These bake in absolute paths from the machine
+# that generated them, so they are never portable between clones - regenerate
+# locally instead (see README.md).
+[Bb]uild/
 
 # MSVC Compiled Artifacts
 *.obj
