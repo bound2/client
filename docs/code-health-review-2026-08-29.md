@@ -130,7 +130,10 @@ Eight defects in the `DarkEden` executable, found by running the client against 
   The client tolerates it now that `LoadQuestXML` checks its opens (`d31bf57`) instead of walking a null pointer as a character buffer, but the features stay empty until the archives are unpacked. There is no extractor in the tree; the archives are password-protected RARs and the password is the `RPK_PASSWORD` macro in `VS_UI/src/header/VS_UI_filepath.h`.
 - **The scanline validation enforces an upper bound, not an exact one.** The encoder normally emits exactly `width` pixels per row, but its per-row segment count is stored in a byte, so a row needing more than 255 segments truncates and decodes to fewer.
 - **Two fixes are regression guards rather than reproductions**, and say so in their commit messages: the out-of-range `CTypePack::Get` read did not fault when tested, and `LoadFromFilePart(CSpriteSetManager)` has no observable effect without a running load.
-- **`USE_ASAN` still only applies to GCC and Clang**, so `make debug-asan` and the new `make test-asan` are no-ops under MSVC. This remains the highest-leverage unfixed item for the memory-safety findings still open — see the build area below.
+- **`USE_ASAN` now covers MSVC as well as GCC and Clang.** `/fsanitize=address` is wired up in `CMakeLists.txt`, along with the flag surgery it requires: `/RTC1` and incremental linking are both incompatible and are removed, and the sanitizer runtime DLL is copied beside the executables so a run outside the debugger can find it. It needs the *C++ AddressSanitizer* individual component, which the C++ workload does not install; configure fails with instructions if it is absent. See the AddressSanitizer section of `README.md`.
+
+  This was the highest-leverage unfixed item, because it is the only way to reach the memory-safety findings in `Client/Packet/` and the game logic — code no test binary can link against. Turning it on is not the same as having run it: the findings below are still open until something exercises those paths under the sanitizer.
+- **Enabling it costs `/RTC1`.** MSVC rejects the runtime checks alongside the sanitizer, and `/RTC1` is what caught the uninitialised `bool` in the runtime defect list above. The two builds are complementary rather than one superseding the other.
 
 ---
 

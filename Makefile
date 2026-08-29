@@ -90,8 +90,11 @@ test:
 
 # Run the unit tests under AddressSanitizer.
 # Memory-safety bugs usually produce garbage rather than a failed assertion,
-# so the sanitizer is what actually catches them. Requires GCC or Clang;
-# the sanitizer flags in CMakeLists.txt are not wired up for MSVC.
+# so the sanitizer is what actually catches them. This target drives a
+# single-config generator, so it is for GCC and Clang. MSVC has its own
+# AddressSanitizer and CMakeLists.txt wires it up behind the same USE_ASAN
+# option, but it needs the Visual Studio generator and a --config argument;
+# see the AddressSanitizer section of README.md.
 test-asan:
 	@echo "Building and running unit tests with AddressSanitizer..."
 	cmake -S . -B $(BUILD_DIR_TESTS_ASAN) -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON -DUSE_ASAN=ON

@@ -95,6 +95,57 @@ the startup project, and build from there.
 
 The executable lands in `build/vs2022/bin/Debug/DarkEden.exe`.
 
+### 5. AddressSanitizer (optional)
+
+MSVC has its own AddressSanitizer, wired up behind `USE_ASAN`. It reports heap
+and stack overflows, use-after-free and double frees at the instruction that
+causes them, which is the only realistic way to reach the memory-safety defects
+in code no unit test can link against.
+
+It needs the **C++ AddressSanitizer** individual component, which the *Desktop
+development with C++* workload does not install. Same procedure as ATL in step 1
+— close Visual Studio first, and run from an **elevated** terminal:
+
+```powershell
+& "C:\Program Files (x86)\Microsoft Visual Studio\Installer\setup.exe" modify --installPath "C:\Program Files\Microsoft Visual Studio\2022\Community" --add Microsoft.VisualStudio.Component.VC.ASAN --quiet --norestart
+```
+
+Verify it landed:
+
+```powershell
+& "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -products * -requires Microsoft.VisualStudio.Component.VC.ASAN -property installationPath
+```
+
+Then generate a **separate** build tree. Do not turn `USE_ASAN` on in your normal
+one: it changes the compile and link flags of every target, so the two cannot
+share a cache.
+
+```bash
+cmake -S . -B build/vs2022-asan -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DUSE_ASAN=ON
+cmake --build build/vs2022-asan --config Debug
+```
+
+Configure stops immediately with instructions if the component is missing,
+rather than letting the build run and fail at link time.
+
+Three things the build does on your behalf, because the sanitizer will not work
+otherwise:
+
+- **Drops `/RTC1`.** MSVC rejects the runtime checks outright next to
+  `/fsanitize=address`. That is a real loss, since `/RTC1` is what catches
+  uninitialised locals, so keep the ordinary Debug tree for day-to-day work and
+  switch to this one when chasing a memory error.
+- **Turns off incremental linking**, which the sanitizer does not support.
+- **Copies `clang_rt.asan_dynamic-x86_64.dll` beside the executables.** Visual
+  Studio puts the compiler directory on `PATH` when it launches the debugger, so
+  F5 would find it regardless; running the `.exe` from a shell or from Explorer
+  would not.
+
+Expect roughly 2x the run time and appreciably more memory. A report goes to
+stderr and the debugger breaks at the faulting instruction. Note that leak
+detection is a Linux-only part of AddressSanitizer — this catches invalid
+accesses, not leaks. The CRT leak dump at exit already covers those.
+
 ### Never commit `build/`
 
 CMake bakes **absolute paths** into the generated `.sln`/`.vcxproj` files, along
@@ -136,6 +187,18 @@ you must re-run step 3 (an incremental build alone won't pick it up).
 
 Same cause as the `ATLBASE.H` error above — ATL headers embed a
 `#pragma comment(lib, "atls.lib")`. Install the ATL component and re-configure.
+
+**`LNK1104: cannot open file 'clang_rt.asan_dynamic_runtime_thunk-x86_64.lib'`**
+
+The C++ AddressSanitizer component is missing — see step 5. `cl.exe` accepts
+`/fsanitize=address` without it and only fails at link time, which is why a
+`USE_ASAN=ON` configure now checks for the runtime and stops early instead.
+
+**The sanitized build exits immediately with a missing-DLL dialog**
+
+`clang_rt.asan_dynamic-x86_64.dll` is not beside the executable. Re-run the
+configure step: the copy happens at configure time, so a build tree generated
+before the component was installed will not have it.
 
 ## Legacy VC6 build (deprecated)
 
