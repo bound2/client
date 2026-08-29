@@ -31,6 +31,13 @@ template <class DataType, class SizeType>
 class TArray {
 	public :
 		TArray(SizeType size=0);
+
+		// TArray owns m_pData and frees it in the destructor, so it
+		// needs a copy constructor. The compiler-supplied one copies
+		// the pointer, which shares one buffer between both instances
+		// and double frees it.
+		TArray(const TArray<DataType, SizeType>& array);
+
 		~TArray();
 
 		//--------------------------------------------------------
@@ -96,7 +103,19 @@ TArray<DataType, SizeType>::TArray(SizeType size)
 	Init(size);
 }
 
-template <class DataType, class SizeType> 
+template <class DataType, class SizeType>
+TArray<DataType, SizeType>::TArray(const TArray<DataType, SizeType>& array)
+{
+	m_Size	= 0;
+	m_pData	= NULL;
+
+	Init(array.m_Size);
+
+	for (SizeType i=0; i<m_Size; i++)
+		m_pData[i] = array.m_pData[i];
+}
+
+template <class DataType, class SizeType>
 TArray<DataType, SizeType>::~TArray()
 {
 	Release();
