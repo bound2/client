@@ -737,6 +737,15 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:DarkEden>"
 	)
 
+	# Make F5 in the Visual Studio IDE launch the game. Without this the
+	# generated solution defaults to ALL_BUILD as the startup project, which is
+	# a CMake utility target with no executable behind it, so running it fails
+	# with "Unable to start program ...\ALL_BUILD. Access is denied." rather
+	# than anything that hints at the actual cause.
+	if(MSVC)
+		set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT DarkEden)
+	endif()
+
 	# atls.lib for VS_UI_WebBrowser.h's ATL usage - see the
 	# _atlmfc_include_dir/_atlmfc_lib_dir search above (VS_UI target).
 	if(_atlmfc_lib_dir)

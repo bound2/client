@@ -3257,6 +3257,11 @@ WinMain(HINSTANCE hInstance,
 				InvalidDll != "libpng16.dll" &&
 				InvalidDll != "zlibd1.dll" &&
 				InvalidDll != "zlib1.dll" &&
+				// vcpkg ships zlib as z.dll/zd.dll rather than the zlib1.dll
+				// names above, and it arrives here as a transitive dependency
+				// of freetype and libpng.
+				InvalidDll != "zd.dll" &&
+				InvalidDll != "z.dll" &&
 				InvalidDll != "jpeg62.dll" &&
 				InvalidDll != "brotlicommon.dll" &&
 				InvalidDll != "brotlidec.dll" &&
