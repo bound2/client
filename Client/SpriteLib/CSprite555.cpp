@@ -162,45 +162,82 @@ CSprite555::LoadFromFile(ifstream& file)
 	
 	m_Pixels = new WORD* [m_Height];
 
+	// Cleared up front so Release() is safe if a scanline below is
+	// rejected: it walks every row of this array and frees it, and would
+	// otherwise be handed the uninitialised tail.
+	for (int i=0; i<m_Height; i++)
+		m_Pixels[i] = NULL;
+
 	WORD len;
 
 	//--------------------------------
 	// 5:5:5
 	//--------------------------------
-	// 5:6:5로 저장된걸 읽었기 때문에 5:6:5를 5:5:5로 바꿔줘야 한다.	
+	// The data was stored as 5:6:5, so it is converted to 5:5:5 here.
 	WORD index;
 	int	count, colorCount;
 
-	register int i;
 	register int j;
 	register int k;
 
 	for (int i=0; i<m_Height; i++)
-	{			
-		// byte수와 실제 data를 Load한다.
+	{
+		// Read the scanline length and then the scanline itself.
 		file.read((char*)&len, 2);
+
+		// A scanline has to carry at least the segment count that is
+		// read from element zero below.
+		if (!file || len==0)
+		{
+			Release();
+			return false;
+		}
+
 		m_Pixels[i] = new WORD [len];
+
 		file.read((char*)m_Pixels[i], len<<1);
 
-		count = m_Pixels[i][0];			
+		if (!file)
+		{
+			Release();
+			return false;
+		}
+
+		count = m_Pixels[i][0];
 		index = 1;
 
 		for (j=0; j<count; j++)
 		{
-			//transCount = m_Pixels[i][index];
-			colorCount = m_Pixels[i][index+1];				
+			// Both run lengths are read before the colours, so they
+			// have to lie inside the scanline. The counts come from the
+			// file, so nothing else bounds this walk.
+			if (index+1 >= len)
+			{
+				Release();
+				return false;
+			}
 
-			index+=2;	// 두 count 만큼
+			//transCount = m_Pixels[i][index];
+			colorCount = m_Pixels[i][index+1];
+
+			index+=2;	// past both counts
+
+			// The colour run has to fit in what is left of the
+			// scanline, otherwise the conversion loop below writes past
+			// the end of the allocation.
+			if (index+colorCount > (int)len)
+			{
+				Release();
+				return false;
+			}
 
 			// m_Pixels[i][index] ~ m_Pixels[i][index+colorCount-1]
-			// 5:5:5를 5:6:5로 바꿔서 저장하고 다시 5:5:5로 바꿔준다.
-			for (k=0; k<colorCount; k++)								
-			{					
+			// Converted from 5:6:5 to 5:5:5 in place.
+			for (k=0; k<colorCount; k++)
+			{
 				m_Pixels[i][index] = ColorDraw::Convert565to555(m_Pixels[i][index]);
 				index++;
 			}
-
-			//index += colorCount;	// 투명색 아닌것만큼 +				
 		}
 	}
 
