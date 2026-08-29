@@ -325,8 +325,9 @@ class CSpriteSurface {
 		int m_height;
 		int m_transparency;  // Transparency value for compatibility
 
-		// Lock state tracking to prevent double-locking
-		int m_lock_count;    // Number of times Lock() was called
+		// DirectDraw-style lock flag (0 or 1), never a nesting counter.
+		// See the "Lock state model" comment in CSpriteSurface_SDL.cpp.
+		int m_lock_count;
 
 		// Clipping rectangles (compatibility with CDirectDrawSurface)
 		int m_ClipLeft;
