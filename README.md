@@ -169,29 +169,72 @@ You can put it to any path, not necessarily Game(800)
 
 Open workspace client/Client/Client.dsw in VC6, everything should work.
 
-## run
+## Run
 
-Download the Data files from [Mediafire](https://www.mediafire.com/file/017bif66kyieviw/DARKEDEN.zip/file) or [Baidu Netdisk](https://pan.baidu.com/s/1-DufSEmnydMbOtTwOo_h8A) (extract code 6bcl), extract it to `client/DARKEDEN`, run "window.bat"
+### Code and data are separate
 
-Modify the IP/Port in `DARKEDEN/Data/Info/GameClient.inf` to your own login server IP/Port.
-If you are using docker on the local Windows system, the IP should be `127.0.0.1`.
+This repository contains the client's **source code only** — no game assets.
+The art, maps, audio and configuration are a separate ~1.8 GB download from the
+original publisher, too large for git and not ours to redistribute. Building the
+client gives you a complete, fully functional executable; it just needs that
+data at runtime, the same way an open Doom or Quake engine still needs the
+original WAD or PAK files.
 
-You can see "window.bat" is a simple script that run "fengshen.exe" with a argument:
+Download it from [Mediafire](https://www.mediafire.com/file/017bif66kyieviw/DARKEDEN.zip/file)
+or [Baidu Netdisk](https://pan.baidu.com/s/1-DufSEmnydMbOtTwOo_h8A) (extract
+code `6bcl`) and unpack it anywhere you like.
 
+The archive also contains `fengshen.exe` along with `DEUtil.dll`, `GL.dll`,
+`IFC22.dll` and `basics.dll`. Those are the **old VC6 client** from ~2010, built
+against DirectX. The CMake build replaces all of them: `DarkEden.exe` is the
+same client built from this source against SDL2, and it links those libraries
+statically from `basic/`, `Client/DXLib`, `Client/SpriteLib` and
+`Client/framelib`. You do not need to copy any of them — only `Data/` and
+`UserSet/`.
+
+### Point the build at the data
+
+`DarkEden.exe` resolves game files relative to its working directory, which is
+its own folder (`CMakeLists.txt` sets `VS_DEBUGGER_WORKING_DIRECTORY` so that
+F5 in Visual Studio matches double-clicking from Explorer). So `Data/` and
+`UserSet/` must sit next to the executable.
+
+Rather than copying 1.8 GB into the build tree, link it. From an ordinary
+prompt — directory junctions do not need administrator rights:
+
+```powershell
+$dest = "build\vs2022\bin\Debug"
+$src  = "C:\path\to\your\unpacked\darkeden"
+New-Item -ItemType Junction -Path "$dest\Data"    -Target "$src\Data"
+New-Item -ItemType Junction -Path "$dest\UserSet" -Target "$src\UserSet"
 ```
-fengshen.exe 0000000001 
+
+Repeat for `bin\Release` if you build that configuration.
+
+### Launch
+
+Run the executable with a display-mode argument:
+
+```powershell
+.\build\vs2022\bin\Debug\DarkEden.exe 0000000001
 ```
 
-The meaning of the argument:
+| Argument | Mode |
+| --- | --- |
+| `0000000001` | window, 800x600 |
+| `0000000002` | fullscreen, 800x600 |
+| `0000000003` | window, 1024x768 |
+| `0000000004` | fullscreen, 1024x768 |
 
-- 0000000001 windowmode
-- 0000000002 fullscreen
-- 0000000003 windowmode 1024
-- 0000000004 fullscreen 1024
+The legacy `window.bat` and `fullscreen.bat` in the data archive pass the same
+arguments to `fengshen.exe`, the old client.
 
-For the CMake build the executable is `DarkEden.exe` instead, and it takes the
-same argument. Its working directory is set to its own folder, so the `Data/`
-directory must sit next to it in `build/vs2022/bin/Debug/`.
+### Connect to a server
 
-You need a [server](https://github.com/opendarkeden/server) to play the game.
-You may follow the [docker install guide](https://github.com/opendarkeden/server/blob/master/docker_install.md) to deploy server.
+Set the login server IP and port in `Data/Info/GameClient.inf`. With a server in
+Docker on the same machine, use `127.0.0.1`.
+
+You need a [server](https://github.com/opendarkeden/server) to play. Follow the
+[docker install guide](https://github.com/opendarkeden/server/blob/master/docker_install.md)
+to deploy one. Without it the client still starts and reaches the main menu —
+it only fails at login.
