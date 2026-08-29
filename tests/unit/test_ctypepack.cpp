@@ -97,6 +97,86 @@ TEST(CTypePack, GetOnUninitialisedPackDoesNotDereferenceNull)
 }
 
 //----------------------------------------------------------------------
+// Releasing a range must stay inside the pack.
+//
+// ReleasePart(first, last) clamped last to 0xFFFE and then called
+// Release() on every element in between, with nothing comparing the
+// index against m_Size. Asking it to release a range wider than the
+// pack wrote through elements past the end of the allocation.
+//----------------------------------------------------------------------
+TEST(CTypePack, ReleasePartByRangeStaysInsideThePack)
+{
+	CTypePack<PackElement>	pack;
+
+	pack.Init(4);
+
+	for (WORD i = 0; i < 4; i++)
+		pack[i].SetValue(10 + i);
+
+	pack.ReleasePart(0, 100);
+
+	CHECK_EQ(4, pack.GetSize());
+
+	CHECK(!pack[0].IsInit());
+	CHECK(!pack[3].IsInit());
+}
+
+//----------------------------------------------------------------------
+// Releasing by list must release every element the list names.
+//
+// The loop ran GetSize() times but never advanced its iterator, so it
+// released whatever the first entry pointed at over and over and left
+// every other listed element alone.
+//----------------------------------------------------------------------
+TEST(CTypePack, ReleasePartByListReleasesEveryListedElement)
+{
+	CTypePack<PackElement>	pack;
+
+	pack.Init(4);
+
+	for (WORD i = 0; i < 4; i++)
+		pack[i].SetValue(10 + i);
+
+	COrderedList<TYPE_SPRITEID>	list;
+
+	list.Add(1);
+	list.Add(3);
+
+	pack.ReleasePart(list);
+
+	// Only the listed elements are released.
+	CHECK(pack[0].IsInit());
+	CHECK(!pack[1].IsInit());
+	CHECK(pack[2].IsInit());
+	CHECK(!pack[3].IsInit());
+}
+
+//----------------------------------------------------------------------
+// An index in the list that falls outside the pack must be ignored
+// rather than written through.
+//----------------------------------------------------------------------
+TEST(CTypePack, ReleasePartByListIgnoresIndexesOutsideThePack)
+{
+	CTypePack<PackElement>	pack;
+
+	pack.Init(2);
+
+	pack[0].SetValue(1);
+	pack[1].SetValue(2);
+
+	COrderedList<TYPE_SPRITEID>	list;
+
+	list.Add(0);
+	list.Add(900);
+
+	pack.ReleasePart(list);
+
+	CHECK_EQ(2, pack.GetSize());
+	CHECK(!pack[0].IsInit());
+	CHECK(pack[1].IsInit());
+}
+
+//----------------------------------------------------------------------
 // The boundary index is one past the last valid element.
 //----------------------------------------------------------------------
 TEST(CTypePack, GetRejectsFirstIndexPastTheEnd)

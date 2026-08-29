@@ -341,6 +341,11 @@ bool CTypePack<Type>::LoadFromFilePart(const CSpriteSetManager& SSM)
 	{
 		if(*iID != 0xFFFF)
 			Get(*iID);
+
+		// The iterator has to advance. Without this the loop asked for
+		// whatever the first entry named once per pass and never
+		// touched the rest of the set.
+		++iID;
 	}
 
 	return true;
@@ -349,7 +354,19 @@ bool CTypePack<Type>::LoadFromFilePart(const CSpriteSetManager& SSM)
 template <class Type>
 bool CTypePack<Type>::ReleasePart(int first, int last)
 {
-	last = min(last, 0xFFFE);
+	if(m_pData == NULL)
+		return false;
+
+	// Release() is called through m_pData[i], so the range has to be
+	// clamped to the pack itself. Capping last at 0xFFFE only bounded it
+	// by the index type, which let the loop write through elements past
+	// the end of the allocation.
+	if(first < 0)
+		first = 0;
+
+	if(last >= (int)m_Size)
+		last = (int)m_Size - 1;
+
 	for(int i = first; i <= last; i++)
 		m_pData[i].Release();
 
@@ -359,11 +376,21 @@ bool CTypePack<Type>::ReleasePart(int first, int last)
 template <class Type>
 bool CTypePack<Type>::ReleasePart(COrderedList<TYPE_SPRITEID> list)
 {
+	if(m_pData == NULL)
+		return false;
+
 	COrderedList<TYPE_SPRITEID>::DATA_LIST::const_iterator iID = list.GetIterator();
 	for (int t=0; t<list.GetSize(); t++)
 	{
-		if(*iID != 0xFFFF)
+		// An entry naming an element outside the pack is skipped rather
+		// than written through.
+		if(*iID != 0xFFFF && *iID < m_Size)
 			m_pData[*iID].Release();
+
+		// The iterator has to advance. Without this the loop released
+		// whatever the first entry named once per pass and ignored every
+		// other element in the list.
+		++iID;
 	}
 
 	return true;
@@ -836,6 +863,11 @@ bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFilePart(const CSpriteSetManage
 	{
 		if(*iID != 0xFFFF)
 			Get(*iID);
+
+		// The iterator has to advance. Without this the loop asked for
+		// whatever the first entry named once per pass and never
+		// touched the rest of the set.
+		++iID;
 	}
 
 	return true;
@@ -854,11 +886,21 @@ bool CTypePack2<TypeBase, Type1, Type2>::ReleasePart(int first, int last)
 template <class TypeBase, class Type1, class Type2>
 bool CTypePack2<TypeBase, Type1, Type2>::ReleasePart(COrderedList<TYPE_SPRITEID> list)
 {
+	if(m_pData == NULL)
+		return false;
+
 	COrderedList<TYPE_SPRITEID>::DATA_LIST::const_iterator iID = list.GetIterator();
 	for (int t=0; t<list.GetSize(); t++)
 	{
-		if(*iID != 0xFFFF)
+		// An entry naming an element outside the pack is skipped rather
+		// than written through.
+		if(*iID != 0xFFFF && *iID < m_Size)
 			m_pData[*iID].Release();
+
+		// The iterator has to advance. Without this the loop released
+		// whatever the first entry named once per pass and ignored every
+		// other element in the list.
+		++iID;
 	}
 
 	return true;
