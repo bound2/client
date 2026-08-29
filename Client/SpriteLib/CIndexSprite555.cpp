@@ -130,10 +130,16 @@ CIndexSprite555::LoadFromFile(ifstream& file)
 	}
 	
 	m_Pixels = NULL;
-	m_Pixels = new WORD* [m_Height];	
+	m_Pixels = new WORD* [m_Height];
+
+	// Cleared up front so Release() is safe if a scanline below is
+	// rejected: it walks every row of this array and frees it, and would
+	// otherwise be handed the uninitialised tail.
+	for (int i=0; i<m_Height; i++)
+		m_Pixels[i] = NULL;
+
 	WORD len;
 
-	register int i;
 	register int j;
 	register int k;
 	//--------------------------------
@@ -141,48 +147,83 @@ CIndexSprite555::LoadFromFile(ifstream& file)
 	//--------------------------------
 	for (int i=0; i<m_Height; i++)
 	{
-		// byte수와 실제 data를 Load한다.
+		// Read the scanline length and then the scanline itself.
 		file.read((char*)&len, 2);
-		
-		m_Pixels[i] = NULL;
-		m_Pixels[i] = new WORD [len];		
+
+		// A scanline has to carry at least the pair count that is read
+		// from element zero below.
+		if (!file || len==0)
+		{
+			Release();
+			return false;
+		}
+
+		m_Pixels[i] = new WORD [len];
 
 		file.read((char*)m_Pixels[i], len<<1);
 
-		
+		if (!file)
+		{
+			Release();
+			return false;
+		}
+
 		//-------------------------------------------------------
-		// m_Pixels[i]에 한 줄을 Load했다.
-		// 현재 줄에서.. Normal color에 해당하는 부분을
-		// 5:6:5에서 5:5:5로 바꿔줘야 한다.
+		// One scanline has been loaded into m_Pixels[i]. The parts of
+		// it holding normal colours are converted from 5:6:5 to 5:5:5.
 		//-------------------------------------------------------
 
 		int transPair, colorCount, indexCount;
 
-		// 반복 회수의 2 byte
+		// Two bytes holding the repeat count.
 		transPair = m_Pixels[i][0];
-				
-		WORD	index	= 1;
+
+		// Held as an int rather than a WORD: indexCount is added to it
+		// below and a file supplied value would otherwise be able to
+		// wrap it back into range and slip past the checks.
+		int	index	= 1;
 
 		for (j=0; j<transPair; j++)
-		{			
+		{
 			// transCount = m_Pixels[i][index];
-			index++;	// 투명 수
-			indexCount = m_Pixels[i][index++];	// indexPair 수
+			index++;	// transparent count
 
-			index += indexCount;	// index색에 대한 정보 수 만큼
+			// Each of the three counts below is read from the scanline,
+			// so the position has to be inside it before every read.
+			if (index >= (int)len)
+			{
+				Release();
+				return false;
+			}
 
-			// Normal색 수
+			indexCount = m_Pixels[i][index++];	// indexPair count
+
+			index += indexCount;	// skip the index colour information
+
+			if (index >= (int)len)
+			{
+				Release();
+				return false;
+			}
+
+			// Normal colour count
 			colorCount = m_Pixels[i][index++];
 
 			// m_Pixels[i][index] ~ m_Pixels[i][index+colorCount-1]
-			// 5:6:5를 5:5:5로 바꾼다.
-			for (k=0; k<colorCount; k++)								
+			// Converted from 5:6:5 to 5:5:5.
+			for (k=0; k<colorCount; k++)
 			{
+				if (index >= (int)len)
+				{
+					Release();
+					return false;
+				}
+
 				m_Pixels[i][index] = ColorDraw::Convert565to555(m_Pixels[i][index]);
 				index++;
 			}
 		}
-	}	
+	}
 	
 	m_bInit = true;
 

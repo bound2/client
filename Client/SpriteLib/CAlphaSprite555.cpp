@@ -130,45 +130,83 @@ CAlphaSprite555::LoadFromFile(ifstream& file)
 	
 	m_Pixels = new WORD* [m_Height];
 
+	// Cleared up front so Release() is safe if a scanline below is
+	// rejected: it walks every row of this array and frees it, and would
+	// otherwise be handed the uninitialised tail.
+	for (int i=0; i<m_Height; i++)
+		m_Pixels[i] = NULL;
+
 	WORD len;
 
 	//--------------------------------
 	// 5:5:5
 	//--------------------------------
-	// 5:6:5로 저장된걸 읽었기 때문에 5:6:5를 5:5:5로 바꿔줘야 한다.	
+	// The data was stored as 5:6:5, so it is converted to 5:5:5 here.
 	int	count, index, colorCount;
 
-	register int i;
 	register int j;
 
 	for (int i=0; i<m_Height; i++)
-	{			
-		// byte수와 실제 data를 Load한다.
+	{
+		// Read the scanline length and then the scanline itself.
 		file.read((char*)&len, 2);
+
+		// A scanline has to carry at least the segment count that is
+		// read from element zero below.
+		if (!file || len==0)
+		{
+			Release();
+			return false;
+		}
+
 		m_Pixels[i] = new WORD [len];
+
 		file.read((char*)m_Pixels[i], len<<1);
 
-		count = m_Pixels[i][0];			
+		if (!file)
+		{
+			Release();
+			return false;
+		}
+
+		count = m_Pixels[i][0];
 		index = 1;
 
 		for (j=0; j<count; j++)
 		{
-			//transCount = m_Pixels[i][index];
-			colorCount = m_Pixels[i][index+1];				
+			// Both counts are read before the run, so they have to lie
+			// inside the scanline.
+			if (index+1 >= (int)len)
+			{
+				Release();
+				return false;
+			}
 
-			index+=2;	// 두 count 만큼
+			//transCount = m_Pixels[i][index];
+			colorCount = m_Pixels[i][index+1];
+
+			index+=2;	// past both counts
 
 			// m_Pixels[i][index] ~ m_Pixels[i][index+colorCount-1]
-			// 5:5:5를 5:6:5로 바꿔서 저장하고 다시 5:5:5로 바꿔준다.
-			index++;	// Alpha값 skip
-			for (int j=0; j<colorCount; j++)								
-			{					
+			// Converted from 5:6:5 to 5:5:5 in place.
+			index++;	// skip the alpha value
+
+			// Every write is bounded individually. The alpha values are
+			// interleaved with the colours, so the run advances two
+			// elements at a time and its extent cannot be checked with a
+			// single comparison as clearly as the plain colour case.
+			for (int k=0; k<colorCount; k++)
+			{
+				if (index >= (int)len)
+				{
+					Release();
+					return false;
+				}
+
 				m_Pixels[i][index] = ColorDraw::Convert565to555(m_Pixels[i][index]);
 				index+=2;
 			}
 			index--;
-
-			//index += colorCount;	// 투명색 아닌것만큼 +				
 		}
 	}
 
