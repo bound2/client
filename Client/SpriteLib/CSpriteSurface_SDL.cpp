@@ -715,25 +715,39 @@ void CSpriteSurface::GammaBox555(RECT* pRect, int p)
  * Missing Methods for Linker Compatibility
  * ============================================================================ */
 
+/* ----------------------------------------------------------------------------
+ * Lock state model
+ *
+ * The game code was written against DirectDraw, where Lock()/Unlock() flip a
+ * single boolean flag: locking an already locked surface is a no-op, and
+ * unlocking one that is not locked is harmless. MTopView and the UI layer rely
+ * on that - they unlock defensively on several paths, re-lock from IsLock()
+ * snapshots, and leave whole branches deliberately unbalanced. A counting model
+ * therefore drifts upwards and never returns to zero, which breaks two things:
+ * the "surface must not be locked" asserts in the UI layer fire every frame,
+ * and SDL_BlitSurface refuses to blit a surface whose SDL lock is still held,
+ * so the frame flip silently draws nothing.
+ *
+ * Backend surfaces are plain software SDL_Surfaces (SDL_CreateRGBSurface, no
+ * RLE color key), so SDL_MUSTLOCK() is false for them and their pixel pointer
+ * stays valid whether or not they are locked; the blit helpers take their own
+ * short backend lock around direct pixel access. We therefore keep the
+ * DirectDraw-style flag for the callers that branch on IsLock(), and never hold
+ * an SDL lock across game code.
+ * -------------------------------------------------------------------------- */
+
+/* Pure accessor: returns the pixel pointer without changing the lock state. */
 void* CSpriteSurface::GetSurfacePointer()
 {
 	if (m_backend_surface == SPRITECTL_INVALID_SURFACE) return NULL;
 
-#ifdef _DEBUG
-	static bool warning_shown = false;
-	if (!warning_shown) {
-		fprintf(stderr, "WARNING: GetSurfacePointer() is deprecated and leaks locks!\n");
-		fprintf(stderr, "         Use Lock() + GetSurfacePointer() + Unlock() instead\n");
-		warning_shown = true;
-	}
-#endif
-
 	spritectl_surface_info_t info;
-	if (spritectl_lock_surface(m_backend_surface, &info) == 0) {
-		m_lock_count++;  // Track this lock
-		return info.pixels;  // Caller MUST call Unlock()!
+	if (spritectl_lock_surface(m_backend_surface, &info) != 0) {
+		return NULL;
 	}
-	return NULL;
+	spritectl_unlock_surface(m_backend_surface);
+
+	return info.pixels;
 }
 
 void* CSpriteSurface::Lock(RECT* rect, DWORD* pitch)
@@ -741,40 +755,23 @@ void* CSpriteSurface::Lock(RECT* rect, DWORD* pitch)
 	(void)rect;  // Not used in SDL backend
 	if (m_backend_surface == SPRITECTL_INVALID_SURFACE) return NULL;
 
-#ifdef _DEBUG
-	// Warn if already locked (potential double-lock)
-	if (m_lock_count > 0) {
-		fprintf(stderr, "WARNING: CSpriteSurface::Lock() called while already locked (lock_count=%d)\n", m_lock_count);
-	}
-#endif
-
 	spritectl_surface_info_t info;
-	if (spritectl_lock_surface(m_backend_surface, &info) == 0) {
-		if (pitch != NULL) {
-			*pitch = info.pitch;
-		}
-		m_lock_count++;  // Track lock
-		return info.pixels;
+	if (spritectl_lock_surface(m_backend_surface, &info) != 0) {
+		return NULL;
 	}
-	return NULL;
+	spritectl_unlock_surface(m_backend_surface);
+
+	if (pitch != NULL) {
+		*pitch = info.pitch;
+	}
+
+	m_lock_count = 1;  // DirectDraw-style flag, not a nesting counter
+	return info.pixels;
 }
 
 void CSpriteSurface::Unlock()
 {
-	if (m_backend_surface != SPRITECTL_INVALID_SURFACE) {
-#ifdef _DEBUG
-		// Warn if not locked (potential double-unlock)
-		if (m_lock_count <= 0) {
-			fprintf(stderr, "WARNING: CSpriteSurface::Unlock() called but not locked!\n");
-		} else {
-			m_lock_count--;  // Track unlock
-		}
-#else
-		m_lock_count--;
-#endif
-
-		spritectl_unlock_surface(m_backend_surface);
-	}
+	m_lock_count = 0;
 }
 
 bool CSpriteSurface::InitTextureSurface(int width, int height, void* tex1, void* tex2)

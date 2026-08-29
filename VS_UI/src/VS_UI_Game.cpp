@@ -887,17 +887,14 @@ C_VS_UI_GAME::~C_VS_UI_GAME()
 			g_Dimension,g_pUserInformation->WorldID);
 		m_pC_mailbox->SaveToFile(mailFileName.GetString());
 	}
-	if(m_NickNameList.size())
+	// erase() invalidates itr, so free the entries first and clear afterwards
+	for(std::vector<C_VS_UI_NicknameInfo*>::iterator itr = m_NickNameList.begin();
+		itr != m_NickNameList.end(); itr ++)
 	{
-		std::vector<C_VS_UI_NicknameInfo*>::iterator itr = m_NickNameList.begin();
-		while(itr != m_NickNameList.end())
-		{
-			C_VS_UI_NicknameInfo * TempInfo2 = (*itr);
-			m_NickNameList.erase(itr);
-			DeleteNew(TempInfo2);
-		}
-		m_NickNameList.clear();
+		C_VS_UI_NicknameInfo * TempInfo2 = (*itr);
+		DeleteNew(TempInfo2);
 	}
+	m_NickNameList.clear();
 	
 	DeleteNew(m_pC_persnalshop);
 	DeleteNew(m_pC_persnalshopmessage);
@@ -6629,17 +6626,14 @@ void C_VS_UI_GAME::SetNickNameList(void* pData)
 {
 	if(NULL == pData)
 		return;
-	if(m_NickNameList.size())
+	// erase() invalidates itr, so free the entries first and clear afterwards
+	for(std::vector<C_VS_UI_NicknameInfo*>::iterator itr = m_NickNameList.begin();
+		itr != m_NickNameList.end(); itr ++)
 	{
-		std::vector<C_VS_UI_NicknameInfo*>::iterator itr = m_NickNameList.begin();
-		while(itr != m_NickNameList.end())
-		{
-			C_VS_UI_NicknameInfo * TempInfo2 = (*itr);
-			m_NickNameList.erase(itr);
-			DeleteNew(TempInfo2);
-		}
-		m_NickNameList.clear();
+		C_VS_UI_NicknameInfo * TempInfo2 = (*itr);
+		DeleteNew(TempInfo2);
 	}
+	m_NickNameList.clear();
 
 	std::vector<C_VS_UI_NicknameInfo*>	*TempList = (std::vector<C_VS_UI_NicknameInfo*>*)pData;
 	

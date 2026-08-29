@@ -54,6 +54,7 @@ endif()
 set(USE_SDL_BACKEND ON CACHE BOOL "Use SDL backend instead of native Windows APIs" FORCE)
 
 option(BUILD_ENGINE "Build new SDL-based engine" ON)
+option(BUILD_TESTS "Build unit tests for the static libraries" OFF)
 
 # Set output directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -161,6 +162,14 @@ endif()
 
 if(BUILD_ENGINE)
 	add_subdirectory(tools/engine/sprite)
+endif()
+
+# ============================================================
+# Unit tests
+# ============================================================
+if(BUILD_TESTS)
+	enable_testing()
+	add_subdirectory(tests)
 endif()
 
 # ============================================================

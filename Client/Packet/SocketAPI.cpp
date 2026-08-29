@@ -33,9 +33,49 @@ extern int errno;
 
 using namespace FileAPI;
 
+#if __WINDOWS__
+
 //////////////////////////////////////////////////////////////////////
 //
-// SOCKET SocketAPI::socket_ex ( int domain , int type , int protocol ) 
+// start the Windows socket library
+//
+//////////////////////////////////////////////////////////////////////
+static int startWinsock ()
+{
+	WSADATA wsaData;
+
+	return WSAStartup( MAKEWORD(2,2) , &wsaData );
+}
+
+
+//////////////////////////////////////////////////////////////////////
+//
+// Winsock requires WSAStartup before any socket call, and every socket
+// this client creates is made through socket_ex() below - including the
+// ones on the request server threads, hence the function local static
+// for its thread safe initialization.
+//
+// The reference is deliberately never released: the helpers in
+// PacketFunction.cpp pair their own WSAStartup with WSACleanup, and
+// holding one reference for the process lifetime keeps those from
+// tearing Winsock down while the game still owns sockets.
+//
+//////////////////////////////////////////////////////////////////////
+static void ensureWinsockStarted ()
+	throw ( Error )
+{
+	static const int startupResult = startWinsock();
+
+	if ( startupResult != 0 )
+		throw Error("WSAStartup failed. the Windows socket library is unavailable.");
+}
+
+#endif
+
+
+//////////////////////////////////////////////////////////////////////
+//
+// SOCKET SocketAPI::socket_ex ( int domain , int type , int protocol )
 //		throw ( Error )
 //
 // exception version of socket()
@@ -56,6 +96,10 @@ SOCKET SocketAPI::socket_ex ( int domain , int type , int protocol )
 	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
+
+#if __WINDOWS__
+	ensureWinsockStarted();
+#endif
 
 	SOCKET s = ::socket(domain,type,protocol);
 

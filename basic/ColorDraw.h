@@ -64,7 +64,12 @@ public:
 
 	static inline WORD	Convert565to555(WORD pixel)
 	{
-		return (pixel & 0xFFE0) >> 1;
+		// Red (bits 11-15) and the top five green bits (bits 6-10) move
+		// down one position; blue (bits 0-4) occupies the same bits in
+		// both formats and is carried across untouched. Masking with
+		// 0xFFE0 instead of 0xFFC0 would shift green's least significant
+		// bit into the top of the blue field and discard blue entirely.
+		return (WORD)(((pixel & 0xFFC0) >> 1) | (pixel & 0x001F));
 	}
 
 	//----------------------------------------------------------------------

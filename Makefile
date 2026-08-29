@@ -1,7 +1,7 @@
 # OpenDarkEden Client - Makefile
 # Wrapper around CMake build system
 
-.PHONY: all debug release test clean fmt fmt-check help
+.PHONY: all debug release test test-asan clean fmt fmt-check help
 .PHONY: check-resources extract-resources clean-resources
 .PHONY: sprite-viewer creature-viewer item-viewer map-viewer zone-parser
 .PHONY: debug-asan debug-tsan run-asan run-tsan
@@ -15,6 +15,8 @@ BUILD_DIR_DEBUG = build/debug
 BUILD_DIR_RELEASE = build/release
 BUILD_DIR_DEBUG_ASAN = build/debug-asan
 BUILD_DIR_DEBUG_TSAN = build/debug-tsan
+BUILD_DIR_TESTS = build/tests
+BUILD_DIR_TESTS_ASAN = build/tests-asan
 BUILD_DIR_WEB = emscripten/build
 
 # Get the absolute path of the client directory
@@ -79,10 +81,22 @@ run-tsan: debug-tsan
 # Testing and Validation
 # ============================================================
 
-# Run tests
+# Run the unit tests for the static libraries
 test:
-	@echo "TODO: Run tests"
-	@echo "cd $(BUILD_DIR_DEBUG) && ctest --output-on-failure"
+	@echo "Building and running unit tests..."
+	cmake -S . -B $(BUILD_DIR_TESTS) -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON
+	cmake --build $(BUILD_DIR_TESTS) --target unit_tests -j$(NPROCS)
+	cd $(BUILD_DIR_TESTS) && ctest --output-on-failure
+
+# Run the unit tests under AddressSanitizer.
+# Memory-safety bugs usually produce garbage rather than a failed assertion,
+# so the sanitizer is what actually catches them. Requires GCC or Clang;
+# the sanitizer flags in CMakeLists.txt are not wired up for MSVC.
+test-asan:
+	@echo "Building and running unit tests with AddressSanitizer..."
+	cmake -S . -B $(BUILD_DIR_TESTS_ASAN) -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON -DUSE_ASAN=ON
+	cmake --build $(BUILD_DIR_TESTS_ASAN) --target unit_tests -j$(NPROCS)
+	cd $(BUILD_DIR_TESTS_ASAN) && ctest --output-on-failure
 
 # Code formatting
 fmt:

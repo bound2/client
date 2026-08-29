@@ -6295,9 +6295,28 @@ CGameUpdate::Update(void)
 		// Windows-specific anti-cheat time verification - disabled on macOS
 		int nextTimeValue =60000;
 
-		g_MyCheckTime+=72;	//modify by viva : +=73(+=72)
+		// g_MyCheckTime measures how much time has passed since the 60-second
+		// reset below, and 97620 means the client believes it ran far ahead of
+		// the wall clock - a speed hack. Two things made it accuse every honest
+		// client instead:
+		//
+		//  - It added a fixed 72 per frame, so it counted frames, not
+		//    milliseconds. Above ~23 fps it reached 97620 before the reset could
+		//    run, and the client quit itself about 23 seconds into the game.
+		//  - timeGetTime() is SDL_GetTicks() here (see basic/Platform.h), so it
+		//    counts from SDL init rather than from boot, which made
+		//    "g_CurrentTime < 60000" flag the first minute of every session.
+		//
+		// Accumulate the real elapsed milliseconds instead, clamped so a
+		// debugger pause or a suspended window does not read as a time jump.
+		static DWORD lastCheckTime = g_CurrentTime;
+		DWORD checkTimeGap = (g_CurrentTime > lastCheckTime)? (g_CurrentTime - lastCheckTime) : 0;
+		lastCheckTime = g_CurrentTime;
+		if (checkTimeGap > 1000) checkTimeGap = 1000;
+		g_MyCheckTime += (int)checkTimeGap;
+
 		// add by Coffee 2006.11.12
-		if(g_MyCheckTime>=97620 || g_CurrentTime < 60000)
+		if(g_MyCheckTime>=97620)
 		{
 			for(int i =0 ;i<10; i++)
 			{

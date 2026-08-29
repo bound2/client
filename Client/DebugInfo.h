@@ -80,14 +80,16 @@
 	#else
 		#define	DEBUG_MESSAGE(debugMessage)	((void)0)
 
-		// Empty macro stubs for release builds
-		#define	DEBUG_ADD(message)				((void)0)
-		#define	DEBUG_ADD_ERR(message)			((void)0)
-		#define	DEBUG_ADD_WAR(message)			((void)0)
+		// Route the legacy DEBUG_ADD macros to the logging system instead of
+		// compiling them out. Defining them as no-ops here made logging depend
+		// on whether a translation unit included this header before or after
+		// DebugLog.h, which silently discarded the socket and login error
+		// reporting in GameInit.cpp and UIMessageManager.cpp.
+		#include "DebugLog.h"
+
+		// DebugLog.h has no equivalent - the console commands it drove only
+		// exist in the OUTPUT_DEBUG build.
 		#define	DEBUG_CMD(cmd, message)			((void)0)
-		#define	DEBUG_ADD_FORMAT(format, ...)	((void)0)
-		#define	DEBUG_ADD_FORMAT_ERR(format, ...)	((void)0)
-		#define	DEBUG_ADD_FORMAT_WAR(format, ...)	((void)0)
 
 //		#define	DEBUG_NEW			new
 	#endif	

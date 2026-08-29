@@ -8,6 +8,7 @@
 #include "VS_UI_Mouse_pointer.h"
 //#include "VS_UI_Item.h"
 
+#include "DebugInfo.h"
 #include "VS_UI.h"
 #include "MPriceManager.h"
 //#include "MCreatureTable.h"
@@ -14014,27 +14015,44 @@ C_VS_UI_QUEST_MANAGER::~C_VS_UI_QUEST_MANAGER()
 // 일단 첨에 로드해놓고 쭈~욱 쓰기로 코딩^^;
 // 생각 해보니 그때 그때 로딩하는게 좋을듯 해서 수정..ㅋㅋ
 // 처음 리스트 받을 땐 기본 tree를 계속 가지고 있고 중간중간 modify할땐 그때 그때 읽어 온다.
-bool	C_VS_UI_QUEST_MANAGER::LoadQuestXML()
+bool C_VS_UI_QUEST_MANAGER::LoadQuestXML()
 {
 	m_Quest_XML_file.SetRAR(RPK_TUTORIAL_ETC, RPK_PASSWORD);
-	
-	m_Quest_XML_file.Open(QUEST_XML_FILE);
 
-	XMLParser	parser;
+	XMLParser parser;
 
-	// quest xml은 vector만 쓰기로 해서뤼..-_-;
-	parser.parse( (char *)m_Quest_XML_file.GetFilePointer(), &m_Quest_XML_Tree, true);
+	// Main quest XML
+	if (!m_Quest_XML_file.Open(QUEST_XML_FILE))
+	{
+		DEBUG_ADD("Failed to open QUEST_XML_FILE");
+		return false;
+	}
+
+	parser.parse(
+		(char*)m_Quest_XML_file.GetFilePointer(),
+		&m_Quest_XML_Tree,
+		true
+	);
 
 	m_Quest_XML_file.Release();
-	
 
-	m_Quest_XML_file.Open(QUEST_EVENT_XML_FILE);
 
-	parser.parse( (char *)m_Quest_XML_file.GetFilePointer(), &m_Quest_XML_Tree, true);
-	
+	// Quest event XML
+	if (!m_Quest_XML_file.Open(QUEST_EVENT_XML_FILE))
+	{
+		DEBUG_ADD("Failed to open QUEST_EVENT_XML_FILE");
+		return false;
+	}
+
+	parser.parse(
+		(char*)m_Quest_XML_file.GetFilePointer(),
+		&m_Quest_XML_Tree,
+		true
+	);
+
 	m_Quest_XML_file.Release();
 
-	return TRUE;
+	return true;
 }
 void	C_VS_UI_QUEST_MANAGER::ReleaseQuestXML()
 {

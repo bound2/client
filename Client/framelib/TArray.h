@@ -30,6 +30,13 @@ template <class DataType, class SizeType>
 class TArray {
 	public :
 		TArray(SizeType size=0);
+
+		// TArray owns m_pData and frees it in the destructor, so it
+		// needs a copy constructor. The compiler-supplied one copies
+		// the pointer, which shares one buffer between both instances
+		// and double frees it.
+		TArray(const TArray<DataType, SizeType>& array);
+
 		~TArray();
 
 		//--------------------------------------------------------
@@ -95,7 +102,19 @@ TArray<DataType, SizeType>::TArray(SizeType size)
 	Init(size);
 }
 
-template <class DataType, class SizeType> 
+template <class DataType, class SizeType>
+TArray<DataType, SizeType>::TArray(const TArray<DataType, SizeType>& array)
+{
+	m_Size	= 0;
+	m_pData	= NULL;
+
+	Init(array.m_Size);
+
+	for (SizeType i=0; i<m_Size; i++)
+		m_pData[i] = array.m_pData[i];
+}
+
+template <class DataType, class SizeType>
 TArray<DataType, SizeType>::~TArray()
 {
 	Release();
@@ -149,10 +168,27 @@ template <class DataType, class SizeType>
 void
 TArray<DataType, SizeType>::operator += (const TArray<DataType, SizeType>& array)
 {
-	SizeType newSize = m_Size + array.m_Size;
+	//------------------------------------------------
+	// The combined count is worked out in a wider type first.
+	// Assigning the sum straight into SizeType truncates it for narrow
+	// instantiations - for a BYTE, 200 + 100 becomes 44 - which would
+	// size the allocation below smaller than the number of elements the
+	// copy loops go on to write.
+	//------------------------------------------------
+	const unsigned long long	combinedSize	=
+		(unsigned long long)m_Size + (unsigned long long)array.m_Size;
+
+	const SizeType			newSize		= (SizeType)combinedSize;
 
 	//------------------------------------------------
-	// 두 Array를 더한 개수만큼의 memory를 잡는다.
+	// Refuse the append rather than overrun the allocation when the
+	// result cannot be represented in SizeType. *this is left unchanged.
+	//------------------------------------------------
+	if ((unsigned long long)newSize != combinedSize)
+		return;
+
+	//------------------------------------------------
+	// Allocate room for the elements of both arrays.
 	//------------------------------------------------
 	DataType*	pTempData = new DataType [newSize];
 	
@@ -217,16 +253,55 @@ template <class DataType, class SizeType>
 bool
 TArray<DataType, SizeType>::LoadFromFile(std::ifstream& file)
 {
-	// frame 개수
-	file.read((char*)&m_Size, s_SIZEOF_SizeType);
+	// Start from a known state so a rejected file leaves an empty array
+	// behind rather than stale storage.
+	Release();
 
-	if (m_Size==0) return false;
-	
-	// memory잡기
-	Init(m_Size);
+	// The count is read into a local. Reading straight into m_Size lets
+	// a short read overwrite part of the member, and leaves the previous
+	// value in place when the read fails outright, so the load would
+	// carry on with a size the file never specified.
+	SizeType	count = 0;
+
+	file.read((char*)&count, s_SIZEOF_SizeType);
+
+	if (!file)
+		return false;
+
+	if (count==0) return false;
+
+	// Reject a count the file cannot hold. Every element consumes at
+	// least one byte, so a count larger than the number of bytes
+	// remaining is corrupt, and sizing the allocation from it would read
+	// the rest of the elements from a dead stream.
+	const std::streampos	afterCount	= file.tellg();
+
+	file.seekg(0, std::ios::end);
+
+	const std::streampos	endOfFile	= file.tellg();
+
+	file.seekg(afterCount, std::ios::beg);
+
+	if (!file)
+		return false;
+
+	if ((unsigned long long)count >
+	    (unsigned long long)(endOfFile - afterCount))
+		return false;
+
+	// Allocate storage.
+	Init(count);
 
 	for (SizeType i=0; i<m_Size; i++)
+	{
+		if (!file)
+		{
+			Release();
+			return false;
+		}
+
 		m_pData[i].LoadFromFile(file);
+	}
 
 	return true;
 }
@@ -238,10 +313,17 @@ template <class DataType, class SizeType>
 void	
 TArray<DataType, SizeType>::operator = (const TArray<DataType, SizeType>& array)
 {
-	// frameArray와 똑같이 해야 한다.
+	// Init() below releases the current buffer before allocating. When
+	// the source and the destination are the same object that release
+	// also destroys the source, and the copy loop would then read the
+	// freshly allocated, uninitialised memory back over itself.
+	if (this == &array)
+		return;
+
+	// Match the source array.
 	Init( array.m_Size );
 
-	// 모든 element를 copy해야 한다.
+	// Copy every element.
 	for (SizeType i=0; i<m_Size; i++)
 	{
 		m_pData[i] = array.m_pData[i];

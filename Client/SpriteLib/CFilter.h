@@ -27,7 +27,7 @@ class CFilter {
 		~CFilter();
 
 		bool		IsNotInit() const	{ return m_ppFilter==NULL; }
-		bool		IsInit() const		{ return m_ppFilter==NULL; }
+		bool		IsInit() const		{ return m_ppFilter!=NULL; }
 
 		//---------------------------------------------------------
 		// Init / Release

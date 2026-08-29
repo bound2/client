@@ -641,6 +641,18 @@ ClientConfig::LoadFromFile(const char* filename)
 	READ_CHECK_EOF( COLOR_NAME_EVIL_MORE, temp, 4 )	
 
 	READ_CHECK_EOF( BLOOD_DROP_HP_PERCENT, temp, 4 )
+
+	// This is a percentage, so anything outside 0..100 means the four bytes
+	// did not come from the field this loader thinks they did - a stale record
+	// leaves the stream inside the URL text, and text read as an integer runs
+	// to hundreds of millions. MCreature::CheckDropBlood tests
+	// "percentHP <= BLOOD_DROP_HP_PERCENT", so such a value makes every
+	// creature bleed permanently at full health. Keep the default instead.
+	if (BLOOD_DROP_HP_PERCENT < 0 || BLOOD_DROP_HP_PERCENT > 100)
+	{
+		BLOOD_DROP_HP_PERCENT = 30;
+	}
+
 	READ_CHECK_EOF( BLOOD_DROP_GAP_TIME, temp, 4 )
 	READ_CHECK_EOF( BLOOD_DROP_RANDOM_TIME, temp, 4 )	
 	READ_CHECK_EOF( MAX_TEXTUREPART_EFFECTSHADOW, temp, 4 )

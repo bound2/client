@@ -140,6 +140,16 @@ Type &CTypePack<Type>::operator [] (WORD n)
 template <class Type>
 Type &CTypePack<Type>::Get(WORD n)
 {
+	// Get returns a reference, so it cannot report a bad index back to
+	// the caller. An out of range index, or any index at all before
+	// Init() has allocated the array, is answered with a shared empty
+	// element instead of indexing past the end of the array or through a
+	// null pointer.
+	static Type	s_OutOfRange;
+
+	if(m_pData == NULL || n >= m_Size)
+		return s_OutOfRange;
+
 	if(m_bRunningLoad && !m_pData[n].IsInit())
 	{
 		m_file->seekg(m_file_index[n]);
@@ -331,6 +341,11 @@ bool CTypePack<Type>::LoadFromFilePart(const CSpriteSetManager& SSM)
 	{
 		if(*iID != 0xFFFF)
 			Get(*iID);
+
+		// The iterator has to advance. Without this the loop asked for
+		// whatever the first entry named once per pass and never
+		// touched the rest of the set.
+		++iID;
 	}
 
 	return true;
@@ -339,7 +354,19 @@ bool CTypePack<Type>::LoadFromFilePart(const CSpriteSetManager& SSM)
 template <class Type>
 bool CTypePack<Type>::ReleasePart(int first, int last)
 {
-	last = min(last, 0xFFFE);
+	if(m_pData == NULL)
+		return false;
+
+	// Release() is called through m_pData[i], so the range has to be
+	// clamped to the pack itself. Capping last at 0xFFFE only bounded it
+	// by the index type, which let the loop write through elements past
+	// the end of the allocation.
+	if(first < 0)
+		first = 0;
+
+	if(last >= (int)m_Size)
+		last = (int)m_Size - 1;
+
 	for(int i = first; i <= last; i++)
 		m_pData[i].Release();
 
@@ -349,11 +376,21 @@ bool CTypePack<Type>::ReleasePart(int first, int last)
 template <class Type>
 bool CTypePack<Type>::ReleasePart(COrderedList<TYPE_SPRITEID> list)
 {
+	if(m_pData == NULL)
+		return false;
+
 	COrderedList<TYPE_SPRITEID>::DATA_LIST::const_iterator iID = list.GetIterator();
 	for (int t=0; t<list.GetSize(); t++)
 	{
-		if(*iID != 0xFFFF)
+		// An entry naming an element outside the pack is skipped rather
+		// than written through.
+		if(*iID != 0xFFFF && *iID < m_Size)
 			m_pData[*iID].Release();
+
+		// The iterator has to advance. Without this the loop released
+		// whatever the first entry named once per pass and ignored every
+		// other element in the list.
+		++iID;
 	}
 
 	return true;
@@ -480,6 +517,11 @@ CTypePack2<TypeBase, Type1, Type2>::CTypePack2()
 	m_nLoadData = 0;
 	m_file_index = NULL;
 	m_file = NULL;
+
+	// Read by Release() to choose which concrete type to delete[] and
+	// by Get() to choose the matching spare element, so it cannot be
+	// left holding whatever was on the stack.
+	m_bSecond = false;
 }
 
 template <class TypeBase, class Type1, class Type2>
@@ -546,20 +588,37 @@ TypeBase &CTypePack2<TypeBase, Type1, Type2>::operator [] (WORD n)
 template <class TypeBase, class Type1, class Type2>
 TypeBase &CTypePack2<TypeBase, Type1, Type2>::Get(WORD n)
 {
+	// Get returns a reference, so it cannot report a bad index back to
+	// the caller. An out of range index, or any index at all before
+	// Init() has allocated the array, is answered with a shared empty
+	// element instead of indexing past the end of the array or through a
+	// null pointer.
+	//
+	// This has to happen before anything touches m_pData: the range
+	// check that used to live further down ran after the element had
+	// already been read once to test IsInit(), and only covered the
+	// running-load path.
+	//
+	// One spare of each concrete type, picked by the same flag Init()
+	// used to choose what to allocate. Handing back a Type1 while the
+	// pack holds Type2 would give the caller an element of a different
+	// type from every other element in the pack.
+	static Type1	s_OutOfRangeFirst;
+	static Type2	s_OutOfRangeSecond;
+
+	if(m_pData == NULL || n >= m_Size)
+	{
+		if(m_bSecond)
+			return s_OutOfRangeSecond;
+
+		return s_OutOfRangeFirst;
+	}
+
 	if(m_bRunningLoad && !m_pData[n].IsInit())
 	{
 		// Safety check: disable lazy loading if file pointer is invalid
 		if (m_file == NULL)
 		{
-			m_bRunningLoad = false;
-			return m_pData[n];
-		}
-
-		// Validate sprite index
-		if (n >= m_Size)
-		{
-			printf("WARNING Get[%d]: this=%p, sprite index %d out of range (size=%d)\n",
-			       n, this, n, m_Size);
 			m_bRunningLoad = false;
 			return m_pData[n];
 		}
@@ -820,6 +879,11 @@ bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFilePart(const CSpriteSetManage
 	{
 		if(*iID != 0xFFFF)
 			Get(*iID);
+
+		// The iterator has to advance. Without this the loop asked for
+		// whatever the first entry named once per pass and never
+		// touched the rest of the set.
+		++iID;
 	}
 
 	return true;
@@ -828,7 +892,20 @@ bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFilePart(const CSpriteSetManage
 template <class TypeBase, class Type1, class Type2>
 bool CTypePack2<TypeBase, Type1, Type2>::ReleasePart(int first, int last)
 {
-	last = min(last, 0xFFFE);
+	if(m_pData == NULL)
+		return false;
+
+	// Release() is called through m_pData[i], so the range has to be
+	// clamped to the pack itself. Capping last at 0xFFFE only bounded it
+	// by the index type, which let the loop write through elements past
+	// the end of the allocation. This is the overload the sprite packs
+	// actually instantiate, so it matters more than the CTypePack one.
+	if(first < 0)
+		first = 0;
+
+	if(last >= (int)m_Size)
+		last = (int)m_Size - 1;
+
 	for(int i = first; i <= last; i++)
 		m_pData[i].Release();
 
@@ -838,11 +915,21 @@ bool CTypePack2<TypeBase, Type1, Type2>::ReleasePart(int first, int last)
 template <class TypeBase, class Type1, class Type2>
 bool CTypePack2<TypeBase, Type1, Type2>::ReleasePart(COrderedList<TYPE_SPRITEID> list)
 {
+	if(m_pData == NULL)
+		return false;
+
 	COrderedList<TYPE_SPRITEID>::DATA_LIST::const_iterator iID = list.GetIterator();
 	for (int t=0; t<list.GetSize(); t++)
 	{
-		if(*iID != 0xFFFF)
+		// An entry naming an element outside the pack is skipped rather
+		// than written through.
+		if(*iID != 0xFFFF && *iID < m_Size)
 			m_pData[*iID].Release();
+
+		// The iterator has to advance. Without this the loop released
+		// whatever the first entry named once per pass and ignored every
+		// other element in the list.
+		++iID;
 	}
 
 	return true;

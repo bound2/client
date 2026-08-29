@@ -46,6 +46,9 @@ public:
 	WORD	GetPixel( short x, short y, MPalette &pal );
 	
 protected:
+	// A plain palette sprite stores one index byte per pixel.
+	virtual bool	ValidateScanlineData() const	{ return ValidateScanlines(1); }
+
 	// Blt Value
 	static DWORD	s_Value1;
 	static DWORD	s_Value2;
