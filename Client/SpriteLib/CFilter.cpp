@@ -196,21 +196,57 @@ CFilter::SaveToFile(ofstream& file)
 bool		
 CFilter::LoadFromFile(ifstream& file)
 {
-	// Size Load
-	file.read((char*)&m_Width, 2);
-	file.read((char*)&m_Height, 2);
+	// The header is read into locals.
+	//
+	// Reading it straight into m_Width and m_Height would hand the
+	// Release() inside Init() below a row count taken from the file
+	// while m_ppFilter still holds the array allocated for the previous
+	// contents. Release frees m_ppFilter[i] for every i under m_Height,
+	// so a file declaring more rows than the filter currently has runs
+	// delete[] over pointers read from past the end of that array.
+	WORD	width	= 0;
+	WORD	height	= 0;
 
-	// size가 0이면 return
-	if (m_Width==0 || m_Height==0)
+	file.read((char*)&width, 2);
+	file.read((char*)&height, 2);
+
+	if (!file)
 		return false;
 
-	// memory 잡기
-	Init( m_Width, m_Height );	
+	// Return if either dimension is zero.
+	if (width==0 || height==0)
+		return false;
 
-	// Filter 내용을 읽어온다.
+	// The body is width * height bytes. Reject a header the file cannot
+	// back with that much data before allocating anything from it.
+	const std::streampos	afterHeader	= file.tellg();
+
+	file.seekg(0, std::ios::end);
+
+	const std::streampos	endOfFile	= file.tellg();
+
+	file.seekg(afterHeader, std::ios::beg);
+
+	if (!file)
+		return false;
+
+	if ((unsigned long long)width * (unsigned long long)height >
+	    (unsigned long long)(endOfFile - afterHeader))
+		return false;
+
+	// Allocate storage.
+	Init( width, height );
+
+	// Read the filter contents.
 	for (int i=0; i<m_Height; i++)
 	{
 		file.read((char*)m_ppFilter[i], m_Width);
+
+		if (!file)
+		{
+			Release();
+			return false;
+		}
 	}
 	return true;
 }
