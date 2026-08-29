@@ -29,9 +29,27 @@ does not prompt for UAC):
 
 Close Visual Studio first. The installer aborts with exit code 8006
 (`Pre-check verification failed with warning(s) : VSProcessesRunning`) if
-anything VS-related is alive — including idle `MSBuild.exe` worker nodes, which
-linger for ~15 minutes after a `cmake --build ... -- -m` run. `taskkill /F /IM
-MSBuild.exe` clears those.
+anything VS-related is alive, and "anything" is broader than it sounds. Beyond
+`devenv` itself:
+
+- idle `MSBuild.exe` worker nodes, which linger for ~15 minutes after a
+  `cmake --build ... -- -m` run,
+- `vctip.exe`, the VC++ telemetry uploader that `cl.exe` spawns and leaves
+  behind,
+- `cl.exe` and `Tracker.exe` orphaned by an interrupted build, which have no
+  parent left to reap them and can sit there indefinitely.
+
+Chasing those by name is a losing game — `taskkill /F /IM MSBuild.exe` does not
+touch the last two. Ask instead what is running out of the Visual Studio
+directory, which is the same question the installer is asking:
+
+```powershell
+Get-Process | Where-Object { $_.Path -like 'C:\Program Files*\Microsoft Visual Studio\*' } | Select-Object Id, ProcessName, Path
+```
+
+Everything it lists has to be gone before the installer will proceed. Note that
+`--quiet` prints nothing on success, so check `$LASTEXITCODE`: `0` is done,
+`3010` is done-but-wants-a-reboot, `8006` is the pre-check above.
 
 Verify it landed before building — this should print an install path, not
 nothing:
