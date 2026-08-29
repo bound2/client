@@ -105,15 +105,23 @@ class Comparison {
 				// 움직인 회수가 같은 경우
 				if (s==0)
 				{
-					if (left->pParent!=NULL && right->pParent!=NULL)
-					{
-						if (right->pParent->direction == right->direction)
-						{
-							return true;	// right선택
-						}
-						
-						return false;	// left선택						
-					}
+					// Prefer the node that carries on in its parent's direction.
+					//
+					// This used to look only at right, so two nodes that both
+					// continued straight each compared less than the other. That is
+					// not a strict weak ordering - it is not even irreflexive, since
+					// a straight node compared less than itself - and push_heap trips
+					// _Debug_lt_pred's "invalid comparator" check on it, so walking
+					// far enough for two such nodes to meet in the open set crashed
+					// a debug build inside MPlayer::SetDestination.
+					//
+					// Compare the property on both sides instead. A node with no
+					// parent is the start node and cannot be carrying on in any
+					// direction, so it counts as not straight.
+					const bool bLeftStraight  = (left->pParent  != NULL && left->pParent->direction  == left->direction);
+					const bool bRightStraight = (right->pParent != NULL && right->pParent->direction == right->direction);
+
+					return !bLeftStraight && bRightStraight;	// right���� only when it alone is straight
 				}
 				// 움직인 회수가 적은 것
 				else if (s>0) 
