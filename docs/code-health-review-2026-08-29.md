@@ -93,9 +93,22 @@ Found while fixing the above:
 
 This repository previously had no way to run a unit test: `enable_testing()` was never called, the `Makefile`'s `test` target was a stub, and `BUILD_TESTS` was referenced in the configuration summary without being defined. Commits `60d5d8e` and `f36b8bb` add a minimal C++11 self-registering framework, wire it into CTest, implement `make test`, and add `make test-asan`. 62 tests now run; each fix above was written test-first.
 
+### Adversarial review of this work
+
+The remediation was itself put through an adversarial review (single Opus reviewer, xhigh effort), which returned a verdict of **significant problems** and found three real defects that the fixes had introduced or missed. All three are repaired in `6ee3e76`:
+
+- **`CTypePack2::ReleasePart(int,int)` was never fixed.** `6f457e0` clamped the `CTypePack` overload and left the `CTypePack2` one untouched — the one the sprite packs actually instantiate and `MTopView` calls. The Remediation Status entry claiming otherwise was false and has been corrected.
+- **The 555 loaders desynchronised the stream.** Their rejection paths returned part way through a sprite, but sprites are stored back to back and the pack loaders ignore the return value and rely on the position having advanced. One malformed sprite turned every later sprite in the pack into garbage. `CSprite555` now reads the whole sprite before validating any of it.
+- **`CSprite555` latched itself permanently.** It sets `m_bLoading` on entry and `CSprite::Release()` never clears it, so an early return left the object unable to load anything again — escalating, through `CTypePack2`'s lazy-load retry, to disabling lazy loading for the whole pack.
+
+The reviewer independently verified the bound arithmetic in `CSprite555`, `CAlphaSprite555`, `CIndexSprite555` and `CAlphaSpritePal::Blt` as correct and not over-strict, confirmed `CAlphaSpritePal::SetPixel` really does emit two bytes per pixel, and could not construct any input to either in-tree encoder that the new scanline validation rejects.
+
 ### Caveats
 
-- **Not validated against real game art.** The sprite validation matches what the encoder in `SetPixel` guarantees, but only running the client against actual `.spr` data proves no shipped asset trips it. The failure mode would be artwork silently vanishing.
+- **`CAlphaSprite555` and `CIndexSprite555` still desynchronise the stream on rejection.** They share the defect fixed in `CSprite555` but have no `m_bLoading` flag; restructuring them is a follow-up.
+- **The 555 fixes are latent in this build.** `ColorDraw::Is565()` returns a hardcoded `true`, and the 555 sprite variants are only constructed on the false branch, so the `CSprite555` family and `Convert565to555` fixes have no runtime effect today. They matter if a 5:5:5 surface is ever supported again.
+- **Not validated against real game art.** The sprite validation matches what the encoder in `SetPixel` guarantees, but only running the client against actual `.spr` data proves no shipped asset trips it. The failure mode would be artwork silently vanishing. Note also that a rejected sprite is dropped with no log line and an ignored return value, so there is no signal when it happens.
+- **The scanline validation enforces an upper bound, not an exact one.** The encoder normally emits exactly `width` pixels per row, but its per-row segment count is stored in a byte, so a row needing more than 255 segments truncates and decodes to fewer.
 - **Two fixes are regression guards rather than reproductions**, and say so in their commit messages: the out-of-range `CTypePack::Get` read did not fault when tested, and `LoadFromFilePart(CSpriteSetManager)` has no observable effect without a running load.
 - **`USE_ASAN` still only applies to GCC and Clang**, so `make debug-asan` and the new `make test-asan` are no-ops under MSVC. This remains the highest-leverage unfixed item for the memory-safety findings still open — see the build area below.
 
@@ -793,7 +806,7 @@ The constructor at lines 474-483 initializes m_pData, m_Size, m_bRunningLoad, m_
 
 **Category:** correctness  |  **Location:** `Client/SpriteLib/CTypePack.h:327`
 
-> ✅ **Fixed** in `6f457e0`. Both iterators advance, list entries are range checked, and ReleasePart's range is clamped to m_Size rather than to 0xFFFE. The CSpriteSetManager variant has no observable effect without a running load, so it has no test of its own and was fixed alongside its tested twin.
+> ✅ **Fixed** in `6f457e0`, completed in `6ee3e76`. Both iterators advance and list entries are range checked. `6f457e0` clamped `ReleasePart(int,int)` to m_Size on `CTypePack` but missed the identical overload on `CTypePack2` — which is the template the sprite packs actually instantiate and the one `MTopView` calls — so the unbounded write survived until an adversarial review caught it. The `CSpriteSetManager` variant has no observable effect without a running load, so it has no test of its own and was fixed alongside its tested twin.
 
 CTypePack::LoadFromFilePart(const CSpriteSetManager&) at lines 329-334 obtains `iID = SSM.GetIterator()` and loops `for (int t=0; t<SSM.GetSize(); t++) { if(*iID != 0xFFFF) Get(*iID); }` — iID is never incremented. CTypePack::ReleasePart(COrderedList) at lines 352-357 has the identical defect, as do both CTypePack2 copies at lines 818-823 and 841-846. The effect is that a partial preload or partial release touches only the first sprite in the set and silently leaves every other requested sprite unloaded (or unreleased), which manifests as missing graphics or unbounded memory growth rather than a crash.
 
