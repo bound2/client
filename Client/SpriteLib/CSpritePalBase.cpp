@@ -49,39 +49,105 @@ void CSpritePalBase::SetEmptySprite()
 bool CSpritePalBase::LoadFromFile(std::ifstream &file)
 {
 	Release();
-	
-	file.read((char *)&m_Size, 4);
 
-//	// size 가 없으면 리턴하쟈
-//	if(m_Size == 0)
-//		return true;
+	// The header goes into locals so nothing is allocated from it until
+	// it has been checked.
+	DWORD	size	= 0;
+	WORD	width	= 0;
+	WORD	height	= 0;
 
-	file.read((char *)&m_Width, 2);
-	file.read((char *)&m_Height, 2);
+	file.read((char *)&size, 4);
+	file.read((char *)&width, 2);
+	file.read((char *)&height, 2);
+
+	if (!file)
+	{
+		SetEmptySprite();
+		return false;
+	}
+
+	// The body is size bytes of packed pixel data followed by one WORD
+	// per scanline. Reject a header the file cannot back with that much
+	// data, rather than sizing an allocation from a number the file is
+	// free to invent.
+	const std::streampos	afterHeader	= file.tellg();
+
+	file.seekg(0, std::ios::end);
+
+	const std::streampos	endOfFile	= file.tellg();
+
+	file.seekg(afterHeader, std::ios::beg);
+
+	if (!file)
+	{
+		SetEmptySprite();
+		return false;
+	}
+
+	const unsigned long long	required =
+		(unsigned long long)size + (unsigned long long)height * 2ULL;
+
+	if (required > (unsigned long long)(endOfFile - afterHeader))
+	{
+		SetEmptySprite();
+		return false;
+	}
+
+	m_Size		= size;
+	m_Width		= width;
+	m_Height	= height;
 
 	m_pData = new BYTE[m_Size+sizeof(BYTE *)*m_Height];
 	m_pPixels = (BYTE **)(m_pData+m_Size);
 
 	file.read((char *)m_pData, m_Size);
 
-	register int i;
-	
 	WORD *indexArray = new WORD[m_Height];
 
 	file.read((char *)indexArray, m_Height<<1);
 
-	BYTE *tempData = m_pData;
+	if (!file)
+	{
+		delete []indexArray;
+		SetEmptySprite();
+		return false;
+	}
+
+	// Build the scanline table.
+	//
+	// The per-scanline byte counts come from the file and are summed to
+	// give each scanline's offset, so the running total has to stay
+	// inside the pixel data. Without this check the pointers stored in
+	// m_pPixels[] can address anything, and the Blt routines dereference
+	// them later. The accumulator is wider than DWORD because height
+	// entries of up to 0xFFFF can otherwise wrap it.
+	unsigned long long	offset	= 0;
+	bool			bValid	= true;
 
 	for (int i=0; i<m_Height; i++)
 	{
-		m_pPixels[i] = tempData;
-		tempData += indexArray[i];
+		// One past the end is allowed, for an empty trailing scanline.
+		if (offset > (unsigned long long)m_Size)
+		{
+			bValid = false;
+			break;
+		}
+
+		m_pPixels[i] = m_pData + offset;
+
+		offset += indexArray[i];
 	}
 
 	delete []indexArray;
 
+	if (!bValid)
+	{
+		SetEmptySprite();
+		return false;
+	}
+
 	m_bInit = true;
-	
+
 	return true;
 }
 
