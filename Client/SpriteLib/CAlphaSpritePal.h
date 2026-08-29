@@ -78,6 +78,10 @@ public:
 	WORD		GetPixel( short x, short y , MPalette &pal);
 	
 protected:
+	// An alpha sprite stores an alpha byte alongside each palette
+	// index, so its colour runs occupy two bytes per pixel.
+	virtual bool	ValidateScanlineData() const	{ return ValidateScanlines(2); }
+
 	// Blt Value
 	static int		s_Value1;
 	static int		s_Value2;

@@ -2,12 +2,7 @@
 // test_calphaspritepal.cpp
 //----------------------------------------------------------------------
 //
-// Tests for CAlphaSpritePal::Blt in Client/SpriteLib/CAlphaSpritePal.cpp.
-//
-// Blt walks the run length encoded scanline at draw time and writes the
-// decoded pixels straight into the locked destination surface. Both run
-// lengths come from the sprite file, so without a bound the destination
-// pointer walks past the end of the scanline it was given.
+// Tests for CAlphaSpritePal in Client/SpriteLib/CAlphaSpritePal.cpp.
 //
 // Scanline layout, all counts one byte:
 //
@@ -17,9 +12,16 @@
 //          BYTE  colourRun
 //          then colourRun pairs of (alpha, paletteIndex)
 //
-// The destination is allocated with a wide guard band filled with a
-// sentinel. A write outside the sprite's own width lands in that band
-// and is detected directly, without depending on the process faulting.
+// A scanline encodes exactly the sprite's width in pixels, and every
+// scanline carries at least its segment count byte. Both are guaranteed
+// by the encoder in SetPixel.
+//
+// There are two layers of defence here and they are tested separately.
+// LoadFromFile rejects a sprite whose scanlines do not decode to that
+// shape, which protects every one of the two dozen blit routines at
+// once. Blt additionally bounds its own walk, which is tested by
+// installing malformed scanlines directly rather than through the
+// loader.
 //
 //----------------------------------------------------------------------
 
@@ -55,6 +57,27 @@ void	PushDword(std::vector<unsigned char>& bytes, DWORD value)
 }
 
 //----------------------------------------------------------------------
+// Builds one segment: a transparent run, a colour run, and the (alpha,
+// palette index) pairs the colour run promises.
+//----------------------------------------------------------------------
+std::vector<unsigned char>	MakeScanline(int transparentRun, int colourRun)
+{
+	std::vector<unsigned char>	scanline;
+
+	scanline.push_back(1);				// one segment
+	scanline.push_back((unsigned char)transparentRun);
+	scanline.push_back((unsigned char)colourRun);
+
+	for (int i = 0; i < colourRun; i++)
+	{
+		scanline.push_back(0x20);		// alpha
+		scanline.push_back(0x01);		// palette index
+	}
+
+	return scanline;
+}
+
+//----------------------------------------------------------------------
 // Writes a single scanline sprite in the CSpritePalBase container
 // format: size, width, height, the pixel data, then one WORD per
 // scanline giving that scanline's length in bytes.
@@ -77,31 +100,36 @@ void	WriteSprite(const std::vector<unsigned char>& scanline)
 	out.write((const char*)&bytes[0], (std::streamsize)bytes.size());
 }
 
-//----------------------------------------------------------------------
-// Builds one segment: a transparent run, a colour run, and the (alpha,
-// palette index) pairs the colour run promises.
-//----------------------------------------------------------------------
-std::vector<unsigned char>	MakeScanline(int transparentRun, int colourRun)
-{
-	std::vector<unsigned char>	scanline;
-
-	scanline.push_back(1);				// one segment
-	scanline.push_back((unsigned char)transparentRun);
-	scanline.push_back((unsigned char)colourRun);
-
-	for (int i = 0; i < colourRun; i++)
-	{
-		scanline.push_back(0x20);		// alpha
-		scanline.push_back(0x01);		// palette index
-	}
-
-	return scanline;
-}
-
 void	RemoveTempFile()
 {
 	std::remove(kTempFile);
 }
+
+//----------------------------------------------------------------------
+// Installs scanline data directly, bypassing LoadFromFile, so Blt's own
+// bound can be exercised on data the loader would now refuse.
+//----------------------------------------------------------------------
+class InjectableAlphaSprite : public CAlphaSpritePal
+{
+public:
+	void	InstallScanline(WORD width, const std::vector<unsigned char>& scanline)
+	{
+		Release();
+
+		m_Width		= width;
+		m_Height	= 1;
+		m_Size		= (DWORD)scanline.size();
+
+		m_pData		= new BYTE[m_Size + sizeof(BYTE*) * m_Height];
+		m_pPixels	= (BYTE**)(m_pData + m_Size);
+
+		std::memcpy(m_pData, &scanline[0], m_Size);
+
+		m_pPixels[0]	= m_pData;
+
+		m_bInit		= true;
+	}
+};
 
 //----------------------------------------------------------------------
 // Destination surface with a sentinel filled guard band to the right of
@@ -147,9 +175,9 @@ void	FillPalette(MPalette& pal)
 } // namespace
 
 //----------------------------------------------------------------------
-// A sprite that fills its declared width draws inside the surface.
+// A sprite whose scanline fills its declared width loads and draws.
 //----------------------------------------------------------------------
-TEST(CAlphaSpritePal, BltStaysInsideTheSurfaceForAWellFormedSprite)
+TEST(CAlphaSpritePal, LoadsAndDrawsAWellFormedSprite)
 {
 	WriteSprite(MakeScanline(0, kSpriteWidth));
 
@@ -157,6 +185,7 @@ TEST(CAlphaSpritePal, BltStaysInsideTheSurfaceForAWellFormedSprite)
 	std::ifstream	in(kTempFile, std::ios::binary);
 
 	CHECK(sprite.LoadFromFile(in));
+	CHECK_EQ(kSpriteWidth, sprite.GetWidth());
 
 	MPalette	pal;
 
@@ -172,46 +201,63 @@ TEST(CAlphaSpritePal, BltStaysInsideTheSurfaceForAWellFormedSprite)
 }
 
 //----------------------------------------------------------------------
-// A transparent run wider than the sprite must not move the destination
-// pointer past the scanline.
+// A scanline that decodes to more pixels than the sprite is wide must
+// be rejected by the loader.
 //
-// Blt added the run straight to the destination pointer with nothing
-// comparing it against the sprite's width, so the colours that followed
-// were written far to the right of where the sprite ends.
+// This is the check that protects every blit routine at once. The
+// clipping variants walk the same run lengths as Blt and write into the
+// destination surface from them, and there are more than twenty of them
+// across CAlphaSpritePal and CSpritePal, so the shape of a scanline is
+// established once here rather than re-checked in each of them.
 //----------------------------------------------------------------------
-TEST(CAlphaSpritePal, BltRejectsTransparentRunWiderThanTheSprite)
+TEST(CAlphaSpritePal, LoadFromFileRejectsScanlineWiderThanTheSprite)
 {
+	// 200 transparent plus 50 colour pixels in a sprite four wide.
 	WriteSprite(MakeScanline(200, 50));
 
 	CAlphaSpritePal	sprite;
 	std::ifstream	in(kTempFile, std::ios::binary);
 
-	CHECK(sprite.LoadFromFile(in));
-
-	MPalette	pal;
-
-	FillPalette(pal);
-
-	GuardedSurface	surface;
-
-	sprite.Blt(surface.Data(), surface.Pitch(), pal);
-
-	CHECK(surface.GuardBandIntact());
+	CHECK(!sprite.LoadFromFile(in));
 
 	RemoveTempFile();
 }
 
 //----------------------------------------------------------------------
-// A colour run wider than the sprite must not be drawn past its width.
+// A colour run that runs past the end of the scanline data is rejected
+// by the loader too.
 //----------------------------------------------------------------------
-TEST(CAlphaSpritePal, BltRejectsColourRunWiderThanTheSprite)
+TEST(CAlphaSpritePal, LoadFromFileRejectsColourRunPastTheScanlineData)
 {
-	WriteSprite(MakeScanline(0, 200));
+	std::vector<unsigned char>	scanline;
+
+	scanline.push_back(1);		// one segment
+	scanline.push_back(0);		// transparent run
+	scanline.push_back(200);	// colour run, with no colours behind it
+
+	WriteSprite(scanline);
 
 	CAlphaSpritePal	sprite;
 	std::ifstream	in(kTempFile, std::ios::binary);
 
-	CHECK(sprite.LoadFromFile(in));
+	CHECK(!sprite.LoadFromFile(in));
+
+	RemoveTempFile();
+}
+
+//----------------------------------------------------------------------
+// Blt bounds its own walk as well, which is checked here on data
+// installed directly rather than through the loader.
+//
+// Blt added the transparent run straight to the destination pointer
+// with nothing comparing it against the sprite's width, so the colours
+// that followed were written far to the right of where the sprite ends.
+//----------------------------------------------------------------------
+TEST(CAlphaSpritePal, BltRejectsTransparentRunWiderThanTheSprite)
+{
+	InjectableAlphaSprite	sprite;
+
+	sprite.InstallScanline(kSpriteWidth, MakeScanline(200, 50));
 
 	MPalette	pal;
 
@@ -222,6 +268,24 @@ TEST(CAlphaSpritePal, BltRejectsColourRunWiderThanTheSprite)
 	sprite.Blt(surface.Data(), surface.Pitch(), pal);
 
 	CHECK(surface.GuardBandIntact());
+}
 
-	RemoveTempFile();
+//----------------------------------------------------------------------
+// The same for an oversized colour run.
+//----------------------------------------------------------------------
+TEST(CAlphaSpritePal, BltRejectsColourRunWiderThanTheSprite)
+{
+	InjectableAlphaSprite	sprite;
+
+	sprite.InstallScanline(kSpriteWidth, MakeScanline(0, 200));
+
+	MPalette	pal;
+
+	FillPalette(pal);
+
+	GuardedSurface	surface;
+
+	sprite.Blt(surface.Data(), surface.Pitch(), pal);
+
+	CHECK(surface.GuardBandIntact());
 }

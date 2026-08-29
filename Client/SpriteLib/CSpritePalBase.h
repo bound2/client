@@ -68,6 +68,29 @@ public:
 	virtual WORD	GetPixel(short x, short y, MPalette &pal) = 0;
 	
 protected:
+	//---------------------------------------------------------
+	// Walks every scanline's run length data once, checking that it
+	// stays inside the pixel data and decodes to no more than the
+	// sprite's width.
+	//
+	// bytesPerPixel is 1 for a plain palette sprite and 2 for an alpha
+	// sprite, which stores an alpha byte alongside each palette index.
+	//
+	// The blit routines take their transparent and colour runs straight
+	// from this data and write into the destination surface from them.
+	// There are more than twenty of those routines across the two
+	// subclasses, counting every clipping and pixel format variant, so
+	// the shape of a scanline is established once here rather than
+	// re-checked in each of them.
+	//---------------------------------------------------------
+	bool		ValidateScanlines(int bytesPerPixel) const;
+
+	//---------------------------------------------------------
+	// Called by LoadFromFile once the scanline table has been built.
+	// Only the subclass knows how many bytes a pixel occupies.
+	//---------------------------------------------------------
+	virtual bool	ValidateScanlineData() const	{ return true; }
+
 	WORD			m_Width;		// 가로 pixel수
 	WORD			m_Height;		// 세로 pixel수		
 	DWORD			m_Size;			// 스프라이트의 size

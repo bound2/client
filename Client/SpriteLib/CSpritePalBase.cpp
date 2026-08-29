@@ -146,7 +146,65 @@ bool CSpritePalBase::LoadFromFile(std::ifstream &file)
 		return false;
 	}
 
+	// The scanline table is in range. Now check what it points at:
+	// the run length data itself has to describe a sprite of this
+	// width and stay inside the pixel data, because every blit routine
+	// walks it and writes into the destination surface from it.
+	if (!ValidateScanlineData())
+	{
+		SetEmptySprite();
+		return false;
+	}
+
 	m_bInit = true;
+
+	return true;
+}
+
+bool CSpritePalBase::ValidateScanlines(int bytesPerPixel) const
+{
+	if (m_pData == NULL || m_pPixels == NULL)
+		return true;
+
+	const BYTE* const	pDataEnd = m_pData + m_Size;
+
+	for (int i=0; i<m_Height; i++)
+	{
+		const BYTE*	pPixels = m_pPixels[i];
+
+		// Every scanline carries at least its segment count byte, so a
+		// pointer at or past the end of the data is not drawable.
+		if (pPixels < m_pData || pPixels >= pDataEnd)
+			return false;
+
+		const int	count = *pPixels++;
+
+		// Pixels the scanline decodes to so far.
+		int		x = 0;
+
+		for (int j=0; j<count; j++)
+		{
+			// Both run lengths have to be readable.
+			if (pPixels+1 >= pDataEnd)
+				return false;
+
+			const int	transparentCount = *pPixels++;
+			const int	colourCount	 = *pPixels++;
+
+			// A scanline never decodes to more than the sprite's own
+			// width; the encoder emits exactly width pixels per row.
+			x += transparentCount + colourCount;
+
+			if (x > (int)m_Width)
+				return false;
+
+			// The colours themselves have to lie inside the data.
+			if (pPixels + colourCount*bytesPerPixel > pDataEnd)
+				return false;
+
+			pPixels += colourCount*bytesPerPixel;
+		}
+	}
 
 	return true;
 }
