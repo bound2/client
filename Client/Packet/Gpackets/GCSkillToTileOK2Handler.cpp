@@ -65,7 +65,7 @@ throw ( ProtocolException , Error )
 			if( g_pActionInfoTable->GetSize() <= skillID )
 			{
 				//DEBUG_ADD_FORMAT("[Error] Exceed SkillType %d",skillID);				
-				SendBugReport("[%s,%d] %d,%d",__FILE__, __LINE__, skillID );
+				SendBugReport("[%s,%d] %d",__FILE__, __LINE__, skillID );
 				return;
 			}
 	
