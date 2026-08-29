@@ -57,6 +57,10 @@ void	RecordFailure(const char* file, int line, const char* expr)
 	g_TestFailures++;
 
 	std::printf("      %s(%d): failed: %s\n", file, line, expr);
+
+	// Flushed eagerly: a test covering memory handling can abort the
+	// process, and buffered output would be lost with it.
+	std::fflush(stdout);
 }
 
 //----------------------------------------------------------------------
@@ -67,6 +71,8 @@ void	RecordFailureInt(const char* file, int line, const char* expr,
 
 	std::printf("      %s(%d): failed: %s (expected %lld, actual %lld)\n",
 		    file, line, expr, expected, actual);
+
+	std::fflush(stdout);
 }
 
 //----------------------------------------------------------------------
@@ -84,6 +90,11 @@ int	RunAll()
 
 		g_TestFailures = 0;
 
+		// Announced before the test runs so a crash inside it still
+		// names the test that caused it.
+		std::printf("  [RUN ] %s.%s\n", testCase.suite, testCase.name);
+		std::fflush(stdout);
+
 		testCase.fn();
 
 		if (g_TestFailures == 0)
@@ -97,6 +108,8 @@ int	RunAll()
 
 			failedTests++;
 		}
+
+		std::fflush(stdout);
 	}
 
 	std::printf("\n%d test(s), %d check(s), %d failed\n",
