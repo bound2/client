@@ -21,6 +21,13 @@
 static int g_spritectl_initialized = 0;
 static SDL_Renderer* g_spritectl_default_renderer = NULL;
 
+/* Reused scratch surface for spritectl_blt_sprite()'s non-RLE fallback path
+ * (see below) - grows to the largest sprite blitted so far instead of being
+ * allocated/freed on every single call. */
+static SDL_Surface* g_spritectl_blt_scratch = NULL;
+static int g_spritectl_blt_scratch_w = 0;
+static int g_spritectl_blt_scratch_h = 0;
+
 /* ============================================================================
  * Initialization
  * ============================================================================ */
@@ -49,6 +56,13 @@ void spritectl_shutdown(void) {
 	if (g_spritectl_default_renderer) {
 		SDL_DestroyRenderer(g_spritectl_default_renderer);
 		g_spritectl_default_renderer = NULL;
+	}
+
+	if (g_spritectl_blt_scratch) {
+		SDL_FreeSurface(g_spritectl_blt_scratch);
+		g_spritectl_blt_scratch = NULL;
+		g_spritectl_blt_scratch_w = 0;
+		g_spritectl_blt_scratch_h = 0;
 	}
 
 	SDL_Quit();
@@ -642,12 +656,34 @@ int spritectl_blt_sprite(spritectl_surface_t dest, int x, int y,
 	 * Locking the destination surface before blitting is incorrect and will cause errors.
 	 */
 
-	/* Create temporary surface from sprite pixels */
-	src_surface = SDL_CreateRGBSurface(0, sprite->width, sprite->height, 32,
-	                                  0xFF, 0xFF00, 0xFF0000, 0xFF000000);
-	if (!src_surface) {
-		return -1;
+	/* Reuse a persistent scratch surface sized to the largest sprite blitted
+	 * so far, instead of creating/destroying a new SDL_Surface on every call.
+	 * This fallback path runs for every non-RLE sprite - including all text
+	 * glyphs (spritectl_create_sprite() always sets has_rle = 0) - so a
+	 * text-heavy screen (e.g. the option dialog's Hotkey tab) was doing
+	 * thousands of surface alloc/free cycles per second just from drawing
+	 * its keybind list every frame. */
+	if (!g_spritectl_blt_scratch ||
+	    g_spritectl_blt_scratch_w < sprite->width ||
+	    g_spritectl_blt_scratch_h < sprite->height) {
+		if (g_spritectl_blt_scratch) {
+			SDL_FreeSurface(g_spritectl_blt_scratch);
+		}
+		if (g_spritectl_blt_scratch_w < sprite->width) {
+			g_spritectl_blt_scratch_w = sprite->width;
+		}
+		if (g_spritectl_blt_scratch_h < sprite->height) {
+			g_spritectl_blt_scratch_h = sprite->height;
+		}
+		g_spritectl_blt_scratch = SDL_CreateRGBSurface(0, g_spritectl_blt_scratch_w, g_spritectl_blt_scratch_h, 32,
+		                                              0xFF, 0xFF00, 0xFF0000, 0xFF000000);
+		if (!g_spritectl_blt_scratch) {
+			g_spritectl_blt_scratch_w = 0;
+			g_spritectl_blt_scratch_h = 0;
+			return -1;
+		}
 	}
+	src_surface = g_spritectl_blt_scratch;
 
 	/* Use cached RGBA pixels if available, otherwise convert and cache */
 	if (sprite->rgba_pixels == NULL && sprite->format != SPRITECTL_FORMAT_RGBA32) {
@@ -692,16 +728,24 @@ int spritectl_blt_sprite(spritectl_surface_t dest, int x, int y,
 		pixel_src = fallback_pixels;
 	}
 
-	/* Copy to temporary surface */
+	/* Copy into the top-left corner of the (possibly larger) scratch surface,
+	 * row by row since its pitch may exceed sprite->width * 4. */
 	SDL_LockSurface(src_surface);
-	uint32_t* src_pixels = (uint32_t*)src_surface->pixels;
-	memcpy(src_pixels, pixel_src, sprite->width * sprite->height * sizeof(uint32_t));
+	uint8_t* dst_row = (uint8_t*)src_surface->pixels;
+	const uint8_t* src_row = (const uint8_t*)pixel_src;
+	size_t row_bytes = (size_t)sprite->width * sizeof(uint32_t);
+	for (int row = 0; row < sprite->height; row++) {
+		memcpy(dst_row, src_row, row_bytes);
+		dst_row += src_surface->pitch;
+		src_row += row_bytes;
+	}
 	SDL_UnlockSurface(src_surface);
 
-	/* Handle alpha blending */
-	if (flags & SPRITECTL_BLT_ALPHA) {
-		SDL_SetSurfaceAlphaMod(src_surface, alpha);
-	}
+	/* Handle alpha blending. src_surface is now a reused scratch buffer (see
+	 * above), so the alpha mod must be reset unconditionally every call -
+	 * otherwise a non-alpha blit could inherit a stale mod value left over
+	 * by an earlier alpha blit that shared the same buffer. */
+	SDL_SetSurfaceAlphaMod(src_surface, (flags & SPRITECTL_BLT_ALPHA) ? (Uint8)alpha : 255);
 
 	/* 关键: 始终启用混合模式以支持 alpha 通道 */
 	/* 即使不是 alpha 模式，也需要 BLEND 模式来处理 colorkey 产生的透明像素 */
@@ -716,16 +760,16 @@ int spritectl_blt_sprite(spritectl_surface_t dest, int x, int y,
 	dest_rect.w = sprite->width;
 	dest_rect.h = sprite->height;
 
-	/* Blit sprite to destination */
-	if (SDL_BlitSurface(src_surface, NULL, dest->surface, &dest_rect) != 0) {
+	/* Blit only the sprite-sized region of the scratch surface */
+	SDL_Rect src_rect = {0, 0, sprite->width, sprite->height};
+	if (SDL_BlitSurface(src_surface, &src_rect, dest->surface, &dest_rect) != 0) {
 		fprintf(stderr, "SpriteLib Backend: SDL_BlitSurface failed: %s\n", SDL_GetError());
 		result = -1;
 	} else {
 		result = 0;
 	}
 
-	/* Cleanup */
-	SDL_FreeSurface(src_surface);
+	/* NOTE: src_surface is the persistent scratch buffer (g_spritectl_blt_scratch) - do not free it here. */
 
 	// Re-lock the surface if it was locked before (to maintain expected state)
 	if (was_locked) {
@@ -1308,40 +1352,59 @@ int spritectl_present_surface(spritectl_surface_t surface, void* renderer_ptr) {
 		return -1;
 	}
 
-	/* Create texture from surface */
-	SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, sdl_surface);
-	if (!texture) {
-		fprintf(stderr, "SpriteLib Backend: Failed to create texture: %s\n", SDL_GetError());
-		return -1;
-	}
-
-	// DEBUG: Check texture format
-	static int texture_debug_count = 0;
-	if (texture_debug_count < 3) {
-		Uint32 format;
-		if (SDL_QueryTexture(texture, &format, NULL, NULL, NULL) == 0) {
-			const char* format_name = SDL_GetPixelFormatName(format);
-			fprintf(stderr, "Texture created: surface_format=%s, texture_format=%s\n",
-				SDL_GetPixelFormatName(sdl_surface->format->format), format_name);
-			texture_debug_count++;
-		}
-	}
-
-	/* Render texture to screen */
 	SDL_Rect dest_rect;
 	dest_rect.x = 0;
 	dest_rect.y = 0;
 	dest_rect.w = sdl_surface->w;
 	dest_rect.h = sdl_surface->h;
 
-	if (SDL_RenderCopy(renderer, texture, NULL, &dest_rect) != 0) {
-		fprintf(stderr, "SpriteLib Backend: Failed to render texture: %s\n", SDL_GetError());
-		SDL_DestroyTexture(texture);
+	/* This is called every frame (e.g. to present the fixed-size g_pBack
+	 * backbuffer). Recreating and destroying a full-screen SDL_Texture on
+	 * every call caused continuous GPU/driver-side memory churn even while
+	 * completely idle. Reuse a persistent streaming texture instead, only
+	 * (re)creating it if the renderer changes or it doesn't exist yet. */
+	if (surface->texture != NULL && surface->renderer != renderer) {
+		SDL_DestroyTexture(surface->texture);
+		surface->texture = NULL;
+	}
+
+	if (surface->texture == NULL) {
+		surface->texture = SDL_CreateTexture(renderer, sdl_surface->format->format,
+			SDL_TEXTUREACCESS_STREAMING, sdl_surface->w, sdl_surface->h);
+		if (surface->texture != NULL) {
+			surface->renderer = renderer;
+
+			// DEBUG: Check texture format
+			Uint32 format;
+			if (SDL_QueryTexture(surface->texture, &format, NULL, NULL, NULL) == 0) {
+				fprintf(stderr, "Persistent texture created: surface_format=%s, texture_format=%s\n",
+					SDL_GetPixelFormatName(sdl_surface->format->format), SDL_GetPixelFormatName(format));
+			}
+		}
+	}
+
+	if (surface->texture != NULL &&
+		SDL_UpdateTexture(surface->texture, NULL, sdl_surface->pixels, sdl_surface->pitch) == 0 &&
+		SDL_RenderCopy(renderer, surface->texture, NULL, &dest_rect) == 0) {
+		return 0;
+	}
+
+	/* Fallback: the renderer may not support this pixel format as a native
+	 * texture format (or the fast path above failed for some other reason).
+	 * SDL_CreateTextureFromSurface performs any necessary conversion, at the
+	 * cost of allocating/freeing a texture every call - same as the old
+	 * behavior, kept only as a safety net. */
+	SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, sdl_surface);
+	if (!texture) {
+		fprintf(stderr, "SpriteLib Backend: Failed to create texture: %s\n", SDL_GetError());
 		return -1;
 	}
 
-	/* Clean up texture */
+	int ok = (SDL_RenderCopy(renderer, texture, NULL, &dest_rect) == 0);
+	if (!ok) {
+		fprintf(stderr, "SpriteLib Backend: Failed to render texture: %s\n", SDL_GetError());
+	}
 	SDL_DestroyTexture(texture);
 
-	return 0;
+	return ok ? 0 : -1;
 }
