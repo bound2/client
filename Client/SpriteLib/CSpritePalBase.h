@@ -6,10 +6,14 @@
 	#include <windows.h>
 #else
 	#include "../basic/Platform.h"
-	#include <fstream>
 	#include <cstring>
 	using namespace std;
 #endif
+
+// Included here rather than only on the non-Windows branch: the
+// declarations below name the stream types, so the header has to be
+// usable without a precompiled header having pulled them in first.
+#include <fstream>
 
 class CSpritePalBase
 {
@@ -35,8 +39,8 @@ public:
 	//--------------------------------------------------------
 	// file I/O
 	//--------------------------------------------------------
-	bool LoadFromFile(ifstream &file);
-	bool SaveToFile(ofstream &file);
+	bool LoadFromFile(std::ifstream &file);
+	bool SaveToFile(std::ofstream &file);
 	
 	//--------------------------------------------------------
 	// Get Functions
