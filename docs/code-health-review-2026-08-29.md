@@ -58,6 +58,49 @@ A subsystem-by-subsystem review surfaced **197 findings**. Every area graded **D
 
 ---
 
+## Remediation Status
+
+**Updated 2026-08-29.** 11 of the 197 findings have been fixed on branch `harden/library-code-fixes` ([PR #1](https://github.com/bound2/client/pull/1)), across 20 commits. Fixed findings carry a ✅ marker in the sections below, naming the commit and the tests covering them.
+
+Work so far is confined to code compiled into a static library, since that is the only code a test binary can link against. Nothing in `Client/Packet/` or the game logic compiled directly into the `DarkEden` executable has been touched, which leaves the network attack surface — the area this review rated most serious — entirely open.
+
+### Fixed
+
+| Finding | Severity | Commits |
+|---|---|---|
+| `CSpritePalBase::LoadFromFile` scanline pointer table (C3) | 🔴 Critical | `b7c4eb3` |
+| `CAlphaSpritePal::Blt` RLE walk and palette indexing (C4) | 🔴 Critical | `764e9ab`, `c444a83`, `a17aa39` |
+| `CSprite555::LoadFromFile` RLE decode (C5) | 🔴 Critical | `cfc6cd6`, `964c043` |
+| `CFilter::LoadFromFile` file-driven free (C6) | 🔴 Critical | `90d6794` |
+| `TArray::LoadFromFile` unvalidated element count | 🟠 High | `e8f86be` |
+| `CTypePack::Get` / `CTypePack2::Get` range check | 🟠 High | `355ef3f` |
+| `TArray` copy constructor and self-assignment | 🟡 Medium | `a2b3c8a`, `1a3b32d` |
+| `TArray::operator+=` size truncation | 🟡 Medium | `4f8435a` |
+| `MPalette` copy constructor and self-assignment | 🟡 Medium | `d78dc21` |
+| `CTypePack` iterators that never advance | 🟡 Medium | `6f457e0` |
+| `ColorDraw::Convert565to555` discards blue | ⚪ Low | `65a2413` |
+
+### Also fixed, not in this review
+
+Found while fixing the above:
+
+- **`CFilter::IsInit` was inverted** (`5939d9e`) — it and `IsNotInit` were both `m_ppFilter == NULL`. Nothing calls it today, but `CTypePack::Get` drives lazy loading off exactly this predicate.
+- **`CSpritePalBase.h` was not self-contained** (`b7debd8`) — it named the stream types without including `<fstream>`, compiling only because every translation unit reached it through the PCH.
+- **The sibling 555 loaders** `CAlphaSprite555` and `CIndexSprite555` (`964c043`) carried the same unbounded RLE decode as `CSprite555`.
+- **The clipping blit variants.** More than twenty routines across `CAlphaSpritePal` and `CSpritePal` walk the same run length data as `Blt` with the same absence of a bound. Rather than patching each one's bespoke clipping arithmetic, `a17aa39` validates the shape of every scanline once at load time, which covers all of them.
+
+### Test infrastructure
+
+This repository previously had no way to run a unit test: `enable_testing()` was never called, the `Makefile`'s `test` target was a stub, and `BUILD_TESTS` was referenced in the configuration summary without being defined. Commits `60d5d8e` and `f36b8bb` add a minimal C++11 self-registering framework, wire it into CTest, implement `make test`, and add `make test-asan`. 62 tests now run; each fix above was written test-first.
+
+### Caveats
+
+- **Not validated against real game art.** The sprite validation matches what the encoder in `SetPixel` guarantees, but only running the client against actual `.spr` data proves no shipped asset trips it. The failure mode would be artwork silently vanishing.
+- **Two fixes are regression guards rather than reproductions**, and say so in their commit messages: the out-of-range `CTypePack::Get` read did not fault when tested, and `LoadFromFilePart(CSpriteSetManager)` has no observable effect without a running load.
+- **`USE_ASAN` still only applies to GCC and Clang**, so `make debug-asan` and the new `make test-asan` are no-ops under MSVC. This remains the highest-leverage unfixed item for the memory-safety findings still open — see the build area below.
+
+---
+
 ## Cross-Cutting Themes
 
 1. **Unvalidated network input is the #1 risk.** Packet handlers pass server-supplied lengths, coordinates, item classes, and indices straight into array subscripts, `strcpy`/`strcat`, and function-pointer tables. A hostile *or merely buggy* server can corrupt the client heap or achieve code execution. This pattern recurs in `MItem`, `MZone`, `MCreature`, the packet layer, sprite/pak loaders, and text handling.
@@ -96,6 +139,8 @@ Every critical finding, grouped for a focused first pass. Full detail (including
 
 **Area:** Rendering & Sprites  |  **Category:** memory-safety  |  **Location:** `Client/SpriteLib/CSpritePalBase.cpp:62`
 
+> ✅ **Fixed** in `b7c4eb3`. The declared size is checked against the file, and the running scanline offset is kept inside the pixel data. Covered by `tests/unit/test_cspritepalbase.cpp`, which asserts the pointer invariant directly rather than waiting for a fault.
+
 m_Size is a DWORD read verbatim from the file (line 53) and used unchecked as the allocation size: `m_pData = new BYTE[m_Size+sizeof(BYTE*)*m_Height]` (line 62). No read-failure check, no cap. Then lines 69-79 read an m_Height-entry WORD array from the file and accumulate it into a running pointer: `m_pPixels[i] = tempData; tempData += indexArray[i];` with no check that the accumulated offset stays inside m_Size. Every m_pPixels[i] beyond the point where the offsets exceed m_Size points into unrelated heap. Those pointers are dereferenced later by CAlphaSpritePal::Blt (see separate finding), which reads RLE opcodes from them and writes the decoded pixels into the locked backbuffer. Also note the addition `m_Size + sizeof(BYTE*)*m_Height` can wrap on a 32-bit build, yielding a tiny allocation for a huge declared size.
 
 **Recommendation:** Cap m_Size against a sane maximum and against the remaining file length; verify each file.read() succeeded; and validate that the running sum of indexArray[] never exceeds m_Size before storing each m_pPixels[i], bailing to SetEmptySprite() on violation.
@@ -103,6 +148,8 @@ m_Size is a DWORD read verbatim from the file (line 53) and used unchecked as th
 ### C4. CAlphaSpritePal::Blt walks file-derived RLE data with zero bounds checks and writes decoded pixels straight into the locked surface with no width clamp.
 
 **Area:** Rendering & Sprites  |  **Category:** memory-safety  |  **Location:** `Client/SpriteLib/CAlphaSpritePal.cpp:461`
+
+> ✅ **Fixed** in `764e9ab` (Blt's own bound), `c444a83` (the unchecked MPalette::operator[] this finding also names) and `a17aa39` (scanline validation at load time, which covers the twenty-odd clipping and pixel format blit variants that share this defect). Covered by `tests/unit/test_calphaspritepal.cpp`, using a sentinel filled guard band beyond the sprite width.
 
 Lines 480-502: `count = *pPixels++` then per segment `pDestTemp += *pPixels++` (transparent run) and `colorCount = *pPixels++`, followed by `memcpyAlpha(pDestTemp, pPixels, colorCount, pal)` and `pPixels += (colorCount<<1)`. None of count, the transparent run, or colorCount is validated against m_Width or against the size of the m_pPixels[i] buffer. This is called from CSpriteSurface::BltAlphaSpritePal (Client/SpriteLib/CSpriteSurface_Adapter.cpp:657) with pDest pointing into the freshly locked backbuffer, so an oversized transparent run or colorCount writes past the end of the destination scanline and past the end of the surface allocation. memcpyAlpha additionally indexes the palette with `pal[*pSource]` (CAlphaSpritePal.cpp:265) where MPalette::operator[] is an unchecked `m_pColor[n]` over an m_Size-entry array (Client/SpriteLib/MPalette.h:30), so any pixel byte >= m_Size reads out of bounds too.
 
@@ -112,6 +159,8 @@ Lines 480-502: `count = *pPixels++` then per segment `pDestTemp += *pPixels++` (
 
 **Area:** Rendering & Sprites  |  **Category:** memory-safety  |  **Location:** `Client/SpriteLib/CSprite555.cpp:182`
 
+> ✅ **Fixed** in `cfc6cd6`, with the same bound applied to CAlphaSprite555 and CIndexSprite555 in `964c043`. Covered by `tests/unit/test_csprite555.cpp` and `tests/unit/test_sprite555_siblings.cpp`.
+
 Line 181-183 read a WORD `len` from the file, allocate `new WORD[len]` and read len WORDs into it. Lines 185-204 then walk that buffer as RLE: `count = m_Pixels[i][0]`, and for each of `count` segments `colorCount = m_Pixels[i][index+1]`, then `m_Pixels[i][index] = ColorDraw::Convert565to555(m_Pixels[i][index])` for colorCount iterations. `index` is never compared against `len`. A file whose count/colorCount fields overstate the actual data walks index past the allocation and writes converted values there. If len is 0, `new WORD[0]` still returns a valid pointer and `m_Pixels[i][0]` is already out of bounds. Its sibling CSprite565::LoadFromFile (Client/SpriteLib/CSprite565.cpp:154) does have a `len > 0 && len <= 8192` guard, so this is the format-variant duplication hazard biting: the check was added to one of the pair only.
 
 **Recommendation:** Apply the same length sanity check as CSprite565, and additionally bound `index` against `len` inside the segment walk in both files; on violation zero the line and stop parsing it.
@@ -119,6 +168,8 @@ Line 181-183 read a WORD `len` from the file, allocate `new WORD[len]` and read 
 ### C6. CFilter::LoadFromFile overwrites m_Width/m_Height from the file before Init() calls Release(), so Release() frees the old pointer array using the new, file-controlled height.
 
 **Area:** Rendering & Sprites  |  **Category:** memory-safety  |  **Location:** `Client/SpriteLib/CFilter.cpp:200`
+
+> ✅ **Fixed** in `90d6794`. The header is read into locals and validated against the bytes the file actually carries before anything is released or allocated, so a rejected file leaves the existing filter intact. Covered by `tests/unit/test_cfilter.cpp`; the reported failure reproduced as an access violation.
 
 LoadFromFile reads directly into the members: `file.read((char*)&m_Width, 2); file.read((char*)&m_Height, 2);` (lines 200-201), then calls `Init(m_Width, m_Height)` (line 208). Init immediately calls Release() (CFilter.cpp:37), and Release loops `for (int i=0; i<m_Height; i++) delete [] m_ppFilter[i];` (CFilter.cpp:59-60) using the just-overwritten m_Height. Reloading a filter whose file declares a larger height than the currently held one runs `delete[]` over indeterminate pointers past the end of the old m_ppFilter array — an arbitrary free driven by file content. This is the one Release-ordering bug of its kind in the area: CSprite565/555, CAlphaSprite565, CIndexSprite565 and CShadowSprite all correctly call Release() before reading the header.
 
@@ -588,6 +639,8 @@ Lines 512-516: `int leastTime = m_pLastTime[leastTimeIndex];` (computed but neve
 
 **Category:** memory-safety  |  **Location:** `Client/SpriteLib/CAlphaSpritePal.cpp:461`
 
+> ✅ **Fixed** in `764e9ab` (Blt's own bound), `c444a83` (the unchecked MPalette::operator[] this finding also names) and `a17aa39` (scanline validation at load time, which covers the twenty-odd clipping and pixel format blit variants that share this defect). Covered by `tests/unit/test_calphaspritepal.cpp`, using a sentinel filled guard band beyond the sprite width.
+
 Lines 480-502: `count = *pPixels++` then per segment `pDestTemp += *pPixels++` (transparent run) and `colorCount = *pPixels++`, followed by `memcpyAlpha(pDestTemp, pPixels, colorCount, pal)` and `pPixels += (colorCount<<1)`. None of count, the transparent run, or colorCount is validated against m_Width or against the size of the m_pPixels[i] buffer. This is called from CSpriteSurface::BltAlphaSpritePal (Client/SpriteLib/CSpriteSurface_Adapter.cpp:657) with pDest pointing into the freshly locked backbuffer, so an oversized transparent run or colorCount writes past the end of the destination scanline and past the end of the surface allocation. memcpyAlpha additionally indexes the palette with `pal[*pSource]` (CAlphaSpritePal.cpp:265) where MPalette::operator[] is an unchecked `m_pColor[n]` over an m_Size-entry array (Client/SpriteLib/MPalette.h:30), so any pixel byte >= m_Size reads out of bounds too.
 
 **Recommendation:** Clamp the running destination x against m_Width and the surface width, validate colorCount and the transparent run against the remaining width, and bounds-check the palette index against MPalette::GetSize() before dereferencing.
@@ -595,6 +648,8 @@ Lines 480-502: `count = *pPixels++` then per segment `pDestTemp += *pPixels++` (
 #### 🔴 Critical -- CFilter::LoadFromFile overwrites m_Width/m_Height from the file before Init() calls Release(), so Release() frees the old pointer array using the new, file-controlled height.
 
 **Category:** memory-safety  |  **Location:** `Client/SpriteLib/CFilter.cpp:200`
+
+> ✅ **Fixed** in `90d6794`. The header is read into locals and validated against the bytes the file actually carries before anything is released or allocated, so a rejected file leaves the existing filter intact. Covered by `tests/unit/test_cfilter.cpp`; the reported failure reproduced as an access violation.
 
 LoadFromFile reads directly into the members: `file.read((char*)&m_Width, 2); file.read((char*)&m_Height, 2);` (lines 200-201), then calls `Init(m_Width, m_Height)` (line 208). Init immediately calls Release() (CFilter.cpp:37), and Release loops `for (int i=0; i<m_Height; i++) delete [] m_ppFilter[i];` (CFilter.cpp:59-60) using the just-overwritten m_Height. Reloading a filter whose file declares a larger height than the currently held one runs `delete[]` over indeterminate pointers past the end of the old m_ppFilter array — an arbitrary free driven by file content. This is the one Release-ordering bug of its kind in the area: CSprite565/555, CAlphaSprite565, CIndexSprite565 and CShadowSprite all correctly call Release() before reading the header.
 
@@ -604,6 +659,8 @@ LoadFromFile reads directly into the members: `file.read((char*)&m_Width, 2); fi
 
 **Category:** memory-safety  |  **Location:** `Client/SpriteLib/CSprite555.cpp:182`
 
+> ✅ **Fixed** in `cfc6cd6`, with the same bound applied to CAlphaSprite555 and CIndexSprite555 in `964c043`. Covered by `tests/unit/test_csprite555.cpp` and `tests/unit/test_sprite555_siblings.cpp`.
+
 Line 181-183 read a WORD `len` from the file, allocate `new WORD[len]` and read len WORDs into it. Lines 185-204 then walk that buffer as RLE: `count = m_Pixels[i][0]`, and for each of `count` segments `colorCount = m_Pixels[i][index+1]`, then `m_Pixels[i][index] = ColorDraw::Convert565to555(m_Pixels[i][index])` for colorCount iterations. `index` is never compared against `len`. A file whose count/colorCount fields overstate the actual data walks index past the allocation and writes converted values there. If len is 0, `new WORD[0]` still returns a valid pointer and `m_Pixels[i][0]` is already out of bounds. Its sibling CSprite565::LoadFromFile (Client/SpriteLib/CSprite565.cpp:154) does have a `len > 0 && len <= 8192` guard, so this is the format-variant duplication hazard biting: the check was added to one of the pair only.
 
 **Recommendation:** Apply the same length sanity check as CSprite565, and additionally bound `index` against `len` inside the segment walk in both files; on violation zero the line and stop parsing it.
@@ -611,6 +668,8 @@ Line 181-183 read a WORD `len` from the file, allocate `new WORD[len]` and read 
 #### 🔴 Critical -- CSpritePalBase::LoadFromFile builds the per-scanline pixel pointer table from unvalidated file offsets, so m_pPixels[] entries can point arbitrarily outside the allocation.
 
 **Category:** memory-safety  |  **Location:** `Client/SpriteLib/CSpritePalBase.cpp:62`
+
+> ✅ **Fixed** in `b7c4eb3`. The declared size is checked against the file, and the running scanline offset is kept inside the pixel data. Covered by `tests/unit/test_cspritepalbase.cpp`, which asserts the pointer invariant directly rather than waiting for a fault.
 
 m_Size is a DWORD read verbatim from the file (line 53) and used unchecked as the allocation size: `m_pData = new BYTE[m_Size+sizeof(BYTE*)*m_Height]` (line 62). No read-failure check, no cap. Then lines 69-79 read an m_Height-entry WORD array from the file and accumulate it into a running pointer: `m_pPixels[i] = tempData; tempData += indexArray[i];` with no check that the accumulated offset stays inside m_Size. Every m_pPixels[i] beyond the point where the offsets exceed m_Size points into unrelated heap. Those pointers are dereferenced later by CAlphaSpritePal::Blt (see separate finding), which reads RLE opcodes from them and writes the decoded pixels into the locked backbuffer. Also note the addition `m_Size + sizeof(BYTE*)*m_Height` can wrap on a 32-bit build, yielding a tiny allocation for a huge declared size.
 
@@ -659,6 +718,8 @@ Lines 549-555 clamp src_w/src_h when `src_x + src_w > src_info.width` and when `
 #### 🟠 High -- CTypePack::Get and CTypePack2::Get index m_pData and m_file_index without a usable bounds check on n.
 
 **Category:** memory-safety  |  **Location:** `Client/SpriteLib/CTypePack.h:141`
+
+> ✅ **Fixed** in `355ef3f`. Both now range check before touching m_pData, and the late duplicate check inside CTypePack2's running-load branch is removed. Out of range access returns a shared empty element, since Get returns a reference and cannot report failure. Covered by `tests/unit/test_ctypepack.cpp`.
 
 CTypePack::Get (lines 141-160) does `m_pData[n].IsInit()`, `m_file_index[n]` and `return m_pData[n]` with no comparison against m_Size at all, and no null check on m_pData (which stays NULL when Init() early-returns for size 0 at line 124). CTypePack2::Get does have a check, but it is placed at line 559 — *after* the out-of-bounds dereference `!m_pData[n].IsInit()` at line 549 has already happened, so it cannot prevent the fault it was written for. These are the accessors every sprite/palette lookup goes through: e.g. CTexturePartManager::GetTexture does `CAlphaSpritePal* pSprite = &m_ASPK[id];` (Client/CTexturePartManager.cpp:332) with an id that came from map/creature data.
 
@@ -732,6 +793,8 @@ The constructor at lines 474-483 initializes m_pData, m_Size, m_bRunningLoad, m_
 
 **Category:** correctness  |  **Location:** `Client/SpriteLib/CTypePack.h:327`
 
+> ✅ **Fixed** in `6f457e0`. Both iterators advance, list entries are range checked, and ReleasePart's range is clamped to m_Size rather than to 0xFFFE. The CSpriteSetManager variant has no observable effect without a running load, so it has no test of its own and was fixed alongside its tested twin.
+
 CTypePack::LoadFromFilePart(const CSpriteSetManager&) at lines 329-334 obtains `iID = SSM.GetIterator()` and loops `for (int t=0; t<SSM.GetSize(); t++) { if(*iID != 0xFFFF) Get(*iID); }` — iID is never incremented. CTypePack::ReleasePart(COrderedList) at lines 352-357 has the identical defect, as do both CTypePack2 copies at lines 818-823 and 841-846. The effect is that a partial preload or partial release touches only the first sprite in the set and silently leaves every other requested sprite unloaded (or unreleased), which manifests as missing graphics or unbounded memory growth rather than a crash.
 
 **Recommendation:** Increment iID at the end of each loop body, or convert these to range-based loops over the underlying container.
@@ -739,6 +802,8 @@ CTypePack::LoadFromFilePart(const CSpriteSetManager&) at lines 329-334 obtains `
 #### 🟡 Medium -- MPalette owns a raw WORD* and defines a destructor but no copy constructor, and its operator= frees the destination before reading the source.
 
 **Category:** memory-safety  |  **Location:** `Client/SpriteLib/MPalette.h:12`
+
+> ✅ **Fixed** in `d78dc21`. Copy constructor added and operator= returns early on self-assignment rather than releasing first. Covered by `tests/unit/test_mpalette.cpp`.
 
 MPalette declares `WORD* m_pColor` (MPalette.h:43) and a destructor that deletes it (MPalette.cpp:11-14), but no copy constructor — so any copy-construction shallow-copies the pointer and the two objects double-free it. The user-written operator= (MPalette.cpp:35-45) calls Release() first and then does `memcpy(m_pColor, pal.m_pColor, m_Size*2)`, so a self-assignment `p = p` copies from the block it just freed; it also memcpys from pal.m_pColor without checking it is non-NULL, which it is for any default-constructed or empty palette. Palettes are handed around as `MPalette&` through the Blt* API (e.g. CSpriteSurface_Adapter.cpp:657) and stored in CTypePack containers, so a copy is one refactor away.
 
@@ -1888,6 +1953,8 @@ Client/CMessageArray.cpp:153-162 guards the whole file-log teardown with `if (m_
 
 **Category:** security  |  **Location:** `Client/framelib/TArray.h:221`
 
+> ✅ **Fixed** in `e8f86be`. The count goes into a local, the stream state is checked, and the count is rejected when it exceeds the bytes remaining in the file. Applied to both copies of the template.
+
 Client/framelib/TArray.h:218-232 does `file.read((char*)&m_Size, s_SIZEOF_SizeType); if (m_Size==0) return false; Init(m_Size); for (SizeType i=0; i<m_Size; i++) m_pData[i].LoadFromFile(file);` — the count is never range-checked, the stream state is never inspected, and nothing bounds the total. Because the types are nested (Client/framelib/CFrame.h:152-168 defines FRAME_ARRAY = TArray<CFrame,WORD>, DIRECTION_FRAME_ARRAY = TArray<FRAME_ARRAY,BYTE>, ACTION_FRAME_ARRAY = TArray<DIRECTION_FRAME_ARRAY,BYTE>), each inner element reads its own count, so a file declaring 255 actions x 255 directions x 65535 frames drives an unbounded allocation cascade. This is a live runtime path, not tool code: Client/EffectResourceContainer.cpp:69, :85, :101 and :113 call LoadFromFile on CEffectFramePack (which inherits this method through CFramePack, Client/framelib/CFramePack.h:25) against .efpk files, and these data files are delivered through the patcher (Client/CGameUpdate.cpp, Client/AppendPatchInfo.cpp).
 
 **Failure scenario:** A truncated or tampered .efpk sets an inner WORD count to 65535 across many outer entries. The client either exhausts memory and dies on an uncaught std::bad_alloc, or (if SizeType were ever signed) reaches `new DataType[negative]` and throws std::bad_array_new_length. Either way the process terminates without a diagnostic.
@@ -2008,6 +2075,8 @@ Client/CToken.cpp:36-41 `Release()` does `if (m_pString!=NULL) delete [] m_pStri
 
 **Category:** memory-safety  |  **Location:** `Client/framelib/TArray.h:152`
 
+> ✅ **Fixed** in `4f8435a`. The count is computed in a wider type and the append is refused when the result cannot be represented in SizeType, leaving the target unchanged. Applied to both copies of the template.
+
 Client/framelib/TArray.h:150-190: `SizeType newSize = m_Size + array.m_Size;` then `DataType* pTempData = new DataType [newSize];` followed by two loops that copy m_Size and array.m_Size elements respectively. The addition promotes to int and is then narrowed back to SizeType on assignment, so for the BYTE instantiations at Client/framelib/CFrame.h:155 and :158 (DIRECTION_FRAME_ARRAY, ACTION_FRAME_ARRAY) a 200 + 100 append allocates 44 elements and writes 300; for the WORD instantiation at CFrame.h:152 a 40000 + 40000 append allocates 14464 and writes 80000. There is no overflow check anywhere. No caller currently uses operator+= on these types, so the defect is latent — but it is a public method on the array type used throughout framelib, and the identical bug is duplicated at Client/SpriteLib/TArray.h:151.
 
 **Failure scenario:** A tool or future feature merges two direction arrays whose combined length exceeds 255 (or two frame arrays exceeding 65535). new DataType[truncated] returns a small buffer and the copy loops write far past its end — a heap overflow with fully attacker-influenceable content if the arrays came from a data file.
@@ -2017,6 +2086,8 @@ Client/framelib/TArray.h:150-190: `SizeType newSize = m_Size + array.m_Size;` th
 #### 🟡 Medium -- TArray manages a raw owning pointer with a destructor but no copy constructor, so any copy-construction double-frees; operator= is also not self-assignment safe.
 
 **Category:** memory-safety  |  **Location:** `Client/framelib/TArray.h:56`
+
+> ✅ **Fixed** in `a2b3c8a` (copy constructor) and `1a3b32d` (self-assignment). Applied to both copies of the template, in `framelib` and `SpriteLib`, so they do not diverge. Covered by `tests/unit/test_tarray.cpp` and `tests/unit/test_tarray_spritelib.cpp`.
 
 Client/framelib/TArray.h declares `~TArray()` (line 99) which deletes m_pData, and a user-defined `void operator = (const TArray&)` (line 58), but no copy constructor. The implicitly generated copy constructor performs a memberwise copy of m_Size and the raw m_pData pointer, so two TArray objects end up owning the same buffer and both delete it. Because the assignment operator is user-declared the compiler does not warn. Additionally, operator= at lines 239-249 begins with `Init( array.m_Size );`, and Init calls Release() — for self-assignment (`a = a`) this frees the source buffer and then copies the freshly default-constructed elements onto themselves, silently wiping the array. The class is used pervasively: CFramePack derives from it (Client/framelib/CFramePack.h:25) and the FRAME_ARRAY / DIRECTION_FRAME_ARRAY / ACTION_FRAME_ARRAY typedefs (Client/framelib/CFrame.h:152-168) are nested instantiations of it.
 
@@ -2047,6 +2118,8 @@ Client/MemoryPool.cpp:56-94 `void* MemoryPool::Alloc()` takes no size parameter 
 #### ⚪ Low -- ColorDraw::Convert565to555 discards the blue channel entirely instead of preserving it.
 
 **Category:** correctness  |  **Location:** `basic/ColorDraw.h:67`
+
+> ✅ **Fixed** in `65a2413`. Blue is now carried across untouched; the mask was losing it. Covered by `tests/unit/test_colordraw.cpp`, including a lossless round trip through Convert555to565.
 
 basic/ColorDraw.h:65-68 implements the 5:6:5 to 5:5:5 conversion as `return (pixel & 0xFFE0) >> 1;`. Masking to 0xFFE0 keeps bits 15..5 and the shift moves them to 14..4, so the low five bits of the result come from the original green channel's upper bits (original bits 9..5) and the original blue channel (bits 4..0) is dropped completely. The correct expression preserves blue separately, e.g. `((pixel & 0xFFC0) >> 1) | (pixel & 0x1F)`. The sibling Convert555to565 at line 62 does handle blue correctly (`((pixel & 0x7FE0) << 1) | (pixel & 0x001F)`), which makes the asymmetry look accidental rather than intended. These are static inline helpers in a header included via basic/Platform.h's dependency chain, so any pixel path that converts down to 555 is affected.
 
