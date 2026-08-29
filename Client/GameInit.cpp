@@ -1635,7 +1635,9 @@ InitGame()
 	//----------------------------------------------------------------------
 	DEBUG_ADD("[ InitGame ]  Socket - Socket initialized");
 
-	// Note: mingw socket (POSIX-compatible) doesn't need WSAStartup like WinSock
+	// Note: on Windows the socket library is started on demand by
+	// SocketAPI::socket_ex(), which every socket this client creates goes
+	// through. Winsock does require WSAStartup even when building with mingw.
 
 //	#ifdef _DEBUG
 //		bool bMerge = false;
