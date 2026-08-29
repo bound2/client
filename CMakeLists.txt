@@ -19,13 +19,94 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Sanitizer configuration
+# Sanitizer configuration. The build wiring lives below the output directory
+# settings, because the MSVC branch copies the sanitizer runtime beside the
+# executables and needs to know where those land.
 option(USE_ASAN "Enable AddressSanitizer for memory error detection" OFF)
 option(USE_TSAN "Enable ThreadSanitizer for race condition detection" OFF)
 option(USE_UBSAN "Enable UndefinedBehaviorSanitizer for undefined behavior detection" OFF)
 
+# SDL backend is now mandatory on all platforms (Windows native support removed)
+set(USE_SDL_BACKEND ON CACHE BOOL "Use SDL backend instead of native Windows APIs" FORCE)
+
+option(BUILD_ENGINE "Build new SDL-based engine" ON)
+option(BUILD_TESTS "Build unit tests for the static libraries" OFF)
+
+# Set output directories
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+
 if(USE_ASAN OR USE_TSAN OR USE_UBSAN)
-    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    # MSVC and clang-cl. Checked before the GNU|Clang branch because CMake
+    # reports clang-cl as "Clang" while it takes MSVC-style flags.
+    if(MSVC)
+        if(USE_TSAN OR USE_UBSAN)
+            message(FATAL_ERROR
+                "This toolchain provides AddressSanitizer only. "
+                "USE_TSAN and USE_UBSAN need GCC or Clang.")
+        endif()
+
+        # cl.exe accepts /fsanitize=address whether or not the sanitizer is
+        # installed, and then fails at link time with an LNK1104 naming a
+        # clang_rt file, which does not say what to install. Fail here instead,
+        # with instructions. The runtime ships beside the compiler.
+        get_filename_component(MSVC_TOOL_DIR "${CMAKE_CXX_COMPILER}" DIRECTORY)
+        find_file(ASAN_RUNTIME_DLL
+            NAMES clang_rt.asan_dynamic-x86_64.dll clang_rt.asan_dynamic-i386.dll
+            PATHS "${MSVC_TOOL_DIR}"
+            NO_DEFAULT_PATH)
+
+        if(NOT ASAN_RUNTIME_DLL)
+            message(FATAL_ERROR
+                "AddressSanitizer is not installed for this toolchain.\n"
+                "Visual Studio Installer -> Modify -> Individual components -> "
+                "\"C++ AddressSanitizer\".\n"
+                "Looked for clang_rt.asan_dynamic-*.dll in ${MSVC_TOOL_DIR}")
+        endif()
+
+        add_compile_options(/fsanitize=address)
+
+        # /RTC1 is rejected outright next to /fsanitize=address and CMake puts it
+        # in the default Debug flags, so it has to come back out. Strip it from
+        # every configuration rather than from Debug alone: the multi-config
+        # generators pick the configuration at build time, not here. /ZI (edit
+        # and continue) is unsupported too, so demote it to plain /Zi.
+        foreach(_asan_cfg "" "_DEBUG" "_RELEASE" "_RELWITHDEBINFO" "_MINSIZEREL")
+            foreach(_asan_lang C CXX)
+                set(_asan_var "CMAKE_${_asan_lang}_FLAGS${_asan_cfg}")
+                string(REPLACE "/RTC1"  "" ${_asan_var} "${${_asan_var}}")
+                string(REPLACE "/RTCsu" "" ${_asan_var} "${${_asan_var}}")
+                string(REPLACE "/ZI" "/Zi" ${_asan_var} "${${_asan_var}}")
+            endforeach()
+        endforeach()
+
+        # Incremental linking is unsupported under the sanitizer. Remove what is
+        # there before appending, so the flag cannot appear twice.
+        foreach(_asan_cfg "" "_DEBUG" "_RELEASE" "_RELWITHDEBINFO" "_MINSIZEREL")
+            foreach(_asan_kind EXE SHARED MODULE)
+                set(_asan_var "CMAKE_${_asan_kind}_LINKER_FLAGS${_asan_cfg}")
+                string(REPLACE "/INCREMENTAL:NO" "" ${_asan_var} "${${_asan_var}}")
+                string(REPLACE "/INCREMENTAL"    "" ${_asan_var} "${${_asan_var}}")
+                set(${_asan_var} "${${_asan_var}} /INCREMENTAL:NO")
+            endforeach()
+        endforeach()
+
+        # The sanitizer runtime is a DLL that must be findable at run time.
+        # Visual Studio puts the compiler directory on PATH when it launches the
+        # debugger, so F5 finds it; running the executable from a shell or from
+        # Explorer does not. Keep a copy beside the executables.
+        set(_asan_out_dirs "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+        foreach(_asan_cfg ${CMAKE_CONFIGURATION_TYPES})
+            list(APPEND _asan_out_dirs "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${_asan_cfg}")
+        endforeach()
+        foreach(_asan_dir ${_asan_out_dirs})
+            file(COPY "${ASAN_RUNTIME_DLL}" DESTINATION "${_asan_dir}")
+        endforeach()
+
+        message(STATUS "AddressSanitizer enabled (/fsanitize=address)")
+        message(STATUS "  runtime: ${ASAN_RUNTIME_DLL}")
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
         set(SANITIZER_FLAGS "")
 
         if(USE_ASAN)
@@ -47,19 +128,10 @@ if(USE_ASAN OR USE_TSAN OR USE_UBSAN)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SANITIZER_FLAGS}")
 
         message(STATUS "Sanitizer flags: ${SANITIZER_FLAGS}")
+    else()
+        message(WARNING "USE_ASAN/USE_TSAN/USE_UBSAN are not wired up for ${CMAKE_CXX_COMPILER_ID}; building without them.")
     endif()
 endif()
-
-# SDL backend is now mandatory on all platforms (Windows native support removed)
-set(USE_SDL_BACKEND ON CACHE BOOL "Use SDL backend instead of native Windows APIs" FORCE)
-
-option(BUILD_ENGINE "Build new SDL-based engine" ON)
-option(BUILD_TESTS "Build unit tests for the static libraries" OFF)
-
-# Set output directories
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # Add SDL2 include directory BEFORE add_subdirectory
 if(EXISTS "/opt/homebrew/include/SDL2")

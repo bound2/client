@@ -15,7 +15,7 @@ MActionEffectSpriteTypeTable*	g_pActionEffectSpriteTypeTable = NULL;
 // If the pointer is corrupted, we can detect it by comparing with the shadow
 #ifdef __SANITIZE_ADDRESS__
 EFFECTSPRITETYPE_TABLE* g_pEffectSpriteTypeTable_shadow = NULL;
-EFFECTSPRITETYPE_TABLE::TYPE* g_pEffectSpriteTypeTable_m_pTypeInfo_shadow = NULL;
+EFFECTSPRITETYPETABLE_INFO* g_pEffectSpriteTypeTable_m_pTypeInfo_shadow = NULL;
 static uint64_t g_pEffectSpriteTypeTable_canary = 0xDEADBEEFCAFEBABEULL;
 
 void validate_effect_sprite_table_pointer(const char* location) {
@@ -28,7 +28,7 @@ void validate_effect_sprite_table_pointer(const char* location) {
 
 	// Check if m_pTypeInfo internal pointer is corrupted
 	if (g_pEffectSpriteTypeTable != NULL && g_pEffectSpriteTypeTable_shadow != NULL) {
-		EFFECTSPRITETYPE_TABLE::TYPE* current_m_pTypeInfo = g_pEffectSpriteTypeTable->GetInternalPointer();
+		EFFECTSPRITETYPETABLE_INFO* current_m_pTypeInfo = g_pEffectSpriteTypeTable->GetInternalPointer();
 		if (current_m_pTypeInfo != g_pEffectSpriteTypeTable_m_pTypeInfo_shadow) {
 			fprintf(stderr, "[CORRUPTION] g_pEffectSpriteTypeTable->m_pTypeInfo corrupted at %s!\n", location);
 			fprintf(stderr, "[CORRUPTION] Expected m_pTypeInfo: %p, Got: %p\n",
@@ -41,7 +41,7 @@ void validate_effect_sprite_table_pointer(const char* location) {
 		// Check if it looks like a heap pointer that might be in a freed region
 		if (ptr_addr > 0x1000 && ptr_addr < 0x100000000ULL) {
 			// Use ASAN to check if the memory is poisoned
-			if (__asan_address_is_poisoned(current_m_pTypeInfo, sizeof(EFFECTSPRITETYPE_TABLE::TYPE))) {
+			if (__asan_region_is_poisoned((void*)current_m_pTypeInfo, sizeof(EFFECTSPRITETYPETABLE_INFO))) {
 				fprintf(stderr, "[CORRUPTION] m_pTypeInfo points to poisoned/freed memory at %s!\n", location);
 				fprintf(stderr, "[CORRUPTION] m_pTypeInfo=%p\n", current_m_pTypeInfo);
 			}
