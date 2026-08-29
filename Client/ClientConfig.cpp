@@ -572,13 +572,47 @@ ClientConfig::LoadFromFile(const char* filename)
 	file.read((char*)&COLOR_HP_BAR_G, 1);
 	file.read((char*)&COLOR_HP_BAR_B, 1);
 
-	// HP bar 배경색
-	if (file.peek() != EOF && file.good()) {
+	// HP bar background colour.
+	//
+	// These three bytes were appended to the record after the shipped data
+	// files were produced (SaveToFile writes them, so files this client
+	// writes do contain them), and the format carries no version number - so
+	// their presence has to be detected rather than assumed.
+	//
+	// peek() != EOF cannot do that: many more fields follow, so it always
+	// succeeded and consumed three bytes belonging to the next record. That
+	// shifted the stream by 3 for everything afterwards - the three URLs
+	// (whose length prefixes then decoded as text, hence the "MString:
+	// Corrupted length" warnings), and after them the alignment name colours,
+	// blood drop settings, texture part limits, UDP port, trade delays and
+	// vampire regen amounts, all of which silently became garbage.
+	//
+	// Detect by looking ahead instead. Under either interpretation the next
+	// field after this one is NEW_USER_REGISTERATION_MODE followed by the
+	// first URL's 4-byte length prefix, so probe that length assuming the
+	// colours are present: a plausible value means they are, and an absurd
+	// one means we just read into the URL text and they are not.
+	const std::streampos posBeforeBarBgColor = file.tellg();
+	file.seekg(3 + sizeof(NUR_MODE), std::ios::cur);
+
+	DWORD probeUrlLength = 0;
+	file.read((char*)&probeUrlLength, 4);
+
+	// Same ceiling MString::LoadFromFile uses to judge a length sane.
+	const bool bHasBarBgColor = (file.good() && probeUrlLength <= 65536);
+
+	file.clear();	// the probe may have run past the end of a short file
+	file.seekg(posBeforeBarBgColor);
+
+	if (bHasBarBgColor)
+	{
 		file.read((char*)&COLOR_HP_BAR_BG_R, 1);
 		file.read((char*)&COLOR_HP_BAR_BG_G, 1);
 		file.read((char*)&COLOR_HP_BAR_BG_B, 1);
-	} else {
-		// 如果配置文件中没有这些值，使用默认值
+	}
+	else
+	{
+		// Older file without the field - keep the defaults set in Init().
 		COLOR_HP_BAR_BG_R = 8;
 		COLOR_HP_BAR_BG_G = 8;
 		COLOR_HP_BAR_BG_B = 8;
