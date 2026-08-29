@@ -133,6 +133,36 @@ if(USE_ASAN OR USE_TSAN OR USE_UBSAN)
     endif()
 endif()
 
+# Runtime checks for the ordinary Debug build.
+#
+# /RTC1 is /RTCs plus /RTCu: it reports a local read before it was written, and
+# damage to a stack frame around a call. It is what turned an uninitialised bool
+# in C_VS_UI_INFO::MouseControl into a diagnostic instead of a branch on garbage.
+#
+# It has been in this build only because CMake happens to put it in the built-in
+# CMAKE_<LANG>_FLAGS_DEBUG. Nothing here asked for it, so anyone overriding those
+# flags - a toolchain file, a preset, a CI script - would drop it without a word.
+# Ask for it explicitly, and only add it if it is not already there, so the
+# default stays authoritative when it is present.
+#
+# Debug only: /RTC is rejected alongside any optimisation, so there is no
+# meaningful RelWithDebInfo variant of this.
+#
+# Skipped under USE_ASAN because the two are mutually exclusive - the sanitizer
+# block above strips /RTC1 for exactly that reason. That is the division of
+# labour between the two Debug trees, not an oversight: this one reports
+# uninitialised locals and stack frame damage, the sanitized one reports heap
+# overflows, use-after-free and double frees. Neither subsumes the other.
+if(MSVC AND NOT USE_ASAN)
+    foreach(_rtc_lang C CXX)
+        if(NOT CMAKE_${_rtc_lang}_FLAGS_DEBUG MATCHES "/RTC")
+            set(CMAKE_${_rtc_lang}_FLAGS_DEBUG "${CMAKE_${_rtc_lang}_FLAGS_DEBUG} /RTC1")
+        endif()
+    endforeach()
+
+    message(STATUS "Debug runtime checks: /RTC1 (uninitialised locals, stack frames)")
+endif()
+
 # Add SDL2 include directory BEFORE add_subdirectory
 if(EXISTS "/opt/homebrew/include/SDL2")
 	include_directories(/opt/homebrew/include/SDL2)

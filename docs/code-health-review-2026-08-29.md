@@ -133,7 +133,9 @@ Eight defects in the `DarkEden` executable, found by running the client against 
 - **`USE_ASAN` now covers MSVC as well as GCC and Clang.** `/fsanitize=address` is wired up in `CMakeLists.txt`, along with the flag surgery it requires: `/RTC1` and incremental linking are both incompatible and are removed, and the sanitizer runtime DLL is copied beside the executables so a run outside the debugger can find it. It needs the *C++ AddressSanitizer* individual component, which the C++ workload does not install; configure fails with instructions if it is absent. See the AddressSanitizer section of `README.md`.
 
   This was the highest-leverage unfixed item, because it is the only way to reach the memory-safety findings in `Client/Packet/` and the game logic — code no test binary can link against. Turning it on is not the same as having run it: the findings below are still open until something exercises those paths under the sanitizer.
-- **Enabling it costs `/RTC1`.** MSVC rejects the runtime checks alongside the sanitizer, and `/RTC1` is what caught the uninitialised `bool` in the runtime defect list above. The two builds are complementary rather than one superseding the other.
+- **Enabling it costs `/RTC1`.** MSVC rejects the runtime checks alongside the sanitizer, and `/RTC1` is what caught the uninitialised `bool` in the runtime defect list above. The two builds are complementary rather than one superseding the other, and `README.md` now sets out which checks live in which.
+
+  `/RTC1` itself was only ever present because CMake happens to include it in the built-in Debug flags — nothing in this tree asked for it, so a toolchain file, preset or CI script that set `CMAKE_CXX_FLAGS_DEBUG` would have removed the check without a word. It is now requested explicitly, and configure reports which of the two mutually exclusive check sets is active.
 
 ---
 

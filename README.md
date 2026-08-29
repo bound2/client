@@ -164,6 +164,36 @@ stderr and the debugger breaks at the faulting instruction. Note that leak
 detection is a Linux-only part of AddressSanitizer — this catches invalid
 accesses, not leaks. The CRT leak dump at exit already covers those.
 
+### Which Debug build to use
+
+There are two, and neither subsumes the other. `/RTC1` and `/fsanitize=address`
+are mutually exclusive, so the checks are split across them:
+
+| | `build/vs2022` | `build/vs2022-asan` |
+|---|---|---|
+| Uninitialised local read | **`/RTC1`** | |
+| Stack frame damage around a call | **`/RTC1`** | |
+| Heap overflow, use-after-free, double free | | **ASan** |
+| Stack buffer overflow | | **ASan** |
+| Invalidated iterator, bad comparator | debug iterators | debug iterators |
+| Speed | normal | ~2x slower |
+
+Use the ordinary tree day to day. Switch to the sanitized one when you have a
+memory error to chase — a wild pointer, a crash inside the allocator, damage
+that shows up far from its cause.
+
+`/RTC1` is requested explicitly by `CMakeLists.txt` rather than inherited from
+CMake's built-in Debug flags, so overriding `CMAKE_CXX_FLAGS_DEBUG` cannot drop
+it silently. Configure prints which checks are on:
+
+```
+-- Debug runtime checks: /RTC1 (uninitialised locals, stack frames)
+-- AddressSanitizer enabled (/fsanitize=address)
+```
+
+Exactly one of those two lines should appear on a Debug configure. If neither
+does, something has gone wrong with the flags.
+
 ### Never commit `build/`
 
 CMake bakes **absolute paths** into the generated `.sln`/`.vcxproj` files, along
