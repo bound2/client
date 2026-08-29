@@ -274,10 +274,17 @@ template <class DataType, class SizeType>
 void	
 TArray<DataType, SizeType>::operator = (const TArray<DataType, SizeType>& array)
 {
-	// frameArray와 똑같이 해야 한다.
+	// Init() below releases the current buffer before allocating. When
+	// the source and the destination are the same object that release
+	// also destroys the source, and the copy loop would then read the
+	// freshly allocated, uninitialised memory back over itself.
+	if (this == &array)
+		return;
+
+	// Match the source array.
 	Init( array.m_Size );
 
-	// 모든 element를 copy해야 한다.
+	// Copy every element.
 	for (SizeType i=0; i<m_Size; i++)
 	{
 		m_pData[i] = array.m_pData[i];

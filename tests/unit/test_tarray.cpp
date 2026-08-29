@@ -151,6 +151,59 @@ TEST(TArray, AppendAcceptsLargestRepresentableSize)
 }
 
 //----------------------------------------------------------------------
+// Assigning an array to itself must leave it alone.
+//
+// operator= starts with Init(array.m_Size), and Init releases the
+// current buffer before allocating. When the source and the destination
+// are the same object that release also destroys the source, so the copy
+// loop that follows reads the freshly allocated, uninitialised memory
+// and writes it back over itself. The contents are lost without any
+// diagnostic.
+//----------------------------------------------------------------------
+TEST(TArray, SelfAssignmentPreservesContents)
+{
+	TArray<int, WORD>	array(3);
+
+	array[0] = 7;
+	array[1] = 8;
+	array[2] = 9;
+
+	// Routed through a reference so this reads as an ordinary assignment
+	// to the compiler rather than a self-assignment it may warn about.
+	const TArray<int, WORD>&	alias = array;
+
+	array = alias;
+
+	CHECK_EQ(3, array.GetSize());
+	CHECK_EQ(7, array[0]);
+	CHECK_EQ(8, array[1]);
+	CHECK_EQ(9, array[2]);
+}
+
+//----------------------------------------------------------------------
+// Ordinary assignment deep copies, so the two arrays stay independent.
+//----------------------------------------------------------------------
+TEST(TArray, AssignmentProducesIndependentStorage)
+{
+	TArray<int, WORD>	source(2);
+
+	source[0] = 100;
+	source[1] = 200;
+
+	TArray<int, WORD>	destination(5);
+
+	destination = source;
+
+	CHECK_EQ(2, destination.GetSize());
+	CHECK_EQ(100, destination[0]);
+	CHECK_EQ(200, destination[1]);
+
+	destination[0] = 555;
+
+	CHECK_EQ(100, source[0]);
+}
+
+//----------------------------------------------------------------------
 // The copy must survive the original being destroyed first, which is the
 // case that turns shared ownership into a dangling read.
 //----------------------------------------------------------------------
