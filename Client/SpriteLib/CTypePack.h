@@ -517,6 +517,11 @@ CTypePack2<TypeBase, Type1, Type2>::CTypePack2()
 	m_nLoadData = 0;
 	m_file_index = NULL;
 	m_file = NULL;
+
+	// Read by Release() to choose which concrete type to delete[] and
+	// by Get() to choose the matching spare element, so it cannot be
+	// left holding whatever was on the stack.
+	m_bSecond = false;
 }
 
 template <class TypeBase, class Type1, class Type2>
@@ -593,10 +598,21 @@ TypeBase &CTypePack2<TypeBase, Type1, Type2>::Get(WORD n)
 	// check that used to live further down ran after the element had
 	// already been read once to test IsInit(), and only covered the
 	// running-load path.
-	static Type1	s_OutOfRange;
+	//
+	// One spare of each concrete type, picked by the same flag Init()
+	// used to choose what to allocate. Handing back a Type1 while the
+	// pack holds Type2 would give the caller an element of a different
+	// type from every other element in the pack.
+	static Type1	s_OutOfRangeFirst;
+	static Type2	s_OutOfRangeSecond;
 
 	if(m_pData == NULL || n >= m_Size)
-		return s_OutOfRange;
+	{
+		if(m_bSecond)
+			return s_OutOfRangeSecond;
+
+		return s_OutOfRangeFirst;
+	}
 
 	if(m_bRunningLoad && !m_pData[n].IsInit())
 	{
@@ -876,7 +892,20 @@ bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFilePart(const CSpriteSetManage
 template <class TypeBase, class Type1, class Type2>
 bool CTypePack2<TypeBase, Type1, Type2>::ReleasePart(int first, int last)
 {
-	last = min(last, 0xFFFE);
+	if(m_pData == NULL)
+		return false;
+
+	// Release() is called through m_pData[i], so the range has to be
+	// clamped to the pack itself. Capping last at 0xFFFE only bounded it
+	// by the index type, which let the loop write through elements past
+	// the end of the allocation. This is the overload the sprite packs
+	// actually instantiate, so it matters more than the CTypePack one.
+	if(first < 0)
+		first = 0;
+
+	if(last >= (int)m_Size)
+		last = (int)m_Size - 1;
+
 	for(int i = first; i <= last; i++)
 		m_pData[i].Release();
 

@@ -126,7 +126,10 @@ bool CSpritePalBase::LoadFromFile(std::ifstream &file)
 
 	for (int i=0; i<m_Height; i++)
 	{
-		// One past the end is allowed, for an empty trailing scanline.
+		// One past the end is tolerated here so the table can be built
+		// and inspected. ValidateScanlineData() below is stricter and
+		// rejects it, because a scanline with no segment count byte
+		// cannot be drawn.
 		if (offset > (unsigned long long)m_Size)
 		{
 			bValid = false;
@@ -192,7 +195,13 @@ bool CSpritePalBase::ValidateScanlines(int bytesPerPixel) const
 			const int	colourCount	 = *pPixels++;
 
 			// A scanline never decodes to more than the sprite's own
-			// width; the encoder emits exactly width pixels per row.
+			// width.
+			//
+			// The encoder normally emits exactly width pixels per row,
+			// but its per-row segment count is stored in a byte, so a
+			// row needing more than 255 segments truncates and decodes
+			// to fewer. Only the upper bound is enforced here, which is
+			// what the blit routines actually need.
 			x += transparentCount + colourCount;
 
 			if (x > (int)m_Width)

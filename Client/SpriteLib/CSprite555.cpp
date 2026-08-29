@@ -180,18 +180,40 @@ CSprite555::LoadFromFile(ifstream& file)
 	register int j;
 	register int k;
 
+	// Scanline lengths are kept for the decode pass below.
+	WORD*	pLengths = new WORD [m_Height];
+
+	for (int i=0; i<m_Height; i++)
+		pLengths[i] = 0;
+
+	bool	bValid = true;
+
+	//--------------------------------
+	// Pass one: read the whole sprite.
+	//
+	// Sprites are stored back to back in a pack file, and the callers
+	// that load them ignore the return value and rely on the stream
+	// having advanced to the next sprite. Reading every scanline before
+	// anything is validated keeps that true, so rejecting a malformed
+	// sprite cannot desynchronise the ones that follow it.
+	//--------------------------------
 	for (int i=0; i<m_Height; i++)
 	{
-		// Read the scanline length and then the scanline itself.
 		file.read((char*)&len, 2);
 
-		// A scanline has to carry at least the segment count that is
-		// read from element zero below.
-		if (!file || len==0)
+		if (!file)
 		{
-			Release();
-			return false;
+			bValid = false;
+			break;
 		}
+
+		pLengths[i] = len;
+
+		// A zero length scanline carries no segment count; it is
+		// rejected in the decode pass rather than here, so the read
+		// loop stays a straight pass over the file.
+		if (len==0)
+			continue;
 
 		m_Pixels[i] = new WORD [len];
 
@@ -199,8 +221,27 @@ CSprite555::LoadFromFile(ifstream& file)
 
 		if (!file)
 		{
-			Release();
-			return false;
+			bValid = false;
+			break;
+		}
+	}
+
+	//--------------------------------
+	// Pass two: decode in place.
+	//
+	// The stream is not touched here, so a rejection leaves the
+	// position at the end of this sprite.
+	//--------------------------------
+	for (int i=0; bValid && i<m_Height; i++)
+	{
+		len = pLengths[i];
+
+		// A scanline has to carry at least the segment count that is
+		// read from element zero below.
+		if (len==0)
+		{
+			bValid = false;
+			break;
 		}
 
 		count = m_Pixels[i][0];
@@ -213,8 +254,8 @@ CSprite555::LoadFromFile(ifstream& file)
 			// file, so nothing else bounds this walk.
 			if (index+1 >= len)
 			{
-				Release();
-				return false;
+				bValid = false;
+				break;
 			}
 
 			//transCount = m_Pixels[i][index];
@@ -227,8 +268,8 @@ CSprite555::LoadFromFile(ifstream& file)
 			// the end of the allocation.
 			if (index+colorCount > (int)len)
 			{
-				Release();
-				return false;
+				bValid = false;
+				break;
 			}
 
 			// m_Pixels[i][index] ~ m_Pixels[i][index+colorCount-1]
@@ -239,6 +280,20 @@ CSprite555::LoadFromFile(ifstream& file)
 				index++;
 			}
 		}
+	}
+
+	delete [] pLengths;
+
+	if (!bValid)
+	{
+		Release();
+
+		// Release() does not clear m_bLoading, and the guard at the top
+		// of this function refuses to run again while it is set, so
+		// leaving it would make one bad sprite permanently unloadable.
+		m_bLoading = false;
+
+		return false;
 	}
 
 	m_bInit = true;

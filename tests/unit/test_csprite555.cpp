@@ -58,19 +58,59 @@ void	WriteRawFile(const std::vector<unsigned char>& bytes)
 // declaredLen is written as the scanline length, which lets a test
 // declare a length that does not match the body it supplies.
 //----------------------------------------------------------------------
-void	WriteSpriteFile(WORD width, WORD height, WORD declaredLen,
-			const std::vector<WORD>& scanline)
+void	AppendSpriteBytes(std::vector<unsigned char>& bytes, WORD width,
+			  WORD height, WORD declaredLen,
+			  const std::vector<WORD>& scanline)
 {
-	std::vector<unsigned char>	bytes;
-
 	PushWord(bytes, width);
 	PushWord(bytes, height);
 	PushWord(bytes, declaredLen);
 
 	for (size_t i = 0; i < scanline.size(); i++)
 		PushWord(bytes, scanline[i]);
+}
+
+void	WriteSpriteFile(WORD width, WORD height, WORD declaredLen,
+			const std::vector<WORD>& scanline)
+{
+	std::vector<unsigned char>	bytes;
+
+	AppendSpriteBytes(bytes, width, height, declaredLen, scanline);
 
 	WriteRawFile(bytes);
+}
+
+//----------------------------------------------------------------------
+// A scanline the loader accepts: one segment, no transparent pixels,
+// two colours, consuming the scanline exactly.
+//----------------------------------------------------------------------
+std::vector<WORD>	GoodScanline()
+{
+	std::vector<WORD>	scanline;
+
+	scanline.push_back(1);
+	scanline.push_back(0);
+	scanline.push_back(2);
+	scanline.push_back(0xFFFF);
+	scanline.push_back(0x07E0);
+
+	return scanline;
+}
+
+//----------------------------------------------------------------------
+// The same shape but with a colour run that runs off the scanline.
+//----------------------------------------------------------------------
+std::vector<WORD>	BadScanline()
+{
+	std::vector<WORD>	scanline;
+
+	scanline.push_back(1);
+	scanline.push_back(0);
+	scanline.push_back(60000);
+	scanline.push_back(0xFFFF);
+	scanline.push_back(0x07E0);
+
+	return scanline;
 }
 
 void	RemoveTempFile()
@@ -223,6 +263,81 @@ TEST(CSprite555, LoadFromFileAcceptsZeroSizedSprite)
 	CHECK(sprite.LoadFromFile(in));
 	CHECK_EQ(0, sprite.GetWidth());
 	CHECK_EQ(0, sprite.GetHeight());
+
+	RemoveTempFile();
+}
+
+//----------------------------------------------------------------------
+// Rejecting a sprite must leave the stream at the next one.
+//
+// Sprites are stored back to back in a pack file, and the callers that
+// load them (CSpritePackList555, CAlphaSpritePack, CShadowSpritePack)
+// ignore the return value and rely on the stream position having moved
+// past the sprite. An earlier version of the bounds checking returned
+// as soon as it spotted bad data, part way through the sprite, so one
+// malformed entry silently destroyed every entry after it.
+//----------------------------------------------------------------------
+TEST(CSprite555, RejectionLeavesTheStreamAtTheNextSprite)
+{
+	std::vector<unsigned char>	bytes;
+
+	const std::vector<WORD>		bad	= BadScanline();
+	const std::vector<WORD>		good	= GoodScanline();
+
+	AppendSpriteBytes(bytes, 2, 1, (WORD)bad.size(), bad);
+	AppendSpriteBytes(bytes, 2, 1, (WORD)good.size(), good);
+
+	WriteRawFile(bytes);
+
+	std::ifstream	in(kTempFile, std::ios::binary);
+
+	CSprite555	first;
+	CSprite555	second;
+
+	CHECK(!first.LoadFromFile(in));
+
+	// The second sprite must still be readable.
+	CHECK(second.LoadFromFile(in));
+	CHECK_EQ(2, second.GetWidth());
+	CHECK_EQ(1, second.GetHeight());
+
+	RemoveTempFile();
+}
+
+//----------------------------------------------------------------------
+// Rejecting a sprite must not brick the object.
+//
+// LoadFromFile sets m_bLoading on entry and refuses to run while it is
+// set, and CSprite::Release() does not clear it. An early return that
+// skipped clearing the flag left the object permanently unable to load
+// anything, which through CTypePack2's lazy-load retry would go on to
+// disable lazy loading for the whole pack.
+//----------------------------------------------------------------------
+TEST(CSprite555, RejectionDoesNotLatchTheLoadingFlag)
+{
+	CSprite555	sprite;
+
+	{
+		const std::vector<WORD>	bad = BadScanline();
+
+		WriteSpriteFile(2, 1, (WORD)bad.size(), bad);
+
+		std::ifstream	in(kTempFile, std::ios::binary);
+
+		CHECK(!sprite.LoadFromFile(in));
+	}
+
+	// The same object must still be able to load a good sprite.
+	{
+		const std::vector<WORD>	good = GoodScanline();
+
+		WriteSpriteFile(2, 1, (WORD)good.size(), good);
+
+		std::ifstream	in(kTempFile, std::ios::binary);
+
+		CHECK(sprite.LoadFromFile(in));
+		CHECK_EQ(2, sprite.GetWidth());
+	}
 
 	RemoveTempFile();
 }

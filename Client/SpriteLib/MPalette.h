@@ -59,16 +59,21 @@ protected:
 	//--------------------------------------------------------
 	WORD&		Entry(BYTE n) const
 	{
-		static WORD	s_OutOfRange = 0;
-
 		if (m_pColor == NULL || n >= m_Size)
-			return s_OutOfRange;
+			return m_OutOfRange;
 
 		return m_pColor[n];
 	}
 
 	WORD *		m_pColor;
 	BYTE		m_Size;
+
+	// Spare entry handed back for an out of range index. Held per
+	// palette rather than in a shared static: operator[] returns a
+	// non-const reference, so a caller writing through a bad index
+	// would otherwise change what every other palette in the process
+	// reads back for its own bad indices.
+	mutable WORD	m_OutOfRange;
 };
 
 class MPalette555 : public MPalette

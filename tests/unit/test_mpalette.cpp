@@ -153,3 +153,25 @@ TEST(MPalette, IndexBeyondSizeDoesNotReadPastTheTable)
 	CHECK_EQ(0, palette[200]);
 	CHECK_EQ(0, palette[255]);
 }
+
+//----------------------------------------------------------------------
+// The out-of-range spare entry must be per palette.
+//
+// operator[] returns a non-const reference, so a caller writing through
+// an out-of-range index writes into the spare. Holding that spare in a
+// shared static meant one palette's bad write changed what every other
+// palette returned for its own bad indices.
+//----------------------------------------------------------------------
+TEST(MPalette, OutOfRangeWriteDoesNotContaminateOtherPalettes)
+{
+	MPalette	first;
+	MPalette	second;
+
+	first.Init(16);
+	second.Init(16);
+
+	first[(BYTE)200] = 0x1234;
+
+	CHECK_EQ(0, second[(BYTE)77]);
+	CHECK_EQ(0, second[(BYTE)200]);
+}

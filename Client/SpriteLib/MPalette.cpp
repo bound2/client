@@ -6,12 +6,14 @@ MPalette::MPalette()
 {
 	m_Size = 0;
 	m_pColor = NULL;
+	m_OutOfRange = 0;
 }
 
 MPalette::MPalette(const MPalette& pal)
 {
 	m_Size = 0;
 	m_pColor = NULL;
+	m_OutOfRange = 0;
 
 	if (pal.m_Size == 0 || pal.m_pColor == NULL)
 		return;

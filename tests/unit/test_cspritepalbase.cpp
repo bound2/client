@@ -5,19 +5,28 @@
 // Tests for CSpritePalBase::LoadFromFile in
 // Client/SpriteLib/CSpritePalBase.cpp.
 //
-// The on-disk layout is:
+// The container layout is:
 //
 //      DWORD  size      bytes of packed pixel data
 //      WORD   width
 //      WORD   height
 //      BYTE   data[size]
-//      WORD   index[height]   per-scanline byte counts
+//      WORD   index[height]   per-scanline byte lengths
 //
-// The loader turns the index array into m_pPixels[], a table of pointers
-// into the pixel data, by accumulating the counts. Those counts come
-// from the file, so the running total has to be kept inside the
-// allocation or the scanline pointers end up aimed at unrelated memory
-// and are later dereferenced by the Blt routines.
+// and each scanline of that data is run length encoded:
+//
+//      BYTE  segmentCount
+//      per segment:
+//          BYTE  transparentRun
+//          BYTE  colourRun
+//          then colourRun pixels, one byte each for a plain palette
+//          sprite and two for an alpha sprite
+//
+// Two separate things are checked here. The loader turns the index
+// array into m_pPixels[], a table of pointers into the pixel data, and
+// those pointers have to stay inside the allocation. Then the run
+// length data those pointers address has to describe a sprite of this
+// width, which is what protects the blit routines.
 //
 //----------------------------------------------------------------------
 
@@ -33,9 +42,10 @@
 namespace {
 
 //----------------------------------------------------------------------
-// CSpritePalBase is abstract. This stands in for a concrete sprite so
-// the parser can be exercised on its own, and exposes the invariant the
-// loader is supposed to maintain.
+// CSpritePalBase is abstract. This stands in for a concrete plain
+// palette sprite, one byte per pixel, so the parser can be exercised on
+// its own. The ValidateScanlineData override is what a real subclass
+// supplies, and without it the scanline validation would not run at all.
 //----------------------------------------------------------------------
 class TestSpritePal : public CSpritePalBase
 {
@@ -64,6 +74,9 @@ public:
 
 		return true;
 	}
+
+protected:
+	virtual bool	ValidateScanlineData() const	{ return ValidateScanlines(1); }
 };
 
 const char* const	kTempFile = "cspritepalbase_loadfromfile_test.bin";
@@ -77,29 +90,69 @@ void	WriteRawFile(const std::vector<unsigned char>& bytes)
 }
 
 //----------------------------------------------------------------------
-// Builds a sprite file. dataBytes controls how much pixel data is
-// actually written, so a caller can declare more than it supplies.
+// One run length encoded scanline: a single segment of transparentRun
+// transparent pixels followed by colourRun opaque ones.
 //----------------------------------------------------------------------
-void	WriteSpriteFile(DWORD declaredSize, WORD width, WORD height,
-			size_t dataBytes, const std::vector<WORD>& index)
+std::vector<unsigned char>	MakeScanline(int transparentRun, int colourRun)
 {
+	std::vector<unsigned char>	scanline;
+
+	scanline.push_back(1);					// one segment
+	scanline.push_back((unsigned char)transparentRun);
+	scanline.push_back((unsigned char)colourRun);
+
+	for (int i = 0; i < colourRun; i++)
+		scanline.push_back((unsigned char)(i + 1));	// palette index
+
+	return scanline;
+}
+
+//----------------------------------------------------------------------
+// Assembles the container around a set of scanlines. declaredSize and
+// the index entries can be overridden so a test can describe something
+// the file does not actually contain.
+//----------------------------------------------------------------------
+void	WriteSprite(WORD width, const std::vector<std::vector<unsigned char> >& scanlines,
+		    const std::vector<WORD>* indexOverride = NULL,
+		    const DWORD* sizeOverride = NULL,
+		    int dataBytesOverride = -1)
+{
+	std::vector<unsigned char>	data;
+
+	std::vector<WORD>		index;
+
+	for (size_t i = 0; i < scanlines.size(); i++)
+	{
+		index.push_back((WORD)scanlines[i].size());
+
+		for (size_t j = 0; j < scanlines[i].size(); j++)
+			data.push_back(scanlines[i][j]);
+	}
+
+	const DWORD	size	= (sizeOverride != NULL) ? *sizeOverride : (DWORD)data.size();
+	const WORD	height	= (WORD)scanlines.size();
+
 	std::vector<unsigned char>	bytes;
 
 	bytes.resize(8);
 
-	std::memcpy(&bytes[0], &declaredSize, 4);
+	std::memcpy(&bytes[0], &size, 4);
 	std::memcpy(&bytes[4], &width, 2);
 	std::memcpy(&bytes[6], &height, 2);
 
-	for (size_t i = 0; i < dataBytes; i++)
-		bytes.push_back((unsigned char)(i & 0xFF));
+	const int	dataBytes =
+		(dataBytesOverride >= 0) ? dataBytesOverride : (int)data.size();
 
-	for (size_t i = 0; i < index.size(); i++)
+	for (int i = 0; i < dataBytes && i < (int)data.size(); i++)
+		bytes.push_back(data[i]);
+
+	const std::vector<WORD>&	written =
+		(indexOverride != NULL) ? *indexOverride : index;
+
+	for (size_t i = 0; i < written.size(); i++)
 	{
-		const WORD	entry = index[i];
-
-		bytes.push_back((unsigned char)(entry & 0xFF));
-		bytes.push_back((unsigned char)((entry >> 8) & 0xFF));
+		bytes.push_back((unsigned char)(written[i] & 0xFF));
+		bytes.push_back((unsigned char)((written[i] >> 8) & 0xFF));
 	}
 
 	WriteRawFile(bytes);
@@ -113,16 +166,17 @@ void	RemoveTempFile()
 } // namespace
 
 //----------------------------------------------------------------------
-// A well formed sprite loads and its scanline table stays in range.
+// A well formed sprite loads: two scanlines, each decoding to exactly
+// the sprite's width.
 //----------------------------------------------------------------------
 TEST(CSpritePalBase, LoadFromFileReadsAWellFormedSprite)
 {
-	std::vector<WORD>	index;
+	std::vector<std::vector<unsigned char> >	scanlines;
 
-	index.push_back(4);
-	index.push_back(4);
+	scanlines.push_back(MakeScanline(0, 4));
+	scanlines.push_back(MakeScanline(2, 2));
 
-	WriteSpriteFile(8, 4, 2, 8, index);
+	WriteSprite(4, scanlines);
 
 	TestSpritePal	sprite;
 	std::ifstream	in(kTempFile, std::ios::binary);
@@ -131,6 +185,74 @@ TEST(CSpritePalBase, LoadFromFileReadsAWellFormedSprite)
 	CHECK_EQ(4, sprite.GetWidth());
 	CHECK_EQ(2, sprite.GetHeight());
 	CHECK(sprite.ScanlinePointersAreInsideData());
+
+	RemoveTempFile();
+}
+
+//----------------------------------------------------------------------
+// A fully transparent scanline is legitimate and must be accepted.
+//----------------------------------------------------------------------
+TEST(CSpritePalBase, LoadFromFileAcceptsAFullyTransparentScanline)
+{
+	std::vector<std::vector<unsigned char> >	scanlines;
+
+	scanlines.push_back(MakeScanline(4, 0));
+
+	WriteSprite(4, scanlines);
+
+	TestSpritePal	sprite;
+	std::ifstream	in(kTempFile, std::ios::binary);
+
+	CHECK(sprite.LoadFromFile(in));
+	CHECK(sprite.ScanlinePointersAreInsideData());
+
+	RemoveTempFile();
+}
+
+//----------------------------------------------------------------------
+// A scanline decoding to more pixels than the sprite is wide must be
+// rejected. This is the check that protects the blit routines, and it
+// only runs because the subclass supplies ValidateScanlineData.
+//----------------------------------------------------------------------
+TEST(CSpritePalBase, LoadFromFileRejectsScanlineWiderThanTheSprite)
+{
+	std::vector<std::vector<unsigned char> >	scanlines;
+
+	// 200 transparent plus 50 colour pixels in a sprite four wide.
+	scanlines.push_back(MakeScanline(200, 50));
+
+	WriteSprite(4, scanlines);
+
+	TestSpritePal	sprite;
+	std::ifstream	in(kTempFile, std::ios::binary);
+
+	CHECK(!sprite.LoadFromFile(in));
+
+	RemoveTempFile();
+}
+
+//----------------------------------------------------------------------
+// A colour run that runs off the end of the scanline data is rejected.
+//----------------------------------------------------------------------
+TEST(CSpritePalBase, LoadFromFileRejectsColourRunPastTheScanlineData)
+{
+	std::vector<unsigned char>	scanline;
+
+	scanline.push_back(1);		// one segment
+	scanline.push_back(0);		// transparent run
+	scanline.push_back(4);		// claims four colours
+	scanline.push_back(1);		// supplies one
+
+	std::vector<std::vector<unsigned char> >	scanlines;
+
+	scanlines.push_back(scanline);
+
+	WriteSprite(4, scanlines);
+
+	TestSpritePal	sprite;
+	std::ifstream	in(kTempFile, std::ios::binary);
+
+	CHECK(!sprite.LoadFromFile(in));
 
 	RemoveTempFile();
 }
@@ -145,13 +267,17 @@ TEST(CSpritePalBase, LoadFromFileReadsAWellFormedSprite)
 //----------------------------------------------------------------------
 TEST(CSpritePalBase, LoadFromFileRejectsScanlineOffsetsPastTheData)
 {
+	std::vector<std::vector<unsigned char> >	scanlines;
+
+	scanlines.push_back(MakeScanline(0, 4));
+	scanlines.push_back(MakeScanline(0, 4));
+
 	std::vector<WORD>	index;
 
-	// Eight bytes of pixel data, but the first scanline claims 60000.
 	index.push_back(60000);
 	index.push_back(60000);
 
-	WriteSpriteFile(8, 4, 2, 8, index);
+	WriteSprite(4, scanlines, &index);
 
 	TestSpritePal	sprite;
 	std::ifstream	in(kTempFile, std::ios::binary);
@@ -172,12 +298,13 @@ TEST(CSpritePalBase, LoadFromFileRejectsScanlineOffsetsPastTheData)
 //----------------------------------------------------------------------
 TEST(CSpritePalBase, LoadFromFileRejectsSizeLargerThanTheFile)
 {
-	std::vector<WORD>	index;
+	std::vector<std::vector<unsigned char> >	scanlines;
 
-	index.push_back(1);
+	scanlines.push_back(MakeScanline(0, 4));
 
-	// Claims 100000 bytes of pixel data while carrying 4.
-	WriteSpriteFile(100000, 4, 1, 4, index);
+	const DWORD	hugeSize = 100000;
+
+	WriteSprite(4, scanlines, NULL, &hugeSize);
 
 	TestSpritePal	sprite;
 	std::ifstream	in(kTempFile, std::ios::binary);
@@ -193,10 +320,22 @@ TEST(CSpritePalBase, LoadFromFileRejectsSizeLargerThanTheFile)
 //----------------------------------------------------------------------
 TEST(CSpritePalBase, LoadFromFileRejectsMissingIndexArray)
 {
+	std::vector<std::vector<unsigned char> >	scanlines;
+
+	scanlines.push_back(MakeScanline(0, 4));
+
+	// Declares four scanlines but supplies one index entry.
 	std::vector<WORD>	index;
 
-	// Declares four scanlines but supplies no index entries at all.
-	WriteSpriteFile(8, 4, 4, 8, index);
+	index.push_back(7);
+
+	std::vector<std::vector<unsigned char> >	padded = scanlines;
+
+	padded.push_back(MakeScanline(0, 4));
+	padded.push_back(MakeScanline(0, 4));
+	padded.push_back(MakeScanline(0, 4));
+
+	WriteSprite(4, padded, &index);
 
 	TestSpritePal	sprite;
 	std::ifstream	in(kTempFile, std::ios::binary);
