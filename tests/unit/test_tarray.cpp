@@ -14,6 +14,51 @@
 
 #include "TArray.h"
 
+#include <cstdio>
+#include <cstring>
+#include <fstream>
+
+namespace {
+
+//----------------------------------------------------------------------
+// Smallest element type that satisfies TArray's file I/O requirement.
+//----------------------------------------------------------------------
+struct TestElement
+{
+	int	value;
+
+	TestElement() : value(0) {}
+
+	bool	SaveToFile(std::ofstream& file)
+	{
+		file.write((const char*)&value, sizeof(value));
+		return true;
+	}
+
+	bool	LoadFromFile(std::ifstream& file)
+	{
+		file.read((char*)&value, sizeof(value));
+		return true;
+	}
+};
+
+const char* const	kTempFile = "tarray_loadfromfile_test.bin";
+
+void	WriteRawFile(const void* data, size_t bytes)
+{
+	std::ofstream	out(kTempFile, std::ios::binary | std::ios::trunc);
+
+	if (bytes > 0)
+		out.write((const char*)data, (std::streamsize)bytes);
+}
+
+void	RemoveTempFile()
+{
+	std::remove(kTempFile);
+}
+
+} // namespace
+
 //----------------------------------------------------------------------
 // Copy construction must deep copy.
 //
@@ -201,6 +246,109 @@ TEST(TArray, AssignmentProducesIndependentStorage)
 	destination[0] = 555;
 
 	CHECK_EQ(100, source[0]);
+}
+
+//----------------------------------------------------------------------
+// A well formed file round trips.
+//----------------------------------------------------------------------
+TEST(TArray, LoadFromFileRoundTripsSavedContents)
+{
+	{
+		TArray<TestElement, WORD>	source(3);
+
+		source[0].value = 11;
+		source[1].value = 22;
+		source[2].value = 33;
+
+		std::ofstream	out(kTempFile, std::ios::binary | std::ios::trunc);
+
+		source.SaveToFile(out);
+	}
+
+	TArray<TestElement, WORD>	loaded;
+	std::ifstream			in(kTempFile, std::ios::binary);
+
+	CHECK(loaded.LoadFromFile(in));
+	CHECK_EQ(3, loaded.GetSize());
+	CHECK_EQ(11, loaded[0].value);
+	CHECK_EQ(22, loaded[1].value);
+	CHECK_EQ(33, loaded[2].value);
+
+	RemoveTempFile();
+}
+
+//----------------------------------------------------------------------
+// A count the file cannot possibly hold must be rejected.
+//
+// The count is read straight out of the file and used as the allocation
+// size with nothing checking it against the data that actually follows.
+// A file claiming 1000 elements while carrying two allocates room for
+// 1000, reads past the end of the data for the rest, and still reports
+// success. Every element occupies at least one byte, so a count larger
+// than the bytes remaining is corrupt by definition.
+//----------------------------------------------------------------------
+TEST(TArray, LoadFromFileRejectsCountLargerThanTheFile)
+{
+	unsigned char	buffer[2 + 8];
+	const WORD	declaredCount	= 1000;
+	const int	first		= 1;
+	const int	second		= 2;
+
+	std::memcpy(buffer, &declaredCount, sizeof(declaredCount));
+	std::memcpy(buffer + 2, &first, sizeof(first));
+	std::memcpy(buffer + 6, &second, sizeof(second));
+
+	WriteRawFile(buffer, sizeof(buffer));
+
+	TArray<TestElement, WORD>	loaded;
+	std::ifstream			in(kTempFile, std::ios::binary);
+
+	CHECK(!loaded.LoadFromFile(in));
+	CHECK_EQ(0, loaded.GetSize());
+
+	RemoveTempFile();
+}
+
+//----------------------------------------------------------------------
+// A failed read must not fall back to the size the array already had.
+//
+// The count was read directly into m_Size, so when the read failed the
+// member kept its previous value and the load continued with it,
+// allocating that many elements and filling them from a dead stream
+// before returning success.
+//----------------------------------------------------------------------
+TEST(TArray, LoadFromFileRejectsEmptyFileWithoutReusingPreviousSize)
+{
+	WriteRawFile(NULL, 0);
+
+	TArray<TestElement, WORD>	loaded(5);
+
+	loaded[0].value = 77;
+
+	std::ifstream	in(kTempFile, std::ios::binary);
+
+	CHECK(!loaded.LoadFromFile(in));
+	CHECK_EQ(0, loaded.GetSize());
+
+	RemoveTempFile();
+}
+
+//----------------------------------------------------------------------
+// A file holding only part of the count is a short read, not a count.
+//----------------------------------------------------------------------
+TEST(TArray, LoadFromFileRejectsTruncatedCount)
+{
+	const unsigned char	singleByte = 0x05;
+
+	WriteRawFile(&singleByte, 1);
+
+	TArray<TestElement, WORD>	loaded;
+	std::ifstream			in(kTempFile, std::ios::binary);
+
+	CHECK(!loaded.LoadFromFile(in));
+	CHECK_EQ(0, loaded.GetSize());
+
+	RemoveTempFile();
 }
 
 //----------------------------------------------------------------------

@@ -256,16 +256,55 @@ template <class DataType, class SizeType>
 bool
 TArray<DataType, SizeType>::LoadFromFile(std::ifstream& file)
 {
-	// frame 개수
-	file.read((char*)&m_Size, s_SIZEOF_SizeType);
+	// Start from a known state so a rejected file leaves an empty array
+	// behind rather than stale storage.
+	Release();
 
-	if (m_Size==0) return false;
-	
-	// memory잡기
-	Init(m_Size);
+	// The count is read into a local. Reading straight into m_Size lets
+	// a short read overwrite part of the member, and leaves the previous
+	// value in place when the read fails outright, so the load would
+	// carry on with a size the file never specified.
+	SizeType	count = 0;
+
+	file.read((char*)&count, s_SIZEOF_SizeType);
+
+	if (!file)
+		return false;
+
+	if (count==0) return false;
+
+	// Reject a count the file cannot hold. Every element consumes at
+	// least one byte, so a count larger than the number of bytes
+	// remaining is corrupt, and sizing the allocation from it would read
+	// the rest of the elements from a dead stream.
+	const std::streampos	afterCount	= file.tellg();
+
+	file.seekg(0, std::ios::end);
+
+	const std::streampos	endOfFile	= file.tellg();
+
+	file.seekg(afterCount, std::ios::beg);
+
+	if (!file)
+		return false;
+
+	if ((unsigned long long)count >
+	    (unsigned long long)(endOfFile - afterCount))
+		return false;
+
+	// Allocate storage.
+	Init(count);
 
 	for (SizeType i=0; i<m_Size; i++)
+	{
+		if (!file)
+		{
+			Release();
+			return false;
+		}
+
 		m_pData[i].LoadFromFile(file);
+	}
 
 	return true;
 }
