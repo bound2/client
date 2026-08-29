@@ -27,20 +27,32 @@ extern CSpriteSurface* g_pBack;
 static void* g_pFL2Surface = NULL;
 static void* g_pFL2DC = NULL;
 
+// SDL/TextSystem 백엔드는 draw 시점마다 surface를 즉시 resolve하므로
+// 원본처럼 실제 GDI HDC를 오래 들고 있을 필요가 없다.
+// 다만 호출부(FL2.cpp 등)는 "최초 GetDC만 true, 중첩 호출은 false"라는
+// 반환값 규약에 기대어 Release 짝을 맞추므로, 그 상태만 흉내낸다.
 bool g_FL2_GetDC()
 {
-    if (g_pFL2DC == NULL)
-    {
-        // Stub: Would normally get device context
-        return false;
-    }
-    return false;
+	if (g_pFL2DC != NULL)
+	{
+		return false;
+	}
+
+	g_pFL2DC = reinterpret_cast<void*>(1);
+
+	return true;
 }
 
 bool g_FL2_ReleaseDC()
 {
-    // Stub: Would normally release device context
-    return false;
+	if (g_pFL2DC == NULL)
+	{
+		return false;
+	}
+
+	g_pFL2DC = NULL;
+
+	return true;
 }
 
 void g_SetFL2Surface(void* pSurface)
