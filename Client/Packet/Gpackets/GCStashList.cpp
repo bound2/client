@@ -89,6 +89,15 @@ void GCStashList::read ( SocketInputStream & iStream )
 		
 		iStream.read(rack);
 		iStream.read(index);
+
+		// rack and index arrive as raw BYTEs and address four parallel arrays
+		// dimensioned [STASH_RACK_MAX][STASH_INDEX_MAX], i.e. [3][20]. Unchecked,
+		// rack=index=255 reaches 255*20+255 elements past the base, and the writes
+		// below include m_pSubItems[rack][index].push_back(), which would run
+		// std::list's members over that memory.
+		if (rack >= STASH_RACK_MAX || index >= STASH_INDEX_MAX)
+			throw InvalidProtocolException("GCStashList: stash rack or index out of range");
+
 		_STASHITEM& item = m_pItems[rack][index];
 
 		iStream.read(item.objectID);
@@ -314,7 +323,13 @@ bool GCStashList::isExist(BYTE rack, BYTE index) const
 {
 	__BEGIN_TRY
 
+	// Assert reports the caller's mistake in a debug build, but compiles to
+	// nothing under NDEBUG, so the read stays in range on its own terms too.
 	Assert(rack < STASH_RACK_MAX && index < STASH_INDEX_MAX);
+
+	if (rack >= STASH_RACK_MAX || index >= STASH_INDEX_MAX)
+		return false;
+
 	return m_bExist[rack][index];
 
 	__END_CATCH
@@ -328,6 +343,10 @@ STASHITEM GCStashList::getStashItem(BYTE rack, BYTE index) const
 	__BEGIN_TRY
 
 	Assert(rack < STASH_RACK_MAX && index < STASH_INDEX_MAX);
+
+	if (rack >= STASH_RACK_MAX || index >= STASH_INDEX_MAX)
+		return STASHITEM();
+
 	return m_pItems[rack][index];
 
 	__END_CATCH
