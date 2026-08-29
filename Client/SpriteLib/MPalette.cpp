@@ -8,6 +8,20 @@ MPalette::MPalette()
 	m_pColor = NULL;
 }
 
+MPalette::MPalette(const MPalette& pal)
+{
+	m_Size = 0;
+	m_pColor = NULL;
+
+	if (pal.m_Size == 0 || pal.m_pColor == NULL)
+		return;
+
+	m_Size = pal.m_Size;
+	m_pColor = new WORD[m_Size];
+
+	memcpy(m_pColor, pal.m_pColor, m_Size * sizeof(WORD));
+}
+
 MPalette::~MPalette()
 {
 	Release();
@@ -34,14 +48,24 @@ void MPalette::Init(BYTE size)
 
 void MPalette::operator = (const MPalette& pal)
 {
-	// 메모리 해제
+	// Release() below frees the colour table and zeroes the size. When
+	// the source and the destination are the same object that empties
+	// the source too, so the size read back afterwards would be zero and
+	// the palette would be silently discarded.
+	if (this == &pal)
+		return;
+
+	// Release the current table.
 	Release();
-	
+
+	if (pal.m_Size == 0 || pal.m_pColor == NULL)
+		return;
+
 	m_Size = pal.m_Size;
 
 	m_pColor = new WORD[m_Size];
-	
-	memcpy(m_pColor, pal.m_pColor, m_Size*2);
+
+	memcpy(m_pColor, pal.m_pColor, m_Size * sizeof(WORD));
 }
 
 

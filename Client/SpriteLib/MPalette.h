@@ -12,6 +12,12 @@ class MPalette
 {
 public:
 	MPalette();
+
+	// MPalette owns m_pColor and frees it in the destructor, so it needs
+	// a copy constructor. The compiler-supplied one copies the pointer,
+	// which shares one table between both instances and double frees it.
+	MPalette(const MPalette& pal);
+
 	~MPalette();
 	
 	//--------------------------------------------------------

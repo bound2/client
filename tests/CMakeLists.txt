@@ -33,6 +33,7 @@ add_executable(unit_tests
 target_link_libraries(unit_tests PRIVATE
 	test_framework
 	basic
+	SpriteLib
 )
 
 target_include_directories(unit_tests PRIVATE
