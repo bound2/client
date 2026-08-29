@@ -110,3 +110,46 @@ TEST(MPalette, AssignmentProducesIndependentStorage)
 
 	CHECK_EQ(0x1234, source[0]);
 }
+
+//----------------------------------------------------------------------
+// Indexing an uninitialised palette must not dereference null.
+//
+// operator[] returned m_pColor[n] with nothing checking that the table
+// existed, so reading through the reference on a palette that had never
+// been given storage faulted.
+//----------------------------------------------------------------------
+TEST(MPalette, IndexingAnEmptyPaletteDoesNotDereferenceNull)
+{
+	MPalette	palette;
+
+	CHECK_EQ(0, palette.GetSize());
+	CHECK_EQ(0, palette[0]);
+	CHECK_EQ(0, palette[200]);
+}
+
+//----------------------------------------------------------------------
+// An index at or beyond the table size must not read past the table.
+//
+// The index is a full byte while the table holds m_Size entries, and
+// sprite pixel bytes are used as palette indices directly, so a sprite
+// carrying an index larger than the palette read out of bounds while
+// being drawn.
+//----------------------------------------------------------------------
+TEST(MPalette, IndexBeyondSizeDoesNotReadPastTheTable)
+{
+	MPalette	palette;
+
+	palette.Init(4);
+
+	palette[0] = 0x1111;
+	palette[1] = 0x2222;
+	palette[2] = 0x3333;
+	palette[3] = 0x4444;
+
+	CHECK_EQ(0x4444, palette[3]);
+
+	// One past the end, and far past the end.
+	CHECK_EQ(0, palette[4]);
+	CHECK_EQ(0, palette[200]);
+	CHECK_EQ(0, palette[255]);
+}

@@ -34,8 +34,13 @@ public:
 	//--------------------------------------------------------
 	// operator
 	//--------------------------------------------------------
-	WORD&		operator [] (BYTE n)		{ return m_pColor[n]; }
-	WORD&		operator [] (BYTE n) const { return m_pColor[n]; }
+	// The index is a full byte while the table holds only m_Size
+	// entries, and sprite pixel bytes are used as palette indices
+	// directly, so an index past the end is reachable straight from
+	// file data. Such an index is answered with a shared spare entry
+	// rather than reading past the table.
+	WORD&		operator [] (BYTE n)		{ return Entry(n); }
+	WORD&		operator [] (BYTE n) const { return Entry(n); }
 	void		operator = (const MPalette& pal);
 	
 	//--------------------------------------------------------
@@ -47,6 +52,21 @@ public:
 	bool IsInit() const { return (m_Size == 0)?false:true; }
 	
 protected:
+	//--------------------------------------------------------
+	// Bounds checked table access shared by both operator[]
+	// overloads. Returns a spare entry when the palette has no table
+	// or the index is outside it.
+	//--------------------------------------------------------
+	WORD&		Entry(BYTE n) const
+	{
+		static WORD	s_OutOfRange = 0;
+
+		if (m_pColor == NULL || n >= m_Size)
+			return s_OutOfRange;
+
+		return m_pColor[n];
+	}
+
 	WORD *		m_pColor;
 	BYTE		m_Size;
 };
