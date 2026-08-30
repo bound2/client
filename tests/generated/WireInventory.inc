@@ -824,11 +824,30 @@ struct Inv_GCEnterVampirePortalFactory {
 };
 struct Inv_GCExchangeBuyFactory {
 	static PacketID_t id() { return Packet::PACKET_GC_EXCHANGE_BUY; }
-	static PacketSize_t maxSize() { return 1 + 1 + 255 + 8; }
+	static PacketSize_t maxSize() { return 1 + 1 + GCExchangeBuy::kMaxMessage + 8; }
 };
 struct Inv_GCExchangeListFactory {
 	static PacketID_t id() { return Packet::PACKET_GC_EXCHANGE_LIST; }
-	static PacketSize_t maxSize() { return 14 + 20 * 1855; }
+	static PacketSize_t maxSize() {
+		
+		const PacketSize_t kMaxString = 1 + GCExchangeList::kMaxListingString;
+		const PacketSize_t kMaxListing =
+			  8 + 2					
+			+ kMaxString * 2		
+			+ 1 + 1 + 2 + 8			
+			+ 4 + 4 + 1 + 1			
+			+ kMaxString * 2		
+			+ 1 + 4					
+			+ kMaxString * 2		
+			+ 4						
+			+ kMaxString			
+			+ 1 + 2 + 4 + 2			
+			+ 1 + 1 + 1				
+			+ 2 + 2 + 2				
+			+ 4;					
+									
+		return 4 + 4 + 4 + 2 + kMaxListing * GCExchangeList::kMaxListingsPerPage;
+	}
 };
 struct Inv_GCExecuteElementFactory {
 	static PacketID_t id() { return Packet::PACKET_GC_EXECUTE_ELEMENT; }
@@ -1986,11 +2005,11 @@ struct Inv_CGDropMoneyFactory {
 };
 struct Inv_CGExchangeBuyFactory {
 	static PacketID_t id() { return Packet::PACKET_CG_EXCHANGE_BUY; }
-	static PacketSize_t maxSize() { return 8 + 1 + 255; }
+	static PacketSize_t maxSize() { return 8 + 1 + CGExchangeBuy::kMaxIdempotencyKey; }
 };
 struct Inv_CGExchangeListFactory {
 	static PacketID_t id() { return Packet::PACKET_CG_EXCHANGE_LIST; }
-	static PacketSize_t maxSize() { return 4 + 4 + 1 + 2 + 4 + 4 + 1 + 255; }
+	static PacketSize_t maxSize() { return 4 + 4 + 1 + 2 + 4 + 4 + 1 + CGExchangeList::kMaxSellerFilter; }
 };
 struct Inv_CGExpelGuildFactory {
 	static PacketID_t id() { return Packet::PACKET_CG_EXPEL_GUILD; }

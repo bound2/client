@@ -17,6 +17,12 @@
 class GCExchangeBuy : public Packet
 {
 public:
+	// Maximum wire length, in bytes, of m_Message. write(), read() and
+	// getPacketSize() all clamp to this value, and the factory's max size is
+	// derived from it. MUST stay equal to the server repo's constant of the
+	// same name.
+	static const PacketSize_t kMaxMessage = 255;
+
 	GCExchangeBuy();
 	virtual ~GCExchangeBuy();
 
@@ -24,8 +30,14 @@ public:
 	void write(SocketOutputStream & oStream) const;
 	void execute(Player* pPlayer);
 
-	// uint8 success + bstr message (length byte always written) + uint64 orderID
-	PacketSize_t getPacketSize() const throw() { return sizeof(BYTE) + sizeof(BYTE) + m_Message.length() + sizeof(ulonglong); }
+	// uint8 success + bstr message (length byte always written, body clamped
+	// to kMaxMessage exactly as write() clamps it) + uint64 orderID
+	PacketSize_t getPacketSize() const throw()
+	{
+		return sizeof(BYTE) + sizeof(BYTE)
+			+ (PacketSize_t)(m_Message.length() > kMaxMessage ? kMaxMessage : m_Message.length())
+			+ sizeof(ulonglong);
+	}
 	PacketID_t getPacketID() const throw() { return PACKET_GC_EXCHANGE_BUY; }
 	string getPacketName() const throw() { return "GCExchangeBuy"; }
 	string toString() const;
@@ -56,9 +68,11 @@ public:
 	Packet* createPacket() throw() { return new GCExchangeBuy(); }
 	string getPacketName() const throw() { return "GCExchangeBuy"; }
 	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_EXCHANGE_BUY; }
-	// success(1) + message length byte(1) + message max(255) + orderID(8)
+	// success(1) + message length byte(1) + message body(255) + orderID(8)
+	// = 265. write() clamps the body to kMaxMessage, so getPacketSize() can
+	// never exceed this.
 	// Must stay identical to the server repo's GCExchangeBuyFactory::getPacketMaxSize()
-	PacketSize_t getPacketMaxSize() const throw() { return 1 + 1 + 255 + 8; }
+	PacketSize_t getPacketMaxSize() const throw() { return 1 + 1 + GCExchangeBuy::kMaxMessage + 8; }
 };
 
 //////////////////////////////////////////////////////////////////////////////

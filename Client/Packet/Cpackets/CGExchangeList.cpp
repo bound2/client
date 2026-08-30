@@ -10,6 +10,10 @@
 
 #include "Player.h"
 
+// Out-of-line definition so the constant may also be odr-used (bound to a
+// reference) by the UI and tests, not only read as a compile-time constant.
+const PacketSize_t CGExchangeList::kMaxSellerFilter;
+
 CGExchangeList::CGExchangeList()
 {
 	m_Page = 1;
@@ -35,10 +39,15 @@ void CGExchangeList::read(SocketInputStream& iStream)
 	iStream.read(m_MinPrice);
 	iStream.read(m_MaxPrice);
 
+	// bstr : length byte is always present, even when the filter is empty.
+	// The else-branch is not optional - read() must fully overwrite the
+	// packet's state so that it stays a true mirror of write().
 	BYTE szSellerFilter;
 	iStream.read(szSellerFilter);
 	if (szSellerFilter > 0)
 	{
+		// char buf[256] is safe for any BYTE length : at 255 the terminator
+		// lands on buf[255], the last element.
 		char buf[256];
 		iStream.read(buf, szSellerFilter);
 		buf[szSellerFilter] = '\0';
@@ -46,7 +55,7 @@ void CGExchangeList::read(SocketInputStream& iStream)
 	}
 	else
 	{
-		m_SellerFilter = "";
+		m_SellerFilter.clear();
 	}
 
 	__END_CATCH
@@ -63,10 +72,19 @@ void CGExchangeList::write(SocketOutputStream& oStream) const
 	oStream.write(m_MinPrice);
 	oStream.write(m_MaxPrice);
 
-	// bstr : length byte is always written, even when the filter is empty
-	oStream.write((BYTE)m_SellerFilter.length());
-	if (!m_SellerFilter.empty())
-		oStream.write(m_SellerFilter);
+	// bstr : length byte is always written, even when the filter is empty.
+	//
+	// The clamp to kMaxSellerFilter is duplicated, deliberately and
+	// identically, in write() and in getPacketSize(). The packet size goes
+	// into the stream header BEFORE write() is called, so the two must agree
+	// for every possible value of the field; writing the truncated length byte
+	// but the full string body desynchronises the connection.
+	// oStream.write(m_SellerFilter) is NOT used here : it would emit the whole
+	// string regardless of the length byte just written.
+	const BYTE szSellerFilter = (BYTE)(m_SellerFilter.length() > kMaxSellerFilter ? kMaxSellerFilter : m_SellerFilter.length());
+	oStream.write(szSellerFilter);
+	if (szSellerFilter > 0)
+		oStream.write(m_SellerFilter.c_str(), szSellerFilter);
 
 	__END_CATCH
 }

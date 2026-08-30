@@ -74,6 +74,20 @@ struct ExchangeListing
 class GCExchangeList : public Packet
 {
 public:
+	// Maximum wire length, in bytes, of EACH per-listing string: sellerAccount,
+	// sellerPlayer, buyerAccount, buyerPlayer, createdAt, expireAt and itemName.
+	// write(), read() and getPacketSize() all clamp to this value, and the
+	// factory's max size is derived from it. MUST stay equal to the server
+	// repo's constant of the same name.
+	static const PacketSize_t kMaxListingString = 255;
+
+	// Maximum number of listings one packet may carry, and the 20 in the
+	// factory's max size formula. read() rejects a count above this value, and
+	// the server clamps its page size to it before filling the listing vector,
+	// which is what keeps getPacketSize() at or below getPacketMaxSize().
+	// MUST stay equal to the server repo's constant of the same name.
+	static const PacketSize_t kMaxListingsPerPage = 20;
+
 	GCExchangeList();
 	virtual ~GCExchangeList();
 
@@ -118,18 +132,32 @@ public:
 	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_EXCHANGE_LIST; }
 
 	// Must equal the server repo's GCExchangeListFactory::getPacketMaxSize().
-	// Header : int32 page + int32 pageSize + int32 total + uint16 count = 14
-	// Per listing (every string at its 255-byte maximum, +1 length byte):
-	//   8 listingID + 2 serverID + (1+255)*2 sellerAccount/sellerPlayer
-	//   + 1 sellerRace + 1 itemClass + 2 itemType + 8 itemID
-	//   + 4 objectID + 4 pricePoint + 1 currency + 1 status
-	//   + (1+255)*2 buyerAccount/buyerPlayer + 1 taxRate + 4 taxAmount
-	//   + (1+255)*2 createdAt/expireAt + 4 version + (1+255) itemName
-	//   + 1 enchantLevel + 2 grade + 4 durability + 2 silver
-	//   + 1+1+1 optionType1..3 + 2+2+2 optionValue1..3 + 4 stackCount
-	//   = 1855
-	// Default page size is 20 listings: 14 + 20 * 1855 = 37114
-	PacketSize_t getPacketMaxSize() const throw() { return 14 + 20 * 1855; }
+	// Header : int32 page + int32 pageSize + int32 total + uint16 count = 14,
+	// then kMaxListingsPerPage listings with every string at its cap. write()
+	// clamps each string to kMaxListingString and read() refuses a count above
+	// kMaxListingsPerPage, so getPacketSize() can never exceed this.
+	// 14 + 20 * 1855 = 37114
+	PacketSize_t getPacketMaxSize() const throw()
+	{
+		// One string at its cap : length byte + body = 256
+		const PacketSize_t kMaxString = 1 + GCExchangeList::kMaxListingString;
+		const PacketSize_t kMaxListing =
+			  8 + 2					// listingID, serverID
+			+ kMaxString * 2		// sellerAccount, sellerPlayer
+			+ 1 + 1 + 2 + 8			// sellerRace, itemClass, itemType, itemID
+			+ 4 + 4 + 1 + 1			// objectID, pricePoint, currency, status
+			+ kMaxString * 2		// buyerAccount, buyerPlayer
+			+ 1 + 4					// taxRate, taxAmount
+			+ kMaxString * 2		// createdAt, expireAt
+			+ 4						// version
+			+ kMaxString			// itemName
+			+ 1 + 2 + 4 + 2			// enchantLevel, grade, durability, silver
+			+ 1 + 1 + 1				// optionType1..3
+			+ 2 + 2 + 2				// optionValue1..3
+			+ 4;					// stackCount
+									// = 1855
+		return 4 + 4 + 4 + 2 + kMaxListing * GCExchangeList::kMaxListingsPerPage;
+	}
 };
 
 #endif // __GC_EXCHANGE_LIST_H__

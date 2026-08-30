@@ -436,6 +436,6 @@
 484	GCFriendChatting	553
 485	GCUseSkillCardOK	1
 486	CGExchangeList	275
-489	CGExchangeBuy	264
+489	CGExchangeBuy	73
 494	GCExchangeList	37114
 497	GCExchangeBuy	265
