@@ -163,6 +163,32 @@ if(MSVC AND NOT USE_ASAN)
     message(STATUS "Debug runtime checks: /RTC1 (uninitialised locals, stack frames)")
 endif()
 
+# Parallel compilation.
+#
+# MSVC compiles the sources of one project one at a time unless asked
+# otherwise. msbuild's own -m flag only overlaps separate *projects*, so the
+# two targets that dominate this build - DarkEden and VS_UI, several hundred
+# translation units each - still come out largely serial. /MP adds the
+# file-level parallelism inside a project, which is where the wall clock
+# actually goes.
+#
+# Set at directory scope here, above every add_subdirectory and every
+# add_library/add_executable below, so it reaches all of them - DarkEden,
+# VS_UI, TextSystem, basic, DXLib, SpriteLib, framelib, the viewer tools and
+# the test binaries. Pinning it onto individual .vcxproj files instead does
+# not survive the next CMake regeneration, since those files are generated.
+#
+# Restricted to C and CXX because the resource compiler does not accept /MP.
+#
+# /MP is rejected alongside #import and /Gm; neither appears in this tree.
+# It also multiplies with msbuild -m, so `cmake --build . -- -m` can
+# oversubscribe the machine - that is the intended trade, not an accident.
+if(MSVC)
+    add_compile_options($<$<COMPILE_LANGUAGE:C,CXX>:/MP>)
+
+    message(STATUS "Parallel compilation: /MP (per-project, all targets)")
+endif()
+
 # Add SDL2 include directory BEFORE add_subdirectory
 if(EXISTS "/opt/homebrew/include/SDL2")
 	include_directories(/opt/homebrew/include/SDL2)
