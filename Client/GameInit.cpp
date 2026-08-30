@@ -969,6 +969,22 @@ InitSound()
 			LONG volume = value*SOUND_DEGREE + SOUND_MIN;
 
 			g_SDLAudio.SetVolumeLimit( volume );	
+
+#ifndef __USE_MP3__
+			//-----------------------------------------------------------
+			// The OGG music streamer. InitMusic() below would create it,
+			// but nothing calls InitMusic(); and once IsInit() is true the
+			// music call sites (PlayMusicCurrentZone and friends) call
+			// g_pOGG->streamClose() without a null check.
+			//-----------------------------------------------------------
+			if (g_pOGG == NULL)
+			{
+				g_pOGG = new COGGSTREAM(NULL, g_pSoundBufferForOGG, 44100, 11025, 8800, 1);
+
+				int musicVolume = (g_pUserOption->VolumeMusic - 15) * 250;
+				g_pOGG->streamVolume( max( -10000, min( -1, musicVolume ) ) );
+			}
+#endif
 		}
 		else
 		{

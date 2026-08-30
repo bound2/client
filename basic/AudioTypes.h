@@ -15,6 +15,9 @@
 /* Include Platform.h for basic type definitions */
 #include "Platform.h"
 
+/* pow() for the dB -> linear volume conversion at the bottom of this file */
+#include <math.h>
+
 /*-----------------------------------------------------------------------------
 	Volume Constants
 
@@ -117,5 +120,48 @@ typedef struct _DSBPOSITIONNOTIFY {
 #ifndef FOURCC
 #define FOURCC(a,b,c,d) (((DWORD)(a)<<0)|((DWORD)(b)<<8)|((DWORD)(c)<<16)|((DWORD)(d)<<24))
 #endif
+
+/*-----------------------------------------------------------------------------
+	Volume / Pan Conversion
+
+	Game code still speaks DirectSound units: a volume is an attenuation in
+	hundredths of a decibel (DSBVOLUME_MIN..DSBVOLUME_MAX, see SOUND_MIN and
+	SOUND_DEGREE in Client.h) and a pan runs DSBPAN_LEFT..DSBPAN_RIGHT. The
+	SDL backend wants linear percentages. These two functions are the only
+	place that mapping lives, so the adapters and the unit tests agree.
+-----------------------------------------------------------------------------*/
+
+#ifndef DSBPAN_LEFT
+#define DSBPAN_LEFT              -10000    /* Fully left */
+#endif
+
+#ifndef DSBPAN_CENTER
+#define DSBPAN_CENTER            0
+#endif
+
+#ifndef DSBPAN_RIGHT
+#define DSBPAN_RIGHT             10000     /* Fully right */
+#endif
+
+/* DirectSound defines the volume as 20*log10(amplitude) in hundredths of a
+   dB, so amplitude = 10^(v/2000). DSBVOLUME_MIN is silence by definition and
+   anything at or above DSBVOLUME_MAX is full scale; the result is rounded to
+   the nearest percent. */
+static inline int AudioVolumeToPercent(long hundredthsOfDb)
+{
+	if (hundredthsOfDb >= DSBVOLUME_MAX) return 100;
+	if (hundredthsOfDb <= DSBVOLUME_MIN) return 0;
+
+	double amplitude = pow(10.0, (double)hundredthsOfDb / 2000.0);
+	return (int)(amplitude * 100.0 + 0.5);
+}
+
+/* DSBPAN_LEFT..DSBPAN_RIGHT -> -100..100, clamped. */
+static inline int AudioPanToPercent(long pan)
+{
+	if (pan <= DSBPAN_LEFT) return -100;
+	if (pan >= DSBPAN_RIGHT) return 100;
+	return (int)(pan / 100);
+}
 
 #endif // __AUDIOTYPES_H__

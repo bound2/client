@@ -420,7 +420,7 @@ ExecuteLogout()
 							if( g_oggfile != NULL )
 							{
 								g_pOGG->streamLoad( g_oggfile, NULL );
-								g_pOGG->streamPlay( 0 );
+								g_pOGG->streamPlay( SOUND_PLAY_REPEAT );
 								int volume = (g_pUserOption->VolumeMusic - 15) * 250;
 								g_pOGG->streamVolume( max( -10000, min( -1, volume ) ) );
 							}
@@ -504,7 +504,7 @@ PlayTitleMusic()
 
 						g_pOGG->streamVolume( max( -10000, min( -1, volume ) ) );
 						g_pOGG->streamLoad( g_oggfile,NULL );
-						g_pOGG->streamPlay( 0 );					
+						g_pOGG->streamPlay( SOUND_PLAY_REPEAT );					
 					}
 				}
 #endif

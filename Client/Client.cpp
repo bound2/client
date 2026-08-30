@@ -3310,7 +3310,19 @@ WinMain(HINSTANCE hInstance,
 				// a real iconv to transcode the shipped CP949 data, since SDL's
 				// built-in converter supports no legacy CJK code page. The name
 				// carries no debug suffix, so one entry covers both configs.
-				InvalidDll != "iconv-2.dll")
+				InvalidDll != "iconv-2.dll" &&
+				// vcpkg's SDL2_mixer and the codec libraries it was built
+				// against (ogg/vorbis for .ogg music, wavpack). They are only
+				// deployed once DXLibBackendSDL.cpp actually references the
+				// mixer, so they were absent from the output directory until
+				// sound was wired up. The codec names carry no debug suffix.
+				InvalidDll != "sdl2_mixerd.dll" &&
+				InvalidDll != "sdl2_mixer.dll" &&
+				InvalidDll != "ogg.dll" &&
+				InvalidDll != "vorbis.dll" &&
+				InvalidDll != "vorbisenc.dll" &&
+				InvalidDll != "vorbisfile.dll" &&
+				InvalidDll != "wavpackdll.dll")
 				//MessageBox(0,(LPCTSTR)InvalidDll.c_str(),"ERROR",MB_OK);
 				//MessageBox(0,
 				return -1;

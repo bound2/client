@@ -3,7 +3,12 @@
 	CDirectSoundStream_Adapter.cpp
 
 	DirectSoundStream adapter using DXLibBackend.
-	This file provides SDL2 backend support for CDirectSoundStream class.
+	This file provides SDL2 backend support for the CSDLStream class declared
+	in CDirectSoundStream.h. CDirectSoundStream.cpp beside it is the fallback
+	used only when SDL2_mixer is absent; the two are never compiled together.
+
+	Volume arrives in DirectSound hundredths of a dB and is converted with
+	AudioVolumeToPercent at the backend boundary, as in CDirectSound_Adapter.
 
 	2025.01.14
 
@@ -19,7 +24,7 @@
 #ifdef DXLIB_BACKEND_SDL
 
 /* Constructor */
-CSDLStream::CDirectSoundStream()
+CSDLStream::CSDLStream()
 {
 	m_bLoad = false;
 	m_bPlay = false;
@@ -35,11 +40,11 @@ CSDLStream::CDirectSoundStream()
 	m_dwLastPos = 0;
 	m_bFoundEnd = false;
 
-	m_MaxVolume = 100;
+	m_MaxVolume = DSBVOLUME_MAX;
 }
 
 /* Destructor */
-CSDLStream::~CDirectSoundStream()
+CSDLStream::~CSDLStream()
 {
 	Release();
 }
@@ -66,9 +71,9 @@ void CSDLStream::Release()
 /* Load audio file for streaming */
 void CSDLStream::Load(LPSTR filename)
 {
-	// Initialize stream backend if needed
-	if (!dxlib_get_backend_name()) {
-		dxlib_stream_init(NULL);
+	// Idempotent: opens the mixer if nothing else has yet.
+	if (dxlib_stream_init(NULL) != 0) {
+		return;
 	}
 
 	// Load stream
@@ -106,12 +111,12 @@ void CSDLStream::Stop()
 void CSDLStream::SetVolumeLimit(LONG volume)
 {
 	m_MaxVolume = volume;
-	if (m_MaxVolume > 100) m_MaxVolume = 100;
-	if (m_MaxVolume < 0) m_MaxVolume = 0;
+	if (m_MaxVolume > DSBVOLUME_MAX) m_MaxVolume = DSBVOLUME_MAX;
+	if (m_MaxVolume < DSBVOLUME_MIN) m_MaxVolume = DSBVOLUME_MIN;
 
 	if (m_bLoad) {
 		dxlib_stream_t stream = (dxlib_stream_t)m_pDSBuffer;
-		dxlib_stream_set_volume(stream, m_MaxVolume);
+		dxlib_stream_set_volume(stream, AudioVolumeToPercent(m_MaxVolume));
 	}
 }
 

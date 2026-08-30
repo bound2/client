@@ -253,6 +253,16 @@ void dxlib_music_release(void);
 int dxlib_music_load(const char* filename);
 
 /**
+ * Load music from a complete file image in memory (OGG, MP3, WAV ...)
+ * The backend decodes straight out of data, so it must stay valid until
+ * dxlib_music_free() or the next load.
+ * @param data File image
+ * @param size Size in bytes
+ * @return 0 on success, non-zero on failure
+ */
+int dxlib_music_load_mem(const void* data, int size);
+
+/**
  * Free current music
  */
 void dxlib_music_free(void);

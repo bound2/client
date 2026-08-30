@@ -4274,7 +4274,7 @@ PlayMusicCurrentZone()
 							// 2004, 11, 8, sobeit add start - 그냥 에러 체크
 							if(SOUND_ERR_OK == g_pOGG->streamLoad( g_oggfile, NULL ))
 							{
-								if(SOUND_ERR_OK == g_pOGG->streamPlay( SOUND_PLAY_ONCE ))
+								if(SOUND_ERR_OK == g_pOGG->streamPlay( SOUND_PLAY_REPEAT ))
 								{
 									int volume = (g_pUserOption->VolumeMusic - 15) * 250;
 									g_pOGG->streamVolume( max( -10000, min( -1, volume ) ) );
