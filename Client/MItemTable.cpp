@@ -10263,7 +10263,7 @@ InitClass( ITEM_CLASS_SR,15 );
  m_pTypeInfo[ITEM_CLASS_SR][3].ElementalType = ITEMTABLE_INFO::ELEMENTAL_TYPE_ANY;
  m_pTypeInfo[ITEM_CLASS_SR][3].Elemental = 0;
 
- m_pTypeInfo[ITEM_CLASS_SR][4].HName = "IS-99 ??";
+ m_pTypeInfo[ITEM_CLASS_SR][4].HName = "IS-99 Harpy";
  m_pTypeInfo[ITEM_CLASS_SR][4].EName = "IS-99 Harpy";
  m_pTypeInfo[ITEM_CLASS_SR][4].Description = "";
  m_pTypeInfo[ITEM_CLASS_SR][4].SetSoundID( SOUND_ITEM_MOVE_GUN,SOUND_ITEM_MOVE_GUN,SOUND_ITEM_MOVE_GUN,SOUNDID_NULL );
