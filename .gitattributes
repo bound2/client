@@ -1,0 +1,4 @@
+# Byte-compared by tests/unit/test_wire_layout.cpp and the wire_inventory_fresh
+# ctest; a CRLF checkout would report every line as a protocol change.
+tests/wire-layout.txt text eol=lf
+tests/generated/*.inc text eol=lf

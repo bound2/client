@@ -50,4 +50,40 @@ target_include_directories(unit_tests PRIVATE
 	${CMAKE_SOURCE_DIR}/Client/TextSystem
 )
 
+#----------------------------------------------------------------------
+# Wire-layout inventory (unit/test_wire_layout.cpp).
+#
+# That one source compiles every packet header under Client/Packet the
+# way the DarkEden target does (__GAME_CLIENT__=1) but links none of the
+# packet .cpp files: tests/generated/WireInventory.inc carries the
+# factories' getPacketID/getPacketMaxSize bodies as plain functions.
+# See tests/tools/gen_wire_inventory.pl.
+#----------------------------------------------------------------------
+target_sources(unit_tests PRIVATE stubs/wire_layout_defs.cpp)
+set_source_files_properties(
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_wire_layout.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/stubs/wire_layout_defs.cpp
+	PROPERTIES
+		INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/Client/Packet;${CMAKE_CURRENT_SOURCE_DIR}/generated"
+		COMPILE_DEFINITIONS "__GAME_CLIENT__=1;WIRE_LAYOUT_FILE=\"${CMAKE_CURRENT_SOURCE_DIR}/wire-layout.txt\""
+)
+
 add_test(NAME unit_tests COMMAND unit_tests)
+
+#----------------------------------------------------------------------
+# The committed WireInventory.inc must match a fresh generation, so a
+# new or changed factory cannot go uninventoried. Needs perl (Git for
+# Windows ships one); without it the check is skipped, not passed.
+#----------------------------------------------------------------------
+find_program(PERL_EXECUTABLE perl)
+if(PERL_EXECUTABLE)
+	add_test(
+		NAME wire_inventory_fresh
+		COMMAND ${CMAKE_COMMAND}
+			-DPERL_EXECUTABLE=${PERL_EXECUTABLE}
+			-DSOURCE_DIR=${CMAKE_SOURCE_DIR}
+			-P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_wire_inventory_fresh.cmake
+	)
+else()
+	message(STATUS "perl not found: the wire_inventory_fresh test is not registered")
+endif()
