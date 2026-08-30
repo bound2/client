@@ -19,6 +19,11 @@
 void	g_InitMessage();
 void	g_FreeMessage();
 
+// Show an OK dialog with arbitrary text on the title/login screens, where
+// UIDialog::PopupFreeMessageDlg draws an empty box (its text path depends on
+// in-game resources). The text is copied.
+void	g_ShowMessage(const char* text);
+
 extern C_VS_UI_DIALOG *		g_msg_not_available_menu;
 extern C_VS_UI_DIALOG *		g_msg_wrong_id_password;
 extern C_VS_UI_DIALOG *		g_msg_invalid_id_password;

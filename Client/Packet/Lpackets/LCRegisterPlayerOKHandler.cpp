@@ -2,7 +2,7 @@
 //
 // Filename    : LCRegisterPlayerOKHandler.cpp
 // Written By  : Reiot
-// Description : 
+// Description :
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -16,68 +16,62 @@
 #ifdef __GAME_CLIENT__
 
 	#include "ClientPlayer.h"
-	#include "Cpackets/CLGetPCList.h"
+	#include "Cpackets/CLGetWorldList.h"
 
 #endif
 
 extern BOOL g_bNeedUpdate;
 
 //////////////////////////////////////////////////////////////////////
+//
+// The login server created the account and treats this session as
+// logged in with it. From here the flow is the one LCLoginOKHandler
+// runs after a normal login: ask for the world list and wait for it.
+//
 //////////////////////////////////////////////////////////////////////
 void LCRegisterPlayerOKHandler::execute ( LCRegisterPlayerOK * pPacket , Player * pPlayer )
-	 
+
 throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
 #ifdef __GAME_CLIENT__
 
-	//cout << "플레이어 등록에 성공했습니당.. 추카.. " << endl;
-
-	//throw DisconnectException("플레이어 등록에 성공했으니깐, 접속을 종료하고 다시 해랑..");
-	// Debug Message
+	// Remember the ID the way a successful login does.
+	if( g_pUserInformation->UserID.GetLength() >= 15 )
+		UI_BackupLoginID( "DarkEden" );
+	else
+		UI_BackupLoginID( g_pUserInformation->UserID );
 
 	if (!g_bNeedUpdate)
 	{
 		ClientPlayer * pClientPlayer = dynamic_cast<ClientPlayer*>(pPlayer);
 
-		CLGetPCList clGetPCList;
+		g_pUserInformation->pLogInClientPlayer = pClientPlayer;
 
-		pClientPlayer->sendPacket( &clGetPCList );
-		
-		// 플레이어의 상태를 바꾼다.
-		pClientPlayer->setPlayerStatus( CPS_AFTER_SENDING_CL_GET_PC_LIST );
+		// The rest of the handshake (world list, server list, PC list)
+		// is validated against the post-login status set, so join it.
+		pClientPlayer->setPlayerStatus( CPS_AFTER_SENDING_CL_LOGIN );
 
-		//------------------------------------------------------------
-		// 닫는다.
-		//------------------------------------------------------------
-		UI_CloseUserRegistrationWindow();
+		CLGetWorldList clGetWorldList;
+		pClientPlayer->sendPacket( &clGetWorldList );
 
-		// ID를 기억시켜둔다.
-		if( g_pUserInformation->UserID != NULL && g_pUserInformation->UserID.GetLength() < 15 )
-			UI_BackupLoginID( g_pUserInformation->UserID );
-		else
-			UI_BackupLoginID( "DarkEden" );
-
+		SetMode( MODE_WAIT_WORLD_LIST );
 
 		//------------------------------------------------------------
-		// 현재 Server 정보를 저장해둔다.
+		// Current server group.
 		//------------------------------------------------------------
 		SetServerGroupName( pPacket->getGroupName().c_str() );
-		//SetServerName( pPacket->getServerName().c_str() );
 
 		//------------------------------------------------------------
-		// Client는 PC List를 기다려야 한다.
-		//------------------------------------------------------------	
-		SetMode( MODE_WAIT_PCLIST );
-
+		// Gore level - same rule as LCLoginOKHandler: the server's
+		// adult flag is not trusted, only the teen-version option.
 		//------------------------------------------------------------
-		// Gore Level을 바꾼다.
-		//------------------------------------------------------------
-		bool bGoreLevel = pPacket->isAdult() && !g_pUserOption->UseTeenVersion;
+		bool bGoreLevel = !g_pUserOption->UseTeenVersion;
 
-		SetGoreLevel( bGoreLevel);	
-		
+		g_pUserInformation->GoreLevel = bGoreLevel;
+
+		SetGoreLevel( bGoreLevel );
 	}
 
 #endif

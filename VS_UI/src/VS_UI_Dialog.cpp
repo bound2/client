@@ -757,7 +757,9 @@ void C_VS_UI_DIALOG::Show()
 		{
 			gpC_base->m_p_DDSurface_back->Unlock();
 			m_line_count=m_vs_msg.size();
-			if (m_line_count <= m_print_line_count)
+			// No-fit mode centres the block on the message area and has no
+			// scroll bar, so draw it even when it is taller than the area;
+			// a slightly overflowing message beats an empty box.
 			{
 				msgStyle.align = TextSystem::TextAlign::Center;
 				textService.DrawLines(
@@ -989,8 +991,15 @@ void C_VS_UI_DIALOG::SetMessage(char ** sz_msg, UINT line_count, SETMESSAGE_MODE
 		m_msg_rect.h=m_client_rect.h-m_menu_rect.h-28;
 		m_print_line_count = (m_msg_rect.h)/m_message_str_height;
 	}
+	// The freetype line height is taller than the bitmap font this geometry
+	// was tuned for, so a small fixed-height dialog can end up with zero
+	// printable lines, and Show() then draws no text at all (an empty box
+	// with just the button). Always allow at least one line.
+	if (m_print_line_count < 1 && m_line_count > 0)
+		m_print_line_count = 1;
+
 	if (mode == SMO_NOFIT)
-	{		
+	{
 		m_nofit_mode_msg_y = m_msg_rect.y+m_msg_rect.h/2-(m_message_str_height*line_count)/2; // sort in center
 	}
 	else if (m_line_count > m_print_line_count)				// 출력범위가 좁으므로 ScrollBar 를 생성한다.
