@@ -80,7 +80,16 @@ void CSDLGraphics::Init(HWND hWnd, WORD width, WORD height, SCREENMODE mode, boo
 		return;
 	}
 
-	m_pSDLRenderer = SDL_CreateRenderer(m_pSDLWindow, -1, SDL_RENDERER_ACCELERATED);
+	// Vsync paces the render loop at the monitor refresh rate now that the
+	// game draws interpolated frames between its 62 ms logic ticks (see
+	// CGameUpdate.cpp). Without it the message loop would spin-present.
+	// Renderers that ignore vsync (e.g. SDL_RENDER_DRIVER=software) are paced
+	// by the fallback frame cap in CGameUpdate::Update instead.
+	m_pSDLRenderer = SDL_CreateRenderer(m_pSDLWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	if (m_pSDLRenderer == NULL)
+	{
+		m_pSDLRenderer = SDL_CreateRenderer(m_pSDLWindow, -1, SDL_RENDERER_ACCELERATED);
+	}
 	if (m_pSDLRenderer == NULL)
 	{
 		m_pSDLRenderer = SDL_CreateRenderer(m_pSDLWindow, -1, 0);
