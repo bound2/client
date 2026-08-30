@@ -110,12 +110,17 @@ baseline: **68 tests, 306 checks, 0 failed** in both trees.
 
 ## Traps
 
-- **`_DEBUG` is never defined** — deliberately, per `CMakeLists.txt:16`, because it
-  conflicts with `DebugInfo.h`. The ~50 `#ifdef _DEBUG` blocks in shipped code are
-  therefore inert, including bounds checks that look protective.
-  `CTypeTable::operator[]` is the canonical case: it range-checks only under `_DEBUG`,
-  so in practice it does not range-check at all. Never treat a `_DEBUG` guard as a live
-  defence.
+- **`_DEBUG` IS defined in MSVC Debug builds.** `CMakeLists.txt:16` only declines to
+  *add* it; MSVC defines it automatically under `/MDd`, which CMake cannot undo. The
+  ~50 `#ifdef _DEBUG` blocks in shipped code are therefore **live in every Debug
+  build** and dead only in Release. Both directions of this trap have bitten: the
+  `_DEBUG`-guarded bounds checks (e.g. `CTypeTable::operator[]`) do run in Debug but
+  vanish in Release, and upstream's `_CrtSetDbgFlag(_CRTDBG_DELAY_FREE_MEM_DF)` in
+  `Client.cpp` — long believed dead — ran on every Debug launch and made the CRT
+  retain every freed block, which presented as a ~200 MB/min in-game "memory leak"
+  (root-caused and removed 2026-08-30, see
+  `docs/memory-leak-investigation-2026-08-30.md`). Judge every `_DEBUG` guard by the
+  build configuration, not by the old doctrine that it never fires.
 - **An unlisted DLL kills the client before `main` does anything.** `Client.cpp` walks
   `*.dll` in the working directory against a hardcoded whitelist and does a bare
   `return -1` on the first name it does not recognise — no message, no log line, and
