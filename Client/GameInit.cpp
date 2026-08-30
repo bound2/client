@@ -1474,6 +1474,13 @@ InitGame()
 	// This ensures DEBUG_ADD macros and panic messages are visible
 	log_set_console_output(true);
 
+	// Debug builds also write the same lines to a file beside the executable.
+	// The client is normally run from the Visual Studio debugger, where the
+	// stderr console is easy to lose; the file is overwritten on every launch.
+#ifdef _DEBUG
+	log_set_file_output("DarkEden-debug.log");
+#endif
+
 // Conditional compilation: Remove DEBUG logs in Release builds
 #ifdef _DEBUG
 	log_set_level(LOG_LEVEL_DEBUG);
