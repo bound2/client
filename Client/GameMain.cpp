@@ -2605,7 +2605,7 @@ LoadZone(int n)
 		//-------------------------------------------------------
 		//g_ThreadJob = THREADJOB_LOAD_IMAGEOBJECT_SMALLZONE;				
 		//SetEvent(g_hFileEvent);
-		MString filename = (*g_pZoneTable).Get(g_nZoneLarge)->TeenFilename;
+		MString filename = (*g_pZoneTable).Get(g_nZoneLarge)->Filename;
 		if(g_pUserInformation->GoreLevel == false)
 		{
 			if((*g_pZoneTable).Get(g_nZoneLarge)->TeenFilename.GetLength() > 0)
