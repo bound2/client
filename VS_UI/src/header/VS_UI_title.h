@@ -153,9 +153,15 @@ enum ALIGNMENT
 };
 
 // character creation slot
-struct S_SLOT
+//
+// The scalar members live in S_SLOT_DATA, a plain aggregate, so that S_SLOT's
+// constructor can value-initialise them to zero. Zeroing an S_SLOT with
+// ZeroMemory()/memset() is not an option: it wipes the std::string and
+// std::vector headers, and a std::string whose capacity reads 0 puts its next
+// short assignment on the heap while c_str() keeps returning the inline
+// buffer - the character-select screen then draws pointer bytes as the name.
+struct S_SLOT_DATA
 {
-	S_SLOT() { m_AdvancementLevel = 0; }
 	bool								bl_set;
 //	bool								bl_vampire;
 	bool								bl_female;
@@ -171,8 +177,6 @@ struct S_SLOT
 	int									left_color;
 	int									right_color;
 
-	std::string							sz_name;
-	std::string							sz_guild_name;
 	ALIGNMENT							alignment;
 	int									alignment_num;
 	int									level;		// vampire only
@@ -216,15 +220,6 @@ struct S_SLOT
 	int									bonus_point; // vampire only
 	int									skill_point; // ousters only
 
-	struct UI_EFFECTSTATUS_STRUCT
-	{
-		TYPE_ACTIONINFO actionInfo;
-		DWORD			delayFrame;
-	};
-
-	typedef std::vector<UI_EFFECTSTATUS_STRUCT>			UI_EFFECTSTATUS_TYPE;
-	UI_EFFECTSTATUS_TYPE				STATUS;	
-	
 //	WORD									hp_cur_line;
 //	WORD									mp_cur_line;	// slayer only
 //	WORD									hp_percent;
@@ -250,7 +245,25 @@ struct S_SLOT
 	int									m_AdvancementLevel;
 //	BYTE								m_NickNameType;
 //	std::string							m_NickName;
-};	
+};
+
+struct S_SLOT : public S_SLOT_DATA
+{
+	// Value-initialising the aggregate base zeroes every scalar member.
+	S_SLOT() : S_SLOT_DATA() {}
+
+	std::string							sz_name;
+	std::string							sz_guild_name;
+
+	struct UI_EFFECTSTATUS_STRUCT
+	{
+		TYPE_ACTIONINFO actionInfo;
+		DWORD			delayFrame;
+	};
+
+	typedef std::vector<UI_EFFECTSTATUS_STRUCT>			UI_EFFECTSTATUS_TYPE;
+	UI_EFFECTSTATUS_TYPE				STATUS;
+};
 
 //-----------------------------------------------------------------------------
 // C_VS_UI_LOGIN

@@ -2103,7 +2103,6 @@ UI_SetCharacter(int slotID, PCSlayerInfo * pInfo)
 {
 	// set character
 	S_SLOT slot;
-	ZeroMemory(&slot, sizeof(S_SLOT));
 
 	slot.sz_name = g_pUserInformation->Character[slotID];
 	slot.sz_guild_name = "";
@@ -2462,7 +2461,6 @@ void
 UI_SetCharacter(int slotID, PCVampireInfo * pInfo)
 {
 	S_SLOT slot;
-	ZeroMemory(&slot, sizeof(S_SLOT));
 
 	slot.sz_name = g_pUserInformation->Character[slotID];
 	slot.sz_guild_name = "";
@@ -2598,7 +2596,6 @@ void
 UI_SetCharacter(int slotID, PCOustersInfo * pInfo)
 {
 	S_SLOT slot;
-	ZeroMemory(&slot, sizeof(S_SLOT));
 
 	slot.sz_name = g_pUserInformation->Character[slotID];
 	slot.sz_guild_name = "";
