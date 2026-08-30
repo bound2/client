@@ -4315,6 +4315,10 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_GEAR(int left, int right, void* void_p
 						_CGAddMouseToGear.setSlotID( pMouseItem->GetItemSlot() );//pItem->GetItemSlot() );
 						
 						g_pSocket->sendPacket( &_CGAddMouseToGear );
+
+						DEBUG_ADD_FORMAT("[UI] CGAddMouseToGear id=%d class=%d type=%d dropSlot=%d sentSlot=%d twoHand=%d",
+							pMouseItem->GetID(), (int)pMouseItem->GetItemClass(), (int)pMouseItem->GetItemType(),
+							left, (int)pMouseItem->GetItemSlot(), pMouseItem->IsGearSlotTwoHand() ? 1 : 0);
 						
 
 					//----------------------------------------------------
