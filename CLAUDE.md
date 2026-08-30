@@ -62,6 +62,18 @@ the single biggest constraint on how work gets verified here.
 `dxlib`, `TextSystem` or `VS_UI` means adding it to `target_link_libraries` in
 `tests/CMakeLists.txt` first.
 
+The one exception to the rule is the **wire-layout inventory**
+(`tests/unit/test_wire_layout.cpp`, `tests/wire-layout.txt`): packet id, name and
+max body size for every factory under `Client/Packet`, without linking a single
+packet `.cpp`. `tests/tools/gen_wire_inventory.pl` lifts each factory's
+`getPacketID()`/`getPacketMaxSize()` body into `tests/generated/WireInventory.inc`
+and the compiler evaluates it against the real headers. Re-run the generator after
+adding or changing a factory (the `wire_inventory_fresh` ctest fails otherwise) and
+re-record with `UPDATE_GOLDENS=1`. The server repo commits the same file from its own
+packet classes; `server/tests/tools/wire_inventory_diff.sh` diffs the two, and a
+diff there is a protocol bug in one repo or the other — see `RESTRUCTURING.md` task
+1.4 in the server repo for the findings and their status.
+
 ### The framework
 
 `tests/framework/test_framework.h` — a minimal self-registering C++11 framework, not
