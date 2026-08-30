@@ -338,8 +338,21 @@ class MCreature : public MObject, public MStatus {
 		BYTE		GetDirectionToPosition(TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY);
 
 		// Pixel좌표
+		// During the draw phase (g_bInterpolateDraw) these return a position
+		// interpolated between the previous and current logic tick, so the
+		// renderer can present smooth frames between 62 ms ticks. Logic code
+		// runs with the flag off and always sees the exact tick position.
 		int			GetPixelX() const;
 		int			GetPixelY() const;
+
+		// Remembers the pre-tick pixel position; called once per logic tick
+		// from MZone::UpdateAllCreature before Action() moves the creature.
+		void		SnapshotDrawState();
+
+		// interpolated-minus-exact pixel gap, used to bias the camera so the
+		// view scrolls smoothly with the player between ticks.
+		int			GetDrawGapX() const;
+		int			GetDrawGapY() const;
 
 		// item count
 		int			GetItemCount() const	{ return m_ItemCount; }
@@ -848,9 +861,16 @@ class MCreature : public MObject, public MStatus {
 		MOVENODE_LIST			m_listMoveBuffer;
 	
 
-		// sector사이의 smooth scroll을 위해서		
+		// sector사이의 smooth scroll을 위해서
 		int				m_sX, m_sY;		// 이동해야할 나머지 pixels
 		int				m_cX, m_cY;		// 한번에 이동하는 가로 pixel
+
+		// pre-tick pixel position for draw-phase interpolation. Valid only
+		// when m_DrawSnapFrame equals the current logic frame; otherwise the
+		// creature was not ticked (corpse conversion, fresh spawn) and draw
+		// falls back to the exact position.
+		int				m_PrevPixelX, m_PrevPixelY;
+		DWORD			m_DrawSnapFrame;
 		
 		// 이동하는데 필요한 정보
 		static int		m_sXTable[MAX_DIRECTION];

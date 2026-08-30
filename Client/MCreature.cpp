@@ -598,6 +598,10 @@ MCreature::ReleaseMoveTable()
 //----------------------------------------------------------------------
 MCreature::MCreature()
 {
+	m_PrevPixelX = 0;
+	m_PrevPixelY = 0;
+	m_DrawSnapFrame = 0;
+
 	m_PersonalShopOpenTime = 0;
 	m_HeadSkin = 0;
 	m_DelayLastAction = 0;
@@ -2920,21 +2924,104 @@ MCreature::SetStop()
 }
 
 //----------------------------------------------------------------------
+// Draw-phase interpolation (60 fps rendering between 62 ms logic ticks)
+//----------------------------------------------------------------------
+// g_DrawAlphaNum is how far the wall clock has advanced into the current
+// 62 ms tick, as a 0..256 fixed-point fraction. g_bInterpolateDraw is set
+// only around the world draw in CGameUpdate::UpdateDraw, so game logic
+// always reads exact tick positions. Both live in CGameUpdate.cpp.
+extern DWORD	g_DrawAlphaNum;
+extern bool		g_bInterpolateDraw;
+extern DWORD	g_CurrentFrame;
+
+// A creature never moves more than a tile's worth of pixels per tick; a
+// larger gap means teleport/respawn and must snap, not glide.
+static const int DRAW_LERP_SNAP_DISTANCE = 96;
+
+//----------------------------------------------------------------------
+// Snapshot Draw State
+//----------------------------------------------------------------------
+// Called once per logic tick from MZone::UpdateAllCreature, before this
+// creature's Action() moves it. Stores the pre-tick pixel position that
+// GetPixelX/Y interpolate from during the draw phase.
+//----------------------------------------------------------------------
+void
+MCreature::SnapshotDrawState()
+{
+	m_PrevPixelX = MTopView::MapToPixelX(m_X) + m_sX;
+	m_PrevPixelY = MTopView::MapToPixelY(m_Y) + m_sY;
+	m_DrawSnapFrame = g_CurrentFrame;
+}
+
+//----------------------------------------------------------------------
 // Get PixelX - Creature의 PixelX좌표
 //----------------------------------------------------------------------
-int			
+int
 MCreature::GetPixelX() const
-{ 
-	return MTopView::MapToPixelX(m_X) + m_sX;
+{
+	int cur = MTopView::MapToPixelX(m_X) + m_sX;
+
+	if (!g_bInterpolateDraw || m_DrawSnapFrame != g_CurrentFrame)
+		return cur;
+
+	int d = cur - m_PrevPixelX;
+	if (d > DRAW_LERP_SNAP_DISTANCE || d < -DRAW_LERP_SNAP_DISTANCE)
+		return cur;
+
+	return m_PrevPixelX + (int)(((LONGLONG)d * (LONGLONG)g_DrawAlphaNum) >> 8);
 }
 
 //----------------------------------------------------------------------
 // Get PixelY - Creature의 PixelY좌표
 //----------------------------------------------------------------------
-int			
-MCreature::GetPixelY() const			
-{ 
-	return MTopView::MapToPixelY(m_Y) + m_sY;// + ((m_MoveType == CREATURE_FLYING)<<2);
+int
+MCreature::GetPixelY() const
+{
+	int cur = MTopView::MapToPixelY(m_Y) + m_sY;// + ((m_MoveType == CREATURE_FLYING)<<2);
+
+	if (!g_bInterpolateDraw || m_DrawSnapFrame != g_CurrentFrame)
+		return cur;
+
+	int d = cur - m_PrevPixelY;
+	if (d > DRAW_LERP_SNAP_DISTANCE || d < -DRAW_LERP_SNAP_DISTANCE)
+		return cur;
+
+	return m_PrevPixelY + (int)(((LONGLONG)d * (LONGLONG)g_DrawAlphaNum) >> 8);
+}
+
+//----------------------------------------------------------------------
+// Get Draw Gap - interpolated minus exact pixel position
+//----------------------------------------------------------------------
+// The camera in MTopView::DrawZone follows the player's exact position, so
+// UpdateDraw biases it by this gap (through the Draw(x, y) offset
+// parameters) to scroll smoothly between ticks.
+//----------------------------------------------------------------------
+int
+MCreature::GetDrawGapX() const
+{
+	if (m_DrawSnapFrame != g_CurrentFrame)
+		return 0;
+
+	int cur = MTopView::MapToPixelX(m_X) + m_sX;
+	int d = cur - m_PrevPixelX;
+	if (d > DRAW_LERP_SNAP_DISTANCE || d < -DRAW_LERP_SNAP_DISTANCE)
+		return 0;
+
+	return (int)(((LONGLONG)d * (LONGLONG)g_DrawAlphaNum) >> 8) - d;
+}
+
+int
+MCreature::GetDrawGapY() const
+{
+	if (m_DrawSnapFrame != g_CurrentFrame)
+		return 0;
+
+	int cur = MTopView::MapToPixelY(m_Y) + m_sY;
+	int d = cur - m_PrevPixelY;
+	if (d > DRAW_LERP_SNAP_DISTANCE || d < -DRAW_LERP_SNAP_DISTANCE)
+		return 0;
+
+	return (int)(((LONGLONG)d * (LONGLONG)g_DrawAlphaNum) >> 8) - d;
 }
 
 //----------------------------------------------------------------------

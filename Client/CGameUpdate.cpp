@@ -158,6 +158,19 @@ extern char	g_CWD[_MAX_PATH];
 #endif
 
 bool	g_bFrameChanged	 = false;
+
+//----------------------------------------------------------------------
+// Draw-phase interpolation (60 fps rendering between 62 ms logic ticks)
+//----------------------------------------------------------------------
+// The game simulation is hard-locked to one tick per 62 ms (g_UpdateDelay,
+// server-synced and anti-cheat-guarded - do not touch the tick). To render
+// more than 16 fps, UpdateDraw now runs between ticks as well and
+// MCreature::GetPixelX/Y interpolate positions by g_DrawAlphaNum, the
+// elapsed fraction of the current tick in 0..256 fixed point.
+// g_bInterpolateDraw scopes that behaviour to the world draw only, so all
+// game logic keeps reading exact tick positions.
+DWORD	g_DrawAlphaNum = 256;
+bool	g_bInterpolateDraw = false;
 bool	g_bTestMusic = false;
 
 #ifdef OUTPUT_DEBUG
@@ -5075,11 +5088,29 @@ CGameUpdate::UpdateDraw()
 		//-----------------------------------------------------------------
 		__BEGIN_PROFILE("GameDraw2D")
 
+			// Camera interpolation: DrawZone recomputes the camera from the
+			// player's exact tile+pixel position, so between ticks it would
+			// still step 16 times a second. The Draw(x, y) offsets feed
+			// straight into m_PlusPoint (m_PlusPoint = GetSX() - firstPoint),
+			// so passing the negated interpolation gap biases the camera to
+			// the player's interpolated position - which also keeps the
+			// player pinned at the same screen spot, since the player sprite
+			// itself is drawn at the interpolated position too.
+			int camGapX = 0;
+			int camGapY = 0;
+			if (g_pPlayer != NULL)
+			{
+				camGapX = -g_pPlayer->GetDrawGapX();
+				camGapY = -g_pPlayer->GetDrawGapY();
+			}
+
+			g_bInterpolateDraw = true;
+
 //		#if defined(OUTPUT_DEBUG) && defined(_DEBUG)
 //			if (g_pSDLInput->KeyDown(DIK_SPACE))
 			const MEvent *event = g_pEventManager->GetEventByFlag(EVENTFLAG_SHAKE_SCREEN);
 			if(event != NULL && event->IsShowTime() == true)
-			{		
+			{
 				static int count = 0;
 				const int maxStep = 13;
 
@@ -5087,18 +5118,20 @@ CGameUpdate::UpdateDraw()
 				//const int step[maxStep] = { 0, 2, 3, 6, 5, 3, 0, -4, -6, -5, -3, -1, 0 };
 				//g_pTopView->Draw( step[count]*event->parameter3, ((g_pEventManager->IsEvent(EVENTID_METEOR_SHAKE) == true)?((count%2)*3-3):(count%3-1)*3)*event->parameter3 );
 				const int step[maxStep] = { 0, 1, 2, 2, 2, 1, 0, -2, -2, -2, -1, -1, 0 };
-				g_pTopView->Draw( step[count]*event->parameter3, ((g_pEventManager->IsEvent(EVENTID_METEOR_SHAKE) == true)?((count%2)*3-2):(count%3-1)*3)*event->parameter3 );
+				g_pTopView->Draw( step[count]*event->parameter3 + camGapX, ((g_pEventManager->IsEvent(EVENTID_METEOR_SHAKE) == true)?((count%2)*3-2):(count%3-1)*3)*event->parameter3 + camGapY );
 				// 2004, 5, 21 sobeit modify end
 
 				if(g_bFrameChanged)
 				{
 					count ++;
-					count %= maxStep;			
+					count %= maxStep;
 				}
 			}
 			else
 //		#endif
-			g_pTopView->Draw(0,0);			
+			g_pTopView->Draw(camGapX, camGapY);
+
+			g_bInterpolateDraw = false;
 
 		__END_PROFILE("GameDraw2D")
 
@@ -5332,43 +5365,12 @@ CGameUpdate::UpdateDraw()
 	// 바로 전의 FPS가 출력FPS 한계를 넘을 경우....
 	// 커서 출력 위치를 기억한다.
 	// 	
-	if (g_pUserOption->UseSmoothCursor)
-	{
-		if (CSDLGraphics::IsFullscreen() && g_FrameRate > LIMIT_FPS_FOR_CURSOR)
-		{
-			GetCursorPos(&point);
-			
-			ScreenToClient(g_hWnd, &point);//by viva
-			
-			// ui에 mouse좌표 설정
-			gC_vs_ui.MouseControl(M_MOVING, point.x, point.y);
-
-			// 저장할 영역 설정
-			MOUSEPOINTER_INFO mp_info;
-			gC_vs_ui.GetCurrentMousePointerInfo(mp_info);
-
-			g_pCursorSurface->Init(2, mp_info.width, mp_info.height);
-			//DEBUG_ADD_FORMAT("[MouseCursor] %d,%d, %d,%d", mp_info.width, mp_info.height, mp_info.rx, mp_info.ry);
-			
-			POINT tempPoint;
-			tempPoint.x = mp_info.x;
-			tempPoint.y = mp_info.y;
-			g_pCursorSurface->Store(0, g_pBack, &tempPoint);
-			
-			g_bSmoothCursor = true;
-		}
-		else
-		{
-			g_bSmoothCursor = false;
-		}	
-	}
-	else
-	{
-		//GetCursorPos(&point);	
-			
-		// ui에 mouse좌표 설정
-		//gC_vs_ui.MouseControl(M_MOVING, point.x, point.y);
-	}
+	// The smooth-cursor surface ping-pong (Store here, Restore/Flip in the
+	// cursor-only path of Update) existed to move the mouse between the old
+	// 16 fps world draws. Full frames now go out at the refresh rate with the
+	// cursor drawn into each one, so the machinery is retired - its saved
+	// background rectangles would smear over interpolated frames.
+	g_bSmoothCursor = false;
 
 	//-----------------------------------------------------------------
 	// Mouse 그리기
@@ -6513,12 +6515,28 @@ CGameUpdate::Update(void)
 		static DWORD oldFrame = 0;
 
 		//------------------------------------------------------
-		// Update됐으면.. 
+		// Update됐으면..
 		// 새로운 게임 화면을 그려준다.
 		//------------------------------------------------------
-		if (g_bFrameChanged || !(*g_pUserOption).UseSmoothCursor)
+		// Draw between ticks too - positions interpolate by g_DrawAlphaNum
+		// and vsync paces the presents (CDirectDraw.cpp). lastTime is the
+		// scheduled time of the last consumed tick, so the fraction runs
+		// 0 -> 256 across each 62 ms window. The 15 ms fallback cap only
+		// matters when the renderer ignores vsync (SDL_RENDER_DRIVER=
+		// software) - it keeps the message loop from spin-presenting.
+		g_DrawAlphaNum = 256;
+		if (g_UpdateDelay > 0 && g_CurrentTime >= lastTime)
 		{
-			g_bNewDraw = true;		
+			DWORD sinceTick = g_CurrentTime - lastTime;
+			if (sinceTick < (DWORD)g_UpdateDelay)
+				g_DrawAlphaNum = (sinceTick << 8) / (DWORD)g_UpdateDelay;
+		}
+
+		static DWORD s_lastDrawTime = 0;
+		if (g_bFrameChanged || g_CurrentTime - s_lastDrawTime >= 15)
+		{
+			s_lastDrawTime = g_CurrentTime;
+			g_bNewDraw = true;
 			
 			#ifdef OUTPUT_DEBUG_UPDATE_LOOP
 					//DEBUG_ADD("d");//[Update] Before Draw");

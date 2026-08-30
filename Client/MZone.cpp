@@ -2056,6 +2056,12 @@ MZone::UpdateAllCreature()
 	{
 		pCreature = ((*iCreature).second);
 
+		// Remember the pre-tick pixel position for draw-phase interpolation
+		// (60 fps rendering between 62 ms ticks). Must precede Action() -
+		// the player can even Action() twice per tick under ghost or
+		// dragon-eyes below, and the snapshot has to be the pre-move state.
+		pCreature->SnapshotDrawState();
+
 		#ifdef OUTPUT_DEBUG_UPDATE_ZONE
 				DEBUG_ADD_FORMAT("[UpdateCreature] id=%d, cType=%d, x=%d, y=%d, action=%d", 
 									(int)pCreature->GetID(), (int)pCreature->GetCreatureType(),

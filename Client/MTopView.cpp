@@ -6479,6 +6479,10 @@ MTopView::DrawFade()
 		}
 		else
 		// 2004, 6, 21, sobeit add end - 질드레 연출 땜에 추가..
+		// Advance only on logic ticks: Draw now also runs between ticks for
+		// 60 fps interpolation, and an unguarded step here would speed every
+		// fade up by the ratio of draws to ticks.
+		if (g_bFrameChanged)
 			m_FadeValue += m_FadeInc;
 
 		//------------------------------------------------
@@ -19783,7 +19787,11 @@ MTopView::ExcuteAdvancementQuestEnding(void *pVoid)
 			m_pSurface->BltSpriteAlpha( &pointZero, &m_AdvacementQuestEnding[SpkIndex+1], AdvancementQuestEndingEvent->parameter3 );
 		}
 		m_pSurface->Unlock();
-		if(AdvancementQuestEndingEvent->parameter3>0 && g_FrameCount & 0x01)
+		// Was gated on g_FrameCount & 0x01 when draws only happened on logic
+		// ticks (every other draw = every other tick). Draws now run per
+		// refresh for 60 fps interpolation, so gate on the tick counter to
+		// keep the original crossfade pace.
+		if(AdvancementQuestEndingEvent->parameter3>0 && g_bFrameChanged && (g_CurrentFrame & 0x01))
 			AdvancementQuestEndingEvent->parameter3 --;
 		switch(AdvancementQuestEndingEvent->parameter1)
 		{
