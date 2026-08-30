@@ -1202,19 +1202,18 @@ MCreatureWear::RemoveEffectStatus(EFFECTSTATUS status)
 						&& (pEffect->GetEffectSpriteType() == type ||
 						type2 != EFFECTSPRITETYPE_NULL && pEffect->GetEffectSpriteType() == type2 ) )
 					{						
-						// 메모리 제거
+						// free the memory
 						delete pEffect;
 						pEffect = NULL;
 						
-						ATTACHEFFECT_LIST::iterator dEffect = iEffect;
-						iEffect--;
-
-						// list에서 제거
-						m_listEffect.erase( dEffect );
+						// remove from the list; erase() hands back the following
+						// element, so the loop must not step forward again below.
+						iEffect = m_listEffect.erase( iEffect );
 
 						m_bAttachEffect[type] = false;
-						
+
 						re = true;
+						continue;
 					}					
 					
 					iEffect++;
