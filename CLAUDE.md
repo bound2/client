@@ -116,8 +116,18 @@ baseline: **68 tests, 306 checks, 0 failed** in both trees.
   `CTypeTable::operator[]` is the canonical case: it range-checks only under `_DEBUG`,
   so in practice it does not range-check at all. Never treat a `_DEBUG` guard as a live
   defence.
-- **Don't launch `DarkEden.exe` yourself.** It is run from the Visual Studio debugger;
-  launching it separately steals the stack trace and locks the build output.
+- **An unlisted DLL kills the client before `main` does anything.** `Client.cpp` walks
+  `*.dll` in the working directory against a hardcoded whitelist and does a bare
+  `return -1` on the first name it does not recognise — no message, no log line, and
+  well before `InitGame()` sets up logging. Adding any library that deploys a new DLL
+  beside the executable therefore breaks startup until that DLL is added to the list.
+  A silent `-1` exit with no log written is this check until proven otherwise, and note
+  that the DLL stays in the output directory after you revert the build change that
+  brought it in, so reverting alone does not restore a working tree.
+- **Don't launch `DarkEden.exe` yourself** unless asked. It is normally run from the
+  Visual Studio debugger, and launching it separately steals the stack trace and locks
+  the build output. When a startup failure has to be bisected, ask — running it is
+  sometimes the only way to see the exit code, and no test binary can reach that code.
 - **Half the shipped data is still packed.** `CRarFile` no longer reads `.rpk` archives
   and needs their contents extracted flat beside them. `Data/ui/txt` and `Data/ui/xml`
   are effectively empty at runtime, so quest data and chat help are absent; lookups

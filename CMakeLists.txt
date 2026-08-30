@@ -281,6 +281,25 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	)
 
 	target_compile_definitions(TextSystem PRIVATE SPRITELIB_BACKEND_SDL USE_SDL_BACKEND)
+
+	# TextService::NormalizeText transcodes the shipped CP949 .inf data to the
+	# UTF-8 the text backend renders. It needs a real iconv to do it: SDL2 as
+	# vcpkg builds it has HAVE_ICONV undefined, so SDL_iconv resolves to SDL's
+	# own converter, which supports no legacy CJK code page and fails at open
+	# for every one of them. Without this, NormalizeText compiles, runs, and
+	# returns its input unchanged.
+	#
+	# PUBLIC so the test binary, which links TextSystem to cover NormalizeText,
+	# resolves iconv too.
+	if(Iconv_FOUND)
+		target_link_libraries(TextSystem PUBLIC Iconv::Iconv)
+		target_compile_definitions(TextSystem PRIVATE HAVE_REAL_ICONV)
+		message(STATUS "TextSystem: legacy code page conversion via iconv")
+	else()
+		message(WARNING
+			"TextSystem: iconv not found - CP949 game data will render as "
+			"replacement glyphs because NormalizeText cannot transcode it")
+	endif()
 	if(NOT WIN32)
 		target_compile_definitions(TextSystem PRIVATE PLATFORM_MACOS)
 	endif()

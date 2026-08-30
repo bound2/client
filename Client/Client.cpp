@@ -3266,7 +3266,13 @@ WinMain(HINSTANCE hInstance,
 				InvalidDll != "brotlicommon.dll" &&
 				InvalidDll != "brotlidec.dll" &&
 				InvalidDll != "bz2d.dll" &&
-				InvalidDll != "bz2.dll")
+				InvalidDll != "bz2.dll" &&
+				// vcpkg's libiconv, deployed beside the executable because
+				// DarkEden links Iconv::Iconv. TextService::NormalizeText needs
+				// a real iconv to transcode the shipped CP949 data, since SDL's
+				// built-in converter supports no legacy CJK code page. The name
+				// carries no debug suffix, so one entry covers both configs.
+				InvalidDll != "iconv-2.dll")
 				//MessageBox(0,(LPCTSTR)InvalidDll.c_str(),"ERROR",MB_OK);
 				//MessageBox(0,
 				return -1;
