@@ -25,17 +25,62 @@ MObject::MObject()
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
+// Screen rects in exact tick space
+//----------------------------------------------------------------------
+// The rects are computed by the draw path, which since the 60 fps change
+// renders positions interpolated between logic ticks against a camera
+// carrying the player's interpolation bias (g_DrawCamGapX/Y). The per-tick
+// input code hit-tests these rects (IsPointInScreenRect) against per-tick
+// state, and a pick that misses because rect and logic disagree drops the
+// held-button attack repeat. Shifting the rect by minus the object's own
+// gap and minus the camera gap converts it back to exact tick space -
+// identical to pre-interpolation behaviour. For the player both gaps cancel
+// to zero, matching the pinned on-screen position. Outside the draw phase
+// (g_bInterpolateDraw false) both gaps read as zero and this is a no-op.
+//----------------------------------------------------------------------
+extern bool		g_bInterpolateDraw;
+extern int		g_DrawCamGapX;
+extern int		g_DrawCamGapY;
+
+//----------------------------------------------------------------------
 // Add ScreenRect
 //----------------------------------------------------------------------
 // 화면에서의 Sprite충돌 사각 영역을 추가한다.
 //----------------------------------------------------------------------
-void				
+void
 MObject::AddScreenRect(RECT* pRect)
 {
-	if (pRect->left < m_ScreenRect.left)		m_ScreenRect.left	= pRect->left;
-	if (pRect->top < m_ScreenRect.top)			m_ScreenRect.top	= pRect->top;
-	if (pRect->right > m_ScreenRect.right)		m_ScreenRect.right	= pRect->right;
-	if (pRect->bottom > m_ScreenRect.bottom)	m_ScreenRect.bottom	= pRect->bottom;
+	RECT rect = *pRect;
+
+	if (g_bInterpolateDraw)
+	{
+		int shiftX = -GetDrawGapX() - g_DrawCamGapX;
+		int shiftY = -GetDrawGapY() - g_DrawCamGapY;
+		rect.left += shiftX;	rect.right += shiftX;
+		rect.top += shiftY;		rect.bottom += shiftY;
+	}
+
+	if (rect.left < m_ScreenRect.left)		m_ScreenRect.left	= rect.left;
+	if (rect.top < m_ScreenRect.top)		m_ScreenRect.top	= rect.top;
+	if (rect.right > m_ScreenRect.right)	m_ScreenRect.right	= rect.right;
+	if (rect.bottom > m_ScreenRect.bottom)	m_ScreenRect.bottom	= rect.bottom;
+}
+
+//----------------------------------------------------------------------
+// Set ScreenRect
+//----------------------------------------------------------------------
+void
+MObject::SetScreenRect(RECT* pRect)
+{
+	m_ScreenRect = *pRect;
+
+	if (g_bInterpolateDraw)
+	{
+		int shiftX = -GetDrawGapX() - g_DrawCamGapX;
+		int shiftY = -GetDrawGapY() - g_DrawCamGapY;
+		m_ScreenRect.left += shiftX;	m_ScreenRect.right += shiftX;
+		m_ScreenRect.top += shiftY;		m_ScreenRect.bottom += shiftY;
+	}
 }
 
 //----------------------------------------------------------------------

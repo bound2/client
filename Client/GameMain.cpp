@@ -15,6 +15,10 @@
 #include <io.h>
 #include <direct.h>
 #include <fcntl.h>	// _O_RDONLY (used with _open() below)
+
+// SpriteLib backend: maps letterboxed window coordinates back to game
+// coordinates (see UpdateMouse below).
+extern "C" void spritectl_window_to_game_coords(int* x, int* y);
 #else
 #include <unistd.h>
 #include <fcntl.h>
@@ -4595,10 +4599,21 @@ UpdateMouse()
 	POINT point;
 	GetCursorPos(&point);
 	// add by svi
-	ScreenToClient(g_hWnd, &point); 
+	ScreenToClient(g_hWnd, &point);
 	// end
 //	RECT rc;
 //	GetWindowRect(g_hWnd, &rc);
+
+	// The game frame is letterbox-scaled into the window, so window-client
+	// coordinates must map back to game coordinates (SpriteLib backend).
+	{
+		int mouseX = (int)point.x;
+		int mouseY = (int)point.y;
+		spritectl_window_to_game_coords(&mouseX, &mouseY);
+		point.x = mouseX;
+		point.y = mouseY;
+	}
+
 	g_x = point.x;
 	g_y = point.y;
 
