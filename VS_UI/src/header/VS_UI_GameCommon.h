@@ -669,6 +669,11 @@ private:
 	std::vector<std::string>	m_v_help_string;
 	std::vector<bool>			m_v_help_check;
 
+	// Set once Process() has attempted to load the in-game help text, whether
+	// or not it succeeded. Without it an unreadable help file makes Process()
+	// reopen the archive on every single frame, forever.
+	bool						m_bl_help_load_tried;
+
 	//
 	// Chat history buffer.
 	//

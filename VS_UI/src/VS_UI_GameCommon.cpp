@@ -6023,13 +6023,18 @@ void C_VS_UI_CHATTING::Run(id_t id)
 //-----------------------------------------------------------------------------
 void C_VS_UI_CHATTING::Process()
 {
-	if(m_v_help_check.empty())
+	// Attempt the load once per window, not once per empty vector. Half the
+	// shipped help text is still packed, so these opens fail and the vectors
+	// stay empty; keying off emptiness reopened the archive every frame.
+	if(!m_bl_help_load_tried)
 	{
-		// 도움말용 파일 읽기
-#define dSTRING_LEN 2048 
-		
-		char szLine[dSTRING_LEN]; 
-		
+		m_bl_help_load_tried = true;
+
+		// Read the help text file
+#define dSTRING_LEN 2048
+
+		char szLine[dSTRING_LEN];
+
 		CRarFile pack_file;
 		pack_file.SetRAR(RPK_HELP, RPK_PASSWORD);
 		
@@ -6153,6 +6158,8 @@ C_VS_UI_CHATTING::C_VS_UI_CHATTING()
 	AttrPin(true);
 	
 	g_RegisterWindow(this);
+
+	m_bl_help_load_tried = false;
 
 	m_pC_chatting_spk = NULL;
 	
