@@ -49,6 +49,11 @@ CTestTestfile.cmake
 Makefile
 *.cmake
 !CMakeLists.txt
+# *.cmake above is aimed at what an in-source build drops beside the
+# sources. It also swallows hand-written CMake scripts, which is how
+# tests/tools/check_wire_inventory_fresh.cmake went missing from the
+# commit that registered the test using it.
+!tests/tools/*.cmake
 .cache
 
 # ==========================================
