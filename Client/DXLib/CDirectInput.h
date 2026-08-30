@@ -50,6 +50,13 @@ public:
 	BOOL						m_rb_up;	// right button - up
 	BOOL						m_cb_up;	// center button - up
 
+	// The six flags above are one-frame pulses ("pressed / released this
+	// frame"), exactly as the DirectInput original reset them at the top of
+	// every UpdateInput(). CGameUpdate::ProcessInput reads them that way.
+	// These hold the physical state between frames for edge detection.
+	BOOL						m_lb_held;
+	BOOL						m_rb_held;
+	BOOL						m_cb_held;
 	enum E_EXCLUSIVE // debugging 할 때를 위해서...
 	{
 		EXCLUSIVE,

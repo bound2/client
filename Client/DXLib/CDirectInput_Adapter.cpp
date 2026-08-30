@@ -70,9 +70,12 @@ void CSDLInput::Clear()
 	// when a click is often still in progress.
 	int left = 0, right = 0, center = 0;
 	dxlib_input_get_mouse_buttons(&left, &right, &center);
-	m_lb_down = left ? TRUE : FALSE;
-	m_rb_down = right ? TRUE : FALSE;
-	m_cb_down = center ? TRUE : FALSE;
+	m_lb_held = left ? TRUE : FALSE;
+	m_rb_held = right ? TRUE : FALSE;
+	m_cb_held = center ? TRUE : FALSE;
+	m_lb_down = FALSE;
+	m_rb_down = FALSE;
+	m_cb_down = FALSE;
 	m_lb_up = FALSE;
 	m_rb_up = FALSE;
 	m_cb_up = FALSE;
@@ -115,12 +118,19 @@ void CSDLInput::UpdateInput()
 	// Update backend
 	dxlib_input_update();
 
-	// Reset UP events (they should only be true for one frame)
+	// The button flags are per-frame pulses: "pressed this frame" and
+	// "released this frame". The DirectInput original cleared all six at
+	// the top of every update, and CGameUpdate::ProcessInput depends on
+	// that - it calls MouseControl(M_LEFTBUTTON_DOWN) whenever m_lb_down is
+	// set, so a flag that stayed up while the button was held delivered a
+	// fresh click on every frame of the press (an equip that ran twice and
+	// swapped the old item straight back). Physical state lives in m_*_held.
+	m_lb_down = FALSE;
+	m_rb_down = FALSE;
+	m_cb_down = FALSE;
 	m_lb_up = FALSE;
 	m_rb_up = FALSE;
 	m_cb_up = FALSE;
-
-	// NOTE: Don't reset DOWN states here - they should persist until button is released
 
 	// Update keyboard state
 	for (int i = 0; i < 256; i++) {
@@ -160,23 +170,25 @@ void CSDLInput::UpdateInput()
 	// been cleared under a held button.
 	int button, down, ex, ey;
 	while (dxlib_input_pop_mouse_button(&button, &down, &ex, &ey)) {
+		BOOL* pHeld = NULL;
 		BOOL* pDown = NULL;
 		BOOL* pUp = NULL;
 		E_MOUSE_EVENT downEvent = MOVE;
 		E_MOUSE_EVENT upEvent = MOVE;
 
 		switch (button) {
-			case 0:  pDown = &m_lb_down; pUp = &m_lb_up; downEvent = LEFTDOWN;   upEvent = LEFTUP;   break;
-			case 1:  pDown = &m_rb_down; pUp = &m_rb_up; downEvent = RIGHTDOWN;  upEvent = RIGHTUP;  break;
-			case 2:  pDown = &m_cb_down; pUp = &m_cb_up; downEvent = CENTERDOWN; upEvent = CENTERUP; break;
+			case 0:  pHeld = &m_lb_held; pDown = &m_lb_down; pUp = &m_lb_up; downEvent = LEFTDOWN;   upEvent = LEFTUP;   break;
+			case 1:  pHeld = &m_rb_held; pDown = &m_rb_down; pUp = &m_rb_up; downEvent = RIGHTDOWN;  upEvent = RIGHTUP;  break;
+			case 2:  pHeld = &m_cb_held; pDown = &m_cb_down; pUp = &m_cb_up; downEvent = CENTERDOWN; upEvent = CENTERUP; break;
 			default: continue;
 		}
 
-		if (down && !*pDown) {
+		if (down && !*pHeld) {
+			*pHeld = TRUE;
 			*pDown = TRUE;
 			DispatchMouseAt(downEvent, ex, ey);
-		} else if (!down && *pDown) {
-			*pDown = FALSE;
+		} else if (!down && *pHeld) {
+			*pHeld = FALSE;
 			*pUp = TRUE;
 			DispatchMouseAt(upEvent, ex, ey);
 		}
@@ -191,12 +203,12 @@ void CSDLInput::UpdateInput()
 	int left, right, center;
 	dxlib_input_get_mouse_buttons(&left, &right, &center);
 
-	if (left && !m_lb_down)        { m_lb_down = TRUE;  DispatchMouseAt(LEFTDOWN, cur_x, cur_y); }
-	else if (!left && m_lb_down)   { m_lb_down = FALSE; m_lb_up = TRUE; DispatchMouseAt(LEFTUP, cur_x, cur_y); }
-	if (right && !m_rb_down)       { m_rb_down = TRUE;  DispatchMouseAt(RIGHTDOWN, cur_x, cur_y); }
-	else if (!right && m_rb_down)  { m_rb_down = FALSE; m_rb_up = TRUE; DispatchMouseAt(RIGHTUP, cur_x, cur_y); }
-	if (center && !m_cb_down)      { m_cb_down = TRUE;  DispatchMouseAt(CENTERDOWN, cur_x, cur_y); }
-	else if (!center && m_cb_down) { m_cb_down = FALSE; m_cb_up = TRUE; DispatchMouseAt(CENTERUP, cur_x, cur_y); }
+	if (left && !m_lb_held)        { m_lb_held = TRUE;  m_lb_down = TRUE; DispatchMouseAt(LEFTDOWN, cur_x, cur_y); }
+	else if (!left && m_lb_held)   { m_lb_held = FALSE; m_lb_up = TRUE;   DispatchMouseAt(LEFTUP, cur_x, cur_y); }
+	if (right && !m_rb_held)       { m_rb_held = TRUE;  m_rb_down = TRUE; DispatchMouseAt(RIGHTDOWN, cur_x, cur_y); }
+	else if (!right && m_rb_held)  { m_rb_held = FALSE; m_rb_up = TRUE;   DispatchMouseAt(RIGHTUP, cur_x, cur_y); }
+	if (center && !m_cb_held)      { m_cb_held = TRUE;  m_cb_down = TRUE; DispatchMouseAt(CENTERDOWN, cur_x, cur_y); }
+	else if (!center && m_cb_held) { m_cb_held = FALSE; m_cb_up = TRUE;   DispatchMouseAt(CENTERUP, cur_x, cur_y); }
 
 	// Finally bring the cursor to where it is now.
 	if (cur_x != m_mouse_x || cur_y != m_mouse_y) {

@@ -283,7 +283,13 @@ CGameUpdate::DXMouseEvent(CSDLInput::E_MOUSE_EVENT event, int x, int y, int z)
 //					}
 //				}				
 //				
-				gC_vs_ui.MouseControl(M_LEFTBUTTON_DOWN, g_x, g_y);
+				// Deliberately not delivered from here. ProcessInput() sends
+				// M_LEFTBUTTON_DOWN from the m_lb_down pulse this same frame,
+				// as the DirectInput original did (this line was commented
+				// out there); sending it here too ran every click twice, so
+				// an equip swap undid itself. The wait-UI screens have their
+				// own receiver and are unaffected.
+				//gC_vs_ui.MouseControl(M_LEFTBUTTON_DOWN, g_x, g_y);
 				last_click_time = GetTickCount();
 				double_click_x = g_x;
 				double_click_y = g_y;
