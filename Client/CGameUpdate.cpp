@@ -171,6 +171,30 @@ bool	g_bFrameChanged	 = false;
 // game logic keeps reading exact tick positions.
 DWORD	g_DrawAlphaNum = 256;
 bool	g_bInterpolateDraw = false;
+
+// The game frame is letterbox-scaled into the window by
+// spritectl_present_surface, so every Win32 cursor position must be mapped
+// from window-client space back to game space before the UI consumes it.
+// The camera-interpolation bias that was passed into the last MTopView::Draw
+// (the camGap values in UpdateDraw). Picking code (GetSelectedObject and
+// friends, creature screen rects) adds it back so that everything the per-tick
+// input logic hit-tests lives in exact tick space, matching pre-interpolation
+// behaviour - only the *drawing* is interpolated. Without this, a tick whose
+// pick lands between the interpolated and exact positions misses the target,
+// and one missed pick drops the held-button attack repeat
+// (ProcessInputRButtonDown: pObject == NULL -> UnSetRepeatAction).
+int		g_DrawCamGapX = 0;
+int		g_DrawCamGapY = 0;
+
+extern "C" void spritectl_window_to_game_coords(int* x, int* y);
+static void WindowToGamePoint(POINT& pt)
+{
+	int mouseX = (int)pt.x;
+	int mouseY = (int)pt.y;
+	spritectl_window_to_game_coords(&mouseX, &mouseY);
+	pt.x = mouseX;
+	pt.y = mouseY;
+}
 bool	g_bTestMusic = false;
 
 #ifdef OUTPUT_DEBUG
@@ -3325,6 +3349,7 @@ CGameUpdate::ProcessInput()
 	GetCursorPos(&cursorPoint);
 
 	ScreenToClient(g_hWnd, &cursorPoint);//by viva
+	WindowToGamePoint(cursorPoint);
 
 	#ifdef OUTPUT_DEBUG_PROCESS_INPUT
 		DEBUG_ADD("UIMM");
@@ -5001,8 +5026,8 @@ CGameUpdate::UpdateDraw()
 	GetCursorPos(&point);
 
 	ScreenToClient(g_hWnd, &point);//by viva
-	
-		
+	WindowToGamePoint(point);
+
 	// ui에 mouse좌표 설정
 	gC_vs_ui.MouseControl(M_MOVING, point.x, point.y);
 
@@ -5103,6 +5128,10 @@ CGameUpdate::UpdateDraw()
 				camGapX = -g_pPlayer->GetDrawGapX();
 				camGapY = -g_pPlayer->GetDrawGapY();
 			}
+
+			// Published for the picking code - see g_DrawCamGapX above.
+			g_DrawCamGapX = camGapX;
+			g_DrawCamGapY = camGapY;
 
 			g_bInterpolateDraw = true;
 
@@ -6633,6 +6662,7 @@ CGameUpdate::Update(void)
 			GetCursorPos(&cursorPoint);
 
 			ScreenToClient(g_hWnd, &cursorPoint);//by viva
+			WindowToGamePoint(cursorPoint);
 
 			// UI에 마우스 좌표 설정
 			gC_vs_ui.MouseControl(M_MOVING, cursorPoint.x, cursorPoint.y);

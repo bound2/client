@@ -1338,6 +1338,60 @@ cleanup:
  * Present Surface to Renderer
  * ============================================================================ */
 
+/* Where the last present placed the game frame inside the window, for the
+ * window-to-game mouse mapping. Identity (empty) until the first present. */
+static SDL_Rect g_present_dest = { 0, 0, 0, 0 };
+static int g_present_game_w = 0;
+static int g_present_game_h = 0;
+
+/* Intermediate render target for sharp-bilinear upscaling: the game frame is
+ * first enlarged by an integer factor with nearest (crisp pixels), then that
+ * is scaled to the final size with linear (no shimmer at fractional scales).
+ * Direct nearest is used when the scale is an exact integer, direct linear
+ * when shrinking. */
+static SDL_Texture* g_scale_tex = NULL;
+static SDL_Renderer* g_scale_tex_renderer = NULL;
+static int g_scale_tex_w = 0;
+static int g_scale_tex_h = 0;
+
+/* The two-pass sharp-bilinear is only worth it on a GPU. A software renderer
+ * (SDL_RENDER_DRIVER=software) would run both scaling passes on the CPU at
+ * output resolution every frame - there, a single linear pass is the right
+ * trade. Cached per renderer. */
+static int present_renderer_accelerated(SDL_Renderer* renderer) {
+	static SDL_Renderer* cached_renderer = NULL;
+	static int cached_accelerated = 0;
+
+	if (renderer != cached_renderer) {
+		SDL_RendererInfo info;
+		cached_accelerated = (SDL_GetRendererInfo(renderer, &info) == 0) &&
+			(info.flags & SDL_RENDERER_ACCELERATED) != 0;
+		cached_renderer = renderer;
+	}
+	return cached_accelerated;
+}
+
+void spritectl_window_to_game_coords(int* x, int* y) {
+	if (!x || !y) {
+		return;
+	}
+	if (g_present_dest.w <= 0 || g_present_dest.h <= 0 ||
+		g_present_game_w <= 0 || g_present_game_h <= 0) {
+		return;	/* nothing presented yet - coordinates are already game pixels */
+	}
+
+	int gx = (int)(((long long)(*x - g_present_dest.x) * g_present_game_w) / g_present_dest.w);
+	int gy = (int)(((long long)(*y - g_present_dest.y) * g_present_game_h) / g_present_dest.h);
+
+	if (gx < 0) gx = 0;
+	if (gx > g_present_game_w - 1) gx = g_present_game_w - 1;
+	if (gy < 0) gy = 0;
+	if (gy > g_present_game_h - 1) gy = g_present_game_h - 1;
+
+	*x = gx;
+	*y = gy;
+}
+
 int spritectl_present_surface(spritectl_surface_t surface, void* renderer_ptr) {
 	if (!surface || !renderer_ptr) {
 		return -1;
@@ -1352,11 +1406,37 @@ int spritectl_present_surface(spritectl_surface_t surface, void* renderer_ptr) {
 		return -1;
 	}
 
+	/* Aspect-preserving letterbox: scale the game frame to the largest size
+	 * that fits the window and center it. The bars are whatever Flip cleared
+	 * the renderer to (black). Falls back to a 1:1 top-left blit if the
+	 * output size cannot be queried. */
 	SDL_Rect dest_rect;
 	dest_rect.x = 0;
 	dest_rect.y = 0;
 	dest_rect.w = sdl_surface->w;
 	dest_rect.h = sdl_surface->h;
+
+	int out_w = 0;
+	int out_h = 0;
+	if (SDL_GetRendererOutputSize(renderer, &out_w, &out_h) == 0 &&
+		out_w > 0 && out_h > 0) {
+		/* largest scale preserving aspect, in 16.16 fixed point */
+		long long scale_x = ((long long)out_w << 16) / sdl_surface->w;
+		long long scale_y = ((long long)out_h << 16) / sdl_surface->h;
+		long long scale = (scale_x < scale_y) ? scale_x : scale_y;
+		if (scale < 1) scale = 1;
+
+		dest_rect.w = (int)(((long long)sdl_surface->w * scale) >> 16);
+		dest_rect.h = (int)(((long long)sdl_surface->h * scale) >> 16);
+		if (dest_rect.w < 1) dest_rect.w = 1;
+		if (dest_rect.h < 1) dest_rect.h = 1;
+		dest_rect.x = (out_w - dest_rect.w) / 2;
+		dest_rect.y = (out_h - dest_rect.h) / 2;
+	}
+
+	g_present_dest = dest_rect;
+	g_present_game_w = sdl_surface->w;
+	g_present_game_h = sdl_surface->h;
 
 	/* This is called every frame (e.g. to present the fixed-size g_pBack
 	 * backbuffer). Recreating and destroying a full-screen SDL_Texture on
@@ -1384,9 +1464,70 @@ int spritectl_present_surface(spritectl_surface_t surface, void* renderer_ptr) {
 	}
 
 	if (surface->texture != NULL &&
-		SDL_UpdateTexture(surface->texture, NULL, sdl_surface->pixels, sdl_surface->pitch) == 0 &&
-		SDL_RenderCopy(renderer, surface->texture, NULL, &dest_rect) == 0) {
-		return 0;
+		SDL_UpdateTexture(surface->texture, NULL, sdl_surface->pixels, sdl_surface->pitch) == 0) {
+
+		int drawn = 0;
+
+		if (dest_rect.w == sdl_surface->w || dest_rect.w % sdl_surface->w == 0) {
+			/* 1:1 or exact integer upscale - nearest is pixel-perfect */
+			SDL_SetTextureScaleMode(surface->texture, SDL_ScaleModeNearest);
+			drawn = (SDL_RenderCopy(renderer, surface->texture, NULL, &dest_rect) == 0);
+		} else if (dest_rect.w < sdl_surface->w) {
+			/* shrinking - plain linear */
+			SDL_SetTextureScaleMode(surface->texture, SDL_ScaleModeLinear);
+			drawn = (SDL_RenderCopy(renderer, surface->texture, NULL, &dest_rect) == 0);
+		} else {
+			/* Fractional upscale - sharp bilinear: nearest to the next integer
+			 * multiple on a render target, then linear down to the final size.
+			 * Crisp pixels without the shimmer plain nearest gives at
+			 * fractional scales, without the blur of plain linear. */
+			int k = (dest_rect.w + sdl_surface->w - 1) / sdl_surface->w;
+			if (k > 4) k = 4;
+
+			int tex_w = sdl_surface->w * k;
+			int tex_h = sdl_surface->h * k;
+
+			if (present_renderer_accelerated(renderer) && SDL_RenderTargetSupported(renderer)) {
+				if (g_scale_tex != NULL &&
+					(g_scale_tex_renderer != renderer ||
+					 g_scale_tex_w != tex_w || g_scale_tex_h != tex_h)) {
+					SDL_DestroyTexture(g_scale_tex);
+					g_scale_tex = NULL;
+				}
+
+				if (g_scale_tex == NULL) {
+					g_scale_tex = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888,
+						SDL_TEXTUREACCESS_TARGET, tex_w, tex_h);
+					if (g_scale_tex != NULL) {
+						g_scale_tex_renderer = renderer;
+						g_scale_tex_w = tex_w;
+						g_scale_tex_h = tex_h;
+						SDL_SetTextureScaleMode(g_scale_tex, SDL_ScaleModeLinear);
+					}
+				}
+
+				if (g_scale_tex != NULL) {
+					SDL_SetTextureScaleMode(surface->texture, SDL_ScaleModeNearest);
+					if (SDL_SetRenderTarget(renderer, g_scale_tex) == 0) {
+						SDL_RenderCopy(renderer, surface->texture, NULL, NULL);
+						SDL_SetRenderTarget(renderer, NULL);
+						drawn = (SDL_RenderCopy(renderer, g_scale_tex, NULL, &dest_rect) == 0);
+					} else {
+						SDL_SetRenderTarget(renderer, NULL);
+					}
+				}
+			}
+
+			if (!drawn) {
+				/* no render-target support (or it failed) - plain linear */
+				SDL_SetTextureScaleMode(surface->texture, SDL_ScaleModeLinear);
+				drawn = (SDL_RenderCopy(renderer, surface->texture, NULL, &dest_rect) == 0);
+			}
+		}
+
+		if (drawn) {
+			return 0;
+		}
 	}
 
 	/* Fallback: the renderer may not support this pixel format as a native

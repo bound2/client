@@ -134,6 +134,21 @@ int spritectl_get_surface_size(spritectl_surface_t surface, int* width, int* hei
  */
 int spritectl_present_surface(spritectl_surface_t surface, void* renderer);
 
+/**
+ * Map window-client coordinates to game coordinates.
+ *
+ * spritectl_present_surface scales the fixed-size game frame into the window
+ * with an aspect-preserving letterbox, so a mouse position in window pixels no
+ * longer equals a game pixel. Every input path (Win32 GetCursorPos results and
+ * SDL mouse events alike - both are in window-client space) must run its
+ * coordinates through this before the game consumes them. The result is
+ * clamped to the game frame, so clicks in the letterbox bars land on the
+ * nearest edge. Identity until the first present.
+ * @param x In: window-client X. Out: game X.
+ * @param y In: window-client Y. Out: game Y.
+ */
+void spritectl_window_to_game_coords(int* x, int* y);
+
 /* ============================================================================
  * Sprite Functions
  * ============================================================================ */

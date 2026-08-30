@@ -161,7 +161,15 @@ extern	LONG g_TILESURFACE_OUTLINE_DOWN;
 // Global
 //----------------------------------------------------------------------
 MTopView*	g_pTopView = NULL;
-extern bool g_bFrameChanged;		
+extern bool g_bFrameChanged;
+
+// Camera-interpolation bias of the last draw (CGameUpdate). The camera the
+// draw published (m_PlusPoint / m_FirstZonePixel) carries it; adding it back
+// puts the picking functions (ScreenToPixel, GetSelectedSector,
+// GetSelectedObject*) in exact tick space, so per-tick hit tests agree with
+// per-tick object positions. Zero while the player stands still.
+extern int	g_DrawCamGapX;
+extern int	g_DrawCamGapY;
 
 bool g_bMouseInPortal  = false;
 
@@ -6185,8 +6193,9 @@ MTopView::ScreenToPixel(int x, int y)
 	// 화면 상의 좌표가 나타내는 Map에서의 Pixel좌표를 구하는 것이다
 
 
-	zonePixel.x = m_FirstZonePixel.x + x;
-	zonePixel.y = m_FirstZonePixel.y + y;
+	// + g_DrawCamGap: back out the camera-interpolation bias, exact tick space
+	zonePixel.x = m_FirstZonePixel.x + g_DrawCamGapX + x;
+	zonePixel.y = m_FirstZonePixel.y + g_DrawCamGapY + y;
 
 	return zonePixel;
 }
@@ -6258,8 +6267,9 @@ MTopView::GetSelectedSector(int x, int y)
 	//-------------------------------------------------
 
 	point = MapToPixel(m_FirstSector.x, m_FirstSector.y);
-	point.x += m_PlusPoint.x;
-	point.y += m_PlusPoint.y;
+	// + g_DrawCamGap: back out the camera-interpolation bias, exact tick space
+	point.x += m_PlusPoint.x + g_DrawCamGapX;
+	point.y += m_PlusPoint.y + g_DrawCamGapY;
 
 	point.x += x;
 	point.y += y;
@@ -6594,8 +6604,9 @@ MTopView::GetSelectedObject(int x, int y)
 
 	POINT firstZonePixel;	// 화면상의 처음 Sector가 나타내는 Zone의 pixel좌표
 	firstZonePixel = MapToPixel(m_FirstSector.x, m_FirstSector.y);
-	firstZonePixel.x += m_PlusPoint.x;
-	firstZonePixel.y += m_PlusPoint.y;
+	// + g_DrawCamGap: back out the camera-interpolation bias, exact tick space
+	firstZonePixel.x += m_PlusPoint.x + g_DrawCamGapX;
+	firstZonePixel.y += m_PlusPoint.y + g_DrawCamGapY;
 
 
 	POINT	pixelPoint;			// Pixel Position In Zone
@@ -6605,8 +6616,8 @@ MTopView::GetSelectedObject(int x, int y)
 	// (x,y)의 Zone에서의 pixel좌표를 구한다.
 	//--------------------------------------------------------------
 	pixelPoint = MapToPixel(m_FirstSector.x, m_FirstSector.y);
-	pixelPoint.x += m_PlusPoint.x + x;
-	pixelPoint.y += m_PlusPoint.y + y;
+	pixelPoint.x += m_PlusPoint.x + g_DrawCamGapX + x;
+	pixelPoint.y += m_PlusPoint.y + g_DrawCamGapY + y;
 
 	//--------------------------------------------------------------
 	// (x,y)의 Zone에서의 sector좌표를 구한다.
@@ -7560,8 +7571,9 @@ MTopView::GetSelectedObjectSprite(int x, int y)
 
 	POINT firstZonePixel;	// 화면상의 처음 Sector가 나타내는 Zone의 pixel좌표
 	firstZonePixel = MapToPixel(m_FirstSector.x, m_FirstSector.y);
-	firstZonePixel.x += m_PlusPoint.x;
-	firstZonePixel.y += m_PlusPoint.y;
+	// + g_DrawCamGap: back out the camera-interpolation bias, exact tick space
+	firstZonePixel.x += m_PlusPoint.x + g_DrawCamGapX;
+	firstZonePixel.y += m_PlusPoint.y + g_DrawCamGapY;
 
 
 	POINT	pixelPoint;			// Pixel Position In Zone
@@ -7571,8 +7583,8 @@ MTopView::GetSelectedObjectSprite(int x, int y)
 	// (x,y)의 Zone에서의 pixel좌표를 구한다.
 	//--------------------------------------------------------------
 	pixelPoint = MapToPixel(m_FirstSector.x, m_FirstSector.y);
-	pixelPoint.x += m_PlusPoint.x + x;
-	pixelPoint.y += m_PlusPoint.y + y;
+	pixelPoint.x += m_PlusPoint.x + g_DrawCamGapX + x;
+	pixelPoint.y += m_PlusPoint.y + g_DrawCamGapY + y;
 
 	//--------------------------------------------------------------
 	// (x,y)의 Zone에서의 sector좌표를 구한다.

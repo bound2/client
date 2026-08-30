@@ -82,8 +82,16 @@ class MObject {
 				m_ScreenRect.right = 0;
 				m_ScreenRect.bottom = 0;
 		}
+		// Draw-phase interpolation gap of this object (see MCreature) - the
+		// base class covers static scenery, which never interpolates.
+		virtual int			GetDrawGapX() const	{ return 0; }
+		virtual int			GetDrawGapY() const	{ return 0; }
+
+		// The rects arrive in drawn (interpolated) screen space; the setters
+		// shift them back into exact tick space so per-tick picking agrees
+		// with per-tick object positions. Implemented in MObject.cpp.
 		void				AddScreenRect(RECT* pRect);
-		void				SetScreenRect(RECT* pRect)	{ m_ScreenRect = *pRect; }
+		void				SetScreenRect(RECT* pRect);
 		const RECT&			GetScreenRect() const	{ return m_ScreenRect; }
 		BOOL				IsPointInScreenRect(int x, int y) const
 		{

@@ -223,6 +223,13 @@ extern BOOL InitDebugInfo();
 // add by Sonic 2006.9.26 检测1024 * 768版本全局变量
 BOOL g_MyFull=TRUE;
 RECT g_GameRect={799,599,800,600};
+
+// Integer factor by which the OS window is larger than the game frame in
+// windowed mode. The game still renders at g_GameRect size; the renderer
+// letterbox-scales the frame up (spritectl_present_surface) and mouse input
+// maps back down (spritectl_window_to_game_coords). Chosen in InitApp as the
+// largest factor that fits the desktop work area.
+static int g_WindowScale = 1;
 LONG	g_SECTOR_WIDTH           =16 ;
 LONG	g_SECTOR_HEIGHT          =25 ;
 LONG	g_SECTOR_WIDTH_HALF      =9 ;
@@ -885,7 +892,10 @@ long FAR PASCAL WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 #endif
 					return 1;
 
-				case SC_CLOSE:
+				// SC_CLOSE deliberately NOT blocked: Alt+F4 must always work
+				// as the emergency exit - upstream swallowed it in fullscreen,
+				// which together with the old topmost window style could trap
+				// the user on a wedged fullscreen client with no way out.
 				case SC_MOVE:
                 case SC_SIZE:
                 case SC_MAXIMIZE:
@@ -1033,8 +1043,11 @@ long FAR PASCAL WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 			//else
 			//{
 			
-				pMinMax->ptMinTrackSize.x = g_GameRect.right+GetSystemMetrics(SM_CXSIZEFRAME)*2;
-				pMinMax->ptMinTrackSize.y = g_GameRect.bottom+GetSystemMetrics(SM_CYSIZEFRAME)*2
+				// Pinned to the scaled window size (see g_WindowScale). Live
+				// resizing stays disabled: the SDL renderer wraps a foreign
+				// Win32 window and does not reliably track swapchain resizes.
+				pMinMax->ptMinTrackSize.x = g_GameRect.right*g_WindowScale+GetSystemMetrics(SM_CXSIZEFRAME)*2;
+				pMinMax->ptMinTrackSize.y = g_GameRect.bottom*g_WindowScale+GetSystemMetrics(SM_CYSIZEFRAME)*2
 											   +GetSystemMetrics(SM_CYMENU);
 			//}
 			// end
@@ -1706,12 +1719,17 @@ InitApp(int nCmdShow)
 // 2004, 8, 27, sobeit add end - mac address 체크 및, mac screen mode 체크
 	if (g_bFullScreen)
 	{
-		exStyle = WS_EX_TOPMOST;// | WS_EX_APPWINDOW;
+		// Borderless fullscreen, deliberately NOT topmost: a WS_EX_TOPMOST
+		// popup keeps covering the whole screen even when the process hangs
+		// or the debugger breaks, leaving alt-tab useless and forcing a
+		// reboot. A screen-sized popup covers the desktop just as well while
+		// focused, and yields normally on alt-tab and debugger breaks.
+		exStyle = WS_EX_APPWINDOW;
 		//style = WS_POPUP;
 		style = WS_POPUP|WS_CLIPCHILDREN;
 	//	style = WS_POPUP|WS_CLIPCHILDREN| WS_CLIPSIBLINGS;
 		cx = GetSystemMetrics(SM_CXSCREEN);
-		cy = GetSystemMetrics(SM_CYSCREEN);				  
+		cy = GetSystemMetrics(SM_CYSCREEN);
 	}
 	else
 	{
@@ -1737,8 +1755,28 @@ InitApp(int nCmdShow)
 		//}
 		//else
 		//{
-			cx = g_GameRect.right + GetSystemMetrics(SM_CXSIZEFRAME)*2;
-			cy = g_GameRect.bottom + GetSystemMetrics(SM_CYSIZEFRAME)*2+GetSystemMetrics(SM_CYMENU);
+			// Largest integer multiple of the game size that fits the desktop
+			// work area - crisp upscale, no gameplay or UI change. Fullscreen
+			// (the branch above) gets the fractional sharp-bilinear scale.
+			{
+				RECT workArea = { 0, 0, 0, 0 };
+				SystemParametersInfo(SPI_GETWORKAREA, 0, &workArea, 0);
+
+				int frameW = GetSystemMetrics(SM_CXSIZEFRAME)*2;
+				int frameH = GetSystemMetrics(SM_CYSIZEFRAME)*2 + GetSystemMetrics(SM_CYMENU);
+				int workW = workArea.right - workArea.left;
+				int workH = workArea.bottom - workArea.top;
+
+				g_WindowScale = 1;
+				while ((g_WindowScale + 1) * g_GameRect.right + frameW <= workW
+					&& (g_WindowScale + 1) * g_GameRect.bottom + frameH <= workH)
+				{
+					g_WindowScale++;
+				}
+			}
+
+			cx = g_GameRect.right * g_WindowScale + GetSystemMetrics(SM_CXSIZEFRAME)*2;
+			cy = g_GameRect.bottom * g_WindowScale + GetSystemMetrics(SM_CYSIZEFRAME)*2+GetSystemMetrics(SM_CYMENU);
 		//}
 	}
 	//增加随机类名窗口名标题
@@ -3827,9 +3865,11 @@ WinMain(HINSTANCE hInstance,
 		}
 		else
 			g_bFullScreen = false;
-	#ifdef _DEBUG
-		g_bFullScreen = false;
-	#endif
+	// Upstream forced windowed mode here under #ifdef _DEBUG - which is live
+	// in every Debug build (MSVC defines _DEBUG under /MDd, see CLAUDE.md).
+	// Removed so the fullscreen command-line flag ('2'/'4' as the last
+	// character) works in Debug builds too; fullscreen is a borderless
+	// desktop-size window, so there is nothing debugger-hostile about it.
 	
 //end 
 	if (!CheckTerriblePatch())

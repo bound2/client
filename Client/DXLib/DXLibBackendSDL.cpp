@@ -15,6 +15,11 @@
 #include "CDirectInput.h"
 #include "DXLibBackend.h"
 
+/* Implemented in Client/SpriteLib/SpriteLibBackendSDL.cpp (declared in
+ * SpriteLibBackend.h, which dxlib cannot include - it builds without the
+ * SpriteLib include paths). Resolved when the executable links both libs. */
+extern "C" void spritectl_window_to_game_coords(int* x, int* y);
+
 #ifdef DXLIB_BACKEND_SDL
 
 #include <SDL.h>
@@ -471,6 +476,14 @@ void dxlib_input_update(void) {
 
 	/* Update mouse position from SDL (as fallback if no events received) */
 	SDL_GetMouseState(&g_mouse_x, &g_mouse_y);
+
+	/* The renderer letterboxes the fixed-size game frame into the window
+	 * (spritectl_present_surface in SpriteLib), so window coordinates must be
+	 * mapped back to game coordinates before the game consumes them. One
+	 * transform here covers everything this function produced: the event
+	 * cases above and the SDL_GetMouseState fallback both wrote raw window
+	 * coordinates, and this runs after both. */
+	spritectl_window_to_game_coords(&g_mouse_x, &g_mouse_y);
 
 	/* Also update global g_x, g_y for legacy code (IMPORTANT!) */
 	g_x = g_mouse_x;
