@@ -95,7 +95,10 @@ throw ( ProtocolException , Error )
 	//-----------------------------------------------------------------
 	else
 	{
-		DEBUG_ADD("Else.. what?");
+		// No check buffer covers this rejection. CGAddMouseToGear is the
+		// usual source: the client has already applied the equip locally
+		// and nothing here reverts it.
+		DEBUG_ADD("[GCCannotAdd] rejection with no item check buffer - a gear equip refused by the server is not reverted locally");
 
 		g_pPlayer->ClearItemCheckBuffer();		
 	}

@@ -420,7 +420,7 @@ ExecuteLogout()
 							if( g_oggfile != NULL )
 							{
 								g_pOGG->streamLoad( g_oggfile, NULL );
-								g_pOGG->streamPlay( 0 );
+								g_pOGG->streamPlay( SOUND_PLAY_REPEAT );
 								int volume = (g_pUserOption->VolumeMusic - 15) * 250;
 								g_pOGG->streamVolume( max( -10000, min( -1, volume ) ) );
 							}
@@ -504,7 +504,7 @@ PlayTitleMusic()
 
 						g_pOGG->streamVolume( max( -10000, min( -1, volume ) ) );
 						g_pOGG->streamLoad( g_oggfile,NULL );
-						g_pOGG->streamPlay( 0 );					
+						g_pOGG->streamPlay( SOUND_PLAY_REPEAT );					
 					}
 				}
 #endif
@@ -4112,13 +4112,39 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_QUICKSLOT(int left, int right, void* v
 	// 그러므로, 두 개를 바꿔서 읽어야 한다. - -;
 	// 였으나 클라이언트에서 처리해주는걸로 바꿈 by larosel
 	//---------------------------------------------------
+	//---------------------------------------------------
+	// No belt to drop into: a slayer without one, or a vampire, for whom
+	// neither branch above set anything up.
+	//---------------------------------------------------
+	if (g_pPlayer->IsSlayer() ? g_pQuickSlot == NULL : pQuickSlot == NULL)
+	{
+		DEBUG_ADD("[Error] UI_ITEM_DROP_TO_QUICKSLOT without a quick slot");
+		return;
+	}
+
+	MItem* pMouseItem = gpC_mouse_pointer->GetPickUpItem();//g_pQuickSlot->GetItem( left );
+
+	//---------------------------------------------------
+	// Nothing on the mouse: the message is stale. The UI checks the mouse
+	// before queueing, but messages are dispatched one per frame, so a
+	// second click (a double-click delivers DOWN and DBLCLK, queueing two
+	// drops) or a server packet that cleared the mouse in between
+	// (GCDeleteObject, GCDeleteInventoryItem, a trade verify) arrives
+	// here with nothing to drop. ReplaceItem() tolerates a NULL item;
+	// the packet built below dereferenced it. Same guard as
+	// Execute_UI_ITEM_DROP_TO_INVENTORY.
+	//---------------------------------------------------
+	if (pMouseItem == NULL)
+	{
+		DEBUG_ADD("[Error] UI_ITEM_DROP_TO_QUICKSLOT with no item on the mouse");
+		return;
+	}
+
 	MItem* pSlotItem = NULL ;// = (MItem*)g_pQuickSlot->GetItem( left );;//gpC_mouse_pointer->GetPickUpItem();
 	if( g_pPlayer->IsSlayer() )
 		pSlotItem = (MItem*)g_pQuickSlot->GetItem( left );
 	else
 		pSlotItem = (MItem*)pQuickSlot->GetItem( slot );
-	
-	MItem* pMouseItem = gpC_mouse_pointer->GetPickUpItem();//g_pQuickSlot->GetItem( left );
 	
 	bool	Replace = FALSE;
 	
@@ -4289,6 +4315,10 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_GEAR(int left, int right, void* void_p
 						_CGAddMouseToGear.setSlotID( pMouseItem->GetItemSlot() );//pItem->GetItemSlot() );
 						
 						g_pSocket->sendPacket( &_CGAddMouseToGear );
+
+						DEBUG_ADD_FORMAT("[UI] CGAddMouseToGear id=%d class=%d type=%d dropSlot=%d sentSlot=%d twoHand=%d",
+							pMouseItem->GetID(), (int)pMouseItem->GetItemClass(), (int)pMouseItem->GetItemType(),
+							left, (int)pMouseItem->GetItemSlot(), pMouseItem->IsGearSlotTwoHand() ? 1 : 0);
 						
 
 					//----------------------------------------------------

@@ -37,8 +37,10 @@ if(NOT WIN32)
 	message(STATUS "DXLib: Using SDL2 backend (required on this platform)")
 endif()
 
-# Check if SDL2_mixer is available
-if(TARGET SDL2::SDL2_mixer OR SDL2_MIXER_LIBRARIES)
+# Check if SDL2_mixer is available. SDL2_mixer >= 2.6 (what vcpkg ships)
+# exports SDL2_mixer::SDL2_mixer; the older SDL2::SDL2_mixer spelling and the
+# plain-variable FindSDL2_mixer path are kept for other package sources.
+if(TARGET SDL2_mixer::SDL2_mixer OR TARGET SDL2::SDL2_mixer OR SDL2_MIXER_LIBRARIES)
 	set(HAVE_SDL2_MIXER TRUE)
 	message(STATUS "DXLib: SDL2_mixer found - audio support enabled")
 	add_definitions(-DHAVE_SDL2_MIXER)
@@ -52,12 +54,9 @@ set(DXLIB_SOURCES
 	# Platform backend
 	DXLibBackendSDL.cpp
 
-	# Core DirectDraw/Sound/Music implementations
+	# Core DirectDraw implementations
 	CDirectDraw.cpp
 	CDirectDrawSurface.cpp
-	CDirectSound.cpp
-	CDirectMusic.cpp
-	CDirectSoundStream.cpp
 
 	# Static member definitions for CDirectDraw
 	CDirectDraw_StaticMembers.cpp
@@ -66,12 +65,21 @@ set(DXLIB_SOURCES
 	CDirectInput_Adapter.cpp
 )
 
-# Add audio adapters only if SDL2_mixer is available
+# Audio: CSDLAudio / CSDLMusic / CSDLStream each have two definitions.
+# The *_Adapter.cpp files are the real SDL_mixer implementations; the plain
+# files are "not implemented" fallbacks that let the client link (silently)
+# when SDL2_mixer is absent. Exactly one set goes in, never both.
 if(HAVE_SDL2_MIXER)
 	list(APPEND DXLIB_SOURCES
 		CDirectSound_Adapter.cpp
 		CDirectMusic_Adapter.cpp
 		CDirectSoundStream_Adapter.cpp
+	)
+else()
+	list(APPEND DXLIB_SOURCES
+		CDirectSound.cpp
+		CDirectMusic.cpp
+		CDirectSoundStream.cpp
 	)
 endif()
 
@@ -103,7 +111,9 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 
 	# Link SDL2_mixer if available
 	if(HAVE_SDL2_MIXER)
-		if(TARGET SDL2::SDL2_mixer)
+		if(TARGET SDL2_mixer::SDL2_mixer)
+			target_link_libraries(dxlib PUBLIC SDL2_mixer::SDL2_mixer)
+		elseif(TARGET SDL2::SDL2_mixer)
 			target_link_libraries(dxlib PUBLIC SDL2::SDL2_mixer)
 		else()
 			target_link_libraries(dxlib PUBLIC ${SDL2_MIXER_LIBRARIES})

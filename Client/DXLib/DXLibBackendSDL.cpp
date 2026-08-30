@@ -30,8 +30,13 @@ extern "C" void spritectl_window_to_game_coords(int* x, int* y);
 /* Include input focus manager */
 #include "../../VS_UI/src/InputFocusManager.h"
 
-/* For MP3/OGG support */
-#ifdef SDL_MIXER_MAJOR_VERSION
+/* For MP3/OGG support.
+ * HAVE_SDL2_MIXER comes from Client/DXLib/CMakeLists.txt when SDL2_mixer is
+ * found. The sound/music/stream sections below key on SDL_MIXER_MAJOR_VERSION,
+ * which SDL_mixer.h itself defines - so this include must not be guarded by
+ * that macro, or the header is never pulled in and every section silently
+ * compiles into its "SDL_mixer not available" stub. */
+#ifdef HAVE_SDL2_MIXER
 	#include <SDL_mixer.h>
 #endif
 
@@ -188,6 +193,20 @@ static int g_mouse_x = 0;
 static int g_mouse_y = 0;
 static int g_mouse_wheel = 0;
 static int g_mouse_buttons[3] = {0, 0, 0};
+
+/* Buffered button transitions, in the order SDL delivered them. Drained by
+ * dxlib_input_pop_mouse_button(). 64 is far more than one frame can hold;
+ * if nothing drains the queue it simply stops recording. */
+#define DXLIB_MOUSE_EVENT_QUEUE 64
+struct dxlib_mouse_button_event {
+	int button;
+	int down;
+	int x;
+	int y;
+};
+static struct dxlib_mouse_button_event g_mouse_button_events[DXLIB_MOUSE_EVENT_QUEUE];
+static int g_mouse_button_event_head = 0;
+static int g_mouse_button_event_count = 0;
 
 /* Text input callback */
 static dxlib_textinput_callback g_textinput_callback = NULL;
@@ -436,12 +455,34 @@ void dxlib_input_update(void) {
 				g_x = event.button.x;
 				g_y = event.button.y;
 
-				if (event.button.button == SDL_BUTTON_LEFT) {
-					g_mouse_buttons[0] = (event.type == SDL_MOUSEBUTTONDOWN) ? 1 : 0;
-				} else if (event.button.button == SDL_BUTTON_RIGHT) {
-					g_mouse_buttons[1] = (event.type == SDL_MOUSEBUTTONDOWN) ? 1 : 0;
-				} else if (event.button.button == SDL_BUTTON_MIDDLE) {
-					g_mouse_buttons[2] = (event.type == SDL_MOUSEBUTTONDOWN) ? 1 : 0;
+				{
+					int button = -1;
+					int down = (event.type == SDL_MOUSEBUTTONDOWN) ? 1 : 0;
+
+					if (event.button.button == SDL_BUTTON_LEFT) {
+						button = 0;
+					} else if (event.button.button == SDL_BUTTON_RIGHT) {
+						button = 1;
+					} else if (event.button.button == SDL_BUTTON_MIDDLE) {
+						button = 2;
+					}
+
+					if (button >= 0) {
+						g_mouse_buttons[button] = down;
+
+						if (g_mouse_button_event_count < DXLIB_MOUSE_EVENT_QUEUE) {
+							int slot = (g_mouse_button_event_head + g_mouse_button_event_count) % DXLIB_MOUSE_EVENT_QUEUE;
+							struct dxlib_mouse_button_event* ev = &g_mouse_button_events[slot];
+							ev->button = button;
+							ev->down = down;
+							/* Event coordinates are window space; the game
+							 * works in the letterboxed frame's space. */
+							ev->x = event.button.x;
+							ev->y = event.button.y;
+							spritectl_window_to_game_coords(&ev->x, &ev->y);
+							g_mouse_button_event_count++;
+						}
+					}
 				}
 				break;
 
@@ -517,6 +558,21 @@ void dxlib_input_get_mouse_buttons(int* left, int* right, int* center) {
 	if (center) *center = g_mouse_buttons[2];
 }
 
+int dxlib_input_pop_mouse_button(int* button, int* down, int* x, int* y) {
+	if (g_mouse_button_event_count == 0) return 0;
+
+	const struct dxlib_mouse_button_event* ev = &g_mouse_button_events[g_mouse_button_event_head];
+	if (button) *button = ev->button;
+	if (down) *down = ev->down;
+	if (x) *x = ev->x;
+	if (y) *y = ev->y;
+
+	g_mouse_button_event_head = (g_mouse_button_event_head + 1) % DXLIB_MOUSE_EVENT_QUEUE;
+	g_mouse_button_event_count--;
+
+	return 1;
+}
+
 void dxlib_input_set_mouse_pos(int x, int y) {
 	SDL_WarpMouseInWindow(NULL, x, y);
 }
@@ -543,17 +599,93 @@ void dxlib_input_stop_text(void) {
 
 #ifdef SDL_MIXER_MAJOR_VERSION
 
-struct dxlib_sound_buffer {
+/* Mixer channels reserved for sound effects. Also bounds g_channel_owner. */
+#define DXLIB_SOUND_CHANNELS 32
+
+/* Decoded sample data shared between a buffer and every duplicate made from
+ * it. dxlib_sound_duplicate used to hand out a second handle to the same
+ * Mix_Chunk with no bookkeeping, so freeing the duplicate - which the game
+ * does every tick from ReleaseTerminatedDuplicateBuffer - freed the chunk
+ * out from under the original. The chunk now goes when the last reference
+ * does. */
+struct dxlib_chunk_ref {
 	Mix_Chunk* chunk;
-	int channel;
-	int volume;
-	int pan;
-	int playing;
+	int refs;
 };
 
-static int g_max_volume = 100;
+struct dxlib_sound_buffer {
+	struct dxlib_chunk_ref* ref;
+	int channel;	/* mixer channel this buffer last started on, or -1 */
+	int volume;		/* 0..100, applied whenever the buffer owns a channel */
+	int pan;		/* -100..100, likewise */
+};
+
+/* Which buffer most recently started on each mixer channel. SDL_mixer hands
+ * a finished channel to the next Mix_PlayChannel(-1) caller, so a buffer's
+ * remembered channel number alone is not proof that the channel is still
+ * its own: without this table a buffer would stop, re-volume or report
+ * "playing" for whatever sound inherited its channel. */
+static struct dxlib_sound_buffer* g_channel_owner[DXLIB_SOUND_CHANNELS];
+
+static int dxlib_sound_owns_channel(const struct dxlib_sound_buffer* sound) {
+	return sound->channel >= 0
+		&& sound->channel < DXLIB_SOUND_CHANNELS
+		&& g_channel_owner[sound->channel] == sound;
+}
+
+static int dxlib_clamp(int value, int lo, int hi) {
+	if (value < lo) return lo;
+	if (value > hi) return hi;
+	return value;
+}
+
+/* Push the buffer's stored volume and pan onto the channel it owns. Channel
+ * volume and panning persist on the channel in SDL_mixer, so this must run
+ * every time a buffer starts, not only when the game changes a setting. */
+static void dxlib_sound_apply_channel(struct dxlib_sound_buffer* sound) {
+	int mix_volume = (sound->volume * MIX_MAX_VOLUME) / 100;
+	Uint8 left, right;
+
+	Mix_Volume(sound->channel, mix_volume);
+
+	/* The louder side stays at full gain; the other side is attenuated.
+	 * (255, 255) makes SDL_mixer drop the effect, which is centre. */
+	if (sound->pan <= 0) {
+		left = 255;
+		right = (Uint8)((255 * (100 + sound->pan)) / 100);
+	} else {
+		right = 255;
+		left = (Uint8)((255 * (100 - sound->pan)) / 100);
+	}
+	Mix_SetPanning(sound->channel, left, right);
+}
+
+/* Wrap a freshly loaded chunk in a buffer that owns the only reference.
+ * Takes ownership of the chunk even on failure. */
+static struct dxlib_sound_buffer* dxlib_sound_wrap(Mix_Chunk* chunk) {
+	struct dxlib_chunk_ref* ref = (struct dxlib_chunk_ref*)malloc(sizeof(struct dxlib_chunk_ref));
+	struct dxlib_sound_buffer* sound = (struct dxlib_sound_buffer*)malloc(sizeof(struct dxlib_sound_buffer));
+	if (!ref || !sound) {
+		free(ref);
+		free(sound);
+		Mix_FreeChunk(chunk);
+		return NULL;
+	}
+
+	ref->chunk = chunk;
+	ref->refs = 1;
+
+	sound->ref = ref;
+	sound->channel = -1;
+	sound->volume = 100;
+	sound->pan = 0;
+
+	return sound;
+}
 
 int dxlib_sound_init(void* window_handle) {
+	(void)window_handle;
+
 	if (g_sound_initialized) return 0;
 
 	/* Initialize SDL_mixer */
@@ -563,7 +695,8 @@ int dxlib_sound_init(void* window_handle) {
 	}
 
 	/* Allocate channels */
-	Mix_AllocateChannels(32);
+	Mix_AllocateChannels(DXLIB_SOUND_CHANNELS);
+	memset(g_channel_owner, 0, sizeof(g_channel_owner));
 
 	g_sound_initialized = 1;
 	return 0;
@@ -571,6 +704,9 @@ int dxlib_sound_init(void* window_handle) {
 
 void dxlib_sound_release(void) {
 	if (!g_sound_initialized) return;
+
+	Mix_HaltChannel(-1);
+	memset(g_channel_owner, 0, sizeof(g_channel_owner));
 
 	Mix_CloseAudio();
 	g_sound_initialized = 0;
@@ -585,94 +721,85 @@ dxlib_sound_t dxlib_sound_load_wav(const char* filename) {
 		return NULL;
 	}
 
-	struct dxlib_sound_buffer* sound = (struct dxlib_sound_buffer*)malloc(sizeof(struct dxlib_sound_buffer));
-	if (!sound) {
-		Mix_FreeChunk(chunk);
-		return NULL;
-	}
-
-	sound->chunk = chunk;
-	sound->channel = -1;
-	sound->volume = 100;
-	sound->pan = 0;
-	sound->playing = 0;
-
-	return sound;
+	return dxlib_sound_wrap(chunk);
 }
 
+/* `data` must be a complete RIFF/WAVE image, not bare PCM: it is handed to
+ * Mix_LoadWAV_RW, which parses the header and converts to the device
+ * format itself. The explicit format arguments are therefore unused. */
 dxlib_sound_t dxlib_sound_create_buffer(const void* data, int size,
                                        int channels, int sample_rate,
                                        int bits_per_sample) {
+	(void)channels;
+	(void)sample_rate;
+	(void)bits_per_sample;
+
 	if (!g_sound_initialized) return NULL;
 
-	/* Convert raw data to SDL_RWops */
 	SDL_RWops* rw = SDL_RWFromConstMem(data, size);
 	if (!rw) return NULL;
 
 	Mix_Chunk* chunk = Mix_LoadWAV_RW(rw, 1); /* 1 = auto-free */
 	if (!chunk) return NULL;
 
-	struct dxlib_sound_buffer* sound = (struct dxlib_sound_buffer*)malloc(sizeof(struct dxlib_sound_buffer));
-	if (!sound) {
-		Mix_FreeChunk(chunk);
-		return NULL;
-	}
-
-	sound->chunk = chunk;
-	sound->channel = -1;
-	sound->volume = 100;
-	sound->pan = 0;
-	sound->playing = 0;
-
-	return sound;
+	return dxlib_sound_wrap(chunk);
 }
 
 void dxlib_sound_free(dxlib_sound_t sound) {
 	if (!sound) return;
 
-	if (sound->playing) {
+	if (dxlib_sound_owns_channel(sound)) {
 		Mix_HaltChannel(sound->channel);
+		g_channel_owner[sound->channel] = NULL;
 	}
 
-	Mix_FreeChunk(sound->chunk);
+	if (--sound->ref->refs == 0) {
+		Mix_FreeChunk(sound->ref->chunk);
+		free(sound->ref);
+	}
 	free(sound);
 }
 
 int dxlib_sound_play(dxlib_sound_t sound, int loop) {
-	if (!sound || !sound->chunk) return 1;
+	if (!sound || !g_sound_initialized) return 1;
 
 	int loops = loop ? -1 : 0; /* -1 = infinite loop */
-	sound->channel = Mix_PlayChannel(-1, sound->chunk, loops);
-	sound->playing = (sound->channel >= 0);
+	int channel = Mix_PlayChannel(-1, sound->ref->chunk, loops);
+	if (channel < 0 || channel >= DXLIB_SOUND_CHANNELS) {
+		sound->channel = -1;
+		return 1;
+	}
 
-	return sound->playing ? 0 : 1;
+	sound->channel = channel;
+	g_channel_owner[channel] = sound;
+	dxlib_sound_apply_channel(sound);
+
+	return 0;
 }
 
 int dxlib_sound_stop(dxlib_sound_t sound) {
 	if (!sound) return 1;
 
-	if (sound->channel >= 0) {
+	if (dxlib_sound_owns_channel(sound)) {
 		Mix_HaltChannel(sound->channel);
-		sound->channel = -1;
-		sound->playing = 0;
+		g_channel_owner[sound->channel] = NULL;
 	}
+	sound->channel = -1;
 
 	return 0;
 }
 
 int dxlib_sound_is_playing(dxlib_sound_t sound) {
 	if (!sound) return 0;
-	return sound->playing && (sound->channel >= 0) && Mix_Playing(sound->channel);
+	return dxlib_sound_owns_channel(sound) && Mix_Playing(sound->channel);
 }
 
 int dxlib_sound_set_volume(dxlib_sound_t sound, int volume) {
 	if (!sound) return 1;
 
-	sound->volume = volume;
-	int mix_volume = (volume * 128) / 100; /* Convert to SDL_mixer range */
-
-	if (sound->channel >= 0) {
-		Mix_Volume(sound->channel, mix_volume);
+	sound->volume = dxlib_clamp(volume, 0, 100);
+	if (dxlib_sound_owns_channel(sound)) {
+		dxlib_sound_apply_channel(sound);
 	}
 
 	return 0;
@@ -681,17 +808,19 @@ int dxlib_sound_set_volume(dxlib_sound_t sound, int volume) {
 int dxlib_sound_set_pan(dxlib_sound_t sound, int pan) {
 	if (!sound) return 1;
 
-	/* SDL_mixer doesn't support panning directly on channels */
-	/* This would require using Mix_SetPosition (which is not always available) */
-	/* For now, just store the pan value */
-	sound->pan = pan;
+	sound->pan = dxlib_clamp(pan, -100, 100);
+	if (dxlib_sound_owns_channel(sound)) {
+		dxlib_sound_apply_channel(sound);
+	}
 
 	return 0;
 }
 
 int dxlib_sound_set_frequency(dxlib_sound_t sound, int frequency) {
-	/* SDL_mixer doesn't support changing frequency */
-	/* This would require recreating the chunk with resampled data */
+	/* SDL_mixer cannot change the playback rate of a channel; that would
+	 * mean resampling the chunk into a new one. Not supported. */
+	(void)sound;
+	(void)frequency;
 	return 1;
 }
 
@@ -701,12 +830,12 @@ dxlib_sound_t dxlib_sound_duplicate(dxlib_sound_t sound) {
 	struct dxlib_sound_buffer* duplicate = (struct dxlib_sound_buffer*)malloc(sizeof(struct dxlib_sound_buffer));
 	if (!duplicate) return NULL;
 
-	/* Reference the same chunk */
-	duplicate->chunk = sound->chunk;
+	/* Share the decoded data; the duplicate gets its own channel state. */
+	duplicate->ref = sound->ref;
+	duplicate->ref->refs++;
 	duplicate->channel = -1;
 	duplicate->volume = sound->volume;
 	duplicate->pan = sound->pan;
-	duplicate->playing = 0;
 
 	return duplicate;
 }
@@ -775,6 +904,27 @@ int dxlib_music_load(const char* filename) {
 	g_current_music = Mix_LoadMUS(filename);
 	if (!g_current_music) {
 		fprintf(stderr, "Failed to load music %s: %s\n", filename, Mix_GetError());
+		return 1;
+	}
+
+	return 0;
+}
+
+int dxlib_music_load_mem(const void* data, int size) {
+	if (!g_music_initialized) return 1;
+
+	/* Free previous music */
+	if (g_current_music) {
+		Mix_FreeMusic(g_current_music);
+		g_current_music = NULL;
+	}
+
+	SDL_RWops* rw = SDL_RWFromConstMem(data, size);
+	if (!rw) return 1;
+
+	g_current_music = Mix_LoadMUS_RW(rw, 1); /* 1 = free rw with the music */
+	if (!g_current_music) {
+		fprintf(stderr, "Failed to load music from memory: %s\n", Mix_GetError());
 		return 1;
 	}
 
@@ -851,6 +1001,7 @@ int dxlib_music_set_tempo(float tempo) {
 int dxlib_music_init(void* window_handle) { return 1; }
 void dxlib_music_release(void) {}
 int dxlib_music_load(const char* filename) { return 1; }
+int dxlib_music_load_mem(const void* data, int size) { return 1; }
 void dxlib_music_free(void) {}
 int dxlib_music_play(int loop) { return 1; }
 void dxlib_music_stop(void) {}
@@ -876,8 +1027,11 @@ void dxlib_stream_release(void) {
 }
 
 dxlib_stream_t dxlib_stream_load(const char* filename) {
-	/* For simplicity, streams use the music backend */
-	return (dxlib_stream_t)1; /* Non-null value */
+	/* Streams ride on the single music slot, so loading a stream replaces
+	 * whatever music was loaded. The handle is a token, not a pointer. */
+	if (dxlib_music_init(NULL) != 0) return NULL;
+	if (dxlib_music_load(filename) != 0) return NULL;
+	return (dxlib_stream_t)1;
 }
 
 void dxlib_stream_free(dxlib_stream_t stream) {

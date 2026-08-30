@@ -2,8 +2,18 @@
 
 	CDirectSound_Adapter.cpp
 
-	DirectSound adapter using DXLibBackend.
-	This file provides SDL2 backend support for CDirectSound class.
+	CSDLAudio on top of the DXLibBackend sound interface (SDL_mixer).
+
+	This is the live implementation of the class declared in CDirectSound.h.
+	CDirectSound.cpp beside it is the "not implemented" fallback that the
+	build uses only when SDL2_mixer is absent; the two are never compiled
+	together (see Client/DXLib/CMakeLists.txt).
+
+	Units: callers pass DirectSound values - volume as an attenuation in
+	hundredths of a decibel (DSBVOLUME_MIN..DSBVOLUME_MAX), pan as
+	DSBPAN_LEFT..DSBPAN_RIGHT. They are stored as such and converted to the
+	backend's linear percentages through AudioVolumeToPercent /
+	AudioPanToPercent at the one point they cross into the backend.
 
 	2025.01.14
 
@@ -12,8 +22,10 @@
 #include "CDirectSound.h"
 #include "DXLibBackend.h"
 
+#include <cstdio>
+
 /* Global instance */
-CDirectSound	g_SDLAudio;
+CSDLAudio	g_SDLAudio;
 
 /*=============================================================================
  * SDL Backend Implementation
@@ -21,37 +33,96 @@ CDirectSound	g_SDLAudio;
 
 #ifdef DXLIB_BACKEND_SDL
 
-/* Sound buffer wrapper structure */
+namespace {
+
+/* What an LPDIRECTSOUNDBUFFER really points at in this build. */
 struct SoundBufferWrapper {
-	dxlib_sound_t sound;		// Backend sound handle
-	bool			is_playing;	// Playing state
-	int				volume;		// Current volume (0-100)
-	int				frequency;	// Frequency offset (not supported in SDL)
-	int				pan;		// Pan value (-100 to 100, not supported in SDL)
-	bool			auto_release; // Auto-release on stop
+	dxlib_sound_t	sound;			// Backend handle
+	LONG			volume;			// DSBVOLUME_MIN..DSBVOLUME_MAX
+	LONG			pan;			// DSBPAN_LEFT..DSBPAN_RIGHT
+	bool			bAutoRelease;	// Reclaimed by ReleaseTerminatedDuplicateBuffer
 };
 
-/* Constructor */
-CSDLAudio::CDirectSound()
+inline SoundBufferWrapper* Wrap(LPDIRECTSOUNDBUFFER buffer)
+{
+	return reinterpret_cast<SoundBufferWrapper*>(buffer);
+}
+
+inline LPDIRECTSOUNDBUFFER Unwrap(SoundBufferWrapper* wrapper)
+{
+	return reinterpret_cast<LPDIRECTSOUNDBUFFER>(wrapper);
+}
+
+inline LONG ClampVolume(LONG volume)
+{
+	if (volume < DSBVOLUME_MIN) return DSBVOLUME_MIN;
+	if (volume > DSBVOLUME_MAX) return DSBVOLUME_MAX;
+	return volume;
+}
+
+inline LONG ClampPan(LONG pan)
+{
+	if (pan < DSBPAN_LEFT) return DSBPAN_LEFT;
+	if (pan > DSBPAN_RIGHT) return DSBPAN_RIGHT;
+	return pan;
+}
+
+/* Store a new volume on the wrapper and hand it to the backend, which
+ * applies it to the live channel now and again on every later play. */
+bool SetVolume(SoundBufferWrapper* wrapper, LONG volume)
+{
+	wrapper->volume = ClampVolume(volume);
+	return dxlib_sound_set_volume(wrapper->sound, AudioVolumeToPercent(wrapper->volume)) == 0;
+}
+
+bool SetPan(SoundBufferWrapper* wrapper, LONG pan)
+{
+	wrapper->pan = ClampPan(pan);
+	return dxlib_sound_set_pan(wrapper->sound, AudioPanToPercent(wrapper->pan)) == 0;
+}
+
+SoundBufferWrapper* NewWrapper(dxlib_sound_t sound, LONG volume, LONG pan, bool bAutoRelease)
+{
+	SoundBufferWrapper* wrapper = new SoundBufferWrapper;
+	wrapper->sound = sound;
+	wrapper->bAutoRelease = bAutoRelease;
+	SetVolume(wrapper, volume);
+	SetPan(wrapper, pan);
+	return wrapper;
+}
+
+void FreeWrapper(SoundBufferWrapper* wrapper)
+{
+	dxlib_sound_free(wrapper->sound);
+	delete wrapper;
+}
+
+} // namespace
+
+//-----------------------------------------------------------------------------
+// Constructor / Destructor
+//-----------------------------------------------------------------------------
+CSDLAudio::CSDLAudio()
 {
 	m_pDS = NULL;
 	m_bInit = false;
 	m_bMute = false;
-	m_MaxVolume = 100;
+	m_MaxVolume = DSBVOLUME_MAX;
 	m_listDuplicatedBuffer.clear();
 }
 
-/* Destructor */
-CSDLAudio::~CDirectSound()
+CSDLAudio::~CSDLAudio()
 {
 	Release();
 }
 
-/* Initialize SDL backend */
+//-----------------------------------------------------------------------------
+// Init / Release
+//-----------------------------------------------------------------------------
 bool CSDLAudio::Init(HWND hWnd)
 {
 	if (dxlib_sound_init(hWnd) != 0) {
-		return false;
+		return DirectSoundFailed("dxlib_sound_init");
 	}
 
 	m_pDS = (LPDIRECTSOUND)0x01;	// Non-null indicator
@@ -59,35 +130,46 @@ bool CSDLAudio::Init(HWND hWnd)
 	return true;
 }
 
-/* Release SDL backend */
 void CSDLAudio::Release()
 {
-	// Release all duplicated buffers
 	ReleaseDuplicateBuffer();
-
-	// Release backend
 	dxlib_sound_release();
 
 	m_pDS = NULL;
 	m_bInit = false;
 }
 
-/* Release all duplicated buffers */
 void CSDLAudio::ReleaseDuplicateBuffer()
 {
 	for (LPDIRECTSOUNDBUFFER_LIST::iterator it = m_listDuplicatedBuffer.begin();
 		it != m_listDuplicatedBuffer.end(); ++it)
 	{
-		SoundBufferWrapper* wrapper = (SoundBufferWrapper*)(*it);
-		if (wrapper) {
-			dxlib_sound_free(wrapper->sound);
-			delete wrapper;
+		if (*it) {
+			FreeWrapper(Wrap(*it));
 		}
 	}
 	m_listDuplicatedBuffer.clear();
 }
 
-/* Load WAV file */
+bool CSDLAudio::IsInit() const
+{
+	return m_bInit;
+}
+
+LPDIRECTSOUND CSDLAudio::GetDS() const
+{
+	return m_pDS;
+}
+
+bool CSDLAudio::DirectSoundFailed(const char* str)
+{
+	fprintf(stderr, "[CSDLAudio] %s failed\n", str);
+	return false;
+}
+
+//-----------------------------------------------------------------------------
+// Load / Release / Duplicate
+//-----------------------------------------------------------------------------
 LPDIRECTSOUNDBUFFER CSDLAudio::LoadWav(LPSTR filename)
 {
 	if (!m_bInit) return NULL;
@@ -97,159 +179,115 @@ LPDIRECTSOUNDBUFFER CSDLAudio::LoadWav(LPSTR filename)
 		return NULL;
 	}
 
-	// Create wrapper
-	SoundBufferWrapper* wrapper = new SoundBufferWrapper();
-	wrapper->sound = sound;
-	wrapper->is_playing = false;
-	wrapper->volume = 100;	// Max volume
-	wrapper->frequency = 0;
-	wrapper->pan = 0;
-	wrapper->auto_release = false;
-
-	return (LPDIRECTSOUNDBUFFER)wrapper;
+	return Unwrap(NewWrapper(sound, m_MaxVolume, DSBPAN_CENTER, false));
 }
 
-/* Create sound buffer from raw data */
 LPDIRECTSOUNDBUFFER CSDLAudio::CreateBuffer(LPVOID sdat, DWORD size, DWORD caps, LPWAVEFORMATEX wfx)
 {
-	if (!m_bInit) return NULL;
+	(void)caps;
 
-	// Extract format info
-	int channels = wfx->nChannels;
-	int sample_rate = wfx->nSamplesPerSec;
-	int bits_per_sample = wfx->wBitsPerSample;
+	if (!m_bInit || !wfx) return NULL;
 
-	dxlib_sound_t sound = dxlib_sound_create_buffer(sdat, size,
-		channels, sample_rate, bits_per_sample);
-
+	dxlib_sound_t sound = dxlib_sound_create_buffer(sdat, (int)size,
+		wfx->nChannels, (int)wfx->nSamplesPerSec, wfx->wBitsPerSample);
 	if (!sound) {
 		return NULL;
 	}
 
-	// Create wrapper
-	SoundBufferWrapper* wrapper = new SoundBufferWrapper();
-	wrapper->sound = sound;
-	wrapper->is_playing = false;
-	wrapper->volume = 100;
-	wrapper->frequency = 0;
-	wrapper->pan = 0;
-	wrapper->auto_release = false;
-
-	return (LPDIRECTSOUNDBUFFER)wrapper;
+	return Unwrap(NewWrapper(sound, m_MaxVolume, DSBPAN_CENTER, false));
 }
 
-/* Release sound buffer */
 void CSDLAudio::Release(LPDIRECTSOUNDBUFFER buffer)
 {
 	if (!buffer) return;
 
-	SoundBufferWrapper* wrapper = (SoundBufferWrapper*)buffer;
-	dxlib_sound_free(wrapper->sound);
-	delete wrapper;
+	// A buffer on the auto-release list is owned by that list; releasing it
+	// here as well would free it twice on the next game tick.
+	m_listDuplicatedBuffer.remove(buffer);
+
+	FreeWrapper(Wrap(buffer));
 }
 
-/* Duplicate sound buffer */
 LPDIRECTSOUNDBUFFER CSDLAudio::DuplicateSoundBuffer(LPDIRECTSOUNDBUFFER buffer, bool bAutoRelease)
 {
 	if (!buffer) return NULL;
 
-	SoundBufferWrapper* src_wrapper = (SoundBufferWrapper*)buffer;
+	SoundBufferWrapper* source = Wrap(buffer);
 
-	// Use backend duplicate function
-	dxlib_sound_t duplicated = dxlib_sound_duplicate(src_wrapper->sound);
+	dxlib_sound_t duplicated = dxlib_sound_duplicate(source->sound);
 	if (!duplicated) {
 		return NULL;
 	}
 
-	// Create wrapper for duplicate
-	SoundBufferWrapper* wrapper = new SoundBufferWrapper();
-	wrapper->sound = duplicated;
-	wrapper->is_playing = false;
-	wrapper->volume = src_wrapper->volume;
-	wrapper->frequency = src_wrapper->frequency;
-	wrapper->pan = src_wrapper->pan;
-	wrapper->auto_release = bAutoRelease;
+	SoundBufferWrapper* wrapper = NewWrapper(duplicated, source->volume, source->pan, bAutoRelease);
 
-	// Add to list if auto-release is enabled
 	if (bAutoRelease) {
-		m_listDuplicatedBuffer.push_back((LPDIRECTSOUNDBUFFER)wrapper);
+		m_listDuplicatedBuffer.push_back(Unwrap(wrapper));
 	}
 
-	return (LPDIRECTSOUNDBUFFER)wrapper;
+	return Unwrap(wrapper);
 }
 
-/* Check if sound is playing */
+//-----------------------------------------------------------------------------
+// Play / Stop
+//-----------------------------------------------------------------------------
 bool CSDLAudio::IsPlay(LPDIRECTSOUNDBUFFER buffer) const
 {
 	if (!buffer) return false;
 
-	SoundBufferWrapper* wrapper = (SoundBufferWrapper*)buffer;
-	return dxlib_sound_is_playing(wrapper->sound) != 0;
+	return dxlib_sound_is_playing(Wrap(buffer)->sound) != 0;
 }
 
-/* Play sound (restart if already playing) */
+/* Restart from the beginning, cutting off any playback of this buffer. */
 bool CSDLAudio::NewPlay(LPDIRECTSOUNDBUFFER buffer, bool bLoop)
 {
 	if (!buffer) return false;
 	if (m_bMute) return false;
 
-	SoundBufferWrapper* wrapper = (SoundBufferWrapper*)buffer;
+	SoundBufferWrapper* wrapper = Wrap(buffer);
 
-	// Stop if already playing
 	if (dxlib_sound_is_playing(wrapper->sound)) {
 		dxlib_sound_stop(wrapper->sound);
 	}
 
-	// Apply volume
-	dxlib_sound_set_volume(wrapper->sound, wrapper->volume);
-
-	// Play
-	int loop_flag = bLoop ? 1 : 0;
-	return dxlib_sound_play(wrapper->sound, loop_flag) == 0;
+	return dxlib_sound_play(wrapper->sound, bLoop ? 1 : 0) == 0;
 }
 
-/* Play sound (allow simultaneous playback) */
+/* Play without cutting off a running instance: when the buffer is already
+ * sounding and the caller allows it, an auto-released duplicate plays
+ * alongside instead. */
 bool CSDLAudio::Play(LPDIRECTSOUNDBUFFER buffer, bool bLoop, bool bDuplicate)
 {
 	if (!buffer) return false;
 	if (m_bMute) return false;
 
-	SoundBufferWrapper* wrapper = (SoundBufferWrapper*)buffer;
+	SoundBufferWrapper* wrapper = Wrap(buffer);
 
-	// If duplicate is requested and sound is playing, create duplicate
 	if (bDuplicate && dxlib_sound_is_playing(wrapper->sound)) {
 		LPDIRECTSOUNDBUFFER dup = DuplicateSoundBuffer(buffer, true);
 		if (dup) {
-			wrapper = (SoundBufferWrapper*)dup;
+			wrapper = Wrap(dup);
 		}
 	}
 
-	// Apply volume
-	dxlib_sound_set_volume(wrapper->sound, wrapper->volume);
-
-	// Play
-	int loop_flag = bLoop ? 1 : 0;
-	return dxlib_sound_play(wrapper->sound, loop_flag) == 0;
+	return dxlib_sound_play(wrapper->sound, bLoop ? 1 : 0) == 0;
 }
 
-/* Stop sound */
 bool CSDLAudio::Stop(LPDIRECTSOUNDBUFFER buffer)
 {
 	if (!buffer) return false;
 
-	SoundBufferWrapper* wrapper = (SoundBufferWrapper*)buffer;
-	return dxlib_sound_stop(wrapper->sound) == 0;
+	return dxlib_sound_stop(Wrap(buffer)->sound) == 0;
 }
 
-/* Release terminated duplicate buffers */
+/* Called once per game tick to reclaim duplicates that have finished. */
 void CSDLAudio::ReleaseTerminatedDuplicateBuffer()
 {
 	LPDIRECTSOUNDBUFFER_LIST::iterator it = m_listDuplicatedBuffer.begin();
 	while (it != m_listDuplicatedBuffer.end()) {
-		SoundBufferWrapper* wrapper = (SoundBufferWrapper*)(*it);
+		SoundBufferWrapper* wrapper = Wrap(*it);
 		if (wrapper && !dxlib_sound_is_playing(wrapper->sound)) {
-			dxlib_sound_free(wrapper->sound);
-			delete wrapper;
+			FreeWrapper(wrapper);
 			it = m_listDuplicatedBuffer.erase(it);
 		} else {
 			++it;
@@ -257,123 +295,133 @@ void CSDLAudio::ReleaseTerminatedDuplicateBuffer()
 	}
 }
 
-/* Set max volume */
+//-----------------------------------------------------------------------------
+// Mute
+//-----------------------------------------------------------------------------
+bool CSDLAudio::IsMute() const
+{
+	return m_bMute;
+}
+
+void CSDLAudio::SetMute()
+{
+	m_bMute = true;
+}
+
+void CSDLAudio::UnSetMute()
+{
+	m_bMute = false;
+}
+
+//-----------------------------------------------------------------------------
+// Frequency - SDL_mixer cannot change a channel's playback rate.
+//-----------------------------------------------------------------------------
+bool CSDLAudio::AddFrequency(LPDIRECTSOUNDBUFFER buffer, int step)
+{
+	(void)buffer;
+	(void)step;
+	return false;
+}
+
+bool CSDLAudio::SubFrequency(LPDIRECTSOUNDBUFFER buffer, int step)
+{
+	(void)buffer;
+	(void)step;
+	return false;
+}
+
+//-----------------------------------------------------------------------------
+// Volume
+//-----------------------------------------------------------------------------
 bool CSDLAudio::SetMaxVolume(LPDIRECTSOUNDBUFFER buffer)
 {
 	if (!buffer) return false;
 
-	SoundBufferWrapper* wrapper = (SoundBufferWrapper*)buffer;
-	wrapper->volume = m_MaxVolume;
-	return dxlib_sound_set_volume(wrapper->sound, m_MaxVolume) == 0;
+	return SetVolume(Wrap(buffer), m_MaxVolume);
 }
 
-/* Add volume */
-bool CSDLAudio::AddVolume(LPDIRECTSOUNDBUFFER buffer, int amount)
+bool CSDLAudio::AddVolume(LPDIRECTSOUNDBUFFER buffer, int step)
 {
 	if (!buffer) return false;
 
-	SoundBufferWrapper* wrapper = (SoundBufferWrapper*)buffer;
-	wrapper->volume += amount;
-
-	// Clamp volume
-	if (wrapper->volume > 100) wrapper->volume = 100;
-	if (wrapper->volume < 0) wrapper->volume = 0;
-
-	return dxlib_sound_set_volume(wrapper->sound, wrapper->volume) == 0;
+	SoundBufferWrapper* wrapper = Wrap(buffer);
+	LONG volume = wrapper->volume + step;
+	if (volume > m_MaxVolume) volume = m_MaxVolume;
+	return SetVolume(wrapper, volume);
 }
 
-/* Subtract volume */
-bool CSDLAudio::SubVolume(LPDIRECTSOUNDBUFFER buffer, int amount)
+bool CSDLAudio::SubVolume(LPDIRECTSOUNDBUFFER buffer, int step)
 {
 	if (!buffer) return false;
 
-	SoundBufferWrapper* wrapper = (SoundBufferWrapper*)buffer;
-	wrapper->volume -= amount;
-
-	// Clamp volume
-	if (wrapper->volume < 0) wrapper->volume = 0;
-
-	return dxlib_sound_set_volume(wrapper->sound, wrapper->volume) == 0;
+	SoundBufferWrapper* wrapper = Wrap(buffer);
+	return SetVolume(wrapper, wrapper->volume - step);
 }
 
-/* Subtract volume from max */
-bool CSDLAudio::SubVolumeFromMax(LPDIRECTSOUNDBUFFER buffer, int amount)
+/* The distance attenuation the zone sound code uses: `step` below the
+ * current limit, in hundredths of a dB. */
+bool CSDLAudio::SubVolumeFromMax(LPDIRECTSOUNDBUFFER buffer, int step)
 {
 	if (!buffer) return false;
 
-	SoundBufferWrapper* wrapper = (SoundBufferWrapper*)buffer;
-	wrapper->volume = m_MaxVolume - amount;
-
-	// Clamp volume
-	if (wrapper->volume < 0) wrapper->volume = 0;
-	if (wrapper->volume > 100) wrapper->volume = 100;
-
-	return dxlib_sound_set_volume(wrapper->sound, wrapper->volume) == 0;
+	return SetVolume(Wrap(buffer), m_MaxVolume - step);
 }
 
-/* Set volume limit */
 void CSDLAudio::SetVolumeLimit(LONG volume)
 {
-	m_MaxVolume = volume;
-	if (m_MaxVolume > 100) m_MaxVolume = 100;
-	if (m_MaxVolume < 0) m_MaxVolume = 0;
+	m_MaxVolume = ClampVolume(volume);
 }
 
-/* Add frequency (not supported in SDL backend) */
-bool CSDLAudio::AddFrequency(LPDIRECTSOUNDBUFFER buffer, int amount)
+LONG CSDLAudio::GetVolumeLimit() const
 {
-	// SDL_mixer does not support frequency adjustment
-	return false;
+	return m_MaxVolume;
 }
 
-/* Subtract frequency (not supported in SDL backend) */
-bool CSDLAudio::SubFrequency(LPDIRECTSOUNDBUFFER buffer, int amount)
+//-----------------------------------------------------------------------------
+// Pan
+//-----------------------------------------------------------------------------
+bool CSDLAudio::RightPan(LPDIRECTSOUNDBUFFER buffer, int step)
 {
-	// SDL_mixer does not support frequency adjustment
-	return false;
+	if (!buffer) return false;
+
+	SoundBufferWrapper* wrapper = Wrap(buffer);
+	return SetPan(wrapper, wrapper->pan + step);
 }
 
-/* Pan right (not supported in SDL backend) */
-bool CSDLAudio::RightPan(LPDIRECTSOUNDBUFFER buffer, int amount)
+bool CSDLAudio::LeftPan(LPDIRECTSOUNDBUFFER buffer, int step)
 {
-	// SDL_mixer does not support pan control
-	return false;
+	if (!buffer) return false;
+
+	SoundBufferWrapper* wrapper = Wrap(buffer);
+	return SetPan(wrapper, wrapper->pan - step);
 }
 
-/* Pan left (not supported in SDL backend) */
-bool CSDLAudio::LeftPan(LPDIRECTSOUNDBUFFER buffer, int amount)
+bool CSDLAudio::CenterToRightPan(LPDIRECTSOUNDBUFFER buffer, int step)
 {
-	// SDL_mixer does not support pan control
-	return false;
+	if (!buffer) return false;
+
+	return SetPan(Wrap(buffer), DSBPAN_CENTER + step);
 }
 
-/* Pan from center to right (not supported in SDL backend) */
-bool CSDLAudio::CenterToRightPan(LPDIRECTSOUNDBUFFER buffer, int amount)
+bool CSDLAudio::CenterToLeftPan(LPDIRECTSOUNDBUFFER buffer, int step)
 {
-	// SDL_mixer does not support pan control
-	return false;
+	if (!buffer) return false;
+
+	return SetPan(Wrap(buffer), DSBPAN_CENTER - step);
 }
 
-/* Pan from center to left (not supported in SDL backend) */
-bool CSDLAudio::CenterToLeftPan(LPDIRECTSOUNDBUFFER buffer, int amount)
-{
-	// SDL_mixer does not support pan control
-	return false;
-}
-
-/* Center pan (not supported in SDL backend) */
 bool CSDLAudio::CenterPan(LPDIRECTSOUNDBUFFER buffer)
 {
-	// SDL_mixer does not support pan control
-	return false;
+	if (!buffer) return false;
+
+	return SetPan(Wrap(buffer), DSBPAN_CENTER);
 }
 
-/* Change pan (not supported in SDL backend) */
 bool CSDLAudio::ChangePan(LPDIRECTSOUNDBUFFER buffer, int pan)
 {
-	// SDL_mixer does not support pan control
-	// Pan range: -10000 to 10000 (DirectX) vs -100 to 100 (our backend)
-	return false;
+	if (!buffer) return false;
+
+	return SetPan(Wrap(buffer), pan);
 }
 
 #endif /* DXLIB_BACKEND_SDL */

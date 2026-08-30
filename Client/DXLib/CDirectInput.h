@@ -50,6 +50,13 @@ public:
 	BOOL						m_rb_up;	// right button - up
 	BOOL						m_cb_up;	// center button - up
 
+	// The six flags above are one-frame pulses ("pressed / released this
+	// frame"), exactly as the DirectInput original reset them at the top of
+	// every UpdateInput(). CGameUpdate::ProcessInput reads them that way.
+	// These hold the physical state between frames for edge detection.
+	BOOL						m_lb_held;
+	BOOL						m_rb_held;
+	BOOL						m_cb_held;
 	enum E_EXCLUSIVE // debugging 할 때를 위해서...
 	{
 		EXCLUSIVE,
@@ -101,7 +108,10 @@ public:
 	~CSDLInput();
 
 	void		Clear();
-	BOOL		Init(HWND hWnd, HINSTANCE hInst, E_EXCLUSIVE ex=EXCLUSIVE);
+
+	// Deliver one mouse event at (x, y): moves the cursor there first if
+	// it is not already there, so the receiver sees MOVE then the event.
+	void		DispatchMouseAt(E_MOUSE_EVENT event, int x, int y);	BOOL		Init(HWND hWnd, HINSTANCE hInst, E_EXCLUSIVE ex=EXCLUSIVE);
 	HRESULT		SetAcquire(bool active_app);
 	void		SetMouseEventReceiver(void (*fp_receiver)(E_MOUSE_EVENT, int, int, int));
 	void		SetKeyboardEventReceiver(void (*fp_receiver)(E_KEYBOARD_EVENT, DWORD));

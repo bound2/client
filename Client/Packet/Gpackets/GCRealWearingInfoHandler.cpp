@@ -28,6 +28,8 @@ throw ( ProtocolException , Error )
 
 	DWORD flag = pPacket->getInfo();
 
+	DEBUG_ADD_FORMAT("[GCRealWearingInfo] flag=0x%08X (bit n = gear slot n is effective)", (unsigned)flag);
+
 	if (g_pPlayer==NULL)
 	{
 		DEBUG_ADD("[Error] g_pPlayer is NULL");
@@ -96,6 +98,8 @@ throw ( ProtocolException , Error )
 						//-------------------------------------------------------
 						else
 						{
+							DEBUG_ADD_FORMAT("[GCRealWearingInfo] slayer slot %d item id=%d class=%d type=%d not effective - addon removed",
+								i, itemID, (int)pModifyItem->GetItemClass(), (int)pModifyItem->GetItemType());
 							pModifyItem->UnSetAffectStatus();
 							g_pPlayer->RemoveAddonItem(pModifyItem);
 						}
