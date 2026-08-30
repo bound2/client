@@ -12,6 +12,7 @@
 #include "ClientDef.h"
 #include "MSkillManager.h"
 #include "SkillDef.h"
+#include "MGameStringTable.h"
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
@@ -33,7 +34,10 @@ throw ( ProtocolException , Error )
 
 	(*g_pSkillManager)[domainType].SetNewSkill();
 	
-	g_pGameMessage->AddFormat( "%s 계열의 기술을 배울 수 있습니다.", SKILLDOMAIN_NAME[domainType]);
+	// SKILLDOMAIN_NAME holds string table ids, not strings, so look the name up
+	// before formatting it.
+	g_pGameMessage->AddFormat( "You can learn a new %s skill.",
+		(*g_pGameStringTable)[SKILLDOMAIN_NAME[domainType]].GetString() );
 
 	// levelup했다고 뭔가 보여준다. 뭘까.... --;
 	//UI_LevelUp();

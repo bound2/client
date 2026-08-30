@@ -1109,14 +1109,14 @@ UIDialog::ProcessMessageDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 		//---------------------------------------------------------
 		const int menuSize = 9;
 		DIALOG_MENU menu[ menuSize ] = {
-					{"머리", 1},
-					{"모자", 2},
-					{"상의", 3},
-					{"하의", 4},
-					{"근접무기", 5},
-					{"총", 6},
-					{"방패", 7},
-					{"오토바이", 8},
+					{"Head", 1},
+					{"Hat", 2},
+					{"Top", 3},
+					{"Bottom", 4},
+					{"Melee weapon", 5},
+					{"Gun", 6},
+					{"Shield", 7},
+					{"Motorcycle", 8},
 					{"EXIT", DIALOG_EXECID_EXIT},					
 				};
 
@@ -1609,14 +1609,14 @@ UIDialog::ProcessMessageDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 		//---------------------------------------------------------
 		const int menuSize = 9;//21;
 		DIALOG_MENU menu[ menuSize ] = {
-					{ "좌 (Left)",			0 }, 
-					{ "좌하 (LeftDown)", 	1 }, 
-					{ "하 (Down)", 			2 }, 
-					{ "우하 (RightDown)",	3 }, 
-					{ "우 (Right)", 		4 }, 
-					{ "우상 (RightUp)", 	5 }, 
-					{ "상 (Up)", 			6 }, 
-					{ "좌상 (LeftUp)",		7 }, 
+					{ "Left",		0 }, 
+					{ "Left down", 	1 }, 
+					{ "Down", 		2 }, 
+					{ "Right down",	3 }, 
+					{ "Right", 		4 }, 
+					{ "Right up", 	5 }, 
+					{ "Up", 		6 }, 
+					{ "Left up",	7 }, 
 					
 					
 					{"EXIT", DIALOG_EXECID_EXIT}

@@ -6446,9 +6446,9 @@ void	C_VS_UI_FINDING_MINE::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 	{
 		char szGameLevel[GAMELEVEL_MAX][16] = 
 		{
-			"초급",
-			"중급",
-			"고급",
+			"Easy",
+			"Normal",
+			"Hard",
 		};
 
 		g_PrintColorStr(smile_x+5, smile_y+6, szGameLevel[p_button->GetID()-LEVEL0_ID], gpC_base->m_item_name_pi, BLACK);

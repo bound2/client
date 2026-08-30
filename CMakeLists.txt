@@ -163,6 +163,32 @@ if(MSVC AND NOT USE_ASAN)
     message(STATUS "Debug runtime checks: /RTC1 (uninitialised locals, stack frames)")
 endif()
 
+# Parallel compilation.
+#
+# MSVC compiles the sources of one project one at a time unless asked
+# otherwise. msbuild's own -m flag only overlaps separate *projects*, so the
+# two targets that dominate this build - DarkEden and VS_UI, several hundred
+# translation units each - still come out largely serial. /MP adds the
+# file-level parallelism inside a project, which is where the wall clock
+# actually goes.
+#
+# Set at directory scope here, above every add_subdirectory and every
+# add_library/add_executable below, so it reaches all of them - DarkEden,
+# VS_UI, TextSystem, basic, DXLib, SpriteLib, framelib, the viewer tools and
+# the test binaries. Pinning it onto individual .vcxproj files instead does
+# not survive the next CMake regeneration, since those files are generated.
+#
+# Restricted to C and CXX because the resource compiler does not accept /MP.
+#
+# /MP is rejected alongside #import and /Gm; neither appears in this tree.
+# It also multiplies with msbuild -m, so `cmake --build . -- -m` can
+# oversubscribe the machine - that is the intended trade, not an accident.
+if(MSVC)
+    add_compile_options($<$<COMPILE_LANGUAGE:C,CXX>:/MP>)
+
+    message(STATUS "Parallel compilation: /MP (per-project, all targets)")
+endif()
+
 # Add SDL2 include directory BEFORE add_subdirectory
 if(EXISTS "/opt/homebrew/include/SDL2")
 	include_directories(/opt/homebrew/include/SDL2)
@@ -255,6 +281,25 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	)
 
 	target_compile_definitions(TextSystem PRIVATE SPRITELIB_BACKEND_SDL USE_SDL_BACKEND)
+
+	# TextService::NormalizeText transcodes the shipped CP949 .inf data to the
+	# UTF-8 the text backend renders. It needs a real iconv to do it: SDL2 as
+	# vcpkg builds it has HAVE_ICONV undefined, so SDL_iconv resolves to SDL's
+	# own converter, which supports no legacy CJK code page and fails at open
+	# for every one of them. Without this, NormalizeText compiles, runs, and
+	# returns its input unchanged.
+	#
+	# PUBLIC so the test binary, which links TextSystem to cover NormalizeText,
+	# resolves iconv too.
+	if(Iconv_FOUND)
+		target_link_libraries(TextSystem PUBLIC Iconv::Iconv)
+		target_compile_definitions(TextSystem PRIVATE HAVE_REAL_ICONV)
+		message(STATUS "TextSystem: legacy code page conversion via iconv")
+	else()
+		message(WARNING
+			"TextSystem: iconv not found - CP949 game data will render as "
+			"replacement glyphs because NormalizeText cannot transcode it")
+	endif()
 	if(NOT WIN32)
 		target_compile_definitions(TextSystem PRIVATE PLATFORM_MACOS)
 	endif()

@@ -25,8 +25,14 @@ target_include_directories(test_framework PUBLIC
 #----------------------------------------------------------------------
 file(GLOB UNIT_TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/unit/*.cpp)
 
+#----------------------------------------------------------------------
+# stubs/ defines globals that a linked library references but that are
+# defined in the DarkEden executable. See the file for why each one is
+# there; they are not a general escape hatch for pulling game logic in.
+#----------------------------------------------------------------------
 add_executable(unit_tests
 	framework/test_main.cpp
+	stubs/client_globals.cpp
 	${UNIT_TEST_SOURCES}
 )
 
@@ -34,12 +40,14 @@ target_link_libraries(unit_tests PRIVATE
 	test_framework
 	basic
 	SpriteLib
+	TextSystem
 )
 
 target_include_directories(unit_tests PRIVATE
 	${CMAKE_SOURCE_DIR}
 	${CMAKE_SOURCE_DIR}/basic
 	${CMAKE_SOURCE_DIR}/Client/framelib
+	${CMAKE_SOURCE_DIR}/Client/TextSystem
 )
 
 add_test(NAME unit_tests COMMAND unit_tests)

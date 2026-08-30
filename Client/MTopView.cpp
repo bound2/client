@@ -10015,24 +10015,24 @@ MTopView::DrawTestHelp()
 			const char helpStr[maxHelp][128] = 
 			{
 				"---------------------------------------------------------------------",
-				"         ALPHA-TEST CLIENT 도움말",
+				"         ALPHA-TEST CLIENT help",
 				"---------------------------------------------------------------------",
 				"  [ESC] Menu",
-				"  [F1~F8] 벨트 아이템 사용",
-				"  [Scroll Lock] 화면 캡쳐(--> \\ScreenShot)",
-				"  [Ctrl + M/T/Z] 지도/게임시간/존 이름",
-				"  [Tab] 아이템창 on/off",			
-				"  [Ctrl + Tab] 장착창 on/off",			
-				"  [L-Ctrl + ~] 벨트 on/off",			
-				"  [L-Ctrl + S] 기술 아이콘 선택",			
-				"  [L-Ctrl + Space] 아이템창, 장착창 on/off",
+				"  [F1~F8] Use belt item",
+				"  [Scroll Lock] Screenshot (--> \\ScreenShot)",
+				"  [Ctrl + M/T/Z] Map / game time / zone name",
+				"  [Tab] Inventory on/off",			
+				"  [Ctrl + Tab] Gear window on/off",			
+				"  [L-Ctrl + ~] Belt on/off",			
+				"  [L-Ctrl + S] Pick a skill icon",			
+				"  [L-Ctrl + Space] Inventory and gear window on/off",
 				"---------------------------------------------------------------------",
-				"  [L-Button] 이동, 추적, 공격",
-				"  [L-Shift + L-Button] 강제 공격",
-				"  [L-Ctrl + L-Button] 적만 선택 공격",
-				"  [R-Button] 마법, 기술",
+				"  [L-Button] Move, chase, attack",
+				"  [L-Shift + L-Button] Forced attack",
+				"  [L-Ctrl + L-Button] Attack enemies only",
+				"  [R-Button] Magic, skills",
 				"---------------------------------------------------------------------",
-				"  [채팅할때] ! 를 사용하면 존 채팅"
+				"  [When chatting] start with ! for zone chat"
 			};
 
 			POINT point;

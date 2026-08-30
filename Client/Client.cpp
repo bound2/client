@@ -3266,7 +3266,13 @@ WinMain(HINSTANCE hInstance,
 				InvalidDll != "brotlicommon.dll" &&
 				InvalidDll != "brotlidec.dll" &&
 				InvalidDll != "bz2d.dll" &&
-				InvalidDll != "bz2.dll")
+				InvalidDll != "bz2.dll" &&
+				// vcpkg's libiconv, deployed beside the executable because
+				// DarkEden links Iconv::Iconv. TextService::NormalizeText needs
+				// a real iconv to transcode the shipped CP949 data, since SDL's
+				// built-in converter supports no legacy CJK code page. The name
+				// carries no debug suffix, so one entry covers both configs.
+				InvalidDll != "iconv-2.dll")
 				//MessageBox(0,(LPCTSTR)InvalidDll.c_str(),"ERROR",MB_OK);
 				//MessageBox(0,
 				return -1;
@@ -3417,19 +3423,20 @@ WinMain(HINSTANCE hInstance,
 
 	//g_MemLogFile = _open("memlog.txt", _O_WRONLY | _O_TEXT | _O_CREAT | _O_TRUNC);
 
-	#ifdef _DEBUG
-		int tmpDbgFlag;
-		tmpDbgFlag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
-		tmpDbgFlag |= _CRTDBG_DELAY_FREE_MEM_DF;
-		tmpDbgFlag |= _CRTDBG_LEAK_CHECK_DF;
-		//_CrtSetDbgFlag(tmpDbgFlag);
-		_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | tmpDbgFlag);
-		
-
-		_CrtSetReportMode ( _CRT_WARN, _CRTDBG_MODE_DEBUG );
-		_CrtSetReportMode ( _CRT_ERROR,	_CRTDBG_MODE_DEBUG );
-		_CrtSetReportMode ( _CRT_ASSERT,_CRTDBG_MODE_DEBUG );
-	#endif	
+	// Upstream configured the CRT debug heap here (#ifdef _DEBUG):
+	//
+	//   tmpDbgFlag  = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
+	//   tmpDbgFlag |= _CRTDBG_DELAY_FREE_MEM_DF | _CRTDBG_LEAK_CHECK_DF;
+	//   _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | tmpDbgFlag);
+	//
+	// MSVC defines _DEBUG automatically under /MDd, so this ran in every Debug
+	// build. _CRTDBG_DELAY_FREE_MEM_DF makes the debug CRT keep every freed
+	// block, dead-filled, instead of releasing it - with in-game churn of
+	// ~2,000 small alloc/free cycles per frame that retained ~190 KB of
+	// corpses per frame (~200 MB/min) until the process ran out of memory.
+	// Removed outright: the leak-check exit dump it paired with is useless at
+	// this allocation volume, and the default _CRTDBG_ALLOC_MEM_DF already
+	// provides the debug-heap guard fills.
 	
 
 	g_hInstance = hInstance;

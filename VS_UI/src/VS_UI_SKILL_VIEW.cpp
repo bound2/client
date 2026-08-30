@@ -577,33 +577,33 @@ void	C_VS_UI_SKILL_VIEW::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 	int button_pushed = 0;
 	static char m_default_string[2][30] = 
 	{
-		"SkillInfo창을 닫습니다",
-		"SkillInfo창의 도움말을 봅니다",
+		"Close the skill info window",
+		"Skill info window help",
 	};
 
 	static char m_grade_string[2][30] = 
 	{
-		"이전 단계를 봅니다",
-		"다음 단계를 봅니다",
+		"Show the previous grade",
+		"Show the next grade",
 	};
 
 	static char m_skill_string[5][30] = 
 	{
-		"검 계열",
-		"도 계열",
-		"총/폭탄 계열",
-		"회복 계열",
-		"축복 계열",
+		"Sword line",
+		"Blade line",
+		"Gun / bomb line",
+		"Heal line",
+		"Enchant line",
 	};
 
 	static char m_magic_string[6][30] = 
 	{
-		"독 계열",
-		"산 계열",
-		"저주 계열",
-		"소환 계열",
-		"피 계열",
-		"고유 계열",
+		"Poison line",
+		"Acid line",
+		"Curse line",
+		"Summon line",
+		"Blood line",
+		"Innate line",
 	};
 
 	if (p_button->GetFocusState())
@@ -659,9 +659,9 @@ void	C_VS_UI_SKILL_VIEW::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 							int next_exp = (*g_pSkillManager)[temp_domain[domain]].GetExpInfo(level).AccumExp;
 							
 							wsprintf(temp_str[1], "Level : %d", level);
-							wsprintf(temp_str[2], "현재경험치 : %d", exp);
-							wsprintf(temp_str[3], "다음  레벨 : %d", next_exp);
-							wsprintf(temp_str[4], "남은경험치 : %d", next_exp - exp);
+							wsprintf(temp_str[2], "Current exp : %d", exp);
+							wsprintf(temp_str[3], "Next level : %d", next_exp);
+							wsprintf(temp_str[4], "Exp remaining : %d", next_exp - exp);
 //							strcat(temp_str[2], "%");
 							
 							g_descriptor_manager.Set(DID_STRINGS, x+p_button->x, y+p_button->y, (void *)str, 5);//3);

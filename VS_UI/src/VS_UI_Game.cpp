@@ -6140,8 +6140,34 @@ C_VS_UI_GAMEMENU::~C_VS_UI_GAMEMENU()
 	DeleteNew(m_pC_gamemenu_spk);
 }
 
+//-----------------------------------------------------------------------------
+// ShowButtonDescription
+//
+// The three buttons are Korean artwork baked into the race skin sprite, so
+// name them in a tooltip instead. The letters match the shortcuts that
+// KeyboardControl() below already accepts.
+//-----------------------------------------------------------------------------
 void	C_VS_UI_GAMEMENU::ShowButtonDescription(C_VS_UI_EVENT_BUTTON * p_button)
 {
+	int stringID;
+
+	switch (p_button->GetID())
+	{
+		case OPTION:	stringID = UI_STRING_MESSAGE_GAME_MENU_OPTION;	break;
+		case LOGOUT:	stringID = UI_STRING_MESSAGE_GAME_MENU_LOGOUT;	break;
+		case CONTINUE:	stringID = UI_STRING_MESSAGE_GAME_MENU_CONTINUE;	break;
+		default:		return;
+	}
+
+	const char* description = GetGameString(stringID);
+
+	if (description[0] == '\0')
+	{
+		return;
+	}
+
+	// Button coordinates are relative to the window, the descriptor wants screen ones.
+	g_descriptor_manager.Set(DID_INFO, p_button->x + x, p_button->y + y, (void *)description, 0, 0);
 }
 
 //-----------------------------------------------------------------------------
@@ -6318,10 +6344,13 @@ void C_VS_UI_GAMEMENU::Show()
 	if(gpC_base->m_p_DDSurface_back->Lock())
 	{
 		m_pC_gamemenu_spk->BltLocked(x, y, GAMEMENU_WINDOW);
-		
+
 		m_pC_button_group->Show();
 		gpC_base->m_p_DDSurface_back->Unlock();
 	}
+
+	// Names the focused button, whose sprite label is untranslated Korean art.
+	m_pC_button_group->ShowDescription();
 
 /*
 	// TEST -- 

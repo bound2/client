@@ -1,212 +1,186 @@
 # OpenDarkEden Client
 
-This is the **Dark Eden** game client - an isometric MMORPG similar to Diablo. Dark Eden is a horror-themed MMORPG featuring vampires, slayers, and ousters as playable races.
+Isometric horror MMORPG client — slayers, vampires, ousters. Korean original from
+roughly 2000-2010, ported from Win32 + DirectX to SDL2. C++11, CMake, MSVC.
 
-## Project Overview
+`README.md` is the human setup guide: prerequisites, vcpkg, generating the solution,
+running the game, troubleshooting. **Link to it rather than restating it.** This file
+is the working brief for an agent in this repo.
 
-Dark Eden is a classic Korean MMORPG originally developed by Softon. This open-source client project aims to modernize and maintain the game client.
+## Build
 
-**Build System: CMake
-**Primary Language:** C++
-**Platform:** Windows (original), with modern cross-platform efforts
+Windows + MSVC is the live path. There are two Debug trees and neither subsumes the
+other, because `/RTC1` and `/fsanitize=address` are mutually exclusive:
 
-## How to build
+| Tree | Flags | Catches |
+|---|---|---|
+| `build/vs2022` | `/RTC1` | uninitialised locals, stack frame damage |
+| `build/vs2022-asan` | `/fsanitize=address` | heap/stack overflow, use-after-free, double free |
 
-There is a Makefile warp cmake providing commands like `make` `make debug` `make release` etc.
+Use the ordinary tree day to day; switch to the sanitized one to chase a memory error.
+README has the full table. Configure prints exactly one of the two check-set lines — if
+neither appears, the flags are wrong.
 
-For development, the most commonly used one is:
-
-```
-make debug-asan 
-```
-
-## Repository Structure
-
-```
-client/
-├── Client/              # Main game client code
-│   ├── D3DLib/         # SDL compatibility stub (post-migration)
-│   ├── DXLib/          # SDL backend for Input, Sound, Music
-│   ├── SpriteLib/      # Sprite animation system (SDL backend)
-│   ├── TextSystem/     # Text rendering system (SDL + freetype2)
-│   ├── TextLib/        # Text layout and caching
-│   ├── VolumeLib/      # Volume/collision detection
-│   ├── framelib/       # Frame handling
-│   ├── DEUtil/         # Dark Eden utilities
-│   ├── MZLib/          # Compression library
-│   ├── Packet/         # Network packet definitions
-│   └── *.cpp/*.h       # Main game logic (GameMain, GameUI, etc.)
-│
-├── VS_UI/              # User Interface framework
-│   └── src/
-│       ├── header/     # UI header files
-│       ├── widget/     # UI widget components (buttons, scrollbars, etc.)
-│       ├── Imm/        # Immersion touch feedback library
-│       └── hangul/     # Korean text input support
-│
-├── basic/              # Basic utility library
-│   ├── BasicMemory.h   # Memory management
-│   ├── BasicException.h # Exception handling
-│   ├── Typedef.h       # Type definitions
-│   └── PlatformUtil.h  # Platform utilities (SDL/Windows abstraction)
-│
-├── build/              # CMake build output
-├── ../DarkEden/        # Game data directory (runtime)
-│   ├── Data/           # Game data files
-│   │   ├── Info/       # Configuration files
-│   │   ├── Map/        # Map files
-│   │   └── ...
-│   └── UserSet/        # User settings
-│
-└── demo/               # Demo applications
+```bash
+cmake --build build/vs2022 --config Debug -- -m
 ```
 
-## Key Components
+Ignore the Makefile's `make debug-asan` and friends: they target Unix build dirs
+(`build/debug-asan`) and are not the path used here.
 
-### Rendering System (SDL2 Based)
-- **D3DLib/**: Minimal compatibility stub for DirectX to SDL migration
-  - `CDirect3D`: Stub class providing D3D-compatible interface
-  - `DX3D.h`: Main header for backward compatibility
-  - **Note**: Actual rendering handled by SpriteLib with SDL backend
+The **first** configure of a fresh tree must pass the vcpkg toolchain or SDL2 is not
+found:
 
-- **SpriteLib/**: Sprite animation system with SDL backend
-  - `CSprite_SDL.cpp`: SDL sprite implementation
-  - `CSpriteSurface_SDL.cpp`: SDL surface implementation
-  - `SpriteLibBackendSDL.h/cpp`: SDL backend utilities
-  - Supports multiple pixel formats (555, 565, 4444, etc.)
+```bash
+cmake -S . -B build/vs2022 -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+```
 
-- **TextSystem/**: Modern text rendering (SDL + freetype2)
-  - UTF-8 support for internationalization
-  - Replaces old Windows GDI rendering
-  - `TextService.cpp`: Main text service
-  - `TextBackendSDL.cpp`: SDL text backend
+`build/` is gitignored and bakes absolute paths into the generated projects —
+regenerate locally, never commit it. `/MP` is set once for all targets in
+`CMakeLists.txt`; if it ever looks missing, fix it there and never in a generated
+`.vcxproj`, which the next configure discards.
 
-### Input & Sound (`Client/DXLib/`)
-- **CDirectInput**: SDL-based keyboard/mouse input handling
-- **CDirectSound/SoundStream**: SDL_mixer-based sound playback
-- **CDirectMusic**: SDL_mixer-based music playback (MP3, OGG support)
-- **Backend**: SDL2 implementations with DirectX-compatible interface
-- **Huffman compression**: Network data compression (platform-independent)
+### Reading build output
 
-### Sprite System (`Client/SpriteLib/`)
-- Sprite animation and rendering with SDL backend
-- Texture part management
-- Palette manipulation
-- Multiple pixel format support (555, 565, 4444, etc.)
-- **Migration Status**: DirectX implementations removed, SDL backend active
+A clean build is **~27,000 warnings and 0 errors**. The noise is pre-existing: C4290
+across `Client/Packet/**`, and LNK4217/LNK4286 because some sources compile into both
+`DarkEden` and `VS_UI.lib`. Judge a build by `error C####`, `error LNK`, `error MSB`
+or `fatal error` — never by grepping `"error"`, which matches ~2,700 identifiers such
+as `GCMoveErrorHandler`. Redirect builds to a log file; piping through `tail` buffers
+the output and hides all progress.
 
-### UI Framework (`VS_UI/`)
-- **Widget System**: Buttons, scrollbars, dialogs
-- **Skin Manager**: UI theming
-- **Input Editors**: Text input with Korean IME support
-- **Game UI**: Race-specific UI (Slayer, Vampire, Ouster)
-- **Dialogs**: Shop, storage, exchange, skill tree, etc.
+## Testability
 
-### Game Logic (`Client/`)
-- **GameMain**: Main game loop
-- **GameUI**: Game UI manager
-- **MZone**: Zone/map management
-- **MCreature**: Creature/NPC system
-- **MPlayer**: Player character management
-- **MItem**: Item system
-- **MSkill**: Skill system
-- **Effect System**: Visual effects generators
+### What can be tested
 
-### Network (`Client/Packet/`)
-- Packet definitions for client-server communication
-- Login, gameplay, chat packets
+Only code compiled into a **static library**: `basic`, `SpriteLib`, `dxlib`,
+`framelib`, `TextSystem`, `VS_UI`. Game logic compiled straight into the `DarkEden`
+executable cannot be linked into a test binary. That is a structural limit, and it is
+the single biggest constraint on how work gets verified here.
 
-## Build Requirements
+`unit_tests` currently links `basic` and `SpriteLib` only. Covering something in
+`dxlib`, `TextSystem` or `VS_UI` means adding it to `target_link_libraries` in
+`tests/CMakeLists.txt` first.
 
-### Modern CMake Build (Recommended):
-The project uses CMake for cross-platform builds with SDL2 backend.
+### The framework
 
-**Dependencies:**
-1. **CMake 3.20+** - Build system
-2. **SDL2** - Graphics, input, and platform abstraction
-3. **SDL2_image** - Image loading support
-4. **SDL2_ttf** - TrueType font rendering (freetype2)
-5. **SDL2_mixer** (optional) - Audio playback
-6. **C++11 compatible compiler** - Clang, GCC, or MSVC
+`tests/framework/test_framework.h` — a minimal self-registering C++11 framework, not
+GoogleTest. Tests register during static initialisation and `tests/unit/*.cpp` is
+globbed, so adding a test means adding a file; there is no runner to edit.
 
-**Platform Support:**
-- ✅ macOS (tested)
-- ✅ Linux (should work)
-- ⚠️ Windows (use legacy VC6 build or modern MSVC)
+```cpp
+TEST(TArray, LoadFromFileRejectsCountLargerThanTheFile)
+{
+	CHECK_EQ(false, arr.LoadFromFile(truncated));
+}
+```
 
-### Original VC6 Build (Legacy):
-1. **Visual C++ 6.0** (original development environment)
-2. **DirectX 9 SDK** - Get from [mirror](https://github.com/opendarkeden/client/raw/data/dx90bsdk.zip)
-3. **xerces-c 3.2.3** - XML parsing library [mirror](https://github.com/opendarkeden/client/raw/data/xerces-c-3.2.3.zip)
+`CHECK(expr)` and `CHECK_EQ(expected, actual)` are the whole API. `RunAll()` returns
+the failure count, so the exit code is 0 only when the suite is clean.
 
-**Note:** The VC6 build is deprecated. Use the modern CMake build with SDL2.
+### How we work
 
-## Running the Game
+- **Library fixes are written test-first.** Every fix in the remediation table of
+  `docs/code-health-review-2026-08-29.md` was.
+- **Assert the observable contract, not the crash.** An out-of-bounds read in C++
+  usually returns garbage rather than failing an assertion, so a memory-safety test
+  asserts the rejected input or the preserved value.
+- **Then run the same suite under ASan**, where the invalid access aborts the process.
+  Both trees green, or the fix is not verified.
+- **Executable-only code has no test path.** It gets verified by running the client
+  against a live server. The eight defects under *Runtime defects* in the review were
+  all found that way, and none were reachable from a test binary.
+- A fix that could not be reproduced is called a **regression guard** in its commit
+  message, not described as a reproduction.
+- Substantial remediation work gets an **adversarial review** afterwards. The last one
+  returned "significant problems" and found three real defects the fixes had introduced
+  or missed — assume your own fixes deserve the same scrutiny.
 
-1. Extract game data to `DarkEden/` directory
-2. Configure server IP in `DarkEden/Data/Info/GameClient.inf`
-3. Run with mode argument:
-   - `0000000001` - Window mode
-   - `0000000002` - Fullscreen
-   - `0000000003` - Window mode 1024x768
-   - `0000000004` - Fullscreen 1024x768
+### Running them
 
-## Game Features
+```bash
+cmake -S . -B build/tests -DBUILD_TESTS=ON -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+cmake --build build/tests --config Debug --target unit_tests -- -m
+cd build/tests && ctest -C Debug --output-on-failure
+```
 
-- **Three Races**: Slayer (human), Vampire, Ouster
-- **Isometric View**: 2D sprite-based isometric graphics
-- **Skill System**: Race-specific skill trees
-- **Item System**: Equipment, consumables, quest items
-- **Party/Guild**: Social features
-- **PvP**: Player vs Player combat
-- **Dungeons**: Instance-based dungeons (Bathory, etc.)
+Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
+to `OFF`, so a tree configured without it generates no test target at all. Current
+baseline: **68 tests, 306 checks, 0 failed** in both trees.
 
-## Configuration Files
+## Traps
 
-- `GameClient.inf` - Server connection settings
-- `Language.inf` - Language settings
-- `config.txt` - General configuration
+- **`_DEBUG` IS defined in MSVC Debug builds.** `CMakeLists.txt:16` only declines to
+  *add* it; MSVC defines it automatically under `/MDd`, which CMake cannot undo. The
+  ~50 `#ifdef _DEBUG` blocks in shipped code are therefore **live in every Debug
+  build** and dead only in Release. Both directions of this trap have bitten: the
+  `_DEBUG`-guarded bounds checks (e.g. `CTypeTable::operator[]`) do run in Debug but
+  vanish in Release, and upstream's `_CrtSetDbgFlag(_CRTDBG_DELAY_FREE_MEM_DF)` in
+  `Client.cpp` — long believed dead — ran on every Debug launch and made the CRT
+  retain every freed block, which presented as a ~200 MB/min in-game "memory leak"
+  (root-caused and removed 2026-08-30, see
+  `docs/memory-leak-investigation-2026-08-30.md`). Judge every `_DEBUG` guard by the
+  build configuration, not by the old doctrine that it never fires.
+- **An unlisted DLL kills the client before `main` does anything.** `Client.cpp` walks
+  `*.dll` in the working directory against a hardcoded whitelist and does a bare
+  `return -1` on the first name it does not recognise — no message, no log line, and
+  well before `InitGame()` sets up logging. Adding any library that deploys a new DLL
+  beside the executable therefore breaks startup until that DLL is added to the list.
+  A silent `-1` exit with no log written is this check until proven otherwise, and note
+  that the DLL stays in the output directory after you revert the build change that
+  brought it in, so reverting alone does not restore a working tree.
+- **Don't launch `DarkEden.exe` yourself** unless asked. It is normally run from the
+  Visual Studio debugger, and launching it separately steals the stack trace and locks
+  the build output. When a startup failure has to be bisected, ask — running it is
+  sometimes the only way to see the exit code, and no test binary can reach that code.
+- **Half the shipped data is still packed.** `CRarFile` no longer reads `.rpk` archives
+  and needs their contents extracted flat beside them. `Data/ui/txt` and `Data/ui/xml`
+  are effectively empty at runtime, so quest data and chat help are absent; lookups
+  fail with `[RARFile ERROR]`.
+- **The 5:5:5 sprite paths are latent.** `ColorDraw::Is565()` returns a hardcoded
+  `true`, so the `CSprite555` family is never constructed and fixes there have no
+  runtime effect today.
+- **Sprite rejection is silent** — a rejected sprite is dropped with no log line and an
+  ignored return value, so bad art would vanish without a signal.
 
-## SDL Migration Status
+## Conventions
 
-The project has been successfully migrated from Windows + DirectX to SDL2 for cross-platform support.
+- **Tabs**, not spaces, in C++ sources. There is no `.clang-format` and `make fmt` is a
+  stub, so match the surrounding file by hand.
+- **English only.** Remaining Korean and Chinese comments are upstream's; translate them
+  when you touch that code, and never add more.
+- Hungarian notation (`m_pFoo`, `g_pBar`, `bFlag`) and banner comments above functions
+  and sections — follow the file you are in.
+- Commit messages: `type: lowercase imperative summary`, then prose covering why the
+  change is right, what was verified, and what is deliberately out of scope. `a41eec9`
+  is the model. Trailer: `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`.
 
-### Completed Migrations
-- ✅ **Graphics**: Direct3D → SDL2 rendering
-- ✅ **Input**: DirectInput → SDL2 event handling
-- ✅ **Sound**: DirectSound → SDL_mixer
-- ✅ **Music**: DirectMusic → SDL_mixer
-- ✅ **Text**: Windows GDI → SDL2 + freetype2 (TextSystem)
-- ✅ **Platform Abstraction**: Win32 API → SDL2 + basic library
+## Layout
 
-### Architecture
-- **DXLib**: Provides DirectX-compatible interface with SDL backend
-- **D3DLib**: Minimal compatibility stub (CDirect3D class)
-- **SpriteLib**: SDL-based sprite rendering
-- **TextSystem**: Modern UTF-8 text rendering
-- **basic/**: Cross-platform platform utilities
+| Path | What |
+|---|---|
+| `Client/` | game logic — `GameMain`, `MZone`, `MCreature`, `MPlayer`, `MItem`, `MSkill` |
+| `Client/Packet/` | packet definitions and handlers; `Gpackets/` is server → client |
+| `Client/SpriteLib/` | sprite decode and blitting, SDL backend, the 555/565 variants |
+| `Client/DXLib/` | input, sound and music behind a DirectX-shaped interface, SDL underneath |
+| `Client/TextSystem/`, `TextLib/` | UTF-8 text rendering on SDL + freetype2 |
+| `Client/D3DLib/` | compatibility stub only; `CDirect3D::GetDevice()` returns `nullptr` |
+| `Client/framelib/`, `VolumeLib/`, `DEUtil/`, `MZLib/` | frames, collision, utilities, compression |
+| `VS_UI/` | UI framework — widgets, dialogs, skinning, Korean IME |
+| `basic/` | memory, exceptions, typedefs, platform abstraction |
+| `tests/` | framework and unit tests |
+| `docs/` | code health review |
+| `참고자료/` | upstream asset notes, non-English, not built |
 
-### Known Limitations
-- Some DirectX-specific features are stubbed (e.g., CDirect3D::GetDevice() returns nullptr)
-- Code contains many `CDirect3D::IsHAL()` checks (always true in SDL)
-- Multiple pixel format variants remain (555, 565) for compatibility
-- Some commented-out D3D code remains for reference
+## Current focus
 
-### Future Work
-- [ ] Remove/comment-out obsolete DirectX code
-- [ ] Simplify pixel format handling
-- [ ] Reduce `CDirect3D` dependencies throughout codebase
-- [ ] Unify sprite classes if pixel format variants can be consolidated
+`docs/code-health-review-2026-08-29.md` holds 197 findings, 11 fixed. In priority order:
 
-## Development Notes
-
-- Codebase uses Hungarian notation
-- Currently there are mixed of English | Korean | Chinese comments in the codebase, while only **English** should be used, update them whenever possible.
-- Original code from ~2000-2010 era
-- Some legacy copy protection code (EXECryptor, ACProtect) - not functional
-- GameGuard anti-cheat integration
-
-## Related Projects
-
-- **Server**: https://github.com/opendarkeden/server
-- **Docker Install Guide**: See server repo for deployment instructions
+1. **Unvalidated network input is the top open risk.** `Client/Packet/Gpackets/` passes
+   server-supplied lengths, indices and item classes straight into array subscripts,
+   `strcpy`/`sprintf` targets, and a function-pointer table. Largely untouched — a
+   hostile *or merely buggy* server can corrupt the client heap.
+2. Fixed-size buffers fed by variable-length server strings (21-byte chat rows,
+   128-byte stack buffers).
+3. Dead and duplicate source sitting alongside live code, which is a correctness trap
+   when the wrong file gets edited.

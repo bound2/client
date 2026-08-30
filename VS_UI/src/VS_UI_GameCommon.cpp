@@ -6023,13 +6023,18 @@ void C_VS_UI_CHATTING::Run(id_t id)
 //-----------------------------------------------------------------------------
 void C_VS_UI_CHATTING::Process()
 {
-	if(m_v_help_check.empty())
+	// Attempt the load once per window, not once per empty vector. Half the
+	// shipped help text is still packed, so these opens fail and the vectors
+	// stay empty; keying off emptiness reopened the archive every frame.
+	if(!m_bl_help_load_tried)
 	{
-		// 도움말용 파일 읽기
-#define dSTRING_LEN 2048 
-		
-		char szLine[dSTRING_LEN]; 
-		
+		m_bl_help_load_tried = true;
+
+		// Read the help text file
+#define dSTRING_LEN 2048
+
+		char szLine[dSTRING_LEN];
+
 		CRarFile pack_file;
 		pack_file.SetRAR(RPK_HELP, RPK_PASSWORD);
 		
@@ -6153,6 +6158,8 @@ C_VS_UI_CHATTING::C_VS_UI_CHATTING()
 	AttrPin(true);
 	
 	g_RegisterWindow(this);
+
+	m_bl_help_load_tried = false;
 
 	m_pC_chatting_spk = NULL;
 	
@@ -26127,7 +26134,7 @@ void C_VS_UI_FRIEND_CHATTING_INFO::Show()
 		m_lev_send.SetPosition(x+history_x, y+145+40);
 	m_lev_send.Show();
 
-	std::string str = "与 " + m_pList->Name + " 聊天中";
+	std::string str = "Chatting with " + m_pList->Name;
 	g_FL2_GetDC();
 	if(g_eRaceInterface == RACE_VAMPIRE)
 		g_PrintColorStr(x+80+50,y+10+20, str.c_str(), gpC_base->m_chatting_pi, RGB_WHITE);
@@ -27052,13 +27059,13 @@ void	C_VS_UI_TEAM_INFO::Run(id_t id)
 
 
 	
-	DIALOG_MENU d_menu[] = {	{"예", 0},
-								{"아니오", DIALOG_EXECID_EXIT},
+	DIALOG_MENU d_menu[] = {	{"Yes", 0},
+								{"No", DIALOG_EXECID_EXIT},
 	};
 
 	DIALOG_MENU d_menu2[] = {	{(*g_pGameStringTable)[UI_STRING_MESSAGE_TOTAL_GUILD_LEAVE_MSG].GetString(), 0},
 								{(*g_pGameStringTable)[UI_STRING_MESSAGE_TOTAL_GUILD_LEAVE_MSG2].GetString(), 1},
-								{"아니오", DIALOG_EXECID_EXIT},
+								{"No", DIALOG_EXECID_EXIT},
 	};
 	
 	static char * pp_dmsg_union[] = { (*g_pGameStringTable)[UI_STRING_MESSAGE_TOTAL_GUILD_JOIN_ASK].GetString() };
@@ -33296,7 +33303,7 @@ void	C_VS_UI_QUEST_STATUS::Show()
 
 			case QUEST_INFO_MEET_NPC:
 				if(m_quest_status.current_point == 0)
-					wsprintf(sz_temp, "완료되었습니다");
+					wsprintf(sz_temp, "Completed");
 				else
 					wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_MEET_NPC].GetString(), (*g_pCreatureTable)[m_quest_status.current_point].Name.GetString());
 				break;
@@ -33319,7 +33326,7 @@ void	C_VS_UI_QUEST_STATUS::Show()
 					else if (QuestInfo->GetGameType() == MINI_GAME_TYPE_ARROW )
 						wsprintf(sz_temp,(*g_pGameStringTable)[UI_STRING_MESSAGE_QUEST_STATUS_ARROW_TILES].GetString());
 					else
-						wsprintf(sz_temp,"알 수 없음");
+						wsprintf(sz_temp,"Unknown");
 				}
 				break;
 			}
@@ -33914,7 +33921,7 @@ void	C_VS_UI_QUEST_STATUS::Run(id_t id)
 		if( m_quest_status.QuestID == 57 || m_quest_status.QuestID == 72 || m_quest_status.QuestID ==  87 )
 		{
 			// 5단계 퀘스트일경우에만
-			std::string		detail_info = "몬스터 : ";
+			std::string		detail_info = "Monsters : ";
 			detail_info+=GetDetailInfo();
 			
 			gC_vs_ui.RunPopupMessage( detail_info.c_str(), C_VS_UI_POPUP_MESSAGE::POPUP_MINI_WINDOW);
