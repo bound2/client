@@ -92,6 +92,18 @@
 #include "vs_ui_item.h"
 #include "NicknameInfo.h"
 
+//----------------------------------------------------------------------
+// Light rendering path selector.
+//
+// The original client chose between a D3D texture light path ("3D") and a
+// software light path ("2D") with CDirect3D::IsHAL(). The SDL port has no
+// D3D device: InitFilters() only prepares the 2D path (Light2D.ftp plus the
+// per-pixel width/height tables) and m_pLightBufferTexture is never created,
+// so the 3D path dereferences NULL in DrawLightBuffer3D(). Keep every former
+// IsHAL() selector on the 2D path.
+//----------------------------------------------------------------------
+static const bool s_bUse3DLight = false;
+
 #include "MTopViewDraw.inl"
 #include "VS_UI_GameCommon2.h"
 //#undef OUTPUT_DEBUG
@@ -10212,7 +10224,7 @@ MTopView::Draw(int firstPointX,int firstPointY)
 	//------------------------------------------------------------
 	//else
 	{			
-		if (true)// && m_b3DLight)
+		if (s_bUse3DLight)// && m_b3DLight)
 		{
 			#ifdef OUTPUT_DEBUG_DRAW_PROCESS
 				DEBUG_ADD( "IsLost?" );
@@ -14289,10 +14301,10 @@ if (!m_pSurface->Lock()) return;
 //			if(g_pPlayer->HasEffectStatus(EFFECTSTATUS_BLINDNESS))
 //				playerLight = 1;
 
-		//	DEBUG_ADD_FORMAT("######## Sight  (%d)", playerLight); 
-			if (true)
-			{ 
-				AddLightFilter3D( pX, 
+		//	DEBUG_ADD_FORMAT("######## Sight  (%d)", playerLight);
+			if (s_bUse3DLight)
+			{
+				AddLightFilter3D( pX,
 					pY - (g_pPlayer->IsFlyingCreature()? 72:0 ),	//g_pPlayer->GetZ(), 
 					playerLight, 
 					false,	// screenPixel좌표			
@@ -16445,10 +16457,10 @@ MTopView::DrawImageObject(POINT* pPoint, MImageObject* pImageObject)
 						//-------------------------------------------------------
 						// H/W 가속이 되는 경우이면...
 						//-------------------------------------------------------
-						if (true)
+						if (s_bUse3DLight)
 						{
-//							
-//							DRAW_TEXTURE_SPRITEPAL_LOCKED(pPoint->x, pPoint->y, 
+//
+//							DRAW_TEXTURE_SPRITEPAL_LOCKED(pPoint->x, pPoint->y,
 //								sprite, m_pAlphaEffectTextureManager, fid )//m_EffectAlphaPPK[fid])
 //								
 
@@ -16510,11 +16522,11 @@ MTopView::DrawImageObject(POINT* pPoint, MImageObject* pImageObject)
 							//-------------------------------------------------------
 							// H/W 가속이 되는 경우이면...
 							//-------------------------------------------------------
-							if (true)
+							if (s_bUse3DLight)
 							{
-//								
-//								
-//								DRAW_TEXTURE_SPRITEPAL_LOCKED(pPoint->x, pPoint->y, 
+//
+//
+//								DRAW_TEXTURE_SPRITEPAL_LOCKED(pPoint->x, pPoint->y,
 //									sprite, m_pScreenEffectTextureManager, fid ) //m_EffectScreenPPK[fid])
 //									
 
@@ -17073,7 +17085,7 @@ MTopView::DrawAttachEffect(POINT* pPoint, ATTACHEFFECT_LIST::const_iterator iEff
 									//-------------------------------------------------------
 									// H/W 가속이 되는 경우이면...
 									//-------------------------------------------------------
-									if (true)
+									if (s_bUse3DLight)
 									{
 //							
 //										DRAW_TEXTURE_SPRITEPAL_LOCKED(pointTemp.x, pointTemp.y, 
@@ -17139,7 +17151,7 @@ MTopView::DrawAttachEffect(POINT* pPoint, ATTACHEFFECT_LIST::const_iterator iEff
 							//-------------------------------------------------------
 							// H/W 가속이 되는 경우이면...
 							//-------------------------------------------------------
-							if (true)
+							if (s_bUse3DLight)
 							{
 //					
 //								DRAW_TEXTURE_SPRITEPAL_LOCKED(pointTemp.x, pointTemp.y, 
@@ -17224,7 +17236,7 @@ MTopView::DrawAttachEffect(POINT* pPoint, ATTACHEFFECT_LIST::const_iterator iEff
 									//-------------------------------------------------------
 									// H/W 가속이 되는 경우이면...
 									//-------------------------------------------------------
-									if (true)
+									if (s_bUse3DLight)
 									{
 //							
 //										DRAW_TEXTURE_SPRITEPAL_LOCKED(pointTemp.x, pointTemp.y, 
@@ -17353,7 +17365,7 @@ MTopView::DrawAttachEffect(POINT* pPoint, ATTACHEFFECT_LIST::const_iterator iEff
 							//-------------------------------------------------------
 							// H/W 가속이 되는 경우이면...
 							//-------------------------------------------------------
-							if (true)
+							if (s_bUse3DLight)
 							{
 //
 //					
@@ -17440,7 +17452,7 @@ MTopView::DrawAttachEffect(POINT* pPoint, ATTACHEFFECT_LIST::const_iterator iEff
 									//-------------------------------------------------------
 									// H/W 가속이 되는 경우이면...
 									//-------------------------------------------------------
-									if (true)
+									if (s_bUse3DLight)
 									{
 //
 //							
@@ -18158,7 +18170,7 @@ MTopView::DrawEffect(POINT* pPoint, MEffect* pEffect, bool bSelectable)
 				//-------------------------------------------------------
 				// Hardware acceleration enabled
 				//-------------------------------------------------------
-				if (true)
+				if (s_bUse3DLight)
 				{
 //					
 //					DRAW_TEXTURE_SPRITEPAL_LOCKED(point.x, point.y, spriteID, m_pAlphaEffectTextureManager, pEffect->GetFrameID() ) //m_EffectAlphaPPK[pEffect->GetFrameID()])
@@ -18276,7 +18288,7 @@ MTopView::DrawEffect(POINT* pPoint, MEffect* pEffect, bool bSelectable)
 				//-------------------------------------------------------
 				// Hardware acceleration enabled
 				//-------------------------------------------------------
-				if (true)
+				if (s_bUse3DLight)
 				{
 //
 //					
@@ -18372,7 +18384,7 @@ MTopView::DrawEffect(POINT* pPoint, MEffect* pEffect, bool bSelectable)
 				//-------------------------------------------------------
 				// Hardware acceleration enabled
 				//-------------------------------------------------------
-				if (true)
+				if (s_bUse3DLight)
 				{
 //					DRAW_TEXTURE_SPRITE_LOCKED(point.x, point.y, spriteID, m_pEffectShadowManager)		
 
