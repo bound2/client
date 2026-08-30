@@ -36,7 +36,9 @@
 #include "MLevelNameTable.h"
 #include "MonsterNameTable.h"
 #include "ExperienceTable.h"
+#include "MGameStringTable.h"
 #include "MNPCScriptTable.h"
+#include "MNPCScriptTableEnglish.h"
 #include "ModifyStatusManager.h"
 #include "AcceleratorDef.h"
 #include "KeyAccelerator.h"
@@ -823,6 +825,13 @@ InitInfomation()
 		return FALSE;
 	g_pNPCScriptTable->LoadFromFile(NPCScriptTable);
 	NPCScriptTable.close();
+
+	// NPCScript.inf ships in Korean, so in English the built-in translation is
+	// applied over it - the same arrangement String.inf has.
+	if (UseEnglishText())
+	{
+		ApplyEnglishNPCScriptTable();
+	}
 
 
 	//------------------------------------------------

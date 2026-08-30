@@ -16,7 +16,7 @@ MStringArray*		g_pNickNameStringTable = NULL;
 
 
 //----------------------------------------------------------------------
-// Should the built-in English strings replace the ones from String.inf?
+// Should the built-in English text replace the text the game data ships?
 //
 // Data/Info/Language.inf picks the language with a "LANGUAGE <n>" line,
 // numbered as DARKEDEN_LANGUAGE in Client.cpp: 0 Korean, 1 Chinese,
@@ -25,7 +25,7 @@ MStringArray*		g_pNickNameStringTable = NULL;
 // other value leaves the strings that String.inf supplied untouched.
 //----------------------------------------------------------------------
 bool
-UseEnglishGameStringTable()
+UseEnglishText()
 {
 	enum { LANGUAGE_ENGLISH = 3 };
 

@@ -59,15 +59,17 @@ throw ( ProtocolException , Error )
 				int scriptID = pPacket->getScriptID();
 				int subjectID = pPacket->getSubjectID();
 
-				// 채팅~~
-				char str[256];
 				const char* pString = g_pNPCScriptTable->GetSubject( scriptID, subjectID );
 
 				if (pString!=NULL)
 				{
-					strcpy(str, pString );
-				
-					pCreature->SetChatString( str );
+					// A subject is longer than 256 bytes in 151 of the shipped
+					// scripts, so the copy is sized to the string instead of to
+					// a fixed buffer. It is copied at all only because
+					// SetChatString takes a non-const pointer.
+					std::string str( pString );
+
+					pCreature->SetChatString( &str[0] );
 				}
 			}
 			//-------------------------------------------------

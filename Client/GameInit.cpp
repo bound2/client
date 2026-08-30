@@ -1601,7 +1601,7 @@ InitGame()
 	// String.inf carries the localised UI strings that ship with the game data.
 	// In English the built-in table from MGameStringTable.cpp is applied on top
 	// of it, so the English UI does not depend on an English String.inf.
-	const bool bUseEnglishStrings = UseEnglishGameStringTable();
+	const bool bUseEnglishStrings = UseEnglishText();
 
 	std::ifstream gameStringTableTable2;//(FILE_INFO_gameStringTable, ios::binary);
 	if (FileOpenBinary(g_pFileDef->getProperty("FILE_INFO_STRING").c_str(), gameStringTableTable2))
