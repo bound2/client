@@ -195,7 +195,9 @@ ClientConfig::ClientConfig()
 	//	NUR_HOMEPAGE,			// 홈페이지를 띄워주면서 등록
 	//	NUR_MESSAGE_HOMEPAGE,	// 홈페이지에서 등록하라는 message
 	//	NUR_DENY				// 새 사용자 등록 불가			
-	NEW_USER_REGISTERATION_MODE	= ClientConfig::NUR_HOMEPAGE;
+	// Accounts are created from the login window (see LoadFromFile, which
+	// forces the same value over whatever the config file says).
+	NEW_USER_REGISTERATION_MODE	= ClientConfig::NUR_CLIENT;
 //	URL_HOMEPAGE					= "http://www.t2cn.com";				// 홈페이지 main
 //	URL_HOMEPAGE_NEW_USER			= "http://member.t2cn.com/reg";		// 새 사용자 등록 URL
 //	URL_HOMEPAGE_BILING				= "http://member.t2cn.com/billing";
@@ -622,9 +624,15 @@ ClientConfig::LoadFromFile(const char* filename)
 	// 새 사용자 등록 mode
 	//--------------------------------------------------------
 	file.read((char*)&NEW_USER_REGISTERATION_MODE, sizeof(NUR_MODE));
-	URL_HOMEPAGE.LoadFromFile( file );				// 홈페이지 main
-	URL_HOMEPAGE_NEW_USER.LoadFromFile( file );		// 새 사용자 등록 URL
+	URL_HOMEPAGE.LoadFromFile( file );				// homepage main
+	URL_HOMEPAGE_NEW_USER.LoadFromFile( file );		// new user registration URL
 	URL_HOMEPAGE_BILING.LoadFromFile( file );
+
+	// The shipped config file says NUR_HOMEPAGE, which pointed at a
+	// registration web page that no longer exists. Accounts are created from
+	// the login window now, so the file's value is overridden the same way
+	// the URLs below are.
+	NEW_USER_REGISTERATION_MODE = ClientConfig::NUR_CLIENT;
 
 	URL_HOMEPAGE					= "http://bbstest.web11.zcidc.com/bbs/index.asp";				// 홈페이지 main
 	URL_HOMEPAGE_NEW_USER			= "http://bbstest.web11.zcidc.com/bbs/index.asp";		// 새 사용자 등록 URL

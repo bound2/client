@@ -297,6 +297,7 @@ private:
 	//INPUT_POSITION	m_e_ip; // input position
 
 	void	SendLoginToClient();
+	void	SendNewUserToClient();
 	//bool	NextFocus();
 	bool	ReadySend();
 	void	ChangeFocus();

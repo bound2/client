@@ -138,6 +138,8 @@ void g_InitMessage()
 //
 // 
 //-----------------------------------------------------------------------------
+extern C_VS_UI_DIALOG *	g_msg_free_text;
+
 void g_FreeMessage()
 {
 	DeleteNew(g_msg_not_available_menu);
@@ -160,6 +162,34 @@ void g_FreeMessage()
 	DeleteNew(g_msg_password_mismatch);
 //	DeleteNew(g_msg_character_used_id);
 //	DeleteNew(g_msg_character_empty_id);
-	
+
 //	DeleteNew(g_msg_not_empty_slot);
+	DeleteNew(g_msg_free_text);
+}
+
+//-----------------------------------------------------------------------------
+// g_ShowMessage
+//
+// One reusable OK dialog for text decided at runtime (registration
+// validation, server error replies) on the title/login screens.
+//-----------------------------------------------------------------------------
+C_VS_UI_DIALOG *	g_msg_free_text = NULL;
+
+void g_ShowMessage(const char* text)
+{
+	if (text == NULL)
+		return;
+
+	// SetMessage copies the text, so a fresh dialog per call is simplest
+	// and never shows a stale message.
+	DeleteNew(g_msg_free_text);
+
+	// Same geometry as the g_msg_* dialogs. Its message area holds one
+	// line of the freetype font by the old line-count rule, so
+	// C_VS_UI_DIALOG::Show draws no-fit text even when it overflows;
+	// two wrapped lines still fit the area in practice.
+	g_msg_free_text = new C_VS_UI_DIALOG(-1, -1, 2, 0, g_ExecF, DIALOG_OK);
+	char * pp_msg[] = { (char*)text };
+	g_msg_free_text->SetMessage(pp_msg, 1, SMO_NOFIT);
+	g_msg_free_text->Start();
 }

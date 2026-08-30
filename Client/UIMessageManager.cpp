@@ -15,6 +15,7 @@
 #include "UIFunction.h"
 #include "VS_UI.h" 
 #include "VS_UI_Mouse_pointer.h"
+#include "VS_UI_Message.h"
 #include "TalkBox.h"
 #include "MShopShelf.h"
 #include "MPriceManager.h"
@@ -1252,29 +1253,202 @@ UIMessageManager::Execute_UI_NEW_CHARACTER(int left, int right, void* void_ptr)
 
 //-----------------------------------------------------------------------------
 //
+// RegisterNewUser
+//
+// Registers a new account with the login server using the ID/password typed
+// into the login window. The original design had a full registration form
+// (C_VS_UI_NEWUSER: name, national ID, address, ...) that never shipped, so
+// every field the CLRegisterPlayer wire format still requires is filled with a
+// placeholder; the server only acts on the ID and password.
+//
+// Mirrors Execute_UI_LOGIN: version check, encryption key, then the request.
+// Takes ownership of the two strings in *pLogin.
+//
+//-----------------------------------------------------------------------------
+static void
+RegisterNewUser(LOGIN* pLogin)
+{
+	if (pLogin == NULL || pLogin->sz_id == NULL || pLogin->sz_password == NULL)
+	{
+		DEBUG_ADD("[RegisterNewUser] no ID/password");
+		return;
+	}
+
+	bool bOK = false;
+
+	if (g_Mode != MODE_MAINMENU)
+	{
+		DEBUG_ADD("[RegisterNewUser] Not Mode MODE_MAINMENU");
+	}
+	else
+	{
+		const int idLength = strlen(pLogin->sz_id);
+		const int passwordLength = strlen(pLogin->sz_password);
+		char strTemp[128];
+
+		DEBUG_ADD_FORMAT("[RegisterNewUser] id='%s' idLength=%d passwordLength=%d", pLogin->sz_id, idLength, passwordLength);
+
+		//--------------------------------------------------
+		// ID: length, then ASCII letters/digits/underscore only.
+		// IsValidID() is not used here: it also forbids a leading
+		// digit, which every existing account in the shipped DB has.
+		//--------------------------------------------------
+		bool bIDCharsOK = true;
+		for (const char* p = pLogin->sz_id; *p != '\0'; ++p)
+		{
+			const char ch = *p;
+			if (!((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == '_'))
+			{
+				bIDCharsOK = false;
+				break;
+			}
+		}
+
+		if (idLength < (int)PlayerInfo::minIDLength || idLength > (int)PlayerInfo::maxIDLength)
+		{
+			DEBUG_ADD("[RegisterNewUser] rejected: ID length");
+			sprintf(strTemp, "The ID must be %d to %d characters.", PlayerInfo::minIDLength, PlayerInfo::maxIDLength);
+			g_ShowMessage( strTemp );
+		}
+		else if (!bIDCharsOK)
+		{
+			DEBUG_ADD("[RegisterNewUser] rejected: ID characters");
+			g_ShowMessage( "The ID may only contain letters, digits and '_'." );
+		}
+		//--------------------------------------------------
+		// Password: length, character set
+		//--------------------------------------------------
+		else if (passwordLength < (int)PlayerInfo::minPasswordLength || passwordLength > (int)PlayerInfo::maxPasswordLength)
+		{
+			DEBUG_ADD("[RegisterNewUser] rejected: password length");
+			sprintf(strTemp, "The password must be %d to %d characters.", PlayerInfo::minPasswordLength, PlayerInfo::maxPasswordLength);
+			g_ShowMessage( strTemp );
+		}
+		else if (!IsValidPassword(pLogin->sz_password))
+		{
+			DEBUG_ADD("[RegisterNewUser] rejected: password characters");
+			g_ShowMessage( "Do not use special characters in the password." );
+		}
+		else
+		{
+			bOK = true;
+		}
+	}
+
+	if (bOK)
+	{
+		char strName[128];
+		strcpy(strName, pLogin->sz_id);
+
+		// An ID containing a curse word is not allowed.
+		if (g_pChatManager->RemoveCurse(strName))
+		{
+			g_ShowMessage( "Invalid ID." );
+			bOK = false;
+		}
+	}
+
+	if (bOK && !InitSocket())
+	{
+		DEBUG_ADD("[RegisterNewUser] Can't init Socket");
+		bOK = false;
+	}
+
+	if (bOK)
+	{
+		//--------------------------------------------------
+		// CLVersionCheck - same guard as Execute_UI_LOGIN
+		//--------------------------------------------------
+		#if !defined(_DEBUG) && !defined(OUTPUT_DEBUG)
+			CLVersionCheck _CLVersionCheck;
+			_CLVersionCheck.setVersion( g_pUserInformation->GameVersion );
+			g_pSocket->sendPacket( &_CLVersionCheck );
+		#endif
+
+		//--------------------------------------------------
+		// Encryption key - the login server expects it before
+		// anything else on a fresh connection.
+		//--------------------------------------------------
+		CGConnectSetKey cgConnectSetKey;
+		cgConnectSetKey.setEncryptKey(rand());
+		cgConnectSetKey.setHashKey(rand());
+		g_pSocket->sendPacket(&cgConnectSetKey);
+		UpdateSocketOutput();
+		cgConnectSetKey.execute(g_pSocket);
+		Sleep(500);
+
+		//--------------------------------------------------
+		// CLRegisterPlayer
+		//--------------------------------------------------
+		CLRegisterPlayer _CLRegisterPlayer;
+
+		_CLRegisterPlayer.setID( pLogin->sz_id );
+		_CLRegisterPlayer.setPassword( pLogin->sz_password );
+
+		// The wire format rejects empty strings, so every profile field
+		// the client no longer collects carries a placeholder.
+		_CLRegisterPlayer.setName( pLogin->sz_id );
+		_CLRegisterPlayer.setSex( MALE );
+		_CLRegisterPlayer.setSSN( "000000-0000000" );
+		_CLRegisterPlayer.setTelephone( "NULL" );
+		_CLRegisterPlayer.setCellular( "NULL" );
+		_CLRegisterPlayer.setZipCode( "NULL" );
+		_CLRegisterPlayer.setAddress( "NULL" );
+		_CLRegisterPlayer.setNation( KOREA );
+		_CLRegisterPlayer.setEmail( "NULL" );
+		_CLRegisterPlayer.setHomepage( "NULL" );
+		_CLRegisterPlayer.setProfile( "NULL" );
+		_CLRegisterPlayer.setPublic( false );
+
+		g_pSocket->setPlayerStatus( CPS_AFTER_SENDING_CL_REGISTER_PLAYER );
+		g_pSocket->sendPacket( &_CLRegisterPlayer );
+		DEBUG_ADD("[RegisterNewUser] CLRegisterPlayer sent");
+
+		// Remember the ID; LCRegisterPlayerOK backs it up as the login ID.
+		g_pUserInformation->UserID = pLogin->sz_id;
+
+		gC_vs_ui.ClearAllCharacter();
+
+		SetMode( MODE_WAIT_REGISTERPLAYEROK );
+	}
+
+	// C_VS_UI_LOGIN::SendNewUserToClient() malloc()s these.
+	free(pLogin->sz_id);
+	free(pLogin->sz_password);
+	pLogin->sz_id = NULL;
+	pLogin->sz_password = NULL;
+}
+
+//-----------------------------------------------------------------------------
+//
 // Run NewUser Registration
+//
+// void_ptr is a LOGIN* from C_VS_UI_LOGIN::SendNewUserToClient() (may be NULL
+// when the message is raised without input).
 //
 //-----------------------------------------------------------------------------
 void
 UIMessageManager::Execute_UI_RUN_NEWUSER_REGISTRATION(int left, int right, void* void_ptr)
 {
 	DEBUG_ADD("[UI] UI_RUN_NEWUSER_REGISTRATION");
-	
+
+	LOGIN* pLogin = (LOGIN*)void_ptr;
+
 	switch (g_pClientConfig->NEW_USER_REGISTERATION_MODE)
 	{
 		//-----------------------------------------------------------
-		// CLIENT - 새 사용자 등록 가능
+		// CLIENT - register from inside the client
 		//-----------------------------------------------------------
 		case ClientConfig::NUR_CLIENT :
 		{
-//			gC_vs_ui.RunNewUserRegistration();
+			RegisterNewUser(pLogin);
+			return;
 		}
-//		break;
 
 		//-----------------------------------------------------------
-		// HOMEPAGE - 홈페이지를 띄워주면서 등록
+		// HOMEPAGE - open the registration web page and quit
 		//-----------------------------------------------------------
-		case ClientConfig::NUR_HOMEPAGE :		
+		case ClientConfig::NUR_HOMEPAGE :
 		{
 			g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_USER_REGISTER_HOMEPAGE].GetString() );			
 
@@ -1321,11 +1495,19 @@ UIMessageManager::Execute_UI_RUN_NEWUSER_REGISTRATION(int left, int right, void*
 		//-----------------------------------------------------------
 		case ClientConfig::NUR_DENY :				
 		{
-			g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_USER_REGISTER_DENY].GetString() );						
+			g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_USER_REGISTER_DENY].GetString() );
 		}
-		break;	
+		break;
 	}
 
+	// Not registering from the client: release the typed strings unused.
+	if (pLogin != NULL)
+	{
+		free(pLogin->sz_id);
+		free(pLogin->sz_password);
+		pLogin->sz_id = NULL;
+		pLogin->sz_password = NULL;
+	}
 }
 
 //-----------------------------------------------------------------------------

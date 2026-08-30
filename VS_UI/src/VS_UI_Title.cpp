@@ -4481,9 +4481,18 @@ void C_VS_UI_LOGIN::Run(id_t id)
 			break;
 
 		case NEW_ID:
-			//g_msg_not_available_menu->Start();
-			Finish();
-			gpC_base->SendMessage(UI_RUN_NEWUSER_REGISTRATION);
+			// Register the ID/password typed into this window as a new
+			// account. There is no dedicated registration window (the
+			// C_VS_UI_NEWUSER design never shipped), so the login fields are
+			// the whole form.
+			if (ReadySend() == true)
+			{
+				SendNewUserToClient();
+			}
+			else
+			{
+				g_msg_wrong_id_password->Start();
+			}
 			break;
 	}
 }
@@ -4617,9 +4626,36 @@ void C_VS_UI_LOGIN::SendLoginToClient()
 	}
 }
 
+//-----------------------------------------------------------------------------
+// SendNewUserToClient
+// Send the typed ID/password to the client as a new-account registration.
+// Same contract as SendLoginToClient: the receiver frees both strings.
+//-----------------------------------------------------------------------------
+void C_VS_UI_LOGIN::SendNewUserToClient()
+{
+	static LOGIN S_newuser;
+	S_newuser.sz_id = (char*)malloc(128);
+	S_newuser.sz_password = (char*)malloc(128);
+
+	if (S_newuser.sz_id == NULL || S_newuser.sz_password == NULL)
+	{
+		free(S_newuser.sz_id);
+		free(S_newuser.sz_password);
+		S_newuser.sz_id = NULL;
+		S_newuser.sz_password = NULL;
+		return;
+	}
+
+	// Convert from LineEditor (UTF-32/char_t) to single-byte char strings
+	g_Convert_DBCS_Ascii2SingleByte(m_lev_id.GetStringWide(), m_lev_id.Size(), S_newuser.sz_id);
+	g_Convert_DBCS_Ascii2SingleByte(m_lev_password.GetStringWide(), m_lev_password.Size(), S_newuser.sz_password);
+
+	gpC_base->SendMessage(UI_RUN_NEWUSER_REGISTRATION, 0, 0, &S_newuser);
+}
+
 /*-----------------------------------------------------------------------------
 - KeyboardControl
-- Log-In ID와 Password를 입력받는다.
+- Reads the login ID and password.
 -----------------------------------------------------------------------------*/
 void C_VS_UI_LOGIN::KeyboardControl(UINT message, UINT key, long extra)
 {
