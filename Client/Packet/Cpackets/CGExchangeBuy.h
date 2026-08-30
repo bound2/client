@@ -24,19 +24,22 @@ public:
 	void write(SocketOutputStream& oStream) const;
 	void execute(Player* pPlayer);
 
-	PacketSize_t getPacketSize() const { return szint; }  // listingID
+	PacketSize_t getPacketSize() const { return sizeof(ulonglong) + sizeof(BYTE) + m_IdempotencyKey.length(); }
 	PacketID_t getPacketID() const { return PACKET_CG_EXCHANGE_BUY; }
 	string getPacketName() const { return "CGExchangeBuy"; }
 	string toString() const;
 
 	// Getters
-	uint getListingID() const { return m_ListingID; }
+	ulonglong getListingID() const { return m_ListingID; }
+	const string& getIdempotencyKey() const { return m_IdempotencyKey; }
 
 	// Setters
-	void setListingID(uint listingID) { m_ListingID = listingID; }
+	void setListingID(ulonglong listingID) { m_ListingID = listingID; }
+	void setIdempotencyKey(const string& idempotencyKey) { m_IdempotencyKey = idempotencyKey; }
 
 private:
-	uint	m_ListingID;
+	ulonglong	m_ListingID;
+	string		m_IdempotencyKey;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -49,7 +52,7 @@ public:
 	Packet* createPacket() throw() { return new CGExchangeBuy(); }
 	string getPacketName() const throw() { return "CGExchangeBuy"; }
 	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_EXCHANGE_BUY; }
-	PacketSize_t getPacketMaxSize() const throw() { return szint; }
+	PacketSize_t getPacketMaxSize() const throw() { return 8 + 1 + 255; }
 };
 
 #endif

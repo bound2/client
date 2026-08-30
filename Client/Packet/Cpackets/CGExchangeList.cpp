@@ -35,6 +35,20 @@ void CGExchangeList::read(SocketInputStream& iStream)
 	iStream.read(m_MinPrice);
 	iStream.read(m_MaxPrice);
 
+	BYTE szSellerFilter;
+	iStream.read(szSellerFilter);
+	if (szSellerFilter > 0)
+	{
+		char buf[256];
+		iStream.read(buf, szSellerFilter);
+		buf[szSellerFilter] = '\0';
+		m_SellerFilter = buf;
+	}
+	else
+	{
+		m_SellerFilter = "";
+	}
+
 	__END_CATCH
 }
 
@@ -49,6 +63,11 @@ void CGExchangeList::write(SocketOutputStream& oStream) const
 	oStream.write(m_MinPrice);
 	oStream.write(m_MaxPrice);
 
+	// bstr : length byte is always written, even when the filter is empty
+	oStream.write((BYTE)m_SellerFilter.length());
+	if (!m_SellerFilter.empty())
+		oStream.write(m_SellerFilter);
+
 	__END_CATCH
 }
 
@@ -62,6 +81,7 @@ string CGExchangeList::toString() const
 		<< ", ItemType:" << (int)m_ItemType
 		<< ", MinPrice:" << (int)m_MinPrice
 		<< ", MaxPrice:" << (int)m_MaxPrice
+		<< ", SellerFilter:" << m_SellerFilter
 		<< ")";
 	return msg.toString();
 }

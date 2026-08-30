@@ -24,7 +24,7 @@ public:
 	void write(SocketOutputStream& oStream) const;
 	void execute(Player* pPlayer);
 
-	PacketSize_t getPacketSize() const { return szint * 4 + sizeof(BYTE) + sizeof(ushort); }
+	PacketSize_t getPacketSize() const { return szint * 4 + sizeof(BYTE) + sizeof(ushort) + sizeof(BYTE) + m_SellerFilter.length(); }
 	PacketID_t getPacketID() const { return PACKET_CG_EXCHANGE_LIST; }
 	string getPacketName() const { return "CGExchangeList"; }
 	string toString() const;
@@ -36,6 +36,7 @@ public:
 	ushort getItemType() const { return m_ItemType; }
 	int getMinPrice() const { return m_MinPrice; }
 	int getMaxPrice() const { return m_MaxPrice; }
+	const string& getSellerFilter() const { return m_SellerFilter; }
 
 	// Setters
 	void setPage(int page) { m_Page = page; }
@@ -44,6 +45,7 @@ public:
 	void setItemType(ushort itemType) { m_ItemType = itemType; }
 	void setMinPrice(int minPrice) { m_MinPrice = minPrice; }
 	void setMaxPrice(int maxPrice) { m_MaxPrice = maxPrice; }
+	void setSellerFilter(const string& sellerFilter) { m_SellerFilter = sellerFilter; }
 
 private:
 	int		m_Page;
@@ -52,6 +54,7 @@ private:
 	ushort	m_ItemType;		// 0xFFFF = all
 	int		m_MinPrice;
 	int		m_MaxPrice;
+	string	m_SellerFilter;	// empty = no filter
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -64,7 +67,7 @@ public:
 	Packet* createPacket() throw() { return new CGExchangeList(); }
 	string getPacketName() const throw() { return "CGExchangeList"; }
 	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_EXCHANGE_LIST; }
-	PacketSize_t getPacketMaxSize() const throw() { return 4 + 4 + 1 + 2 + 4 + 4; }
+	PacketSize_t getPacketMaxSize() const throw() { return 4 + 4 + 1 + 2 + 4 + 4 + 1 + 255; }
 };
 
 #endif

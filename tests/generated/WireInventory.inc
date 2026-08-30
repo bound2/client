@@ -231,6 +231,7 @@
 #include "Gpackets/GCDownSkillOK.h"
 #include "Gpackets/GCDropItemToZone.h"
 #include "Gpackets/GCEnterVampirePortal.h"
+#include "Gpackets/GCExchangeBuy.h"
 #include "Gpackets/GCExchangeList.h"
 #include "Gpackets/GCExecuteElement.h"
 #include "Gpackets/GCFakeMove.h"
@@ -821,9 +822,13 @@ struct Inv_GCEnterVampirePortalFactory {
 	static PacketID_t id() { return Packet::PACKET_GC_ENTER_VAMPIRE_PORTAL; }
 	static PacketSize_t maxSize() { return szObjectID + szCoord*2; }
 };
+struct Inv_GCExchangeBuyFactory {
+	static PacketID_t id() { return Packet::PACKET_GC_EXCHANGE_BUY; }
+	static PacketSize_t maxSize() { return 1 + 1 + 255 + 8; }
+};
 struct Inv_GCExchangeListFactory {
 	static PacketID_t id() { return Packet::PACKET_GC_EXCHANGE_LIST; }
-	static PacketSize_t maxSize() { return 2048; }
+	static PacketSize_t maxSize() { return 14 + 20 * 1855; }
 };
 struct Inv_GCExecuteElementFactory {
 	static PacketID_t id() { return Packet::PACKET_GC_EXECUTE_ELEMENT; }
@@ -1981,11 +1986,11 @@ struct Inv_CGDropMoneyFactory {
 };
 struct Inv_CGExchangeBuyFactory {
 	static PacketID_t id() { return Packet::PACKET_CG_EXCHANGE_BUY; }
-	static PacketSize_t maxSize() { return szint; }
+	static PacketSize_t maxSize() { return 8 + 1 + 255; }
 };
 struct Inv_CGExchangeListFactory {
 	static PacketID_t id() { return Packet::PACKET_CG_EXCHANGE_LIST; }
-	static PacketSize_t maxSize() { return 4 + 4 + 1 + 2 + 4 + 4; }
+	static PacketSize_t maxSize() { return 4 + 4 + 1 + 2 + 4 + 4 + 1 + 255; }
 };
 struct Inv_CGExpelGuildFactory {
 	static PacketID_t id() { return Packet::PACKET_CG_EXPEL_GUILD; }
@@ -2719,6 +2724,7 @@ struct Inv_UCRequestLoginModeFactory {
 	{ "GCDownSkillOK", &Inv_GCDownSkillOKFactory::id, &Inv_GCDownSkillOKFactory::maxSize },
 	{ "GCDropItemToZone", &Inv_GCDropItemToZoneFactory::id, &Inv_GCDropItemToZoneFactory::maxSize },
 	{ "GCEnterVampirePortal", &Inv_GCEnterVampirePortalFactory::id, &Inv_GCEnterVampirePortalFactory::maxSize },
+	{ "GCExchangeBuy", &Inv_GCExchangeBuyFactory::id, &Inv_GCExchangeBuyFactory::maxSize },
 	{ "GCExchangeList", &Inv_GCExchangeListFactory::id, &Inv_GCExchangeListFactory::maxSize },
 	{ "GCExecuteElement", &Inv_GCExecuteElementFactory::id, &Inv_GCExecuteElementFactory::maxSize },
 	{ "GCFakeMove", &Inv_GCFakeMoveFactory::id, &Inv_GCFakeMoveFactory::maxSize },
