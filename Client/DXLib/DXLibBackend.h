@@ -85,6 +85,19 @@ int dxlib_input_get_mouse_wheel(void);
 void dxlib_input_get_mouse_buttons(int* left, int* right, int* center);
 
 /**
+ * Pop the oldest buffered mouse button transition recorded by
+ * dxlib_input_update(). Every SDL press and release is queued in order
+ * with the game-space coordinates it happened at, so a press and release
+ * that both land inside one frame are still seen by the caller - sampling
+ * dxlib_input_get_mouse_buttons() once per frame would miss them.
+ * @param button 0 = left, 1 = right, 2 = middle
+ * @param down   1 for a press, 0 for a release
+ * @param x, y   Game coordinates of the transition
+ * @return 1 if an event was returned, 0 if the queue is empty
+ */
+int dxlib_input_pop_mouse_button(int* button, int* down, int* x, int* y);
+
+/**
  * Set mouse position (for relative movement)
  * @param x X coordinate
  * @param y Y coordinate

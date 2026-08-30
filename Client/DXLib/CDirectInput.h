@@ -101,7 +101,10 @@ public:
 	~CSDLInput();
 
 	void		Clear();
-	BOOL		Init(HWND hWnd, HINSTANCE hInst, E_EXCLUSIVE ex=EXCLUSIVE);
+
+	// Deliver one mouse event at (x, y): moves the cursor there first if
+	// it is not already there, so the receiver sees MOVE then the event.
+	void		DispatchMouseAt(E_MOUSE_EVENT event, int x, int y);	BOOL		Init(HWND hWnd, HINSTANCE hInst, E_EXCLUSIVE ex=EXCLUSIVE);
 	HRESULT		SetAcquire(bool active_app);
 	void		SetMouseEventReceiver(void (*fp_receiver)(E_MOUSE_EVENT, int, int, int));
 	void		SetKeyboardEventReceiver(void (*fp_receiver)(E_KEYBOARD_EVENT, DWORD));

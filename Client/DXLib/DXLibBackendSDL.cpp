@@ -194,6 +194,20 @@ static int g_mouse_y = 0;
 static int g_mouse_wheel = 0;
 static int g_mouse_buttons[3] = {0, 0, 0};
 
+/* Buffered button transitions, in the order SDL delivered them. Drained by
+ * dxlib_input_pop_mouse_button(). 64 is far more than one frame can hold;
+ * if nothing drains the queue it simply stops recording. */
+#define DXLIB_MOUSE_EVENT_QUEUE 64
+struct dxlib_mouse_button_event {
+	int button;
+	int down;
+	int x;
+	int y;
+};
+static struct dxlib_mouse_button_event g_mouse_button_events[DXLIB_MOUSE_EVENT_QUEUE];
+static int g_mouse_button_event_head = 0;
+static int g_mouse_button_event_count = 0;
+
 /* Text input callback */
 static dxlib_textinput_callback g_textinput_callback = NULL;
 
@@ -441,12 +455,34 @@ void dxlib_input_update(void) {
 				g_x = event.button.x;
 				g_y = event.button.y;
 
-				if (event.button.button == SDL_BUTTON_LEFT) {
-					g_mouse_buttons[0] = (event.type == SDL_MOUSEBUTTONDOWN) ? 1 : 0;
-				} else if (event.button.button == SDL_BUTTON_RIGHT) {
-					g_mouse_buttons[1] = (event.type == SDL_MOUSEBUTTONDOWN) ? 1 : 0;
-				} else if (event.button.button == SDL_BUTTON_MIDDLE) {
-					g_mouse_buttons[2] = (event.type == SDL_MOUSEBUTTONDOWN) ? 1 : 0;
+				{
+					int button = -1;
+					int down = (event.type == SDL_MOUSEBUTTONDOWN) ? 1 : 0;
+
+					if (event.button.button == SDL_BUTTON_LEFT) {
+						button = 0;
+					} else if (event.button.button == SDL_BUTTON_RIGHT) {
+						button = 1;
+					} else if (event.button.button == SDL_BUTTON_MIDDLE) {
+						button = 2;
+					}
+
+					if (button >= 0) {
+						g_mouse_buttons[button] = down;
+
+						if (g_mouse_button_event_count < DXLIB_MOUSE_EVENT_QUEUE) {
+							int slot = (g_mouse_button_event_head + g_mouse_button_event_count) % DXLIB_MOUSE_EVENT_QUEUE;
+							struct dxlib_mouse_button_event* ev = &g_mouse_button_events[slot];
+							ev->button = button;
+							ev->down = down;
+							/* Event coordinates are window space; the game
+							 * works in the letterboxed frame's space. */
+							ev->x = event.button.x;
+							ev->y = event.button.y;
+							spritectl_window_to_game_coords(&ev->x, &ev->y);
+							g_mouse_button_event_count++;
+						}
+					}
 				}
 				break;
 
@@ -520,6 +556,21 @@ void dxlib_input_get_mouse_buttons(int* left, int* right, int* center) {
 	if (left) *left = g_mouse_buttons[0];
 	if (right) *right = g_mouse_buttons[1];
 	if (center) *center = g_mouse_buttons[2];
+}
+
+int dxlib_input_pop_mouse_button(int* button, int* down, int* x, int* y) {
+	if (g_mouse_button_event_count == 0) return 0;
+
+	const struct dxlib_mouse_button_event* ev = &g_mouse_button_events[g_mouse_button_event_head];
+	if (button) *button = ev->button;
+	if (down) *down = ev->down;
+	if (x) *x = ev->x;
+	if (y) *y = ev->y;
+
+	g_mouse_button_event_head = (g_mouse_button_event_head + 1) % DXLIB_MOUSE_EVENT_QUEUE;
+	g_mouse_button_event_count--;
+
+	return 1;
 }
 
 void dxlib_input_set_mouse_pos(int x, int y) {

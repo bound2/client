@@ -12,6 +12,9 @@
 #include "CDirectInput.h"
 #include "DXLibBackend.h"
 
+/* Cursor position globals the game reads directly; defined in Client. */
+extern int g_x, g_y;
+
 #define MSB		0x80
 
 /* Global instance */
@@ -60,12 +63,24 @@ void CSDLInput::Clear()
 		m_key[i] = FALSE;
 	}
 	
-	m_lb_down = FALSE;
-	m_rb_down = FALSE;
-	m_cb_down = FALSE;
+	// The down flags mirror the physical buttons, so take them from the
+	// backend rather than zeroing them. Zeroing while a button was still
+	// held made the next UpdateInput() report a second press for the same
+	// click, and Clear() runs on mode changes and re-activation - exactly
+	// when a click is often still in progress.
+	int left = 0, right = 0, center = 0;
+	dxlib_input_get_mouse_buttons(&left, &right, &center);
+	m_lb_down = left ? TRUE : FALSE;
+	m_rb_down = right ? TRUE : FALSE;
+	m_cb_down = center ? TRUE : FALSE;
 	m_lb_up = FALSE;
 	m_rb_up = FALSE;
 	m_cb_up = FALSE;
+
+	// Transitions queued before the clear belong to the old mode; drop them.
+	int button, down, x, y;
+	while (dxlib_input_pop_mouse_button(&button, &down, &x, &y)) {
+	}
 }
 
 /* Initialize using SDL backend */
@@ -125,81 +140,89 @@ void CSDLInput::UpdateInput()
 		}
 	}
 
-	// Update mouse position
-	int old_x = m_mouse_x;
-	int old_y = m_mouse_y;
-	dxlib_input_get_mouse_pos(&m_mouse_x, &m_mouse_y);
-
-	// Check for mouse movement
-	if (old_x != m_mouse_x || old_y != m_mouse_y) {
-		if (m_fp_mouse_event_receiver) {
-			m_fp_mouse_event_receiver(MOVE, m_mouse_x, m_mouse_y, m_mouse_z);
-		}
-	}
-
-	// Update mouse wheel
+	// Wheel: a delta since the last frame is all the game wants.
 	int old_z = m_mouse_z;
 	m_mouse_z = dxlib_input_get_mouse_wheel();
-	
-	// Check for wheel movement
+
 	if (old_z != m_mouse_z) {
 		if (m_fp_mouse_event_receiver) {
-			if (m_mouse_z > old_z) {
-				m_fp_mouse_event_receiver(WHEELUP, m_mouse_x, m_mouse_y, m_mouse_z);
-			} else {
-				m_fp_mouse_event_receiver(WHEELDOWN, m_mouse_x, m_mouse_y, m_mouse_z);
-			}
+			int cur_x, cur_y;
+			dxlib_input_get_mouse_pos(&cur_x, &cur_y);
+			m_fp_mouse_event_receiver(m_mouse_z > old_z ? WHEELUP : WHEELDOWN, cur_x, cur_y, m_mouse_z);
 		}
 	}
 
-	// Update mouse buttons
+	// Buttons: consume every transition SDL delivered since the last frame,
+	// in order and at the coordinates it happened at. The previous code
+	// sampled the button state once per frame, which lost any press whose
+	// release arrived in the same frame - a quick click on an inventory
+	// slot did nothing - and reported a fresh press whenever the flags had
+	// been cleared under a held button.
+	int button, down, ex, ey;
+	while (dxlib_input_pop_mouse_button(&button, &down, &ex, &ey)) {
+		BOOL* pDown = NULL;
+		BOOL* pUp = NULL;
+		E_MOUSE_EVENT downEvent = MOVE;
+		E_MOUSE_EVENT upEvent = MOVE;
+
+		switch (button) {
+			case 0:  pDown = &m_lb_down; pUp = &m_lb_up; downEvent = LEFTDOWN;   upEvent = LEFTUP;   break;
+			case 1:  pDown = &m_rb_down; pUp = &m_rb_up; downEvent = RIGHTDOWN;  upEvent = RIGHTUP;  break;
+			case 2:  pDown = &m_cb_down; pUp = &m_cb_up; downEvent = CENTERDOWN; upEvent = CENTERUP; break;
+			default: continue;
+		}
+
+		if (down && !*pDown) {
+			*pDown = TRUE;
+			DispatchMouseAt(downEvent, ex, ey);
+		} else if (!down && *pDown) {
+			*pDown = FALSE;
+			*pUp = TRUE;
+			DispatchMouseAt(upEvent, ex, ey);
+		}
+	}
+
+	// Safety net: if a transition never reached the queue (it overflowed,
+	// or SDL released the button silently on focus loss), the sampled state
+	// still wins so a button can neither stick nor go unreported.
+	int cur_x, cur_y;
+	dxlib_input_get_mouse_pos(&cur_x, &cur_y);
+
 	int left, right, center;
 	dxlib_input_get_mouse_buttons(&left, &right, &center);
 
-	// Check for button state changes
-	if (left && !m_lb_down) {
-		m_lb_down = TRUE;
-		if (m_fp_mouse_event_receiver) {
-			m_fp_mouse_event_receiver(LEFTDOWN, m_mouse_x, m_mouse_y, m_mouse_z);
-		}
-	}
-	if (!left && m_lb_down) {
-		m_lb_up = TRUE;
-		m_lb_down = FALSE;
-		if (m_fp_mouse_event_receiver) {
-			m_fp_mouse_event_receiver(LEFTUP, m_mouse_x, m_mouse_y, m_mouse_z);
-		}
-	}
+	if (left && !m_lb_down)        { m_lb_down = TRUE;  DispatchMouseAt(LEFTDOWN, cur_x, cur_y); }
+	else if (!left && m_lb_down)   { m_lb_down = FALSE; m_lb_up = TRUE; DispatchMouseAt(LEFTUP, cur_x, cur_y); }
+	if (right && !m_rb_down)       { m_rb_down = TRUE;  DispatchMouseAt(RIGHTDOWN, cur_x, cur_y); }
+	else if (!right && m_rb_down)  { m_rb_down = FALSE; m_rb_up = TRUE; DispatchMouseAt(RIGHTUP, cur_x, cur_y); }
+	if (center && !m_cb_down)      { m_cb_down = TRUE;  DispatchMouseAt(CENTERDOWN, cur_x, cur_y); }
+	else if (!center && m_cb_down) { m_cb_down = FALSE; m_cb_up = TRUE; DispatchMouseAt(CENTERUP, cur_x, cur_y); }
 
-	if (right && !m_rb_down) {
-		m_rb_down = TRUE;
-		if (m_fp_mouse_event_receiver) {
-			m_fp_mouse_event_receiver(RIGHTDOWN, m_mouse_x, m_mouse_y, m_mouse_z);
-		}
-	}
-	if (!right && m_rb_down) {
-		m_rb_up = TRUE;
-		m_rb_down = FALSE;
-		if (m_fp_mouse_event_receiver) {
-			m_fp_mouse_event_receiver(RIGHTUP, m_mouse_x, m_mouse_y, m_mouse_z);
-		}
-	}
-
-	if (center && !m_cb_down) {
-		m_cb_down = TRUE;
-		if (m_fp_mouse_event_receiver) {
-			m_fp_mouse_event_receiver(CENTERDOWN, m_mouse_x, m_mouse_y, m_mouse_z);
-		}
-	}
-	if (!center && m_cb_down) {
-		m_cb_up = TRUE;
-		m_cb_down = FALSE;
-		if (m_fp_mouse_event_receiver) {
-			m_fp_mouse_event_receiver(CENTERUP, m_mouse_x, m_mouse_y, m_mouse_z);
-		}
+	// Finally bring the cursor to where it is now.
+	if (cur_x != m_mouse_x || cur_y != m_mouse_y) {
+		DispatchMouseAt(MOVE, cur_x, cur_y);
 	}
 }
 
+/* Move the cursor to (x, y) if needed, then deliver the event there. The
+ * receiver (CGameUpdate::DXMouseEvent) reads the position from the g_x/g_y
+ * globals rather than its arguments, so those are set as well. */
+void CSDLInput::DispatchMouseAt(E_MOUSE_EVENT event, int x, int y)
+{
+	if (x != m_mouse_x || y != m_mouse_y) {
+		m_mouse_x = x;
+		m_mouse_y = y;
+		g_x = x;
+		g_y = y;
+		if (event != MOVE && m_fp_mouse_event_receiver) {
+			m_fp_mouse_event_receiver(MOVE, x, y, m_mouse_z);
+		}
+	}
+
+	if (m_fp_mouse_event_receiver) {
+		m_fp_mouse_event_receiver(event, x, y, m_mouse_z);
+	}
+}
 /* Set acquire (SDL backend - no-op) */
 HRESULT CSDLInput::SetAcquire(bool active_app)
 {
