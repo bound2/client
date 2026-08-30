@@ -28,10 +28,12 @@ extern MStringArray*		g_pNickNameStringTable;
 extern void				InitGameStringTable();
 
 //----------------------------------------------------------------------
-// True when the built-in English strings above should be used instead of
-// the localised ones loaded from Data/Info/String.inf.
+// True when the built-in English text should be used instead of the
+// localised text the game data supplies. It gates the string table above
+// and the NPC script table, which have the same problem: the shipped data
+// is Korean and the translation lives in the client.
 //----------------------------------------------------------------------
-extern bool				UseEnglishGameStringTable();
+extern bool				UseEnglishText();
 
 //----------------------------------------------------------------------
 // Reads one entry from the game string table, or "" when the table is too
