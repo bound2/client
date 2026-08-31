@@ -45,6 +45,8 @@
 // Exchange System Packets
 #include "Cpackets/CGExchangeList.h"
 #include "Cpackets/CGExchangeBuy.h"
+#include "Gpackets/GCExchangeBuy.h"
+#include "Gpackets/GCExchangeList.h"
 #include "Cpackets/CGShopRequestBuy.h"
 #include "Cpackets/CGShopRequestList.h"
 #include "Cpackets/CGShopRequestSell.h"
@@ -1197,6 +1199,11 @@ void PacketFactoryManager::init ()
 	// Exchange System Packets
 	addFactory( new CGExchangeListFactory() );
 	addFactory( new CGExchangeBuyFactory() );
+	addFactory( new GCExchangeBuyFactory() );
+	// Was never registered: the server's listing reply was unroutable even
+	// though the client had (a stub of) the class. Found during the 1.4
+	// exchange-layout reconciliation.
+	addFactory( new GCExchangeListFactory() );
 
 #if __OUTPUT_INIT__
 	cout << toString() << endl;
