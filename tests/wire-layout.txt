@@ -19,7 +19,7 @@
 14	CGAppointSubmaster	23
 15	CGAttack	7
 16	CGAuthKey	4
-17	CGBloodDrain	7
+17	CGBloodDrain	4
 18	CGBuyStoreItem	9
 19	CGCastingSkill	2
 21	CGConnect	32
@@ -152,7 +152,7 @@
 150	CLGetPCList	0
 151	CLGetServerList	0
 152	CLGetWorldList	0
-153	CLLogin	59
+153	CLLogin	69
 154	CLLogout	0
 155	CLQueryCharacterName	21
 156	CLQueryPlayerID	21
@@ -175,7 +175,7 @@
 181	GCAddInstalledMineToZone	379
 182	GCAddItemToItemVerify	9
 183	GCAddMonster	306
-184	GCAddMonsterCorpse	143
+184	GCAddMonsterCorpse	144
 185	GCAddMonsterFromBurrowing	305
 186	GCAddMonsterFromTransformation	305
 187	GCAddNewItemToZone	379
@@ -269,7 +269,7 @@
 275	GCModifyInformation	2042
 277	GCModifyNickname	30
 278	GCMonsterKillQuestInfo	3061
-279	GCMorph1	26205
+279	GCMorph1	26209
 280	GCMorphSlayer2	69
 281	GCMorphVampire2	54
 282	GCMove	7
@@ -372,7 +372,7 @@
 380	GCStashList	21006
 381	GCStashSell	4
 382	GCStatusCurrentHP	6
-383	GCSubInventoryInfo	21127
+383	GCSubInventoryInfo	21125
 384	GCSweeperBonusInfo	13
 385	GCSystemAvailabilities	6
 386	GCSystemMessage	262
@@ -399,10 +399,10 @@
 407	GCUnionOfferList	1180
 408	GCUntransformFail	0
 409	GCUntransformOK	3
-410	GCUpdateInfo	58376
+410	GCUpdateInfo	58380
 411	GCUseBonusPointFail	0
 412	GCUseBonusPointOK	2042
-413	GCUseOK	255
+413	GCUseOK	2042
 414	GCUsePowerPointResult	6
 415	GCVisibleFail	0
 416	GCVisibleOK	0
@@ -411,7 +411,7 @@
 419	GCWarScheduleList	2281
 420	GCWhisper	145
 421	GCWhisperFailed	0
-426	GLIncomingConnectionError	81
+426	GLIncomingConnectionError	256
 427	GLIncomingConnectionOK	29
 440	LCCreatePCError	1
 441	LCCreatePCOK	0

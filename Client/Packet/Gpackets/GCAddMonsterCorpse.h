@@ -143,14 +143,15 @@ public :
 	// const static GCAddMonsterCorpsePacketSize 를 정의, 리턴하라.
 	PacketSize_t getPacketMaxSize () const throw () 
 	{ 
-		return szObjectID + 
-			szMonsterType + 
-			szBYTE + 
-			128 +
-			szCoord + 
-			szCoord + 
-			szDir + 
+		return szObjectID +
+			szMonsterType +
 			szBYTE +
+			128 +
+			szCoord +
+			szCoord +
+			szDir +
+			szBYTE +	// m_bhasHead
+			szBYTE +	// m_TreasureCount
 			szObjectID;
 	}
 
