@@ -47,8 +47,8 @@
 #include "MTestDef.h"
 #include "MEventManager.h"
 #include "UIFunction.h"
-#include "cmp3.h"
-#include "COGGSTREAM.H"
+#include "CMP3.h"
+#include "COGGSTREAM.h"
 #include "SystemAvailabilities.h"
 #include "MWarManager.H"
 // EXECryptor and ThemidaSDK includes removed (SDL2) - Copy protection no longer needed

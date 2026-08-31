@@ -746,7 +746,6 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 
 	# Add additional source files
 	list(APPEND CLIENT_MAIN_SOURCES
-		Client/COGGSTREAM.cpp
 		# Time functions extracted from PacketFunction.cpp (which has Windows-specific networking code)
 		Client/ClientTimeFunctions.cpp
 		# ActionFunctions.cpp excluded - functions now in PacketFunction.cpp
@@ -793,36 +792,11 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# CAVI's methods are stubbed out directly in CAvi.cpp instead (all
 	# platforms, not just non-Windows) rather than excluding the file.
 
-	# Exclude root-level Client/soundbuf.cpp and Client/mp3.cpp: duplicates of
-	# Client/DXLib/soundbuf.cpp and Client/DXLib/mp3.cpp (already compiled into
-	# the dxlib library that DarkEden links). The original VC6 project
-	# (client-master_vs6/Client/DXLib/DXLib.dsp) only ever compiled these two
-	# files as part of DXLib.lib - Client.dsp (the EXE) never listed them
-	# directly. The root-level copies here still include the real
-	# <dsound.h>/<wtypes.h> (unlike the DXLib/ versions, already migrated to
-	# basic/AudioTypes.h), so the file(GLOB Client/*.cpp) above picking them up
-	# both reintroduces the real-DirectSound redefinition conflict and risks
-	# LNK2005 duplicate symbols against the dxlib copies once compiled cleanly.
-	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "/Client/soundbuf\\.cpp$")
-	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "/Client/mp3\\.cpp$")
-
-	# Same duplication as soundbuf.cpp/mp3.cpp above: reader.cpp/synfilt.cpp/
-	# subdecoder.cpp were also DXLib.lib-only in the original VC6 project
-	# (client-master_vs6/Client/DXLib/DXLib.dsp) and never part of Client.dsp
-	# (the EXE). The root-level copies here still #include the root mp3.h,
-	# which pulls in the real <dsound.h> and redefines _DSBPOSITIONNOTIFY
-	# against basic/AudioTypes.h's compat typedef (already processed earlier
-	# in the TU via Client_PCH.h) - error C2011.
-	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "/Client/reader\\.cpp$")
-	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "/Client/synfilt\\.cpp$")
-	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "/Client/subdecoder\\.cpp$")
-	# header.cpp is the same story - DXLib.lib-only in VC6 (DXLib.dsp) and
-	# never part of Client.dsp. Its only real caller (mp3.cpp) is already
-	# excluded above, and the root copy's ReadHeader() call resolves to the
-	# now-excluded root reader.cpp, so with it compiling directly into
-	# DarkEden.exe MP3_ReadHeader()/ReadHeader() were dead weight that
-	# only produced an unresolved external (LNK2019).
-	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "/Client/header\\.cpp$")
+	# The custom MP3/Huffman decoder (mp3/huffman/reader/header/synfilt/
+	# subdecoder/soundbuf/BIT_RES, once duplicated between Client/ and
+	# Client/DXLib/) was deleted 2026-08-31: no CMakeLists ever compiled the
+	# DXLib copies, nothing outside the family referenced its symbols, and
+	# MP3/OGG decoding now comes from SDL2_mixer.
 
 	# Same duplication again: CSpritePal.cpp was SpriteLib.lib-only in the
 	# original VC6 project (client-master_vs6/Client/SpriteLib/SpriteLib.dsp)
