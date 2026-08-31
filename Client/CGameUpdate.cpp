@@ -2983,7 +2983,13 @@ ProcessInputRButtonDown(MObject* pObject, bool bForceAttack = false)
 		// 선택한 곳에 Object가 없으면 ..
 		//--------------------------------------------------
 		if (pObject == NULL)
-		{		
+		{
+			// [SKILLREPEAT DIAG] temporary - a missed pick on the press edge.
+			// This is the path the 60 fps picking regression came in through.
+			if (g_pPlayer->IsRepeatAction())
+				DEBUG_ADD_FORMAT("[SKILLREPEAT] why=RBDOWN_NOOBJ camGap=(%d,%d) cursor=(%d,%d)",
+					g_DrawCamGapX, g_DrawCamGapY, g_x, g_y);
+
 			g_pPlayer->UnSetRepeatAction();
 			//g_pPlayer->TraceNextNULL();
 
