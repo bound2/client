@@ -688,9 +688,33 @@ int dxlib_sound_init(void* window_handle) {
 
 	if (g_sound_initialized) return 0;
 
+	/* The Windows entry point (Client.cpp WinMain) never passes
+	 * SDL_INIT_AUDIO to SDL_Init - only the non-Windows SDLMain.cpp does.
+	 * Mix_OpenAudio happens to initialize the subsystem itself, but be
+	 * explicit rather than lean on that. */
+	if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0) {
+		fprintf(stderr, "SDL_InitSubSystem(SDL_INIT_AUDIO) failed: %s\n", SDL_GetError());
+		return 1;
+	}
+
+	/* Load the music decoder up front so a missing library surfaces here
+	 * instead of as a per-file Mix_LoadMUS failure. Only OGG: the mixer
+	 * music path (COGGSTREAM/zone music) is OGG-only, and the vcpkg
+	 * SDL2_mixer is built without MP3 - requesting it would print a
+	 * spurious warning on every init. Not fatal: WAV sound effects still
+	 * work without it. */
+	int music_flags = MIX_INIT_OGG;
+	if ((Mix_Init(music_flags) & music_flags) != music_flags) {
+		fprintf(stderr, "Mix_Init: some music decoders unavailable: %s\n", Mix_GetError());
+	}
+
 	/* Initialize SDL_mixer */
 	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) < 0) {
 		fprintf(stderr, "Mix_OpenAudio failed: %s\n", Mix_GetError());
+		/* InitSound retries on every main-menu entry - undo this call's
+		 * own setup so the audio subsystem refcount cannot creep up. */
+		Mix_Quit();
+		SDL_QuitSubSystem(SDL_INIT_AUDIO);
 		return 1;
 	}
 
@@ -709,6 +733,8 @@ void dxlib_sound_release(void) {
 	memset(g_channel_owner, 0, sizeof(g_channel_owner));
 
 	Mix_CloseAudio();
+	Mix_Quit();
+	SDL_QuitSubSystem(SDL_INIT_AUDIO);
 	g_sound_initialized = 0;
 }
 
