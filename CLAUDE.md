@@ -186,13 +186,17 @@ baseline: **81 tests, 345 checks, 0 failed** in both trees.
 
 ## Current focus
 
-`docs/code-health-review-2026-08-29.md` holds 197 findings, 11 fixed. In priority order:
+`docs/code-health-review-2026-08-29.md` holds 197 findings, 24 fixed. In priority order:
 
 1. **Unvalidated network input is the top open risk.** `Client/Packet/Gpackets/` passes
    server-supplied lengths, indices and item classes straight into array subscripts,
-   `strcpy`/`sprintf` targets, and a function-pointer table. Largely untouched — a
-   hostile *or merely buggy* server can corrupt the client heap.
-2. Fixed-size buffers fed by variable-length server strings (21-byte chat rows,
-   128-byte stack buffers).
+   `strcpy`/`sprintf` targets, and a function-pointer table. The critical findings
+   (shop/stash indices, chat/guild/system-message bounds, the NewItem table, the
+   peer file-transfer filename) are fixed on `harden/packet-index-bounds` and
+   `harden/network-input`, but the parsers beyond those findings are unaudited — a
+   hostile *or merely buggy* server can still corrupt the client heap.
+2. Fixed-size buffers fed by variable-length server strings (the 21-byte chat rows
+   are fixed; 128-byte stack buffers remain in other handlers), and format strings
+   loaded from data files passed to sprintf in ~600 places (C19/C20/C22).
 3. Dead and duplicate source sitting alongside live code, which is a correctness trap
    when the wrong file gets edited.
