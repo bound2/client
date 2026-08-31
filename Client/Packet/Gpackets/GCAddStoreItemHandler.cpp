@@ -54,7 +54,7 @@ throw ( ProtocolException , Error )
 						if(p_slot_item == NULL)
 						{
 							//------------------------------------------------------------
-							// item을 생성한다.
+							// create the item.
 							//------------------------------------------------------------
 							MItem* pItem = MItem::NewItem( (ITEM_CLASS)pPacket->getItem().getItemClass() );
 
@@ -142,7 +142,7 @@ throw ( ProtocolException , Error )
 										if (pItemInfo!=NULL)
 										{
 											//------------------------------------------------------------
-											// sub item을 생성한다.
+											// create the sub item.
 											//------------------------------------------------------------
 											MItem* pSubItem = MItem::NewItem( (ITEM_CLASS)pItemInfo->getItemClass() );
 
@@ -187,7 +187,7 @@ throw ( ProtocolException , Error )
 										if (pItemInfo!=NULL)
 										{
 											//------------------------------------------------------------
-											// sub item을 생성한다.
+											// create the sub item.
 											//------------------------------------------------------------
 											MItem* pSubItem = MItem::NewItem( (ITEM_CLASS)pItemInfo->getItemClass() );
 

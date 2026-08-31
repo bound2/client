@@ -508,12 +508,17 @@ ClientConfig::LoadFromFile(const char* filename)
 	file.read((char*)&MAX_CHATSTRING_LENGTH, 4);
 	file.read((char*)&MAX_CHATSTRINGLENGTH_PLUS1, 4);
 
-	// The derived values arrive from the file independently of the ones they
-	// are derived from. MCreature allocates each chat row with
-	// MAX_CHATSTRINGLENGTH_PLUS1 and copies MAX_CHATSTRING_LENGTH characters
-	// into it, so a stale or hand-edited record that breaks the +1 invariant
-	// turns every chat line into a heap overflow. Recompute instead of trusting
-	// the record.
+	// MCreature allocates each chat row with MAX_CHATSTRINGLENGTH_PLUS1 and
+	// copies MAX_CHATSTRING_LENGTH characters into it, and its wrap loops do
+	// signed arithmetic with these values, so a corrupt or hand-edited record
+	// must not be trusted: clamp the primaries to sane geometry, then
+	// recompute the derived values instead of reading them from the record
+	// (a broken +1 invariant turns every chat line into a heap overflow).
+	if (MAX_CHATSTRING < 1 || MAX_CHATSTRING > 100)
+		MAX_CHATSTRING = 5;
+	if (MAX_CHATSTRING_LENGTH < 1 || MAX_CHATSTRING_LENGTH > 255)
+		MAX_CHATSTRING_LENGTH = 20;
+
 	MAX_CHATSTRING_MINUS_1 = MAX_CHATSTRING - 1;
 	MAX_CHATSTRINGLENGTH_PLUS1 = MAX_CHATSTRING_LENGTH + 1;
 

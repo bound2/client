@@ -5798,7 +5798,7 @@ GetMakeItemFitPosition(MItem* pItem, ITEM_CLASS itemClass, int itemType, POINT& 
 {
 	bool bFindPos = false;	// 자리가 있나?
 	
-	// 임시로 성수를 만들어서 들어갈 자리를 찾는다.
+	// create a temporary item to find the position it would fit into.
 	MItem* pResultItem = MItem::NewItem( itemClass );
 
 	if (pResultItem == NULL)

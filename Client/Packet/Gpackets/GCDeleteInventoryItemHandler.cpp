@@ -52,7 +52,7 @@ throw ( ProtocolException , Error )
 		if (g_pPlayer->IsItemCheckBufferDropToRelicTable() || g_pPlayer->IsItemCheckBufferDropToCreature())
 		{
 			//---------------------------------------------
-			// 떨어뜨릴려는 item
+			// the item being dropped
 			//---------------------------------------------
 			MItem* pCheckItem = g_pPlayer->GetItemCheckBuffer();
 

@@ -78,7 +78,7 @@ throw ( ProtocolException , Error )
 					// version 수정
 					pShopShelf->SetVersion( pPacket->getShopVersion() );
 
-					// 새로운 item 생성
+					// create the new item
 					MItem* pItem = MItem::NewItem( (ITEM_CLASS)pPacket->getItemClass() );
 
 					if (pItem == NULL)

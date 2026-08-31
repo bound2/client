@@ -56,7 +56,7 @@ throw ( ProtocolException , Error )
 					const STASHITEM&	item = pPacket->getStashItem(rack, index);
 
 					//------------------------------------------------------------
-					// item을 생성한다.
+					// create the item.
 					//------------------------------------------------------------
 					MItem* pItem = MItem::NewItem( (ITEM_CLASS)item.itemClass );
 
@@ -146,7 +146,7 @@ throw ( ProtocolException , Error )
 								if (pItemInfo!=NULL)
 								{
 									//------------------------------------------------------------
-									// sub item을 생성한다.
+									// create the sub item.
 									//------------------------------------------------------------
 									MItem* pSubItem = MItem::NewItem( (ITEM_CLASS)pItemInfo->getItemClass() );
 
@@ -193,7 +193,7 @@ throw ( ProtocolException , Error )
 								if (pItemInfo!=NULL)
 								{
 									//------------------------------------------------------------
-									// sub item을 생성한다.
+									// create the sub item.
 									//------------------------------------------------------------
 									MItem* pSubItem = MItem::NewItem( (ITEM_CLASS)pItemInfo->getItemClass() );
 

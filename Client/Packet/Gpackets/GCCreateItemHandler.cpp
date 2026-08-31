@@ -64,7 +64,7 @@ throw ( ProtocolException , Error )
 	}
 
 	//---------------------------------------------------------------------
-	// Item을 생성한다.
+	// create the item.
 	//---------------------------------------------------------------------
 	pItem = MItem::NewItem( (enum ITEM_CLASS)pPacket->getItemClass() );
 

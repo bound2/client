@@ -160,7 +160,7 @@ MNPC::CreateFixedShelf(bool bMysterious)
 				//-----------------------------------------------------------
 				for (int type=minType; type<=maxType; type++)
 				{
-					// item 생성
+					// create the item
 					ITEM_CLASS itemClass = (ITEM_CLASS)pShopTemplate->Class;
 					MItem* pItem = MItem::NewItem( itemClass );
 

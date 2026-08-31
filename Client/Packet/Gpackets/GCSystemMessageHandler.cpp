@@ -54,20 +54,24 @@ throw ( ProtocolException , Error )
 			
 		case SYSTEM_MESSAGE_RANGER_CHAT:
 			{
-				char* message = (char*)pPacket->getMessage().c_str();
-				if(NULL != message)
+				// getMessage() returns by value; keep the string alive past
+				// the call instead of holding a dangling c_str() pointer.
+				std::string rangerMessage = pPacket->getMessage();
+				if (!rangerMessage.empty())
 				{
-					UI_SetRangerChatString(message);
+					UI_SetRangerChatString((char*)rangerMessage.c_str());
 				}
 			}
 			return;
-	
-		case SYSTEM_MESSAGE_PLAYER:	    // add by Coffee 2007-8-2 藤속鯤소랙箇무멩
-			char* message = (char*)pPacket->getMessage().c_str();
 
-			if (NULL != message)
+		case SYSTEM_MESSAGE_PLAYER:	    // add by Coffee 2007-8-2
 			{
-				message = (char*)pPacket->getMessage().c_str();
+				// Same by-value hazard as above; one local copy serves the
+				// Add and the dedup record.
+				std::string playerMessage = pPacket->getMessage();
+
+				if (!playerMessage.empty())
+				{
 // 				if (strcmp(previous1, message)==0)
 // 				{
 // 					BOOL bExist = FALSE;
@@ -96,10 +100,11 @@ throw ( ProtocolException , Error )
 // 				//--------------------------------------------------------------------
 // 				else
 // 				{
-					g_pPlayerMessage->Add( message );
+					g_pPlayerMessage->Add( playerMessage.c_str() );
 
-					previous1 = pPacket->getMessage();
+					previous1 = playerMessage;
 //				}
+				}
 			}
 			return;
 
@@ -123,7 +128,7 @@ throw ( ProtocolException , Error )
 			// string itself instead, which is a safe upper bound for a single
 			// %s substitution.
 			const char* pFormat = (*g_pGameStringTable)[UI_STRING_MESSAGE_SYSTEM].GetString();
-			size_t msgSize = strlen(pFormat)+strlen(message)+1;
+			size_t msgSize = (*g_pGameStringTable)[UI_STRING_MESSAGE_SYSTEM].GetLength()+messageStr.size()+1;
 			pMsg = new char[msgSize];
 			snprintf(pMsg,msgSize,pFormat,message);
 			pPacket->setMessage(pMsg);
@@ -134,7 +139,7 @@ throw ( ProtocolException , Error )
 		message = messageStr.c_str();
 	// add end by Coffee 2007-8-2
 	//--------------------------------------------------------------------
-	// system message에 출력
+	// print to the system message area
 	//--------------------------------------------------------------------
 	if (previous == messageStr)
 	{

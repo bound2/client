@@ -69,7 +69,7 @@ throw ( ProtocolException , Error )
 
 				if (item.bExist)
 				{
-					// item 생성
+					// create the item
 					MItem* pItem = MItem::NewItem( (ITEM_CLASS)item.itemClass );
 
 					if (pItem == NULL)

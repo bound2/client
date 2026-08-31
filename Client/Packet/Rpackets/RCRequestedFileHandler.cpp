@@ -16,11 +16,14 @@
 //////////////////////////////////////////////////////////////////////
 //
 // The peer here is another game client, so the filename is fully
-// untrusted. ReceiveFileInfo creates, truncates, renames and deletes
-// whatever path it is given, so a name carrying a path separator, a
-// drive letter or a ".." component would be an arbitrary file write
-// and delete on the local disk. A dot is also required because
-// StartReceive patches the extension in place via rfind(".").
+// untrusted, and ReceiveFileInfo creates, truncates, renames and
+// deletes whatever path it is given. The legitimate wire value is the
+// sender's own relative profile path (CRRequestHandler sends
+// ProfileManager::GetFilename, e.g. "profile\name.spk"), so interior
+// separators must pass; what must never pass is anything that escapes
+// the working directory -- a drive letter, an absolute path, or a
+// ".." component. A dot is also required because StartReceive patches
+// the extension in place via rfind(".").
 //
 //////////////////////////////////////////////////////////////////////
 static bool isSafeRequestFilename(const std::string& filename)
@@ -28,17 +31,44 @@ static bool isSafeRequestFilename(const std::string& filename)
 	if (filename.empty())
 		return false;
 
-	if (filename.find('/') != std::string::npos
-		|| filename.find('\\') != std::string::npos
-		|| filename.find(':') != std::string::npos
-		|| filename.find("..") != std::string::npos)
+	if (filename.find(':') != std::string::npos)
 		return false;
 
-	if (filename[0] == '.')
+	if (filename[0] == '/' || filename[0] == '\\')
+		return false;
+
+	if (filename.find("..") != std::string::npos)
 		return false;
 
 	if (filename.find('.') == std::string::npos)
 		return false;
+
+	// Win32 quirks: a trailing dot or space is stripped by the filesystem
+	// (aliasing a different name than the one checked), and a reserved
+	// device base name (CON, NUL, COM1, ...) opens the device no matter
+	// what extension follows it.
+	char last = filename[filename.size()-1];
+	if (last == '.' || last == ' ')
+		return false;
+
+	size_t base = filename.find_last_of("/\\");
+	base = (base == std::string::npos) ? 0 : base+1;
+	size_t baseEnd = filename.find('.', base);
+	std::string baseName = filename.substr(base, baseEnd-base);
+	for (size_t i=0; i<baseName.size(); i++)
+		baseName[i] = toupper((unsigned char)baseName[i]);
+
+	static const char* const reserved[] =
+	{
+		"CON", "PRN", "AUX", "NUL",
+		"COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+		"LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"
+	};
+	for (size_t r=0; r<sizeof(reserved)/sizeof(reserved[0]); r++)
+	{
+		if (baseName == reserved[r])
+			return false;
+	}
 
 	return true;
 }
@@ -71,16 +101,22 @@ throw ( ProtocolException , Error )
 
 			if (pFileInfo!=NULL)
 			{
+				const std::string filename = pFileInfo->getFilename();
+
 				// Dropping a single file would desynchronise the transfer
 				// stream, so a hostile name aborts the whole exchange.
-				if (!isSafeRequestFilename( pFileInfo->getFilename() ))
+				// pInfo owns the ReceiveFileInfos started so far and their
+				// destructors close the open streams, so it must be freed
+				// before the throw.
+				if (!isSafeRequestFilename( filename ))
 				{
-					DEBUG_ADD_FORMAT("[Error] RCRequestedFile: unsafe filename from peer: %s", pFileInfo->getFilename().c_str());
+					DEBUG_ADD_FORMAT("[Error] RCRequestedFile: unsafe filename from peer: %s", filename.c_str());
 					delete pFileInfo;
+					delete pInfo;
 					throw DisconnectException("unsafe requested filename");
 				}
 
-				ReceiveFileInfo* pReceiveFileInfo = new ReceiveFileInfo( pFileInfo->getFilename().c_str(), pFileInfo->getRequestFileType() );
+				ReceiveFileInfo* pReceiveFileInfo = new ReceiveFileInfo( filename.c_str(), pFileInfo->getRequestFileType() );
 
 				pInfo->AddReceiveFileInfo( pReceiveFileInfo );
 

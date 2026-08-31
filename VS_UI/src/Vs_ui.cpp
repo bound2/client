@@ -1585,12 +1585,16 @@ void ShowItem_MouseControl(UINT message, int _x, int _y)
 			if (pSelectItem!=NULL)
 			{
 				MItem * p_item = MItem::NewItem(pSelectItem->GetItemClass());
-				p_item->SetItemType( pSelectItem->GetItemType() );	
-				p_item->SetItemOptionList( pSelectItem->GetItemOptionList() );
-				p_item->SetID( g_ui_item_max++ );
 
-				gpC_mouse_pointer->PickUpItem( p_item );
-			}			
+				if (p_item != NULL)
+				{
+					p_item->SetItemType( pSelectItem->GetItemType() );
+					p_item->SetItemOptionList( pSelectItem->GetItemOptionList() );
+					p_item->SetID( g_ui_item_max++ );
+
+					gpC_mouse_pointer->PickUpItem( p_item );
+				}
+			}
 		}
 		else if (gpC_mouse_pointer->GetPickUpItem())
 		{

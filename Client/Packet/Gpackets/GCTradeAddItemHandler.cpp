@@ -32,7 +32,7 @@ throw ( ProtocolException , Error )
 	}
 
 	//------------------------------------------------------------------------
-	// 추가되는 아이템 생성
+	// create the item being added
 	//------------------------------------------------------------------------
 	MItem* pItem = MItem::NewItem( (ITEM_CLASS)pPacket->getItemClass() );
 
@@ -126,7 +126,7 @@ throw ( ProtocolException , Error )
 				else
 				{
 					//------------------------------------------
-					// Sub Item의 정보를 설정한다.
+					// set the sub item's info.
 					//------------------------------------------
 					MItem* pSubItem = MItem::NewItem( (enum ITEM_CLASS)pSubItemInfo->getItemClass() );
 
@@ -169,7 +169,7 @@ throw ( ProtocolException , Error )
 				else
 				{
 					//------------------------------------------
-					// Sub Item의 정보를 설정한다.
+					// set the sub item's info.
 					//------------------------------------------
 					MItem* pSubItem = MItem::NewItem( (enum ITEM_CLASS)pSubItemInfo->getItemClass() );
 

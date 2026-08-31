@@ -52,7 +52,7 @@ throw ( ProtocolException , Error )
 				// 2004, 11, 11, sobeit modify start
 				if(0 == pPacket->getType()) // 길드챗 
 					UI_AddChatToHistory( str, (char *)pPacket->getSender().c_str(), 4, pPacket->getColor() );
-				else // 유니온 챗
+				else // union chat
 				{
 					char szName[128];
 					snprintf(szName, sizeof(szName), "[%s]%s", pPacket->getSendGuildName().c_str(), pPacket->getSender().c_str());
