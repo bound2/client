@@ -3497,9 +3497,13 @@ MPlayer::TraceCreatureToSpecialAction(TYPE_OBJECTID id, bool bForceAttack)
 		DEBUG_ADD_FORMAT("SKILL : %d %d", originalSkill, useSkill );
 
 		//-------------------------------------------------------
-		// [SKILLREPEAT DIAG] temporary - remove once the vampire melee
-		// repeat stutter is root-caused. Records the state every re-issue
-		// of a held-button skill sees, so the abort reason is unambiguous.
+		// [SKILLREPEAT DIAG] kept as a permanent regression signal (the
+		// 2026-08-31 stutter was root-caused with it: a learn-time server
+		// seed reaching the client as a 2 s cooldown - see
+		// docs/skill-repeat-diagnostics-2026-08-31.md). INFO level, so
+		// Release builds filter it in log_write. Records the state every
+		// re-issue of a held-button skill sees, so the abort reason is
+		// unambiguous.
 		//-------------------------------------------------------
 		DEBUG_ADD_FORMAT("[SKILLREPEAT] enter ai=%d rep=%d stop=%d act=%d cnt=%d/%d mv=%d/%d mvAct=%d used=%d trace=%02x buf=%02x",
 			originalSkill, (int)m_bRepeatAction, (int)IsStop(),
@@ -3516,7 +3520,7 @@ MPlayer::TraceCreatureToSpecialAction(TYPE_OBJECTID id, bool bForceAttack)
 				|| !(*g_pSkillInfoTable)[originalSkill].IsAvailableTime()
 				|| (*g_pSkillInfoTable)[originalSkill].IsPassive())
 			{
-				// [SKILLREPEAT DIAG] temporary
+				// [SKILLREPEAT DIAG] kept
 				DEBUG_ADD_FORMAT("[SKILLREPEAT] abort=SKILLSET avail=%d enable=%d time=%d passive=%d left=%u",
 					(int)g_pSkillAvailable->IsEnableSkill( (ACTIONINFO)originalSkill ),
 					(int)(*g_pSkillInfoTable)[originalSkill].IsEnable(),
@@ -3565,7 +3569,7 @@ MPlayer::TraceCreatureToSpecialAction(TYPE_OBJECTID id, bool bForceAttack)
 				|| IsOusters() && !(*g_pActionInfoTable)[originalSkill].IsUserOusters() && pCreature->IsOusters() && pCreature->IsPlayerOnly() && !bForceAttack				
 				) 
 			{
-				// [SKILLREPEAT DIAG] temporary
+				// [SKILLREPEAT DIAG] kept
 				DEBUG_ADD_FORMAT("[SKILLREPEAT] abort=TARGET null=%d dead=%d dark=%d",
 					(int)(pCreature==NULL),
 					(int)(pCreature!=NULL && pCreature->IsDead()),
@@ -3603,7 +3607,7 @@ MPlayer::TraceCreatureToSpecialAction(TYPE_OBJECTID id, bool bForceAttack)
 						IsOusters() && g_pZone->GetSector( GetX(), GetY() ).IsSafeOusters() && 
 						pCreature->IsOusters() && !g_pZone->GetSector( pCreature->GetX(), pCreature->GetY() ).IsSafeOusters() && pCreature->IsPlayerOnly())
 					{
-						// [SKILLREPEAT DIAG] temporary
+						// [SKILLREPEAT DIAG] kept
 						DEBUG_ADD_FORMAT("[SKILLREPEAT] abort=SAFESECTOR");
 //						UnSetLockMode();
 						UnSetRepeatAction();
@@ -3621,7 +3625,7 @@ MPlayer::TraceCreatureToSpecialAction(TYPE_OBJECTID id, bool bForceAttack)
 			//-------------------------------------------------------
 			if (pCreature->IsNPC())
 			{
-				// [SKILLREPEAT DIAG] temporary
+				// [SKILLREPEAT DIAG] kept
 				DEBUG_ADD_FORMAT("[SKILLREPEAT] abort=NPC");
 
 				TraceCreatureToBasicAction(id, false);
@@ -3865,7 +3869,7 @@ MPlayer::TraceCreatureToSpecialAction(TYPE_OBJECTID id, bool bForceAttack)
 		}
 		else
 		{
-			// [SKILLREPEAT DIAG] temporary
+			// [SKILLREPEAT DIAG] kept
 			DEBUG_ADD_FORMAT("[SKILLREPEAT] abort=NOTSTOP rep=%d act=%d cnt=%d/%d mv=%d/%d",
 				(int)m_bRepeatAction, (int)m_Action,
 				(int)m_ActionCount, (int)m_ActionCountMax,
@@ -8726,7 +8730,7 @@ MPlayer::CheckRepeatAction()
 	//----------------------------------------------------------------------
 	if (m_bKeepTraceCreature || IsRequestMode() || IsInDarkness())// || m_bTraceCreatureToForceAttack)
 	{
-		// [SKILLREPEAT DIAG] temporary
+		// [SKILLREPEAT DIAG] kept
 		if (m_bRepeatAction)
 			DEBUG_ADD_FORMAT("[SKILLREPEAT] why=KEEPTRACE keep=%d req=%d dark=%d",
 				(int)m_bKeepTraceCreature, (int)IsRequestMode(), (int)IsInDarkness());
@@ -9002,7 +9006,7 @@ MPlayer::CheckBufferAction()
 void			
 MPlayer::UnSetRepeatAction()
 {
-	// [SKILLREPEAT DIAG] temporary - only the transition matters, so stay
+	// [SKILLREPEAT DIAG] kept - only the transition matters, so stay
 	// quiet when the repeat was already off (this is called unconditionally
 	// from dozens of sites).
 	if (m_bRepeatAction)
@@ -9522,7 +9526,7 @@ MPlayer::Action()
 	// 너무 오래 반복 시키지 않게
 	if( m_nUsedActionInfo == SKILL_BLITZ_SLIDING_ATTACK || m_nUsedActionInfo == SKILL_BLAZE_WALK_ATTACK )
 	{
-		// [SKILLREPEAT DIAG] temporary
+		// [SKILLREPEAT DIAG] kept
 		if (m_bRepeatAction)
 			DEBUG_ADD_FORMAT("[SKILLREPEAT] why=BLITZBLAZE");
 
@@ -9533,7 +9537,7 @@ MPlayer::Action()
 	{
 		if(m_RepeatTimer + g_pClientConfig->REPEAT_TIME < GetTickCount())
 		{
-			// [SKILLREPEAT DIAG] temporary
+			// [SKILLREPEAT DIAG] kept
 			DEBUG_ADD_FORMAT("[SKILLREPEAT] why=REPEATTIMER timer=%u limit=%u now=%u",
 				(unsigned)m_RepeatTimer, (unsigned)g_pClientConfig->REPEAT_TIME,
 				(unsigned)GetTickCount());
@@ -9847,7 +9851,7 @@ MPlayer::Action()
 				//--------------------------------------------------------
 				if (creatureID == OBJECTID_NULL)
 				{
-					// [SKILLREPEAT DIAG] temporary
+					// [SKILLREPEAT DIAG] kept
 					if (m_bRepeatAction)
 						DEBUG_ADD_FORMAT("[SKILLREPEAT] why=NOENEMY rb=%d lb=%d", (int)g_bRButtonDown, (int)g_bLButtonDown);
 

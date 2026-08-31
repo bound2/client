@@ -2,7 +2,46 @@
 
 **Date:** 2026-08-31
 **Branch:** `diag/vampire-skill-repeat`
-**Status:** Instrumentation only — no behaviour change. Merge, measure, then revert.
+**Status:** RESOLVED — root cause found the same evening, fixed server-side
+(opendarkeden-server PR #23). The instrumentation is kept as a permanent
+regression signal; see "Keeping this" at the bottom.
+
+---
+
+## Resolution (2026-08-31 evening)
+
+The stutter was real, client-visible, and server-caused. The chain, proven by
+this instrumentation plus the server's `VampireSkillSave` rows:
+
+1. **Learning a skill seeds its server-side cooldown slot with the
+   `SkillBalance` table's MaxDelay** — 20 (= 2.0 s) for both Bloody Nail and
+   Violent Phantom — instead of the per-cast formula delay (0.6 s / 0 s). The
+   first *successful* cast overwrites ("heals") the interval with the formula
+   value and persists it.
+2. **The client re-reads every skill's delay from that slot interval on every
+   skill-info refresh** — login *and* every zone change (`GCUpdateInfo` →
+   `SkillInfoTable Init`, then per-skill `SetDelayTime(skillTurn * 100)` in
+   `GCSkillInfoHandler`). `SetDelayTime` floors anything under 1800 ms to zero,
+   so the healed values vanish — but the learn seed (2000 ms) survives the
+   floor and arms a per-cast cooldown.
+3. **The client then holds that value until the next refresh.** The visible
+   signature is `abort=SKILLSET avail=1 enable=1 time=0` with `left=` counting
+   down from ≈ (2000 − animation length) ms after every cast — a ~2.2 s cast
+   cadence against a 682–930 ms animation floor.
+4. A later zone change (or relog) after the heal delivers the small interval,
+   the floor zeroes it, and the stutter ends mid-session. This is why "relog
+   fixes it" was reported — any refresh after the first landed cast fixes it.
+
+The fix is server-side (opendarkeden-server PR #23): a freshly learned skill's
+slot now starts with a zero interval and no run-time lock; the first successful
+cast installs the real formula delay exactly as before. Attack-speed animation
+tiers are unaffected — measured post-fix at 930/806/682 ms per Bloody Nail cast
+on SLOW/NORMAL/FAST characters, so low-dex players still swing slower.
+
+The one wrong turn recorded below ("Learning a skill mid-session ... cannot
+sustain a stutter") is left in place with a correction, so the reasoning error
+is visible: the learn path itself *is* one-shot, but the seed it plants is
+re-delivered by every zone change, which is what sustained it.
 
 ---
 
@@ -318,18 +357,34 @@ Recorded so the next person does not re-walk these:
   server's delay (`GCSkillInfoHandler.cpp:130`) — but `SetNextAvailableTime()` is
   only re-armed on the inventory-item skill paths, never for creature-target
   ones, so it is a one-shot and cannot sustain a stutter.
+  **CORRECTION — this was the root cause after all**, through a delivery path
+  this ruling-out missed: the learn-time *server-side* seed (SkillBalance
+  MaxDelay, 2.0 s) is re-sent by every `GCUpdateInfo` zone change, survives
+  `SetDelayTime`'s 1800 ms floor, and *is* re-armed per cast — by
+  `MPlayer.cpp`'s `ActionToSendPacket`, which calls `SetNextAvailableTime()`
+  for every committed skill cast, not just item paths. See "Resolution" at the
+  top. Two reasoning errors stacked: the wrong `SetNextAvailableTime` call-site
+  inventory, and treating "learn path" as client-only.
 - **`AttachSelf`** (set on Bloody Nail and Violent Phantom, clear on the two
   working skills) only steers which creature the effect sprite binds to. Nothing
   in the repeat path reads it.
 
-## Removing this
+## Keeping this
 
-Every added line is tagged `[SKILLREPEAT DIAG]` in a comment:
+Decision (2026-08-31, after resolution): the instrumentation stays. The lines
+are `LOG_LEVEL_INFO`, and `log_init` (`DebugLog.cpp`) sets the runtime level to
+`LOG_LEVEL_ERROR` outside `_DEBUG`, so Release builds filter them at the first
+branch inside `log_write` — no log output, negligible cost, and any future
+repeat regression names itself in the first Debug-build log:
+
+- entries-per-commit ≈ 1.3 is healthy; sustained > 2 is a regression;
+- `abort=SKILLSET` with a large `left=` is the cooldown family (check what the
+  server sent as `skillTurn` — this whole investigation);
+- `unset ... rb=1` is the cancel family (input/picking).
+
+Every added line is still tagged `[SKILLREPEAT DIAG]` in a comment and
+greppable if removal is ever wanted:
 
 ```bash
 grep -rn "SKILLREPEAT" Client/
 ```
-
-Revert the branch once the question is settled. If it turns out to be worth
-keeping as a regression signal, the thing to keep is the entries-per-commit
-ratio — "≈1.3 when healthy" is cheap to eyeball in any future log.
