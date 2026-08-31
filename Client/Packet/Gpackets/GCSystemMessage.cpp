@@ -25,8 +25,9 @@ void GCSystemMessage::read ( SocketInputStream & iStream )
 	if ( szMessage == 0 )
 		throw InvalidProtocolException("szMessage == 0");
 
-	if ( szMessage > 256 )
-		throw InvalidProtocolException("too large message length");
+	// szMessage is a BYTE, so the old "> 256" guard here could never fire.
+	// A message of up to 255 bytes is legal; the handler copies it with
+	// bounded operations rather than trusting a length cap here.
 
 	iStream.read( m_Message , szMessage );
 

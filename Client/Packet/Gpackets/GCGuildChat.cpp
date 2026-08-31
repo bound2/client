@@ -24,8 +24,15 @@ void GCGuildChat::read ( SocketInputStream & iStream )
 
 	if ( m_Type != 0 )
 	{
+		// The guild name needs the same bound as the sender and message below:
+		// the declared packet layout caps it at 20 bytes, and the handler
+		// formats it into a fixed stack buffer.
 		BYTE szGName;
 		iStream.read(szGName);
+
+		if ( szGName > 20 )
+			throw InvalidProtocolException("too long guild name length");
+
 		if ( szGName != 0 ) iStream.read( m_SendGuildName, szGName );
 	}
 
@@ -69,6 +76,10 @@ void GCGuildChat::write ( SocketOutputStream & oStream ) const
 	if ( m_Type != 0 )
 	{
 		BYTE szGName = m_SendGuildName.size();
+
+		if ( szGName > 20 )
+			throw InvalidProtocolException("too long guild name length");
+
 		oStream.write( szGName );
 		oStream.write( m_SendGuildName );
 	}

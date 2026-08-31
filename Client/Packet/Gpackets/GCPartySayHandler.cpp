@@ -32,10 +32,13 @@ throw ( ProtocolException , Error )
 		&& g_pChatManager!=NULL)
 	{
 		//g_pClientCommunicationManager->sendPacket( pPacket->getHost() , pPacket->getPort() , &glIncomingConnectionOK );
-		char str[128];
-		char strName[128];
-		strcpy(str, pPacket->getMessage().c_str());
-		strcpy(strName, pPacket->getName().c_str());
+		// The message can be up to 128 bytes plus the terminator, so the buffers
+		// leave headroom and the copies are bounded regardless of what read()
+		// accepted.
+		char str[256];
+		char strName[256];
+		snprintf(str, sizeof(str), "%s", pPacket->getMessage().c_str());
+		snprintf(strName, sizeof(strName), "%s", pPacket->getName().c_str());
 
 		//bool bMasterWords = (strstr(strName, "GM")!=NULL);
 		bool bMasterWords = strncmp( strName, (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetString(), (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetLength() ) == 0;

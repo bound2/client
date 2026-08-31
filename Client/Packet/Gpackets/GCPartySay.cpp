@@ -19,12 +19,26 @@ void GCPartySay::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 
+	// Both lengths arrive as raw BYTEs and must be bounded here: the declared
+	// packet max size (20-byte name, 128-byte message) does not constrain the
+	// sub-reads, and the handler copies both strings into fixed buffers.
+	// The bounds mirror GCSay and GCWhisper.
 	BYTE szName;
 	iStream.read(szName);
+
+	if (szName > 20)
+		throw InvalidProtocolException("too long name length");
+
 	iStream.read(m_Name,szName);
 	iStream.read(m_Color);
-	iStream.read(szName);
-	iStream.read(m_Message,szName);
+
+	BYTE szMessage;
+	iStream.read(szMessage);
+
+	if (szMessage > 128)
+		throw InvalidProtocolException("too long message length");
+
+	iStream.read(m_Message,szMessage);
 		
 	__END_CATCH
 }
