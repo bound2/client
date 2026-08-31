@@ -6,7 +6,7 @@
 
 #ifdef __USE_MP3__
 #else
-#include "COGGSTREAM.H"
+#include "COGGSTREAM.h"
 extern COGGSTREAM*			g_pOGG;
 extern CDirectSoundBuffer*	g_pSoundBufferForOGG;
 extern FILE	*				g_oggfile;

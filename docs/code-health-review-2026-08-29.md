@@ -60,11 +60,15 @@ A subsystem-by-subsystem review surfaced **197 findings**. Every area graded **D
 
 ## Remediation Status
 
-**Updated 2026-08-31.** 24 of the 197 findings have been fixed: 11 on branch `harden/library-code-fixes` ([PR #1](https://github.com/bound2/client/pull/1)), 2 on `harden/packet-index-bounds` ([PR #4](https://github.com/bound2/client/pull/4)), and 11 on `harden/network-input`. Fixed findings carry a ✅ marker in the sections below, naming the commit and the tests covering them.
+**Updated 2026-08-31 (audio pass).** 45 of the 197 findings have been fixed: 11 on branch `harden/library-code-fixes` ([PR #1](https://github.com/bound2/client/pull/1)), 2 on `harden/packet-index-bounds` ([PR #4](https://github.com/bound2/client/pull/4)), 11 on `harden/network-input`, 4 by the earlier SDL_mixer wiring commit `c0670ae` (recorded retroactively during the audio pass), and 17 on `harden/audio-media`. Fixed findings carry a ✅ marker in the sections below, naming the commit and the tests covering them.
 
 The test-driven work is confined to code compiled into a static library, since that is the only code a test binary can link against. A second phase has since fixed seven defects in the `DarkEden` executable itself, listed under Runtime defects below; those were found by running the client rather than by this review, and none of them are among the 197 findings.
 
 A third phase (2026-08-31, branch `harden/network-input`) took on the network attack surface this review rated most serious: the shop/stash index bounds (C7, C8, done earlier in `ed4f872`), the chat/guild/system-message string bounds (C9, C10/C16, C11/C17), the peer file-transfer filename (C12), the NewItem function-pointer table (C13), the 21-byte chat rows (C14, C15/C18) and the tooltip use-after-free (C25). None of these are reachable from a test binary, so they are build-verified regression guards. The branch was put through the same eight-angle adversarial review as phase one, which found ten real defects in the fixes themselves (including a filename guard that would have broken every legitimate profile transfer, and a missed overflow sixty lines from a fixed one) — all repaired in `3bc340e`. After merging master's wire max-size reconcile, a second review (two Opus xhigh reviewers, `1200625`) found more: write-side guards that tested the BYTE-narrowed length, a guild-name cap of 20 that would disconnect on legitimate 30-byte names, a filename validator that confined escape but not scope (a peer could still drop a DLL beside the executable), and config clamp floors of 1 that hung or corrupted the chat rows. The remaining Gpackets parsers beyond these findings are still unaudited, and the data-file format-string sites (C19/C20/C22) are untouched.
+
+A fourth phase (2026-08-31, branch `harden/audio-media`) closed out the Input, Audio & Media area's sound findings. Four of them — the duplicate-buffer double free (the area's first critical), the uncompilable adapters, the self-defeating SDL_mixer include guard, and the recycled-channel confusion — turned out to have been fixed already by `c0670ae`, the commit that made sound play at all; they are now recorded as such. The branch itself fixed the rest: the PlaySound stack overflows and the format-after-Release logging, the zone-sound NULL dereference, the opening-screen modal error box, the WavePackFileManager mmio parsing, the latent CMP3/MMusic MCI defects, the CPartManager bounds/sentinel/rollover defects and the non-virtual Release() leak (test-first — the template is testable, see `tests/unit/test_part_manager.cpp`), and the compat MMCKINFO shadow. It also deleted the five stale root-level DXLib header copies (two of which were live ODR violations against the compiled dxlib layouts of g_SDLMusic and g_SDLInput), deleted both copies of the orphaned MP3/Huffman decoder — resolving the two huffman bounds findings by removal — and renamed COGGSTREAM.CPP so case-sensitive configures work. Of the area's 22 findings, only the two input Lows (the SDL input constructor and the mouse-wheel accumulator — input findings, not sound) remain open.
+
+The audio branch was put through the same adversarial review as the earlier phases (four Opus reviewers, one per commit group). It confirmed the buffer fixes, the mmio semantics (mmioRead does not clamp to the descended chunk, so canonical 16-byte PCM fmt chunks still load), the template guards, the CKINFO rename in every real inclusion order, and the SDL refcount pairing against the installed SDL2_mixer 2.8.2 sources — and found four real problems that were repaired before the branch was finalized: making Release() virtual silently broke the four dead-but-compiled sprite cache managers (reworked as the per-slot hook), renaming only COGGSTREAM.CPP would have broken case-sensitive builds at the header include (both files renamed), the sound-init error path leaked its own subsystem refcount on audio-less machines, and MIX_INIT_MP3 would have logged a spurious warning on every init since the vcpkg mixer has no MP3 decoder. The review left three recorded latents: the `strrchr(Filename.GetString(), '\\')` trio in Client/MPlayer.cpp (6526/6884/7481), a NULL-dereference the day force feedback (`CImm::m_pDevice`) is ever revived after a WAV load failure; the rejected-SetData return being indistinguishable from a no-eviction store (see the CPartManager entry); and `dxlib_sound_release` tearing the mixer down while the music slot's bookkeeping lives elsewhere — currently unreachable in the real shutdown order.
 
 ### Fixed
 
@@ -90,6 +94,26 @@ A third phase (2026-08-31, branch `harden/network-input`) took on the network at
 | `MItem::NewItem` unvalidated function-pointer table index (C13) | 🔴 Critical | `7b81ba4`, `3bc340e` |
 | 21-byte chat rows: "Dear."/"From." copies and newline wrap (C14, C15/C18) | 🔴 Critical | `c3e9937`, `3bc340e` |
 | Tooltip descriptor use-after-free on inventory delete (C25) | 🔴 Critical | `f0b8ae6` |
+| `dxlib_sound_duplicate` shared Mix_Chunk double free (C1) | 🔴 Critical | `c0670ae` |
+| SDL audio adapters uncompilable, duplicate globals | 🟠 High | `c0670ae` |
+| SDL_mixer include guard compiled the backend to a stub | 🟠 High | `c0670ae` |
+| Recycled mixer channel acted on the wrong sound | 🟡 Medium | `c0670ae` |
+| `PlaySound` unbounded strcpy of Sound.inf filenames | 🔴 Critical | `4ff97c4` |
+| `PlaySound` formats the Filename it just released | 🟡 Medium | `4ff97c4` |
+| `MZoneSoundManager::UpdateSound` NULL dereference | 🟠 High | `4ff97c4` |
+| Opening-screen modal MessageBox for the stubbed MPG | 🟠 High | `4ff97c4` |
+| `WavePackFileInfo::SaveToFileData` unchecked mmio parsing | 🟠 High | `4ff97c4` |
+| `CMP3` pointer-sized error buffer, uninitialized Play result | 🟡 Medium | `4ff97c4` |
+| `MMusic::Play` unbounded sprintf | 🟡 Medium | `4ff97c4` |
+| `CPartManager` unbounded index accessors, sentinel collision | 🟡 Medium | `6c2e37e` |
+| `CSoundPartManager::Release` hidden by non-virtual base | 🟡 Medium | `6c2e37e` |
+| LRU counter-rollover normalization | ⚪ Low | `6c2e37e` |
+| Compat MMCKINFO shadowing the real struct layout | 🟡 Medium | `d021544` |
+| Duplicate CDirectMusic.h / CDirectInput.h ODR violations | 🟠 High | `66d8637` |
+| Orphaned MP3/Huffman decoder, duplicated and unbuilt | 🟡 Medium | `66d8637` |
+| `huffman_decoder` unbounded tree walk (both copies' findings) | 🟡 Medium, ⚪ Low | `66d8637` |
+| `COGGSTREAM.CPP` case mismatch on case-sensitive configure | 🟠 High | `66d8637` |
+| SDL audio subsystem and Mix_Init never called explicitly | 🟠 High | `452e854` |
 
 ### Also fixed, not in this review
 
@@ -174,6 +198,8 @@ Every critical finding, grouped for a focused first pass. Full detail (including
 
 **Recommendation:** Either give dxlib_sound_buffer an ownership flag (`owns_chunk`) that duplicates clear, or reference-count the Mix_Chunk. dxlib_sound_free() must only call Mix_FreeChunk when it is the last/owning wrapper.
 
+> ✅ **Fixed** in `c0670ae` (the commit that made sound play at all). The decoded data lives in a reference-counted `dxlib_chunk_ref` shared by every duplicate; Mix_FreeChunk runs only when the last reference goes.
+
 ### C2. PlaySound copies a sound filename of up to 64 KB from Sound.inf into a 256-byte stack buffer with an unbounded strcpy.
 
 **Area:** Input, Audio & Media  |  **Category:** memory-safety  |  **Location:** `Client/GameMain.cpp:3651`
@@ -183,6 +209,8 @@ Every critical finding, grouped for a focused first pass. Full detail (including
 **Failure scenario:** A Sound.inf entry (shipped game data, patch payload, or a tampered install) with a filename longer than 255 bytes causes strcpy to write past `strFilename` on the stack of PlaySound, corrupting saved registers/return address. Because PlaySound is driven by gameplay events, this is remotely influenceable by whatever content the server tells the client to play.
 
 **Recommendation:** Replace with a bounded copy (`strncpy` + explicit NUL, or `snprintf`) sized to the buffer, or pass the MString's char* straight to LoadWav — the temporary copy serves no purpose.
+
+> ✅ **Fixed** in `4ff97c4` (branch `harden/audio-media`). The three live sites (the others sit inside commented-out ForceSound blocks) are truncating bounded copies; an over-long Sound.inf entry now fails to load and gets logged instead of smashing the stack. Regression guard, executable-only code.
 
 ### C3. CSpritePalBase::LoadFromFile builds the per-scanline pixel pointer table from unvalidated file offsets, so m_pPixels[] entries can point arbitrarily outside the allocation.
 
@@ -490,6 +518,8 @@ Client/MemoryPool.cpp:72 allocates each pool chunk via `CBlock *pPool = (CBlock*
 
 **Recommendation:** Either give dxlib_sound_buffer an ownership flag (`owns_chunk`) that duplicates clear, or reference-count the Mix_Chunk. dxlib_sound_free() must only call Mix_FreeChunk when it is the last/owning wrapper.
 
+> ✅ **Fixed** in `c0670ae` (the commit that made sound play at all). The decoded data lives in a reference-counted `dxlib_chunk_ref` shared by every duplicate; Mix_FreeChunk runs only when the last reference goes.
+
 #### 🔴 Critical -- PlaySound copies a sound filename of up to 64 KB from Sound.inf into a 256-byte stack buffer with an unbounded strcpy.
 
 **Category:** memory-safety  |  **Location:** `Client/GameMain.cpp:3651`
@@ -499,6 +529,8 @@ Client/MemoryPool.cpp:72 allocates each pool chunk via `CBlock *pPool = (CBlock*
 **Failure scenario:** A Sound.inf entry (shipped game data, patch payload, or a tampered install) with a filename longer than 255 bytes causes strcpy to write past `strFilename` on the stack of PlaySound, corrupting saved registers/return address. Because PlaySound is driven by gameplay events, this is remotely influenceable by whatever content the server tells the client to play.
 
 **Recommendation:** Replace with a bounded copy (`strncpy` + explicit NUL, or `snprintf`) sized to the buffer, or pass the MString's char* straight to LoadWav — the temporary copy serves no purpose.
+
+> ✅ **Fixed** in `4ff97c4` (branch `harden/audio-media`). The three live sites (the others sit inside commented-out ForceSound blocks) are truncating bounded copies; an over-long Sound.inf entry now fails to load and gets logged instead of smashing the stack. Regression guard, executable-only code.
 
 #### 🟠 High -- Two copies of CDirectMusic.h share one include guard but typedef MUSIC_TIME differently (long long vs long), giving CSDLMusic a different sizeof/layout in different translation units for a shared global.
 
@@ -510,6 +542,8 @@ Client/CDirectMusic.h:21 has `typedef long long MUSIC_TIME;`, Client/DXLib/CDire
 
 **Recommendation:** Delete the duplicate Client/CDirectSound.h, Client/CDirectMusic.h, Client/CDirectSoundStream.h, Client/CDirectInput.h and keep only the Client/DXLib copies (dxlib's include dir is already PUBLIC), or at minimum make the two MUSIC_TIME typedefs identical and give the copies distinct guards so the divergence is caught.
 
+> ✅ **Fixed** in `66d8637` (branch `harden/audio-media`). All five root copies (Client/DXLib.h included) are deleted; both VS_UI and DarkEden already had Client/DXLib on their include paths, so every bare include resolves to the single real copy. The root CDirectInput.h had additionally drifted behind the compiled CSDLInput layout (missing the m_*_held members), so this was two live ODR violations, not one.
+
 #### 🟠 High -- CAVI::OpenMPG is a permanent stub returning FALSE, so entering the opening screen always pops a blocking modal 'Not Found test.mpg' MessageBox.
 
 **Category:** correctness  |  **Location:** `Client/COpeningUpdate.cpp:50`
@@ -519,6 +553,8 @@ CAvi.cpp:21 stubs `CAVI::OpenMPG(...) { return FALSE; }` on all platforms. COpen
 **Failure scenario:** Every time the client enters MODE_OPENING it blocks on a modal Windows message box that the user must dismiss before the game proceeds — a guaranteed startup/flow interruption on a code path the game always takes. The CAvi.cpp header comment (lines 18-20) acknowledges this but the caller was never updated.
 
 **Recommendation:** Make PlayMPG a no-op (or log-only) when the AVI/MPG backend is stubbed, rather than surfacing a modal error for a feature that is deliberately unimplemented; and bound the sprintf.
+
+> ✅ **Fixed** in `4ff97c4` (branch `harden/audio-media`). PlayMPG logs a bounded message (snprintf + DEBUG_ADD) and returns; entering the opening screen no longer blocks on a click-through.
 
 #### 🟠 High -- All three SDL audio adapter files reference class names that no longer exist, so turning SDL2_mixer on (the only way to get audio) breaks the build with compile and duplicate-symbol errors.
 
@@ -530,6 +566,8 @@ After the CDirectSound->CSDLAudio / CDirectSoundStream->CSDLStream rename, the a
 
 **Recommendation:** Fix the constructor/destructor names and the `CDirectSound g_SDLAudio` declaration, move the global definitions so exactly one TU owns each, and make CMakeLists exclude the stub CDirectSound.cpp/CDirectMusic.cpp/CDirectSoundStream.cpp when the adapters are compiled.
 
+> ✅ **Fixed** in `c0670ae`. The three adapters were rewritten against the renamed classes, and Client/DXLib/CMakeLists.txt now compiles exactly one set — the adapters when SDL2_mixer is found, the stubs otherwise — so no global is defined twice.
+
 #### 🟠 High -- The SDL_mixer include is guarded by SDL_MIXER_MAJOR_VERSION, a macro that only SDL_mixer.h itself defines, so the entire audio backend always compiles to the no-op stub.
 
 **Category:** build  |  **Location:** `Client/DXLib/DXLibBackendSDL.cpp:29`
@@ -539,6 +577,8 @@ Lines 29-31 read `#ifdef SDL_MIXER_MAJOR_VERSION` / `#include <SDL_mixer.h>` / `
 **Failure scenario:** The game builds and runs with zero sound and zero music, with no diagnostic beyond CSDLAudio::Init() returning false. Because the stub CDirectSound.cpp is what actually gets linked (see the adapter finding), even the plumbing above it is inert.
 
 **Recommendation:** Include <SDL_mixer.h> unconditionally under `#ifdef HAVE_SDL2_MIXER` (the macro CMake actually defines) and switch all three `#ifdef SDL_MIXER_MAJOR_VERSION` blocks to `#ifdef HAVE_SDL2_MIXER`.
+
+> ✅ **Fixed** in `c0670ae`. The include is gated on `HAVE_SDL2_MIXER`; the later `SDL_MIXER_MAJOR_VERSION` blocks are then true because the header has actually been included, so the real implementations compile.
 
 #### 🟠 High -- SDL's audio subsystem is never initialized on Windows and Mix_Init() is never called, so even a fixed SDL_mixer build would fail to open audio or decode MP3/OGG.
 
@@ -550,6 +590,8 @@ Lines 29-31 read `#ifdef SDL_MIXER_MAJOR_VERSION` / `#include <SDL_mixer.h>` / `
 
 **Recommendation:** Add SDL_INIT_AUDIO to the subsystem init on the Windows path (Client.cpp/GameInit.cpp) or have dxlib_sound_init call SDL_InitSubSystem(SDL_INIT_AUDIO) itself, and call Mix_Init with the required decoder flags before Mix_OpenAudio.
 
+> ✅ **Fixed** in `452e854` (branch `harden/audio-media`). In practice audio worked anyway — SDL2_mixer's Mix_OpenAudio initializes the subsystem itself and loads decoders on demand — but dxlib_sound_init now calls SDL_InitSubSystem(SDL_INIT_AUDIO) and Mix_Init(MIX_INIT_OGG) explicitly rather than lean on that, and a missing decoder is logged at init. Only OGG is requested: the mixer music path is OGG-only and the vcpkg SDL2_mixer is built without MP3, so MIX_INIT_MP3 would warn on every init for a decoder nothing uses. The Mix_OpenAudio failure path undoes the subsystem init so retries cannot grow the refcount.
+
 #### 🟠 High -- MZoneSoundManager::UpdateSound dereferences the result of GetData() without a NULL check in one of three sibling branches.
 
 **Category:** correctness  |  **Location:** `Client/MZoneSoundManager.cpp:461`
@@ -559,6 +601,8 @@ At line 459-464: `ZONESOUND_NODE* pSound = GetData( zoneSoundID ); if (pSound->I
 **Failure scenario:** Player walks into a sector whose SECTORSOUND_INFO references a zone sound that is currently inside its show-hour window but whose next show time has not arrived. UpdateSound() calls GetData(zoneSoundID), gets NULL because no ZONESOUND_NODE was ever allocated for it, and calls IsLoop() on a null pointer — immediate crash on zone entry.
 
 **Recommendation:** Add `if (pSound != NULL)` around the IsLoop()/SetContinueLoop() call, matching the sibling branches.
+
+> ✅ **Fixed** in `4ff97c4` (branch `harden/audio-media`), exactly as recommended. Regression guard, executable-only code.
 
 #### 🟠 High -- WavePackFileInfo::SaveToFileData does an unbounded strcpy into a 256-byte stack buffer, leaks the mmio handle on the format-mismatch path, and allocates using an unvalidated chunk size from the WAV file.
 
@@ -570,6 +614,8 @@ Line 41-42: `char filename[256]; strcpy(filename, m_Filename.c_str());` with no 
 
 **Recommendation:** Use a bounded copy for the path, check every mmio* return value, close the handle on all exit paths (RAII or a single cleanup label), and sanity-bound cksize against the actual file size before allocating.
 
+> ✅ **Fixed** in `4ff97c4` (branch `harden/audio-media`). Every mmio return is checked, every exit path closes the handle, the path copy is length-checked, and the data chunk size is rejected when zero or larger than the parent RIFF chunk. Regression guard, executable-only code.
+
 #### 🟠 High -- CMake configure fails on any case-sensitive filesystem: the source list names Client/COGGSTREAM.cpp but the tracked file is Client/COGGSTREAM.CPP.
 
 **Category:** portability  |  **Location:** `CMakeLists.txt:593`
@@ -579,6 +625,8 @@ CMakeLists.txt:593 does `list(APPEND CLIENT_MAIN_SOURCES Client/COGGSTREAM.cpp)`
 **Failure scenario:** A contributor runs `cmake ..` on Linux (a platform the README and CLAUDE.md both claim support for) and gets `Cannot find source file: Client/COGGSTREAM.cpp` before any compilation starts. On Windows the same file is listed twice under differing case, which risks LNK2005 duplicate symbols for COGGSTREAM if CMake generates two object files.
 
 **Recommendation:** Rename the file to Client/COGGSTREAM.cpp (git mv, case-only rename) and drop the redundant explicit list(APPEND), letting the glob pick it up.
+
+> ✅ **Fixed** in `66d8637` (branch `harden/audio-media`). Both COGGSTREAM.CPP and COGGSTREAM.H are renamed (renaming only the .cpp, the first draft, would have made the newly-globbed file fail at its own `#include "COGGSTREAM.h"` on a case-sensitive filesystem — caught by the adversarial review), the two "COGGSTREAM.H" include spellings and CGameUpdate.cpp's "cmp3.h" are aligned with the tracked names, and the redundant explicit list(APPEND) is dropped.
 
 #### 🟡 Medium -- The compat MMCKINFO in AudioTypes.h has different fields and a different layout from the real Windows MMCKINFO, and both definitions are live in the same program.
 
@@ -590,6 +638,8 @@ AudioTypes.h:87-93 defines `typedef struct _MMCKINFO { FOURCC ckid; FOURCC fccTy
 
 **Recommendation:** Give the compat struct a distinct name (e.g. DXLIB_CKINFO) so the two can never be confused, or drop the compat definition entirely now that no code parses RIFF chunks outside WavePackFileManager.cpp.
 
+> ✅ **Fixed** in `d021544` (branch `harden/audio-media`). The compat struct is now DXLIB_CKINFO, used only by the CSDLStream stubs; the FOURCC/HMMIO typedefs keep the include-guard check since those must still defer to the real headers.
+
 #### 🟡 Medium -- CMP3::GetErrorString passes sizeof(pointer) as the destination buffer length to mciGetErrorString, and CMP3::Play can return an uninitialized DWORD.
 
 **Category:** memory-safety  |  **Location:** `Client/CMP3.cpp:528`
@@ -599,6 +649,8 @@ Line 528: `mciGetErrorString(dwErrCode, lpszErrString, sizeof(lpszErrString));` 
 **Failure scenario:** If __USE_MP3__ is ever enabled: GetErrorString silently truncates every MCI error message to a few bytes (or, on the other reading, misreports capacity to the API); Play() called while the device is MCI_MODE_NOT_READY returns an indeterminate value that callers test as a success/failure code — undefined behavior per the standard.
 
 **Recommendation:** Pass an explicit length parameter to GetErrorString, and initialize dwResult (e.g. to a defined error code) at declaration.
+
+> ✅ **Fixed** in `4ff97c4` (branch `harden/audio-media`). GetErrorString takes the capacity from the caller (there were no existing callers to update), and Play initializes dwResult to MCIERR_DEVICE_NOT_READY. Still latent behind __USE_MP3__.
 
 #### 🟡 Medium -- CPartManager's index-based accessors perform no bounds checking on the caller-supplied index used to address m_pPartIndex.
 
@@ -610,6 +662,8 @@ Line 528: `mciGetErrorString(dwErrCode, lpszErrString, sizeof(lpszErrString));` 
 
 **Recommendation:** Bounds-check index against m_nIndex in IsDataNULL/SetData/GetData (returning a defined result on overflow), clamp maxPart to the PartIndexType sentinel in Init(), and guard GetLRU against an empty LRU list.
 
+> ✅ **Fixed** in `6c2e37e` (branch `harden/audio-media`), test-first: CPartManager.h is a self-contained template, so `tests/unit/test_part_manager.cpp` pins the rejected out-of-range indices, the sentinel clamps (a 255-part BYTE pool becomes 254, not 0xFF), and the empty-list guard.
+
 #### 🟡 Medium -- CSoundPartManager::Release() hides a non-virtual base Release(), so the base class's own Init() path frees the cache array without releasing the sound buffers it holds.
 
 **Category:** memory-safety  |  **Location:** `Client/CSoundPartManager.cpp:12`
@@ -619,6 +673,8 @@ Line 528: `mciGetErrorString(dwErrCode, lpszErrString, sizeof(lpszErrString));` 
 **Failure scenario:** InitSound() (GameInit.cpp:986) calls `g_pSoundManager->Init(g_pSoundTable->GetSize(), g_pClientConfig->MAX_SOUNDPART)`. Any code path that reaches Init() on a manager still holding loaded sounds — a re-init without an intervening UnInitSound(), or a future caller that resizes the cache — leaks up to MAX_SOUNDPART (100) Mix_Chunks with no way to recover them.
 
 **Recommendation:** Make CPartManager::Release() and ~CPartManager() virtual, or add a protected virtual `OnEvictData(DataType&)` hook that the base calls before freeing so subclasses can release resources regardless of which Release() is entered.
+
+> ✅ **Fixed** in `6c2e37e` (branch `harden/audio-media`), via the hook variant of this recommendation: a protected virtual `OnReleaseData(DataType&)` that the base Release() calls per slot, which CSoundPartManager overrides to free each cached buffer. Release() itself deliberately stays non-virtual — the adversarial review of the branch caught that making it virtual (the first draft) silently broke CShadowPartManager and the three texture managers, whose shadowing Release() frees dimension tables their Clear() needs a base re-Init to preserve. `tests/unit/test_part_manager.cpp` asserts a re-Init reaches the hook for every stored slot.
 
 #### 🟡 Medium -- About 180 KB of MP3/Huffman decoder source exists in two duplicated copies that no CMakeLists compiles, while root CMakeLists comments assert they are built into dxlib.
 
@@ -630,6 +686,8 @@ Line 528: `mciGetErrorString(dwErrCode, lpszErrString, sizeof(lpszErrString));` 
 
 **Recommendation:** Delete one copy of each duplicated decoder file and either add the surviving copies to DXLIB_SOURCES or remove them outright; correct the now-inaccurate exclusion comments at root CMakeLists.txt:640-669.
 
+> ✅ **Fixed** in `66d8637` (branch `harden/audio-media`). Both copies are deleted outright — nothing outside the family referenced its symbols, and MP3/OGG decoding comes from SDL2_mixer — and the false CMake comments went with them.
+
 #### 🟡 Medium -- The SDL sound backend caches a mixer channel index that SDL_mixer recycles, so stop/volume/halt operations act on whatever sound now owns that channel.
 
 **Category:** correctness  |  **Location:** `Client/DXLib/DXLibBackendSDL.cpp:632`
@@ -639,6 +697,8 @@ Line 528: `mciGetErrorString(dwErrCode, lpszErrString, sizeof(lpszErrString));` 
 **Failure scenario:** Sound A plays on channel 5 and finishes; `playing` stays 1 and `channel` stays 5. Sound B is then assigned channel 5. A call to g_SDLAudio.Stop(A) or the free path in ReleaseTerminatedDuplicateBuffer halts sound B mid-playback; g_SDLAudio.SubVolumeFromMax(A, ...) silences B; IsPlay(A) reports true because B is audible. Audio cuts out and volume/panning apply to the wrong sounds.
 
 **Recommendation:** Register a Mix_ChannelFinished callback that clears the owning wrapper's channel/playing state, and verify `Mix_GetChunk(channel) == sound->chunk` before acting on a cached channel index.
+
+> ✅ **Fixed** in `c0670ae`. A `g_channel_owner` table records which buffer most recently started on each channel, and every stop/volume/pan/is-playing operation first verifies the buffer still owns its remembered channel.
 
 #### 🟡 Medium -- huffman_decoder's tree-walk bound uses ht->treelen (table 0, whose treelen is 0) instead of h->treelen, disabling the bounds check and allowing out-of-range reads of the Huffman value tables.
 
@@ -650,6 +710,8 @@ The decode loop at lines 410-427 ends with `} while (level || ((unsigned int)poi
 
 **Recommendation:** Restore the reference-decoder bound (`point < h->treelen`), add an explicit range check before every `h->val[point]` access, and initialize *x/*y (or return early) on the error path.
 
+> ✅ **Resolved by removal** in `66d8637` (branch `harden/audio-media`): the orphaned decoder — both copies — is deleted rather than patched (see the dead-decoder finding above).
+
 #### 🟡 Medium -- On WAV load failure PlaySound releases the sound table's Filename MString and then immediately formats that now-NULL pointer with %s.
 
 **Category:** correctness  |  **Location:** `Client/GameMain.cpp:3661`
@@ -659,6 +721,8 @@ At GameMain.cpp:3661-3664: `(*g_pSoundTable)[soundID].Filename.Release();` follo
 **Failure scenario:** In a debug build, the first failure to load any WAV passes a NULL pointer to a %s conversion. MSVC's CRT prints '(null)' but this is not portable — glibc/other CRTs and any custom formatter in DEBUG_ADD_FORMAT will dereference it and crash on the exact code path that is supposed to report the error.
 
 **Recommendation:** Capture the filename into a local (or emit the message) before calling Filename.Release().
+
+> ✅ **Fixed** in `4ff97c4` (branch `harden/audio-media`). The log line formats the bounded local copy and runs before Release() at all three sites.
 
 #### 🟡 Medium -- MMusic::Play formats an unbounded filename into a 256-byte stack buffer with sprintf.
 
@@ -670,6 +734,8 @@ Line 147 declares `char buffer[256];` and line 161 does `sprintf(buffer, "open %
 
 **Recommendation:** Use snprintf with sizeof(buffer), or build the MCI command string with a std::string.
 
+> ✅ **Fixed** in `4ff97c4` (branch `harden/audio-media`), with snprintf. Still latent behind __USE_REAL_MIDI__.
+
 #### ⚪ Low -- The LRU counter-rollover normalization subtracts the minimum inside the loop after that entry has already been zeroed, so only entries before the minimum are corrected.
 
 **Category:** correctness  |  **Location:** `Client/CPartManager.h:513`
@@ -679,6 +745,8 @@ Lines 512-516: `int leastTime = m_pLastTime[leastTimeIndex];` (computed but neve
 **Failure scenario:** After ~4 billion GetData() calls the rollover path runs and leaves the timestamp array in a mixed state, so m_Counter is reset to a value that can be below existing timestamps and LRU eviction picks the wrong entries. Practically unreachable in a game session, but the dead `leastTime` local shows the intent was the opposite.
 
 **Recommendation:** Use the captured `leastTime` local inside the loop instead of re-reading m_pLastTime[leastTimeIndex].
+
+> ✅ **Fixed** in `6c2e37e` (branch `harden/audio-media`), exactly as recommended; `tests/unit/test_part_manager.cpp` drives the counter to the rollover and asserts every timestamp is normalized.
 
 #### ⚪ Low -- The SDL input constructor leaves m_bSwapMouseButtons uninitialized, and CSDLInput::s_KeyName has no definition in the SDL build.
 
@@ -2206,6 +2274,8 @@ Client/framelib/TArray.h and Client/SpriteLib/TArray.h define the same global te
 
 **Recommendation:** Collapse each pair to a single shared header/source (one TArray.h in a common include directory, one huffman/bit-reserve pair), then correct the CMakeLists comment to say the MP3 decoder is currently unbuilt rather than claiming it lives in dxlib.
 
+> ⚠ **Partly resolved** in `66d8637` (branch `harden/audio-media`): the huffman/BIT_RES pairs, the rest of the MP3 decoder, and the false CMakeLists comments are deleted (see the dead-decoder finding in Input, Audio & Media). The two divergent TArray copies remain open.
+
 #### 🟡 Medium -- MemoryPool::Alloc ignores the requested allocation size and the class operator new overrides discard their size_t parameter, so any new subclass silently gets a block sized for its base.
 
 **Category:** memory-safety  |  **Location:** `Client/MemoryPool.cpp:56`
@@ -2267,6 +2337,8 @@ Client/huffman.cpp:415-432 walks the decoder tree with `point` and terminates on
 **Failure scenario:** If MP3 playback is re-enabled, an .mp3 whose bitstream reaches ValTab24 index 310 with a set bit drives point to 560 and the decoder reads past the end of the static table — an out-of-bounds read whose extent is controlled by whatever bytes follow the array.
 
 **Recommendation:** Change the loop condition to use h->treelen, and add an explicit `if (point >= (int)h->treelen) return 1;` guard inside the chaining loops at lines 424 and 428 before indexing. If MP3 support is not coming back, delete both copies rather than leaving them compiled.
+
+> ✅ **Resolved by removal** in `66d8637` (branch `harden/audio-media`). MP3 support is not coming back — SDL2_mixer decodes MP3/OGG — so both copies of the whole decoder family are deleted rather than patched.
 
 ---
 

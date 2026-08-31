@@ -56,7 +56,7 @@ public:
 	DWORD CurrentLength();
 	DWORD CurrentLength(LPSTR lpszReturn);
 	DWORD StatusMode();
-	void GetErrorString(DWORD dwErrCode, LPSTR lpszErrString);
+	void GetErrorString(DWORD dwErrCode, LPSTR lpszErrString, UINT cchErrString);
 	bool IsReady();
 	bool IsPlay();
 	bool IsPause();

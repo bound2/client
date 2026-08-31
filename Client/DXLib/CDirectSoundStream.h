@@ -60,7 +60,7 @@ class CSDLStream {
 		BOOL					RestoreBuffers( BOOL bLooped );
 
 		BOOL					Reset();
-		HRESULT					WaveReadFile( HMMIO hmmioIn, UINT cbRead, BYTE* pbDest, MMCKINFO* pckIn, UINT* cbActualRead );
+		HRESULT					WaveReadFile( HMMIO hmmioIn, UINT cbRead, BYTE* pbDest, DXLIB_CKINFO* pckIn, UINT* cbActualRead );
 
 	protected :
 		BOOL					m_bLoad;
@@ -85,8 +85,8 @@ class CSDLStream {
 		// 가장 최근에 load한 Wav에 대한 정보
 		WAVEFORMATEX			m_wavefmt;        // Pointer to WAVEFORMATEX structure
 		HMMIO					m_hmmioIn;     // MM I/O handle for the WAVE
-		MMCKINFO				m_ckIn;        // Multimedia RIFF chunk
-		MMCKINFO				m_ckInRiff;    // Use in opening a WAVE file
+		DXLIB_CKINFO			m_ckIn;        // Multimedia RIFF chunk
+		DXLIB_CKINFO			m_ckInRiff;    // Use in opening a WAVE file
 
 		LONG					m_MaxVolume;		// 현재의 최대 소리 크기
 };

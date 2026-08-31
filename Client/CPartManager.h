@@ -86,19 +86,28 @@ class CPartManager {
 		
 	public :
 		CPartManager();
-		~CPartManager();
+		virtual ~CPartManager();
 
 		//-------------------------------------------------------
 		// Init/Release
 		//-------------------------------------------------------
+		// Release() stays non-virtual on purpose: several subclasses
+		// (CShadowPartManager and the texture managers) shadow it with a
+		// Release() that must NOT run when the base re-initializes -
+		// their Clear() relies on Init() preserving their own tables.
+		// Subclasses that hold resources in the data slots free them in
+		// OnReleaseData() below, which Release() calls per slot no matter
+		// which path entered it (a re-Init included).
 		void			Init(IndexType maxIndex, PartIndexType maxPart);
 		void			Release();
 
 		//-------------------------------------------------------
 		// 그 index에 관련된 data가 생성되어 있는가?
 		//-------------------------------------------------------
-		bool			IsDataNULL(IndexType index)		{ return m_pPartIndex[index]==m_PartIndexNULL; }
-		bool			IsDataNotNULL(IndexType index)	{ return m_pPartIndex[index]!=m_PartIndexNULL; }
+		// An out-of-range index has no data; callers feed indices from
+		// data files, so answer instead of indexing past m_pPartIndex.
+		bool			IsDataNULL(IndexType index)		{ return index>=m_nIndex || m_pPartIndex[index]==m_PartIndexNULL; }
+		bool			IsDataNotNULL(IndexType index)	{ return index<m_nIndex && m_pPartIndex[index]!=m_PartIndexNULL; }
 
 		//-------------------------------------------------------
 		// Get / Set		
@@ -114,6 +123,16 @@ class CPartManager {
 		PartIndexType	GetMaxPartIndex() const			{ return m_nPart; }
 
 	protected :
+		//-------------------------------------------------------
+		// Called by Release() for every data slot before the arrays are
+		// freed, so a subclass owning resources in its slots (e.g.
+		// CSoundPartManager's sound buffers) can free them regardless of
+		// which path entered Release(). During the base destructor this
+		// resolves to this no-op - a subclass destructor must call
+		// Release() itself (CSoundPartManager does).
+		//-------------------------------------------------------
+		virtual void	OnReleaseData(DataType& data)	{ (void)data; }
+
 		//-------------------------------------------------------
 		// Least_Recently_Used PartIndex를 찾아낸다.
 		//-------------------------------------------------------
@@ -214,6 +233,19 @@ CPartManager<IndexType, PartIndexType, DataType>::Init(IndexType maxIndex, PartI
 	}
 
 	//------------------------------------------------------
+	// The all-ones value of each type is reserved as the NULL
+	// sentinel, so neither count may reach it.
+	//------------------------------------------------------
+	if (maxIndex >= m_IndexNULL)
+	{
+		maxIndex = m_IndexNULL - 1;
+	}
+	if (maxPart >= m_PartIndexNULL)
+	{
+		maxPart = m_PartIndexNULL - 1;
+	}
+
+	//------------------------------------------------------
 	// PartIndexType을 m_nIndex개 생성한다.
 	//------------------------------------------------------
 	m_nIndex = maxIndex;
@@ -267,6 +299,11 @@ CPartManager<IndexType, PartIndexType, DataType>::Release()
 
 	if (m_pData!=NULL)
 	{
+		for (int i=0; i<m_nPart; i++)
+		{
+			OnReleaseData(m_pData[i]);
+		}
+
 		delete [] m_pData;
 		m_pData = NULL;
 		m_nPart = 0;
@@ -304,6 +341,11 @@ template <class IndexType, class PartIndexType, class DataType>
 void
 CPartManager<IndexType, PartIndexType, DataType>::SetData(IndexType index, const DataType& data)
 {
+	if (index >= m_nIndex || m_nPart == 0)
+	{
+		return;
+	}
+
 	// 추가할 위치
 	PartIndexType	newPartIndex = GetLRU();
 
@@ -357,6 +399,11 @@ template <class IndexType, class PartIndexType, class DataType>
 IndexType
 CPartManager<IndexType, PartIndexType, DataType>::SetData(IndexType index, const DataType& data, DataType& oldData)
 {
+	if (index >= m_nIndex || m_nPart == 0)
+	{
+		return m_IndexNULL;
+	}
+
 	// 추가할 위치
 	PartIndexType	newPartIndex = GetLRU();
 
@@ -440,6 +487,11 @@ template <class IndexType, class PartIndexType, class DataType>
 bool
 CPartManager<IndexType, PartIndexType, DataType>::GetData(IndexType index, DataType& data)
 {
+	if (index >= m_nIndex)
+	{
+		return false;
+	}
+
 	PartIndexType partIndex = m_pPartIndex[index];
 
 	//------------------------------------------------------
@@ -509,10 +561,13 @@ CPartManager<IndexType, PartIndexType, DataType>::GetData(IndexType index, DataT
 		}
 
 		// 모두 가장 작은 시간만큼 뺀다.
-		int leastTime = m_pLastTime[leastTimeIndex];
+		// Subtract the captured minimum, not the array slot: the slot
+		// becomes 0 the moment its own iteration runs, which used to
+		// leave every entry after it unnormalized.
+		DWORD leastTime = m_pLastTime[leastTimeIndex];
 		for (int i=0; i<m_nPart; i++)
 		{
-			m_pLastTime[i] -= m_pLastTime[leastTimeIndex];
+			m_pLastTime[i] -= leastTime;
 		}
 
 		// Counter는 현재꺼 중에서 가장 큰 시간의 것이다.
@@ -547,6 +602,13 @@ CPartManager<IndexType, PartIndexType, DataType>::GetLRU() const
 	//---------------------------------------------------
 	// LRU list의 tail이 LRU index이다.
 	//---------------------------------------------------
+	// Full but with an empty LRU list only happens when m_nPart is 0;
+	// callers guard that, but never dereference rbegin() of an empty list.
+	if (m_listLRU.empty())
+	{
+		return 0;
+	}
+
 	PartIndexType leastTimeIndex = *m_listLRU.rbegin();
 
 

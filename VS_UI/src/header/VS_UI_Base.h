@@ -11,11 +11,9 @@
 
 #include "BasicS.h"
 #include "DLL.h"
-/* Explicit path: plain "DXLib.h" is ambiguous with the stale, unmigrated
-   Client/DXLib.h (which pulls in Client/CDirectSoundStream.h etc. - the
-   pre-SDL versions that still expect real <MMSystem.h> types) since
-   Client/ is also on the include path.
-   Must come before GL_import.h: GL_import.h declares a SetSurfaceInfo()
+/* The stale Client/DXLib.h duplicate this path used to disambiguate
+   against is deleted (2026-08-31); the explicit path stays because it
+   must come before GL_import.h: GL_import.h declares a SetSurfaceInfo()
    overload that takes a DDSURFACEDESC2*, a type DXLib/CDirectDraw.h
    defines. */
 #include "DXLib/DXLib.h"

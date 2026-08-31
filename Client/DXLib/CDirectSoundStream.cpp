@@ -86,7 +86,7 @@ BOOL CSDLStream::Reset()
 }
 
 HRESULT CSDLStream::WaveReadFile(HMMIO hmmioIn, UINT cbRead, BYTE* pbDest,
-	MMCKINFO* pckIn, UINT* cbActualRead)
+	DXLIB_CKINFO* pckIn, UINT* cbActualRead)
 {
 	// Not implemented - Windows multimedia API only
 	(void)hmmioIn;

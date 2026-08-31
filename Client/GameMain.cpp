@@ -3651,9 +3651,12 @@ PlaySound(TYPE_SOUNDID soundID, bool repeat, int x, int y)
 				return;
 			}					
 
+			// Sound.inf is data, not code: a filename longer than the buffer
+			// is truncated so the load fails and gets logged, not a smashed stack.
 			char strFilename[256];
-			strcpy(strFilename, pFilename);
- 			
+			strncpy(strFilename, pFilename, sizeof(strFilename)-1);
+			strFilename[sizeof(strFilename)-1] = '\0';
+
 			LPDIRECTSOUNDBUFFER pBuffer = g_SDLAudio.LoadWav( strFilename );
 			//LPDIRECTSOUNDBUFFER	pBuffer = g_pWavePackFileManager->LoadFromFileData(soundID);
 
@@ -3662,13 +3665,13 @@ PlaySound(TYPE_SOUNDID soundID, bool repeat, int x, int y)
 			//-----------------------------------------------------------
 			if (pBuffer==NULL)
 			{
-				(*g_pSoundTable)[soundID].Filename.Release();
 #ifdef PLATFORM_WINDOWS
-				DEBUG_ADD_FORMAT("[Error] Failed to Load WAV. id=%d, fn=%s", soundID, (*g_pSoundTable)[soundID].Filename );
+				DEBUG_ADD_FORMAT("[Error] Failed to Load WAV. id=%d, fn=%s", soundID, strFilename );
 #else
 				// MString debug output on non-Windows
 				printf("[Error] Failed to Load WAV. id=%d\n", soundID);
 #endif // PLATFORM_WINDOWS
+				(*g_pSoundTable)[soundID].Filename.Release();
 			}
 			else
 			//-----------------------------------------------------------
@@ -3840,8 +3843,11 @@ PlaySound(TYPE_SOUNDID soundID)
 			return;
 		}
 
+		// Sound.inf is data, not code: a filename longer than the buffer
+		// is truncated so the load fails and gets logged, not a smashed stack.
 		char strFilename[256];
-		strcpy(strFilename, pFilename);
+		strncpy(strFilename, pFilename, sizeof(strFilename)-1);
+		strFilename[sizeof(strFilename)-1] = '\0';
  		LPDIRECTSOUNDBUFFER pBuffer = g_SDLAudio.LoadWav( strFilename );
 		//LPDIRECTSOUNDBUFFER	pBuffer = g_pWavePackFileManager->LoadFromFileData(soundID);
 
@@ -3850,12 +3856,12 @@ PlaySound(TYPE_SOUNDID soundID)
 		//-----------------------------------------------------------
 		if (pBuffer==NULL)
 		{
-			(*g_pSoundTable)[soundID].Filename.Release();
 #ifdef PLATFORM_WINDOWS
-			DEBUG_ADD_FORMAT("[Error] Failed to Load WAV. id=%d, fn=%s", soundID, (*g_pSoundTable)[soundID].Filename );
+			DEBUG_ADD_FORMAT("[Error] Failed to Load WAV. id=%d, fn=%s", soundID, strFilename );
 #else
 			printf("[Error] Failed to Load WAV. id=%d\n", soundID);
 #endif // PLATFORM_WINDOWS
+			(*g_pSoundTable)[soundID].Filename.Release();
 		}
 		//-----------------------------------------------------------
 		// Load에 성공 했으면...
@@ -3965,8 +3971,11 @@ void PlaySoundForce(TYPE_SOUNDID soundID)
 			return;
 		}
 
+		// Sound.inf is data, not code: a filename longer than the buffer
+		// is truncated so the load fails and gets logged, not a smashed stack.
 		char strFilename[256];
-		strcpy(strFilename, pFilename);
+		strncpy(strFilename, pFilename, sizeof(strFilename)-1);
+		strFilename[sizeof(strFilename)-1] = '\0';
  		LPDIRECTSOUNDBUFFER pBuffer = g_SDLAudio.LoadWav( strFilename );
 		//LPDIRECTSOUNDBUFFER	pBuffer = g_pWavePackFileManager->LoadFromFileData(soundID);
 
@@ -3975,13 +3984,13 @@ void PlaySoundForce(TYPE_SOUNDID soundID)
 		//-----------------------------------------------------------
 		if (pBuffer==NULL)
 		{
-			(*g_pSoundTable)[soundID].Filename.Release();
 #ifdef PLATFORM_WINDOWS
-			DEBUG_ADD_FORMAT("[Error] Failed to Load WAV. id=%d, fn=%s", soundID, (*g_pSoundTable)[soundID].Filename );
+			DEBUG_ADD_FORMAT("[Error] Failed to Load WAV. id=%d, fn=%s", soundID, strFilename );
 #else
 			// MString debug output on non-Windows
 			printf("[Error] Failed to Load WAV. id=%d\n", soundID);
 #endif // PLATFORM_WINDOWS
+			(*g_pSoundTable)[soundID].Filename.Release();
 		}
 		//-----------------------------------------------------------
 		// Load에 성공 했으면...

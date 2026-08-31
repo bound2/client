@@ -23,13 +23,16 @@ typedef struct IDirectSoundBuffer* LPDIRECTSOUNDBUFFER;
 class CSoundPartManager : public CPartManager<WORD, BYTE, LPDIRECTSOUNDBUFFER> {
 	public :
 		CSoundPartManager()		{}
-		~CSoundPartManager()	{ Release(); }
-
-		void			Release();
+		// Release() here still dispatches to the derived OnReleaseData -
+		// the base destructor's own Release() call no longer would.
+		virtual ~CSoundPartManager()	{ Release(); }
 
 		void			Stop();
 
 	protected :
+		// Frees one cached sound buffer; the base Release() calls this
+		// for every slot, so a re-Init no longer leaks the cache.
+		virtual void	OnReleaseData(LPDIRECTSOUNDBUFFER& buffer);
 
 };
 

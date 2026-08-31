@@ -6,31 +6,19 @@
 #include "CDirectSound.h"
 
 //-----------------------------------------------------------------------------
-// Release
+// OnReleaseData
+//-----------------------------------------------------------------------------
+// CPartManager::Release() 가 slot마다 불러준다.
 //-----------------------------------------------------------------------------
 void
-CSoundPartManager::Release()
+CSoundPartManager::OnReleaseData(LPDIRECTSOUNDBUFFER& buffer)
 {
-	//---------------------------------------------------
-	// 내부에 있는 LPDIRECTSOUNDBUFFER를 다 지워준다.
-	//---------------------------------------------------
-	if (m_pData!=NULL)
+	if (buffer!=NULL)
 	{
-		for (int i=0; i<m_nPart; i++)
-		{
-			if (m_pData[i]!=NULL)
-			{
-				g_SDLAudio.Stop(m_pData[i]);
-				g_SDLAudio.Release(m_pData[i]);
-				m_pData[i] = NULL;
-			}
-		}
+		g_SDLAudio.Stop(buffer);
+		g_SDLAudio.Release(buffer);
+		buffer = NULL;
 	}
-
-	//---------------------------------------------------
-	// base class release
-	//---------------------------------------------------
-	CPartManager<WORD, BYTE, LPDIRECTSOUNDBUFFER>::Release();
 }
 
 //-----------------------------------------------------------------------------

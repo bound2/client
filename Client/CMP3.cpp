@@ -371,7 +371,10 @@ DWORD CMP3::Open(LPCSTR lpcszFileName)
 
 DWORD CMP3::Play(bool bLoop)
 {
-  DWORD          dwResult, dwStatus;
+  // Callers test the return as an MCI error code; leaving it
+  // uninitialized on the NOT_READY path returned garbage.
+  DWORD          dwResult = MCIERR_DEVICE_NOT_READY;
+  DWORD          dwStatus;
   MCI_PLAY_PARMS mciPlayParms;
 
 	dwStatus = StatusMode();
@@ -523,9 +526,11 @@ void CMP3::MinsFromSecs(DWORD dwLength, LPSTR lpszReturn)
 
 
 // 전달 받은 코드에 해당하는 에러 메시지를 반환
-void CMP3::GetErrorString(DWORD dwErrCode, LPSTR lpszErrString)
+void CMP3::GetErrorString(DWORD dwErrCode, LPSTR lpszErrString, UINT cchErrString)
 {
-	mciGetErrorString(dwErrCode, lpszErrString, sizeof(lpszErrString));
+	// sizeof(lpszErrString) told the API the buffer was pointer-sized;
+	// the capacity has to come from the caller.
+	mciGetErrorString(dwErrCode, lpszErrString, cchErrString);
 	return;
 }
 
@@ -721,9 +726,9 @@ void CMP3::MinsFromSecs(DWORD dwLength, LPSTR lpszReturn)
 	(void)dwLength;
 }
 
-void CMP3::GetErrorString(DWORD dwErrCode, LPSTR lpszErrString)
+void CMP3::GetErrorString(DWORD dwErrCode, LPSTR lpszErrString, UINT cchErrString)
 {
-	if (lpszErrString) lpszErrString[0] = '\0';
+	if (lpszErrString && cchErrString > 0) lpszErrString[0] = '\0';
 	(void)dwErrCode;
 }
 

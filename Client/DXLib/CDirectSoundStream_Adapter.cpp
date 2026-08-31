@@ -178,7 +178,7 @@ BOOL CSDLStream::Reset()
 
 /* Wave read file (stub for SDL backend) */
 HRESULT CSDLStream::WaveReadFile(HMMIO hmmioIn, UINT cbRead, BYTE* pbDest,
-	MMCKINFO* pckIn, UINT* cbActualRead)
+	DXLIB_CKINFO* pckIn, UINT* cbActualRead)
 {
 	// Not applicable for SDL backend
 	return S_OK;

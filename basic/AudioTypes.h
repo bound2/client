@@ -78,7 +78,7 @@
 	Replaces DirectX multimedia types.
 -----------------------------------------------------------------------------*/
 
-/* HMMIO/MMCKINFO: skip our compat definitions if the real <mmsystem.h>/
+/* FOURCC/HMMIO: skip our compat typedefs if the real <mmsystem.h>/
    <mmiscapi.h> was already included earlier in this translation unit (e.g.
    CMP3.cpp/MMusic.cpp still call real MCI/mmio APIs) - defining both is an
    incompatible redefinition (error C2371/C2011). _INC_MMSYSTEM and
@@ -87,15 +87,21 @@
 /* Forward declarations */
 typedef DWORD FOURCC;
 typedef void* HMMIO;
+#endif /* !_INC_MMSYSTEM && !_MMISCAPI_H_ */
 
-/* Multimedia RIFF chunk information */
-typedef struct _MMCKINFO {
+/* Multimedia RIFF chunk information for the dxlib stream stubs.
+   Deliberately NOT named MMCKINFO: the real <mmsystem.h> struct has five
+   members in a different order (ckid, cksize, fccType, dwDataOffset,
+   dwFlags), so a translation unit mixing the two names across a call
+   boundary would read every field at the wrong offset. Code that parses
+   RIFF chunks with the real mmio API (WavePackFileManager.cpp) uses the
+   real MMCKINFO from <mmsystem.h> instead. */
+typedef struct _DXLIB_CKINFO {
     FOURCC  ckid;
     FOURCC  fccType;
     DWORD   dwDataOffset;
     DWORD   dwSize;
-} MMCKINFO;
-#endif /* !_INC_MMSYSTEM && !_MMISCAPI_H_ */
+} DXLIB_CKINFO;
 
 /* DSBPOSITIONNOTIFY: same idea, deferring to the real <dsound.h> if it was
    already included earlier in this translation unit. __DSOUND_INCLUDED__ is
