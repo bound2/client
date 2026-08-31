@@ -1,8 +1,4 @@
-# client
-
-If you're a player, rather than a developer, just follow the [单机版教程](./standalone_version.md)
-
-TL;DR
+# opendarkeden-client
 
 ## Build on Windows (from scratch)
 
@@ -248,37 +244,6 @@ The C++ AddressSanitizer component is missing — see step 5. `cl.exe` accepts
 configure step: the copy happens at configure time, so a build tree generated
 before the component was installed will not have it.
 
-## Legacy VC6 build (deprecated)
-
-The original VC6 + DirectX 9 build. Kept for reference only — use the CMake
-build above.
-
-Get the xerces-c lib 3.2.3, unzip it to the client project root path.
-You can get it from the internet or here is a [mirror file](https://github.com/opendarkeden/client/raw/data/xerces-c-3.2.3.zip).
-
-The directory then looks like this:
-
-```
-$ ls -lah
-total 202K
-drwxr-xr-x 1 genius 197121   0 Jun  9 10:21 ./
-drwxr-xr-x 1 genius 197121   0 Jun  9 09:53 ../
-drwxr-xr-x 1 genius 197121   0 Jun  9 10:21 .git/
--rw-r--r-- 1 genius 197121 384 Jun  9 10:13 .gitignore
-...
-drwxr-xr-x 1 genius 197121   0 Oct 10  2015 xerces/
-```
-
-Get the directx9 lib, it's staled and hard to find, here is a [mirror file](https://github.com/opendarkeden/client/raw/data/dx90bsdk.zip).
-Extract it to someplace, and add it to the VC6 Include & Library directory:
-
-![image](https://user-images.githubusercontent.com/1420062/121283362-8949b900-c90d-11eb-8a7e-eeac6eb4135b.png)
-![image](https://user-images.githubusercontent.com/1420062/121283745-3a505380-c90e-11eb-91cc-2c6ecfd76479.png)
-
-You can put it to any path, not necessarily Game(800)
-
-
-Open workspace client/Client/Client.dsw in VC6, everything should work.
 
 ## Run
 
@@ -332,20 +297,12 @@ Run the executable with a display-mode argument:
 
 | Argument | Mode |
 | --- | --- |
-| `0000000001` | window, 800x600 |
-| `0000000002` | fullscreen, 800x600 |
+| `0000000001` | window, scaled |
+| `0000000002` | fullscreen, scaled |
 | `0000000003` | window, 1024x768 |
 | `0000000004` | fullscreen, 1024x768 |
-
-The legacy `window.bat` and `fullscreen.bat` in the data archive pass the same
-arguments to `fengshen.exe`, the old client.
 
 ### Connect to a server
 
 Set the login server IP and port in `Data/Info/GameClient.inf`. With a server in
 Docker on the same machine, use `127.0.0.1`.
-
-You need a [server](https://github.com/opendarkeden/server) to play. Follow the
-[docker install guide](https://github.com/opendarkeden/server/blob/master/docker_install.md)
-to deploy one. Without it the client still starts and reaches the main menu —
-it only fails at login.
