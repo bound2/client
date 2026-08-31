@@ -4966,17 +4966,26 @@ MCreature::SetPersnalString(char *str, COLORREF color)
 	{
 		endIndex = startIndex + g_pClientConfig->MAX_CHATSTRING_LENGTH;
 
-		// 크리스마스 트리용 하드 코딩
+		// Hard-coded for the Christmas tree
 		bool bTree = false;
-		char *find = strchr(str+startIndex, '\n'); 
+		char *find = strchr(str+startIndex, '\n');
 		if(find != NULL)
 		{
-			*find = '\0';
-			endIndex = strlen(str+startIndex)+startIndex;
-			bTree = true;
+			// The distance to the newline is server-supplied and unbounded,
+			// but a chat row only holds MAX_CHATSTRING_LENGTH characters, so
+			// the newline cut is only honoured when it fits -- an over-long
+			// line falls back to the normal fixed-width wrap below without
+			// mutating the buffer.
+			int lineLen = (int)(find - (str+startIndex));
+			if (lineLen <= g_pClientConfig->MAX_CHATSTRING_LENGTH)
+			{
+				*find = '\0';
+				endIndex = startIndex + lineLen;
+				bTree = true;
+			}
 		}
-		
-		// len이 짜를만한 길이도 안되면...
+
+		// if len is not even long enough to cut...
 		if (endIndex >= len)
 		{
 			endIndex = len;
@@ -5098,11 +5107,14 @@ MCreature::SetChatString(char *str, COLORREF color)
 			
 			*find = '\0';
 			
-			strcpy(m_ChatString[m_ChatStringCurrent], "Dear. ");
-			strcat(m_ChatString[m_ChatStringCurrent], str);					
-			
+			// str is the server-supplied chat line and the row is only
+			// MAX_CHATSTRINGLENGTH_PLUS1 bytes, so the copy must be bounded.
+			snprintf(m_ChatString[m_ChatStringCurrent],
+					g_pClientConfig->MAX_CHATSTRINGLENGTH_PLUS1, "Dear. %s", str);
+
 			m_ChatStringCurrent++;
-			
+			if (m_ChatStringCurrent==g_pClientConfig->MAX_CHATSTRING) m_ChatStringCurrent=0;
+
 			str = find+1;
 		}
 		char *find2 = strchr(str, '%');
@@ -5149,20 +5161,27 @@ MCreature::SetChatString(char *str, COLORREF color)
 	{
 		endIndex = startIndex + g_pClientConfig->MAX_CHATSTRING_LENGTH;
 
-		// 크리스마스 트리용 하드 코딩
+		// Hard-coded for the Christmas tree
 		bool bTree = false;
 		if(GetCreatureType() == 482 || GetCreatureType() == 650 )
 		{
-			char *find = strchr(str+startIndex, '\n'); 
+			char *find = strchr(str+startIndex, '\n');
 			if(find != NULL)
 			{
-				*find = '\0';
-				endIndex = strlen(str+startIndex)+startIndex;
-				bTree = true;
+				// Same bound as SetPersnalString: the newline cut is only
+				// honoured when the line fits in a chat row; an over-long
+				// line falls back to the fixed-width wrap below.
+				int lineLen = (int)(find - (str+startIndex));
+				if (lineLen <= g_pClientConfig->MAX_CHATSTRING_LENGTH)
+				{
+					*find = '\0';
+					endIndex = startIndex + lineLen;
+					bTree = true;
+				}
 			}
 		}
 		
-		// len이 짜를만한 길이도 안되면...
+		// if len is not even long enough to cut...
 		if (endIndex >= len)
 		{
 			endIndex = len;
@@ -5202,23 +5221,27 @@ MCreature::SetChatString(char *str, COLORREF color)
 	}
 	DEBUG_ADD("[SetChatString] while ok");
 
-	// 크리스마스 트리용 하드코딩
+	// Hard-coded for the Christmas tree
 	if(GetCreatureType() == 482 || GetCreatureType() == 650)
 	{
 		DEBUG_ADD("[SetChatString] Tree code");
 
-		int len = strlen(szTreeFrom) + 6;
+		// szTreeFrom is server-supplied and unbounded, so both the staging
+		// buffer and the copy into the 21-byte chat row must be bounded --
+		// this is the same overflow class the wrap loop above guards against.
+		int len = (int)strlen(szTreeFrom) + 6;
 
 		char szTemp[512];
-		memset(szTemp, ' ', g_pClientConfig->MAX_CHATSTRING_LENGTH);
+		int pad = max(g_pClientConfig->MAX_CHATSTRING_LENGTH - len, 0);
+		memset(szTemp, ' ', pad);
+		snprintf(szTemp + pad, sizeof(szTemp) - pad, "From. %s", szTreeFrom);
 
-		strcpy(szTemp + max(g_pClientConfig->MAX_CHATSTRING_LENGTH - len, 0), "From. ");
-		strcat(szTemp, szTreeFrom);
+		snprintf(m_ChatString[m_ChatStringCurrent],
+				g_pClientConfig->MAX_CHATSTRINGLENGTH_PLUS1, "%s", szTemp);
 
-		strcpy(m_ChatString[m_ChatStringCurrent], szTemp);
-
-		// 다음 줄..
+		// next line..
 		m_ChatStringCurrent++;
+		if (m_ChatStringCurrent==g_pClientConfig->MAX_CHATSTRING) m_ChatStringCurrent=0;
 
 		DEBUG_ADD("[SetChatString] Tree code ok");
 	}

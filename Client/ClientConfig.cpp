@@ -508,6 +508,23 @@ ClientConfig::LoadFromFile(const char* filename)
 	file.read((char*)&MAX_CHATSTRING_LENGTH, 4);
 	file.read((char*)&MAX_CHATSTRINGLENGTH_PLUS1, 4);
 
+	// MCreature allocates each chat row with MAX_CHATSTRINGLENGTH_PLUS1 and
+	// copies MAX_CHATSTRING_LENGTH characters into it, and its wrap loops do
+	// signed arithmetic with these values, so a corrupt or hand-edited record
+	// must not be trusted: clamp the primaries to sane geometry, then
+	// recompute the derived values instead of reading them from the record
+	// (a broken +1 invariant turns every chat line into a heap overflow).
+	// The floors are not 1: MAX_CHATSTRING_LENGTH == 1 makes the wrap loop
+	// unable to advance past a multi-byte character (an infinite loop), and
+	// MAX_CHATSTRING == 1 leaves no second row for the multi-line paths.
+	if (MAX_CHATSTRING < 2 || MAX_CHATSTRING > 100)
+		MAX_CHATSTRING = 5;
+	if (MAX_CHATSTRING_LENGTH < 4 || MAX_CHATSTRING_LENGTH > 255)
+		MAX_CHATSTRING_LENGTH = 20;
+
+	MAX_CHATSTRING_MINUS_1 = MAX_CHATSTRING - 1;
+	MAX_CHATSTRINGLENGTH_PLUS1 = MAX_CHATSTRING_LENGTH + 1;
+
 	//--------------------------------------------------------------
 	// 채팅 보여지는 시간..
 	//--------------------------------------------------------------

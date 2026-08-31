@@ -1634,18 +1634,28 @@ int	C_VS_UI_COMPUTER::PrintTree(int _x, int _y, int y_distance, int depth, int &
 			
 			if(tree[i].Tree.empty())
 			{
+				// itemClass comes from atoi over the help-tree text, so it can
+				// name a class NewItem rejects; fall back to the raw text.
 				MItem* pItem = MItem::NewItem( itemClass );
-				pItem->SetItemType( itemType );
-				
-				if(strcmp(pItem->GetName(), (*g_pGameStringTable)[UI_STRING_MESSAGE_INFRA_RED_HELMET].GetString()) == 0)
+
+				if(pItem == NULL)
 				{
-					char sz_temp[50];
-					wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_INFRA_HELMET].GetString());
-					g_PrintColorStr(x + m_index_x + _x, y + m_index_y + _y + (i+y_plus-m_tree_scroll)*y_distance, sz_temp, gpC_base->m_chatting_pi, color[depth]);	
+					g_PrintColorStr(x + m_index_x + _x, y + m_index_y + _y + (i+y_plus-m_tree_scroll)*y_distance, tree[i].str.c_str(), gpC_base->m_chatting_pi, color[depth]);
 				}
 				else
-					g_PrintColorStr(x + m_index_x + _x, y + m_index_y + _y + (i+y_plus-m_tree_scroll)*y_distance, pItem->GetName(), gpC_base->m_chatting_pi, color[depth]);	
-				delete pItem;
+				{
+					pItem->SetItemType( itemType );
+
+					if(strcmp(pItem->GetName(), (*g_pGameStringTable)[UI_STRING_MESSAGE_INFRA_RED_HELMET].GetString()) == 0)
+					{
+						char sz_temp[50];
+						wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_INFRA_HELMET].GetString());
+						g_PrintColorStr(x + m_index_x + _x, y + m_index_y + _y + (i+y_plus-m_tree_scroll)*y_distance, sz_temp, gpC_base->m_chatting_pi, color[depth]);
+					}
+					else
+						g_PrintColorStr(x + m_index_x + _x, y + m_index_y + _y + (i+y_plus-m_tree_scroll)*y_distance, pItem->GetName(), gpC_base->m_chatting_pi, color[depth]);
+					delete pItem;
+				}
 			}
 			else
 				g_PrintColorStr(x + m_index_x + _x, y + m_index_y + _y + (i+y_plus-m_tree_scroll)*y_distance, tree[i].str.c_str(), gpC_base->m_chatting_pi, color[depth]);	
@@ -1704,20 +1714,26 @@ bool C_VS_UI_COMPUTER::OpenTree(int &index, std::vector<C_TREE_BASE> &tree)
 			std::string filename;// = TXT_ITEMROOT;
 			if(tree[i].Tree.empty())
 			{
+				// Same as PrintTree: the class comes from the help-tree text
+				// and NewItem can reject it.
 				MItem* pItem = MItem::NewItem( itemClass );
-				pItem->SetItemType( itemType );
 
-				filename += pItem->GetEName();
-				filename += ".txt";
+				if(pItem != NULL)
+				{
+					pItem->SetItemType( itemType );
 
-				char sz_temp[100];
-				wsprintf(sz_temp, "%s", pItem->GetName());
-				m_second_title_string = "( ";
-				m_second_title_string += +pItem->GetEName();
-				m_second_title_string += " )";
-				SetDescTitle(sz_temp);
+					filename += pItem->GetEName();
+					filename += ".txt";
 
-				delete pItem;
+					char sz_temp[100];
+					wsprintf(sz_temp, "%s", pItem->GetName());
+					m_second_title_string = "( ";
+					m_second_title_string += +pItem->GetEName();
+					m_second_title_string += " )";
+					SetDescTitle(sz_temp);
+
+					delete pItem;
+				}
 			}
 			else
 			{

@@ -24,8 +24,16 @@ void GCGuildChat::read ( SocketInputStream & iStream )
 
 	if ( m_Type != 0 )
 	{
+		// Guild names run up to 30 bytes (CGRegistGuild's cap, and the field
+		// width GCOtherGuildName/GCShowGuildInfo declare), so 30 is the bound
+		// that rejects garbage without dropping a legitimately-long name. The
+		// handler formats it into a fixed buffer with snprintf regardless.
 		BYTE szGName;
 		iStream.read(szGName);
+
+		if ( szGName > 30 )
+			throw InvalidProtocolException("too long guild name length");
+
 		if ( szGName != 0 ) iStream.read( m_SendGuildName, szGName );
 	}
 
@@ -68,6 +76,11 @@ void GCGuildChat::write ( SocketOutputStream & oStream ) const
 	oStream.write( m_Type );
 	if ( m_Type != 0 )
 	{
+		// Test the real length before it is narrowed to a BYTE, or a value
+		// like 258 wraps to 2 and slips past the bound.
+		if ( m_SendGuildName.size() > 30 )
+			throw InvalidProtocolException("too long guild name length");
+
 		BYTE szGName = m_SendGuildName.size();
 		oStream.write( szGName );
 		oStream.write( m_SendGuildName );

@@ -211,9 +211,16 @@ MCreatureWear::NewItemFromAddonInfo(int Addon)
 	}
 	
 	//--------------------------------------------------
-	// item의 정보를 알기위해서 생성해서 제거한다.
+	// create the item just to read its info; the caller frees it.
 	//--------------------------------------------------
 	MItem* pItem = MItem::NewItem( addon.ItemClass );
+
+	if (pItem == NULL)
+	{
+		DEBUG_ADD_FORMAT("[Error] NewItemFromAddonInfo: invalid item class %d", addon.ItemClass);
+		return NULL;
+	}
+
 	pItem->SetItemType( addon.ItemType );
 
 	return pItem;

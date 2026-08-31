@@ -254,7 +254,11 @@ C_VS_UI_ITEM::C_VS_UI_ITEM()
 		{
 			MItem * p_item = MItem::NewItem((enum ITEM_CLASS)i);
 			//MItem * p_item = MItem::NewItem((enum ITEM_CLASS)90);
-			p_item->SetItemType( t );	
+
+			if (p_item == NULL)
+				continue;
+
+			p_item->SetItemType( t );
 			
 			while(1)
 			{

@@ -425,6 +425,13 @@ PacketSkillToMakeItem(MItem* pItem,
 	if (pTargetItem==NULL)
 	{							
 		MItem* pResultItem = MItem::NewItem( itemClass );
+
+		if (pResultItem == NULL)
+		{
+			DEBUG_ADD_FORMAT("[Error] PacketSkillToMakeItem: invalid item class %d", itemClass);
+			return NULL;
+		}
+
 		pResultItem->SetID( itemID );
 		pResultItem->SetItemType( itemType );
 		//pHolyWater->SetItemOption(

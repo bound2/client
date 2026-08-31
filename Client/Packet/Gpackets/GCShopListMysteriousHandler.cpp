@@ -69,8 +69,14 @@ throw ( ProtocolException , Error )
 
 				if (item.bExist)
 				{
-					// item 생성
+					// create the item
 					MItem* pItem = MItem::NewItem( (ITEM_CLASS)item.itemClass );
+
+					if (pItem == NULL)
+					{
+						DEBUG_ADD_FORMAT("[Error] GCShopListMysterious: invalid item class %d", (int)item.itemClass);
+						continue;
+					}
 
 					//pItem->SetID( item.objectID );
 					//pItem->SetItemType( item.itemType );

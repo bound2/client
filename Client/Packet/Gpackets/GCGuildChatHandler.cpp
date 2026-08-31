@@ -34,7 +34,7 @@ throw ( ProtocolException , Error )
 		//UI_WansungToJohap( pPacket->getMessage().c_str(), str );
 	
 		
-		strcpy( str, pPacket->getMessage().c_str() );
+		snprintf( str, sizeof(str), "%s", pPacket->getMessage().c_str() );
 		
 		if (str[0] != NULL)
 		{
@@ -52,10 +52,10 @@ throw ( ProtocolException , Error )
 				// 2004, 11, 11, sobeit modify start
 				if(0 == pPacket->getType()) // 길드챗 
 					UI_AddChatToHistory( str, (char *)pPacket->getSender().c_str(), 4, pPacket->getColor() );
-				else // 유니온 챗
+				else // union chat
 				{
 					char szName[128];
-					sprintf(szName, "[%s]%s", pPacket->getSendGuildName().c_str(), pPacket->getSender().c_str());
+					snprintf(szName, sizeof(szName), "[%s]%s", pPacket->getSendGuildName().c_str(), pPacket->getSender().c_str());
 					UI_AddChatToHistory( str, szName, 5, pPacket->getColor() );
 				}
 				//UI_AddChatToHistory( str, (char *)pPacket->getSender().c_str(), 4, pPacket->getColor() );

@@ -64,9 +64,16 @@ throw ( ProtocolException , Error )
 	}
 
 	//---------------------------------------------------------------------
-	// Item을 생성한다.
+	// create the item.
 	//---------------------------------------------------------------------
 	pItem = MItem::NewItem( (enum ITEM_CLASS)pPacket->getItemClass() );
+
+	if (pItem == NULL)
+	{
+		DEBUG_ADD_FORMAT("[Error] GCCreateItem: invalid item class %d", pPacket->getItemClass());
+		return;
+	}
+
 	pItem->SetItemType( pPacket->getItemType() );
 	pItem->SetItemOptionList( pPacket->getOptionType() );
 

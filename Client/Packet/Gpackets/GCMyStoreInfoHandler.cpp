@@ -103,9 +103,15 @@ throw ( ProtocolException , Error )
 				{
 					 
 					//------------------------------------------------------------
-					// item을 생성한다.
+					// create the item.
 					//------------------------------------------------------------
 					MItem* pItem = MItem::NewItem( (ITEM_CLASS)item.getItemClass() );
+
+					if (pItem == NULL)
+					{
+						DEBUG_ADD_FORMAT("[Error] GCMyStoreInfo: invalid item class %d", item.getItemClass());
+						continue;
+					}
 
 					pItem->SetID( item.getObjectID() );
 
@@ -205,9 +211,16 @@ throw ( ProtocolException , Error )
 								if (pItemInfo!=NULL)
 								{
 									//------------------------------------------------------------
-									// sub item을 생성한다.
+									// create the sub item.
 									//------------------------------------------------------------
 									MItem* pSubItem = MItem::NewItem( (ITEM_CLASS)pItemInfo->getItemClass() );
+
+									if (pSubItem == NULL)
+									{
+										DEBUG_ADD_FORMAT("[Error] GCMyStoreInfo: invalid sub item class %d", pItemInfo->getItemClass());
+										iItem++;
+										continue;
+									}
 
 									pSubItem->SetID( pItemInfo->getObjectID() );
 
@@ -218,7 +231,8 @@ throw ( ProtocolException , Error )
 									{
 										delete pSubItem;
 
-										DEBUG_ADD_FORMAT("[Error] Can't Add Item to Belt. rack=%d, slot=%d, class=%d, belt-slot=%d", rack, index, (int)pSubItem->GetItemClass(), (int)pItemInfo->getSlotID());
+										// pItemInfo carries the same class; pSubItem is already freed here.
+										DEBUG_ADD_FORMAT("[Error] Can't Add Item to Belt. rack=%d, slot=%d, class=%d, belt-slot=%d", rack, index, (int)pItemInfo->getItemClass(), (int)pItemInfo->getSlotID());
 									}
 								}
 
@@ -243,9 +257,16 @@ throw ( ProtocolException , Error )
 								if (pItemInfo!=NULL)
 								{
 									//------------------------------------------------------------
-									// sub item을 생성한다.
+									// create the sub item.
 									//------------------------------------------------------------
 									MItem* pSubItem = MItem::NewItem( (ITEM_CLASS)pItemInfo->getItemClass() );
+
+									if (pSubItem == NULL)
+									{
+										DEBUG_ADD_FORMAT("[Error] GCMyStoreInfo: invalid sub item class %d", pItemInfo->getItemClass());
+										iItem++;
+										continue;
+									}
 
 									pSubItem->SetID( pItemInfo->getObjectID() );
 
@@ -256,7 +277,8 @@ throw ( ProtocolException , Error )
 									{
 										delete pSubItem;
 
-										DEBUG_ADD_FORMAT("[Error] Can't Add Item to Belt. rack=%d, slot=%d, class=%d, belt-slot=%d", rack, index, (int)pSubItem->GetItemClass(), (int)pItemInfo->getSlotID());
+										// pItemInfo carries the same class; pSubItem is already freed here.
+										DEBUG_ADD_FORMAT("[Error] Can't Add Item to Belt. rack=%d, slot=%d, class=%d, belt-slot=%d", rack, index, (int)pItemInfo->getItemClass(), (int)pItemInfo->getSlotID());
 									}
 								}
 

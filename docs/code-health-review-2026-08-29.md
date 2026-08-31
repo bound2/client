@@ -60,9 +60,11 @@ A subsystem-by-subsystem review surfaced **197 findings**. Every area graded **D
 
 ## Remediation Status
 
-**Updated 2026-08-29.** 11 of the 197 findings have been fixed on branch `harden/library-code-fixes` ([PR #1](https://github.com/bound2/client/pull/1)), across 34 commits. Fixed findings carry a ✅ marker in the sections below, naming the commit and the tests covering them.
+**Updated 2026-08-31.** 24 of the 197 findings have been fixed: 11 on branch `harden/library-code-fixes` ([PR #1](https://github.com/bound2/client/pull/1)), 2 on `harden/packet-index-bounds` ([PR #4](https://github.com/bound2/client/pull/4)), and 11 on `harden/network-input`. Fixed findings carry a ✅ marker in the sections below, naming the commit and the tests covering them.
 
-The test-driven work is confined to code compiled into a static library, since that is the only code a test binary can link against. A second phase has since fixed seven defects in the `DarkEden` executable itself, listed under Runtime defects below; those were found by running the client rather than by this review, and none of them are among the 197 findings. The network attack surface this review rated most serious remains open: the packet parsers in `Client/Packet/Gpackets/` are untouched apart from one corrected format-string argument count.
+The test-driven work is confined to code compiled into a static library, since that is the only code a test binary can link against. A second phase has since fixed seven defects in the `DarkEden` executable itself, listed under Runtime defects below; those were found by running the client rather than by this review, and none of them are among the 197 findings.
+
+A third phase (2026-08-31, branch `harden/network-input`) took on the network attack surface this review rated most serious: the shop/stash index bounds (C7, C8, done earlier in `ed4f872`), the chat/guild/system-message string bounds (C9, C10/C16, C11/C17), the peer file-transfer filename (C12), the NewItem function-pointer table (C13), the 21-byte chat rows (C14, C15/C18) and the tooltip use-after-free (C25). None of these are reachable from a test binary, so they are build-verified regression guards. The branch was put through the same eight-angle adversarial review as phase one, which found ten real defects in the fixes themselves (including a filename guard that would have broken every legitimate profile transfer, and a missed overflow sixty lines from a fixed one) — all repaired in `3bc340e`. After merging master's wire max-size reconcile, a second review (two Opus xhigh reviewers, `1200625`) found more: write-side guards that tested the BYTE-narrowed length, a guild-name cap of 20 that would disconnect on legitimate 30-byte names, a filename validator that confined escape but not scope (a peer could still drop a DLL beside the executable), and config clamp floors of 1 that hung or corrupted the chat rows. The remaining Gpackets parsers beyond these findings are still unaudited, and the data-file format-string sites (C19/C20/C22) are untouched.
 
 ### Fixed
 
@@ -79,6 +81,15 @@ The test-driven work is confined to code compiled into a static library, since t
 | `MPalette` copy constructor and self-assignment | 🟡 Medium | `d78dc21` |
 | `CTypePack` iterators that never advance | 🟡 Medium | `6f457e0` |
 | `ColorDraw::Convert565to555` discards blue | ⚪ Low | `65a2413` |
+| `GCShopList::read` unvalidated rack index (C7) | 🔴 Critical | `ed4f872` |
+| `GCStashList::read` unvalidated rack/index pair (C8) | 🔴 Critical | `ed4f872` |
+| `GCPartySay` unbounded name/message + handler strcpy (C9) | 🔴 Critical | `a6cc969`, `3bc340e` |
+| `GCGuildChat` unbounded guild name + handler sprintf (C10/C16) | 🔴 Critical | `a6cc969` |
+| `GCSystemMessage` dead length guard + static char[128] (C11/C17) | 🔴 Critical | `a6cc969`, `3bc340e` |
+| Peer-supplied filename used for local file create/rename/delete (C12) | 🔴 Critical | `76a1185`, `3bc340e` |
+| `MItem::NewItem` unvalidated function-pointer table index (C13) | 🔴 Critical | `7b81ba4`, `3bc340e` |
+| 21-byte chat rows: "Dear."/"From." copies and newline wrap (C14, C15/C18) | 🔴 Critical | `c3e9937`, `3bc340e` |
+| Tooltip descriptor use-after-free on inventory delete (C25) | 🔴 Critical | `f0b8ae6` |
 
 ### Also fixed, not in this review
 
@@ -223,6 +234,8 @@ LoadFromFile reads directly into the members: `file.read((char*)&m_Width, 2); fi
 
 **Recommendation:** Reject the packet when `index >= SHOP_RACK_INDEX_MAX` (throw InvalidProtocolException) before touching m_pBuffer, exactly as the packet-ID bound is enforced in PacketFactoryManager::createPacket.
 
+> ✅ **Fixed** in `ed4f872` (PR #4). The index is rejected with InvalidProtocolException before the array is touched. Regression guard, executable-only code with no test path.
+
 ### C8. GCStashList::read indexes four parallel 3x20 arrays with two unvalidated network-supplied BYTEs.
 
 **Area:** Networking & Protocol  |  **Category:** memory-safety  |  **Location:** `Client/Packet/Gpackets/GCStashList.cpp:92`
@@ -232,6 +245,8 @@ Lines 90-91 read `rack` and `index` as raw BYTEs from the stream with no validat
 **Failure scenario:** Server sends PACKET_GC_STASH_LIST with nTotal=1, rack=0xFF, index=0xFF. The client writes a STASHITEM struct and a bool tens of kilobytes past the arrays, then calls std::list::push_back through an out-of-bounds list head, corrupting the heap with attacker-controlled pointers.
 
 **Recommendation:** Validate `rack < STASH_RACK_MAX && index < STASH_INDEX_MAX` immediately after reading them and throw InvalidProtocolException otherwise. The same guard is needed on the accessors at lines 318, 331 and 363.
+
+> ✅ **Fixed** in `ed4f872` (PR #4). read() rejects out-of-range rack/index with InvalidProtocolException, and the Assert-only accessors gained release-build range checks. The setStashItem site is `#ifdef __GAME_SERVER__` and does not compile into the client; it remains a live issue in the server repository.
 
 ### C9. GCPartySay reads name and message with no length validation, and the handler strcpy's both into 128-byte stack buffers.
 
@@ -243,6 +258,8 @@ GCPartySay::read (Client/Packet/Gpackets/GCPartySay.cpp:22-27) reads a BYTE `szN
 
 **Recommendation:** Add explicit `szName > 20` / `szMessage > 128` checks in GCPartySay::read (matching GCSay.cpp:32 and GCWhisper.cpp:29,43), and replace the strcpy calls with a bounded copy or use std::string directly.
 
+> ✅ **Fixed** in `a6cc969` (branch `harden/network-input`). read() enforces the declared 20/128 layout like GCSay and GCWhisper, and the handler copies are snprintf-bounded. CGPartySay::write gained the matching 128 cap in `3bc340e` so this client cannot trip the new guard on other clients.
+
 ### C10. An unbounded server-supplied guild name is sprintf'd into a 128-byte stack buffer.
 
 **Area:** Networking & Protocol  |  **Category:** memory-safety  |  **Location:** `Client/Packet/Gpackets/GCGuildChatHandler.cpp:58`
@@ -252,6 +269,8 @@ GCGuildChat::read (Client/Packet/Gpackets/GCGuildChat.cpp:27-29) reads `BYTE szG
 **Failure scenario:** Server sends PACKET_GC_GUILD_CHAT with m_Type != 0 (union chat), a 255-byte guild name and a 10-byte sender. sprintf overflows szName by ~141 bytes of attacker-controlled data on the stack.
 
 **Recommendation:** Bound szGName in GCGuildChat::read (the write path at line 71 should get a matching check), and switch the handler to snprintf or std::string concatenation.
+
+> ✅ **Fixed** in `a6cc969` (branch `harden/network-input`). The guild name is capped at 20 bytes -- the declared layout bound, matching the server repo's header -- on both read and write, and both handler copies are snprintf-bounded.
 
 ### C11. A 255-byte-capable server message is strcpy'd into 128-byte static buffers in two places.
 
@@ -263,6 +282,8 @@ GCSystemMessage::read (Client/Packet/Gpackets/GCSystemMessage.cpp:28) guards wit
 
 **Recommendation:** Replace both static char arrays with std::string, or use a bounded copy. Also fix the dead `> 256` check to a real limit such as `> 127`.
 
+> ✅ **Fixed** in `a6cc969` (branch `harden/network-input`). Both statics are std::string; the dead guard is replaced by a comment (a 255-byte message is legal and every sink was verified bounded) and the `+20` allocation is sized from the format string. `3bc340e` additionally fixed the dangling `c_str()`-of-temporary pointers in the RANGER_CHAT and PLAYER cases of the same handler.
+
 ### C12. A filename received verbatim from a remote peer is used to create, truncate, rename and delete files on the local disk with no path validation.
 
 **Area:** Networking & Protocol  |  **Category:** security  |  **Location:** `Client/RequestFileManager.cpp:91`
@@ -272,6 +293,8 @@ RCRequestedFileInfo::read (Client/Packet/Rpackets/RCRequestedFile.cpp:40-50) rea
 **Failure scenario:** A malicious peer answers a profile request with RCRequestedFile carrying filename "..\\..\\DarkEden.exe" (or any path under the user's profile). The client truncates and overwrites that file with peer-supplied bytes, then renames the temp file over it — arbitrary file write, and via remove(), arbitrary file deletion.
 
 **Recommendation:** Reject any filename containing a path separator, '..', a drive letter or a leading separator, and force all received files into a fixed download subdirectory. Validate before constructing ReceiveFileInfo.
+
+> ✅ **Fixed** in `76a1185`, reworked in `3bc340e`, and hardened again in `1200625` (branch `harden/network-input`). The blanket separator ban in the first attempt broke legitimate transfers (the wire value is the sender's relative profile path); the second attempt allowed interior separators but a second adversarial review showed it still blocked only escape, not scope -- a peer could write a benign relative name such as `zz.dll` beside the executable. The handler now ignores the peer's directory entirely: it keeps only the leaf name, requires a `.spk`/`.spki` extension (plus the Win32 device-name and trailing-dot checks), and re-roots the file under the client's own `DIR_PROFILE`, so the peer controls the filename but never the location. The reject path frees the transfer state before disconnecting.
 
 ### C13. MItem::NewItem indexes a static function-pointer table with an unvalidated item class taken directly from network packets, then calls through the result.
 
@@ -283,6 +306,8 @@ RCRequestedFileInfo::read (Client/Packet/Rpackets/RCRequestedFile.cpp:40-50) rea
 
 **Recommendation:** Add `if (itemClass < 0 || itemClass >= MAX_ITEM_CLASS || s_NewItemClassTable[itemClass] == NULL) return NULL;` at the top of NewItem, and audit every caller to handle a NULL return (several currently dereference it immediately).
 
+> ✅ **Fixed** in `7b81ba4` (branch `harden/network-input`), with the VS_UI call sites the first audit missed guarded in `3bc340e`. NewItem validates the class and the table entry and returns NULL; every variable-class caller under Client/ and VS_UI/ handles the NULL return. Regression guard, executable-only code.
+
 ### C14. MCreature::SetChatString does an unbounded strcpy+strcat of a server-supplied chat string into a 21-byte heap buffer.
 
 **Area:** Core Game Loop & State  |  **Category:** memory-safety  |  **Location:** `Client/MCreature.cpp:5016`
@@ -292,6 +317,8 @@ RCRequestedFileInfo::read (Client/Packet/Rpackets/RCRequestedFile.cpp:40-50) rea
 **Failure scenario:** A creature whose type the server reports as 482 says a 60-character line. strcat writes 66 bytes into a 21-byte heap allocation, corrupting adjacent heap metadata and the neighbouring m_ChatString rows.
 
 **Recommendation:** Replace with a length-checked copy bounded by MAX_CHATSTRINGLENGTH_PLUS1-1 (snprintf into the row), and apply the same treatment to the sibling sites at lines 5086, 5130-5133 and 4900.
+
+> ✅ **Fixed** in `c3e9937` and `3bc340e` (branch `harden/network-input`). The "Dear." copy and the tree "From." block -- which the first pass missed -- are both snprintf-bounded to the row size.
 
 ### C15. The chat line-wrapping loop in SetChatString/SetPersnalString copies an entire newline-delimited segment into a 21-byte row without bounding it.
 
@@ -303,6 +330,8 @@ The loop normally cuts at `endIndex = startIndex + MAX_CHATSTRING_LENGTH` (20). 
 
 **Recommendation:** Clamp endIndex to `startIndex + MAX_CHATSTRING_LENGTH` after the newline adjustment, and stop const_casting away c_str() — copy the packet string into a local bounded buffer first.
 
+> ✅ **Fixed** in `c3e9937`, restructured in `3bc340e` (branch `harden/network-input`): the newline cut is only honoured when the line fits in a row, measured before the in-place `'\0'` write so an over-long line no longer mutates the buffer at all. The `(char*)c_str()` const_cast at the call sites remains.
+
 ### C16. Server-controlled guild name of up to 255 bytes is sprintf'd into a 128-byte stack buffer, with no length cap anywhere in the parse path.
 
 **Area:** Text & Strings  |  **Category:** memory-safety  |  **Location:** `Client/Packet/Gpackets/GCGuildChatHandler.cpp:58`
@@ -312,6 +341,8 @@ The loop normally cuts at `endIndex = startIndex + MAX_CHATSTRING_LENGTH` (20). 
 **Failure scenario:** A malicious or compromised game server sends a GCGuildChat packet with m_Type != 0 and a 255-byte guild name. The handler writes 268 bytes into szName[128], smashing 140 bytes of stack including the saved return address — remote code execution in the client.
 
 **Recommendation:** Add an upper-bound check on szGName in GCGuildChat::read() mirroring the szSender/szMessage checks, and replace the sprintf with snprintf(szName, sizeof(szName), ...).
+
+> ✅ **Fixed** in `a6cc969` (branch `harden/network-input`) -- the same defect as C10; see its entry.
 
 ### C17. strcpy of a server message of up to 255 bytes into a static char[128]; the packet's length guard is dead code because the length field is a BYTE.
 
@@ -323,6 +354,8 @@ The loop normally cuts at `endIndex = startIndex + MAX_CHATSTRING_LENGTH` (20). 
 
 **Recommendation:** Change the guard to a real bound (e.g. `> 127`) or, better, cap the copy: use a std::string member or snprintf/strncpy with explicit truncation. Audit the other packet read() methods for the same dead `BYTE > 256` pattern.
 
+> ✅ **Fixed** in `a6cc969` (branch `harden/network-input`) -- the same defect as C11; see its entry. The dead-guard audit of other read() methods has not been done.
+
 ### C18. MCreature::SetPersnalString copies an unbounded newline-delimited segment into a 21-byte heap row.
 
 **Area:** Text & Strings  |  **Category:** memory-safety  |  **Location:** `Client/MCreature.cpp:4917`
@@ -332,6 +365,8 @@ The loop normally cuts at `endIndex = startIndex + MAX_CHATSTRING_LENGTH` (20). 
 **Failure scenario:** A personal-shop message or creature chat string of the form "AAAA...(200 bytes)...\nB" reaches SetPersnalString. endIndex becomes 200, the copy loop writes 200 bytes plus a NUL into a 21-byte heap allocation, corrupting the heap.
 
 **Recommendation:** Clamp endIndex to startIndex + MAX_CHATSTRING_LENGTH after the newline handling, and recompute `len` after the in-place '\0' write. Also validate at load time that MAX_CHATSTRINGLENGTH_PLUS1 == MAX_CHATSTRING_LENGTH + 1 — both are read independently from the config file (ClientConfig.cpp:505-507) with no consistency check.
+
+> ✅ **Fixed** in `c3e9937` and `3bc340e` (branch `harden/network-input`) -- the same wrap-loop defect as C15; see its entry. ClientConfig now clamps the primaries to sane geometry and recomputes the derived +1/-1 values instead of trusting the record.
 
 ### C19. Every printf format string in the client comes from a binary data file, and is passed to sprintf/vsprintf as the format argument in roughly 600 places.
 
@@ -402,6 +437,8 @@ In the loop at lines 3688-3708, `char_temp = cur[CurrentPos - check]; cur[Curren
 **Failure scenario:** Player hovers an inventory item (tooltip shown) at the moment the server sends GCDeleteInventoryItem for that item (consumed by a timer, removed by a GM, quest turn-in). The MItem is freed; the next `DescriptorManager::Show()` calls `GetName()` on freed memory -> crash or reads from a reallocated object.
 
 **Recommendation:** Add `UI_RemoveDescriptor((void*)pItem);` before the `delete` here, and audit every `delete`/`SAFE_DELETE` of an MItem. Longer term, have DescriptorManager hold the item ID rather than a raw pointer, and re-resolve it in `Show()`.
+
+> ✅ **Fixed** in `f0b8ae6` (branch `harden/network-input`) for this handler, matching the shop/gear/reload handlers. The broader delete-site audit and the hold-the-ID redesign remain open. Regression guard; the timing window was not reproduced.
 
 ### C26. AddFormat/AddFormatVL run unbounded vsprintf into a fixed 4096-byte static buffer, with the format string loaded from a data file and the arguments supplied by the server.
 
@@ -907,6 +944,8 @@ GCGuildChat::read (Client/Packet/Gpackets/GCGuildChat.cpp:27-29) reads `BYTE szG
 
 **Recommendation:** Bound szGName in GCGuildChat::read (the write path at line 71 should get a matching check), and switch the handler to snprintf or std::string concatenation.
 
+> ✅ **Fixed** in `a6cc969` (branch `harden/network-input`). The guild name is capped at 20 bytes -- the declared layout bound, matching the server repo's header -- on both read and write, and both handler copies are snprintf-bounded.
+
 #### 🔴 Critical -- GCPartySay reads name and message with no length validation, and the handler strcpy's both into 128-byte stack buffers.
 
 **Category:** memory-safety  |  **Location:** `Client/Packet/Gpackets/GCPartySayHandler.cpp:37`
@@ -916,6 +955,8 @@ GCPartySay::read (Client/Packet/Gpackets/GCPartySay.cpp:22-27) reads a BYTE `szN
 **Failure scenario:** Server sends PACKET_GC_PARTY_SAY with a 255-byte non-NUL name and message. strcpy writes 256 bytes into a 128-byte stack array, smashing the saved return address / stack cookie region with attacker-controlled bytes.
 
 **Recommendation:** Add explicit `szName > 20` / `szMessage > 128` checks in GCPartySay::read (matching GCSay.cpp:32 and GCWhisper.cpp:29,43), and replace the strcpy calls with a bounded copy or use std::string directly.
+
+> ✅ **Fixed** in `a6cc969` (branch `harden/network-input`). read() enforces the declared 20/128 layout like GCSay and GCWhisper, and the handler copies are snprintf-bounded. CGPartySay::write gained the matching 128 cap in `3bc340e` so this client cannot trip the new guard on other clients.
 
 #### 🔴 Critical -- GCShopList::read uses a raw network-supplied BYTE as an index into a 20-element array with no bounds check, writing a full struct out of bounds.
 
@@ -927,6 +968,8 @@ GCPartySay::read (Client/Packet/Gpackets/GCPartySay.cpp:22-27) reads a BYTE `szN
 
 **Recommendation:** Reject the packet when `index >= SHOP_RACK_INDEX_MAX` (throw InvalidProtocolException) before touching m_pBuffer, exactly as the packet-ID bound is enforced in PacketFactoryManager::createPacket.
 
+> ✅ **Fixed** in `ed4f872` (PR #4). The index is rejected with InvalidProtocolException before the array is touched. Regression guard, executable-only code with no test path.
+
 #### 🔴 Critical -- GCStashList::read indexes four parallel 3x20 arrays with two unvalidated network-supplied BYTEs.
 
 **Category:** memory-safety  |  **Location:** `Client/Packet/Gpackets/GCStashList.cpp:92`
@@ -936,6 +979,8 @@ Lines 90-91 read `rack` and `index` as raw BYTEs from the stream with no validat
 **Failure scenario:** Server sends PACKET_GC_STASH_LIST with nTotal=1, rack=0xFF, index=0xFF. The client writes a STASHITEM struct and a bool tens of kilobytes past the arrays, then calls std::list::push_back through an out-of-bounds list head, corrupting the heap with attacker-controlled pointers.
 
 **Recommendation:** Validate `rack < STASH_RACK_MAX && index < STASH_INDEX_MAX` immediately after reading them and throw InvalidProtocolException otherwise. The same guard is needed on the accessors at lines 318, 331 and 363.
+
+> ✅ **Fixed** in `ed4f872` (PR #4). read() rejects out-of-range rack/index with InvalidProtocolException, and the Assert-only accessors gained release-build range checks. The setStashItem site is `#ifdef __GAME_SERVER__` and does not compile into the client; it remains a live issue in the server repository.
 
 #### 🔴 Critical -- A 255-byte-capable server message is strcpy'd into 128-byte static buffers in two places.
 
@@ -947,6 +992,8 @@ GCSystemMessage::read (Client/Packet/Gpackets/GCSystemMessage.cpp:28) guards wit
 
 **Recommendation:** Replace both static char arrays with std::string, or use a bounded copy. Also fix the dead `> 256` check to a real limit such as `> 127`.
 
+> ✅ **Fixed** in `a6cc969` (branch `harden/network-input`). Both statics are std::string; the dead guard is replaced by a comment (a 255-byte message is legal and every sink was verified bounded) and the `+20` allocation is sized from the format string. `3bc340e` additionally fixed the dangling `c_str()`-of-temporary pointers in the RANGER_CHAT and PLAYER cases of the same handler.
+
 #### 🔴 Critical -- A filename received verbatim from a remote peer is used to create, truncate, rename and delete files on the local disk with no path validation.
 
 **Category:** security  |  **Location:** `Client/RequestFileManager.cpp:91`
@@ -956,6 +1003,8 @@ RCRequestedFileInfo::read (Client/Packet/Rpackets/RCRequestedFile.cpp:40-50) rea
 **Failure scenario:** A malicious peer answers a profile request with RCRequestedFile carrying filename "..\\..\\DarkEden.exe" (or any path under the user's profile). The client truncates and overwrites that file with peer-supplied bytes, then renames the temp file over it — arbitrary file write, and via remove(), arbitrary file deletion.
 
 **Recommendation:** Reject any filename containing a path separator, '..', a drive letter or a leading separator, and force all received files into a fixed download subdirectory. Validate before constructing ReceiveFileInfo.
+
+> ✅ **Fixed** in `76a1185`, reworked in `3bc340e`, and hardened again in `1200625` (branch `harden/network-input`). The blanket separator ban in the first attempt broke legitimate transfers (the wire value is the sender's relative profile path); the second attempt allowed interior separators but a second adversarial review showed it still blocked only escape, not scope -- a peer could write a benign relative name such as `zz.dll` beside the executable. The handler now ignores the peer's directory entirely: it keeps only the leaf name, requires a `.spk`/`.spki` extension (plus the Win32 device-name and trailing-dot checks), and re-roots the file under the client's own `DIR_PROFILE`, so the peer controls the filename but never the location. The reject path frees the transfer state before disconnecting.
 
 #### 🟠 High -- m_pDatagramSocket is deliberately left NULL when UDP socket creation fails, but every user dereferences it unconditionally.
 
@@ -1187,6 +1236,8 @@ The loop normally cuts at `endIndex = startIndex + MAX_CHATSTRING_LENGTH` (20). 
 
 **Recommendation:** Clamp endIndex to `startIndex + MAX_CHATSTRING_LENGTH` after the newline adjustment, and stop const_casting away c_str() — copy the packet string into a local bounded buffer first.
 
+> ✅ **Fixed** in `c3e9937`, restructured in `3bc340e` (branch `harden/network-input`): the newline cut is only honoured when the line fits in a row, measured before the in-place `'\0'` write so an over-long line no longer mutates the buffer at all. The `(char*)c_str()` const_cast at the call sites remains.
+
 #### 🔴 Critical -- MCreature::SetChatString does an unbounded strcpy+strcat of a server-supplied chat string into a 21-byte heap buffer.
 
 **Category:** memory-safety  |  **Location:** `Client/MCreature.cpp:5016`
@@ -1197,6 +1248,8 @@ The loop normally cuts at `endIndex = startIndex + MAX_CHATSTRING_LENGTH` (20). 
 
 **Recommendation:** Replace with a length-checked copy bounded by MAX_CHATSTRINGLENGTH_PLUS1-1 (snprintf into the row), and apply the same treatment to the sibling sites at lines 5086, 5130-5133 and 4900.
 
+> ✅ **Fixed** in `c3e9937` and `3bc340e` (branch `harden/network-input`). The "Dear." copy and the tree "From." block -- which the first pass missed -- are both snprintf-bounded to the row size.
+
 #### 🔴 Critical -- MItem::NewItem indexes a static function-pointer table with an unvalidated item class taken directly from network packets, then calls through the result.
 
 **Category:** memory-safety  |  **Location:** `Client/MItem.cpp:325`
@@ -1206,6 +1259,8 @@ The loop normally cuts at `endIndex = startIndex + MAX_CHATSTRING_LENGTH` (20). 
 **Failure scenario:** Server (or an on-path attacker) sends GCCreateItem with m_ItemClass = 200. NewItem reads s_NewItemClassTable[200], 880 bytes past the end of the array into whatever static data follows, and calls that address as a function. Depending on what lies there this is a crash or arbitrary code execution in the client process.
 
 **Recommendation:** Add `if (itemClass < 0 || itemClass >= MAX_ITEM_CLASS || s_NewItemClassTable[itemClass] == NULL) return NULL;` at the top of NewItem, and audit every caller to handle a NULL return (several currently dereference it immediately).
+
+> ✅ **Fixed** in `7b81ba4` (branch `harden/network-input`), with the VS_UI call sites the first audit missed guarded in `3bc340e`. NewItem validates the class and the table entry and returns NULL; every variable-class caller under Client/ and VS_UI/ handles the NULL return. Regression guard, executable-only code.
 
 #### 🟠 High -- MItem::GetName computes a write offset as strlen()-4 and copies an arbitrary-length game-string over it, into a buffer sized for only 9 extra bytes.
 
@@ -1457,6 +1512,8 @@ Both `AddFormat` (line 320) and `AddFormatVL` (line 259) declare `static char Bu
 
 **Recommendation:** Clamp endIndex to startIndex + MAX_CHATSTRING_LENGTH after the newline handling, and recompute `len` after the in-place '\0' write. Also validate at load time that MAX_CHATSTRINGLENGTH_PLUS1 == MAX_CHATSTRING_LENGTH + 1 — both are read independently from the config file (ClientConfig.cpp:505-507) with no consistency check.
 
+> ✅ **Fixed** in `c3e9937` and `3bc340e` (branch `harden/network-input`) -- the same wrap-loop defect as C15; see its entry. ClientConfig now clamps the primaries to sane geometry and recomputes the derived +1/-1 values instead of trusting the record.
+
 #### 🔴 Critical -- Server-controlled guild name of up to 255 bytes is sprintf'd into a 128-byte stack buffer, with no length cap anywhere in the parse path.
 
 **Category:** memory-safety  |  **Location:** `Client/Packet/Gpackets/GCGuildChatHandler.cpp:58`
@@ -1467,6 +1524,8 @@ Both `AddFormat` (line 320) and `AddFormatVL` (line 259) declare `static char Bu
 
 **Recommendation:** Add an upper-bound check on szGName in GCGuildChat::read() mirroring the szSender/szMessage checks, and replace the sprintf with snprintf(szName, sizeof(szName), ...).
 
+> ✅ **Fixed** in `a6cc969` (branch `harden/network-input`) -- the same defect as C10; see its entry.
+
 #### 🔴 Critical -- strcpy of a server message of up to 255 bytes into a static char[128]; the packet's length guard is dead code because the length field is a BYTE.
 
 **Category:** memory-safety  |  **Location:** `Client/Packet/Gpackets/GCSystemMessageHandler.cpp:161`
@@ -1476,6 +1535,8 @@ Both `AddFormat` (line 320) and `AddFormatVL` (line 259) declare `static char Bu
 **Failure scenario:** Server sends a GCSystemMessage with a 255-byte body. strcpy writes 256 bytes into the 128-byte static buffer, corrupting 128 bytes of adjacent .data/.bss — including whatever globals the linker placed next to it. Repeatable at will by the server.
 
 **Recommendation:** Change the guard to a real bound (e.g. `> 127`) or, better, cap the copy: use a std::string member or snprintf/strncpy with explicit truncation. Audit the other packet read() methods for the same dead `BYTE > 256` pattern.
+
+> ✅ **Fixed** in `a6cc969` (branch `harden/network-input`) -- the same defect as C11; see its entry. The dead-guard audit of other read() methods has not been done.
 
 #### 🟠 High -- The non-Windows WideCharToMultiByte shim is not a conversion, returns an unclamped length, and writes out of bounds when cbMultiByte is 0 — and its return value drives a stack write in SXml.
 
@@ -1686,6 +1747,8 @@ The original in VS_UI/src/hangul/FL2.cpp:38 walked the string counting DBCS lead
 **Failure scenario:** Player hovers an inventory item (tooltip shown) at the moment the server sends GCDeleteInventoryItem for that item (consumed by a timer, removed by a GM, quest turn-in). The MItem is freed; the next `DescriptorManager::Show()` calls `GetName()` on freed memory -> crash or reads from a reallocated object.
 
 **Recommendation:** Add `UI_RemoveDescriptor((void*)pItem);` before the `delete` here, and audit every `delete`/`SAFE_DELETE` of an MItem. Longer term, have DescriptorManager hold the item ID rather than a raw pointer, and re-resolve it in `Show()`.
+
+> ✅ **Fixed** in `f0b8ae6` (branch `harden/network-input`) for this handler, matching the shop/gear/reload handlers. The broader delete-site audit and the hold-the-ID redesign remain open. Regression guard; the timing window was not reproduced.
 
 #### 🔴 Critical -- _Multiline_Info_Show writes a NUL terminator at a fixed offset into the caller's buffer before checking that the remaining string is that long, walking past the end of the buffer.
 

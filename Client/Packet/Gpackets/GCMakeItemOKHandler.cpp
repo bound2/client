@@ -71,6 +71,13 @@ throw ( ProtocolException , Error )
 	//
 	//------------------------------------------------------------------	
 	MItem* pItem = MItem::NewItem( (ITEM_CLASS)pPacket->getItemClass() );
+
+	if (pItem == NULL)
+	{
+		DEBUG_ADD_FORMAT("[Error] GCMakeItemOK: invalid item class %d", pPacket->getItemClass());
+		return;
+	}
+
 	pItem->SetID( pPacket->getObjectID() );
 	pItem->SetItemType( pPacket->getItemType() );
 	pItem->SetItemOptionList( pPacket->getOptionType() );

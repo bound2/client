@@ -32,9 +32,15 @@ throw ( ProtocolException , Error )
 	}
 
 	//------------------------------------------------------------------------
-	// 추가되는 아이템 생성
+	// create the item being added
 	//------------------------------------------------------------------------
 	MItem* pItem = MItem::NewItem( (ITEM_CLASS)pPacket->getItemClass() );
+
+	if (pItem == NULL)
+	{
+		DEBUG_ADD_FORMAT("[Error] GCTradeAddItem: invalid item class %d", pPacket->getItemClass());
+		return;
+	}
 
 	pItem->SetID( pPacket->getItemObjectID() );
 	
@@ -120,9 +126,17 @@ throw ( ProtocolException , Error )
 				else
 				{
 					//------------------------------------------
-					// Sub Item의 정보를 설정한다.
+					// set the sub item's info.
 					//------------------------------------------
 					MItem* pSubItem = MItem::NewItem( (enum ITEM_CLASS)pSubItemInfo->getItemClass() );
+
+					if (pSubItem == NULL)
+					{
+						DEBUG_ADD_FORMAT("[Error] GCTradeAddItem: invalid sub item class %d", pSubItemInfo->getItemClass());
+						delete pSubItemInfo;
+						continue;
+					}
+
 					pSubItem->SetItemType( pSubItemInfo->getItemType() );
 					//pItem->SetItemOption( pSubItemInfo->getOptionType() );
 
@@ -155,9 +169,17 @@ throw ( ProtocolException , Error )
 				else
 				{
 					//------------------------------------------
-					// Sub Item의 정보를 설정한다.
+					// set the sub item's info.
 					//------------------------------------------
 					MItem* pSubItem = MItem::NewItem( (enum ITEM_CLASS)pSubItemInfo->getItemClass() );
+
+					if (pSubItem == NULL)
+					{
+						DEBUG_ADD_FORMAT("[Error] GCTradeAddItem: invalid sub item class %d", pSubItemInfo->getItemClass());
+						delete pSubItemInfo;
+						continue;
+					}
+
 					pSubItem->SetItemType( pSubItemInfo->getItemType() );
 					//pItem->SetItemOption( pSubItemInfo->getOptionType() );
 					

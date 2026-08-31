@@ -24,7 +24,8 @@ throw ( ProtocolException , Error )
 	__BEGIN_TRY
 	
 #ifdef __GAME_CLIENT__
-	static char previous1[128] = { NULL, };
+	// The message can be up to 255 bytes; a fixed char[128] here overflowed.
+	static std::string previous1;
 	switch(pPacket->getType())
 	{ 
 		case SYSTEM_MESSAGE_HOLY_LAND :		// 아담의 성지 관련
@@ -53,20 +54,24 @@ throw ( ProtocolException , Error )
 			
 		case SYSTEM_MESSAGE_RANGER_CHAT:
 			{
-				char* message = (char*)pPacket->getMessage().c_str();
-				if(NULL != message)
+				// getMessage() returns by value; keep the string alive past
+				// the call instead of holding a dangling c_str() pointer.
+				std::string rangerMessage = pPacket->getMessage();
+				if (!rangerMessage.empty())
 				{
-					UI_SetRangerChatString(message);
+					UI_SetRangerChatString((char*)rangerMessage.c_str());
 				}
 			}
 			return;
-	
-		case SYSTEM_MESSAGE_PLAYER:	    // add by Coffee 2007-8-2 藤속鯤소랙箇무멩
-			char* message = (char*)pPacket->getMessage().c_str();
 
-			if (NULL != message)
+		case SYSTEM_MESSAGE_PLAYER:	    // add by Coffee 2007-8-2
 			{
-				message = (char*)pPacket->getMessage().c_str();
+				// Same by-value hazard as above; one local copy serves the
+				// Add and the dedup record.
+				std::string playerMessage = pPacket->getMessage();
+
+				if (!playerMessage.empty())
+				{
 // 				if (strcmp(previous1, message)==0)
 // 				{
 // 					BOOL bExist = FALSE;
@@ -95,17 +100,19 @@ throw ( ProtocolException , Error )
 // 				//--------------------------------------------------------------------
 // 				else
 // 				{
-					g_pPlayerMessage->Add( message );
+					g_pPlayerMessage->Add( playerMessage.c_str() );
 
-					strcpy( previous1, pPacket->getMessage().c_str() );
+					previous1 = playerMessage;
 //				}
+				}
 			}
 			return;
 
 			
 	}
 
-	static char previous[128] = { NULL, };
+	// Same overflow as previous1 above: the message outgrows a char[128].
+	static std::string previous;
 
 	// Fix: Store string in local variable to avoid use-after-free
 	// The temporary string returned by getMessage() is destroyed at end of statement
@@ -116,8 +123,14 @@ throw ( ProtocolException , Error )
 		char *pMsg = NULL;
 		if (message!=NULL && pPacket->getType() != SYSTEM_MESSAGE_PLAYER )
 		{
-			pMsg = new char[strlen(message)+20];
-			sprintf(pMsg,(*g_pGameStringTable)[UI_STRING_MESSAGE_SYSTEM].GetString(),message);
+			// The old "+20" assumed the table format never adds more than 20
+			// characters around the message. Size the buffer from the format
+			// string itself instead, which is a safe upper bound for a single
+			// %s substitution.
+			const char* pFormat = (*g_pGameStringTable)[UI_STRING_MESSAGE_SYSTEM].GetString();
+			size_t msgSize = (*g_pGameStringTable)[UI_STRING_MESSAGE_SYSTEM].GetLength()+messageStr.size()+1;
+			pMsg = new char[msgSize];
+			snprintf(pMsg,msgSize,pFormat,message);
 			pPacket->setMessage(pMsg);
 			SAFE_DELETE_ARRAY( pMsg );
 		}
@@ -126,9 +139,9 @@ throw ( ProtocolException , Error )
 		message = messageStr.c_str();
 	// add end by Coffee 2007-8-2
 	//--------------------------------------------------------------------
-	// system message에 출력
+	// print to the system message area
 	//--------------------------------------------------------------------
-	if (strcmp(previous, message)==0)
+	if (previous == messageStr)
 	{
 		BOOL bExist = FALSE;
 
@@ -158,7 +171,7 @@ throw ( ProtocolException , Error )
 	{
 		g_pSystemMessage->Add( message );
 
-		strcpy( previous, pPacket->getMessage().c_str() );
+		previous = messageStr;
 	}
 
 #endif

@@ -18011,7 +18011,17 @@ void	C_VS_UI_POWER_JJANG::SetItemList()
 	{
 		POWER_JJANG_ITEM *TempItem = new POWER_JJANG_ITEM;
 		file.read((char*)TempItem, 3);
+
+		// The class byte comes straight from PowerjjangItem.inf (or is
+		// garbage on a short read), so NewItem can reject it.
 		MItem * p_item = MItem::NewItem((enum ITEM_CLASS) TempItem->bItemClass);
+
+		if(p_item == NULL)
+		{
+			delete TempItem;
+			continue;
+		}
+
 		p_item->SetItemType( TempItem->bItemType );
 		p_item->SetCurrentDurability(p_item->GetMaxDurability());
 		TempItem->pItem = p_item;
