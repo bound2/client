@@ -85,7 +85,9 @@ public :
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
 	// const static GCUseOKPacketSize 를 정의해서 리턴하라.
-	PacketSize_t getPacketMaxSize () const throw () { return 255; }
+	// the body is one ModifyInfo; the old hardcoded 255 dropped any use
+	// result with more than ~36 modify entries (server can send up to this)
+	PacketSize_t getPacketMaxSize () const throw () { return ModifyInfo::getPacketMaxSize(); }
 
 };
 

@@ -92,7 +92,8 @@ public :
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
 	// const static GLIncomingConnectionErrorPacketMaxSize 를 정의, 리턴하라.
-	PacketSize_t getPacketMaxSize () const throw () { return szBYTE + 80; }
+	// two length-prefixed strings (message, playerID), each capped at 127
+	PacketSize_t getPacketMaxSize () const throw () { return szBYTE + 127 + szBYTE + 127; }
 
 };
 

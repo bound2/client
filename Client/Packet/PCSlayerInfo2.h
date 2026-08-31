@@ -45,8 +45,8 @@ public:
 			+ szGuildMemberRank
 			+ szBYTE
 			+ szuint
-			+ szLevel;
-			+ szExp;
+			+ szLevel
+			+ szExp
 			+ szBonus;
 	}
 
@@ -74,8 +74,8 @@ public:
 			+ szGuildMemberRank
 			+ szBYTE
 			+ szuint
-			+ szLevel;
-			+ szExp;
+			+ szLevel
+			+ szExp
 			+ szBonus;
 	}
 #ifdef __DEBUG_OUTPUT__

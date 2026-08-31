@@ -123,7 +123,7 @@ public :
 	PacketID_t getPacketID () const throw () { return Packet::PACKET_CG_BLOOD_DRAIN; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize() const throw() { return szObjectID + szCoord + szCoord + szDir; }
+	PacketSize_t getPacketMaxSize() const throw() { return szObjectID; } // X/Y/Dir are commented out of read()/write()
 
 };
 

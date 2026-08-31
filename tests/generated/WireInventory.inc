@@ -520,14 +520,15 @@ struct Inv_GCAddMonsterFactory {
 struct Inv_GCAddMonsterCorpseFactory {
 	static PacketID_t id() { return Packet::PACKET_GC_ADD_MONSTER_CORPSE; }
 	static PacketSize_t maxSize() { 
-		return szObjectID + 
-			szMonsterType + 
-			szBYTE + 
-			128 +
-			szCoord + 
-			szCoord + 
-			szDir + 
+		return szObjectID +
+			szMonsterType +
 			szBYTE +
+			128 +
+			szCoord +
+			szCoord +
+			szDir +
+			szBYTE +	
+			szBYTE +	
 			szObjectID;
 	}
 };
@@ -1812,7 +1813,7 @@ struct Inv_GCUseBonusPointOKFactory {
 };
 struct Inv_GCUseOKFactory {
 	static PacketID_t id() { return Packet::PACKET_GC_USE_OK; }
-	static PacketSize_t maxSize() { return 255; }
+	static PacketSize_t maxSize() { return ModifyInfo::getPacketMaxSize(); }
 };
 struct Inv_GCUseSkillCardOKFactory {
 	static PacketID_t id() { return Packet::PACKET_GC_USE_SKILLCARD_OK; }
@@ -1857,7 +1858,7 @@ struct Inv_GCWhisperFailedFactory {
 };
 struct Inv_GLIncomingConnectionErrorFactory {
 	static PacketID_t id() { return Packet::PACKET_GL_INCOMING_CONNECTION_ERROR; }
-	static PacketSize_t maxSize() { return szBYTE + 80; }
+	static PacketSize_t maxSize() { return szBYTE + 127 + szBYTE + 127; }
 };
 struct Inv_GLIncomingConnectionOKFactory {
 	static PacketID_t id() { return Packet::PACKET_GL_INCOMING_CONNECTION_OK; }
@@ -1937,7 +1938,7 @@ struct Inv_CGAuthKeyFactory {
 };
 struct Inv_CGBloodDrainFactory {
 	static PacketID_t id() { return Packet::PACKET_CG_BLOOD_DRAIN; }
-	static PacketSize_t maxSize() { return szObjectID + szCoord + szCoord + szDir; }
+	static PacketSize_t maxSize() { return szObjectID; }
 };
 struct Inv_CGBuyStoreItemFactory {
 	static PacketID_t id() { return Packet::PACKET_CG_BUY_STORE_ITEM; }
@@ -2506,7 +2507,7 @@ struct Inv_CLGetWorldListFactory {
 };
 struct Inv_CLLoginFactory {
 	static PacketID_t id() { return Packet::PACKET_CL_LOGIN; }
-	static PacketSize_t maxSize() { return szBYTE + 30 + szBYTE + 20 + 6 + szBYTE; }
+	static PacketSize_t maxSize() { return szBYTE + 30 + szBYTE + 30 + 6 + szBYTE; }
 };
 struct Inv_CLLogoutFactory {
 	static PacketID_t id() { return Packet::PACKET_CL_LOGOUT; }

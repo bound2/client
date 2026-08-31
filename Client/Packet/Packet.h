@@ -552,8 +552,8 @@ public :
 			PACKET_UC_UPDATE,		//   481
 			PACKET_UC_UPDATE_LIST,		//   482
 			PACKET_CG_ENCODE_KEY,		//   483 add by viva 2008-12-27 : Packet Encode Key
-			PACKET_GC_FRIEND_CHATTING,	//add by viva
-			PACKET_GC_USE_SKILLCARD_OK, // by viva
+			PACKET_GC_FRIEND_CHATTING,	//   484 add by viva
+			PACKET_GC_USE_SKILLCARD_OK,	//   485 by viva
 
 			// Exchange System Packets
 			PACKET_CG_EXCHANGE_LIST,		//   486
