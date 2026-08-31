@@ -15,6 +15,36 @@
 
 //////////////////////////////////////////////////////////////////////
 //
+// The peer here is another game client, so the filename is fully
+// untrusted. ReceiveFileInfo creates, truncates, renames and deletes
+// whatever path it is given, so a name carrying a path separator, a
+// drive letter or a ".." component would be an arbitrary file write
+// and delete on the local disk. A dot is also required because
+// StartReceive patches the extension in place via rfind(".").
+//
+//////////////////////////////////////////////////////////////////////
+static bool isSafeRequestFilename(const std::string& filename)
+{
+	if (filename.empty())
+		return false;
+
+	if (filename.find('/') != std::string::npos
+		|| filename.find('\\') != std::string::npos
+		|| filename.find(':') != std::string::npos
+		|| filename.find("..") != std::string::npos)
+		return false;
+
+	if (filename[0] == '.')
+		return false;
+
+	if (filename.find('.') == std::string::npos)
+		return false;
+
+	return true;
+}
+
+//////////////////////////////////////////////////////////////////////
+//
 // 클라이언트에서 서버로부터 메시지를 받았을때 실행되는 메쏘드이다.
 //
 //////////////////////////////////////////////////////////////////////
@@ -41,6 +71,15 @@ throw ( ProtocolException , Error )
 
 			if (pFileInfo!=NULL)
 			{
+				// Dropping a single file would desynchronise the transfer
+				// stream, so a hostile name aborts the whole exchange.
+				if (!isSafeRequestFilename( pFileInfo->getFilename() ))
+				{
+					DEBUG_ADD_FORMAT("[Error] RCRequestedFile: unsafe filename from peer: %s", pFileInfo->getFilename().c_str());
+					delete pFileInfo;
+					throw DisconnectException("unsafe requested filename");
+				}
+
 				ReceiveFileInfo* pReceiveFileInfo = new ReceiveFileInfo( pFileInfo->getFilename().c_str(), pFileInfo->getRequestFileType() );
 
 				pInfo->AddReceiveFileInfo( pReceiveFileInfo );
