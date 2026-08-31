@@ -102,7 +102,9 @@ public :
 	PacketID_t getPacketID () const throw () { return Packet::PACKET_CL_LOGIN; }
 
 	// get packet's max body size
-	PacketSize_t getPacketMaxSize () const throw () { return szBYTE + 30 + szBYTE + 20 + 6 + szBYTE; }
+	// szID + ID(<=30) + szPassword + password(<=30, the server's cap; our
+	// write() clamps at 20) + mac(6) + loginMode
+	PacketSize_t getPacketMaxSize () const throw () { return szBYTE + 30 + szBYTE + 30 + 6 + szBYTE; }
 
 };
 

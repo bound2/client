@@ -48,7 +48,8 @@ public :
 	PacketSize_t getSize () throw ();
 
 	static uint getMaxSize() throw() {
-		return szBYTE + ( InventorySlotInfo::getMaxSize() * 60 ) + szCoordInven + szCoordInven;
+		// Width/Height are commented out of read()/write() — not on the wire
+		return szBYTE + ( InventorySlotInfo::getMaxSize() * 60 );
 	}
 
 	// get packet's debug std::string
