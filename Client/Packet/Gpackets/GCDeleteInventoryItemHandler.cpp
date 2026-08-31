@@ -56,10 +56,15 @@ throw ( ProtocolException , Error )
 			//---------------------------------------------
 			MItem* pCheckItem = g_pPlayer->GetItemCheckBuffer();
 
-			if(pCheckItem->GetID() == pItem->GetID()) 
+			if(pCheckItem->GetID() == pItem->GetID())
 				UI_DropItem();
 			g_pPlayer->ClearItemCheckBuffer();
 		}
+
+		// The tooltip descriptor may still hold this item's raw pointer and
+		// dereferences it every frame, so it has to be cleared before the
+		// delete — the same pattern the shop and gear handlers use.
+		UI_RemoveDescriptor( (void*)pItem );
 
 		delete pItem;
 	}
