@@ -4261,7 +4261,14 @@ void		UI_RunItemShop( GCGoodsList *pPacket )
 			return;
 
 		MItem *pItem = MItem::NewItem( (ITEM_CLASS)pInfo->itemClass );
-		
+
+		if (pItem == NULL)
+		{
+			DEBUG_ADD_FORMAT("[Error] UI item list: invalid item class %d", pInfo->itemClass);
+			delete pInfo;
+			continue;
+		}
+
 		pItem->SetID( pInfo->objectID );
 		pItem->SetItemType( pInfo->itemType );
 		// 2004, 5, 18 sobeit add start

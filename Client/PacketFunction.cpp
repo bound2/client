@@ -1121,10 +1121,17 @@ AddItemToZone(GCAddItemToZone* pPacket, BOOL bDropping)
 	}
 
 	pItem = MItem::NewItem( (enum ITEM_CLASS)pPacket->getItemClass() );
+
+	if (pItem == NULL)
+	{
+		DEBUG_ADD_FORMAT("[Error] AddItemToZone: invalid item class %d", pPacket->getItemClass());
+		return NULL;
+	}
+
 	pItem->SetItemType( pPacket->getItemType() );
 	pItem->SetItemOptionList( pPacket->getOptionType() );
 
-	pItem->SetID( pPacket->getObjectID() );		
+	pItem->SetID( pPacket->getObjectID() );
 
 	pItem->SetPosition( pPacket->getX(), pPacket->getY() );
 
@@ -1242,6 +1249,14 @@ AddItemToZone(GCAddItemToZone* pPacket, BOOL bDropping)
 						continue;
 					}
 					MItem* pSubItem = MItem::NewItem( (enum ITEM_CLASS)pSubItemInfo->getItemClass() );
+
+					if (pSubItem == NULL)
+					{
+						DEBUG_ADD_FORMAT("[Error] invalid sub item class %d", pSubItemInfo->getItemClass());
+						delete pSubItemInfo;
+						continue;
+					}
+
 					pSubItem->SetItemType( pSubItemInfo->getItemType() );
 					//pItem->SetItemOption( pSubItemInfo->getOptionType() );
 
@@ -1283,6 +1298,14 @@ AddItemToZone(GCAddItemToZone* pPacket, BOOL bDropping)
 						continue;
 					}
 					MItem* pSubItem = MItem::NewItem( (enum ITEM_CLASS)pSubItemInfo->getItemClass() );
+
+					if (pSubItem == NULL)
+					{
+						DEBUG_ADD_FORMAT("[Error] invalid sub item class %d", pSubItemInfo->getItemClass());
+						delete pSubItemInfo;
+						continue;
+					}
+
 					pSubItem->SetItemType( pSubItemInfo->getItemType() );
 					//pItem->SetItemOption( pSubItemInfo->getOptionType() );
 					
@@ -1752,7 +1775,14 @@ SetInventoryInfo(InventoryInfo* pInventoryInfo)
 			// Item을 생성해서 Inventory에 추가한다.
 			//------------------------------------------------
 			MItem* pItem = MItem::NewItem( (ITEM_CLASS)pSlotInfo->getItemClass() );
-			
+
+			if (pItem == NULL)
+			{
+				DEBUG_ADD_FORMAT("[Error] invalid item class %d", pSlotInfo->getItemClass());
+				delete pSlotInfo;
+				continue;
+			}
+
 			// object ID
 			pItem->SetID( pSlotInfo->getObjectID() );
 
@@ -1849,6 +1879,14 @@ SetInventoryInfo(InventoryInfo* pInventoryInfo)
 								return;
 							}
 							MItem* pSubItem = MItem::NewItem( (enum ITEM_CLASS)pSubItemInfo->getItemClass() );
+
+							if (pSubItem == NULL)
+							{
+								DEBUG_ADD_FORMAT("[Error] invalid sub item class %d", pSubItemInfo->getItemClass());
+								delete pSubItemInfo;
+								continue;
+							}
+
 							pSubItem->SetItemType( pSubItemInfo->getItemType() );
 							//pItem->SetItemOption( pSubItemInfo->getOptionType() );
 
@@ -1891,6 +1929,14 @@ SetInventoryInfo(InventoryInfo* pInventoryInfo)
 								return;
 							}
 							MItem* pSubItem = MItem::NewItem( (enum ITEM_CLASS)pSubItemInfo->getItemClass() );
+
+							if (pSubItem == NULL)
+							{
+								DEBUG_ADD_FORMAT("[Error] invalid sub item class %d", pSubItemInfo->getItemClass());
+								delete pSubItemInfo;
+								continue;
+							}
+
 							pSubItem->SetItemType( pSubItemInfo->getItemType() );
 							//pItem->SetItemOption( pSubItemInfo->getOptionType() );
 							
@@ -2013,7 +2059,14 @@ SetGearInfo(GearInfo* pGearInfo, BloodBibleSignInfo* pBloodBibleInfo)
 			// Item을 생성해서 Gear에 추가한다.
 			//------------------------------------------------
 			MItem* pItem = MItem::NewItem( (ITEM_CLASS)pSlotInfo->getItemClass() );
-		
+
+			if (pItem == NULL)
+			{
+				DEBUG_ADD_FORMAT("[Error] invalid item class %d", pSlotInfo->getItemClass());
+				delete pSlotInfo;
+				continue;
+			}
+
 			// object ID
 			pItem->SetID( pSlotInfo->getObjectID() );
 
@@ -2118,6 +2171,14 @@ SetGearInfo(GearInfo* pGearInfo, BloodBibleSignInfo* pBloodBibleInfo)
 								return;
 							}
 							MItem* pSubItem = MItem::NewItem( (enum ITEM_CLASS)pSubItemInfo->getItemClass() );
+
+							if (pSubItem == NULL)
+							{
+								DEBUG_ADD_FORMAT("[Error] invalid sub item class %d", pSubItemInfo->getItemClass());
+								delete pSubItemInfo;
+								continue;
+							}
+
 							pSubItem->SetItemType( pSubItemInfo->getItemType() );
 							//pItem->SetItemOption( pSubItemInfo->getOptionType() );
 
@@ -2160,6 +2221,14 @@ SetGearInfo(GearInfo* pGearInfo, BloodBibleSignInfo* pBloodBibleInfo)
 								return;
 							}
 							MItem* pSubItem = MItem::NewItem( (enum ITEM_CLASS)pSubItemInfo->getItemClass() );
+
+							if (pSubItem == NULL)
+							{
+								DEBUG_ADD_FORMAT("[Error] invalid sub item class %d", pSubItemInfo->getItemClass());
+								delete pSubItemInfo;
+								continue;
+							}
+
 							pSubItem->SetItemType( pSubItemInfo->getItemType() );
 							//pItem->SetItemOption( pSubItemInfo->getOptionType() );
 
@@ -2366,7 +2435,13 @@ SetExtraInfo(ExtraInfo* pExtraInfo)
 				return;
 			}
 			MItem* pItem = MItem::NewItem( (ITEM_CLASS)pSlotInfo->getItemClass() );
-			
+
+			if (pItem == NULL)
+			{
+				DEBUG_ADD_FORMAT("[Error] invalid item class %d", pSlotInfo->getItemClass());
+				return;
+			}
+
 			// object ID
 			pItem->SetID( pSlotInfo->getObjectID() );
 
@@ -2460,6 +2535,14 @@ SetExtraInfo(ExtraInfo* pExtraInfo)
 								return;
 							}
 							MItem* pSubItem = MItem::NewItem( (enum ITEM_CLASS)pSubItemInfo->getItemClass() );
+
+							if (pSubItem == NULL)
+							{
+								DEBUG_ADD_FORMAT("[Error] invalid sub item class %d", pSubItemInfo->getItemClass());
+								delete pSubItemInfo;
+								continue;
+							}
+
 							pSubItem->SetItemType( pSubItemInfo->getItemType() );
 							//pItem->SetItemOptionList( pSubItemInfo->getOptionType() );
 
@@ -2503,6 +2586,14 @@ SetExtraInfo(ExtraInfo* pExtraInfo)
 							}
 
 							MItem* pSubItem = MItem::NewItem( (enum ITEM_CLASS)pSubItemInfo->getItemClass() );
+
+							if (pSubItem == NULL)
+							{
+								DEBUG_ADD_FORMAT("[Error] invalid sub item class %d", pSubItemInfo->getItemClass());
+								delete pSubItemInfo;
+								continue;
+							}
+
 							pSubItem->SetItemType( pSubItemInfo->getItemType() );
 							//pItem->SetItemOptionList( pSubItemInfo->getOptionType() );
 							
@@ -6306,7 +6397,14 @@ void SetSubInventoryInfo(InventoryInfo* pInventoryInfo)
 		// Item을 생성해서 Inventory에 추가한다.
 		//------------------------------------------------
 		MItem* pItem = MItem::NewItem( (ITEM_CLASS)pSlotInfo->getItemClass() );
-		
+
+		if (pItem == NULL)
+		{
+			DEBUG_ADD_FORMAT("[Error] invalid item class %d", pSlotInfo->getItemClass());
+			delete pSlotInfo;
+			continue;
+		}
+
 		// object ID
 		pItem->SetID( pSlotInfo->getObjectID() );
 
@@ -6403,6 +6501,14 @@ void SetSubInventoryInfo(InventoryInfo* pInventoryInfo)
 							return;
 						}
 						MItem* pSubItem = MItem::NewItem( (enum ITEM_CLASS)pSubItemInfo->getItemClass() );
+
+						if (pSubItem == NULL)
+						{
+							DEBUG_ADD_FORMAT("[Error] invalid sub item class %d", pSubItemInfo->getItemClass());
+							delete pSubItemInfo;
+							continue;
+						}
+
 						pSubItem->SetItemType( pSubItemInfo->getItemType() );
 						//pItem->SetItemOption( pSubItemInfo->getOptionType() );
 
@@ -6445,6 +6551,14 @@ void SetSubInventoryInfo(InventoryInfo* pInventoryInfo)
 							return;
 						}
 						MItem* pSubItem = MItem::NewItem( (enum ITEM_CLASS)pSubItemInfo->getItemClass() );
+
+						if (pSubItem == NULL)
+						{
+							DEBUG_ADD_FORMAT("[Error] invalid sub item class %d", pSubItemInfo->getItemClass());
+							delete pSubItemInfo;
+							continue;
+						}
+
 						pSubItem->SetItemType( pSubItemInfo->getItemType() );
 						//pItem->SetItemOption( pSubItemInfo->getOptionType() );
 						

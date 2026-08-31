@@ -57,7 +57,13 @@ throw ( ProtocolException , Error )
 							// item을 생성한다.
 							//------------------------------------------------------------
 							MItem* pItem = MItem::NewItem( (ITEM_CLASS)pPacket->getItem().getItemClass() );
-							
+
+							if (pItem == NULL)
+							{
+								DEBUG_ADD_FORMAT("[Error] GCAddStoreItem: invalid item class %d", pPacket->getItem().getItemClass());
+								return;
+							}
+
 							pItem->SetID( pPacket->getItem().getObjectID() );
 							
 							pItem->SetItemType( pPacket->getItem().getItemType() );
@@ -139,7 +145,14 @@ throw ( ProtocolException , Error )
 											// sub item을 생성한다.
 											//------------------------------------------------------------
 											MItem* pSubItem = MItem::NewItem( (ITEM_CLASS)pItemInfo->getItemClass() );
-											
+
+											if (pSubItem == NULL)
+											{
+												DEBUG_ADD_FORMAT("[Error] GCAddStoreItem: invalid sub item class %d", pItemInfo->getItemClass());
+												iItem++;
+												continue;
+											}
+
 											pSubItem->SetID( pItemInfo->getObjectID() );
 											
 											pSubItem->SetItemType( pItemInfo->getItemType() );
@@ -177,7 +190,14 @@ throw ( ProtocolException , Error )
 											// sub item을 생성한다.
 											//------------------------------------------------------------
 											MItem* pSubItem = MItem::NewItem( (ITEM_CLASS)pItemInfo->getItemClass() );
-											
+
+											if (pSubItem == NULL)
+											{
+												DEBUG_ADD_FORMAT("[Error] GCAddStoreItem: invalid sub item class %d", pItemInfo->getItemClass());
+												iItem++;
+												continue;
+											}
+
 											pSubItem->SetID( pItemInfo->getObjectID() );
 											
 											pSubItem->SetItemType( pItemInfo->getItemType() );

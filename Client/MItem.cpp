@@ -319,9 +319,22 @@ MItem*	MVampireShoes::NewItem()	{ return new MVampireShoes; }
 //----------------------------------------------------------------------
 // itemClass에 맞는 class의 객체를 생성해서(new) 넘겨준다.
 //----------------------------------------------------------------------
-MItem*		
+MItem*
 MItem::NewItem(ITEM_CLASS itemClass)
 {
+	// itemClass reaches here straight from network packets, so it has to be
+	// validated before indexing the function-pointer table — an out-of-range
+	// value would read a code pointer past the table and call through it.
+	// The NULL-entry check also matters in range: the table's initializer
+	// list can leave trailing slots zeroed (e.g. the __TEST_SUB_INVENTORY__
+	// entry when the macro is off). Every caller must handle a NULL return.
+	if (itemClass < 0 || itemClass >= MAX_ITEM_CLASS
+		|| s_NewItemClassTable[itemClass] == NULL)
+	{
+		DEBUG_ADD_FORMAT("[Error] MItem::NewItem: invalid item class %d", itemClass);
+		return NULL;
+	}
+
 	return (MItem*)(*s_NewItemClassTable[itemClass])();
 };
 

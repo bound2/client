@@ -81,6 +81,12 @@ throw ( ProtocolException , Error )
 					// 새로운 item 생성
 					MItem* pItem = MItem::NewItem( (ITEM_CLASS)pPacket->getItemClass() );
 
+					if (pItem == NULL)
+					{
+						DEBUG_ADD_FORMAT("[Error] GCShopBought: invalid item class %d", pPacket->getItemClass());
+						return;
+					}
+
 					pItem->SetID( pPacket->getItemObjectID() );
 					pItem->SetItemType( pPacket->getItemType() );
 					pItem->SetItemOptionList( pPacket->getOptionType() );

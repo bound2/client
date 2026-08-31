@@ -4,6 +4,7 @@
 #include "Client_PCH.h"
 #include "MNPC.h"
 #include "MNPCTable.h"
+#include "DebugLog.h"
 #include "MShopTemplateTable.h"
 #include "MShopShelf.h"
 #include "MPlayer.h"
@@ -162,6 +163,13 @@ MNPC::CreateFixedShelf(bool bMysterious)
 					// item 생성
 					ITEM_CLASS itemClass = (ITEM_CLASS)pShopTemplate->Class;
 					MItem* pItem = MItem::NewItem( itemClass );
+
+					if (pItem == NULL)
+					{
+						DEBUG_ADD_FORMAT("[Error] Shop template: invalid item class %d", itemClass);
+						continue;
+					}
+
 					bEnable = true;
 
 					if(bMysterious && g_pPlayer->IsFemale() && 

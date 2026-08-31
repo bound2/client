@@ -5800,6 +5800,13 @@ GetMakeItemFitPosition(MItem* pItem, ITEM_CLASS itemClass, int itemType, POINT& 
 	
 	// 임시로 성수를 만들어서 들어갈 자리를 찾는다.
 	MItem* pResultItem = MItem::NewItem( itemClass );
+
+	if (pResultItem == NULL)
+	{
+		DEBUG_ADD_FORMAT("[Error] GetMakeItemFitPosition: invalid item class %d", itemClass);
+		return false;
+	}
+
 	pResultItem->SetItemType( itemType );
 
 	if (g_pInventory->GetFitPosition(pResultItem, fitPoint))
