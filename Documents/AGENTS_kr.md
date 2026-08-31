@@ -1,1 +1,0 @@
-CLAUDE_kr.md
