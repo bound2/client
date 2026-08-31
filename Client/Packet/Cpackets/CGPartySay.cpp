@@ -38,17 +38,7 @@ void CGPartySay::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
-	// The receive side (GCPartySay and the server) caps the message at 128,
-	// so an over-long line must not leave this client either -- the same
-	// guard CGSay::write carries.
 	BYTE szMessage = m_Message.size();
-
-	if (szMessage == 0)
-		throw InvalidProtocolException("szMessage == 0");
-
-	if (szMessage > 128)
-		throw InvalidProtocolException("too large message length");
-
 	oStream.write(m_Color);
 	oStream.write(szMessage);
 	oStream.write(m_Message);

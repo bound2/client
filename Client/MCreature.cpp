@@ -5111,9 +5111,10 @@ MCreature::SetChatString(char *str, COLORREF color)
 			// MAX_CHATSTRINGLENGTH_PLUS1 bytes, so the copy must be bounded.
 			snprintf(m_ChatString[m_ChatStringCurrent],
 					g_pClientConfig->MAX_CHATSTRINGLENGTH_PLUS1, "Dear. %s", str);
-			
+
 			m_ChatStringCurrent++;
-			
+			if (m_ChatStringCurrent==g_pClientConfig->MAX_CHATSTRING) m_ChatStringCurrent=0;
+
 			str = find+1;
 		}
 		char *find2 = strchr(str, '%');

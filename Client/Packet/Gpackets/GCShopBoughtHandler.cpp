@@ -75,10 +75,9 @@ throw ( ProtocolException , Error )
 				}
 				else
 				{
-					// version 수정
-					pShopShelf->SetVersion( pPacket->getShopVersion() );
-
-					// create the new item
+					// create the new item -- validate the class before touching
+					// the shelf version, so a bad class does not leave the
+					// shelf marked current with an empty slot.
 					MItem* pItem = MItem::NewItem( (ITEM_CLASS)pPacket->getItemClass() );
 
 					if (pItem == NULL)
@@ -86,6 +85,9 @@ throw ( ProtocolException , Error )
 						DEBUG_ADD_FORMAT("[Error] GCShopBought: invalid item class %d", pPacket->getItemClass());
 						return;
 					}
+
+					// version 수정
+					pShopShelf->SetVersion( pPacket->getShopVersion() );
 
 					pItem->SetID( pPacket->getItemObjectID() );
 					pItem->SetItemType( pPacket->getItemType() );

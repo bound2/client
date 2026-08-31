@@ -12,51 +12,67 @@
 #include "RequestClientPlayer.h"
 #include "RequestFileManager.h"
 #include "ClientDef.h"
+#include "Packet/Properties.h"
 
 //////////////////////////////////////////////////////////////////////
 //
-// The peer here is another game client, so the filename is fully
+// The peer is another game client, so the wire filename is fully
 // untrusted, and ReceiveFileInfo creates, truncates, renames and
-// deletes whatever path it is given. The legitimate wire value is the
-// sender's own relative profile path (CRRequestHandler sends
-// ProfileManager::GetFilename, e.g. "profile\name.spk"), so interior
-// separators must pass; what must never pass is anything that escapes
-// the working directory -- a drive letter, an absolute path, or a
-// ".." component. A dot is also required because StartReceive patches
-// the extension in place via rfind(".").
+// deletes whatever path it is given. Rather than trust the peer's path
+// and enumerate every way it could escape, we ignore its directory
+// entirely: only the leaf name is kept and it is re-rooted under our
+// own profile directory (below), so a hostile peer can write nothing
+// outside it. This validator therefore only has to vet a bare leaf
+// name -- no separators, only the two profile extensions the sender
+// legitimately transfers, and none of the Win32 aliasing traps.
 //
 //////////////////////////////////////////////////////////////////////
-static bool isSafeRequestFilename(const std::string& filename)
+static std::string requestFileBaseName(const std::string& path)
 {
-	if (filename.empty())
+	size_t sep = path.find_last_of("/\\");
+	return (sep == std::string::npos) ? path : path.substr(sep+1);
+}
+
+static bool endsWithNoCase(const std::string& s, const char* suffix)
+{
+	size_t n = strlen(suffix);
+	if (s.size() < n)
+		return false;
+	for (size_t i=0; i<n; i++)
+	{
+		if (tolower((unsigned char)s[s.size()-n+i]) != tolower((unsigned char)suffix[i]))
+			return false;
+	}
+	return true;
+}
+
+static bool isSafeProfileBaseName(const std::string& base)
+{
+	if (base.empty() || base[0] == '.')
 		return false;
 
-	if (filename.find(':') != std::string::npos)
+	// A leaf name carries no separators, drive colon, or ".." run.
+	if (base.find('/')  != std::string::npos
+		|| base.find('\\') != std::string::npos
+		|| base.find(':')  != std::string::npos
+		|| base.find("..") != std::string::npos)
 		return false;
 
-	if (filename[0] == '/' || filename[0] == '\\')
+	// StartReceive patches the extension via rfind("."), and only profile
+	// sprites and their indexes are ever transferred.
+	if (!endsWithNoCase(base, ".spk") && !endsWithNoCase(base, ".spki"))
 		return false;
 
-	if (filename.find("..") != std::string::npos)
+	// A trailing dot or space is stripped by the Win32 filesystem, and a
+	// reserved device base name (CON, NUL, COM1, ...) opens the device no
+	// matter what extension follows it.
+	char lastCh = base[base.size()-1];
+	if (lastCh == '.' || lastCh == ' ')
 		return false;
 
-	if (filename.find('.') == std::string::npos)
-		return false;
-
-	// Win32 quirks: a trailing dot or space is stripped by the filesystem
-	// (aliasing a different name than the one checked), and a reserved
-	// device base name (CON, NUL, COM1, ...) opens the device no matter
-	// what extension follows it.
-	char last = filename[filename.size()-1];
-	if (last == '.' || last == ' ')
-		return false;
-
-	size_t base = filename.find_last_of("/\\");
-	base = (base == std::string::npos) ? 0 : base+1;
-	size_t baseEnd = filename.find('.', base);
-	std::string baseName = filename.substr(base, baseEnd-base);
-	for (size_t i=0; i<baseName.size(); i++)
-		baseName[i] = toupper((unsigned char)baseName[i]);
+	std::string stem = base.substr(0, base.find('.'));
+	for (size_t i=0; i<stem.size(); i++)
+		stem[i] = toupper((unsigned char)stem[i]);
 
 	static const char* const reserved[] =
 	{
@@ -66,7 +82,7 @@ static bool isSafeRequestFilename(const std::string& filename)
 	};
 	for (size_t r=0; r<sizeof(reserved)/sizeof(reserved[0]); r++)
 	{
-		if (baseName == reserved[r])
+		if (stem == reserved[r])
 			return false;
 	}
 
@@ -101,22 +117,37 @@ throw ( ProtocolException , Error )
 
 			if (pFileInfo!=NULL)
 			{
-				const std::string filename = pFileInfo->getFilename();
+				// Keep only the leaf name and re-root it under our own
+				// profile directory, so the peer controls the filename but
+				// never the location. Dropping a single file would
+				// desynchronise the transfer stream, so a hostile or
+				// undeliverable name aborts the whole exchange; pInfo owns the
+				// ReceiveFileInfos started so far and their destructors close
+				// the open streams, so it must be freed before the throw.
+				const std::string baseName = requestFileBaseName( pFileInfo->getFilename() );
 
-				// Dropping a single file would desynchronise the transfer
-				// stream, so a hostile name aborts the whole exchange.
-				// pInfo owns the ReceiveFileInfos started so far and their
-				// destructors close the open streams, so it must be freed
-				// before the throw.
-				if (!isSafeRequestFilename( filename ))
+				std::string localPath;
+				try
 				{
-					DEBUG_ADD_FORMAT("[Error] RCRequestedFile: unsafe filename from peer: %s", filename.c_str());
+					localPath = g_pFileDef->getProperty("DIR_PROFILE");
+				}
+				catch (...)
+				{
+					localPath.clear();
+				}
+
+				if (localPath.empty() || !isSafeProfileBaseName( baseName ))
+				{
+					DEBUG_ADD_FORMAT("[Error] RCRequestedFile: unsafe filename from peer: %s", pFileInfo->getFilename().c_str());
 					delete pFileInfo;
 					delete pInfo;
 					throw DisconnectException("unsafe requested filename");
 				}
 
-				ReceiveFileInfo* pReceiveFileInfo = new ReceiveFileInfo( filename.c_str(), pFileInfo->getRequestFileType() );
+				localPath += "\\";
+				localPath += baseName;
+
+				ReceiveFileInfo* pReceiveFileInfo = new ReceiveFileInfo( localPath.c_str(), pFileInfo->getRequestFileType() );
 
 				pInfo->AddReceiveFileInfo( pReceiveFileInfo );
 

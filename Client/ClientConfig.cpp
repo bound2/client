@@ -514,9 +514,12 @@ ClientConfig::LoadFromFile(const char* filename)
 	// must not be trusted: clamp the primaries to sane geometry, then
 	// recompute the derived values instead of reading them from the record
 	// (a broken +1 invariant turns every chat line into a heap overflow).
-	if (MAX_CHATSTRING < 1 || MAX_CHATSTRING > 100)
+	// The floors are not 1: MAX_CHATSTRING_LENGTH == 1 makes the wrap loop
+	// unable to advance past a multi-byte character (an infinite loop), and
+	// MAX_CHATSTRING == 1 leaves no second row for the multi-line paths.
+	if (MAX_CHATSTRING < 2 || MAX_CHATSTRING > 100)
 		MAX_CHATSTRING = 5;
-	if (MAX_CHATSTRING_LENGTH < 1 || MAX_CHATSTRING_LENGTH > 255)
+	if (MAX_CHATSTRING_LENGTH < 4 || MAX_CHATSTRING_LENGTH > 255)
 		MAX_CHATSTRING_LENGTH = 20;
 
 	MAX_CHATSTRING_MINUS_1 = MAX_CHATSTRING - 1;

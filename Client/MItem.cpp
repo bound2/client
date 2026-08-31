@@ -325,9 +325,8 @@ MItem::NewItem(ITEM_CLASS itemClass)
 	// itemClass reaches here straight from network packets, so it has to be
 	// validated before indexing the function-pointer table — an out-of-range
 	// value would read a code pointer past the table and call through it.
-	// The NULL-entry check also matters in range: the table's initializer
-	// list can leave trailing slots zeroed (e.g. the __TEST_SUB_INVENTORY__
-	// entry when the macro is off). Every caller must handle a NULL return.
+	// The NULL-entry check is cheap defence in depth should a future edit
+	// leave a table slot unfilled. Every caller must handle a NULL return.
 	if (itemClass < 0 || itemClass >= MAX_ITEM_CLASS
 		|| s_NewItemClassTable[itemClass] == NULL)
 	{
