@@ -13,6 +13,13 @@
 DWORD g_CurrentFrame = 0;
 MTopView* g_pTopView = nullptr;
 
+// Draw-phase interpolation state (defined by CGameUpdate.cpp in the game).
+// The viewer has no interpolated draw phase, so these stay at their
+// outside-the-draw-phase values and MObject's rect shifting is a no-op.
+bool g_bInterpolateDraw = false;
+int g_DrawCamGapX = 0;
+int g_DrawCamGapY = 0;
+
 // Stub implementation of GetEffectLight
 // In a real scenario, this would look up the light value from effect frame data
 // For effect_viewer, we return a default value
