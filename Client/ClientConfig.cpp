@@ -508,6 +508,15 @@ ClientConfig::LoadFromFile(const char* filename)
 	file.read((char*)&MAX_CHATSTRING_LENGTH, 4);
 	file.read((char*)&MAX_CHATSTRINGLENGTH_PLUS1, 4);
 
+	// The derived values arrive from the file independently of the ones they
+	// are derived from. MCreature allocates each chat row with
+	// MAX_CHATSTRINGLENGTH_PLUS1 and copies MAX_CHATSTRING_LENGTH characters
+	// into it, so a stale or hand-edited record that breaks the +1 invariant
+	// turns every chat line into a heap overflow. Recompute instead of trusting
+	// the record.
+	MAX_CHATSTRING_MINUS_1 = MAX_CHATSTRING - 1;
+	MAX_CHATSTRINGLENGTH_PLUS1 = MAX_CHATSTRING_LENGTH + 1;
+
 	//--------------------------------------------------------------
 	// 채팅 보여지는 시간..
 	//--------------------------------------------------------------

@@ -4966,16 +4966,26 @@ MCreature::SetPersnalString(char *str, COLORREF color)
 	{
 		endIndex = startIndex + g_pClientConfig->MAX_CHATSTRING_LENGTH;
 
-		// 크리스마스 트리용 하드 코딩
+		// Hard-coded for the Christmas tree
 		bool bTree = false;
-		char *find = strchr(str+startIndex, '\n'); 
+		char *find = strchr(str+startIndex, '\n');
 		if(find != NULL)
 		{
 			*find = '\0';
 			endIndex = strlen(str+startIndex)+startIndex;
 			bTree = true;
+
+			// The distance to the newline is server-supplied and unbounded,
+			// but a chat row only holds MAX_CHATSTRING_LENGTH characters —
+			// unclamped, the copy below overruns the row allocation. Clear
+			// bTree so the newline skip does not swallow a real character.
+			if (endIndex > startIndex + g_pClientConfig->MAX_CHATSTRING_LENGTH)
+			{
+				endIndex = startIndex + g_pClientConfig->MAX_CHATSTRING_LENGTH;
+				bTree = false;
+			}
 		}
-		
+
 		// len이 짜를만한 길이도 안되면...
 		if (endIndex >= len)
 		{
@@ -5098,8 +5108,10 @@ MCreature::SetChatString(char *str, COLORREF color)
 			
 			*find = '\0';
 			
-			strcpy(m_ChatString[m_ChatStringCurrent], "Dear. ");
-			strcat(m_ChatString[m_ChatStringCurrent], str);					
+			// str is the server-supplied chat line and the row is only
+			// MAX_CHATSTRINGLENGTH_PLUS1 bytes, so the copy must be bounded.
+			snprintf(m_ChatString[m_ChatStringCurrent],
+					g_pClientConfig->MAX_CHATSTRINGLENGTH_PLUS1, "Dear. %s", str);
 			
 			m_ChatStringCurrent++;
 			
@@ -5149,16 +5161,25 @@ MCreature::SetChatString(char *str, COLORREF color)
 	{
 		endIndex = startIndex + g_pClientConfig->MAX_CHATSTRING_LENGTH;
 
-		// 크리스마스 트리용 하드 코딩
+		// Hard-coded for the Christmas tree
 		bool bTree = false;
 		if(GetCreatureType() == 482 || GetCreatureType() == 650 )
 		{
-			char *find = strchr(str+startIndex, '\n'); 
+			char *find = strchr(str+startIndex, '\n');
 			if(find != NULL)
 			{
 				*find = '\0';
 				endIndex = strlen(str+startIndex)+startIndex;
 				bTree = true;
+
+				// Same clamp as SetPersnalString: the newline distance is
+				// server-supplied and the row only holds
+				// MAX_CHATSTRING_LENGTH characters.
+				if (endIndex > startIndex + g_pClientConfig->MAX_CHATSTRING_LENGTH)
+				{
+					endIndex = startIndex + g_pClientConfig->MAX_CHATSTRING_LENGTH;
+					bTree = false;
+				}
 			}
 		}
 		
