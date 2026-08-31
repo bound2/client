@@ -153,15 +153,24 @@ ZONESOUND_NODE::Play(int x, int y, bool bLoop)
 			{
 				DEBUG_ADD("[ZONESOUND_NODE] Load Wave");
 
-				// 다시 load						
- 				LPDIRECTSOUNDBUFFER pBuffer = g_SDLAudio.LoadWav( (*g_pSoundTable)[m_SoundID].Filename );
+				// GameMain releases the table Filename when its own load
+				// fails, so it can be NULL here - don't pass that to
+				// LoadWav or format it with %s below.
+				const char* pFilename = (*g_pSoundTable)[m_SoundID].Filename;
+				if (pFilename==NULL)
+				{
+					return;
+				}
+
+				// 다시 load
+ 				LPDIRECTSOUNDBUFFER pBuffer = g_SDLAudio.LoadWav( (LPSTR)pFilename );
 
 				//-----------------------------------------------------------
 				// Loading 실패
 				//-----------------------------------------------------------
 				if (pBuffer==NULL)
 				{
-					DEBUG_ADD_FORMAT("[Error] Failed to Load WAV. id=%d, fn=%s", m_SoundID, (const char*)(*g_pSoundTable)[m_SoundID].Filename );
+					DEBUG_ADD_FORMAT("[Error] Failed to Load WAV. id=%d, fn=%s", m_SoundID, pFilename );
 
 					return;
 				}
@@ -458,7 +467,9 @@ MZoneSoundManager::UpdateSound()
 				{
 					ZONESOUND_NODE* pSound = GetData( zoneSoundID );
 
-					if (pSound->IsLoop())
+					// Inside the show hour but before the first show time no
+					// node has been created yet - same guard as the siblings.
+					if (pSound!=NULL && pSound->IsLoop())
 					{
 						pSound->SetContinueLoop();
 					}

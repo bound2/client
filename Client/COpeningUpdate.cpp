@@ -47,11 +47,14 @@ COpeningUpdate::PlayMPG(char* filename)
 	}
 
 	g_pAvi = new CAVI;
-	if(!g_pAvi->OpenMPG(g_hWnd, filename, 640, 480)) 
+	if(!g_pAvi->OpenMPG(g_hWnd, filename, 640, 480))
 	{
+		// CAVI::OpenMPG is a permanent stub (CAvi.cpp) - MPG playback is
+		// deliberately unimplemented, so this fires on every entry to the
+		// opening screen. Log it instead of blocking on a modal error box.
 		char str[256];
-		sprintf(str, "Not Found %s", filename);
-		MessageBox(g_hWnd, str, "Error!", MB_OK);
+		snprintf(str, sizeof(str), "Not Found %s", filename);
+		DEBUG_ADD(str);
 		return;
 	}
 	g_pAvi->Play();

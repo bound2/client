@@ -158,7 +158,9 @@ bool MMusic::Play(LPCSTR	filename)
 			return ErrorMsg();
 		}
 
-		sprintf(buffer, "open %s type sequencer alias Midi", filename);
+		// The filename comes from the music table (a data file), so bound
+		// the MCI command to the buffer instead of trusting its length.
+		snprintf(buffer, sizeof(buffer), "open %s type sequencer alias Midi", filename);
 
 		if(::mciSendString("close all", NULL, 0, NULL) != 0)
 		{

@@ -37,45 +37,81 @@ WavePackFileInfo::SaveToFileData(std::ofstream& file)
 	const int wavefmtSize = sizeof(WAVEFORMATEX);
 
 	// open a wav file
-	HMMIO wavefile;
 	char filename[256];
-	strcpy(filename, m_Filename.c_str());
-	wavefile = mmioOpen(filename, 0, MMIO_READ|MMIO_ALLOCBUF);
-	if(wavefile == NULL)
+	const char* pFilename = m_Filename.c_str();
+	if (strlen(pFilename) >= sizeof(filename))
 	{
-		//DirectSoundFailed("Direct Sound mmioOpen Error!");		
 		return false;
 	}
-	
+	strcpy(filename, pFilename);
+
+	HMMIO wavefile = mmioOpen(filename, 0, MMIO_READ|MMIO_ALLOCBUF);
+	if(wavefile == NULL)
+	{
+		//DirectSoundFailed("Direct Sound mmioOpen Error!");
+		return false;
+	}
+
 	// find wave data
 	MMCKINFO parent;
 	memset(&parent, 0, sizeof(MMCKINFO));
 	parent.fccType = mmioFOURCC('W','A','V','E');
-	mmioDescend(wavefile, &parent, 0, MMIO_FINDRIFF);
+	if (mmioDescend(wavefile, &parent, 0, MMIO_FINDRIFF) != MMSYSERR_NOERROR)
+	{
+		mmioClose(wavefile, 0);
+		return false;
+	}
 
 	// find fmt data
 	MMCKINFO child;
 	memset(&child, 0, sizeof(MMCKINFO));
 	child.fccType = mmioFOURCC('f','m','t',' ');
-	mmioDescend(wavefile, &child, &parent,0);
+	if (mmioDescend(wavefile, &child, &parent, 0) != MMSYSERR_NOERROR)
+	{
+		mmioClose(wavefile, 0);
+		return false;
+	}
 
 	// read the format
 	WAVEFORMATEX wavefmt;
-	mmioRead(wavefile, (char*)&wavefmt, wavefmtSize);
-	if(wavefmt.wFormatTag != WAVE_FORMAT_PCM)
+	if (mmioRead(wavefile, (char*)&wavefmt, wavefmtSize) != wavefmtSize
+		|| wavefmt.wFormatTag != WAVE_FORMAT_PCM)
 	{
+		mmioClose(wavefile, 0);
 		return false;
 	}
 
 	// find the wave data chunk
-	mmioAscend(wavefile, &child, 0);
+	if (mmioAscend(wavefile, &child, 0) != MMSYSERR_NOERROR)
+	{
+		mmioClose(wavefile, 0);
+		return false;
+	}
 	child.ckid = mmioFOURCC('d','a','t','a');
-	mmioDescend(wavefile, &child, &parent, MMIO_FINDCHUNK);
+	if (mmioDescend(wavefile, &child, &parent, MMIO_FINDCHUNK) != MMSYSERR_NOERROR)
+	{
+		mmioClose(wavefile, 0);
+		return false;
+	}
 
+	// The data chunk lives inside the RIFF chunk, so its declared size can
+	// never exceed the parent's; a corrupt header otherwise drives the
+	// allocation and the pack entry size below. The LONG cap keeps the
+	// mmioRead count and its return comparison in signed range.
 	DWORD cksize = child.cksize;
+	if (cksize == 0 || cksize > parent.cksize || cksize > 0x7FFFFFFF)
+	{
+		mmioClose(wavefile, 0);
+		return false;
+	}
 
 	char* pBuffer = new char [cksize];
-	mmioRead(wavefile, (char*)pBuffer, cksize);
+	if (mmioRead(wavefile, (char*)pBuffer, cksize) != (LONG)cksize)
+	{
+		delete [] pBuffer;
+		mmioClose(wavefile, 0);
+		return false;
+	}
 	mmioClose(wavefile, 0);
 
 	//--------------------------------------------------------------
