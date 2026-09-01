@@ -266,7 +266,18 @@ result immediately covers the top-risk area's foundations. This is the
   anyway when fixing, and switch the family to `snprintf`. Write the
   overflowing test first (plain tree: garbage/RTC; ASan tree: abort), then
   fix, then both trees green.
-  > **Status:** not started.
+  > **Status:** done (2026-09-01, `restructuring/packetwire`) — the
+  > tests ran first and proved the defect exactly as predicted: /RTC1
+  > reported "Stack around the variable 'buf' was corrupted" on the
+  > float ≥ 10,000 and double ≥ 1e15 cases, and `%f` of 1e300 (308
+  > characters into `char[22]`) killed the process with a stack-buffer
+  > overrun fast-fail (0xc0000409). Fix: the whole nine-operator numeric
+  > family switched to `snprintf` with range-sized buffers (`short` 8,
+  > 32/64-bit integers 24, `float` 64, `double` 352 — `%f` of `-DBL_MAX`
+  > is 317 characters). 8 tests pin the boundaries, including exact
+  > formatting at each old overflow threshold and `INT_MIN`/
+  > `ULLONG_MAX`. Suite: 110 tests / 428 checks / 0 failed in the plain
+  > tree AND the ASan tree; both full client trees rebuild clean.
   - Owner: the unit test.
 
 **Phase exit criteria:** `packetwire` builds in both Debug trees; DarkEden

@@ -77,11 +77,18 @@ StringStream & StringStream::operator << ( uchar T )
 	return *this;
 }
 
+// Buffer sizing note for the numeric operators below: every buffer is
+// sized for the widest "%"-format output of its type's full range, and
+// every call is snprintf, so an undersized buffer can only truncate,
+// never overrun. The old sprintf-into-char[12] family overran the stack
+// for float values >= 10,000 and double values >= ~1e15 (%f of DBL_MAX
+// is 316 characters) - pinned by tests/unit/test_stringstream.cpp.
+
 StringStream & StringStream::operator << ( short T )
 	throw ()
 {
-	char buf[7];
-	sprintf( buf , "%d" , T );
+	char buf[8];
+	snprintf( buf , sizeof(buf) , "%d" , T );
 
 	std::string str(buf);
 
@@ -96,8 +103,8 @@ StringStream & StringStream::operator << ( short T )
 StringStream & StringStream::operator << ( ushort T )
 	throw ()
 {
-	char buf[7];
-	sprintf( buf , "%d" , T );
+	char buf[8];
+	snprintf( buf , sizeof(buf) , "%d" , T );
 
 	std::string str(buf);
 
@@ -112,8 +119,8 @@ StringStream & StringStream::operator << ( ushort T )
 StringStream & StringStream::operator << ( int T )
 	throw ()
 {
-	char buf[12];
-	sprintf( buf , "%d" , T );
+	char buf[24];
+	snprintf( buf , sizeof(buf) , "%d" , T );
 	
 	std::string str(buf);
 
@@ -127,9 +134,9 @@ StringStream & StringStream::operator << ( int T )
 
 StringStream & StringStream::operator << ( uint T )
 	throw ()
-{	
-	char buf[12];
-	sprintf( buf , "%u" , T );
+{
+	char buf[24];
+	snprintf( buf , sizeof(buf) , "%u" , T );
 	
 	std::string str(buf);
 
@@ -144,8 +151,10 @@ StringStream & StringStream::operator << ( uint T )
 StringStream & StringStream::operator << ( long T )
 	throw ()
 {
-	char buf[12];
-	sprintf( buf , "%ld" , T );
+	// long is 32-bit under MSVC but 64-bit on LP64 platforms - size for
+	// the wider case rather than the current compiler.
+	char buf[24];
+	snprintf( buf , sizeof(buf) , "%ld" , T );
 	
 	std::string str(buf);
 
@@ -159,9 +168,9 @@ StringStream & StringStream::operator << ( long T )
 
 StringStream & StringStream::operator << ( ulong T )
 	throw ()
-{	
-	char buf[12];
-	sprintf( buf , "%lu" , T );
+{
+	char buf[24];
+	snprintf( buf , sizeof(buf) , "%lu" , T );
 	
 	std::string str(buf);
 
@@ -177,7 +186,7 @@ StringStream & StringStream::operator << ( ulonglong T )
 	throw ()
 {
 	char buf[24];
-	sprintf( buf , "%llu" , T );
+	snprintf( buf , sizeof(buf) , "%llu" , T );
 
 	std::string str(buf);
 
@@ -192,8 +201,9 @@ StringStream & StringStream::operator << ( ulonglong T )
 StringStream & StringStream::operator << ( float T )
 	throw ()
 {
-	char buf[12];
-	sprintf( buf , "%f" , T );
+	// %f of FLT_MAX is 46 characters (39 integer digits, '.', 6 decimals).
+	char buf[64];
+	snprintf( buf , sizeof(buf) , "%f" , T );
 	
 	std::string str(buf);
 
@@ -208,8 +218,11 @@ StringStream & StringStream::operator << ( float T )
 StringStream & StringStream::operator << ( double T )
 	throw ()
 {
-	char buf[22];
-	sprintf( buf , "%f" , T );
+	// %f of -DBL_MAX is 317 characters (sign, 309 integer digits, '.',
+	// 6 decimals); sized with headroom so no representable double
+	// truncates.
+	char buf[352];
+	snprintf( buf , sizeof(buf) , "%f" , T );
 	
 	std::string str(buf);
 
