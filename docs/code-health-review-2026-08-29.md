@@ -133,7 +133,7 @@ The audio branch was put through the same adversarial review as the earlier phas
 | Gear tooltip's second item passed through a 32-bit `long` and dereferenced (C21) | 🔴 Critical | `c0df91c` |
 | SDL text pointer passed through a 32-bit `long` (C23, dead path, removed) | 🔴 Critical | `2a531a9` |
 
-### Open, not in this review: the `SendMessage` pointer-truncation family
+### Fixed, not in this review: the `SendMessage` pointer-truncation family
 
 Found while fixing C21, and **not among the 197 findings** — the review caught the
 `DescriptorManager` instance of this defect but missed the same pattern in a
@@ -155,9 +155,43 @@ On MSVC x64 `int` is 32 bits, so every one of these truncates a heap pointer and
 sign-extends it back. This is the same defect as C21 with the same consequence,
 and at least the item-rename path is reachable in ordinary play. The `(int)(intptr_t)`
 casts present at these sites silence the truncation warning without preserving the
-value — the same false-reassurance C21 called out.
+value — the same false-reassurance C21 called out. `git blame` puts them at
+`a6e21d2`, the SDL port: the original `(int)ptr` stopped compiling on x64 and was
+made to compile again rather than made correct, so every one of these features has
+been crash-on-use since.
 
-Not fixed here; this branch was scoped to the two findings the review does list.
+> ✅ **Fixed** in `12bde38` (branch `harden/sendmessage-truncation`). The payload
+> path is `intptr_t` end to end — `MESSAGE`, `SendMessage`/`_SendMessage`, the three
+> function-pointer typedefs, `UI_ResultReceiver`, `UIMessageManager::Execute`,
+> `UI_MESSAGE_FUNCTION` and every handler signature — plus `TempInformation::Value1..4`,
+> which is the parking slot two packet handlers cast back to `char*`. Unlike C23's
+> virtual `long extra`, this bus dispatches through a function-pointer table, so a
+> handler left at the old width is a compile error rather than a silent non-override;
+> that is what makes the widening verifiable, and it caught two handlers written with
+> a signature variant the first pass missed.
+
+**The dangerous part was making these paths reachable.** Three memory-safety bugs sat
+behind them that the truncation had been masking, all found by adversarial review and
+fixed in the same commit — without them, this "fix" would have replaced a guaranteed
+crash with silent corruption:
+
+- `C_VS_UI_SMS_MESSAGE::AddSendList` copied a **server-supplied** phone number into
+  `char[16]` with `wsprintf`, which bounds output at 1024 bytes rather than at the
+  destination. `GCSMSAddressList` reads that field with a BYTE length prefix, so a
+  hostile or buggy server had ~240 bytes of stack past the buffer — the review's own
+  top open risk, unvalidated network input, in a newly-reachable path.
+- `Execute_UI_CHANGE_CUSTOM_NAMING` `strcpy`'d the nickname into `char[22]`, where the
+  editor's `SetByteLimit(22)` counts *characters* and the DBCS conversion emits up to
+  two bytes each — 22 Korean characters are 44.
+- The SMS and nickname flows parked `c_str()` pointers in `TempInformation` across the
+  server round trip, with nothing keeping the owning dialog alive; closing it, or the
+  ESC path through `ClosePopupWindow`, deletes it. `TempInformation` owns `std::string`
+  copies now.
+
+Recorded latent: the bus queues messages and dispatches one per frame, so a sender that
+passes `c_str()` can in principle have its owner deleted in that window. The handlers
+copy immediately on dispatch, so the exposure is one frame; closing it properly means
+having the bus own its payloads.
 
 ### Also fixed, not in this review
 
