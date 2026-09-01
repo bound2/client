@@ -113,7 +113,7 @@ an unrecorded drop, so tightening lands in the same commit as the progress.
 
 | # | Metric | Baseline | Command |
 |---|--------|---------:|---------|
-| R1 | Translation units compiled directly into the DarkEden target | 1,044 | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` (machine-local tree; the ratchet script recomputes it from the CMake lists when the vcxproj is absent) |
+| R1 | Translation units compiled directly into the DarkEden target | 993 (was 1,044 before task 1.1's `packetwire` move) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` (machine-local tree; the ratchet script recomputes it from the CMake lists when the vcxproj is absent) |
 | R2 | Packet `.cpp` files still defining `::execute(` (non-Handler) | 448 | `grep -rlE '::execute\s*\(' Client/Packet/Gpackets Client/Packet/Cpackets Client/Packet/Lpackets Client/Packet/Rpackets Client/Packet/Upackets --include='*.cpp' \| grep -v Handler \| wc -l` |
 | R3 | `sprintf`/`strcpy`/`strcat` call sites under `Client/Packet` | 70 | `grep -rE '\b(sprintf\|strcpy\|strcat)\s*\(' Client/Packet --include='*.cpp' \| wc -l` |
 | R4 | Files in static libraries referencing `g_p*` client globals | measure in 0.2 | `ratchets.sh` computes it over the union of the libraries' explicit source lists |
@@ -214,7 +214,15 @@ result immediately covers the top-risk area's foundations. This is the
   exist in this family), include dirs `Client/Packet`, `Client`, `basic`.
   `DarkEden` and `VS_UI` link it; the files leave `CLIENT_MAIN_SOURCES` via
   `list(REMOVE_ITEM)`. Zero source-file edits in the move commit.
-  > **Status:** not started.
+  > **Status:** in progress (owner missing — the explicit source list
+  > exists, but the W1/W2 include rules (0.3) and the R1 ratchet test
+  > (0.2) do not yet enforce it). The move itself landed: 51 files (the
+  > membership above, minus a few counted twice in the "~57" estimate)
+  > compile as `packetwire`, DarkEden dropped 1,044 → 993 TUs with zero
+  > source edits and zero double-compiled members (verified against the
+  > generated .vcxproj), both Debug trees build with 0 errors, and the
+  > existing test suite is green. Runtime verification against a live
+  > server pending (user-run).
   - Owner: the explicit source list + W1/W2 in the include checker + R1
     dropping by the member count.
 

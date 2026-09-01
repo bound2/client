@@ -254,6 +254,127 @@ add_subdirectory(Client/SpriteLib)
 add_subdirectory(Client/framelib)
 
 # ============================================================
+# packetwire - wire-support static library
+# ============================================================
+#
+# The game-free subset of the Client/Packet root: socket streams, the
+# encrypter, StringStream/Exception, and the wire info classes the GC
+# packets delegate their parsing to. Created by docs/RESTRUCTURING.md
+# task 1.1 so this code can be linked into unit_tests; the packet
+# classes themselves join in Phase 2 once execute() is stripped.
+#
+# Membership is an explicit list on purpose: the ratchet script and the
+# include-graph checker (tasks 0.2/0.3) parse it, and file(GLOB) would
+# silently adopt new files. Absolute paths so the list(REMOVE_ITEM ...)
+# against the globbed CLIENT_MAIN_SOURCES below matches - file(GLOB)
+# returns absolute paths, and a relative entry is silently not removed
+# (that mismatch is exactly how sources end up compiled into both a
+# library and the executable, see the LNK4217 note in CLAUDE.md).
+#
+# Excluded root files and why (sort when touched, never silently):
+# ClientPlayer/ClientCommunicationManager/Player/Request*Player* are
+# receive loops with game includes (Phase 2); PacketFactoryManager/
+# PacketIDSet/PacketValidator drag every packet's execute() (task 2.4);
+# NPCInfo (MZone.h), OustersSkillInfo (ClientDef.h), SocketAPI/
+# DatagramSocket/PacketFileAPI (DebugInfo.h) are one vestigial include
+# away each (tasks 1.1 follow-ups / 5.1).
+set(PACKETWIRE_SOURCES
+	# Streams / framing / crypto
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/Datagram.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/Encrypter.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/Exception.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PacketAssert.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SocketEncryptInputStream.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SocketEncryptOutputStream.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SocketInputStream.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SocketOutputStream.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/StringStream.cpp
+
+	# Sockets
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/ServerSocket.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/Socket.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SocketImpl.cpp
+
+	# Wire info classes (parsers for server-supplied sub-structures)
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/EffectInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/ExtraInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/ExtraSlotInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/GameTime.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/GearInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/GearSlotInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/GuildWarInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/InventoryInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/InventorySlotInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/LevelWarInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/ModifyInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PCItemInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PCOustersInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PCOustersInfo2.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PCOustersInfo3.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PCSlayerInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PCSlayerInfo2.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PCSlayerInfo3.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PCVampireInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PCVampireInfo2.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PCVampireInfo3.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PetInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/QuestStatusInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/RaceWarInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/RideMotorcycleInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/RideMotorcycleSlotInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/ScriptParameter.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/ServerGroupInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SlayerSkillInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SubItemInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SubOustersSkillInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SubServerInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SubSlayerSkillInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SubVampireSkillInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/TextInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/VampireSkillInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/WarInfo.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/WorldInfo.cpp
+
+	# Misc utility
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/Properties.cpp
+)
+
+add_library(packetwire STATIC ${PACKETWIRE_SOURCES})
+
+target_include_directories(packetwire PUBLIC
+	${CMAKE_CURRENT_SOURCE_DIR}
+	${CMAKE_CURRENT_SOURCE_DIR}/basic
+	${CMAKE_CURRENT_SOURCE_DIR}/Client
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet
+)
+
+# Byte-identical compilation to how these files compiled inside the
+# DarkEden target: mirror its compile definitions exactly (see the
+# DarkEden target below for why each exists). __GAME_CLIENT__ also
+# comes from Client_PCH.h, but the exe passes =1 on the command line
+# too, and identical preprocessing is the point of the move.
+target_compile_definitions(packetwire PRIVATE
+	USE_SDL_BACKEND
+	SPRITELIB_BACKEND_SDL
+	__GAME_CLIENT__=1
+)
+if(WIN32)
+	target_compile_definitions(packetwire PRIVATE __WIN32__ __WINDOWS__)
+else()
+	target_compile_definitions(packetwire PRIVATE PLATFORM_MACOS)
+endif()
+
+target_link_libraries(packetwire PUBLIC basic)
+
+# Socket.cpp/SocketImpl.cpp call Winsock directly; carry the import
+# library with the target so every consumer resolves it.
+if(WIN32)
+	target_link_libraries(packetwire PUBLIC ws2_32)
+endif()
+
+message(STATUS "packetwire library: wire-support subset of Client/Packet (explicit list)")
+
+# ============================================================
 # TextSystem - New SDL-based Text System (Abstracted)
 # ============================================================
 if(USE_SDL_BACKEND OR NOT WIN32)
@@ -496,6 +617,7 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# Link libraries
 	target_link_libraries(VS_UI PUBLIC
 		basic
+		packetwire
 		dxlib
 		SpriteLib
 		framelib
@@ -774,6 +896,11 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/ActionFunctions.cpp
 	)
 
+	# packetwire members compile in the packetwire library now; leaving
+	# them here too would compile them into the executable a second time
+	# (the existing LNK4217 double-compilation trap).
+	list(REMOVE_ITEM CLIENT_MAIN_SOURCES ${PACKETWIRE_SOURCES})
+
 	# Note: Cpackets contains CG (Client to Game) handlers
 	# These are server-side handlers that shouldn't be compiled in the client
 	# The client-side packet handling is done through different mechanisms
@@ -886,6 +1013,7 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		SpriteLib
 		dxlib
 		basic
+		packetwire
 		framelib
 		VS_UI
 		TextSystem
