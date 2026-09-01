@@ -62,9 +62,12 @@ void InventoryInfo::read ( SocketInputStream & iStream )
 	iStream.read( m_ListNum );
 
 	for( int i = 0; i < m_ListNum; i++ ) {
+		// The list takes ownership before read() runs: if read() throws
+		// (truncated payload), the destructor frees the slot instead of
+		// leaking it. The caller discards the whole object on a throw.
 		InventorySlotInfo * pInventorySlotInfo = new InventorySlotInfo();
-		pInventorySlotInfo->read( iStream );
 		m_InventorySlotInfoList.push_back( pInventorySlotInfo );
+		pInventorySlotInfo->read( iStream );
 
 	}
 
