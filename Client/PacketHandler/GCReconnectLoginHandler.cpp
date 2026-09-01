@@ -8,6 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
+#include "PacketDispatcher.h"
 #include "Gpackets/GCReconnectLogin.h"
 #include "ClientDef.h"
 
@@ -72,7 +73,9 @@ throw ( ProtocolException , Error )
 	pClientPlayer->sendPacket(&cgConnectSetKey);
 	UpdateSocketOutput();
 	Sleep(500);
-	cgConnectSetKey.execute(pClientPlayer);
+	// Registered as an explicit no-op (see PacketHandlerRegistry.cpp) - the
+	// linked handler was always the empty stub.
+	PacketDispatcher::dispatch(&cgConnectSetKey, pClientPlayer);
 	//end
 
 	// 재접속..

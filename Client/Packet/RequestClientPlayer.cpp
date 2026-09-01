@@ -233,10 +233,9 @@ void RequestClientPlayer::processCommand ()
 						DEBUG_ADD(pPacket->toString().c_str());
 					#endif
 
-					// Dispatch-first (RESTRUCTURING.md task 2.1), legacy
-					// virtual as fallback until ratchet R2 reaches 0.
-					if ( !PacketDispatcher::tryDispatch( pPacket , this ) )
-						pPacket->execute( this );
+					// Dispatch table (RESTRUCTURING.md tasks 2.1-2.4); an
+					// unregistered id throws.
+					PacketDispatcher::dispatch( pPacket , this );
 
 					//DEBUG_ADD_FORMAT("[Executed] %s", pPacket->toString().c_str());
 					DEBUG_ADD("[PacketExecute OK]");

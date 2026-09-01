@@ -180,16 +180,18 @@ check "R4 (library cpps referencing g_p globals)" "$R4" "$R4_BASELINE"
 # PacketDispatcher::dispatch. The baseline of 1 is the commented-out
 # PacketAttackMelee block in CGameUpdate.cpp (~line 5867), which lives
 # inside a /* */ block this line-based grep cannot see; it leaves with
-# that dead block's deletion. Client/PacketHandler is excluded with
-# Client/Packet: the handlers lived there when the baseline was taken
-# (task 2.4 moved them), and the metric is about callers outside the
-# packet layer.
+# that dead block's deletion. Client/PacketHandler (where task 2.4 moved
+# the handlers) is IN scope: two handlers turned out to fabricate a
+# CGConnectSetKey and execute() it directly - invisible while they lived
+# under the excluded Client/Packet, caught by the compiler when
+# Packet::execute was deleted, and now routed through the dispatcher.
+# With the virtual gone a new direct caller is a compile error first.
 #----------------------------------------------------------------------
 R5_BASELINE=1
 
 R5=$(grep -rnE '(\.|->)execute\s*\(\s*(g_pSocket|NULL|this|0)\s*\)' \
 	Client VS_UI --include='*.cpp' 2>/dev/null \
-	| grep -vE 'Client/Packet(Handler)?/' | grep -vE ':\s*//' | wc -l)
+	| grep -v 'Client/Packet/' | grep -vE ':\s*//' | wc -l)
 check "R5 (direct packet execute callers outside Client/Packet)" "$R5" "$R5_BASELINE"
 
 #----------------------------------------------------------------------

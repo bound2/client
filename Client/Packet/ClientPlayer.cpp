@@ -291,12 +291,11 @@ void ClientPlayer::processCommand ()
 
 //					_MinTrace("Incomming Packet ID : %d\n",pPacket->getPacketID());
 
-					// Dispatch-first (RESTRUCTURING.md task 2.1): migrated
-					// packets run through the dispatch table; unmigrated
-					// ones fall back to the legacy virtual until ratchet
-					// R2 reaches 0 and the fallback is deleted.
-					if ( !PacketDispatcher::tryDispatch( pPacket , this ) )
-						pPacket->execute( this );
+					// Every packet runs through the dispatch table
+					// (RESTRUCTURING.md tasks 2.1-2.4); an id with no
+					// registered handler throws InvalidProtocolException,
+					// which is a protocol violation, not a no-op.
+					PacketDispatcher::dispatch( pPacket , this );
 
 					//DEBUG_ADD_FORMAT("[Executed] %s", pPacket->toString().c_str());
 					DEBUG_ADD("[PacketExecute OK1]");

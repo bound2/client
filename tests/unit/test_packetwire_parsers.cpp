@@ -61,14 +61,13 @@ struct StreamFixture
 };
 
 //----------------------------------------------------------------------
-// ModifyInfo is abstract (it inherits Packet's pure execute() and
-// getPacketID()); the concrete subclasses are the GC packets. This
-// minimal subclass exists only so read() can run against a real object.
+// ModifyInfo is abstract (it inherits Packet's pure getPacketID()); the
+// concrete subclasses are the GC packets. This minimal subclass exists
+// only so read() can run against a real object.
 //----------------------------------------------------------------------
 class TestModifyInfo : public ModifyInfo
 {
 public:
-	void execute(Player*) { }
 	PacketID_t getPacketID() const  { return 0; }
 };
 

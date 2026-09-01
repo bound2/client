@@ -608,23 +608,15 @@ public :
 		}
 	}
 	
-	// execute packet's handler.
-	//
-	// No longer pure (RESTRUCTURING.md task 2.2): packets carry no
-	// override any more - every direction runs through PacketDispatcher,
-	// registered at the composition root
-	// (Client/PacketHandlerRegistry.cpp), and ratchet R2 holds the
-	// override count at zero. Reaching this default therefore means an
-	// id arrived with no registered handler - a protocol violation, not
-	// a no-op. The receive loops still route here via their tryDispatch
-	// fallback; flipping them to dispatch() and deleting tryDispatch is
-	// the recorded cosmetic follow-up after live verification.
-	virtual void execute (Player* /*pPlayer*/)
-	{
-		throw InvalidProtocolException("packet has no registered handler and no legacy execute()");
-	}
-	
-	// get packet's PacketID	
+	// A packet carries no handler entry point (RESTRUCTURING.md tasks
+	// 2.1-2.4): the handler is declared beside the packet class, defined
+	// under Client/PacketHandler, and bound to the id at the executable's
+	// composition root (Client/PacketHandlerRegistry.cpp); the receive
+	// loops call PacketDispatcher::dispatch, which throws
+	// InvalidProtocolException for an id with no registered handler.
+	// Ratchet R2 guards against an execute(Player*) override returning.
+
+	// get packet's PacketID
 	virtual PacketID_t getPacketID () const  = 0;
 
 	// get packet's size
