@@ -52,12 +52,25 @@ target_include_directories(unit_tests PRIVATE
 )
 
 #----------------------------------------------------------------------
+# Every TU that shares class definitions with the packetwire library
+# (which compiles with __GAME_CLIENT__=1 and the Windows wire macros)
+# must see the identical definitions - Packet's virtual set changes
+# under these macros, so a mismatch would be a real ODR/vtable break,
+# not a style issue. One list, used by every such TU below, so the two
+# blocks cannot drift apart.
+#----------------------------------------------------------------------
+set(PACKETWIRE_TEST_DEFINITIONS "__GAME_CLIENT__=1")
+if(WIN32)
+	list(APPEND PACKETWIRE_TEST_DEFINITIONS "__WIN32__" "__WINDOWS__")
+endif()
+
+#----------------------------------------------------------------------
 # Wire-layout inventory (unit/test_wire_layout.cpp).
 #
 # That one source compiles every packet header under Client/Packet the
-# way the DarkEden target does (__GAME_CLIENT__=1) but links none of the
-# packet .cpp files: tests/generated/WireInventory.inc carries the
-# factories' getPacketID/getPacketMaxSize bodies as plain functions.
+# way the DarkEden target does but links none of the packet .cpp files:
+# tests/generated/WireInventory.inc carries the factories'
+# getPacketID/getPacketMaxSize bodies as plain functions.
 # See tests/tools/gen_wire_inventory.pl.
 #----------------------------------------------------------------------
 target_sources(unit_tests PRIVATE stubs/wire_layout_defs.cpp)
@@ -66,20 +79,12 @@ set_source_files_properties(
 	${CMAKE_CURRENT_SOURCE_DIR}/stubs/wire_layout_defs.cpp
 	PROPERTIES
 		INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/Client/Packet;${CMAKE_CURRENT_SOURCE_DIR}/generated"
-		COMPILE_DEFINITIONS "__GAME_CLIENT__=1;WIRE_LAYOUT_FILE=\"${CMAKE_CURRENT_SOURCE_DIR}/wire-layout.txt\""
+		COMPILE_DEFINITIONS "${PACKETWIRE_TEST_DEFINITIONS};WIRE_LAYOUT_FILE=\"${CMAKE_CURRENT_SOURCE_DIR}/wire-layout.txt\""
 )
 
 #----------------------------------------------------------------------
-# packetwire tests compile against class definitions the library built
-# with __GAME_CLIENT__=1 (and the Windows wire macros); the test TUs
-# must see the identical definitions - Packet's virtual set changes
-# under these macros, so a mismatch would be a real ODR/vtable break,
-# not a style issue. Include dirs come from packetwire's PUBLIC dirs.
+# packetwire tests. Include dirs come from packetwire's PUBLIC dirs.
 #----------------------------------------------------------------------
-set(PACKETWIRE_TEST_DEFINITIONS "__GAME_CLIENT__=1")
-if(WIN32)
-	list(APPEND PACKETWIRE_TEST_DEFINITIONS "__WIN32__" "__WINDOWS__")
-endif()
 set_source_files_properties(
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packetwire_parsers.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_stringstream.cpp
