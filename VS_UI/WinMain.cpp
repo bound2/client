@@ -54,7 +54,7 @@
 #include "FameInfo.h"
 #include "MQuestInfo.h"
 #include "MMonsterKillQuestInfo.h"
-#include "../client/packet/Properties.h"
+#include "../Client/Packet/Properties.h"
 #include "SystemAvailabilities.h"
 #include "ShrineInfoManager.h"
 #include "RankBonusDef.h"

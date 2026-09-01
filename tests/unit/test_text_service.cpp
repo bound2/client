@@ -10,10 +10,19 @@
 // through counted as a success, so NormalizeText took the converted prefix
 // and dropped the rest. It is already fixed - 43458c1 moved the function
 // off SDL_iconv and added the `inBytes != 0` test that rejects a partial
-// run - so nothing here reproduces a live bug. They exist because the two
-// halves of that condition look redundant next to each other (POSIX iconv
-// already reports the same failures through its return value) and the
-// obvious tidy-up of dropping one silently reintroduces truncation.
+// run - so nothing here reproduces a live bug.
+//
+// What they guard is NormalizeText's observable contract: a code page that
+// cannot explain the whole string must not claim it, and the bytes must
+// come back unchanged when none can. They do NOT guard the `inBytes != 0`
+// half of the accept condition specifically, and an earlier version of this
+// comment wrongly claimed they did. That was measured and disproved: a
+// conforming iconv returns a non-negative count only when it has consumed
+// all of its input, so `inBytes != 0` implies `res == (size_t)-1` and the
+// two halves cannot be told apart by any input. Deleting either one leaves
+// every test below green. The clause is worth keeping as a guard against a
+// non-conforming iconv, but nothing here would catch its removal - if you
+// want that, it needs a stubbed iconv, not a byte vector.
 //
 // tests/unit/test_textservice_normalize.cpp covers the conversions that are
 // meant to succeed; this file covers the ones that must not. Its vectors

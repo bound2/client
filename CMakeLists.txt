@@ -400,7 +400,6 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		Client/MPlayer.cpp
 		Client/MCreatureTable.cpp
 		Client/MFakeCreature.cpp
-		Client/MNpcTable.cpp
 		Client/MNPCTable.cpp
 
 		# Social System

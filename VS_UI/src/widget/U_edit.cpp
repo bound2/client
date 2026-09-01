@@ -1,5 +1,5 @@
 #include "U_edit.h"
-#include "../hangul/CI.h"
+#include "../hangul/Ci.h"
 #include "../InputFocusManager.h"
 #include <stdint.h>
 #include <stdio.h>

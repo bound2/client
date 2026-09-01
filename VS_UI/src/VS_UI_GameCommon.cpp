@@ -35,7 +35,7 @@
 
 #include <algorithm>
 #include <time.h>
-#include "../client/packet/types/WarTypes.h"
+#include "../Client/Packet/Types/WarTypes.h"
 
 #include "MHelpDef.h"
 #include "VS_UI_ExtraDialog.h"

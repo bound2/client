@@ -9,7 +9,7 @@
  */
 
 #include "animation.h"
-#include "Types.h"
+#include "types.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>

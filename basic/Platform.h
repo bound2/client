@@ -730,11 +730,20 @@ typedef WORD			char_t;
 	 *
 	 * wchar_t is 16 bits on Windows and 32 on the platforms this block is
 	 * compiled for, so the source is UTF-16 in one case and UTF-32 in the
-	 * other. Both are handled by the same walk: surrogate halves only ever
-	 * appear in UTF-16 input, because a UTF-32 unit in D800-DFFF is not a
-	 * code point in the first place. Anything that is not a well formed
-	 * code point becomes U+FFFD, and it must do so identically in both
-	 * passes of the conversion below or their byte counts diverge. */
+	 * other, and one walk deliberately serves both: a surrogate pair is
+	 * combined wherever it appears, without testing the unit width.
+	 *
+	 * That is a real if harmless divergence from strict UTF-32, and it is
+	 * stated rather than hidden because an earlier version of this comment
+	 * asserted the opposite. Given the units D83D DE00, a strict UTF-32
+	 * decoder yields two U+FFFD and this yields the single code point they
+	 * spell in UTF-16. Well formed input of either width is unaffected, and
+	 * ill formed UTF-32 has no right answer worth branching for.
+	 *
+	 * What does matter is that anything not a well formed code point becomes
+	 * U+FFFD identically in both passes of the conversion below - the two
+	 * passes share this function precisely so their byte counts cannot
+	 * diverge, and a divergence of one byte would be a buffer overflow. */
 	static inline unsigned int Platform_WideNextCodePoint(LPCWSTR pSrc, int nCount, int* pIndex) {
 		unsigned int cp = (unsigned int)pSrc[(*pIndex)++];
 
@@ -803,6 +812,11 @@ typedef WORD			char_t;
 	 *   - A destination too small for the whole conversion returns 0
 	 *     (ERROR_INSUFFICIENT_BUFFER on Win32), never a length. A caller that
 	 *     indexes with the return value therefore stays inside its buffer.
+	 *     One deliberate divergence, measured against the real API: Win32
+	 *     fills the destination with as much as fits before failing, and this
+	 *     writes nothing. Every caller here zeroes its length before touching
+	 *     the buffer, so the difference is unobservable in this tree, and
+	 *     writing nothing is the safer of the two.
 	 *   - cchWideChar == -1 means the source is NUL terminated; the
 	 *     terminator is converted and counted. A non-negative cchWideChar
 	 *     converts exactly that many units and appends no terminator.

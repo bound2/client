@@ -69,9 +69,11 @@ throw ( ProtocolException , Error )
 
 		if (!g_pRequestUserManager->HasRequestUser(pPacket->getName().c_str()))
 		{
-			const char* pIP = pPlayer->getSocket()->getHost().c_str();
+			// getHost() returns std::string by value, so its c_str() dies at
+			// the end of this statement; the copy has to outlive the call.
+			const std::string strIP = pPlayer->getSocket()->getHost();
 
-			g_pRequestUserManager->AddRequestUser( pPacket->getName().c_str(), pIP );
+			g_pRequestUserManager->AddRequestUser( pPacket->getName().c_str(), strIP.c_str() );
 		}
 
 		// IP, Port 다시 설정.
@@ -87,9 +89,14 @@ throw ( ProtocolException , Error )
 
 		int numMessage = pPacket->getMessageSize();
 
-		char str[128];
-		char strName[128];	
-		strcpy(strName, pPacket->getName().c_str());
+		// CRWhisper::read admits a name of exactly 10 bytes and a message of
+		// exactly 128 (CRWhisper.cpp:87,105), so each buffer needs room for
+		// that many characters plus the terminator -- the old char[128] was
+		// one byte short for the message. Same shape as GCWhisperHandler and
+		// RCSayHandler; the sender here is a peer client over UDP.
+		char str[128 + 1];
+		char strName[10 + 1];
+		snprintf(strName, sizeof(strName), "%s", pPacket->getName().c_str());
 
 		//bool bMasterWords = (strstr(strName, "GM")!=NULL);
 		bool bMasterWords = strncmp( strName, (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetString(), (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetLength() ) == 0;
@@ -109,7 +116,7 @@ throw ( ProtocolException , Error )
 					break;
 				}
 
-				strcpy(str, pString->msg.c_str());
+				snprintf(str, sizeof(str), "%s", pString->msg.c_str());
 
 				//--------------------------------------------------
 				// 욕 제거

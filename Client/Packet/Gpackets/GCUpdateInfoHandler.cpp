@@ -306,22 +306,39 @@ throw ( ProtocolException , Error )
 	// 2004, 6, 15 sobeit add end - nick name
 	NicknameInfo* TempNick	= pPacket->getNicknameInfo();
 	const char* szNickName;
+	// getNickname() returns std::string by value, so binding its c_str()
+	// would dangle at the end of that statement; the copy has to outlive the
+	// SetNickName call below.
+	std::string strCustomNick;
 	if(TempNick != NULL)
 	{
 		if(TempNick->getNicknameType() == NicknameInfo::NICK_NONE)
 		{
 			szNickName = "";
 		}
-		else 
+		else
 		if(TempNick->getNicknameType() == NicknameInfo::NICK_CUSTOM_FORCED ||
 			TempNick->getNicknameType() == NicknameInfo::NICK_CUSTOM)
 		{
-			szNickName = (TempNick->getNickname()).c_str();
+			strCustomNick = TempNick->getNickname();
+			szNickName = strCustomNick.c_str();
 		}
-		else // 닉네임 인덱스가 있을 때
+		else // when a nickname index is supplied
 		{
-			szNickName = (*g_pNickNameStringTable)[TempNick->getNicknameIndex()].GetString();
+			// The index is a raw WORD off the wire. Clamping matters more
+			// than it looks: out of range, CTypeTable now returns a default
+			// MString whose GetString() is NULL, and SetNickName assigns
+			// that straight into a std::string. The siblings in
+			// GCModifyNicknameHandler and the three GCAdd*Handlers clamp the
+			// same way.
+			DWORD TempIndex = TempNick->getNicknameIndex();
+			if(TempIndex >= g_pNickNameStringTable->GetSize())
+				TempIndex = 0;
+			szNickName = (*g_pNickNameStringTable)[TempIndex].GetString();
 		}
+
+		if(szNickName == NULL)
+			szNickName = "";
 
 		g_pPlayer->SetNickName(TempNick->getNicknameType(), (char*)szNickName);
 //		g_char_slot_ingame.m_NickNameType = TempNick->getNicknameType();

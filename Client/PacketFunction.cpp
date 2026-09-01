@@ -6065,7 +6065,9 @@ void Add_Race_SlayerMonster(GCAddMonster * pPacket)
 			pCreature = NULL;
 		}
 
-		if(pPacket->getMonsterType() == 793)
+		// Same rejection path as the type-795 block further down: the branch
+		// above nulls pCreature, so this cannot run unconditionally.
+		if(pCreature != NULL && pPacket->getMonsterType() == 793)
 		{
 			pCreature->AddEffectStatus(EFFECTSTATUS_CAUSE_CRITICAL_WOUNDS, 0xffff);
 			ExecuteActionInfoFromMainNode(RESULT_MAGIC_CAUSE_CRITICAL_WOUNDS,pCreature->GetX(), pCreature->GetY(), 0,2,	pCreature->GetID(),	

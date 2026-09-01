@@ -234,14 +234,27 @@ int platform_event_wait(platform_event_t event, DWORD timeout) {
 	if (timeout == PLATFORM_INFINITE) {
 		while (!event->signaled) {
 			if (SDL_CondWait(event->cond, event->mutex) != 0) {
-				result = 1;
+				/* Deliberately not SDL_MUTEX_TIMEDOUT, which is 1: an
+				   infinite wait cannot time out, so reporting one here would
+				   be a lie the caller has no way to see through. Callers that
+				   collapse every non-zero return to a timeout are unaffected
+				   either way, but the value is now honest for one that does
+				   not. */
+				result = -1;
 				break;
 			}
 		}
 	} else {
 		/* Re-waiting must not restart the caller's timeout, so the remaining
-		   time is measured against a deadline taken before the first wait. */
-		const Uint32 deadline = SDL_GetTicks() + (Uint32)timeout;
+		   time is measured against a deadline taken before the first wait.
+		   The clamp keeps the signed arithmetic below valid: DWORD spans
+		   values a Sint32 cannot hold, and without it any timeout of 2^31 ms
+		   or more would compute a negative remainder on the first pass and
+		   return without ever waiting. No caller passes one - the live values
+		   are 0, 2000 and PLATFORM_INFINITE - but the signature accepts it. */
+		const Uint32 SDL_MAX_WAIT = 0x7FFFFFFFu;
+		const Uint32 capped   = ((Uint32)timeout > SDL_MAX_WAIT) ? SDL_MAX_WAIT : (Uint32)timeout;
+		const Uint32 deadline = SDL_GetTicks() + capped;
 
 		while (!event->signaled) {
 			/* Unsigned subtraction, then a signed compare, so this stays

@@ -506,10 +506,15 @@ MZone::ReleaseObject()
 		pItem = (*iItem).second;
 		if (pItem!=NULL)
 		{
-			if (m_ppSector!=NULL)
+			// The creature loop above routes its subscripts through SectorAt;
+			// this one writes through its sector, so it needs the same bound.
+			// The m_ppSector NULL test alone does not cover a position off
+			// the map, which an item can carry just as a creature can.
+			MSector*	pItemSector = SectorAt(pItem->GetX(), pItem->GetY());
+
+			if (pItemSector!=NULL)
 			{
-				// [성물수정]
-				MSector& sector = m_ppSector[pItem->GetY()][pItem->GetX()];
+				MSector& sector = *pItemSector;
 				sector.RemoveItem();
 
 				// 혹시 문제가 있을까봐.. 시체 정리..
@@ -3224,16 +3229,26 @@ MZone::RemoveCreature(TYPE_OBJECTID id)
 	}
 	*/
 
-	// 찾은 경우 --> 제거		
+	// Found it -- now take it out of its sector.
 	bool removed = true;
-	
+
 	//------------------------------------------------
-	// sector에서 제거시킨다.
+	// Both coordinate pairs are whatever the creature
+	// currently carries, and a handler can reposition
+	// an existing creature from packet data after
+	// AddCreature validated it, so neither pair is
+	// guaranteed to be on the map by the time we get
+	// here. A missing sector counts as "not removed",
+	// which is exactly what the guarded delete below
+	// wants to hear.
 	//------------------------------------------------
-	if (!m_ppSector[y][x].RemoveCreature(id))
+	MSector*	pSector       = SectorAt(x, y);
+	MSector*	pServerSector = SectorAt(serverX, serverY);
+
+	if (pSector==NULL || !pSector->RemoveCreature(id))
 	{
-		if (!m_ppSector[serverY][serverX].RemoveCreature(id))
-		{	
+		if (pServerSector==NULL || !pServerSector->RemoveCreature(id))
+		{
 			DEBUG_ADD_FORMAT("Can't RemoveCreature! ID=%d client(%d,%d), server(%d,%d)", pCreature->GetID(), x,y,serverX,serverY);
 
 			removed = false;
@@ -3648,8 +3663,19 @@ MZone::AddItem(MItem* pItem, BOOL bDropping)
 	// 아직 없는 Item이면 추가	
 	if (theIterator == m_mapItem.end())
 	{
-		// Sector Setting [성물수정]
-		MSector& sector = m_ppSector[pItem->GetY()][pItem->GetX()];
+		// Item coordinates reach the zone straight out of GCAddItemToZone,
+		// exactly as creature coordinates do in AddCreature, so the sector
+		// they name has to be checked before it is written through.
+		MSector*	pSector = SectorAt(pItem->GetX(), pItem->GetY());
+
+		if (pSector==NULL)
+		{
+			DEBUG_ADD_FORMAT("[Error] AddItem: position (%d, %d) is outside the zone (%d x %d)", (int)pItem->GetX(), (int)pItem->GetY(), (int)m_Width, (int)m_Height);
+
+			return false;
+		}
+
+		MSector& sector = *pSector;
 
 		if (sector.AddItem(pItem))
 		{		
