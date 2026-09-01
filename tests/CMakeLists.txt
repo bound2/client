@@ -87,6 +87,7 @@ set_source_files_properties(
 #----------------------------------------------------------------------
 set_source_files_properties(
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packetwire_parsers.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_dispatcher.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_stringstream.cpp
 	PROPERTIES
 		COMPILE_DEFINITIONS "${PACKETWIRE_TEST_DEFINITIONS}"

@@ -285,6 +285,7 @@ set(PACKETWIRE_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/Encrypter.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/Exception.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PacketAssert.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PacketDispatcher.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SocketEncryptInputStream.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SocketEncryptOutputStream.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SocketInputStream.cpp

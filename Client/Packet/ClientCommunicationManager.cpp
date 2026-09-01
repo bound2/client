@@ -7,6 +7,7 @@
 #include "ClientCommunicationManager.h"
 #include "Datagram.h"
 #include "DatagramPacket.h"
+#include "PacketDispatcher.h"
 #include "ClientConfig.h"
 #include "PacketValidator.h"
 #include "DebugInfo.h"
@@ -209,7 +210,11 @@ ClientCommunicationManager::Update()
 				DEBUG_ADD_FORMAT("[From] %s(%d)", pDatagramPacket->getHost().c_str(),
 													pDatagramPacket->getPort());
 
-				pDatagramPacket->execute(NULL);
+				// Dispatch-first (RESTRUCTURING.md task 2.1), legacy
+				// virtual as fallback until ratchet R2 reaches 0. The
+				// datagram direction has no player behind it.
+				if ( !PacketDispatcher::tryDispatch( pDatagramPacket , NULL ) )
+					pDatagramPacket->execute(NULL);
 
 				#ifdef __METROTECH_TEST__
 					g_UDPTest.UDPPacketExecute ++;

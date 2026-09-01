@@ -337,7 +337,7 @@ migration recipe, the dispatcher design, and the traps are all recorded in
 the server's status notes. This is what makes the ~509 `Gpackets` parsers
 (priority 1 in the code-health review) directly unit-testable.
 
-- [ ] **2.1 `PacketDispatcher` in `packetwire`.** Table of packet id →
+- [x] **2.1 `PacketDispatcher` in `packetwire`.** Table of packet id →
   `void(*)(Packet*, Player*)`, written only at startup, consulted before the
   legacy virtual. Port the server's `PacketDispatcher.h` shape (including
   the `DE_REGISTER_PACKET_HANDLER` macros) rather than inventing a new one.
@@ -345,7 +345,24 @@ the server's status notes. This is what makes the ~509 `Gpackets` parsers
   `ClientPlayer.cpp:293`, `Player.cpp:201`, `RequestClientPlayer.cpp:235`,
   `RequestServerPlayer.cpp:215`, `ClientCommunicationManager.cpp:212`
   (datagram, `NULL` player).
-  > **Status:** not started.
+  > **Status:** done (2026-09-01, `restructuring/packet-dispatcher`) —
+  > `Client/Packet/PacketDispatcher.{h,cpp}` is the server's design
+  > verbatim (fixed `PACKET_MAX` table, startup-only writes, assert on
+  > double registration, `InvalidProtocolException` from `dispatch` on
+  > an unregistered id, both `DE_REGISTER_PACKET_HANDLER` macros) plus
+  > one client-only transitional entry: `tryDispatch`, which reports an
+  > unregistered id instead of throwing so the five receive loops —
+  > all converted, `DatagramPacket` is a `Packet` so the datagram loop
+  > uses the same table — fall back to the legacy virtual until R2
+  > reaches 0, at which point the loops switch to `dispatch()` and
+  > `tryDispatch` is deleted. Five unit tests pin the contract
+  > (registered handler runs with the given packet/player, tryDispatch
+  > true/false split, dispatch throws on unregistered, double
+  > registration refused via `AssertionError`). With no handlers
+  > registered yet the change is behaviorally inert — every packet
+  > still takes the fallback — so the runtime risk of this landing
+  > alone is nil; each 2.2 slice carries its own live verification.
+  > Suite 119/450/0 in plain and ASan trees; both client trees 0 errors.
   - Owner: R2 ratchet + a dispatcher unit test (unknown id → protocol
     exception).
 

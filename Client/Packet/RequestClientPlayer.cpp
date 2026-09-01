@@ -10,6 +10,7 @@
 #include "RequestClientPlayer.h"
 #include "PacketAssert.h"
 #include "Packet.h"
+#include "PacketDispatcher.h"
 #include "PacketFactoryManager.h"
 #include "PacketValidator.h"
 #include "ClientDef.h"
@@ -232,11 +233,14 @@ void RequestClientPlayer::processCommand ()
 						DEBUG_ADD(pPacket->toString().c_str());
 					#endif
 
-					pPacket->execute( this );
+					// Dispatch-first (RESTRUCTURING.md task 2.1), legacy
+					// virtual as fallback until ratchet R2 reaches 0.
+					if ( !PacketDispatcher::tryDispatch( pPacket , this ) )
+						pPacket->execute( this );
 
 					//DEBUG_ADD_FORMAT("[Executed] %s", pPacket->toString().c_str());
-					DEBUG_ADD("[PacketExecute OK]");				
-				}				
+					DEBUG_ADD("[PacketExecute OK]");
+				}
 				
 				delete pPacket;
 				pPacket = NULL;
