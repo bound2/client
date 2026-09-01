@@ -49,18 +49,6 @@ void CGModifyNickname::write (SocketOutputStream & oStream) const
 	__END_CATCH
 }
 
-void CGModifyNickname::execute (Player* pPlayer) 
-	 throw (ProtocolException , Error)
-{
-#ifndef __GAME_CLIENT__
-	__BEGIN_TRY
-
-	CGModifyNicknameHandler::execute (this , pPlayer);
-		
-	__END_CATCH
-#endif
-}
-
 #ifdef __DEBUG_OUTPUT__
 string CGModifyNickname::toString () 
 	const throw ()

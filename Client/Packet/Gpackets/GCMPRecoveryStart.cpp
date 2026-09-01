@@ -76,16 +76,6 @@ void GCMPRecoveryStart::write ( SocketOutputStream & oStream )
 // execute packet's handler
 //
 //////////////////////////////////////////////////////////////////////
-void GCMPRecoveryStart::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCMPRecoveryStartHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 
 //////////////////////////////////////////////////////////////////////
 //

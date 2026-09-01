@@ -33,18 +33,3 @@ void CLGetPCList::write ( SocketOutputStream & oStream ) const
 }
 
 
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void CLGetPCList::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	#ifndef __GAME_CLIENT__
-		CLGetPCListHandler::execute ( this , pPlayer );
-	#endif
-		
-	__END_CATCH
-}
-

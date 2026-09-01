@@ -39,19 +39,6 @@ void GCCreatureDied::write ( SocketOutputStream & oStream ) const
 }
 
 
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void GCCreatureDied::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCCreatureDiedHandler::execute( this , pPlayer );
-
-	__END_CATCH
-}
-
 
 //////////////////////////////////////////////////////////////////////
 // get packet's debug std::string

@@ -63,21 +63,6 @@ void CGSelectPortal::write ( SocketOutputStream & oStream ) const
 }
 
 
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void CGSelectPortal::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-
-	#ifndef __GAME_CLIENT__
-		CGSelectPortalHandler::execute( this , pPlayer );
-	#endif
-
-	__END_CATCH
-}
-
 
 //////////////////////////////////////////////////////////////////////
 // get packet's debug std::string

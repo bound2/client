@@ -31,16 +31,6 @@ void GCNPCSay::write ( SocketOutputStream & oStream ) const
 	__END_CATCH
 }
 
-void GCNPCSay::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCNPCSayHandler::execute( this , pPlayer );
-
-	__END_CATCH
-}
-
 #ifdef __DEBUG_OUTPUT__
 std::string GCNPCSay::toString () const
        throw ()

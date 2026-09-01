@@ -37,16 +37,6 @@ void GCKnockBack::write ( SocketOutputStream & oStream )
 	__END_CATCH
 }
 
-void GCKnockBack::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCKnockBackHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 #ifdef __DEBUG_OUTPUT__
 	std::string GCKnockBack::toString () 
 		const throw ()

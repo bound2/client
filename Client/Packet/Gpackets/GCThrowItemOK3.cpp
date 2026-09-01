@@ -75,16 +75,6 @@ void GCThrowItemOK3::write ( SocketOutputStream & oStream )
 // execute packet's handler
 //
 //////////////////////////////////////////////////////////////////////
-void GCThrowItemOK3::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCThrowItemOK3Handler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 
 //////////////////////////////////////////////////////////////////////
 //

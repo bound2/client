@@ -49,19 +49,6 @@ void GCDropItemToZone::write ( SocketOutputStream & oStream ) const
 	oStream.write( m_DropPetOID );
 }
 
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void GCDropItemToZone::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCDropItemToZoneHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 #ifdef __DEBUG_OUTPUT__
 //////////////////////////////////////////////////////////////////////
 // toString

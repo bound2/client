@@ -146,16 +146,6 @@ PacketSize_t GCSMSAddressList::getPacketSize() const throw()
 // execute packet's handler
 //
 //////////////////////////////////////////////////////////////////////
-void GCSMSAddressList::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCSMSAddressListHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 #ifdef __DEBUG_OUTPUT__
 //////////////////////////////////////////////////////////////////////
 //

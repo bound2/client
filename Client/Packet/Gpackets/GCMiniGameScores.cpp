@@ -117,16 +117,6 @@ PacketSize_t GCMiniGameScores::getPacketSize() const throw()
 // execute packet's handler
 //
 //////////////////////////////////////////////////////////////////////
-void GCMiniGameScores::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCMiniGameScoresHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 
 #ifdef __DEBUG_OUTPUT__
 

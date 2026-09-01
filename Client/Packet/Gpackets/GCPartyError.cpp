@@ -33,16 +33,6 @@ void GCPartyError::write (SocketOutputStream & oStream) const
 	__END_CATCH
 }
 
-void GCPartyError::execute (Player * pPlayer) 
-	 throw (ProtocolException , Error)
-{
-	__BEGIN_TRY
-		
-	GCPartyErrorHandler::execute(this , pPlayer);
-
-	__END_CATCH
-}
-
 #ifdef __DEBUG_OUTPUT__
 std::string GCPartyError::toString () const
        throw ()

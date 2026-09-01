@@ -152,16 +152,6 @@ void GCSkillToTileOK6::deleteCListElement()
 // execute packet's handler
 //
 //////////////////////////////////////////////////////////////////////
-void GCSkillToTileOK6::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCSkillToTileOK6Handler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 
 #ifdef __DEBUG_OUTPUT__
 

@@ -100,16 +100,6 @@ void CRConnect::write ( SocketOutputStream & oStream )
 // execute packet's handler
 //
 //////////////////////////////////////////////////////////////////////
-void CRConnect::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	CRConnectHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 
 //////////////////////////////////////////////////////////////////////
 //

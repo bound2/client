@@ -58,19 +58,6 @@ void GCSelectRankBonusOK::write ( SocketOutputStream & oStream ) const
 }
 
 
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void GCSelectRankBonusOK::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCSelectRankBonusOKHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 #ifdef __DEBUG_OUTPUT__
 //////////////////////////////////////////////////////////////////////
 //

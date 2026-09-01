@@ -69,21 +69,6 @@ void CGThrowItem::write ( SocketOutputStream & oStream ) const
 }
 
 
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void CGThrowItem::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	#ifndef __GAME_CLIENT__
-		CGThrowItemHandler::execute( this , pPlayer );
-	#endif
-
-	__END_CATCH
-}
-
 
 //////////////////////////////////////////////////////////////////////
 // get packet's debug std::string

@@ -65,19 +65,6 @@ void GCBloodBibleList::write ( SocketOutputStream & oStream ) const
 }
 
 
-//////////////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////////////
-void GCBloodBibleList::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCBloodBibleListHandler::execute( this , pPlayer );
-
-	__END_CATCH
-}
-
 PacketSize_t GCBloodBibleList::getPacketSize() const
 	throw()
 {

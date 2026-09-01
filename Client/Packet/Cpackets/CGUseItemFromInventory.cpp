@@ -86,18 +86,6 @@ void CGUseItemFromInventory::write (SocketOutputStream & oStream) const
 	__END_CATCH
 }
 
-void CGUseItemFromInventory::execute (Player* pPlayer) 
-	 throw (ProtocolException , Error)
-{
-	__BEGIN_TRY
-
-#ifndef __GAME_CLIENT__
-	CGUseItemFromInventoryHandler::execute (this , pPlayer);
-#endif
-	
-	__END_CATCH
-}
-
 #ifdef __DEBUG_OUTPUT__
 std::string CGUseItemFromInventory::toString () 
 	const throw ()

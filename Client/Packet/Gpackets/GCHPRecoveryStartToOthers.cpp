@@ -78,16 +78,6 @@ void GCHPRecoveryStartToOthers::write ( SocketOutputStream & oStream )
 // execute packet's handler
 //
 //////////////////////////////////////////////////////////////////////
-void GCHPRecoveryStartToOthers::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCHPRecoveryStartToOthersHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 
 //////////////////////////////////////////////////////////////////////
 //

@@ -93,7 +93,6 @@ public:
 
 	void read(SocketInputStream & iStream);
 	void write(SocketOutputStream & oStream) const;
-	void execute(Player* pPlayer);
 
 	PacketSize_t getPacketSize() const throw();
 	PacketID_t getPacketID() const throw() { return PACKET_GC_EXCHANGE_LIST; }

@@ -74,16 +74,6 @@ void GCRideMotorCycle::write ( SocketOutputStream & oStream )
 // execute packet's handler
 //
 //////////////////////////////////////////////////////////////////////
-void GCRideMotorCycle::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCRideMotorCycleHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 
 //////////////////////////////////////////////////////////////////////
 //

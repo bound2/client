@@ -104,12 +104,3 @@ string CGExchangeList::toString() const
 	return msg.toString();
 }
 
-void CGExchangeList::execute(Player* pPlayer)
-{
-	__BEGIN_TRY
-
-	// This is handled by the server's packet handler
-	// The client doesn't execute this packet
-
-	__END_CATCH
-}

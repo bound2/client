@@ -61,19 +61,6 @@ void GCUseOK::write ( SocketOutputStream & oStream ) const
 }
 
 //////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void GCUseOK::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCUseOKHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
-//////////////////////////////////////////////////////////////////////
 //
 // get packet's debug string
 //
@@ -140,19 +127,6 @@ void GCUseSkillCardOK::write ( SocketOutputStream & oStream ) const
 
 	oStream.write(m_CardType);
 
-	__END_CATCH
-}
-
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void GCUseSkillCardOK::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCUseSkillCardOKHandler::execute( this , pPlayer );
-		
 	__END_CATCH
 }
 

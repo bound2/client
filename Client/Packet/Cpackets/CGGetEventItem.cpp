@@ -54,24 +54,6 @@ void CGGetEventItem::write (SocketOutputStream & oStream) const
 
 
 
-void CGGetEventItem::execute (Player* pPlayer) 
-
-	 throw (ProtocolException , Error)
-
-{
-
-	__BEGIN_TRY
-
-
-
-//	CGGetEventItemHandler::execute (this , pPlayer);
-
-		
-
-	__END_CATCH
-
-}
-
 
 
 string CGGetEventItem::toString () 

@@ -39,19 +39,6 @@ void GCTakeOutOK::write ( SocketOutputStream & oStream ) const
 	__END_CATCH
 }
 
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void GCTakeOutOK::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCTakeOutOKHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 #ifdef __DEBUG_OUTPUT__
 //////////////////////////////////////////////////////////////////////
 //

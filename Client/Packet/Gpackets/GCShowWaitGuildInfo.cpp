@@ -157,19 +157,6 @@ PacketSize_t GCShowWaitGuildInfo::getPacketSize() const throw()
 
 
 
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void GCShowWaitGuildInfo::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCShowWaitGuildInfoHandler::execute( this , pPlayer );
-
-	__END_CATCH
-}
-
 
 //////////////////////////////////////////////////////////////////////
 // get packet's debug std::string

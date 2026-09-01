@@ -53,19 +53,6 @@ void GCPartyPosition::write ( SocketOutputStream & oStream ) const
 }
 
 
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void GCPartyPosition::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCPartyPositionHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 
 #ifdef __DEBUG_OUTPUT__
 //////////////////////////////////////////////////////////////////////

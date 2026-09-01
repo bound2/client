@@ -36,21 +36,6 @@ void CGVerifyTime::write ( SocketOutputStream & oStream ) const
 }
 
 
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void CGVerifyTime::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	#ifndef __GAME_CLIENT__
-		CGVerifyTimeHandler::execute( this , pPlayer );
-	#endif
-
-	__END_CATCH
-}
-
 
 //////////////////////////////////////////////////////////////////////
 // get packet's debug std::string

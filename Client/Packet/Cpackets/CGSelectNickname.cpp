@@ -26,18 +26,6 @@ void CGSelectNickname::write (SocketOutputStream & oStream) const
 
 	__END_CATCH
 }
-void CGSelectNickname::execute (Player* pPlayer) 
-	 throw (ProtocolException , Error)
-{
-#ifndef __GAME_CLIENT__
-	__BEGIN_TRY
-		
-	CGSelectNicknameHandler::execute(this , pPlayer);
-
-	__END_CATCH
-#endif
-}
-
 #ifdef __DEBUG_OUTPUT__
 string CGSelectNickname::toString () const
        throw ()

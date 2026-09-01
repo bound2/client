@@ -46,16 +46,6 @@ void CGPartySay::write (SocketOutputStream & oStream) const
 	__END_CATCH
 }
 
-void CGPartySay::execute (Player* pPlayer) 
-	 throw (ProtocolException , Error)
-{
-	__BEGIN_TRY
-#ifndef __GAME_CLIENT__
-	CGPartySayHandler::execute (this , pPlayer);
-#endif		
-	__END_CATCH
-}
-
 //////////////////////////////////////////////////////////////////////////////
 // get debug std::string
 //////////////////////////////////////////////////////////////////////////////

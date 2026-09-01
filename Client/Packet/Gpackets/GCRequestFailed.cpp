@@ -49,19 +49,6 @@ void GCRequestFailed::write ( SocketOutputStream & oStream ) const
 	__END_CATCH
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////////////
-void GCRequestFailed::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCRequestFailedHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 
 //////////////////////////////////////////////////////////////////////////////
 // get packet's debug std::string

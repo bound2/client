@@ -32,17 +32,3 @@ void CGReady::write ( SocketOutputStream & oStream ) const
 }
 
 
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void CGReady::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	#ifndef __GAME_CLIENT__
-		CGReadyHandler::execute( this , pPlayer );
-	#endif
-		
-	__END_CATCH
-}

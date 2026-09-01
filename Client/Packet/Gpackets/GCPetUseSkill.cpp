@@ -71,16 +71,6 @@ void GCPetUseSkill::write ( SocketOutputStream & oStream )
 // execute packet's handler
 //
 //////////////////////////////////////////////////////////////////////
-void GCPetUseSkill::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCPetUseSkillHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 
 #ifdef __DEBUG_OUTPUT__
 //////////////////////////////////////////////////////////////////////

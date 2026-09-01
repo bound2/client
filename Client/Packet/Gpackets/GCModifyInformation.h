@@ -20,7 +20,6 @@
 class GCModifyInformation : public ModifyInfo
 {
 public:
-	void execute(Player* pPlayer) throw(ProtocolException, Error);
 	PacketID_t getPacketID() const throw() { return PACKET_GC_MODIFY_INFORMATION; }
 #ifdef __DEBUG_OUTPUT__
 	std::string getPacketName() const throw() { return "GCModifyInformation"; }

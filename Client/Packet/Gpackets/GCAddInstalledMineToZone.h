@@ -24,7 +24,6 @@ public:
 	GCAddInstalledMineToZone() throw();
 	~GCAddInstalledMineToZone() throw();
 public:
-	void execute(Player* pPlayer) throw(ProtocolException, Error);
 	PacketID_t getPacketID() const throw() { return PACKET_GC_ADD_INSTALLED_MINE_TO_ZONE; }
 
 #ifdef __DEBUG_OUTPUT__	

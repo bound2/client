@@ -66,16 +66,6 @@ void GCRequestedIP::write (SocketOutputStream & oStream)
 	__END_CATCH
 }
 
-void GCRequestedIP::execute (Player * pPlayer) 
-	 throw (ProtocolException , Error)
-{
-	__BEGIN_TRY
-		
-	GCRequestedIPHandler::execute(this , pPlayer);
-		
-	__END_CATCH
-}
-
 #ifdef __DEBUG_OUTPUT__
 std::string GCRequestedIP::toString () 
 	const throw ()

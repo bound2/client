@@ -32,17 +32,4 @@ void LCDeletePCOK::write ( SocketOutputStream & oStream ) const
 }
 
 
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void LCDeletePCOK::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	LCDeletePCOKHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 

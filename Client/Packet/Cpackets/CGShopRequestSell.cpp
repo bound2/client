@@ -42,21 +42,6 @@ void CGShopRequestSell::write ( SocketOutputStream & oStream ) const
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
-// execute packet's handler
-////////////////////////////////////////////////////////////////////////////////
-void CGShopRequestSell::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-
-	#ifndef __GAME_CLIENT__
-		CGShopRequestSellHandler::execute ( this , pPlayer );
-	#endif
-		
-	__END_CATCH
-}
-
 
 ////////////////////////////////////////////////////////////////////////////////
 // get debug std::string

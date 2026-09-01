@@ -77,17 +77,6 @@ void CGCrashReport::write (SocketOutputStream & oStream) const
 	__END_CATCH
 }
 
-void CGCrashReport::execute (Player* pPlayer) 
-	 throw (ProtocolException , Error)
-{
-	__BEGIN_TRY
-#ifndef __GAME_CLIENT__
-	CGCrashReportHandler::execute (this , pPlayer);
-#endif
-		
-	__END_CATCH
-}
-
 #ifdef __DEBUG_OUTPUT__
 
 std::string CGCrashReport::toString () 

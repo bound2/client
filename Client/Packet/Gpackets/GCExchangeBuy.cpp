@@ -95,15 +95,6 @@ string GCExchangeBuy::toString() const
 	return msg.toString();
 }
 
-void GCExchangeBuy::execute(Player* pPlayer)
-{
-	__BEGIN_TRY
-
-	GCExchangeBuyHandler::execute(this, pPlayer);
-
-	__END_CATCH
-}
-
 void GCExchangeBuyHandler::execute(GCExchangeBuy* pPacket, Player* pPlayer)
 	throw ( ProtocolException , Error )
 {

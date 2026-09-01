@@ -138,19 +138,6 @@ RCRequestedFile::Release()
 	}
 }
 
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void RCRequestedFile::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	RCRequestedFileHandler::execute( this , pPlayer );
-
-	__END_CATCH
-}
-
 PacketSize_t 
 RCRequestedFile::getPacketSize () const throw ()
 {

@@ -145,16 +145,6 @@ void GCThrowBombOK3::deleteCListElement()
 // execute packet's handler
 //
 //////////////////////////////////////////////////////////////////////
-void GCThrowBombOK3::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCThrowBombOK3Handler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 
 //////////////////////////////////////////////////////////////////////
 //

@@ -63,21 +63,6 @@ void CGPhoneSay::write ( SocketOutputStream & oStream ) const
 }
 
 
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void CGPhoneSay::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	#ifndef __GAME_CLIENT__
-		CGPhoneSayHandler::execute( this , pPlayer );
-	#endif
-
-	__END_CATCH
-}
-
 
 //////////////////////////////////////////////////////////////////////
 // get packet's debug std::string

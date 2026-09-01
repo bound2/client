@@ -74,19 +74,6 @@ void GCShowGuildMemberInfo::write ( SocketOutputStream & oStream ) const
 }
 
 
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void GCShowGuildMemberInfo::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCShowGuildMemberInfoHandler::execute( this , pPlayer );
-
-	__END_CATCH
-}
-
 
 #ifdef __DEBUG_OUTPUT__
 //////////////////////////////////////////////////////////////////////

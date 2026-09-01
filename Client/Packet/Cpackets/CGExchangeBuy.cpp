@@ -94,12 +94,3 @@ string CGExchangeBuy::toString() const
 	return msg.toString();
 }
 
-void CGExchangeBuy::execute(Player* pPlayer)
-{
-	__BEGIN_TRY
-
-	// This is handled by the server's packet handler
-	// The client doesn't execute this packet
-
-	__END_CATCH
-}

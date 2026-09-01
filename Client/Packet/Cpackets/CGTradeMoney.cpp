@@ -38,21 +38,6 @@ void CGTradeMoney::write ( SocketOutputStream & oStream ) const
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
-// execute packet's handler
-////////////////////////////////////////////////////////////////////////////////
-void CGTradeMoney::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-
-	#ifndef __GAME_CLIENT__
-		CGTradeMoneyHandler::execute ( this , pPlayer );
-	#endif	
-		
-	__END_CATCH
-}
-
 
 ////////////////////////////////////////////////////////////////////////////////
 // get debug std::string

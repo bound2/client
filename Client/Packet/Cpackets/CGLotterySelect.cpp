@@ -31,16 +31,6 @@ void CGLotterySelect::write (SocketOutputStream & oStream) const
 	__END_CATCH
 }
 
-void CGLotterySelect::execute (Player* pPlayer) 
-	 throw (ProtocolException , Error)
-{
-	__BEGIN_TRY
-		
-	CGLotterySelectHandler::execute(this , pPlayer);
-
-	__END_CATCH
-}
-
 std::string CGLotterySelect::toString () const
        throw ()
 {

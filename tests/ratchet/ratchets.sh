@@ -43,12 +43,12 @@ check () {
 # passed in, then the day-to-day tree. On generators that produce no
 # .vcxproj the ratchet is skipped with a message - skipped, not passed.
 #----------------------------------------------------------------------
-# 993, not 992: task 2.2 added Client/PacketHandlerRegistry.cpp, the
-# composition root every migration slice registers into - new wiring
-# that must live in the executable, not legacy debt escaping to it.
-# Recorded 2026-09-01; later slices only append lines to that file, so
-# this is a one-time +1.
-R1_BASELINE=993
+# 992: 993 - 1. Task 2.2's registry (PacketHandlerRegistry.cpp, a
+# recorded +1: composition-root wiring, not legacy debt) is offset by
+# the finished migration deleting CGHandlersStub.cpp, whose no-op CG
+# handler stubs existed only to satisfy the now-deleted execute()
+# bodies.
+R1_BASELINE=992
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do
@@ -66,12 +66,17 @@ else
 fi
 
 #----------------------------------------------------------------------
-# R2 - packet .cpp files still defining ::execute( (non-Handler).
-# The client twin of the server's R4; Phase 2 drives it to ~0.
+# R2 - packet .cpp files still defining a packet-style ::execute
+# (first parameter Player*). The client twin of the server's R4; task
+# 2.2 drove it to 0 and this ratchet holds it there. The regex was
+# refined when it reached 0: the original '::execute\s*\(' also
+# matched comments and handler bodies defined inside packet files
+# (GCExchangeBuy), which are not the debt being measured. Anchored
+# 'void X::execute(Player' matches exactly the legacy virtual.
 #----------------------------------------------------------------------
-R2_BASELINE=432
+R2_BASELINE=0
 
-R2=$(grep -rlE '::execute\s*\(' \
+R2=$(grep -rlE '^void\s+\w+::execute\s*\(\s*Player' \
 	Client/Packet/Gpackets Client/Packet/Cpackets Client/Packet/Lpackets \
 	Client/Packet/Rpackets Client/Packet/Upackets \
 	--include='*.cpp' 2>/dev/null | grep -v Handler | wc -l)

@@ -97,16 +97,6 @@ void CRRequest2::write ( Datagram & oDatagram )
 // execute packet's handler
 //
 //////////////////////////////////////////////////////////////////////
-void CRRequest2::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	CRRequest2Handler::execute( this );
-		
-	__END_CATCH
-}
-
 
 //////////////////////////////////////////////////////////////////////
 //

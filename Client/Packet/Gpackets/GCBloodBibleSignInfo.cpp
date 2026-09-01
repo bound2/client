@@ -45,18 +45,6 @@ void GCBloodBibleSignInfo::write ( SocketOutputStream & oStream ) const
 }
 
 
-//////////////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////////////
-void GCBloodBibleSignInfo::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCBloodBibleSignInfoHandler::execute( this , pPlayer );
-
-	__END_CATCH
-}
 #ifdef __DEBUG_OUTPUT__
 //////////////////////////////////////////////////////////////////////////////
 // get packet's debug string

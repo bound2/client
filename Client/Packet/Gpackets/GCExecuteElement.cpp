@@ -38,16 +38,6 @@ GCExecuteElement::~GCExecuteElement ()
 // execute packet's handler
 //
 //////////////////////////////////////////////////////////////////////
-void GCExecuteElement::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCExecuteElementHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 
 //////////////////////////////////////////////////////////////////////
 //

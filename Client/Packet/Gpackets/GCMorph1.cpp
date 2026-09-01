@@ -145,16 +145,6 @@ void GCMorph1::write ( SocketOutputStream & oStream ) const
 //--------------------------------------------------------------------------------
 // execute packet's handler
 //--------------------------------------------------------------------------------
-void GCMorph1::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCMorph1Handler::execute( this , pPlayer );
-
-	__END_CATCH
-}
-
 
 //--------------------------------------------------------------------------------
 // get packet's debug std::string

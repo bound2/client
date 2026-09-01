@@ -104,16 +104,6 @@ const throw()
 // execute packet's handler
 //
 //////////////////////////////////////////////////////////////////////
-void GCGQuestStatusInfo::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCGQuestStatusInfoHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 
 //////////////////////////////////////////////////////////////////////
 //

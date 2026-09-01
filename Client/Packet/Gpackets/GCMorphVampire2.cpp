@@ -42,16 +42,6 @@ void GCMorphVampire2::write ( SocketOutputStream & oStream ) const
 //--------------------------------------------------------------------------------
 // execute packet's handler
 //--------------------------------------------------------------------------------
-void GCMorphVampire2::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCMorphVampire2Handler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 
 //--------------------------------------------------------------------------------
 // get packet's debug std::string

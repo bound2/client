@@ -37,7 +37,6 @@ public:
 public:
     void read(SocketInputStream & iStream) throw(ProtocolException, Error) { iStream.read(m_Type); m_pInfo = new QuestStatusInfo(); m_pInfo->read(iStream); }
     void write(SocketOutputStream & oStream) const throw(ProtocolException, Error) { oStream.write(m_Type); m_pInfo->write(oStream); }
-	void execute(Player* pPlayer) throw(ProtocolException, Error);
 	PacketID_t getPacketID() const throw() { return PACKET_GC_GQUEST_STATUS_MODIFY; }
 	PacketSize_t getPacketSize() const throw() { return szBYTE + m_pInfo->getSize(); }
 #ifdef __DEBUG_OUTPUT__

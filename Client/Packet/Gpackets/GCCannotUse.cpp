@@ -40,19 +40,6 @@ void GCCannotUse::write ( SocketOutputStream & oStream ) const
 }
 
 //////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void GCCannotUse::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCCannotUseHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
-//////////////////////////////////////////////////////////////////////
 //
 // get packet's debug std::string
 //

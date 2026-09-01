@@ -94,19 +94,6 @@ void GCHolyLandBonusInfo::clearBloodBibleBonusInfoList()
 }
 
 
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void GCHolyLandBonusInfo::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCHolyLandBonusInfoHandler::execute( this , pPlayer );
-
-	__END_CATCH
-}
-
 
 //////////////////////////////////////////////////////////////////////
 // get packet size

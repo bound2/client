@@ -32,7 +32,6 @@ public :
 
     void read(SocketInputStream & iStream) throw(ProtocolException, Error);
     void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	void execute(Player* pPlayer) throw(ProtocolException, Error);
 
 	PacketID_t getPacketID() const throw() { return PACKET_GC_TIME_LIMIT_ITEM_INFO; }
 	PacketSize_t getPacketSize() const throw();

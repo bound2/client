@@ -51,16 +51,6 @@ void GCNotifyWin::write ( SocketOutputStream & oStream ) const
 	__END_CATCH
 }
 
-void GCNotifyWin::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCNotifyWinHandler::execute( this , pPlayer );
-
-	__END_CATCH
-}
-
 #ifdef __DEBUG_OUTPUT__
 std::string GCNotifyWin::toString () const
        throw ()

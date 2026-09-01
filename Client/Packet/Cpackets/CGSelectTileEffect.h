@@ -21,7 +21,6 @@ class CGSelectTileEffect : public Packet
 public:
     void read(SocketInputStream & iStream) throw(ProtocolException, Error);
     void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	void execute(Player* pPlayer) throw(ProtocolException, Error);
 	PacketID_t getPacketID() const throw() { return PACKET_CG_SELECT_TILE_EFFECT; }
 	PacketSize_t getPacketSize() const throw() { return szObjectID; }
 

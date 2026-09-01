@@ -26,15 +26,3 @@ void CLSelectWorld::write (SocketOutputStream & oStream) const
 	__END_CATCH
 }
 
-void CLSelectWorld::execute (Player* pPlayer) 
-	 throw (ProtocolException , Error)
-{
-	__BEGIN_TRY
-		
-	#ifndef __GAME_CLIENT__
-		CLSelectWorldHandler::execute (this , pPlayer);
-	#endif
-		
-	__END_CATCH
-}
-

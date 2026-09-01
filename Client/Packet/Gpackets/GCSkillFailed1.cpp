@@ -48,16 +48,6 @@ void GCSkillFailed1::write ( SocketOutputStream & oStream ) const
 	__END_CATCH
 }
 
-void GCSkillFailed1::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCSkillFailed1Handler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 #ifdef __DEBUG_OUTPUT__
 std::string GCSkillFailed1::toString () const
        throw ()

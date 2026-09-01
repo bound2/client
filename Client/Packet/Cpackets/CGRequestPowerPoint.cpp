@@ -63,15 +63,6 @@ void CGRequestPowerPoint::write ( SocketOutputStream & oStream )
 	__END_CATCH
 }
 
-void CGRequestPowerPoint::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-#ifndef __GAME_CLIENT__	
-	CGRequestPowerPointHandler::execute( this , pPlayer );
-#endif		
-	__END_CATCH
-}
 #ifdef __DEBUG_OUTPUT__
 string CGRequestPowerPoint::toString () 
 	const throw ()

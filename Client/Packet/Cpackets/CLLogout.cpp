@@ -32,18 +32,3 @@ void CLLogout::write ( SocketOutputStream & oStream ) const
 }
 
 
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void CLLogout::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	#ifndef __GAME_CLIENT__
-		CLLogoutHandler::execute ( this , pPlayer );
-	#endif
-		
-	__END_CATCH
-}
-

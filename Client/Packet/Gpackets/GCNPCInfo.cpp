@@ -96,16 +96,6 @@ void GCNPCInfo::write ( SocketOutputStream & oStream ) const
 //--------------------------------------------------------------------------------
 // execute packet's handler
 //--------------------------------------------------------------------------------
-void GCNPCInfo::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCNPCInfoHandler::execute( this , pPlayer );
-
-	__END_CATCH
-}
-
 
 #ifdef __DEBUG_OUTPUT__
 //--------------------------------------------------------------------------------

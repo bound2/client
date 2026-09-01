@@ -20,15 +20,3 @@ void CLGetWorldList::write (SocketOutputStream & oStream) const
 	__END_CATCH
 }
 
-void CLGetWorldList::execute (Player* pPlayer) 
-	 throw (ProtocolException , Error)
-{
-	__BEGIN_TRY
-
-	#ifndef __GAME_CLIENT__
-		CLGetWorldListHandler::execute(this, pPlayer);
-	#endif
-
-	__END_CATCH
-}
-

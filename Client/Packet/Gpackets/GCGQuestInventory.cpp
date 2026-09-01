@@ -70,16 +70,6 @@ void GCGQuestInventory::write(SocketOutputStream & oStream) const throw(Protocol
 // execute packet's handler
 //
 //////////////////////////////////////////////////////////////////////
-void GCGQuestInventory::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCGQuestInventoryHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 
 //////////////////////////////////////////////////////////////////////
 //

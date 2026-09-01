@@ -63,19 +63,6 @@ void GCReloadOK::write ( SocketOutputStream & oStream ) const
 }
 
 //////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void GCReloadOK::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCReloadOKHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
-//////////////////////////////////////////////////////////////////////
 //
 // get packet's debug std::string
 //

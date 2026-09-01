@@ -33,16 +33,6 @@ void GCAddHelicopter::write ( SocketOutputStream & oStream )
 	__END_CATCH
 }
 
-void GCAddHelicopter::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCAddHelicopterHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 #ifdef __DEBUG_OUTPUT__
 	std::string GCAddHelicopter::toString () 
 		const throw ()

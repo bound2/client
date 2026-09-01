@@ -32,19 +32,6 @@ GCAddNewItemToZone::~GCAddNewItemToZone()
 	__END_CATCH
 }
 
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void GCAddNewItemToZone::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCAddNewItemToZoneHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 
 #ifdef __DEBUG_OUTPUT__	
 //////////////////////////////////////////////////////////////////////

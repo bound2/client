@@ -105,16 +105,6 @@ PacketSize_t GCNicknameList::getPacketSize() const throw()
 //
 //////////////////////////////////////////////////////////////////////
 
-void GCNicknameList::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCNicknameListHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 
 //////////////////////////////////////////////////////////////////////
 //

@@ -82,18 +82,6 @@ void CGRequestIP::write ( SocketOutputStream & oStream )
 // execute packet's handler
 //
 //////////////////////////////////////////////////////////////////////
-void CGRequestIP::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	#ifndef __GAME_CLIENT__
-		CGRequestIPHandler::execute( this , pPlayer );
-	#endif
-		
-	__END_CATCH
-}
-
 
 //////////////////////////////////////////////////////////////////////
 //

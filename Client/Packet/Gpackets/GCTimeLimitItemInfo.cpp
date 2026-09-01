@@ -65,16 +65,6 @@ void GCTimeLimitItemInfo::write(SocketOutputStream& oStream ) const
 	__END_CATCH
 }
 
-void GCTimeLimitItemInfo::execute(Player* pPlayer)
-	throw(ProtocolException, Error)
-{
-	__BEGIN_TRY
-
-	GCTimeLimitItemInfoHandler::execute( this, pPlayer );
-
-	__END_CATCH
-}
-
 PacketSize_t GCTimeLimitItemInfo::getPacketSize() const
 	throw()
 {

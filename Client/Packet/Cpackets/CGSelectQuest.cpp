@@ -28,16 +28,6 @@ void CGSelectQuest::write (SocketOutputStream & oStream) const
 	__END_CATCH
 }
 
-void CGSelectQuest::execute (Player* pPlayer) 
-	 throw (ProtocolException , Error)
-{
-	__BEGIN_TRY
-		
-	CGSelectQuestHandler::execute(this , pPlayer);
-
-	__END_CATCH
-}
-
 #ifdef __DEBUG_OUTPUT__
 std::string CGSelectQuest::toString () const
        throw ()

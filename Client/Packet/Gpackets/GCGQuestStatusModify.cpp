@@ -38,16 +38,6 @@ GCGQuestStatusModify::~GCGQuestStatusModify ()
 // execute packet's handler
 //
 //////////////////////////////////////////////////////////////////////
-void GCGQuestStatusModify::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCGQuestStatusModifyHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 
 //////////////////////////////////////////////////////////////////////
 //

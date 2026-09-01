@@ -77,16 +77,6 @@ void RCConnectVerify::write ( SocketOutputStream & oStream )
 // execute packet's handler
 //
 //////////////////////////////////////////////////////////////////////
-void RCConnectVerify::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	RCConnectVerifyHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 
 
 //////////////////////////////////////////////////////////////////////

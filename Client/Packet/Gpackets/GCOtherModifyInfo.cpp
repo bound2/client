@@ -29,16 +29,6 @@ void GCOtherModifyInfo::write ( SocketOutputStream & oStream )
 	__END_CATCH
 }
 
-void GCOtherModifyInfo::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCOtherModifyInfoHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 #ifdef __DEBUG_OUTPUT__
 std::string GCOtherModifyInfo::toString () const 
 	throw ()

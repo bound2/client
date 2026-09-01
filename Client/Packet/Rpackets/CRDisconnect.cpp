@@ -65,16 +65,6 @@ void CRDisconnect::write ( SocketOutputStream & oStream )
 // execute packet's handler
 //
 //////////////////////////////////////////////////////////////////////
-void CRDisconnect::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	CRDisconnectHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 //////////////////////////////////////////////////////////////////////
 //
 // get packet's debug std::string

@@ -22,16 +22,6 @@ void CGStoreClose::write (SocketOutputStream & oStream) const
 	__END_CATCH
 }
 
-void CGStoreClose::execute (Player* pPlayer) 
-	 throw (ProtocolException , Error)
-{
-	__BEGIN_TRY
-		
-	CGStoreCloseHandler::execute(this , pPlayer);
-
-	__END_CATCH
-}
-
 string CGStoreClose::toString () const
        throw ()
 {

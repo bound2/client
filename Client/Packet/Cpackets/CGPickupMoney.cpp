@@ -80,18 +80,6 @@ void CGPickupMoney::write (SocketOutputStream & oStream) const
 	__END_CATCH
 }
 
-void CGPickupMoney::execute (Player* pPlayer) 
-	 throw (ProtocolException , Error)
-{
-	__BEGIN_TRY
-
-#ifndef __GAME_CLIENT__
-	CGPickupMoneyHandler::execute (this , pPlayer);
-#endif
-	
-	__END_CATCH
-}
-
 #ifdef __DEBUG_OUTPUT__
 std::string CGPickupMoney::toString () 
 	const throw ()

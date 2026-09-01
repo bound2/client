@@ -63,16 +63,6 @@ void GCAddVampirePortal::write ( SocketOutputStream & oStream )
 	__END_CATCH
 }
 
-void GCAddVampirePortal::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCAddVampirePortalHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 #ifdef __DEBUG_OUTPUT__
 	std::string GCAddVampirePortal::toString () 
 		const throw ()

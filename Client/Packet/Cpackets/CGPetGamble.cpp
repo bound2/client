@@ -38,18 +38,6 @@ void CGPetGamble::write (SocketOutputStream & oStream) const
 	__END_CATCH
 }
 
-void CGPetGamble::execute (Player* pPlayer) 
-	 throw (ProtocolException , Error)
-{
-	__BEGIN_TRY
-
-#ifndef __GAME_CLIENT__
-	CGPetGambleHandler::execute (this , pPlayer);
-#endif
-		
-	__END_CATCH
-}
-
 #ifdef __DEBUG_OUTPUT__
 std::string CGPetGamble::toString () 
 	const throw ()

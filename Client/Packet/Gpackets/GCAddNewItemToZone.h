@@ -29,8 +29,6 @@ public :
 	GCAddNewItemToZone() throw();
 	~GCAddNewItemToZone() throw();
 	
-	// execute packet's handler
-	void execute(Player* pPlayer) throw(ProtocolException, Error);
 
 	// get packet id
 	PacketID_t getPacketID() const throw() { return PACKET_GC_ADD_NEW_ITEM_TO_ZONE; }

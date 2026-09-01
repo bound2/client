@@ -27,15 +27,6 @@ void CGExpelGuild::write (SocketOutputStream & oStream) const
 	__END_CATCH
 }
 
-void CGExpelGuild::execute (Player* pPlayer) 
-	 throw (ProtocolException , Error)
-{
-	__BEGIN_TRY
-#ifndef __GAME_CLIENT__					
-	CGExpelGuildHandler::execute(this , pPlayer);
-#endif
-	__END_CATCH
-}
 #ifdef __DEBUG_OUTPUT__
 string CGExpelGuild::toString () const
        throw ()
