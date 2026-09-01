@@ -66,12 +66,9 @@ CWaitUIUpdate::Init()
 	// keyboard event 처리
 	g_pSDLInput->SetKeyboardEventReceiver( DXKeyboardEvent );
 
-	// text input 처리 (SDL2 only)
-	dxlib_input_set_textinput_callback(SDLTextInputEvent);
-	dxlib_input_set_textediting_callback(SDLTextEditingEvent);
+	// Text input (SDL2 only). The SDL backend delivers SDL_TEXTINPUT to
+	// InputFocusManager itself, so there is no receiver to register here.
 	dxlib_input_start_text();  // Enable SDL text input
-	printf("DEBUG: SDL text input enabled, callback set to %p\n", (void*)SDLTextInputEvent);
-	fflush(stdout);
 }
 
 //-----------------------------------------------------------------------------
@@ -163,50 +160,6 @@ CWaitUIUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 	
 			#endif
 		}
-}
-
-//-----------------------------------------------------------------------------
-// SDLTextInputEvent
-//-----------------------------------------------------------------------------
-
-void CWaitUIUpdate::SDLTextInputEvent(const char* text, int* window_coords)
-{
-	static int debug_count = 0;
-
-	// Send WM_TEXTINPUT with the full UTF-8 text
-	// The LineEditor will handle UTF-8 to UTF-32 conversion internally
-	if (text == NULL || text[0] == '\0') {
-		return;
-	}
-
-//	if (debug_count < 10) {
-//		printf("DEBUG SDLTextInputEvent: text='%s', coords=[%d,%d]\n", text, window_coords[0], window_coords[1]);
-//		debug_count++;
-//	}
-
-	// Send WM_TEXTINPUT message with text pointer as extra parameter
-	gC_vs_ui.KeyboardControl(WM_TEXTINPUT, 0, (long)text);
-}
-
-//-----------------------------------------------------------------------------
-// SDLTextEditingEvent
-//-----------------------------------------------------------------------------
-
-void CWaitUIUpdate::SDLTextEditingEvent(const char* text, int start, int length, int* window_coords)
-{
-	static int debug_count = 0;
-
-	// Send WM_TEXTEDITING for IME composition
-	if (debug_count < 10) {
-		printf("DEBUG SDLTextEditingEvent: text='%s', start=%d, length=%d, coords=[%d,%d]\n",
-		       text ? text : "(null)", start, length, window_coords[0], window_coords[1]);
-		debug_count++;
-	}
-
-	// Send WM_TEXTEDITING message with start and length parameters
-	// Note: The actual composition text would need to be passed separately
-	// For now, we just send the start and length information
-	gC_vs_ui.KeyboardControl(WM_TEXTEDITING, start, length);
 }
 
 //-----------------------------------------------------------------------------

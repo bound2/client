@@ -293,7 +293,7 @@ bool		GetMakeItemFitPosition(MItem* pItem, ITEM_CLASS itemClass, int itemType, P
 void		MakeScreenShot();
 
 // UI
-void		UI_ResultReceiver(DWORD message, int left, int right, void *void_ptr);
+void		UI_ResultReceiver(DWORD message, intptr_t left, intptr_t right, void *void_ptr);
 
 // 날씨
 void		SetWeather(int weather, int level);

@@ -35,7 +35,10 @@ throw ( ProtocolException , Error )
 	{
 	case GCAddressListVerify::ADDRESS_LIST_ADD_OK:
 		if (g_pTempInformation->GetMode()==TempInformation::MODE_SMS_ADD_ADDRESS)
-			UI_AddSMSList(pPacket->getParameter(), (char*)g_pTempInformation->Value1,(char*)g_pTempInformation->Value2,(char*)g_pTempInformation->Value3);
+			UI_AddSMSList(pPacket->getParameter(),
+						  (char*)g_pTempInformation->StrValue1.c_str(),
+						  (char*)g_pTempInformation->StrValue2.c_str(),
+						  (char*)g_pTempInformation->StrValue3.c_str());
 		break;
 	case GCAddressListVerify::ADDRESS_LIST_DELETE_OK:
 		if (g_pTempInformation->GetMode()==TempInformation::MODE_SMS_DELETE_ADDRESS)

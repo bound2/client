@@ -208,12 +208,6 @@ static struct dxlib_mouse_button_event g_mouse_button_events[DXLIB_MOUSE_EVENT_Q
 static int g_mouse_button_event_head = 0;
 static int g_mouse_button_event_count = 0;
 
-/* Text input callback */
-static dxlib_textinput_callback g_textinput_callback = NULL;
-
-/* Text editing callback */
-static dxlib_textediting_callback g_textediting_callback = NULL;
-
 /* Legacy global mouse coordinates (used by CWaitUIUpdate) */
 extern int g_x, g_y;
 
@@ -490,10 +484,14 @@ void dxlib_input_update(void) {
 				g_mouse_wheel += event.wheel.y;
 				break;
 
+			/* Text input is routed to InputFocusManager by design: it takes the
+			 * SDL UTF-8 buffer as a const char* and hands it to the focused
+			 * editor. Do not re-route this through gC_vs_ui.KeyboardControl()
+			 * - its `extra` parameter is a `long`, 32-bit on LLP64, so a
+			 * pointer passed that way is truncated. */
 			case SDL_TEXTINPUT:
 				/* Handle text input for IME and text entry */
 				{
-					// Route to InputFocusManager instead of callback
 					if (event.text.text[0] != '\0') {
 						g_GetInputFocusManager().HandleTextInput(event.text.text);
 					}
@@ -503,7 +501,6 @@ void dxlib_input_update(void) {
 			case SDL_TEXTEDITING:
 				/* Handle IME composition (text editing in progress) */
 				{
-					// Route to InputFocusManager instead of callback
 					g_GetInputFocusManager().HandleTextEditing(event.edit.text,
 					                                         event.edit.start,
 					                                         event.edit.length);
@@ -575,14 +572,6 @@ int dxlib_input_pop_mouse_button(int* button, int* down, int* x, int* y) {
 
 void dxlib_input_set_mouse_pos(int x, int y) {
 	SDL_WarpMouseInWindow(NULL, x, y);
-}
-
-void dxlib_input_set_textinput_callback(dxlib_textinput_callback callback) {
-	g_textinput_callback = callback;
-}
-
-void dxlib_input_set_textediting_callback(dxlib_textediting_callback callback) {
-	g_textediting_callback = callback;
 }
 
 void dxlib_input_start_text(void) {

@@ -1559,7 +1559,7 @@ void	C_VS_UI_BULLETIN_BOARD::Run(id_t id)
 				}
 
 
-				gpC_base->SendMessage(UI_USE_XMAS_TREE, (int)(intptr_t)m_pItem, 1, (void*)m_szTreeMessage.c_str());
+				gpC_base->SendMessage(UI_USE_XMAS_TREE, (intptr_t)m_pItem, 1, (void*)m_szTreeMessage.c_str());
 
 				DeleteNew(psz_msg);
 //				DeleteNew(psz_from);
@@ -1567,7 +1567,7 @@ void	C_VS_UI_BULLETIN_BOARD::Run(id_t id)
 			else
 			{
 				// 빈항목이 있습니다.
-				gpC_base->SendMessage(UI_USE_XMAS_TREE, (int)(intptr_t)m_pItem, 1, NULL);
+				gpC_base->SendMessage(UI_USE_XMAS_TREE, (intptr_t)m_pItem, 1, NULL);
 			}
 		}
 		break;
@@ -9907,7 +9907,7 @@ void	C_VS_UI_PET_INFO::Run(id_t id)
 				if(szName != NULL)
 				{
 					m_PetInfo.NICK_NAME = szName;
-					gpC_base->SendMessage(UI_CHANGE_CUSTOM_NAMING, (int)(intptr_t)m_PetInfo.NICK_NAME.c_str(),0);
+					gpC_base->SendMessage(UI_CHANGE_CUSTOM_NAMING, (intptr_t)m_PetInfo.NICK_NAME.c_str(),0);
 				}
 				DeleteNew(szName);
 			}
@@ -11636,12 +11636,29 @@ void	C_VS_UI_SMS_MESSAGE::Process()
 
 void	C_VS_UI_SMS_MESSAGE::AddSendList(char* str)
 {
+	//
+	// str is a phone number that arrived from the server (GCSMSAddressList reads
+	// it with a BYTE length prefix, so up to 255 bytes) and the first three
+	// characters are the area code this splits off. Check the length before
+	// touching either part: wsprintf bounds its output at 1024 bytes rather than
+	// at the destination, so the old unbounded copy into Num[16] put server
+	// chosen bytes on the stack, and str[2] read past the end of anything
+	// shorter than three characters.
+	//
+	if(NULL == str)
+		return;
+
+	const size_t len = strlen(str);
+
+	if(len < 3)
+		return;
+
 	for(int i = 0; i< 5; i++)
 	{
 		if(0 == m_lev_OtherNum[i].Size())
 		{
 			char Num[16];
-			wsprintf(Num, "%s", str+3);
+			snprintf(Num, sizeof(Num), "%s", str+3);
 			m_lev_OtherNum[i].AddString(Num);
 			for(int j = 0; j< 6; j++)
 			{
@@ -12104,7 +12121,7 @@ void	C_VS_UI_SMS_MESSAGE::Run(id_t id)
 					}
 				}
 				if(m_szOtherNum.size()<=g_char_slot_ingame.m_SMS_Charge && g_char_slot_ingame.m_SMS_Charge)
-					gpC_base->SendMessage(UI_SEND_SMS_MESSAGE, (int)(intptr_t)m_szMyNum.c_str(), (int)(intptr_t)m_szSMSMessage.c_str(), &m_szOtherNum);
+					gpC_base->SendMessage(UI_SEND_SMS_MESSAGE, (intptr_t)m_szMyNum.c_str(), (intptr_t)m_szSMSMessage.c_str(), &m_szOtherNum);
 				else
 					gpC_base->SendMessage(UI_MESSAGE_BOX, UI_STRING_MESSAGE_SMS_FAIL_NOT_ENOUGH_CHARGE, 0, 	NULL);
 			}
@@ -12509,7 +12526,7 @@ void	C_VS_UI_SMS_LIST::Run(id_t id)
 				if(m_SelectPos< m_Addresses.size())
 				{
 					AddressUnit* _AddressUnit = m_Addresses[m_SelectPos];
-					gpC_base->SendMessage(UI_SMS_ADD_SEND_LIST, (int)(intptr_t)_AddressUnit->Number.c_str(), 0, NULL);
+					gpC_base->SendMessage(UI_SMS_ADD_SEND_LIST, (intptr_t)_AddressUnit->Number.c_str(), 0, NULL);
 				}
 			}
 			break;
@@ -13021,7 +13038,7 @@ void	C_VS_UI_SMS_RECORD::Run(id_t id)
 				m_szID = szID;
 				m_szName = szName;
 
-			gpC_base->SendMessage(UI_SMS_RECORD, (int)(intptr_t)m_szName.c_str(), (int)(intptr_t)m_szID.c_str(), (void*)m_szNum.c_str());
+			gpC_base->SendMessage(UI_SMS_RECORD, (intptr_t)m_szName.c_str(), (intptr_t)m_szID.c_str(), (void*)m_szNum.c_str());
 			}
 				
 			DeleteNew(szNum);
@@ -13822,7 +13839,7 @@ void	C_VS_UI_NAMING_CHANGE::Run(id_t id)
 			if(szName != NULL)
 			{
 				m_szEditName = szName;
-				gpC_base->SendMessage(UI_CHANGE_CUSTOM_NAMING, (int)(intptr_t)m_szEditName.c_str(), (int)m_PenItem->GetID(), (void*)m_PenItem);
+				gpC_base->SendMessage(UI_CHANGE_CUSTOM_NAMING, (intptr_t)m_szEditName.c_str(), (int)m_PenItem->GetID(), (void*)m_PenItem);
 			//	gpC_base->SendMessage(UI_CLOSE_NAMING_CHANGE);
 			}
 			DeleteNew(szName);

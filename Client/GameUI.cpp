@@ -3207,7 +3207,7 @@ UI_UnlockGear()
 //-----------------------------------------------------------------------------
 // UI 메세지 처리
 //-----------------------------------------------------------------------------
-void UI_ResultReceiver(DWORD message, int left, int right, void *void_ptr)
+void UI_ResultReceiver(DWORD message, intptr_t left, intptr_t right, void *void_ptr)
 {
 //	DEBUG_ADD("[UI_ResultReceiver] Start");
 	if (g_pUIMessageManager==NULL)

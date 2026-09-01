@@ -295,13 +295,10 @@ void LineEditor::KeyboardControl(unsigned int message, unsigned int key, long ex
 		InsertChar((uint32_t)key);
 		break;
 
-	case WM_TEXTINPUT:
-		// SDL_TEXTINPUT event (extra is text pointer)
-		{
-			const char* text = (const char*)extra;
-			HandleTextInput(text);
-		}
-		break;
+	// No WM_TEXTINPUT case: committed text reaches HandleTextInput() from the
+	// SDL backend by way of InputFocusManager, as a const char*. It must not
+	// arrive here, because `extra` is a `long` - 32-bit on LLP64 - and would
+	// truncate the pointer.
 
 	case WM_TEXTEDITING:
 		// SDL_TEXTEDITING event (composition)

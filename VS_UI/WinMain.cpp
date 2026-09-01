@@ -77,7 +77,7 @@ void InitSound();
 -----------------------------------------------------------------------------*/
 void MouseEventReceiver(CSDLInput::E_MOUSE_EVENT event, int x, int y, int z);
 void KeyboardEventReceiver(CSDLInput::E_KEYBOARD_EVENT event, DWORD scan_code);
-void UI_ResultReceiver(DWORD message, int dw_left, int dw_right, void *void_ptr);
+void UI_ResultReceiver(DWORD message, intptr_t dw_left, intptr_t dw_right, void *void_ptr);
 void ProgramLoop();
 
 /*-----------------------------------------------------------------------------
@@ -1484,7 +1484,7 @@ void ProgramLoop()
   그런식으로 들어온다.
   만약 DWORD의 값이라면 그것을 사용하지 않는다.
 -----------------------------------------------------------------------------*/
-void UI_ResultReceiver(DWORD message, int dw_left, int dw_right, void *void_ptr)
+void UI_ResultReceiver(DWORD message, intptr_t dw_left, intptr_t dw_right, void *void_ptr)
 {
 	switch (message)
 	{

@@ -63,7 +63,9 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 	if(p_item == NULL)
 		return;
 
-	MItem* p_AddItem = (MItem*)right;
+	// NOT from right: long is 32 bits here, so a pointer routed through it
+	// loses its top half. NULL unless the Set() call supplied one.
+	MItem* p_AddItem = (MItem*)g_descriptor_manager.GetSecondaryPtr();
 
 	RECT _rect;
 	
@@ -2745,7 +2747,9 @@ void _Item_Description_Calculator(void (*fp_show)(Rect, void *, long, long), int
 	//////////////////////////////// start calculation
 	MItem * p_item = (MItem *)void_ptr;
 
-	MItem * pAddItem = (MItem*)right;
+	// NOT from right: long is 32 bits here, so a pointer routed through it
+	// loses its top half. NULL unless the Set() call supplied one.
+	MItem * pAddItem = (MItem*)g_descriptor_manager.GetSecondaryPtr();
 
 
 	
