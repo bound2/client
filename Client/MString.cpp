@@ -24,11 +24,6 @@ static char* ConvertGBKToUTF8(const char* gbkStr, size_t gbkLen, size_t& outLen)
 //#define	delete		DEBUG_DELETE
 
 //--------------------------------------------------------------------------
-// static
-//--------------------------------------------------------------------------
-char MString::s_pBuffer[MAX_BUFFER_LENGTH];
-
-//--------------------------------------------------------------------------
 //
 // constructor / destructor
 //
@@ -163,18 +158,31 @@ MString::operator = (const MString& str)
 //--------------------------------------------------------------------------
 // Format
 //--------------------------------------------------------------------------
-// 적절한 형식으로 string을 만든다.
+// Build the string from a printf style format.
 //--------------------------------------------------------------------------
 void
 MString::Format(const char* format, ...)
 {
+	// The scratch buffer is function local: a process wide static was shared by
+	// every MString, so two Format calls interleaved through a logging or
+	// drawing path overwrote each other's result.
+	char		Buffer[MAX_BUFFER_LENGTH];
 	va_list		vl;
 
-    va_start(vl, format);
-    vsprintf(s_pBuffer, format, vl);
-    va_end(vl);
+	va_start(vl, format);
+	int written = vsnprintf(Buffer, sizeof(Buffer), format, vl);
+	va_end(vl);
 
-	*this = s_pBuffer;
+	// vsnprintf returns the length the output *would* have had and NUL
+	// terminates within sizeof(Buffer), so an over long expansion is truncated
+	// rather than written past the end. A negative return is an encoding
+	// error, where nothing usable was produced, so the result is made empty.
+	if (written < 0)
+	{
+		Buffer[0] = '\0';
+	}
+
+	*this = Buffer;
 }
 
 //--------------------------------------------------------------------------

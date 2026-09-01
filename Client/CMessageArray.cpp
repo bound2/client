@@ -262,18 +262,33 @@ CMessageArray::AddFormatVL(const char* format, va_list& vl)
 
 	//AddFormat( format, vl );
 //	va_list		vl;
-	static char Buffer[4096];
+	char		Buffer[4096];
 
 //    va_start(vl, format);
-	vsprintf(Buffer, format, vl);    
+	int written = vsnprintf(Buffer, sizeof(Buffer), format, vl);
  //   va_end(vl);
 
+	// vsnprintf returns the length the output *would* have had, so the length
+	// is taken from the buffer instead - len must be what is really stored.
+	// A negative return is an encoding error: nothing usable was produced, so
+	// the row is made empty instead of letting strlen walk uninitialised stack.
+	// On every other path vsnprintf has already terminated inside the buffer;
+	// the explicit terminator is a redundant guard on the truncation path.
+	if (written < 0)
+	{
+		Buffer[0] = '\0';
+	}
+	else
+	{
+		Buffer[sizeof(Buffer)-1] = '\0';
+	}
+
 	int len = strlen(Buffer);
- 
+
 	// file log
 	if (m_bLog)
 	{
-		// [ TEST CODE ] 시간 출력
+		// [ TEST CODE ] print the time
 		//sprintf(g_MessageBuffer, "[%4d] ", timeGetTime() % 10000);
 		//PLATFORM_WRITE( m_LogFile, g_MessageBuffer, strlen(g_MessageBuffer) );
 
@@ -281,26 +296,26 @@ CMessageArray::AddFormatVL(const char* format, va_list& vl)
 		PLATFORM_WRITE( m_LogFile, Buffer, len );
 		PLATFORM_WRITE( m_LogFile, "\n", 1 );
 
-		// [ TEST CODE ] 화일 닫고 다시 열기
+		// [ TEST CODE ] close the file and open it again
 		#ifdef OUTPUT_FILE_LOG
 			PLATFORM_CLOSE( m_LogFile );
 			m_LogFile = PLATFORM_OPEN(m_Filename, _O_WRONLY | _O_TEXT | _O_APPEND | _O_CREAT);
 		#endif
-	}	
+	}
 
-	// 혹시 넘어갈까봐.. (이거 심각한데. - -;;)
+	// in case it runs over.. (this one is serious. - -;;)
 	if (len >= m_Length)
-	{		
+	{
 		for (int i=0; i<m_Length; i++)
 		{
 			m_ppMessage[m_Current][i] = Buffer[i];
-		}	
+		}
 
-		m_ppMessage[m_Current][m_Length] = NULL;	
+		m_ppMessage[m_Current][m_Length] = NULL;
 	}
 	else
 	{
-		// 저장
+		// store
 		strcpy(m_ppMessage[m_Current], Buffer);
 	}
 	
@@ -314,7 +329,7 @@ CMessageArray::AddFormatVL(const char* format, va_list& vl)
 //--------------------------------------------------------------------------
 // Add Format
 //--------------------------------------------------------------------------
-// 적절한 형식으로 string을 만든다.
+// Build a string from a printf style format.
 //--------------------------------------------------------------------------
 void
 CMessageArray::AddFormat(const char* format, ...)
@@ -327,18 +342,33 @@ CMessageArray::AddFormat(const char* format, ...)
 	
 
 	va_list		vl;
-	static char Buffer[4096];
+	char		Buffer[4096];
 
     va_start(vl, format);
-	vsprintf(Buffer, format, vl);    
+	int written = vsnprintf(Buffer, sizeof(Buffer), format, vl);
     va_end(vl);
 
+	// vsnprintf returns the length the output *would* have had, so the length
+	// is taken from the buffer instead - len must be what is really stored.
+	// A negative return is an encoding error: nothing usable was produced, so
+	// the row is made empty instead of letting strlen walk uninitialised stack.
+	// On every other path vsnprintf has already terminated inside the buffer;
+	// the explicit terminator is a redundant guard on the truncation path.
+	if (written < 0)
+	{
+		Buffer[0] = '\0';
+	}
+	else
+	{
+		Buffer[sizeof(Buffer)-1] = '\0';
+	}
+
 	int len = strlen(Buffer);
- 
+
 	// file log
 	if (m_bLog)
 	{
-		// [ TEST CODE ] 시간 출력
+		// [ TEST CODE ] print the time
 		//sprintf(g_MessageBuffer, "[%4d] ", timeGetTime() % 10000);
 		//PLATFORM_WRITE( m_LogFile, g_MessageBuffer, strlen(g_MessageBuffer) );
 
@@ -346,26 +376,26 @@ CMessageArray::AddFormat(const char* format, ...)
 		PLATFORM_WRITE( m_LogFile, Buffer, len );
 		PLATFORM_WRITE( m_LogFile, "\n", 1 );
 
-		// [ TEST CODE ] 화일 닫고 다시 열기
+		// [ TEST CODE ] close the file and open it again
 		#ifdef OUTPUT_FILE_LOG
 			PLATFORM_CLOSE( m_LogFile );
 			m_LogFile = PLATFORM_OPEN(m_Filename, _O_WRONLY | _O_TEXT | _O_APPEND | _O_CREAT);
 		#endif
-	}	
+	}
 
-	// 혹시 넘어갈까봐.. (이거 심각한데. - -;;)
+	// in case it runs over.. (this one is serious. - -;;)
 	if (len >= m_Length)
-	{		
+	{
 		for (int i=0; i<m_Length; i++)
 		{
 			m_ppMessage[m_Current][i] = Buffer[i];
-		}	
+		}
 
-		m_ppMessage[m_Current][m_Length] = NULL;	
+		m_ppMessage[m_Current][m_Length] = NULL;
 	}
 	else
 	{
-		// 저장
+		// store
 		strcpy(m_ppMessage[m_Current], Buffer);
 	}
 	

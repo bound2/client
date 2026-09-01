@@ -65,8 +65,6 @@ class MString {
 	protected :
 		size_t	m_Length;
 		char*	m_pString;
-
-		static	char		s_pBuffer[MAX_BUFFER_LENGTH];    
 };
 
 
