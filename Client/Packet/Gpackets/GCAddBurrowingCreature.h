@@ -72,8 +72,6 @@ public :
 	Coord_t getY () const throw () { return m_Y; }
 	void setY ( Coord_t y ) throw () { m_Y = y; }
 
-
-
 private :
 	
     // 존 레벨에서 유니크한 아이디로 객체 구분을 위해서 사용한다.

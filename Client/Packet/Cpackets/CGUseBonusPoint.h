@@ -66,8 +66,6 @@ public :
 	BYTE getWhich() const throw() { return m_Which;}
 	void setWhich( BYTE w) throw() { m_Which = w;}
 
-
-
 private :
 
 	// which

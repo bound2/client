@@ -47,8 +47,6 @@ void LCLoginOK::write ( SocketOutputStream & oStream ) const
 	__END_CATCH
 }
 
-
-
 PacketSize_t LCLoginOK::getPacketSize() const throw() 
 { 
 	return szBYTE + szBYTE + szBYTE + szWORD; 

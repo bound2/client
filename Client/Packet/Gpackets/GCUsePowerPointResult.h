@@ -119,8 +119,6 @@ public :
 	PacketSize_t getPacketMaxSize() const throw() { return szBYTE + szBYTE + szDWORD; }
 };
 
-
-
 //--------------------------------------------------------------------------------
 //
 // class GCUsePowerPointResultHandler;

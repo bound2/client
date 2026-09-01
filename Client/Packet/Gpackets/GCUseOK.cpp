@@ -81,8 +81,6 @@ void GCUseOK::write ( SocketOutputStream & oStream ) const
 	}
 #endif
 
-
-
 //----------------------------------------GCUseSkillCardOK-------------------
 GCUseSkillCardOK::GCUseSkillCardOK()
 	throw()

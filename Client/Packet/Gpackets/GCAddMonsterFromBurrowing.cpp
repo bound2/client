@@ -98,8 +98,6 @@ void GCAddMonsterFromBurrowing::write ( SocketOutputStream & oStream ) const
 	__END_CATCH
 }
 
-
-
 //////////////////////////////////////////////////////////////////////
 //
 // get packet's debug std::string

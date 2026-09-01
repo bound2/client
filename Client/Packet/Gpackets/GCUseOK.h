@@ -104,8 +104,6 @@ public :
 	static void execute ( GCUseOK * pPacket , Player * player ) throw ( ProtocolException , Error );
 };
 
-
-
 //-------------------------------------------GCUseSkillCardOK----------------
 
 //////////////////////////////////////////////////////////////////////

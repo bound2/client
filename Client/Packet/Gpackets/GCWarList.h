@@ -66,7 +66,5 @@ public :
 
 };
 
-
-
 #endif // __GC_WAR_LIST_H__
 

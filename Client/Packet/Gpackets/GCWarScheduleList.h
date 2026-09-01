@@ -76,7 +76,5 @@ public :
 
 };
 
-
-
 #endif // __GC_WAR_SCHEDULE_LIST_H__
 

@@ -74,8 +74,6 @@ void LCQueryResultCharacterName::write ( SocketOutputStream & oStream ) const
 	__END_CATCH
 }
 
-
-
 //--------------------------------------------------------------------------------
 // get debug string
 //--------------------------------------------------------------------------------

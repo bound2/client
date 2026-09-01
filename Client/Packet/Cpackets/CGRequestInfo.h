@@ -12,8 +12,6 @@
 #include "Packet.h"
 #include "PacketFactory.h"
 
-
-
 //--------------------------------------------------------------------------------
 //
 // class CGRequestInfo;

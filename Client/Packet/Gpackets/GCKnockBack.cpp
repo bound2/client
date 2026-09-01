@@ -7,8 +7,6 @@
 #include "Client_PCH.h"
 #include "GCKnockBack.h"
 
-
-
 void GCKnockBack::read ( SocketInputStream & iStream )
 	 throw ( ProtocolException , Error )
 {

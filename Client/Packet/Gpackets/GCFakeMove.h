@@ -79,8 +79,6 @@ public :
 	// get
 	Coord_t getToX() const throw() { return m_ToX; }
 	Coord_t getToY() const throw() { return m_ToY; }
-	
-
 
 private :
 	

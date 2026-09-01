@@ -8,19 +8,13 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-
-
 #ifndef __CG_GET_EVENT_ITEM_H__
 
 #define __CG_GET_EVENT_ITEM_H__
 
-
-
 #include "Packet.h"
 
 #include "PacketFactory.h"
-
-
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -38,13 +32,9 @@ enum EventType
 
 	EVENT_TYPE_200412_COMBACK_RECOMMEND_ITEM,	// 돌아온 사용자 결제 시 추천 받은 자 아이템 주기 이벤트
 
-
-
 	EVENT_TYPE_MAX
 
 };
-
-
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -75,8 +65,6 @@ public:
 
 	string toString() const throw();
 
-	
-
 public:
 
 	// get / set Event Type
@@ -85,17 +73,11 @@ public:
 
 	void setEventType( BYTE eventType ) { m_EventType = eventType; }
 
-
-
 private:
 
 	BYTE		m_EventType;		// 이벤트 종류
 
 };
-
-
-
-
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -106,8 +88,6 @@ private:
 //
 
 ////////////////////////////////////////////////////////////////////////////////
-
-
 
 class CGGetEventItemFactory : public PacketFactory 
 
@@ -124,10 +104,6 @@ public:
 	PacketSize_t getPacketMaxSize() const throw() { return szBYTE; }
 
 };
-
-
-
-
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -149,9 +125,5 @@ public:
 
 };
 
-
-
 #endif
-
-
 

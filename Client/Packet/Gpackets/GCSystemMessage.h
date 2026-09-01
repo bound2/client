@@ -74,9 +74,6 @@ public :
 	SystemMessageType getType() const throw() { return m_Type; }
 	void setType( SystemMessageType Type ) throw() { m_Type = Type; }
 
-
-	
-
 private :
 	
 	// chatting message

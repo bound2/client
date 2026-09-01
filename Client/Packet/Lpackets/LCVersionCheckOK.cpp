@@ -31,5 +31,3 @@ void LCVersionCheckOK::write ( SocketOutputStream & oStream ) const
 	__END_CATCH
 }
 
-
-

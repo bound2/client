@@ -36,8 +36,6 @@ enum
 	//add by svi 2009-07-15
 	ADD_ITEM_TO_ITEM_REMOVE_OPTION_OK,
 
-
-
     ADD_ITEM_TO_ITEM_VERIFY_MAX
 };
 

@@ -42,8 +42,6 @@ void GCFakeMove::write ( SocketOutputStream & oStream ) const
 	__END_CATCH
 }
 
-
-
 #ifdef __DEBUG_OUTPUT__
 //////////////////////////////////////////////////////////////////////
 //

@@ -58,8 +58,6 @@ void GCAddVampireFromTransformation::write ( SocketOutputStream & oStream ) cons
 	__END_CATCH
 }
 
-
-
 //--------------------------------------------------------------------------------
 // get packet's debug std::string
 //--------------------------------------------------------------------------------

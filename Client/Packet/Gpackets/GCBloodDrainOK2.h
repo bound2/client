@@ -68,8 +68,6 @@ private :
 	// ObjectID
 	ObjectID_t m_ObjectID;
 
-
-
 };
 
 

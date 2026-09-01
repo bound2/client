@@ -610,13 +610,15 @@ public :
 	
 	// execute packet's handler.
 	//
-	// No longer pure (RESTRUCTURING.md task 2.2): migrated packets carry
-	// no override - they run through PacketDispatcher, registered at the
-	// composition root (Client/PacketHandlerRegistry.cpp). Reaching this
-	// default therefore means a migrated id arrived with no registered
-	// handler, which is a protocol violation, not a no-op. Unmigrated
-	// packets still override it; the receive loops try the dispatcher
-	// first and fall back here until ratchet R2 reaches 0.
+	// No longer pure (RESTRUCTURING.md task 2.2): packets carry no
+	// override any more - every direction runs through PacketDispatcher,
+	// registered at the composition root
+	// (Client/PacketHandlerRegistry.cpp), and ratchet R2 holds the
+	// override count at zero. Reaching this default therefore means an
+	// id arrived with no registered handler - a protocol violation, not
+	// a no-op. The receive loops still route here via their tryDispatch
+	// fallback; flipping them to dispatch() and deleting tryDispatch is
+	// the recorded cosmetic follow-up after live verification.
 	virtual void execute (Player* /*pPlayer*/)
 	{
 		throw InvalidProtocolException("packet has no registered handler and no legacy execute()");

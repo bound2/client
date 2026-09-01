@@ -42,8 +42,6 @@ void GCRegenZoneStatus::write ( SocketOutputStream & oStream ) const
 	__END_CATCH
 }
 
-
-
 #ifdef __DEBUG_OUTPUT__
 //////////////////////////////////////////////////////////////////////
 // get packet's debug string
