@@ -314,9 +314,9 @@ public:
 	Base();
 	~Base();
 
-	void	Init(CSpriteSurface *surface, void (*fp)(DWORD, int, int, void *));
+	void	Init(CSpriteSurface *surface, void (*fp)(DWORD, intptr_t, intptr_t, void *));
 	void	DispatchMessage();
-	void	SendMessage(DWORD message, int left = 0, int right = 0, void *void_ptr = NULL);
+	void	SendMessage(DWORD message, intptr_t left = 0, intptr_t right = 0, void *void_ptr = NULL);
 //	void	SelectFont(font_id_t id);
 
 #ifndef _LIB

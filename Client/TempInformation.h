@@ -13,6 +13,8 @@
 #include "../../basic/Platform.h"
 #endif
 
+#include <string>
+
 class TempInformation {
 	public :
 		enum TEMP_MODE
@@ -82,10 +84,23 @@ class TempInformation {
 		void			SetMode(TEMP_MODE mode);
 		const TEMP_MODE GetMode() const;
 
-		int				Value1;
-		int				Value2;
-		int				Value3;
-		int				Value4;
+		// intptr_t, not int, so that a mode parking a pointer here keeps all of
+		// it on 64-bit Windows.
+		intptr_t			Value1;
+		intptr_t			Value2;
+		intptr_t			Value3;
+		intptr_t			Value4;
+
+		//
+		// The SMS and nickname modes carry text across a server round trip, and
+		// they used to do it by parking the c_str() of a dialog member here.
+		// Nothing keeps that dialog alive in the meantime - closing it, or the
+		// ESC path through ClosePopupWindow, deletes the owner - so the reply
+		// handler read freed memory. These own their copies instead.
+		//
+		std::string			StrValue1;
+		std::string			StrValue2;
+		std::string			StrValue3;
 
 		int				PartyInviter;	// 검증 없이 처리되는거라서리.. - -;
 

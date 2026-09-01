@@ -46,14 +46,14 @@ throw ( ProtocolException , Error )
 					switch(g_pTempInformation->Value2)
 					{
 					case 22: // 닉네임 수정
-						gC_vs_ui.Change_Custom_Naming(0, (char*)g_pTempInformation->Value1);
+						gC_vs_ui.Change_Custom_Naming(0, (char*)g_pTempInformation->StrValue1.c_str());
 						break;
 					case 23: // 펫 닉네임 수정 - gc_modify nickname 에서 수정 되겠지..
 						break;
 					case 24: // 유저 닉네임 추가 - 서버에서 리스트날라오기로 했음
 						break;
 					case 25: // 닉네임 수정 (시간제)
-						gC_vs_ui.Change_Custom_Naming(0, (char*)g_pTempInformation->Value1);
+						gC_vs_ui.Change_Custom_Naming(0, (char*)g_pTempInformation->StrValue1.c_str());
 						break;
 					}
 					

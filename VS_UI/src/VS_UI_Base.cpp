@@ -134,7 +134,7 @@ void Base::SelectFont(font_id_t id)
 //
 // 
 //-----------------------------------------------------------------------------
-void Base::Init(CSpriteSurface *surface, void (*fp)(DWORD, int, int, void *))
+void Base::Init(CSpriteSurface *surface, void (*fp)(DWORD, intptr_t, intptr_t, void *))
 {
 	InitSurface(surface);
 	InitFont();
@@ -358,7 +358,7 @@ void Base::DispatchMessage()
 //
 // 
 //-----------------------------------------------------------------------------
-void Base::SendMessage(DWORD message, int left, int right, void * void_ptr)
+void Base::SendMessage(DWORD message, intptr_t left, intptr_t right, void * void_ptr)
 {
 	m_C_ui_result_receiver._SendMessage(message, left, right, void_ptr);
 }

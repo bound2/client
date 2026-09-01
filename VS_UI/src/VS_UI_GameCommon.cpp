@@ -28311,7 +28311,7 @@ void	C_VS_UI_TEAM_REGIST::Run(id_t id)
 				m_introduction = sz_intro;
 				m_team_name = sz_team_name;
 				
-				gpC_base->SendMessage(UI_REGIST_GUILD_TEAM, (int)(intptr_t)m_team_name.c_str(), 0, (void *)m_introduction.c_str());
+				gpC_base->SendMessage(UI_REGIST_GUILD_TEAM, (intptr_t)m_team_name.c_str(), 0, (void *)m_introduction.c_str());
 				
 				DeleteNew(sz_intro);
 				DeleteNew(sz_team_name);
@@ -30462,7 +30462,7 @@ void	C_VS_UI_XMAS_CARD::Run(id_t id)
 				m_szTreeMessage += "%";
 				m_szTreeMessage += psz_from;
 				
-				gpC_base->SendMessage(UI_USE_XMAS_TREE, (int)(intptr_t)m_pItem, 0, (void*)m_szTreeMessage.c_str());
+				gpC_base->SendMessage(UI_USE_XMAS_TREE, (intptr_t)m_pItem, 0, (void*)m_szTreeMessage.c_str());
 
 				DeleteNew(psz_to);
 				DeleteNew(psz_msg);
@@ -30471,7 +30471,7 @@ void	C_VS_UI_XMAS_CARD::Run(id_t id)
 			else
 			{
 				// 빈항목이 있습니다.
-				gpC_base->SendMessage(UI_USE_XMAS_TREE, (int)(intptr_t)m_pItem, 0, NULL);
+				gpC_base->SendMessage(UI_USE_XMAS_TREE, (intptr_t)m_pItem, 0, NULL);
 			}
 		}
 		break;

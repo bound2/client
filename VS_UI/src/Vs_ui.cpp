@@ -3716,7 +3716,7 @@ class C_VS_UI_FRIEND_INFO;
 //
 // 당연히 가장 먼저 실행하여야 한다.
 //-----------------------------------------------------------------------------
-void C_VS_UI::Init(CSpriteSurface *surface, void (*fp)(DWORD, int, int, void *))
+void C_VS_UI::Init(CSpriteSurface *surface, void (*fp)(DWORD, intptr_t, intptr_t, void *))
 {
 	g_SetNewHandler();
 

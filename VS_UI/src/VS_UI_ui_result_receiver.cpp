@@ -26,7 +26,7 @@ C_VS_UI_UI_RESULT_RECEIVER::~C_VS_UI_UI_RESULT_RECEIVER()
 - SetResultReceiver
 -
 -----------------------------------------------------------------------------*/
-void C_VS_UI_UI_RESULT_RECEIVER::SetResultReceiver(void (*fp)(DWORD, int, int, void *))
+void C_VS_UI_UI_RESULT_RECEIVER::SetResultReceiver(void (*fp)(DWORD, intptr_t, intptr_t, void *))
 {
 	assert(fp);
 	
@@ -37,7 +37,7 @@ void C_VS_UI_UI_RESULT_RECEIVER::SetResultReceiver(void (*fp)(DWORD, int, int, v
 - SendMessage
 - Message queue에 message를 넣는다.
 -----------------------------------------------------------------------------*/
-void C_VS_UI_UI_RESULT_RECEIVER::_SendMessage(DWORD message, int left, int right, 
+void C_VS_UI_UI_RESULT_RECEIVER::_SendMessage(DWORD message, intptr_t left, intptr_t right,
 															 void *void_ptr)
 {
 	assert(message != INVALID_MESSAGE);
