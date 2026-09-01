@@ -101,3 +101,19 @@ TEST(StringStream, MixedInsertionsConcatenate)
 	ss << "hp:" << (int)42 << "," << 10000.0f;
 	CHECK(ss.toString() == std::string("hp:42,10000.000000"));
 }
+
+TEST(StringStream, SizeAccumulatorSurvivesSixtyFourKiB)
+{
+	// m_Size was ushort: 64 insertions of 1024 characters total exactly
+	// 65,536, wrapping the accumulator to 0 - isEmpty() then reported an
+	// empty stream over real content and toString()'s reserve()
+	// under-reserved. Now size_t.
+	std::string chunk(1024, 'x');
+
+	StringStream ss;
+	for (int i = 0; i < 64; i++)
+		ss << chunk.c_str();
+
+	CHECK(!ss.isEmpty());
+	CHECK_EQ(65536, ss.toString().size());
+}
