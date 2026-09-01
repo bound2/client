@@ -60,13 +60,19 @@ A subsystem-by-subsystem review surfaced **197 findings**. Every area graded **D
 
 ## Remediation Status
 
-**Updated 2026-08-31 (audio pass).** 45 of the 197 findings have been fixed: 11 on branch `harden/library-code-fixes` ([PR #1](https://github.com/bound2/client/pull/1)), 2 on `harden/packet-index-bounds` ([PR #4](https://github.com/bound2/client/pull/4)), 11 on `harden/network-input`, 4 by the earlier SDL_mixer wiring commit `c0670ae` (recorded retroactively during the audio pass), and 17 on `harden/audio-media`. Fixed findings carry a ✅ marker in the sections below, naming the commit and the tests covering them.
+**Updated 2026-09-01 (text/format pass).** 53 of the 197 findings have been fixed: 11 on branch `harden/library-code-fixes` ([PR #1](https://github.com/bound2/client/pull/1)), 2 on `harden/packet-index-bounds` ([PR #4](https://github.com/bound2/client/pull/4)), 11 on `harden/network-input`, 4 by the earlier SDL_mixer wiring commit `c0670ae` (recorded retroactively during the audio pass), 17 on `harden/audio-media`, and 8 on `harden/text-format`. Fixed findings carry a ✅ marker in the sections below, naming the commit and the tests covering them.
 
 The test-driven work is confined to code compiled into a static library, since that is the only code a test binary can link against. A second phase has since fixed seven defects in the `DarkEden` executable itself, listed under Runtime defects below; those were found by running the client rather than by this review, and none of them are among the 197 findings.
 
 A third phase (2026-08-31, branch `harden/network-input`) took on the network attack surface this review rated most serious: the shop/stash index bounds (C7, C8, done earlier in `ed4f872`), the chat/guild/system-message string bounds (C9, C10/C16, C11/C17), the peer file-transfer filename (C12), the NewItem function-pointer table (C13), the 21-byte chat rows (C14, C15/C18) and the tooltip use-after-free (C25). None of these are reachable from a test binary, so they are build-verified regression guards. The branch was put through the same eight-angle adversarial review as phase one, which found ten real defects in the fixes themselves (including a filename guard that would have broken every legitimate profile transfer, and a missed overflow sixty lines from a fixed one) — all repaired in `3bc340e`. After merging master's wire max-size reconcile, a second review (two Opus xhigh reviewers, `1200625`) found more: write-side guards that tested the BYTE-narrowed length, a guild-name cap of 20 that would disconnect on legitimate 30-byte names, a filename validator that confined escape but not scope (a peer could still drop a DLL beside the executable), and config clamp floors of 1 that hung or corrupted the chat rows. The remaining Gpackets parsers beyond these findings are still unaudited, and the data-file format-string sites (C19/C20/C22) are untouched.
 
 A fourth phase (2026-08-31, branch `harden/audio-media`) closed out the Input, Audio & Media area's sound findings. Four of them — the duplicate-buffer double free (the area's first critical), the uncompilable adapters, the self-defeating SDL_mixer include guard, and the recycled-channel confusion — turned out to have been fixed already by `c0670ae`, the commit that made sound play at all; they are now recorded as such. The branch itself fixed the rest: the PlaySound stack overflows and the format-after-Release logging, the zone-sound NULL dereference, the opening-screen modal error box, the WavePackFileManager mmio parsing, the latent CMP3/MMusic MCI defects, the CPartManager bounds/sentinel/rollover defects and the non-virtual Release() leak (test-first — the template is testable, see `tests/unit/test_part_manager.cpp`), and the compat MMCKINFO shadow. It also deleted the five stale root-level DXLib header copies (two of which were live ODR violations against the compiled dxlib layouts of g_SDLMusic and g_SDLInput), deleted both copies of the orphaned MP3/Huffman decoder — resolving the two huffman bounds findings by removal — and renamed COGGSTREAM.CPP so case-sensitive configures work. Of the area's 22 findings, only the two input Lows (the SDL input constructor and the mouse-wheel accumulator — input findings, not sound) remain open.
+
+A fifth phase (2026-09-01, branch `harden/text-format`) took on the data-file format strings the third phase had left untouched, plus two unrelated criticals in the same sweep. C27 (MemoryPool releasing `::operator new` chunks with `free`) and C28 (the APICheck probe that could `ExitProcess` at random from the frame loop) are fixed by pairing the allocator and by deleting the probe outright. C20/C26 (the unbounded `vsprintf` into a shared static in `CMessageArray`) is fixed together with its two siblings, both of which are separate High findings in their own right: `MString::Format`, which had the same shape one layer down, and `SendBugReport`, whose four call sites passed a caught exception's text — which can embed packet-derived bytes — as the *format* argument. C22 (the guild-quest mission title, server text used as a format) and C24 (the fixed-offset NUL write in the tooltip renderer) are fixed at their call sites.
+
+C19 is **narrowed, not closed**, and the distinction is the point of the phase. The load-time sanitizer added for it (`SanitizeGameStringTable`) cannot check that an entry's specifier count matches its call site, because arity is unknowable without the call site — so the actual fix for the exploit the finding describes is the conversion of all 100 zero-argument `wsprintf(buf, tableEntry)` sites to bounded `snprintf(buf, sizeof(buf), "%s", GetGameString(id))`, where the data is an argument rather than a format. The ~140 sites that do pass arguments still take their format from `String.inf` and are covered only by the gate. Two further limits are recorded in the code itself rather than left for a reader to discover: the gate does not run in the default English build at all, because `InitGameStringTable` reallocates the table from source literals immediately afterwards and discards the scrubbed file data (it protects `LANGUAGE != 3`), and its width cap bounds argument-driven expansion, not the literal text of an entry.
+
+That branch was reviewed by two Opus reviewers who were told the authoring model's own review was not to be trusted, and they earned it. One compiled the sanitizer into a standalone harness and measured it against the real MSVC runtime rather than reasoning about it, which is how the first revision's policy came apart: `"%512d"` passed the check and emitted 512 bytes, five `"%500d"` in one entry passed and emitted 2500 because the width test never composed, and `"%f"` needs no width at all and emitted 308 bytes — all into destinations of 50 to 128 bytes, which is precisely what the check's own comment claimed to prevent. The cap became 32 with a whole-entry budget, floating-point and wide (`%S`, `%ls`) conversions are now rejected, and the comparison was off by one (`>` accepted exactly 512). The same pass found that the `CMessageArray` fix carried a comment asserting a guarantee it did not deliver, that the C24 rewrite had introduced a one-line tooltip overdraw by making the renderer disagree with the sizing pass beside it, and that the two `vsprintf` siblings existed at all. All repaired before the branch was committed.
 
 The audio branch was put through the same adversarial review as the earlier phases (four Opus reviewers, one per commit group). It confirmed the buffer fixes, the mmio semantics (mmioRead does not clamp to the descended chunk, so canonical 16-byte PCM fmt chunks still load), the template guards, the CKINFO rename in every real inclusion order, and the SDL refcount pairing against the installed SDL2_mixer 2.8.2 sources — and found four real problems that were repaired before the branch was finalized: making Release() virtual silently broke the four dead-but-compiled sprite cache managers (reworked as the per-slot hook), renaming only COGGSTREAM.CPP would have broken case-sensitive builds at the header include (both files renamed), the sound-init error path leaked its own subsystem refcount on audio-less machines, and MIX_INIT_MP3 would have logged a spurious warning on every init since the vcpkg mixer has no MP3 decoder. The review left three recorded latents: the `strrchr(Filename.GetString(), '\\')` trio in Client/MPlayer.cpp (6526/6884/7481), a NULL-dereference the day force feedback (`CImm::m_pDevice`) is ever revived after a WAV load failure; the rejected-SetData return being indistinguishable from a no-eviction store (see the CPartManager entry); and `dxlib_sound_release` tearing the mixer down while the music slot's bookkeeping lives elsewhere — currently unreachable in the real shutdown order.
 
@@ -114,6 +120,14 @@ The audio branch was put through the same adversarial review as the earlier phas
 | `huffman_decoder` unbounded tree walk (both copies' findings) | 🟡 Medium, ⚪ Low | `66d8637` |
 | `COGGSTREAM.CPP` case mismatch on case-sensitive configure | 🟠 High | `66d8637` |
 | SDL audio subsystem and Mix_Init never called explicitly | 🟠 High | `452e854` |
+| `CMessageArray::AddFormat`/`AddFormatVL` unbounded vsprintf into a shared static (C20/C26) | 🔴 Critical | `0e9d247` |
+| `MString::Format` unbounded vsprintf into a process-wide static | 🟠 High | `0e9d247` |
+| `SendBugReport` unbounded vsprintf, and four call sites passing exception text as the format | 🟠 High | `0e9d247` |
+| `MemoryPool` chunks allocated with `::operator new`, released with `free` (C27) | 🔴 Critical | `8b349e7` |
+| APICheck probe truncating FARPROCs and calling ExitProcess at random (C28) | 🔴 Critical | `c2f65b7` |
+| Guild-quest mission title used as a printf format string (C22) | 🔴 Critical | `31f5f2f` |
+| `_Multiline_Info_Show` fixed-offset NUL write past the caller's buffer (C24) | 🔴 Critical | `31f5f2f` |
+| Data-file strings as printf formats: 100 zero-argument call sites bounded, load-time gate added (C19, partial) | 🔴 Critical | `31f5f2f` |
 
 ### Also fixed, not in this review
 
@@ -406,6 +420,8 @@ The loop normally cuts at `endIndex = startIndex + MAX_CHATSTRING_LENGTH` (20). 
 
 **Recommendation:** Never pass externally-sourced strings as the format argument. Introduce a checked formatter that validates the specifier sequence of a table entry against the argument types at the call site (or at minimum a table-load-time validator rejecting %n and counting/typing specifiers), and convert the zero-argument cases to snprintf(buf, size, "%s", tableString).
 
+> ⚠ **Narrowed, not fixed**, in `31f5f2f` (branch `harden/text-format`). All 100 zero-argument call sites — the exploitable half, where a bare `%s` reads a stack word as a `char*` with no varargs to consume — are now `snprintf(dest, sizeof(dest), "%s", GetGameString(id))`: bounded, and the data is an argument rather than a format. `GetGameString` also range-clamps the id, which matters because `CTypeTable::operator[]` only bounds-checks under `_DEBUG`. A load-time gate (`SanitizeGameStringTable`) rejects entries carrying `%n`, an argument-supplied width, a width or precision of 32 or more, a whole-entry width budget over 256, a floating-point conversion, or a wide conversion that would retype a `char*` as `wchar_t*`. **The ~140 call sites that pass arguments still take their format from `String.inf`** and are covered only by that gate, which cannot check arity. Note also that the gate has no effect in the default English build, where `InitGameStringTable` reallocates the table from source literals immediately after and discards the scrubbed data; it protects `LANGUAGE != 3`.
+
 ### C20. CMessageArray::AddFormat and AddFormatVL vsprintf into a fixed static 4096-byte buffer with a data-file-supplied format string.
 
 **Area:** Text & Strings  |  **Category:** memory-safety  |  **Location:** `Client/CMessageArray.cpp:333`
@@ -415,6 +431,8 @@ Both `AddFormat` (line 320) and `AddFormatVL` (line 259) declare `static char Bu
 **Failure scenario:** A table entry with a wide field width ("%9000d") or a long %s substitution overflows the 4096-byte static buffer, corrupting adjacent globals. Because the same buffer backs every message array, a nested AddFormat (e.g. from a logging path) silently clobbers an in-flight message.
 
 **Recommendation:** Replace vsprintf with vsnprintf(Buffer, sizeof(Buffer), ...), make the buffer a local (or per-instance) rather than static, and route the format string through the validated-format path from the previous finding.
+
+> ✅ **Fixed** in `0e9d247` (branch `harden/text-format`). Both functions use vsnprintf into a function-local buffer, and the return value is captured so that the negative encoding-error path — where the contents are unspecified — empties the row instead of letting strlen walk uninitialised stack into the log file and the visible chat row. Regression guard, executable-only code.
 
 ### C21. An MItem* is passed through a 32-bit int parameter and dereferenced on the other side, guaranteeing a wild-pointer dereference on 64-bit builds.
 
@@ -436,6 +454,8 @@ Line 15893 builds `szString` with `sprintf(szString, <table format>, i+1, TempIn
 
 **Recommendation:** Never pass runtime data as a format string. Split the two-stage substitution: format the fixed table template once with all arguments, or use a placeholder-replacement helper (`std::string` find/replace) for the mission title and arg. Apply the same rule to the ~230 `sprintf(buf, (*g_pGameStringTable)[...].GetString(), ...)` sites, whose format strings come from an on-disk data file.
 
+> ✅ **Fixed** in `31f5f2f` (branch `harden/text-format`). The server-supplied mission title is expanded by a bounded helper that substitutes only `%s` and `%d` and copies every other byte — a second `%s`, `%n`, a width form — literally, so no conversion in packet text reaches a printf. The remaining format on that path is the table entry itself, which is C19's problem rather than this one. The ~230 argument-passing table sites are **not** fixed; see the C19 entry for what was and was not done there.
+
 ### C23. The SDL text-input event pointer is passed through a `long`, truncating it on 64-bit Windows and crashing on every keystroke into a text field.
 
 **Area:** UI Framework  |  **Category:** memory-safety  |  **Location:** `Client/CWaitUIUpdate.cpp:188`
@@ -455,6 +475,8 @@ In the loop at lines 3688-3708, `char_temp = cur[CurrentPos - check]; cur[Curren
 **Failure scenario:** A quest mission line of ~500 characters gives LineCount=14; `cur` reaches offset 504 and the code writes `cur[36]` = byte 540 of a 512-byte static buffer, corrupting whatever follows it in .bss, then reads it back into `char_temp` and restores it at line 3705.
 
 **Recommendation:** Move the length check before the write, bound the loop by the actual remaining length rather than a precomputed LineCount, delete the dead `sz_temp` copy, and make the function take a `const char*` plus its buffer size instead of mutating the input.
+
+> ✅ **Fixed** in `31f5f2f` (branch `harden/text-format`). The loop checks the remaining length before writing the terminator and is bounded by the string rather than by a precomputed count, so the NUL always lands on a real character; the dead `sz_temp` copy is gone. The signature still mutates in place — restoring each byte before the next line — because the caller set is fixed. The rewrite initially introduced a one-line overdraw, since `_Multiline_Info_Calculator` beside it still sized the box with `strlen/right + 1` while the renderer consumes one byte less per line whenever a multi-byte character straddles the cut; the calculator now runs the same walk, so the two agree by construction. That sibling's unconditional 36-byte `memcpy` out of the caller's string is bounded as well (latent — the only caller guarantees the length).
 
 ### C25. An inventory item is deleted without clearing the tooltip descriptor that may still hold its raw pointer, leaving a use-after-free the renderer dereferences next frame.
 
@@ -478,6 +500,8 @@ Client/CMessageArray.cpp:330-333 declares `static char Buffer[4096];` and calls 
 
 **Recommendation:** Replace both vsprintf calls with vsnprintf(Buffer, sizeof(Buffer), ...) and make Buffer a local (or per-instance) rather than static. Longer term, stop using data-file strings as printf format strings — validate the specifier list at load time, or switch to an indexed substitution scheme.
 
+> ✅ **Fixed** in `0e9d247` (branch `harden/text-format`), the same change as C20 — this is the Foundation Libraries reviewer's report of the same two functions. The load-time specifier validation the "longer term" note asks for is the C19 gate, added in `31f5f2f`.
+
 ### C27. MemoryPool allocates its blocks with ::operator new but releases them with free(), which is undefined behaviour.
 
 **Area:** Foundation Libraries  |  **Category:** memory-safety  |  **Location:** `Client/MemoryPool.cpp:50`
@@ -488,6 +512,8 @@ Client/MemoryPool.cpp:72 allocates each pool chunk via `CBlock *pPool = (CBlock*
 
 **Recommendation:** Use ::operator delete(m_pCurrentBlock) in the destructor to match the allocation, and drop the dead NULL check (or use the nothrow form of operator new if the null path is wanted).
 
+> ✅ **Fixed** in `8b349e7` (branch `harden/text-format`). The destructor — the class's only release path, since `Free()` merely pushes onto an intrusive free list inside the chunks — now uses `::operator delete`, and the dead NULL check is dropped rather than switched to the nothrow form: these pools back a throwing `operator new`, which must not hand a null block to a new-expression. Regression guard.
+
 ### C28. The legacy anti-cheat probe runs every frame, reads the wrong byte, and can terminate the process at random.
 
 **Area:** Build, Portability & Hygiene  |  **Category:** correctness  |  **Location:** `Client/APICheck.cpp:126`
@@ -495,6 +521,8 @@ Client/MemoryPool.cpp:72 allocates each pool chunk via `CBlock *pPool = (CBlock*
 `_APICheck.CheckApi()` is called from inside the `while (TRUE)` message loop at Client/Client.cpp:4155 (initialised at Client.cpp:3996), so this whole routine executes once per frame on Windows. Line 126 does `g_ppProceAddress[i] = (DWORD)GetProcAddress(LoadLibrary(g_szCheckDLL[i*2]), ...)` for winmm/User32/kernel32. Three problems compound: (1) `g_ppProceAddress` is declared `DWORD[3]` (APICheck.h:42), so a 64-bit `FARPROC` is truncated to 32 bits on x64 — the stored value is not the address at all; (2) line 127 `memcpy(&code, &g_ppProceAddress[i], 1)` copies the low byte of the *stored address value*, not the opcode byte at that address, so the intended hook detection at line 128 (`code == 0xB9 || code == 0xE9`) can never detect anything; (3) when that low byte does happen to equal 0xB9 or 0xE9, line 130 calls `::ExitProcess(0)` — the game vanishes at startup with no message, no log, and no reproducibility, since the value depends on where the OS loaded the DLL. Additionally each frame calls `LoadLibrary` three times with no matching `FreeLibrary`, taking the loader lock 180x/second and leaking module reference counts for the life of the process. Lines 98-113 compile a hardcoded 37-byte x86 opcode signature of the 32-bit `send` prologue that cannot match on x64, and on a false match pops `MessageBox(0, "", "", MB_OK)` (an empty dialog) before `ExitProcess(0)`.
 
 **Recommendation:** Delete APICheck entirely — it is 2006-era WPE-blocking security theatre that cannot work on x64 and provides no protection against any modern tool. Remove `Client/APICheck.cpp`/`.h`, the `APICheck _APICheck;` global at Client/Client.cpp:6, and the call sites at Client.cpp:3996 and 4155. If some form of tamper check is genuinely wanted later, it belongs behind an explicit opt-in build option, not unconditionally in the frame loop.
+
+> ✅ **Fixed** in `c2f65b7` (branch `harden/text-format`). Both sources, the global, and both call sites are gone, along with the stale entries in the committed legacy `Client.vcxproj.filters`. `APICheck.h` declared nothing but the class — no macro or typedef anything else used — so nothing had to be rehomed. Because `CMakeLists.txt` globs sources without `CONFIGURE_DEPENDS`, an existing build tree keeps compiling the deleted file until it is reconfigured.
 
 ---
 
@@ -1144,6 +1172,8 @@ SendBugReport (line 4958) declares `char Buffer[256]` at line 4965 and calls `vs
 
 **Recommendation:** Use vsnprintf with sizeof(Buffer), and change the two ClientCommunicationManager call sites to `SendBugReport("%s", t.toString().c_str())`.
 
+> ✅ **Fixed** in `0e9d247` (branch `harden/text-format`). The formatting is bounded and returns early on an encoding error, so the pre-existing 100-character truncation is protective rather than cosmetic now that it no longer runs after the overflow. **Four** call sites passed the exception text as the format, not two — `GameMain.cpp:286` and `:437` do it as well — and all four now pass it as an argument to a literal `"%s"`. The inverted datagram guard above them (a separate Low, below) is untouched; it matters here only in that it does let exceptions through, so this fix is load-bearing whichever way that guard is eventually corrected.
+
 #### 🟠 High -- ReceiveFileInfo::StartReceive writes to index -1 of a std::string when the peer-supplied filename contains no dot.
 
 **Category:** memory-safety  |  **Location:** `Client/RequestFileManager.cpp:81`
@@ -1560,6 +1590,8 @@ Both `AddFormat` (line 320) and `AddFormatVL` (line 259) declare `static char Bu
 
 **Recommendation:** Replace vsprintf with vsnprintf(Buffer, sizeof(Buffer), ...), make the buffer a local (or per-instance) rather than static, and route the format string through the validated-format path from the previous finding.
 
+> ✅ **Fixed** in `0e9d247` (branch `harden/text-format`). Both functions use vsnprintf into a function-local buffer, and the return value is captured so that the negative encoding-error path — where the contents are unspecified — empties the row instead of letting strlen walk uninitialised stack into the log file and the visible chat row. Regression guard, executable-only code.
+
 #### 🔴 Critical -- Every printf format string in the client comes from a binary data file, and is passed to sprintf/vsprintf as the format argument in roughly 600 places.
 
 **Category:** security  |  **Location:** `Client/GameInit.cpp:1604`
@@ -1569,6 +1601,8 @@ Both `AddFormat` (line 320) and `AddFormatVL` (line 259) declare `static char Bu
 **Failure scenario:** Anyone who can write the Strings data file (a malicious patch/CDN, a repacked client distribution, or simply a user tricked into installing modified game data) puts "%n" or a long "%s" run into a table entry. sprintf then performs an arbitrary write or dereferences stack garbage as a char*. The zero-argument `wsprintf(buf, tableString)` form is exploitable with any conversion specifier at all, since there are no varargs to consume.
 
 **Recommendation:** Never pass externally-sourced strings as the format argument. Introduce a checked formatter that validates the specifier sequence of a table entry against the argument types at the call site (or at minimum a table-load-time validator rejecting %n and counting/typing specifiers), and convert the zero-argument cases to snprintf(buf, size, "%s", tableString).
+
+> ⚠ **Narrowed, not fixed**, in `31f5f2f` (branch `harden/text-format`). All 100 zero-argument call sites — the exploitable half, where a bare `%s` reads a stack word as a `char*` with no varargs to consume — are now `snprintf(dest, sizeof(dest), "%s", GetGameString(id))`: bounded, and the data is an argument rather than a format. `GetGameString` also range-clamps the id, which matters because `CTypeTable::operator[]` only bounds-checks under `_DEBUG`. A load-time gate (`SanitizeGameStringTable`) rejects entries carrying `%n`, an argument-supplied width, a width or precision of 32 or more, a whole-entry width budget over 256, a floating-point conversion, or a wide conversion that would retype a `char*` as `wchar_t*`. **The ~140 call sites that pass arguments still take their format from `String.inf`** and are covered only by that gate, which cannot check arity. Note also that the gate has no effect in the default English build, where `InitGameStringTable` reallocates the table from source literals immediately after and discards the scrubbed data; it protects `LANGUAGE != 3`.
 
 #### 🔴 Critical -- MCreature::SetPersnalString copies an unbounded newline-delimited segment into a 21-byte heap row.
 
@@ -1645,6 +1679,8 @@ The bounds check in `operator[]`, the const overload, and `Get()` (lines 42-68) 
 **Failure scenario:** Any Format() call whose expansion exceeds 1024 bytes writes past s_pBuffer into adjacent static storage. Separately, two MString::Format calls interleaved (recursion through a logging or drawing path) corrupt each other's results because the buffer is process-global.
 
 **Recommendation:** Use vsnprintf with sizeof(s_pBuffer), and make the scratch buffer function-local.
+
+> ✅ **Fixed** in `0e9d247` (branch `harden/text-format`). The scratch buffer is function-local and written with vsnprintf, so the cross-call corruption goes with the overflow. `s_pBuffer` had no other reference in the tree, so the static member is deleted outright; being a static, it occupied no object storage and no layout changed.
 
 #### 🟠 High -- ConvertEncoding treats SDL_ICONV_EILSEQ/EINVAL/E2BIG as success, so partial and mis-guessed conversions are accepted as valid text.
 
@@ -1828,6 +1864,8 @@ In the loop at lines 3688-3708, `char_temp = cur[CurrentPos - check]; cur[Curren
 
 **Recommendation:** Move the length check before the write, bound the loop by the actual remaining length rather than a precomputed LineCount, delete the dead `sz_temp` copy, and make the function take a `const char*` plus its buffer size instead of mutating the input.
 
+> ✅ **Fixed** in `31f5f2f` (branch `harden/text-format`). The loop checks the remaining length before writing the terminator and is bounded by the string rather than by a precomputed count, so the NUL always lands on a real character; the dead `sz_temp` copy is gone. The signature still mutates in place — restoring each byte before the next line — because the caller set is fixed. The rewrite initially introduced a one-line overdraw, since `_Multiline_Info_Calculator` beside it still sized the box with `strlen/right + 1` while the renderer consumes one byte less per line whenever a multi-byte character straddles the cut; the calculator now runs the same walk, so the two agree by construction. That sibling's unconditional 36-byte `memcpy` out of the caller's string is bounded as well (latent — the only caller guarantees the length).
+
 #### 🔴 Critical -- An MItem* is passed through a 32-bit int parameter and dereferenced on the other side, guaranteeing a wild-pointer dereference on 64-bit builds.
 
 **Category:** memory-safety  |  **Location:** `VS_UI/src/VS_UI_GameCommon.cpp:2887`
@@ -1847,6 +1885,8 @@ Line 15893 builds `szString` with `sprintf(szString, <table format>, i+1, TempIn
 **Failure scenario:** A malicious or compromised server sends a guild mission whose title is `%s%s%s%s%n`. Opening the quest window makes the client walk arbitrary stack words as char* and then write through one of them.
 
 **Recommendation:** Never pass runtime data as a format string. Split the two-stage substitution: format the fixed table template once with all arguments, or use a placeholder-replacement helper (`std::string` find/replace) for the mission title and arg. Apply the same rule to the ~230 `sprintf(buf, (*g_pGameStringTable)[...].GetString(), ...)` sites, whose format strings come from an on-disk data file.
+
+> ✅ **Fixed** in `31f5f2f` (branch `harden/text-format`). The server-supplied mission title is expanded by a bounded helper that substitutes only `%s` and `%d` and copies every other byte — a second `%s`, `%n`, a width form — literally, so no conversion in packet text reaches a printf. The remaining format on that path is the table entry itself, which is C19's problem rather than this one. The ~230 argument-passing table sites are **not** fixed; see the C19 entry for what was and was not done there.
 
 #### 🟠 High -- C_VS_UI_EVENT_BUTTON's constructor tests the uninitialized member m_image_index instead of the parameter, so every default-image button gets a garbage or -1 sprite/menu index.
 
@@ -2068,6 +2108,8 @@ Client/CMessageArray.cpp:330-333 declares `static char Buffer[4096];` and calls 
 
 **Recommendation:** Replace both vsprintf calls with vsnprintf(Buffer, sizeof(Buffer), ...) and make Buffer a local (or per-instance) rather than static. Longer term, stop using data-file strings as printf format strings — validate the specifier list at load time, or switch to an indexed substitution scheme.
 
+> ✅ **Fixed** in `0e9d247` (branch `harden/text-format`), the same change as C20 — this is the Foundation Libraries reviewer's report of the same two functions. The load-time specifier validation the "longer term" note asks for is the C19 gate, added in `31f5f2f`.
+
 #### 🔴 Critical -- MemoryPool allocates its blocks with ::operator new but releases them with free(), which is undefined behaviour.
 
 **Category:** memory-safety  |  **Location:** `Client/MemoryPool.cpp:50`
@@ -2077,6 +2119,8 @@ Client/MemoryPool.cpp:72 allocates each pool chunk via `CBlock *pPool = (CBlock*
 **Failure scenario:** On shutdown, ~MemoryPool passes an ::operator new pointer to free(). Under a debug CRT or a heap with allocator-specific headers this trips a heap-validation assertion or corrupts the heap; under ASan it is reported as alloc-dealloc-mismatch.
 
 **Recommendation:** Use ::operator delete(m_pCurrentBlock) in the destructor to match the allocation, and drop the dead NULL check (or use the nothrow form of operator new if the null path is wanted).
+
+> ✅ **Fixed** in `8b349e7` (branch `harden/text-format`). The destructor — the class's only release path, since `Free()` merely pushes onto an intrusive free list inside the chunks — now uses `::operator delete`, and the dead NULL check is dropped rather than switched to the nothrow form: these pools back a throwing `operator new`, which must not hand a null block to a new-expression. Regression guard.
 
 #### 🟠 High -- Five #include directives in basic/ use the wrong filename case, so the library cannot compile on a case-sensitive filesystem despite the documented Linux support.
 
@@ -2357,6 +2401,8 @@ Client/huffman.cpp:415-432 walks the decoder tree with `point` and terminates on
 `_APICheck.CheckApi()` is called from inside the `while (TRUE)` message loop at Client/Client.cpp:4155 (initialised at Client.cpp:3996), so this whole routine executes once per frame on Windows. Line 126 does `g_ppProceAddress[i] = (DWORD)GetProcAddress(LoadLibrary(g_szCheckDLL[i*2]), ...)` for winmm/User32/kernel32. Three problems compound: (1) `g_ppProceAddress` is declared `DWORD[3]` (APICheck.h:42), so a 64-bit `FARPROC` is truncated to 32 bits on x64 — the stored value is not the address at all; (2) line 127 `memcpy(&code, &g_ppProceAddress[i], 1)` copies the low byte of the *stored address value*, not the opcode byte at that address, so the intended hook detection at line 128 (`code == 0xB9 || code == 0xE9`) can never detect anything; (3) when that low byte does happen to equal 0xB9 or 0xE9, line 130 calls `::ExitProcess(0)` — the game vanishes at startup with no message, no log, and no reproducibility, since the value depends on where the OS loaded the DLL. Additionally each frame calls `LoadLibrary` three times with no matching `FreeLibrary`, taking the loader lock 180x/second and leaking module reference counts for the life of the process. Lines 98-113 compile a hardcoded 37-byte x86 opcode signature of the 32-bit `send` prologue that cannot match on x64, and on a false match pops `MessageBox(0, "", "", MB_OK)` (an empty dialog) before `ExitProcess(0)`.
 
 **Recommendation:** Delete APICheck entirely — it is 2006-era WPE-blocking security theatre that cannot work on x64 and provides no protection against any modern tool. Remove `Client/APICheck.cpp`/`.h`, the `APICheck _APICheck;` global at Client/Client.cpp:6, and the call sites at Client.cpp:3996 and 4155. If some form of tamper check is genuinely wanted later, it belongs behind an explicit opt-in build option, not unconditionally in the frame loop.
+
+> ✅ **Fixed** in `c2f65b7` (branch `harden/text-format`). Both sources, the global, and both call sites are gone, along with the stale entries in the committed legacy `Client.vcxproj.filters`. `APICheck.h` declared nothing but the class — no macro or typedef anything else used — so nothing had to be rehomed. Because `CMakeLists.txt` globs sources without `CONFIGURE_DEPENDS`, an existing build tree keeps compiling the deleted file until it is reconfigured.
 
 #### 🟠 High -- PLATFORM_USE_SDL and DXLIB_USE_SDL_BACKEND are set with directory-scoped add_definitions(), so libraries and their consumers see different versions of the same headers.
 
