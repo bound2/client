@@ -45,7 +45,10 @@ throw ( ProtocolException , Error )
 		if(pInfo == NULL)
 			break;
 
-		const char* pName = pInfo->getName().c_str();
+		// NPCInfo::getName() returns std::string by value; bind it so pName is
+		// not into a temporary that died on this line.
+		const std::string npcName = pInfo->getName();
+		const char* pName = npcName.c_str();
 		int npcID = pInfo->getNPCID();
 		int x = pInfo->getX();
 		int y = pInfo->getY();

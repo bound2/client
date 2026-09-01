@@ -23,7 +23,11 @@
 bool
 MStopZoneCrossEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 {
-	bool bOK, bAdd;
+	// bOK is only written once an AddEffect has succeeded, and AddEffect
+	// fails on any of its early returns - a duplicate frame ID, an
+	// out-of-zone position, a ground effect already on the tile - so the
+	// caller sees this value even when nothing was ever added.
+	bool bOK = false, bAdd = false;
 
 	BLT_TYPE		bltType = (*g_pEffectSpriteTypeTable)[egInfo.effectSpriteType].BltType;
 	TYPE_FRAMEID	frameID	= (*g_pEffectSpriteTypeTable)[egInfo.effectSpriteType].FrameID;

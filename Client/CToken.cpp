@@ -31,13 +31,21 @@ CToken::~CToken()
 //------------------------------------------------------------------------
 
 //------------------------------------------------------------------------
-// 메모리 해제
+// Free the buffer.
+//
+// Both pointers have to be cleared, not just the one being freed. Release()
+// is called by ~CToken and again at the top of SetString(), and m_pCurrent
+// points into the same allocation - so leaving either set makes the second
+// Release() a double free and makes any GetToken() in between write ('\0'
+// over the delimiter) into memory that is already back on the heap.
 //------------------------------------------------------------------------
 void
 CToken::Release()
 {
-   if (m_pString!=NULL)
-      delete [] m_pString;
+   delete [] m_pString;
+
+   m_pString  = NULL;
+   m_pCurrent = NULL;
 }
 
 //------------------------------------------------------------------------

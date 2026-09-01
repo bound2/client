@@ -9,9 +9,9 @@
 #ifndef __VS_UI_TUTORAL_H__
 #define __VS_UI_TUTORAL_H__
 
-#include "Unicorn.h"
-#include "VS_UI_Widget.h"
-#include "VS_UI_Util.h"
+#include "unicorn.h"
+#include "VS_UI_widget.h"
+#include "VS_UI_util.h"
 //#include "VS_UI_GameCommon.h"
 #include "VS_UI_DESC.h"
 #include "../../RarFile.h"

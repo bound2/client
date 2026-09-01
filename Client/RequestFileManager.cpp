@@ -7,8 +7,8 @@
 #include "RequestServerPlayer.h"
 #include "ProfileManager.h"
 
-#include "packet/Rpackets/RCRequestedFile.h"
-#include "packet/Rpackets/RCRequestVerify.h"
+#include "Packet/Rpackets/RCRequestedFile.h"
+#include "Packet/Rpackets/RCRequestVerify.h"
 
 #include "ServerInfo.h"
 #include "DebugInfo.h"

@@ -124,7 +124,7 @@
     <ClCompile Include="MAttachOrbitEffect.cpp">
       <Filter>Source Files\GameObject Source\EffectGenerator</Filter>
     </ClCompile>
-    <ClCompile Include="MAttachZoneAroundEffectGenerator.CPP">
+    <ClCompile Include="MAttachZoneAroundEffectGenerator.cpp">
       <Filter>Source Files\GameObject Source\EffectGenerator</Filter>
     </ClCompile>
     <ClCompile Include="MAttachZoneEffectGenerator.cpp">
@@ -154,7 +154,7 @@
     <ClCompile Include="MAttackZoneRectEffectGenerator.cpp">
       <Filter>Source Files\GameObject Source\EffectGenerator</Filter>
     </ClCompile>
-    <ClCompile Include="MBloodyBreakerEffectGenerator.CPP">
+    <ClCompile Include="MBloodyBreakerEffectGenerator.cpp">
       <Filter>Source Files\GameObject Source\EffectGenerator</Filter>
     </ClCompile>
     <ClCompile Include="MBloodyWallEffectGenerator.cpp">
@@ -613,10 +613,10 @@
     <ClCompile Include="MStringMap.cpp">
       <Filter>Source Files\Utility source</Filter>
     </ClCompile>
-    <ClCompile Include="MTimeItemManager.CPP">
+    <ClCompile Include="MTimeItemManager.cpp">
       <Filter>Source Files\Utility source</Filter>
     </ClCompile>
-    <ClCompile Include="MWarManager.CPP">
+    <ClCompile Include="MWarManager.cpp">
       <Filter>Source Files\Utility source</Filter>
     </ClCompile>
     <ClCompile Include="MWorkNode.cpp">
@@ -5274,7 +5274,7 @@
     <ClInclude Include="Packet\ModifyInfo.h">
       <Filter>Header Files\Packet Header</Filter>
     </ClInclude>
-    <ClInclude Include="MWarManager.H">
+    <ClInclude Include="MWarManager.h">
       <Filter>Header Files\Packet Header</Filter>
     </ClInclude>
     <ClInclude Include="Packet\NPCInfo.h">

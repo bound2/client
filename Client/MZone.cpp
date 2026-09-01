@@ -35,7 +35,7 @@
 #include "MTestDef.h"
 #include <fstream>
 #include "SkillDef.h"
-#include "mintr.h"
+#include "MinTr.h"
 #include "MNPC.h"
 #include "MGuildType.h"
 #include "MEffectStatusDef.h"
@@ -417,15 +417,17 @@ MZone::ReleaseObject()
 
 				UnSetServerBlock(pCreature->GetMoveType(), serverX, serverY);
 
-				//if (x>=0 && y>=0 && x<m_Width && y<m_Height) 
 				{
+					MSector*	pSector			= SectorAt(x, y);
+					MSector*	pServerSector	= SectorAt(serverX, serverY);
+
 					//------------------------------------------------
-					// sector에서 제거시킨다.
+					// Remove it from its sector.
 					//------------------------------------------------
-					if (!m_ppSector[y][x].RemoveCreature(id))
+					if (pSector==NULL || !pSector->RemoveCreature(id))
 					{
-						if (!m_ppSector[serverY][serverX].RemoveCreature(id))
-						{	
+						if (pServerSector==NULL || !pServerSector->RemoveCreature(id))
+						{
 							DEBUG_ADD_FORMAT("Can't RemoveCreatureWhenRelease! ID=%d client(%d,%d), server(%d,%d)", pCreature->GetID(), x,y,serverX,serverY);
 						}
 					}
@@ -504,10 +506,15 @@ MZone::ReleaseObject()
 		pItem = (*iItem).second;
 		if (pItem!=NULL)
 		{
-			if (m_ppSector!=NULL)
+			// The creature loop above routes its subscripts through SectorAt;
+			// this one writes through its sector, so it needs the same bound.
+			// The m_ppSector NULL test alone does not cover a position off
+			// the map, which an item can carry just as a creature can.
+			MSector*	pItemSector = SectorAt(pItem->GetX(), pItem->GetY());
+
+			if (pItemSector!=NULL)
 			{
-				// [성물수정]
-				MSector& sector = m_ppSector[pItem->GetY()][pItem->GetX()];
+				MSector& sector = *pItemSector;
 				sector.RemoveItem();
 
 				// 혹시 문제가 있을까봐.. 시체 정리..
@@ -1045,7 +1052,6 @@ MZone::LoadFromFile(std::ifstream& file)
 		//-------------------------------------------------
 		// Zone의 ImageObject들을 Load
 		//-------------------------------------------------
-		MImageObject				*pImageObject;
 		IMAGEOBJECT_POSITION_LIST	ImageObjectPositionList;
 		BYTE						ObjectType;
 		for (i=0; i<size; i++)	
@@ -1054,8 +1060,10 @@ MZone::LoadFromFile(std::ifstream& file)
 				char str[1024];
 			#endif
 
-			// ImageObject memory를 잡고 Load한다.
+			// Allocate the ImageObject and load it.
 			file.read((char*)&ObjectType, 1);
+
+			MImageObject				*pImageObject = NULL;
 
 			switch (ObjectType)
 			{
@@ -1098,9 +1106,25 @@ MZone::LoadFromFile(std::ifstream& file)
 						strcpy(str, "InteractionObject : ");
 					#endif
 				break;
+
+				//-------------------------------------------------
+				// The type byte comes straight out of the .map
+				// file, so an unrecognised one leaves nothing
+				// allocated. Everything below assumes an object,
+				// and the rest of the record cannot be skipped
+				// because only the object itself knows its length.
+				//-------------------------------------------------
+				default :
+					DEBUG_ADD_FORMAT("[Error] Unknown ImageObject type %d in map file", (int)ObjectType);
+				break;
 			}
 
-			pImageObject->LoadFromFile(file);	
+			if (pImageObject==NULL)
+			{
+				return false;
+			}
+
+			pImageObject->LoadFromFile(file);
 			
 			#ifdef __OUTPUT_IMAGEOBJECT__
 				sprintf(str, "%s[%d] vp=%d. ", str, pImageObject->GetImageObjectID(), pImageObject->GetViewpoint());
@@ -2182,16 +2206,19 @@ MZone::UpdateAllCreature()
 						m_HelicopterManager.RemoveHelicopter( pCreature->GetID() );
 					}				
 					
-					// 찾은 경우 --> 제거		
+					// Found it --> remove
 					bool removed = true;
-					
+
+					MSector*	pSector			= SectorAt(x, y);
+					MSector*	pServerSector	= SectorAt(serverX, serverY);
+
 					//------------------------------------------------
-					// sector에서 제거시킨다.
+					// Remove it from its sector.
 					//------------------------------------------------
-					if (!m_ppSector[y][x].RemoveCreature(id))
+					if (pSector==NULL || !pSector->RemoveCreature(id))
 					{
-						if (!m_ppSector[serverY][serverX].RemoveCreature(id))
-						{	
+						if (pServerSector==NULL || !pServerSector->RemoveCreature(id))
+						{
 							DEBUG_ADD_FORMAT("Can't RemoveCreature! ID=%d client(%d,%d), server(%d,%d)", pCreature->GetID(), x,y,serverX,serverY);
 
 							removed = false;
@@ -2200,17 +2227,26 @@ MZone::UpdateAllCreature()
 
 					UnSetServerBlock( pCreature->GetMoveType(), pCreature->GetServerX(), pCreature->GetServerY() );
 
-					// 제거
-					delete pCreature;	
+					//------------------------------------------------
+					// Only the sector that still holds the pointer can
+					// release it. Freeing one that no sector gave up
+					// leaves that sector pointing at dead memory, so
+					// the creature stays owned by m_mapCreature and
+					// Release() collects it when the zone goes away.
+					// MZone::RemoveCreature guards the same delete.
+					//------------------------------------------------
+					if (removed)
+					{
+						delete pCreature;
 
-					// map에서 creature를 제거한다.
-					CREATURE_MAP::iterator	iCreatureTemp = iCreature;
-					iCreature++;
+						// remove the creature from the map
+						CREATURE_MAP::iterator	iCreatureTemp = iCreature;
+						iCreature++;
 
-					m_mapCreature.erase( iCreatureTemp );			
+						m_mapCreature.erase( iCreatureTemp );
 
-
-					continue;
+						continue;
+					}
 				}
 			}
 
@@ -2701,14 +2737,21 @@ MZone::KeepObjectInSight(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y, BYTE sigh
 				int x = pCreature->GetX();
 				int y = pCreature->GetY();
 				
+				bool removed = true;
+
+				MSector*	pSector			= SectorAt(x, y);
+				MSector*	pServerSector	= SectorAt(cX, cY);
+
 				//------------------------------------------------
-				// sector에서 제거시킨다.
+				// Remove it from its sector.
 				//------------------------------------------------
-				if (!m_ppSector[y][x].RemoveCreature(id))
+				if (pSector==NULL || !pSector->RemoveCreature(id))
 				{
-					if (!m_ppSector[cY][cX].RemoveCreature(id))
-					{	
+					if (pServerSector==NULL || !pServerSector->RemoveCreature(id))
+					{
 						DEBUG_ADD_FORMAT("Can't RemoveCreature! ID=%d client(%d,%d), server(%d,%d)", pCreature->GetID(), x,y,cX,cY);
+
+						removed = false;
 					}
 				}
 
@@ -2759,13 +2802,21 @@ MZone::KeepObjectInSight(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y, BYTE sigh
 				}
 				*/
 				
-				// memory에서 제거
 				UnSetServerBlock( pCreature->GetMoveType(), pCreature->GetServerX(), pCreature->GetServerY() );
 
-				delete pCreature;				
-				
-				m_mapCreature.erase(iTemp);			
-			}			
+				//------------------------------------------------
+				// Same rule as MZone::RemoveCreature: free it only
+				// once a sector has given up its pointer, otherwise
+				// that sector is left pointing at dead memory. It
+				// stays in m_mapCreature and Release() collects it.
+				//------------------------------------------------
+				if (removed)
+				{
+					delete pCreature;
+
+					m_mapCreature.erase(iTemp);
+				}
+			}
 		}		
 	}
 
@@ -2971,7 +3022,10 @@ MZone::AddCreature(MCreature* pCreature)
 			}
 		}
 
-		bool bAdd;
+		// A move type the switch below does not place leaves this false,
+		// so the creature is reported as not added rather than inserted
+		// into m_mapCreature without a sector to remove it from later.
+		bool bAdd = false;
 		//----------------------------------------
 		// Sector Setting
 		//----------------------------------------
@@ -2990,10 +3044,27 @@ MZone::AddCreature(MCreature* pCreature)
 			int x = pCreature->GetX();
 			int y = pCreature->GetY();
 
+			//----------------------------------------
+			// The position arrives with the packet that
+			// created this creature and is only tested
+			// against SECTORPOSITION_NULL above, so the
+			// sector it names still has to be checked.
+			// The player is handled by the branch above
+			// and is deliberately not rejected here.
+			//----------------------------------------
+			MSector*	pSector = SectorAt(x, y);
+
+			if (pSector==NULL)
+			{
+				DEBUG_ADD_FORMAT("[Error] AddCreature: position (%d, %d) is outside the zone (%d x %d)", x, y, (int)m_Width, (int)m_Height);
+
+				return false;
+			}
+
 			switch (pCreature->GetMoveType())
 			{
 				case MCreature::CREATURE_UNDERGROUND :
-					bAdd = m_ppSector[y][x].AddUndergroundCreature(pCreature);
+					bAdd = pSector->AddUndergroundCreature(pCreature);
 
 					//if (!bAdd)
 					{
@@ -3003,7 +3074,7 @@ MZone::AddCreature(MCreature* pCreature)
 				break;
 
 				case MCreature::CREATURE_GROUND :
-					bAdd = m_ppSector[y][x].AddGroundCreature(pCreature);		
+					bAdd = pSector->AddGroundCreature(pCreature);
 
 					//if (!bAdd)
 					{
@@ -3013,13 +3084,27 @@ MZone::AddCreature(MCreature* pCreature)
 				break;
 
 				case MCreature::CREATURE_FLYING :
-					bAdd = m_ppSector[y][x].AddFlyingCreature(pCreature);		
+					bAdd = pSector->AddFlyingCreature(pCreature);
 
 					//if (!bAdd)
 					{
 					//	m_ppSector[pCreature->GetY()][pCreature->GetX()].RemoveFlyingCreature();
-					//	bAdd = m_ppSector[pCreature->GetY()][pCreature->GetX()].AddFlyingCreature(pCreature);		
+					//	bAdd = m_ppSector[pCreature->GetY()][pCreature->GetX()].AddFlyingCreature(pCreature);
 					}
+				break;
+
+				//----------------------------------------
+				// The CREATURE_FAKE_* move types belong to
+				// MFakeCreature, which lives in
+				// m_mapFakeCreature and never occupies a
+				// sector. Only CREATURE_FAKE_UNDERGROUND
+				// can reach here - the branch above rewrites
+				// every other move type to GROUND or FLYING
+				// - but nothing places it, so it must not be
+				// reported as added.
+				//----------------------------------------
+				default :
+					DEBUG_ADD_FORMAT("[Error] AddCreature: move type %d has no sector", (int)pCreature->GetMoveType());
 				break;
 			}
 		}
@@ -3144,16 +3229,26 @@ MZone::RemoveCreature(TYPE_OBJECTID id)
 	}
 	*/
 
-	// 찾은 경우 --> 제거		
+	// Found it -- now take it out of its sector.
 	bool removed = true;
-	
+
 	//------------------------------------------------
-	// sector에서 제거시킨다.
+	// Both coordinate pairs are whatever the creature
+	// currently carries, and a handler can reposition
+	// an existing creature from packet data after
+	// AddCreature validated it, so neither pair is
+	// guaranteed to be on the map by the time we get
+	// here. A missing sector counts as "not removed",
+	// which is exactly what the guarded delete below
+	// wants to hear.
 	//------------------------------------------------
-	if (!m_ppSector[y][x].RemoveCreature(id))
+	MSector*	pSector       = SectorAt(x, y);
+	MSector*	pServerSector = SectorAt(serverX, serverY);
+
+	if (pSector==NULL || !pSector->RemoveCreature(id))
 	{
-		if (!m_ppSector[serverY][serverX].RemoveCreature(id))
-		{	
+		if (pServerSector==NULL || !pServerSector->RemoveCreature(id))
+		{
 			DEBUG_ADD_FORMAT("Can't RemoveCreature! ID=%d client(%d,%d), server(%d,%d)", pCreature->GetID(), x,y,serverX,serverY);
 
 			removed = false;
@@ -3568,8 +3663,19 @@ MZone::AddItem(MItem* pItem, BOOL bDropping)
 	// 아직 없는 Item이면 추가	
 	if (theIterator == m_mapItem.end())
 	{
-		// Sector Setting [성물수정]
-		MSector& sector = m_ppSector[pItem->GetY()][pItem->GetX()];
+		// Item coordinates reach the zone straight out of GCAddItemToZone,
+		// exactly as creature coordinates do in AddCreature, so the sector
+		// they name has to be checked before it is written through.
+		MSector*	pSector = SectorAt(pItem->GetX(), pItem->GetY());
+
+		if (pSector==NULL)
+		{
+			DEBUG_ADD_FORMAT("[Error] AddItem: position (%d, %d) is outside the zone (%d x %d)", (int)pItem->GetX(), (int)pItem->GetY(), (int)m_Width, (int)m_Height);
+
+			return false;
+		}
+
+		MSector& sector = *pSector;
 
 		if (sector.AddItem(pItem))
 		{		
@@ -4121,8 +4227,16 @@ MZone::AddEffect(MEffect* pNewEffect, DWORD dwWaitCount)
 
 	if(bDarkNess)
 	{
-		const MSector& sector= m_ppSector[y][x];
-		if(sector.HasDarknessForbidden() == true )
+		//---------------------------------------------------------
+		// The effect position is not tested against the zone until
+		// the boundary check further down, which deliberately lets
+		// a chase effect outside the map through, so this lookup
+		// has to tolerate an off-map position. The block right
+		// below already guards its own read the same way.
+		//---------------------------------------------------------
+		const MSector*	pSector = SectorAt(x, y);
+
+		if(pSector!=NULL && pSector->HasDarknessForbidden() == true )
 		{
 			delete pNewEffect;
 			return false;

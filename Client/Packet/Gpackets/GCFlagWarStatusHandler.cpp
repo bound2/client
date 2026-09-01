@@ -9,7 +9,7 @@
 // include files
 #include "Client_PCH.h"
 #include "GCFlagWarStatus.h"
-#include "clientdef.h"
+#include "ClientDef.h"
 #include "UIFunction.h"
 
 //////////////////////////////////////////////////////////////////////

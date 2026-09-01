@@ -3,10 +3,10 @@
 // AcceleratorDef.cpp
 //----------------------------------------------------------------------
 
-#include "client_PCH.h"
+#include "Client_PCH.h"
 #include "KeyAccelerator.h"
 #include "DIK_Defines.h"
-#include "mgamestringtable.h"
+#include "MGameStringTable.h"
 
 //#include "VS_UI_Widget.h"
 

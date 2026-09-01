@@ -393,6 +393,40 @@ class MZone {
 
 		
 	protected :
+		//--------------------------------------------------------------
+		// Bounds-checked sector lookup.
+		//
+		// m_ppSector is a bare row-pointer array, and creature and effect
+		// coordinates reach the zone straight out of packets, so a
+		// subscript driven by one of those has to come through here: off
+		// the map it yields NULL instead of a wild row pointer. Sites that
+		// index from a loop already bounded by m_Width/m_Height do not
+		// need it.
+		//--------------------------------------------------------------
+		MSector*		SectorAt(int x, int y)
+		{
+			if (m_ppSector==NULL
+				|| x<0 || y<0
+				|| x>=(int)m_Width || y>=(int)m_Height)
+			{
+				return NULL;
+			}
+
+			return &m_ppSector[y][x];
+		}
+
+		const MSector*	SectorAt(int x, int y) const
+		{
+			if (m_ppSector==NULL
+				|| x<0 || y<0
+				|| x>=(int)m_Width || y>=(int)m_Height)
+			{
+				return NULL;
+			}
+
+			return &m_ppSector[y][x];
+		}
+
 		// Zone File Header
 		FILEINFO_ZONE_HEADER	m_Info;
 

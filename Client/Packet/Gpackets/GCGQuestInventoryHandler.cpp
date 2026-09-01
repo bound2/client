@@ -10,7 +10,7 @@
 #include "Client_PCH.h"
 #include "GCGQuestInventory.h"
 #include "Client.h"
-#include "vs_ui.h"
+#include "VS_UI.h"
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 void GCGQuestInventoryHandler::execute ( GCGQuestInventory * pGCGQuestInventory , Player * pPlayer )

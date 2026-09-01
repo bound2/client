@@ -2,7 +2,7 @@
 // KeyAccelerator.cpp
 //----------------------------------------------------------------------
 
-#include "client_PCH.h"
+#include "Client_PCH.h"
 #include <fstream>
 #include "KeyAccelerator.h"
 #include "DXLib/CDirectInput.h"

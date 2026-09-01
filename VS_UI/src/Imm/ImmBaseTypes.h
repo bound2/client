@@ -38,7 +38,7 @@
 
 //#include <windows.h>
 #ifdef PLATFORM_WINDOWS
-#include "FeelitApi.h"
+#include "FeelitAPI.h"
 #endif
 
 // Version 0x0100 -- IFC10

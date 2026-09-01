@@ -13,7 +13,7 @@
 #include "Packet.h"
 #include "PacketFactory.h"
 #include "ValueList.h"
-#include "types/WarTypes.h"
+#include "Types/WarTypes.h"
 
 //--------------------------------------------------------------------------------
 //

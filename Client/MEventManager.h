@@ -7,7 +7,7 @@
 
 #pragma warning(disable:4786)
 
-#include "ctypetable.h"
+#include "CTypeTable.h"
 /* Explicit path: plain "CDirectDrawSurface.h" resolves to this same
    directory's stale, unmigrated copy (missing m_ddsd) instead of the
    maintained Client/DXLib/CDirectDrawSurface.h. */

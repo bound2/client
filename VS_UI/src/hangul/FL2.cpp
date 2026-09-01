@@ -1,8 +1,8 @@
 ﻿// FL2.cpp
 
-#include "client_PCH.h"
+#include "Client_PCH.h"
 
-#include "FL2.h"
+#include "Fl2.h"
 #include "VS_UI_Base.h"
 
 //-----------------------------------------------------------------------------

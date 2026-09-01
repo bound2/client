@@ -1,10 +1,10 @@
 ﻿// VS_UI_Game.cpp
 
-#include "client_PCH.h"
+#include "Client_PCH.h"
 #include "VS_UI_Game.h"
 #include "VS_UI_filepath.h"
 #include "VS_UI_Message.h"
-#include "VS_UI_Mouse_Pointer.h"
+#include "VS_UI_mouse_pointer.h"
 
 #include "MInventory.h"
 #include "MSlayerGear.h"

@@ -32,11 +32,11 @@
 #include "CMessageArray.h"
 #include "DXLib.h"
 #include "SP.h"
-#include "FL2.h"
+#include "Fl2.h"
 //#include "2D.h"
 #include "ClientConfig.h"
-#include "VS_UI_BASE.h"
-#include "VS_UI_Mouse_Pointer.h"
+#include "VS_UI_Base.h"
+#include "VS_UI_mouse_pointer.h"
 #include "UIFunction.h"
 #include "AddonDef.h"
 #include "MZoneTable.h"
@@ -59,7 +59,7 @@
 #include "MItemOptionTable.h"
 #include "Client.h"
 #include "SkillDef.h"
-#include "vs_ui_item.h"
+#include "VS_UI_item.h"
 #include "MTopViewDraw.inl"
 
 #define	SHIFT_SNIPPING			2

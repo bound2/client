@@ -13,10 +13,10 @@
 
 #include "VS_UI_Game.h"
 #include "VS_UI_Helper.h"
-#include "VS_UI_Item.h"
-#include "VS_UI_Title.h"
-#include "VS_UI_description.h"
-#include "VS_UI_Progress.h"
+#include "VS_UI_item.h"
+#include "VS_UI_title.h"
+#include "VS_UI_Description.h"
+#include "VS_UI_progress.h"
 #include "ProfileManager.h"
 
 #ifndef _LIB

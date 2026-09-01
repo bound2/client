@@ -40,8 +40,8 @@
 #include "MObjectSelector.h"
 #include "SoundDef.h"
 #include "MItemFinder.h"
-#include "packet/Cpackets/CGSelectTileEffect.h"
-#include "packet/Cpackets/CGPartyInvite.h"
+#include "Packet/Cpackets/CGSelectTileEffect.h"
+#include "Packet/Cpackets/CGPartyInvite.h"
 #include "EffectSpriteTypeDef.h"
 #include "ModifyStatusManager.h"
 #include "ClientCommunicationManager.h"
@@ -69,7 +69,7 @@
 #include "RankBonusDef.h"
 #include "MOustersGear.h"
 
-#include "CPackets/CGAbsorbSoul.h"
+#include "Cpackets/CGAbsorbSoul.h"
 
 #include "UIMessageManager.h"
 #include "UIFunction.h"
@@ -124,7 +124,7 @@ BYTE GetCreatureActionCountMax( const MCreature* pCreature, int action );
 
 
 #include "VS_UI.h" // KJTINC
-#include "VS_UI_Mouse_pointer.h"
+#include "VS_UI_mouse_pointer.h"
 #ifdef PLATFORM_WINDOWS
 #include "CImm.h"
 #endif

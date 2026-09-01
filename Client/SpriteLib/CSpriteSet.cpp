@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // CSpriteSet.cpp
 //----------------------------------------------------------------------
-#include "client_PCH.h"
+#include "Client_PCH.h"
 #include "CSpriteSurface.h"
 #include "CSprite565.h"
 #include <cstdint>

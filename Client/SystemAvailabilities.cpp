@@ -1,8 +1,8 @@
 #include "Client_PCH.h"
 #include "SystemAvailabilities.h"
-#include "MinTR.H"
+#include "MinTr.h"
 #include "RarFile.h"
-#include "packet/Properties.h"
+#include "Packet/Properties.h"
 
 SystemAvailabilitiesManager *g_pSystemAvailableManager = NULL;
 

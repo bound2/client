@@ -17,6 +17,13 @@ class CToken {
 		CToken(const char* str=NULL);
 		~CToken();
 
+		// The class owns a raw char[] and hands out interior pointers, so a
+		// copy would share the allocation and both destructors would free it.
+		// Every use in the tree is a local built from a string, so nothing
+		// needs a copy; make the double free unbuildable rather than latent.
+		CToken(const CToken&) = delete;
+		CToken& operator=(const CToken&) = delete;
+
 		// set string
 		void SetString(const char* str);
 

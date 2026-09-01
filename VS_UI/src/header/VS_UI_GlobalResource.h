@@ -12,7 +12,7 @@
 #define __VS_UI_GLOBALRESOURCE_H__
 
 #include "VS_UI_Base.h"
-#include "VS_UI_Util.h"
+#include "VS_UI_util.h"
 
 //-----------------------------------------------------------------------------
 // C_GLOBAL_RESOURCE

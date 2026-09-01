@@ -9,9 +9,9 @@
 //////////////////////////////////////////////////////////////////////////////
 
 //#include "SFCPCH.h"
-#include "client_PCH.h"
+#include "Client_PCH.h"
 
-#include "SXML.h"
+#include "SXml.h"
 #include "PacketAssert.h"
 using namespace std;
 
@@ -43,9 +43,20 @@ static const char* XML_ERROR_FILENAME = "__XMLError.log";
 //////////////////////////////////////////////////////////////////////////////
 string XMLUtil::WideCharToString(const wchar_t * wstr, int wstrlen)
 {
+	if ( wstr == NULL )
+	{
+		return string();
+	}
+
 	if ( wstrlen == -1 )
 	{
 		wstrlen = (int)wcslen(wstr);
+	}
+	else if ( wstrlen < 0 )
+	{
+		// -1 is the only negative the API defines; anything else would be
+		// passed straight through as a unit count.
+		return string();
 	}
 
 	// test korean with WideCharToMultiByte
@@ -75,11 +86,16 @@ string XMLUtil::WideCharToString(const wchar_t * wstr, int wstrlen)
 	//	For the code pages mentioned in dwFlags, lpUsedDefaultChar must be NULL, 
 	//  otherwise the function fails with ERROR_INVALID_PARAMETER. 
 
-	// 최소한의 복사를 줄이기 위해서 스트링을 준비. 	
+	// Staged through a local buffer to keep the copying down.
 	char szTemp[5120];
 
 	string strBuffer;
-	strBuffer.reserve( wstrlen * 2 + 1 );		// capacity 를 충분하게..
+	strBuffer.reserve( wstrlen * 2 + 1 );		// generous, so the assignment below does not grow it
+
+	// One byte of szTemp is held back deliberately. WideCharToMultiByte
+	// terminates its output only when cchWideChar is -1, and wstrlen is a real
+	// unit count here, so the terminator is this function's job and there has
+	// to be room for it at szTemp[nCopied] whatever the conversion returns.
 	int nCopied = WideCharToMultiByte(
 #ifdef _WIN32
 		CP_OEMCP,
@@ -90,12 +106,20 @@ string XMLUtil::WideCharToString(const wchar_t * wstr, int wstrlen)
 #endif
 		wstr,									// wide string
 		wstrlen,								// length of wide string
-		szTemp, //const_cast<LPSTR>(strBuffer.data()),	// mbcs string (unicode)
-		5120,//(int)strBuffer.capacity(),					// length of mbcs string
-		NULL,									// NULL 이 빠르다는데?
+		szTemp,									// mbcs string (unicode)
+		(int)sizeof(szTemp) - 1,				// length of mbcs string
+		NULL,									// faster when both defaults are NULL
 		NULL );
-	szTemp[nCopied] = NULL;
-//	strBuffer._Mysize = nCopied;				// 수동으로 지정해야 한다.
+
+	// 0 is the API's answer for both outright failure and a destination too
+	// small (ERROR_INSUFFICIENT_BUFFER), and neither leaves szTemp usable. An
+	// out-of-range count cannot index the buffer either, so both collapse to
+	// the empty string rather than to a wild write.
+	if ( nCopied < 0 || nCopied > (int)sizeof(szTemp) - 1 )
+	{
+		nCopied = 0;
+	}
+	szTemp[nCopied] = '\0';
 
 	strBuffer = szTemp;
 

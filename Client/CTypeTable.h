@@ -38,32 +38,39 @@ class CTypeTable {
 		
 		//-------------------------------------------------------
 		// Reference
+		//
+		// m_Size is whatever the data file the table was loaded
+		// from declared, while the ids indexing it come from
+		// packets and from compile-time enums a shorter file does
+		// not cover, so the range test has to hold in every
+		// configuration. It used to be #ifdef _DEBUG - which MSVC
+		// defines for Debug and not for Release - so the only
+		// build without the check was the one that ships.
+		//
+		// Out of range yields a default-constructed Type, exactly
+		// what the Debug build has always returned. Note that a
+		// default MString holds a NULL string, so a caller that
+		// copies out of the result still needs its own test.
 		//-------------------------------------------------------
 		const Type&	operator [] (int type) const {
-#ifdef _DEBUG
-			if (type < 0 || type >= m_Size) {
+			if (m_pTypeInfo == NULL || type < 0 || type >= m_Size) {
 				static Type dummy;
 				return dummy;
 			}
-#endif
 			return m_pTypeInfo[type];
 		}
 		Type&	operator [] (int type) {
-#ifdef _DEBUG
-			if (type < 0 || type >= m_Size) {
+			if (m_pTypeInfo == NULL || type < 0 || type >= m_Size) {
 				static Type dummy;
 				return dummy;
 			}
-#endif
 			return m_pTypeInfo[type];
 		}
 		Type&	Get(int type) {
-#ifdef _DEBUG
-			if (type < 0 || type >= m_Size) {
+			if (m_pTypeInfo == NULL || type < 0 || type >= m_Size) {
 				static Type dummy;
 				return dummy;
 			}
-#endif
 			return m_pTypeInfo[type];
 		}
 
@@ -76,9 +83,57 @@ class CTypeTable {
 		void			SaveToFile(const char *filename);
 		void			LoadFromFile(const char *filename);
 		bool			LoadFromFile_NickNameString(std::ifstream& file);
-	protected :		
-		int			m_Size;					// Type 종류 수
-		Type*		m_pTypeInfo;			// Type 정보
+	protected :
+		// Entry counts at or below this are taken on trust; see
+		// IsEntryCountSane.
+		enum { MAX_UNMEASURED_ENTRIES = 65536 };
+
+		//-------------------------------------------------------
+		// Is an entry count read out of a file plausible?
+		//
+		// Every entry costs at least one byte on disk, so a count
+		// larger than what is left of the file cannot describe
+		// real entries however small Type is. Fails open: when the
+		// stream will not say how much is left, only the sign is
+		// judged, and a negative count is always rejected because
+		// new Type[negative] is undefined.
+		//-------------------------------------------------------
+		static bool	IsEntryCountSane(std::ifstream& file, int count)
+		{
+			if (count < 0)
+				return false;
+
+			// No shipped table comes near this, and a count below it
+			// cannot ask for an allocation worth refusing. Nested
+			// tables run this once per outer entry, so the ordinary
+			// case must not pay for the seek below.
+			if (count <= MAX_UNMEASURED_ENTRIES)
+				return true;
+
+			if (!file.good())
+				return false;
+
+			std::streamoff	cur = file.tellg();
+
+			if (cur < 0)
+				return true;
+
+			file.seekg(0, std::ios::end);
+
+			std::streamoff	end = file.tellg();
+
+			// put the stream back exactly where it was
+			file.clear();
+			file.seekg(cur, std::ios::beg);
+
+			if (end < cur)
+				return true;
+
+			return (std::streamoff)count <= end - cur;
+		}
+
+		int			m_Size;					// number of Types held
+		Type*		m_pTypeInfo;			// the Type information
 
 };
 
@@ -114,17 +169,19 @@ template <class Type>
 void
 CTypeTable<Type>::Init(int size)
 {
-	// 개수가 없을 경우 
-	if (size==0) 
+	// nothing to hold; a negative count would make new Type[] undefined
+	if (size<=0)
 		return;
 
-	// 일단 해제
+	// release what is held first
 	Release();
 
-	// 메모리 잡기
-	m_Size = size;
-	
-	m_pTypeInfo = new Type [m_Size];	
+	// m_Size is only published once the array exists, so a throwing
+	// allocation cannot leave a size behind with no table under it
+	Type*	pTypeInfo = new Type [size];
+
+	m_pTypeInfo	= pTypeInfo;
+	m_Size		= size;
 }
 
 
@@ -179,20 +236,24 @@ CTypeTable<Type>::LoadFromFile(std::ifstream& file)
 {
 	int numSize=0;
 
-	// size 읽어오기
+	// read the size
 	file.read((char*)&numSize, 4);
 
-	// 현재 잡혀있는 메모리와 다르면 다시 메모리를 잡는다.
+	// the count is whatever the file says, and Init allocates from it
+	if (!IsEntryCountSane(file, numSize))
+		return;
+
+	// reallocate when the size differs from what is currently held
 	if (m_Size != numSize)
 	{
-		// 메모리 해제
+		// release the memory
 		Release();
 
-		// 메모리 잡기
+		// allocate
 		Init( numSize );
 	}
 
-	// file에서 각각의 정보를 읽어들인다.
+	// read each entry from the file
 	for (int i=0; i<m_Size; i++)
 	{
 		if (i==700)
@@ -231,26 +292,30 @@ template <class Type>
 bool			
 CTypeTable<Type>::LoadFromFile_NickNameString(std::ifstream& file)
 {
-	int numSize;
+	int numSize=0;
 	WORD wIndex;
-	// size 읽어오기
+	// read the size
 	file.read((char*)&numSize, 4);
 
-	// 현재 잡혀있는 메모리와 다르면 다시 메모리를 잡는다.
+	// the count is whatever the file says, and Init allocates from it
+	if (!IsEntryCountSane(file, numSize))
+		return false;
+
+	// reallocate when the size differs from what is currently held
 	if (m_Size != numSize)
 	{
-		// 메모리 해제
+		// release the memory
 		Release();
 
-		// 메모리 잡기
+		// allocate
 		Init( numSize );
 	}
-	
-	
+
+
 	for (int i=0; i<m_Size; i++)
 	{
 		file.read((char*)&wIndex, 2);
-		if(wIndex>=numSize)
+		if(wIndex>=m_Size)
 			return false;
  		m_pTypeInfo[wIndex].LoadFromFile( file );
 	}

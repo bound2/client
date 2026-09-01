@@ -189,8 +189,10 @@ RequestServerPlayerManager::AddRequestServerPlayer(RequestServerPlayer* pRequest
 
 					if (pSocket!=NULL)
 					{
-						const char* addrIP = pSocket->getHost().c_str();
-						g_pGameMessage->AddFormat("New Connection From %s", addrIP);
+						// getHost() returns std::string by value, so binding
+						// its c_str() would dangle before AddFormat reads it.
+						const std::string strIP = pSocket->getHost();
+						g_pGameMessage->AddFormat("New Connection From %s", strIP.c_str());
 					}
 					else
 					{

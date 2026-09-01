@@ -11,7 +11,7 @@
 #ifndef __TIMER2__
 #define __TIMER2__
 
-#include "BasicS.h"
+#include "Basics.h"
 
 typedef long timer_id_t;
 

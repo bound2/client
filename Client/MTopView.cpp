@@ -43,11 +43,11 @@
 #include "DXLib.h"
 #include "DebugLog.h"
 #include "SP.h"
-#include "FL2.h"
+#include "Fl2.h"
 //#include "2D.h"
 #include "ClientConfig.h"
-#include "VS_UI_BASE.h"
-#include "VS_UI_Mouse_Pointer.h"
+#include "VS_UI_Base.h"
+#include "VS_UI_mouse_pointer.h"
 #include "UIFunction.h"
 #include "AddonDef.h"
 #include "MZoneTable.h"
@@ -83,13 +83,13 @@
 #include "MItemOptionTable.h"
 #include "MMonsterKillQuestInfo.h"
 #include "Client.h"
-#include "cmp3.h"
+#include "CMP3.h"
 #include "CSprite555.h"
 #include "CSprite565.h"
 #include "SoundSetting.h"
 #include "SystemAvailabilities.h"
 #include "SkillDef.h"
-#include "vs_ui_item.h"
+#include "VS_UI_item.h"
 #include "NicknameInfo.h"
 
 //----------------------------------------------------------------------
@@ -9671,8 +9671,14 @@ MTopView::DrawEventString(int& strX, int& strY)
 			case EVENTFLAG_SHOW_STRING:
 				if(!event->m_StringsID.empty())
 				{
-					if(event->m_StringsID[eventMessageCount] < MAX_GAME_STRING && (*g_pGameStringTable)[event->m_StringsID[eventMessageCount]].GetString() != NULL)
-						strcpy(str, (*g_pGameStringTable)[event->m_StringsID[eventMessageCount]].GetString());
+					// The table is only as long as String.inf made it, which
+					// need not reach MAX_GAME_STRING, so the id has to be
+					// judged against the size actually loaded.
+					const int stringID = event->m_StringsID[eventMessageCount];
+
+					if(stringID >= 0 && stringID < g_pGameStringTable->GetSize()
+						&& (*g_pGameStringTable)[stringID].GetString() != NULL)
+						strcpy(str, (*g_pGameStringTable)[stringID].GetString());
 				}
 				break;
 
@@ -9683,8 +9689,13 @@ MTopView::DrawEventString(int& strX, int& strY)
 			case EVENTFLAG_SHOW_DELAY_STRING:
 				if(!event->m_StringsID.empty())
 				{
-					if(event->m_StringsID[eventMessageCount] < MAX_GAME_STRING && (*g_pGameStringTable)[event->m_StringsID[eventMessageCount]].GetString() != NULL)
-						sprintf(str, (*g_pGameStringTable)[event->m_StringsID[eventMessageCount]].GetString(), (event->eventDelay - (GetTickCount() - event->eventStartTickCount)+999)/1000);
+					// See above: MAX_GAME_STRING is what the client knows,
+					// GetSize() is what the data file supplied.
+					const int stringID = event->m_StringsID[eventMessageCount];
+
+					if(stringID >= 0 && stringID < g_pGameStringTable->GetSize()
+						&& (*g_pGameStringTable)[stringID].GetString() != NULL)
+						sprintf(str, (*g_pGameStringTable)[stringID].GetString(), (event->eventDelay - (GetTickCount() - event->eventStartTickCount)+999)/1000);
 				}
 				break;
 			}			

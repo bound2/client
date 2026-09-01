@@ -13,8 +13,8 @@
 #define __VS_UI_GAME_COMMON2_H__
 
 #include "VS_UI_Base.h"
-#include "VS_UI_Util.h"
-#include "VS_UI_description.h"
+#include "VS_UI_util.h"
+#include "VS_UI_Description.h"
 #include "VS_UI_ExtraDialog.h"
 
 #include "SkillDef.h"

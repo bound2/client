@@ -9,7 +9,7 @@
 #include "MPlayer.h"
 #include "SkillDef.h"
 #include "UserInformation.h"
-#include "vs_ui.h"
+#include "VS_UI.h"
 extern DWORD g_CurrentTime;
 extern bool			HasEffectStatusSummonSylph( MCreature* pCreature );
 extern void			RemoveEffectStatusSummonSylph( MCreature* pCreature );

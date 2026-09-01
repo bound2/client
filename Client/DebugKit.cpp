@@ -3,7 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "Client_PCH.h"
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "DebugKit.h"
 
 #ifdef PLATFORM_WINDOWS

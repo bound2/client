@@ -1,17 +1,17 @@
 // VS_UI_PointExchange.cpp
 // Point-based Exchange Market UI Implementation
 
-#include "client_PCH.h"
+#include "Client_PCH.h"
 #define assert(e) ((void)(e))
 // Disabled assert for macOS
 
 #pragma warning(disable:4786)
 
 #include "VS_UI_PointExchange.h"
-#include "VS_UI_Filepath.h"
+#include "VS_UI_filepath.h"
 #include "VS_UI_GameCommon.h"
-#include "VS_UI_Item.h"
-#include "VS_UI_Mouse_Pointer.h"
+#include "VS_UI_item.h"
+#include "VS_UI_mouse_pointer.h"
 #include "VS_UI.h"
 #include "UserOption.h"
 #include "ServerInfo.h"
@@ -23,7 +23,7 @@
 #include "../Client/Packet/SocketInputStream.h"
 #include "../Client/Packet/SocketOutputStream.h"
 
-#include "MgamestringTable.H"
+#include "MGameStringTable.h"
 
 //-----------------------------------------------------------------------------
 // C_VS_UI_POINT_EXCHANGE

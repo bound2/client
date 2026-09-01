@@ -35,8 +35,15 @@ throw ( ProtocolException , Error )
 	}
 
 	
-	const char* pExpeller = pPacket->getExpeller().c_str();	// 추방자
-	const char* pExpellee = pPacket->getExpellee().c_str(); // 추방된 자
+	// getExpeller()/getExpellee() return std::string by value, so the temporary
+	// died at the end of its own full-expression and the pointers below dangled
+	// for the rest of the function. Bind the strings to locals that outlive
+	// every use.
+	const std::string expeller = pPacket->getExpeller();	// the one who expelled
+	const std::string expellee = pPacket->getExpellee();	// the one expelled
+
+	const char* pExpeller = expeller.c_str();
+	const char* pExpellee = expellee.c_str();
 
 	char str[256];
 			

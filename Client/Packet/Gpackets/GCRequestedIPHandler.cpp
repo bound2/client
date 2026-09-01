@@ -34,7 +34,11 @@ throw ( ProtocolException , Error )
 		&& g_pRequestUserManager!=NULL
 		&& g_pRequestClientPlayerManager!=NULL)
 	{
-		const char* pName = pPacket->getName().c_str();
+		// getName() returns std::string by value; bind it so pName stays valid
+		// for the AddRequestUser / GetRequestingFor / Connect /
+		// RemoveRequestingUser sequence below.
+		const std::string name = pPacket->getName();
+		const char* pName = name.c_str();
 
 		struct in_addr sa;
 #ifdef PLATFORM_WINDOWS

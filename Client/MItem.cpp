@@ -27,13 +27,13 @@
 	#include "MZone.h"
 	#include "MZoneTable.h"
 	#include "MPlayer.h"
-#include "packet/CPackets/CGUseItemFromGear.h"
-	#include "packet/CPackets/CGUsePotionFromInventory.h"
-	#include "packet/CPackets/CGUsePotionFromQuickSlot.h"
+#include "Packet/Cpackets/CGUseItemFromGear.h"
+	#include "Packet/Cpackets/CGUsePotionFromInventory.h"
+	#include "Packet/Cpackets/CGUsePotionFromQuickSlot.h"
 
-	#include "FL2.h"
+	#include "Fl2.h"
 	#include "VS_UI_GameCommon.h"
-	#include "vs_ui.h"
+	#include "VS_UI.h"
 	#include "UIDialog.h"
 #endif
 
@@ -435,24 +435,36 @@ MItem::GetName()
 	//---------------------------------------------------------
 	if (m_pName==NULL)
 	{
-		//if (s_bUseKorean) 
+		//if (s_bUseKorean)
 		{
-			// 틴버전인경우 XXX머리를 XXX소울 스톤로 표시한다.
+			// In the teen build "<X> Head" is shown as "<X> Soul Stone".
 			if(g_pUserInformation->GoreLevel == false && GetItemClass() == ITEM_CLASS_SKULL)
 			{
-//				static char sz_temp[256];
-				m_pName = new char[strlen((*g_pItemTable)[GetItemClass()][m_ItemType].HName)+1+5];
-				strcpy(m_pName, (*g_pItemTable)[GetItemClass()][m_ItemType].HName);
+				const char*	pszHName		= (*g_pItemTable)[GetItemClass()][m_ItemType].HName.GetString();
+				const char*	pszSoulStone	= (*g_pGameStringTable)[STRING_MESSAGE_SOUL_STONE].GetString();
 
-				char *psz_temp = &m_pName[strlen(m_pName)-4];
-				if(psz_temp != NULL)
+				//-----------------------------------------------------------
+				// The head noun being replaced is the last 4 bytes of the
+				// item name, so a name shorter than that has nothing to
+				// substitute. Both strings come out of data files: MString
+				// holds NULL for an entry the file never supplied, and the
+				// replacement is not bounded by the noun it overwrites, so
+				// the allocation has to be sized from both of them.
+				//-----------------------------------------------------------
+				if (pszHName!=NULL && pszSoulStone!=NULL && strlen(pszHName)>=4)
 				{
-					strcpy(psz_temp, (*g_pGameStringTable)[STRING_MESSAGE_SOUL_STONE].GetString());
+					size_t	nPrefix = strlen(pszHName) - 4;
+
+					m_pName = new char[nPrefix + strlen(pszSoulStone) + 1];
+
+					memcpy(m_pName, pszHName, nPrefix);
+					strcpy(m_pName + nPrefix, pszSoulStone);
+
 					return m_pName;
 				}
 			}
 
-			return (*g_pItemTable)[GetItemClass()][m_ItemType].HName; 
+			return (*g_pItemTable)[GetItemClass()][m_ItemType].HName;
 		}
 		//else 
 //		{
@@ -474,20 +486,38 @@ MItem::GetEName() const
 	//---------------------------------------------------------
 //	if (m_pName==NULL)
 	{
-		// 틴버전인경우 XXXHead또는 XXXSkull를 XXXSoul Stone로 표시한다.
+		// In the teen build "<X>Head" / "<X>Skull" is shown as "<X>Soul Stone".
 		if(g_pUserInformation->GoreLevel == false && GetItemClass() == ITEM_CLASS_SKULL)
 		{
 			static char sz_temp[256];
-			strcpy(sz_temp, (*g_pItemTable)[GetItemClass()][m_ItemType].EName);
-			
-			char *psz_temp = strstr(sz_temp, "Head");
 
-			if(psz_temp == NULL)psz_temp = strstr(sz_temp, "Skull");
+			const char*	pszEName		= (*g_pItemTable)[GetItemClass()][m_ItemType].EName.GetString();
+			const char*	pszSoulStone	= (*g_pGameStringTable)[STRING_MESSAGE_SOUL_STONE].GetString();
 
-			if(psz_temp != NULL)
+			//---------------------------------------------------------------
+			// The item name and the replacement are both data-file strings,
+			// so neither length is bounded by anything in the code and every
+			// write into sz_temp has to be clamped to what is left of it.
+			//---------------------------------------------------------------
+			if (pszEName!=NULL && pszSoulStone!=NULL)
 			{
-				strcpy(psz_temp, (*g_pGameStringTable)[STRING_MESSAGE_SOUL_STONE].GetString());
-				return sz_temp;
+				strncpy(sz_temp, pszEName, sizeof(sz_temp)-1);
+				sz_temp[sizeof(sz_temp)-1] = '\0';
+
+				char *psz_temp = strstr(sz_temp, "Head");
+
+				if(psz_temp == NULL)psz_temp = strstr(sz_temp, "Skull");
+
+				if(psz_temp != NULL)
+				{
+					// Bytes between the match and the end of sz_temp.
+					size_t	nRoom = sizeof(sz_temp) - (size_t)(psz_temp - sz_temp) - 1;
+
+					strncpy(psz_temp, pszSoulStone, nRoom);
+					psz_temp[nRoom] = '\0';
+
+					return sz_temp;
+				}
 			}
 		}
 		return (*g_pItemTable)[GetItemClass()][m_ItemType].EName; 		

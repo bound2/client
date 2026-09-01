@@ -11,8 +11,8 @@
 #ifndef __VS_UI_MOUSE_POINTER_H__
 #define __VS_UI_MOUSE_POINTER_H__
 
-#include "VS_UI_Util.h"
-#include "VS_UI_base.h"
+#include "VS_UI_util.h"
+#include "VS_UI_Base.h"
 #include "MItem.h"
 #include <limits.h>
 

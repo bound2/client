@@ -11,7 +11,7 @@
 #ifndef __IMG_H__
 #define __IMG_H__
 
-#include "BasicS.h"
+#include "Basics.h"
 #include "2d.h"
 #include "DLL.h"
 

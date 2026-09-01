@@ -7,7 +7,7 @@
 
 
 
-#include "ifc.h"
+#include "IFC.h"
 #include <vector>
 
 class CImm  

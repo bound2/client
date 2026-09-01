@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------
 // CShadowSprite.cpp
 //----------------------------------------------------------------------
-#include "client_PCH.h"
+#include "Client_PCH.h"
 #include "CSpriteSurface.h"
 #include "CFilter.h"
 #include "CShadowSprite.h"

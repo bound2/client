@@ -134,7 +134,10 @@ throw ( ProtocolException , Error )
 			//pCreature->SetDelay( 1000 );
 		}	
 
-		if( wolfCreatureType == CREATURETYPE_WER_WOLF )
+		// This runs after both arms of the if/else above, and the "new
+		// creature" arm nulls pCreature when AddCreature rejects it -- an
+		// out-of-zone position, or a move type with no sector list.
+		if( pCreature != NULL && wolfCreatureType == CREATURETYPE_WER_WOLF )
 			pCreature->SetBodyColor1( pPacket->getColor() );
 	}
 

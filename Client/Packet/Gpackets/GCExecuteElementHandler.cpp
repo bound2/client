@@ -11,7 +11,7 @@
 #include "GCExecuteElement.h"
 
 #include "Client.h"
-#include "vs_ui.h"
+#include "VS_UI.h"
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 void GCExecuteElementHandler::execute ( GCExecuteElement * pGCExecuteElement , Player * pPlayer )

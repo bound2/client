@@ -5,7 +5,7 @@
 #include "MPlayerGear.h"
 #include "MItem.h"
 #include "MHelpManager.h"
-#include "debuginfo.h"
+#include "DebugInfo.h"
 
 #ifdef __GAME_CLIENT__
 	#include "ClientConfig.h"

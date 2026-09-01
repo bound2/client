@@ -1,7 +1,7 @@
 #ifndef __GL_IMPORT__
 #define __GL_IMPORT__
 
-#include "2D.h"
+#include "2d.h"
 #include "picinfo.h"
 #include "TGA.h"
 #include "IMG.h"

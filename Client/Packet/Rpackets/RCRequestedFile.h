@@ -12,7 +12,7 @@
 // include files
 #include "Packet.h"
 #include "PacketFactory.h"
-#include "../types/RequestTypes.h"
+#include "../Types/RequestTypes.h"
 
 class RCRequestedFileInfo
 {

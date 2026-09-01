@@ -11,18 +11,18 @@
 #ifndef __VS_UI_PETSTORAGE_H__
 #define __VS_UI_PETSTORAGE_H__
 
-#include "Unicorn.h"
-#include "VS_UI_Widget.h"
+#include "unicorn.h"
+#include "VS_UI_widget.h"
 
 #include "MGameDef.h"
 #include "MStorage.h"
 #include "MShopShelf.h"
 
 #include "VS_UI_Base.h"
-#include "VS_UI_Util.h"
-#include "VS_UI_description.h"
+#include "VS_UI_util.h"
+#include "VS_UI_Description.h"
 #include "VS_UI_ExtraDialog.h"
-#include "VS_UI_Title.h" // for S_SLOT
+#include "VS_UI_title.h" // for S_SLOT
 #include "SkillDef.h"
 #include "MItem.h"
 

@@ -1,7 +1,7 @@
-#include "client_PCH.h"
+#include "Client_PCH.h"
 #include "SkinManager.h"
 #include "RarFile.h"
-#include "vs_ui_filepath.h"
+#include "VS_UI_filepath.h"
 
 
 #include <map>

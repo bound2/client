@@ -9,7 +9,7 @@
 // include files
 #include "Client_PCH.h"
 #include "GCNicknameList.h"
-#include "vs_ui.h"
+#include "VS_UI.h"
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 void GCNicknameListHandler::execute ( GCNicknameList * pGCNicknameList , Player * pPlayer )

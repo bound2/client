@@ -1,11 +1,11 @@
 ﻿// VS_UI_Title.cpp
 
-#include "client_PCH.h"
+#include "Client_PCH.h"
 #include "VS_UI.h"
 
 #include "VS_UI_filepath.h"
 #include "VS_UI_Message.h"
-#include "VS_UI_Mouse_pointer.h"
+#include "VS_UI_mouse_pointer.h"
 #include "VS_UI_GameCommon.h"
 #include "UserOption.h"
 #include "ClientConfig.h"
@@ -17,8 +17,8 @@
 #include "UserInformation.h"
 #include <time.h>
 
-#include "MItemOptionTable.H"
-#include "mgamestringtable.H"
+#include "MItemOptionTable.h"
+#include "MGameStringTable.h"
 #include "SkinManager.h"
 
 //add by zdj

@@ -48,11 +48,6 @@ SocketInputStream::SocketInputStream ( Socket * sock , uint BufferLen )
 	
 	m_Buffer = new char[ m_BufferLen ];
 
-	//add by viva 2008-12-31
-	m_EncryptKey = 0;
-	m_HashTable = NULL;
-	//end
-		
 	__END_CATCH
 }
 	
@@ -423,10 +418,6 @@ uint SocketInputStream::fill () throw ( IOException , Error )
 
 			// by tiancaiamao
 			if (nReceived==0) return 0;
-			//add by viva
-			if(nReceived>0)
-				m_EncryptKey = EncryptData(m_EncryptKey, &m_Buffer[m_Tail], nReceived);
-			//end
 
 			m_Tail += nReceived;
 			nFilled += nReceived;
@@ -445,11 +436,7 @@ uint SocketInputStream::fill () throw ( IOException , Error )
 					resize( available + 1 );
 					// resize 되면, 내부의 데이타가 정렬되므로 m_Tail 부터 쓰면 된다.
 					nReceived = receiveWithDebug(m_pSocket, &m_Buffer[m_Tail] , available );
-					
-					//add by viva
-					if(nReceived>0)
-						m_EncryptKey = EncryptData(m_EncryptKey, &m_Buffer[m_Tail], nReceived);
-					//end
+
 					m_Tail += nReceived;
 					nFilled += nReceived;
 #ifdef __TEST_PACKET_RECEIVED_SIZE_PER_SECOND__
@@ -472,10 +459,7 @@ uint SocketInputStream::fill () throw ( IOException , Error )
 
 			// by tiancaiamao Nonblock exception
 			if (nReceived==0) return 0;
-			//add by viva
-			if(nReceived>0)
-				m_EncryptKey = EncryptData(m_EncryptKey, &m_Buffer[m_Tail], nReceived);
-			//end
+
 			m_Tail = ( m_Tail + nReceived ) % m_BufferLen;
 			nFilled += nReceived;
 #ifdef __TEST_PACKET_RECEIVED_SIZE_PER_SECOND__
@@ -492,10 +476,7 @@ uint SocketInputStream::fill () throw ( IOException , Error )
 				// -1 줄이도록 한다.
 				nFree = m_Head - 1;
 				nReceived = receiveWithDebug(m_pSocket, &m_Buffer[0] , nFree );
-				//add by viva
-				if(nReceived>0)
-					m_EncryptKey = EncryptData(m_EncryptKey, &m_Buffer[m_Tail], nReceived);
-				//end
+
 				m_Tail += nReceived;
 				nFilled += nReceived;
 				
@@ -511,10 +492,7 @@ uint SocketInputStream::fill () throw ( IOException , Error )
 
 						// by tiancaiamao
 						if (nReceived==0) return 0;
-						//add by viva
-						if(nReceived>0)
-							m_EncryptKey = EncryptData(m_EncryptKey, &m_Buffer[m_Tail], nReceived);
-						//end
+
 						m_Tail += nReceived;
 						nFilled += nReceived;
 #ifdef __TEST_PACKET_RECEIVED_SIZE_PER_SECOND__
@@ -537,10 +515,7 @@ uint SocketInputStream::fill () throw ( IOException , Error )
 		nReceived = receiveWithDebug(m_pSocket, &m_Buffer[m_Tail] , nFree );
 		// by tiancaiamao
 		if(nReceived==0) return 0;
-		//add by viva
-		if(nReceived>0)
-			m_EncryptKey = EncryptData(m_EncryptKey, &m_Buffer[m_Tail], nReceived);
-		//end
+
 		m_Tail += nReceived;
 		nFilled += nReceived;
 #ifdef __TEST_PACKET_RECEIVED_SIZE_PER_SECOND__
@@ -557,10 +532,7 @@ uint SocketInputStream::fill () throw ( IOException , Error )
 				// resize 되면, 내부의 데이타가 정렬되므로 m_Tail 부터 쓰면 된다.
 				nReceived = receiveWithDebug(m_pSocket, &m_Buffer[m_Tail] , available );
 				if(nReceived==0) return 0;
-				//add by viva
-				if(nReceived>0)
-					m_EncryptKey = EncryptData(m_EncryptKey, &m_Buffer[m_Tail], nReceived);
-				//end
+
 				m_Tail += nReceived;
 				nFilled += nReceived;
 #ifdef __TEST_PACKET_RECEIVED_SIZE_PER_SECOND__
@@ -762,26 +734,6 @@ std::string SocketInputStream::toString () const
 
 	return msg.toString();
 }
-//add by viva 2008-12-31
-WORD SocketInputStream::EncryptData(WORD EncryptKey, char* buf, int len)
-	throw()
-{
-	return EncryptKey;
-
-	for(int i = 0; i<len; i++)
-		*(buf + i) ^= 0xCC;
-	
-	if(m_HashTable == NULL) return EncryptKey;
-
-	for(int i = 0; i<len; i++)
-	{
-		*(buf + i) ^= m_HashTable[EncryptKey];
-		if(++EncryptKey == 512)	EncryptKey = 0;
-	}
-	return EncryptKey;
-}
-//end
-
 // add by tiancaiamao
 uint receiveWithDebug (Socket *pSock, void * buf , uint len) {
 	uint ret = pSock->receive(buf,len); 

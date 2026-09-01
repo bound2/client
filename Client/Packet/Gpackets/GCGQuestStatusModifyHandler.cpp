@@ -10,7 +10,7 @@
 #include "Client_PCH.h"
 #include "GCGQuestStatusModify.h"
 #include "Client.h"
-#include "vs_ui.h"
+#include "VS_UI.h"
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 void GCGQuestStatusModifyHandler::execute ( GCGQuestStatusModify * pGCGQuestStatusModify , Player * pPlayer )

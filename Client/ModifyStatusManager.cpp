@@ -6,7 +6,7 @@
 #include "MTopView.h"
 #include "MTypeDef.h"
 #include "ModifyStatusManager.h"
-#include "packet/types/ModifyDef.h"
+#include "Packet/Types/ModifyDef.h"
 #include "UIFunction.h"
 #include "MPlayer.h"
 #include "MSkillManager.h"
@@ -20,7 +20,7 @@
 #include "UserInformation.h"
 #include "ExperienceTable.h"
 #include "VS_UI.h"
-#include "VS_UI_Mouse_pointer.h"
+#include "VS_UI_mouse_pointer.h"
 #include "MFakeCreature.h"
 #include "MHelpDef.h"
 //-----------------------------------------------------------------------------

@@ -6,7 +6,7 @@
 
 #include "u_window.h"
 #include <math.h>
-#include "vs_ui.h"
+#include "VS_UI.h"
 #ifdef _WIN32
 #include "CImm.h"
 #endif

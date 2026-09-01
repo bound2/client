@@ -591,7 +591,7 @@ SaveSurfaceToImage(const char* pFilename, CDirectDrawSurface& surface)
 // CBaseImage
 
 extern "C" {
-#include "jpegLib/jpeglib.h"
+#include "JpegLib/jpeglib.h"
 }
 
 /*

@@ -25,7 +25,7 @@ using namespace std;
 
 //#include "MInput.h"
 //#include "MMusic.h"
-#include "CAVI.h"
+#include "CAvi.h"
 //#include "MySound.h"
 
 //#include "CInputManager.h"

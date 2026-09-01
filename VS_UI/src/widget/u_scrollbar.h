@@ -13,7 +13,7 @@
 #define __U_SCROLLBAR_H__
 
 #include "Basics.h"
-#include "Mother.h"
+#include "mother.h"
 
 //----------------------------------------------------------------------------
 // Widget Scrollbar
