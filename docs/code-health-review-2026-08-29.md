@@ -60,7 +60,9 @@ A subsystem-by-subsystem review surfaced **197 findings**. Every area graded **D
 
 ## Remediation Status
 
-**Updated 2026-09-01 (pointer-truncation pass).** 55 of the 197 findings have been fixed: 11 on branch `harden/library-code-fixes` ([PR #1](https://github.com/bound2/client/pull/1)), 2 on `harden/packet-index-bounds` ([PR #4](https://github.com/bound2/client/pull/4)), 11 on `harden/network-input`, 4 by the earlier SDL_mixer wiring commit `c0670ae` (recorded retroactively during the audio pass), 17 on `harden/audio-media`, 8 on `harden/text-format`, and 2 on `harden/pointer-truncation`. Fixed findings carry a ✅ marker in the sections below, naming the commit and the tests covering them.
+**Updated 2026-09-01 (High-severity pass).** 79 of the 197 findings have been fixed: 11 on branch `harden/library-code-fixes` ([PR #1](https://github.com/bound2/client/pull/1)), 2 on `harden/packet-index-bounds` ([PR #4](https://github.com/bound2/client/pull/4)), 11 on `harden/network-input`, 4 by the earlier SDL_mixer wiring commit `c0670ae` (recorded retroactively during the audio pass), 17 on `harden/audio-media`, 8 on `harden/text-format`, 2 on `harden/pointer-truncation`, and 24 on `harden/high-severity-batch1`. Fixed findings carry a ✅ marker in the sections below, naming the commit and the tests covering them; three carry ⚠️ instead, meaning the finding was resolved without a code change — already fixed elsewhere, made unreachable by another fix, or only partly closed with the remainder stated.
+
+By severity: **Critical 27 fixed / 1 open** (C19, narrowed — see its entry), **High 36 fixed, 3 noted, 21 open**, **Medium 13 fixed / 68 open**, **Low 3 fixed / 25 open**.
 
 **Every finding the review rated Critical is now closed or explicitly narrowed** (C19 is narrowed — see its entry). That does not mean the client is free of critical defects: the pointer-truncation pass found a whole family of the same class that the review never recorded, described under *Open, not in this review* below.
 
@@ -68,13 +70,19 @@ The test-driven work is confined to code compiled into a static library, since t
 
 A third phase (2026-08-31, branch `harden/network-input`) took on the network attack surface this review rated most serious: the shop/stash index bounds (C7, C8, done earlier in `ed4f872`), the chat/guild/system-message string bounds (C9, C10/C16, C11/C17), the peer file-transfer filename (C12), the NewItem function-pointer table (C13), the 21-byte chat rows (C14, C15/C18) and the tooltip use-after-free (C25). None of these are reachable from a test binary, so they are build-verified regression guards. The branch was put through the same eight-angle adversarial review as phase one, which found ten real defects in the fixes themselves (including a filename guard that would have broken every legitimate profile transfer, and a missed overflow sixty lines from a fixed one) — all repaired in `3bc340e`. After merging master's wire max-size reconcile, a second review (two Opus xhigh reviewers, `1200625`) found more: write-side guards that tested the BYTE-narrowed length, a guild-name cap of 20 that would disconnect on legitimate 30-byte names, a filename validator that confined escape but not scope (a peer could still drop a DLL beside the executable), and config clamp floors of 1 that hung or corrupted the chat rows. The remaining Gpackets parsers beyond these findings are still unaudited, and the data-file format-string sites (C19/C20/C22) are untouched.
 
-A fourth phase (2026-08-31, branch `harden/audio-media`) closed out the Input, Audio & Media area's sound findings. Four of them — the duplicate-buffer double free (the area's first critical), the uncompilable adapters, the self-defeating SDL_mixer include guard, and the recycled-channel confusion — turned out to have been fixed already by `c0670ae`, the commit that made sound play at all; they are now recorded as such. The branch itself fixed the rest: the PlaySound stack overflows and the format-after-Release logging, the zone-sound NULL dereference, the opening-screen modal error box, the WavePackFileManager mmio parsing, the latent CMP3/MMusic MCI defects, the CPartManager bounds/sentinel/rollover defects and the non-virtual Release() leak (test-first — the template is testable, see `tests/unit/test_part_manager.cpp`), and the compat MMCKINFO shadow. It also deleted the five stale root-level DXLib header copies (two of which were live ODR violations against the compiled dxlib layouts of g_SDLMusic and g_SDLInput), deleted both copies of the orphaned MP3/Huffman decoder — resolving the two huffman bounds findings by removal — and renamed COGGSTREAM.CPP so case-sensitive configures work. Of the area's 22 findings, only the two input Lows (the SDL input constructor and the mouse-wheel accumulator — input findings, not sound) remain open.
+A fourth phase (2026-08-31, branch `harden/audio-media`) closed out the Input, Audio & Media area's sound findings. Four of them — the duplicate-buffer double free (the area's first critical), the uncompilable adapters, the self-defeating SDL_mixer include guard, and the recycled-channel confusion — turned out to have been fixed already by `c0670ae`, the commit that made sound play at all; they are now recorded as such. The branch itself fixed the rest: the PlaySound stack overflows and the format-after-Release logging, the zone-sound NULL dereference, the opening-screen modal error box, the WavePackFileManager mmio parsing, the latent CMP3/MMusic MCI defects, the CPartManager bounds/sentinel/rollover defects and the non-virtual Release() leak (test-first — the template is testable, see `tests/unit/test_part_manager.cpp`), and the compat MMCKINFO shadow. It also deleted the five stale root-level DXLib header copies (two of which were live ODR violations against the compiled dxlib layouts of g_SDLMusic and g_SDLInput), deleted both copies of the orphaned MP3/Huffman decoder — resolving the two huffman bounds findings by removal — and *believed* it had renamed COGGSTREAM.CPP so case-sensitive configures work. It had not: the rename was verified missing at HEAD during the sixth phase and is only now done. See that finding's entry. Of the area's 22 findings, only the two input Lows (the SDL input constructor and the mouse-wheel accumulator — input findings, not sound) remain open.
 
 A fifth phase (2026-09-01, branch `harden/text-format`) took on the data-file format strings the third phase had left untouched, plus two unrelated criticals in the same sweep. C27 (MemoryPool releasing `::operator new` chunks with `free`) and C28 (the APICheck probe that could `ExitProcess` at random from the frame loop) are fixed by pairing the allocator and by deleting the probe outright. C20/C26 (the unbounded `vsprintf` into a shared static in `CMessageArray`) is fixed together with its two siblings, both of which are separate High findings in their own right: `MString::Format`, which had the same shape one layer down, and `SendBugReport`, whose four call sites passed a caught exception's text — which can embed packet-derived bytes — as the *format* argument. C22 (the guild-quest mission title, server text used as a format) and C24 (the fixed-offset NUL write in the tooltip renderer) are fixed at their call sites.
 
 C19 is **narrowed, not closed**, and the distinction is the point of the phase. The load-time sanitizer added for it (`SanitizeGameStringTable`) cannot check that an entry's specifier count matches its call site, because arity is unknowable without the call site — so the actual fix for the exploit the finding describes is the conversion of all 100 zero-argument `wsprintf(buf, tableEntry)` sites to bounded `snprintf(buf, sizeof(buf), "%s", GetGameString(id))`, where the data is an argument rather than a format. The ~140 sites that do pass arguments still take their format from `String.inf` and are covered only by the gate. Two further limits are recorded in the code itself rather than left for a reader to discover: the gate does not run in the default English build at all, because `InitGameStringTable` reallocates the table from source literals immediately afterwards and discards the scrubbed file data (it protects `LANGUAGE != 3`), and its width cap bounds argument-driven expansion, not the literal text of an entry.
 
 That branch was reviewed by two Opus reviewers who were told the authoring model's own review was not to be trusted, and they earned it. One compiled the sanitizer into a standalone harness and measured it against the real MSVC runtime rather than reasoning about it, which is how the first revision's policy came apart: `"%512d"` passed the check and emitted 512 bytes, five `"%500d"` in one entry passed and emitted 2500 because the width test never composed, and `"%f"` needs no width at all and emitted 308 bytes — all into destinations of 50 to 128 bytes, which is precisely what the check's own comment claimed to prevent. The cap became 32 with a whole-entry budget, floating-point and wide (`%S`, `%ls`) conversions are now rejected, and the comparison was off by one (`>` accepted exactly 512). The same pass found that the `CMessageArray` fix carried a comment asserting a guarantee it did not deliver, that the C24 rewrite had introduced a one-line tooltip overdraw by making the renderer disagree with the sizing pass beside it, and that the two `vsprintf` siblings existed at all. All repaired before the branch was committed.
+
+A sixth phase (2026-09-01, branch `harden/high-severity-batch1`) took the High tier, the first pass since the Critical list was exhausted. Four areas were worked in parallel on disjoint file sets: the networking handlers (the NULL datagram socket, the dangling `c_str()` family, the `GCShopListMysterious` index, the `GCWhisper`/`RCSay` off-by-one, and the dead wire encryption, deleted outright so the absence of transport security is honest); the core game loop (`MItem::GetName`'s heap overflow, three uninitialised locals, the two creature-delete paths that freed an object a sector still pointed at, and the unvalidated `m_ppSector` subscripts, now routed through a bounds-checked `SectorAt` accessor); text and strings (the `WideCharToMultiByte` shim, `CToken`'s double free, `ReduceString2`, a twelve-site `snprintf` sweep, and the UTF-8 edit-buffer decoder); and the foundation libraries (`platform_event_wait`'s unreachable branch, the two one-byte overflows in `platform_get_executable_dir`, and `CMessageArray::Release`). `CTypeTable`'s bounds check — filed twice, once correctly and once as a CMake finding — is now unconditional in Release as well.
+
+**The most useful output of this phase was not the fixes but the corrections.** Ten findings were wrong or stale in a way that mattered, and one previously recorded as fixed had not been. `GCShopListMysterious`'s accessors were already guarded three lines above the lines the review cites; `ConvertEncoding` had been fixed in `43458c1`; the `RequestFileManager` index -1 write was made unreachable by the C12 rework; `AddCreature` is reachable with one FAKE move type, not four, and not by the path named; `ReduceString2`'s stated failure scenario matches no caller in the tree while a genuine out-of-bounds *read* beside it went unmentioned; `platform_get_executable_dir`'s "live" callers are both dead; all three `CMessageArray` re-init sites are dead; and the `_DEBUG` premise behind the `CTypeTable` build finding is simply false on MSVC. Two review recommendations were refused with cause: allocating `m_Filename` only after a successful open would convert a leak into a NULL dereference at an unguarded `strcpy`, and hoisting `AddEffect`'s boundary test would skip rejections the chase-effect path depends on. Fixing a finding here means checking it first; roughly a third did not survive contact with the current code.
+
+Two things this phase makes reachable and one it could not close. Adding a reject path to `MZone::AddCreature` turned a previously unreachable NULL dereference in `PacketFunction.cpp` into a live one — fixed in the same change, and the same un-masking pattern the `SendMessage` family produced, so it should now be the default expectation whenever a function gains a rejection. Making `CTypeTable`'s check unconditional moves Release from reading past the array to a deterministic NULL dereference at call sites that copy from the result without testing; that is the right trade and it matches the Debug build that is actually run, but ~600 call sites were not audited and it is the change most likely to surface in play. And the include-case finding is **swept, not closed**: it was written as "five `#include` directives" and measured at **412 occurrences across 174 files**, of which 408 plus 36 backslash separators are now rewritten by script under a `lc(old) == lc(new)` invariant — but no compiler on this machine can verify any of it, because Windows resolves either spelling. Linux still needs the CI job the finding asks for.
 
 The audio branch was put through the same adversarial review as the earlier phases (four Opus reviewers, one per commit group). It confirmed the buffer fixes, the mmio semantics (mmioRead does not clamp to the descended chunk, so canonical 16-byte PCM fmt chunks still load), the template guards, the CKINFO rename in every real inclusion order, and the SDL refcount pairing against the installed SDL2_mixer 2.8.2 sources — and found four real problems that were repaired before the branch was finalized: making Release() virtual silently broke the four dead-but-compiled sprite cache managers (reworked as the per-slot hook), renaming only COGGSTREAM.CPP would have broken case-sensitive builds at the header include (both files renamed), the sound-init error path leaked its own subsystem refcount on audio-less machines, and MIX_INIT_MP3 would have logged a spurious warning on every init since the vcpkg mixer has no MP3 decoder. The review left three recorded latents: the `strrchr(Filename.GetString(), '\\')` trio in Client/MPlayer.cpp (6526/6884/7481), a NULL-dereference the day force feedback (`CImm::m_pDevice`) is ever revived after a WAV load failure; the rejected-SetData return being indistinguishable from a no-eviction store (see the CPartManager entry); and `dxlib_sound_release` tearing the mixer down while the music slot's bookkeeping lives elsewhere — currently unreachable in the real shutdown order.
 
@@ -120,7 +128,7 @@ The audio branch was put through the same adversarial review as the earlier phas
 | Duplicate CDirectMusic.h / CDirectInput.h ODR violations | 🟠 High | `66d8637` |
 | Orphaned MP3/Huffman decoder, duplicated and unbuilt | 🟡 Medium | `66d8637` |
 | `huffman_decoder` unbounded tree walk (both copies' findings) | 🟡 Medium, ⚪ Low | `66d8637` |
-| `COGGSTREAM.CPP` case mismatch on case-sensitive configure | 🟠 High | `66d8637` |
+| `COGGSTREAM.CPP` case mismatch on case-sensitive configure | 🟠 High | `66d8637` (partial -- the rename did not land, see its entry), completed on `harden/high-severity-batch1` |
 | SDL audio subsystem and Mix_Init never called explicitly | 🟠 High | `452e854` |
 | `CMessageArray::AddFormat`/`AddFormatVL` unbounded vsprintf into a shared static (C20/C26) | 🔴 Critical | `0e9d247` |
 | `MString::Format` unbounded vsprintf into a process-wide static | 🟠 High | `0e9d247` |
@@ -724,7 +732,9 @@ CMakeLists.txt:593 does `list(APPEND CLIENT_MAIN_SOURCES Client/COGGSTREAM.cpp)`
 
 **Recommendation:** Rename the file to Client/COGGSTREAM.cpp (git mv, case-only rename) and drop the redundant explicit list(APPEND), letting the glob pick it up.
 
-> ✅ **Fixed** in `66d8637` (branch `harden/audio-media`). Both COGGSTREAM.CPP and COGGSTREAM.H are renamed (renaming only the .cpp, the first draft, would have made the newly-globbed file fail at its own `#include "COGGSTREAM.h"` on a case-sensitive filesystem — caught by the adversarial review), the two "COGGSTREAM.H" include spellings and CGameUpdate.cpp's "cmp3.h" are aligned with the tracked names, and the redundant explicit list(APPEND) is dropped.
+> ⚠️ **Recorded as fixed in `66d8637`, but the rename never landed.** Verified at HEAD on 2026-09-01: `git ls-files` still reported `Client/COGGSTREAM.CPP` and `Client/COGGSTREAM.H`, while all three include sites (`CGameUpdate.cpp:51`, `SoundSetting.h:9`, and the file's own line 1) spelled it `"COGGSTREAM.h"`. Only the include-spelling half and the `list(APPEND)` removal actually landed. That combination is *worse* on Linux than what the finding described, not better: dropping the explicit append removed the loud `Cannot find source file` configure error and left the case-sensitive glob silently skipping the file, so the failure moved from configure time to a link-time cascade of unresolved `COGGSTREAM::` symbols.
+>
+> ✅ **Fixed for real** on branch `harden/high-severity-batch1`. Both files are renamed to `COGGSTREAM.cpp` / `COGGSTREAM.h` with a two-step `git mv` (a case-only rename is a no-op in one step on a case-insensitive filesystem, which is the most likely reason the original attempt was believed to have worked). The lesson for this document: a rename claimed in a commit message is not evidence, because on Windows the build stays green either way — only `git ls-files` is.
 
 #### 🟡 Medium -- The compat MMCKINFO in AudioTypes.h has different fields and a different layout from the real Windows MMCKINFO, and both definitions are live in the same program.
 
@@ -1182,6 +1192,8 @@ The constructor catches socket-creation failure and sets `m_pDatagramSocket = NU
 
 **Recommendation:** Guard all three call sites with `if (m_pDatagramSocket == NULL) return;`, or add an `IsAvailable()` accessor the caller must consult.
 
+> ✅ **Fixed** on branch `harden/high-severity-batch1`. All three sites return early. The pointer is private with only three users in one file, so an `IsAvailable()` accessor would have added API for no caller. `sendDatagram`/`sendPacket` log one line per dropped send; `Update()` is deliberately silent because it runs every frame and would otherwise write a log line forever. P2P (whisper-by-IP, profile transfer) is now quietly unavailable when the bind fails, which is what the constructor's comment always claimed. Regression guard, executable-only code.
+
 #### 🟠 High -- The declared packetSize is validated but never used to bound a packet's own read(), so any packet body can consume arbitrary amounts of the stream.
 
 **Category:** protocol-design  |  **Location:** `Client/Packet/ClientPlayer.cpp:265`
@@ -1202,6 +1214,12 @@ processCommand checks `packetSize > getPacketMaxSize(packetID)` (line 256) and `
 
 **Recommendation:** Bind the accessor results to `const std::string` locals (as GCSystemMessageHandler.cpp:112 now does) or change the accessors to return `const std::string&`. Add length bounds to GCPartyLeave::read.
 
+> ✅ **Fixed** on branch `harden/high-severity-batch1`, with two corrections to the finding. Both `GCSystemMessageHandler` sites it names were **already fixed** in `3bc340e`. Against that, a sweep of the other handlers found **three more the review did not name**: `GCNPCInfoHandler.cpp:50`, `GCUpdateInfoHandler.cpp:793` and `GCModifyNicknameHandler.cpp:43`, the last of which carried the dangling pointer all the way into `SetNickName`. All are bound to named locals rather than changing the accessors to return a reference, because those headers are the wire-layout inventory's input and share their shape with the server repo.
+>
+> `GCPartyLeave::read` gained the length bound in the same change. The limit is derived, not chosen: `GCPartyLeaveFactory::getPacketMaxSize()` is `szBYTE*2 + 20` and the server's copy is byte-identical, and `ClientPlayer::processCommand` already rejects anything declaring more — so the two names together cannot legitimately exceed 20 bytes, and the guard enforces that as a *combined* budget rather than a per-name round number. It therefore cannot reject anything the existing size check accepts.
+>
+> Left as-is: `GCPartyLeaveHandler.cpp:63`'s `pExpeller==NULL` test is vacuous and always was, since `c_str()` never returns NULL. Noted rather than changed, because removing it alters control flow for no safety gain.
+
 #### 🟠 High -- GCShopListMysterious::read indexes a 20-element array with an unvalidated network BYTE, the same defect as GCShopList.
 
 **Category:** memory-safety  |  **Location:** `Client/Packet/Gpackets/GCShopListMysterious.cpp:63`
@@ -1211,6 +1229,10 @@ Lines 63-67: `iStream.read(index); iStream.read(m_pBuffer[index].itemClass); iSt
 **Failure scenario:** Server sends PACKET_GC_SHOP_LIST_MYSTERIOUS with index=0xFF; the client writes itemClass, itemType and a bool at an offset ~235 elements past the end of the member array, corrupting whatever follows the packet object.
 
 **Recommendation:** Add `if (index >= SHOP_RACK_INDEX_MAX) throw InvalidProtocolException(...)` before the writes.
+
+> ✅ **Fixed** on branch `harden/high-severity-batch1`, following `ed4f872`'s house pattern for the `GCShopList` twin. **The finding is wrong about the accessors.** It states "No bounds check exists at the read site or at the accessors on lines 200 and 216" — both accessors *are* guarded, three lines above the lines it cites. The reviewer quoted the use lines and missed the guards. Only the read site needed fixing. (`setShopItem` is `#ifndef __GAME_CLIENT__` and is not compiled into the client at all, the same situation `ed4f872` recorded for `GCStashList`.)
+>
+> Recorded latent, present in both this file and `GCShopList.cpp:260,273`: those accessors `throw` a string literal from functions declared `throw()`. MSVC treats `throw()` as `__declspec(nothrow)`, so an escaping exception is undefined behaviour rather than a clean `std::unexpected`. Left alone to keep the two files identical, but it is a real defect in both.
 
 #### 🟠 High -- Chat handlers strcpy a 128-byte-maximum server string into a 128-byte buffer, overflowing by the NUL terminator.
 
@@ -1222,6 +1244,10 @@ GCWhisper::read (Client/Packet/Gpackets/GCWhisper.cpp:43) rejects only `szMessag
 
 **Recommendation:** Either tighten the packet check to `> 127`, or size the buffers 129+ / use bounded copies. Applying the same fix to RCSayHandler.cpp is required.
 
+> ✅ **Fixed** on branch `harden/high-severity-batch1` by the second option, deliberately. Tightening `read()` to `> 127` would reject a message the factory's own `getPacketMaxSize()` budgets 128 bytes for and that this repo's `write()` will happily produce — the same shape as the guild-name cap of 20 that `1200625` had to undo after it started disconnecting legitimate sessions. Both handlers now use `char str[128 + 1]` with `snprintf`, and the name buffers are sized from each packet's own name cap (10 for `GCWhisper`, 20 for `RCSay`).
+>
+> The name buffers shrinking from 128 is the load-bearing part, so it was traced rather than assumed: the only writer of each is the `snprintf` beside it, and the consumers are `strncmp`, `IsAcceptID(const char*)`, `CMessageArray::AddFormat` (varargs, read-only) and `UI_AddChatToHistory`. That last one is declared `char*` and carries a comment saying it must not be const, so its whole chain was followed — `UI_AddChatToHistory` → `C_VS_UI::AddChatToHistory` → `C_VS_UI_GAME::AddChatToHistory` are all pure forwarders, and the terminal `C_VS_UI_CHATTING::AddChatToHistory` takes `const char*`. Nothing writes back through either pointer.
+
 #### 🟠 High -- The wire encryption is dead code — both EncryptData implementations return before the XOR loop, so all traffic including login credentials is cleartext.
 
 **Category:** security  |  **Location:** `Client/Packet/SocketInputStream.cpp:769`
@@ -1231,6 +1257,14 @@ SocketInputStream::EncryptData (line 766) begins with `return EncryptKey;` at li
 **Failure scenario:** Anyone on the network path between the client and the login server reads account IDs and passwords directly off the wire, and can trivially forge or modify any packet in either direction — which is what makes every parsing defect in this report remotely reachable by a network attacker, not just by a hostile server operator.
 
 **Recommendation:** Either delete the dead EncryptData functions so the absence of transport security is honest, or move the connection to TLS. At minimum stop sending the password in the clear.
+
+> ✅ **Resolved by the first option** on branch `harden/high-severity-batch1`: both `EncryptData` bodies, all ten no-op call sites in `fill()`/`flush()`, and the `m_EncryptKey`/`m_HashTable` members are deleted. `setKey(WORD, BYTE*)` is kept with its exact signature as an explicit no-op, because `Player::setKey`/`delKey` call it from a file outside that change's scope; the header comment now states plainly that the stream carries cleartext including the login password.
+>
+> **Nothing changed on the wire.** There was never transport encryption on this link and there is none now — the deletion only stops the code from implying otherwise. `CLLogin::write` still sends the account password through the plain `SocketOutputStream`. Real encryption is a protocol change requiring the server repo. The separate `Encrypter` path (`SocketEncryptInputStream`/`SocketEncryptOutputStream`, keyed per-field on zone/server) is untouched and still live; it never referenced the removed members.
+>
+> **Worth knowing before anyone "re-enables" this from git history:** the deleted code was not merely inert, it was wrong. `SocketInputStream.cpp:497` passed `&m_Buffer[m_Tail]` to `EncryptData` after receiving into `&m_Buffer[0]`, so removing the early `return` would have produced ring-buffer corruption rather than encryption.
+>
+> Follow-up left open: `Player::setKey` still allocates a 512-byte hash table that nothing now reads. Harmless and still freed by `delKey`, but it belongs to whoever next touches `Player.cpp`.
 
 #### 🟠 High -- SendBugReport vsprintf's a caller-supplied runtime string into a fixed 256-byte stack buffer, and two callers pass an exception message as the format string.
 
@@ -1253,6 +1287,10 @@ Line 79: `int dot = m_FilenameTemp.rfind(".");`. `std::string::rfind` returns `s
 **Failure scenario:** A peer sends a filename with no '.' character, e.g. "profile". rfind returns npos, dot becomes -1, and the assignment writes outside the std::string allocation, corrupting the heap allocator's metadata.
 
 **Recommendation:** Use `size_t dot = m_FilenameTemp.rfind('.'); if (dot != std::string::npos) m_FilenameTemp[dot] = '-';` and handle the no-extension case explicitly.
+
+> ⚠️ **Not reachable; deliberately left unchanged.** The `int dot = rfind(".")` and the `m_FilenameTemp[dot] = '-'` are textually still there, but a peer can no longer drive them. `ReceiveFileInfo` has exactly one construction site in the tree, and the C12 rework (`76a1185` → `3bc340e` → `1200625`) made it keep only the leaf name and require a `.spk`/`.spki` extension, so a dotless name is rejected before it can reach `StartReceive`. That commit's own comment records the coupling deliberately.
+>
+> **The risk this leaves is worth stating, because it is not obvious from either file.** The safety of `RequestFileManager.cpp:81` now lives in a whitelist in a *different* file. Relax that extension check and the index -1 write returns with no local signal. A one-line `size_t`/`npos` test here would decouple them, and should be done the next time this file is opened — it is cheap insurance against a fix that looks unrelated.
 
 #### 🟡 Medium -- Datagram bounds checks compute m_InputOffset + len in unsigned arithmetic that can wrap, bypassing the check.
 
@@ -1440,6 +1478,12 @@ Lines 432-439: `m_pName = new char[strlen(HName)+1+5];` then `strcpy(m_pName, HN
 
 **Recommendation:** Size the allocation from strlen(HName)+strlen(replacement)+1, guard `strlen(m_pName) >= 4` before computing the offset, and drop the meaningless NULL test. Return a std::string or a caller-supplied buffer instead of the static in GetEName.
 
+> ✅ **Fixed** on branch `harden/high-severity-batch1`. `GetName` sizes the allocation from both strings, requires `strlen(HName) >= 4`, builds the result with `memcpy` + `strcpy` at the computed offset, and the vacuous NULL test is gone. Both source strings are now NULL-checked, which matters because they come from data files and an `MString` for an entry the file never supplied holds NULL.
+>
+> `GetEName` keeps its `static char sz_temp[256]` — returning a `std::string` would change the signature and every caller — but both writes are clamped, the second by the room actually left after the `strstr` match. A localised name over 255 bytes is now truncated instead of overflowing.
+>
+> Behaviour change: on the reject path `GetName` returns the item table's `HName` and leaves `m_pName` NULL, so it recomputes each call. That is the same shape as the existing non-skull path, with no leak and no ownership change. Regression guard, executable-only code.
+
 #### 🟠 High -- MStopZoneCrossEffectGenerator::Generate reads and returns the uninitialized local bOK whenever the first AddEffect fails.
 
 **Category:** undefined-behavior  |  **Location:** `Client/MStopZoneCrossEffectGenerator.cpp:26`
@@ -1449,6 +1493,10 @@ Lines 432-439: `m_pName = new char[strlen(HName)+1+5];` then `strcpy(m_pName, HN
 **Failure scenario:** A cross-shaped stop-zone effect is cast on a tile that already holds an identical effect. AddEffect returns false, bOK is indeterminate; the loop takes an arbitrary branch for effect-target linking and the function returns garbage to the effect-generator dispatcher.
 
 **Recommendation:** Initialize `bool bOK = false; bool bAdd = false;`. This is the only generator in the M*EffectGenerator family with this declaration form, so it is a one-line fix.
+
+> ✅ **Fixed** on branch `harden/high-severity-batch1`, and **the supporting claim is wrong**. Four siblings declare `bool bOK;` uninitialized too — `MStopZoneEmptyCrossEffectGenerator`, `MStopZoneRandomEffectGenerator`, `MStopZoneXEffectGenerator` and `MStopZoneRhombusEffectGenerator`. None of them has the bug: each assigns `bOK = g_pZone->AddEffect(...)` unconditionally before any read, whereas this one assigns only inside `if (bAdd)`. The fix is still one line, but "the only generator with this declaration form" is not the reason.
+>
+> Visible behaviour change, and the reason this one deserves a runtime look: `MEffectGeneratorTable.cpp` documents the return as whether `pEffectTarget` was linked into an effect. A garbage-true made the dispatcher skip `SetResultTime()` and copy the target instead of linking the original. A deterministic false now fires the result immediately and links the original on the first successful tile — the designed behaviour, but stop-zone-cross and SAND_CROSS result *timing* changes with it.
 
 #### 🟠 High -- MZone::LoadFromFile calls pImageObject->LoadFromFile through a pointer left uninitialized when a map file contains an unknown object-type byte.
 
@@ -1460,6 +1508,8 @@ Lines 432-439: `m_pName = new char[strlen(HName)+1+5];` then `strcpy(m_pName, HN
 
 **Recommendation:** Initialize pImageObject to NULL inside the loop, add a default: case that logs and aborts the load (return false), and guard the LoadFromFile/AddImageObject calls on non-NULL.
 
+> ✅ **Fixed** on branch `harden/high-severity-batch1`, exactly as recommended. Aborting is the only correct option rather than skipping the record: only the object itself knows its length, so the loader cannot resynchronise past an unknown type byte. Both callers already treat a `false` return as fatal (`SetMode(MODE_QUIT)`), so this is an existing, handled path rather than a new one.
+
 #### 🟠 High -- MZone::UpdateAllCreature deletes a creature even when it failed to remove it from its sector, leaving a dangling MCreature* in the sector.
 
 **Category:** memory-safety  |  **Location:** `Client/MZone.cpp:2198`
@@ -1469,6 +1519,10 @@ Lines 2180-2204 compute `bool removed = true;`, set it to false when both `m_ppS
 **Failure scenario:** A creature's client and server coordinates have drifted apart (the normal case this code exists to handle) so neither sector holds it. The object is freed, but MSector still holds the pointer; the next MZone::GetCreatureBySector or draw pass dereferences freed memory.
 
 **Recommendation:** Guard the delete with `if (removed)` exactly as RemoveCreature does, or do a full scan of the zone for the stale pointer before freeing. Remove the dead `removed` variable if the guard is intentionally omitted, so the intent is not ambiguous.
+
+> ✅ **Fixed** on branch `harden/high-severity-batch1`. Both the `delete` and the `m_mapCreature.erase` are now under `if (removed)`, matching `MZone::RemoveCreature`. `KeepObjectInSight` turned out to have no `removed` variable at all — the review described it as "discarded", but the live code simply ignored the result — so one was added.
+>
+> The cost is worth stating: when no sector gives the pointer up, the creature now stays owned by `m_mapCreature` (and is collected by `Release()`) instead of being freed while a sector still points at it. An invisible creature can therefore linger and re-log "Can't RemoveCreature!" each frame. That is exactly `RemoveCreature`'s existing semantics, and a leak is preferable to a dangling pointer the draw pass dereferences. Iterator flow was checked in both functions: neither can loop forever.
 
 #### 🟠 High -- MZone::AddCreature indexes the 2D sector array with unvalidated creature coordinates taken straight from packets.
 
@@ -1480,6 +1534,12 @@ Lines 2984-3018 do `int x = pCreature->GetX(); int y = pCreature->GetY();` then 
 
 **Recommendation:** Reject out-of-range coordinates in AddCreature (return false) and restore the commented-out check at MZone.cpp:420; better, add a private `MSector* SectorAt(x,y)` accessor returning NULL out of range and route every m_ppSector subscript through it.
 
+> ✅ **Fixed** on branch `harden/high-severity-batch1` via the recommended accessor: `MZone::SectorAt(x, y)` plus a const overload return NULL when `m_ppSector` is NULL or the coordinate is off-map. The commented-out check at `MZone.cpp:420` was real, and that site also indexed `[serverY][serverX]`, which the old commented-out check never covered; both subscripts there now go through the accessor.
+>
+> **It was deliberately not routed through all 167 `m_ppSector` subscripts.** Only the six sites in these findings' scope were converted. Many of the rest index legitimately — immediately after their own bounds test, or from a loop already bounded by `m_Width`/`m_Height` — and a mechanical 167-site rewrite that nobody can run is a worse risk than the one being fixed. Note `GetX()`/`GetY()` return `unsigned short`, so the `x < 0` half of the guard is dead for creature coordinates and live only for computed ones.
+>
+> **`AddCreature` now returns `false` in two new situations**, so every call site was audited: all 15 live ones use `if (!AddCreature(p)) { delete p; ... }`, which is correct because on `false` the creature is in neither `m_mapCreature` nor a sector. One caller was broken by this and is fixed in the same change — `Client/PacketFunction.cpp` nulled `pCreature` on rejection and then dereferenced it two lines later for monster type 795. That is the pattern to watch for whenever a function gains a reject path: the fix makes a previously unreachable NULL dereference reachable.
+
 #### 🟠 High -- MZone::AddEffect reads m_ppSector[y][x] before the zone-bounds check that appears 70 lines later.
 
 **Category:** memory-safety  |  **Location:** `Client/MZone.cpp:4118`
@@ -1489,6 +1549,8 @@ Lines 2984-3018 do `int x = pCreature->GetX(); int y = pCreature->GetY();` then 
 **Failure scenario:** A darkness effect is generated at a target position outside the current zone — the code at 4191 anticipates exactly this — and the read at 4118 dereferences m_ppSector past its bounds, then branches on whatever HasDarknessForbidden() finds in unrelated memory.
 
 **Recommendation:** Move the zone-boundary test at 4191 to immediately after x/y are read at 3990, before any sector access.
+
+> ✅ **Fixed** on branch `harden/high-severity-batch1`, but **not** by the recommended move. Hoisting the boundary test would have skipped the darkness and mercy-ground rejections for the chase effects the code deliberately lets through at ~4197 — the very behaviour the finding notes exists on purpose. The darkness read instead goes through `SectorAt` and skips its test when off-map, matching the shape of the adjacent block that already guards itself.
 
 #### 🟠 High -- MZone::AddCreature reads the uninitialized local bAdd when a creature's move type falls outside the three cases the switch handles.
 
@@ -1500,6 +1562,12 @@ Lines 2984-3018 do `int x = pCreature->GetX(); int y = pCreature->GetY();` then 
 
 **Recommendation:** Initialize `bool bAdd = false;` and add an explicit default: case that logs and returns false.
 
+> ✅ **Fixed** on branch `harden/high-severity-batch1`, and **the finding is wrong twice over — it is a latent-UB guard, not a live bug.**
+>
+> First, only `CREATURE_FAKE_UNDERGROUND` can reach the switch at all. The block above it calls `SetFlyingCreature()`/`SetGroundCreature()` for anything that is not `IsUndergroundCreature()`, which rewrites `CREATURE_FAKE_NO_BLOCK`, `CREATURE_FAKE_GROUND` and `CREATURE_FAKE_FLYING` to `CREATURE_GROUND`/`CREATURE_FLYING` first. The review's "four FAKE_* values" is one.
+>
+> Second, the cited live path does not exist. The ghost site calls **`AddFakeCreature`**, which inserts into `m_mapFakeCreature` and never touches a sector or `bAdd`, and `SetMoveType(CREATURE_FAKE_UNDERGROUND)` is called only there and only after the creature is already in that map. No live path reaches `AddCreature` with a FAKE move type. The initialiser and the `default:` case are still correct, but nothing was reproduced and the chained consequence the finding describes — a creature freed while still mapped — cannot occur through this route.
+
 #### 🟠 High -- CTypeTable's index bounds checks are compiled only under _DEBUG, which the build system deliberately never defines — so every table lookup is unchecked in all configurations including debug-asan.
 
 **Category:** build  |  **Location:** `CMakeLists.txt:16`
@@ -1509,6 +1577,14 @@ Client/CTypeTable.h:41-65 wraps the range test in all three accessors (`const op
 **Failure scenario:** A packet carries a creature type beyond the loaded creature table. In MSVC Debug the guard silently returns a dummy; in every build the project actually ships and tests, the same input reads past the end of m_pTypeInfo.
 
 **Recommendation:** Make the check unconditional (it is a single comparison on a hot-but-not-critical path), or gate it on a project-owned macro that the CMake Debug and asan configurations do define.
+
+> ✅ **Fixed** on branch `harden/high-severity-batch1` — but **this finding's premise is false and its filing is wrong**, which matters because it is filed as a *build* finding against `CMakeLists.txt:16`.
+>
+> It claims the build system "deliberately never defines `_DEBUG`", so "every table lookup is unchecked in all configurations". Not so: MSVC defines `_DEBUG` automatically under `/MDd`, and CMake only declines to *add* it — see the Traps section of `CLAUDE.md`. The check has been running in both Debug trees all along and is dead only in Release. The real defect is narrower than described, the correct location is `Client/CTypeTable.h`, the category is memory-safety rather than build, and **no CMake change was needed or made**. The duplicate write-up in Text & Strings states it correctly.
+>
+> The second half of the finding — that `LoadFromFile` reads `numSize` as a raw `int` from a data file and hands it to `Init` unvalidated — was untouched by any of that and was entirely real. All three accessors now check unconditionally and also reject a NULL table; `Init` rejects `size <= 0` (a negative made `new Type[]` undefined) and publishes `m_Size` only after the allocation succeeds; both `LoadFromFile` variants validate the file-supplied count against the bytes actually left in the file. `LoadFromFile_NickNameString`'s `int numSize;` was *also* uninitialized, which neither write-up mentions.
+>
+> **The behaviour change to weigh at runtime.** Out of range now returns a default-constructed entry in Release too, and for `MStringArray` that is an `MString` whose `GetString()` is NULL — so Release moves from *reading past the array* (garbage pointer, sometimes survivable) to a *deterministic NULL dereference* at call sites that copy from the result without testing. That is the right trade — it makes Release behave like the Debug build that is actually run, and a NULL dereference beats a wild pointer — but roughly 600 table-indexing call sites were not audited, and this is the change in the batch most likely to surface in play.
 
 #### 🟡 Medium -- Format strings for the in-game clock are taken from a loadable string table and printed into a fixed 80-byte stack buffer.
 
@@ -1720,6 +1796,12 @@ The shim (lines 729-747) ignores CodePage entirely and does `lpMultiByteStr[i] =
 
 **Recommendation:** Implement a real UTF-16 to UTF-8 conversion (or route through SDL_iconv), clamp and return the bytes actually written, honour the cbMultiByte == 0 size-query contract, and have SXml.cpp check for a 0 return before indexing.
 
+> ✅ **Fixed** on branch `harden/high-severity-batch1`. The shim now decodes through a single wide-codepoint walk that handles both 16-bit and 32-bit `wchar_t` (surrogates pair only where they actually appear, U+FFFD for unpaired or out-of-range) and encodes in two passes over that walk — measure, then write — so the returned count is exactly the bytes written. The Win32 contract holds: `cbMultiByte == 0` is a size query, a too-small destination returns 0, and `cchWideChar == -1` counts the terminator.
+>
+> **The finding was incomplete in one way that matters.** It presents the `SXml` write as a Linux-only consequence, but `WideCharToMultiByte` on Windows returns *up to* `cbMultiByte` bytes, so a conversion that exactly fills the 5120-byte buffer makes `szTemp[nCopied]` write at `szTemp[5120]` — one past a stack array, on a path that **is** compiled here. Holding back one byte of capacity removes it.
+>
+> Two honest limits. The shim itself is `#ifndef PLATFORM_WINDOWS`, so **no build on this machine compiles it** and the rewrite is unverifiable here by any means. And every caller of `XMLUtil::WideCharToString` in both copies of `SXml.cpp` is commented out — this is a latent-trap fix, not a live-bug fix. `VS_UI/SXml.cpp` is a near-duplicate carrying the identical defect and is excluded from the build only under `NOT WIN32`, so on Windows it compiles into `VS_UI.lib`; it is untouched and still open.
+
 #### 🟠 High -- CToken::Release frees m_pString without nulling it, producing a double free and a dangling m_pCurrent.
 
 **Category:** memory-safety  |  **Location:** `Client/CToken.cpp:37`
@@ -1730,6 +1812,10 @@ The shim (lines 729-747) ignores CodePage entirely and does `lpMultiByteStr[i] =
 
 **Recommendation:** Set m_pString = NULL and m_pCurrent = NULL inside Release().
 
+> ✅ **Fixed** on branch `harden/high-severity-batch1`, plus the same defect by another route: the class owns a raw `char[]` and hands out interior pointers, so a copy would share the allocation and both destructors would free it. Copy construction and assignment are now `= delete`, which makes that unbuildable rather than latent.
+>
+> Reachability the finding does not state: `CToken` has exactly three uses in the tree, all locals in `UIMessageManager.cpp`, none of which calls `SetString` twice or copies. The double free was latent, not live.
+
 #### 🟠 High -- CTypeTable::operator[] bounds-checks only under _DEBUG, while m_Size is taken unvalidated from a data file and callers index by compile-time constants.
 
 **Category:** memory-safety  |  **Location:** `Client/CTypeTable.h:49`
@@ -1739,6 +1825,8 @@ The bounds check in `operator[]`, the const overload, and `Get()` (lines 42-68) 
 **Failure scenario:** A truncated or older Strings file yields numSize = 800. `(*g_pGameStringTable)[1500].GetString()` reads 700 MString objects past the end of the array, returns whatever the garbage m_pString field holds, and MTopView.cpp:9647 strcpy's from that wild pointer.
 
 **Recommendation:** Make the bounds check unconditional (return a shared empty object out of range), validate numSize in LoadFromFile against a sane maximum and against the table's expected size, and change MTopView's guard to compare against GetSize().
+
+> ✅ **Fixed** on branch `harden/high-severity-batch1`. This is the same defect as the *build*-filed duplicate in Core Game Loop & State, and it was fixed once covering both — **this write-up is the accurate one**; the other misattributes the cause to CMake. See that entry for the full note, including the Release-side behaviour change. `MTopView`'s two guards now compare against the runtime `GetSize()` instead of the compile-time `MAX_GAME_STRING`, which also closes a missing lower bound.
 
 #### 🟠 High -- MString::Format vsprintf's into a 1024-byte buffer shared statically by every MString in the process.
 
@@ -1762,6 +1850,14 @@ The bounds check in `operator[]`, the const overload, and `Get()` (lines 42-68) 
 
 **Recommendation:** Reject any res other than a non-negative count (or at minimum reject EILSEQ/EINVAL), require that all input bytes were consumed, and stop guessing: record the resource file's declared encoding in the file/config and convert once at load rather than re-guessing per draw call.
 
+> ⚠️ **Already fixed** in `43458c1`, before this batch looked at it — no code change was made or needed. `ConvertEncoding` reads `if (res == (size_t)-1 || inBytes != 0)`, and the `inBytes != 0` half is exactly the "require that all input bytes were consumed" clause. The finding's stated mechanism is obsolete in a second way too: that commit moved the function off `SDL_iconv` onto real `iconv`, so `SDL_ICONV_E2BIG`/`EILSEQ`/`EINVAL` are no longer the return values at all — POSIX `iconv` reports all three as `-1` with `errno` and a non-zero `inbytesleft`.
+>
+> `tests/unit/test_text_service.cpp` was added anyway (4 tests, 7 checks), because the two halves of that condition look redundant side by side and the obvious tidy-up of dropping one silently reintroduces truncation. It covers a truncated tail, an unmappable byte mid-string, a positive control so the rejections cannot pass vacuously, and the fallback contract.
+>
+> That last test is the important one. Tightening this condition looks like it risks blanking text on screen; it does not, and the test pins down why — when no candidate accepts the bytes, `NormalizeText` returns *the input*, not an empty string, and the renderer draws unrecognised bytes as U+FFFD. So the worst case is replacement glyphs, which is already the behaviour for unrecognised text. "Return empty on failure" is the tempting simplification that would actually erase a line.
+>
+> **Still open, and not addressable here:** CP949 and GBK share a lead-byte range, so GBK resource text still decodes *fully* as CP949 mojibake. No accept condition can fix that — only recording the declared encoding can, which is the finding's larger recommendation and a data-format change.
+
 #### 🟠 High -- ReduceString2 writes at pStr[maxWidth-3..maxWidth] without ever verifying the string is that long — a regression introduced when the function was ported.
 
 **Category:** memory-safety  |  **Location:** `Client/UIUtilityFunctions.cpp:58`
@@ -1771,6 +1867,16 @@ The counting loop (lines 41-54) stops at `len < maxWidth`, so `len` is the *actu
 **Failure scenario:** `ReduceString2(szString, 38)` (VS_UI/src/vs_ui_gamecommon2.cpp:15455) on a 36-byte title held in a buffer sized exactly 37 bytes writes at indices 35..38 — two bytes past the end of the allocation.
 
 **Recommendation:** Restore the `strlen(pStr) > maxWidth` precondition in ReduceString2 (as ReduceString and ReduceString3 have), and take an explicit buffer-capacity parameter rather than inferring it from maxWidth.
+
+> ✅ **Fixed** on branch `harden/high-severity-batch1`, with **three corrections to the finding**.
+>
+> 1. **Its failure scenario is not reachable.** At every call site in the tree the destination is far larger than `maxWidth` (`szString[64]`/`[256]`/`[512]` with 32/36/38, `sz_temp[200]` with 55, `name[300]` with 38), so `pStr[maxWidth]` lands inside the buffer everywhere. The "36-byte title in a 37-byte buffer" corresponds to no actual caller. The out-of-bounds *write* is a latent trap.
+> 2. **It missed the defect that does fire today.** The counting loop advanced `p += 2` on any high-bit byte, so a string ending on an unpaired DBCS lead byte steps over the terminator and keeps reading past the buffer — and the callers fill those buffers with `sprintf("%s", ...)`, which cuts multi-byte text wherever the buffer happens to end, which is precisely how an unpaired lead byte gets there. That is a live out-of-bounds *read*, and `strlen` replaces the loop.
+> 3. **`ReduceString3` is not a defect** — its `len <= maxWidth` early return and `cutLen > 0` test keep every index at or before the terminator. Unchanged.
+>
+> `ReduceString` and `ReduceString2` also gained a `maxWidth < 3` branch that cuts without the marker instead of indexing at `pStr[-2]`. The capacity parameter was **not** added: it would mean changing `Fl2.h` and every call site, several outside that change's scope. So the guarantee is narrower than the recommendation asks for and is stated in a banner comment — these functions take a `char*` with no capacity and can only promise that every byte they touch lies at or before the existing terminator.
+>
+> **On-screen change:** `VS_UI_ExtraDialog.cpp:1513` calls `ReduceString2(sz_temp, 55)` with no length guard, so item-description titles of 53–55 bytes are today rendered as `<52 chars>...` with the ellipsis stamped past the string; they will now render in full, which is correct for a 55-wide field. The three call sites in `vs_ui_gamecommon2.cpp` all guard with `strlen > N` first and are unaffected.
 
 #### 🟠 High -- Quest titles and nicknames are sprintf'd into 64-byte stack buffers with no length limit; the length check is applied only afterwards.
 
@@ -1782,6 +1888,17 @@ The counting loop (lines 41-54) stops at `len < maxWidth`, so `len` is the *actu
 
 **Recommendation:** Use snprintf with sizeof(szString), or copy into a std::string and truncate before formatting.
 
+> ✅ **Fixed** on branch `harden/high-severity-batch1`, and the sweep found more than the three sites the review sampled. The rule applied across `vs_ui_gamecommon2.cpp`: every `sprintf`/`wsprintf`/`strcpy` whose destination is a fixed-size array and whose source is a runtime-variable-length string becomes `snprintf(dst, sizeof(dst), ...)` — twelve sites in all.
+>
+> **Three further defects turned up during that sweep and are fixed with it:**
+> - An *entirely unchecked* `BYTE` index into a 7-element `const char*` array of quest-status labels, followed by `sprintf("%s", ...)` through whatever pointer that yielded. The sibling loop in the mission list does bound its index; this one never did.
+> - A `memcpy` into a 20480-byte help-text buffer using an offset derived from the text itself, now clamped.
+> - A `strlen(TempNum) > 0` test guarding a `TempNum+3` split and a `TempNum[2]` read that need three characters, now `>= 3` — matching the sibling that `12bde38` had already hardened for exactly this.
+>
+> **Deliberately left in this file:** the `"%d %s"` / `"%s +%d"` family fed by game-string-table entries and the `strcat` chains beside them. Those are the C19/C20/C22 data-file-format class, and bounding the `sprintf` without also bounding the adjacent `strcat(sz_buf, "%")` would leave a one-byte overflow reachable exactly on truncation — a fix that makes things worse. Also left: `char pPartName[20]` filled by `strcpy` from a data table whose index is itself unchecked, same class.
+>
+> Same-class sites outside that change's scope and still open: `VS_UI_ExtraDialog.cpp:1511` (`wsprintf` of two `std::string`s into `char[200]`) and `:2858` (`strcpy` of a title into `char[300]`).
+
 #### 🟠 High -- utf8_to_utf32 dereferences continuation bytes without checking the NUL terminator, reading past the end of the input buffer.
 
 **Category:** memory-safety  |  **Location:** `VS_UI/src/widget/U_edit.cpp:44`
@@ -1791,6 +1908,12 @@ The decoder tests only the lead byte and then unconditionally consumes 1-3 more 
 **Failure scenario:** An SDL_TEXTEDITING event whose UTF-8 payload ends mid-sequence (e.g. a lone 0xE0 as the final byte, which IMEs can emit when a composition string is chunked) causes the decoder to read past the SDL-owned buffer, producing garbage codepoints and potentially faulting on an unmapped page.
 
 **Recommendation:** Check for the NUL terminator before consuming each continuation byte and bail out of the sequence (emit U+FFFD) if the string ends early; also validate that continuation bytes have the 0b10xxxxxx prefix.
+
+> ✅ **Fixed** on branch `harden/high-severity-batch1`. Every continuation byte is tested for the `0b10xxxxxx` prefix before it is read, so a NUL ends the sequence instead of being consumed, and `s` itself is NULL-guarded because `HandleTextEditing` passes SDL's pointer straight through. Decoding of well-formed input is byte-identical.
+>
+> **Reachability, corrected:** all three entry points are live, but not by the route the finding's line numbers describe. `2a531a9` (finding C23) deleted only the `WM_TEXTINPUT` plumbing that carried a pointer through a `long`; the SDL path is untouched, reaching `HandleTextInput`/`HandleTextEditing` from `DXLibBackendSDL.cpp`.
+>
+> **One deliberate divergence:** malformed input is dropped rather than emitting U+FFFD, which is what the original did for an unusable lead byte. This decoder fills an *edit buffer* whose contents are echoed to the user and sent to the server, and a replacement character silently typed into someone's chat line is worse than a byte that never arrives. `TextService::Utf8Decode`, which is a *rendering* decoder, correctly does emit U+FFFD — the two want opposite answers.
 
 #### 🟡 Medium -- The wsprintf shim turns a length-capped Win32 API into an unbounded vsprintf at 646 call sites.
 
@@ -2208,6 +2331,15 @@ git ls-files shows the tracked names as basic/Basics.h, basic/i_signal.h, basic/
 
 **Recommendation:** Normalise all of these to the tracked on-disk names (Basics.h, i_signal.h, timer2.h, 2d.h) in one pass, then add a CI job that builds on Linux so the class of bug cannot reappear.
 
+> ⚠️ **Swept on branch `harden/high-severity-batch1`, but the finding understates the scale by roughly eighty times and Linux still does not build.** Its headline says "Five #include directives"; its own body lists ten. The actual number, measured by resolving every `#include "..."` in every tracked source against `git ls-files` the way a case-sensitive compiler would, was **412 occurrences across 174 files**. `client_PCH.h` alone appears 63 times against a tracked `Client_PCH.h`; `VS_UI_Mouse_pointer.h`, `VS_UI_Util.h` and `VS_UI_Widget.h` account for another 49.
+>
+> 408 of them are now rewritten to the tracked case by script, under two invariants that make the change auditable: a rewrite happens **only** when `lc(old) == lc(new)`, so it can change case and nothing else and can never redirect an include to a different file; and the substitution is byte-level in binary mode, confined to the bytes inside the quotes, so CRLF line endings survive exactly (verified: `git diff --numstat` equals `git diff --ignore-cr-at-eol --numstat` across the whole tree). A second pass rewrote 36 Windows backslash separators, which break on Linux regardless of case.
+>
+> **What is still open, because a partial fix recorded as a complete one is how the `COGGSTREAM` entry above went wrong:**
+> - Nine backslash includes remain, all inside `//` comments, plus one naming an `ex/` directory that does not exist and one naming `mp3lib/mp3.h`, deleted with the orphaned decoder in `66d8637`. Dead, but they will mislead the next reader.
+> - The sweep only rewrites includes that resolve to a tracked file, so anything naming a file that does not exist is untouched by design.
+> - **Nothing here was verified by a compiler.** Windows resolves either spelling, so the tree is green before and after; the evidence is `git ls-files` plus the invariants above. Only a Linux configure would actually prove it — which is the finding's CI recommendation, and it still stands.
+
 #### 🟠 High -- platform_event_wait contains an unreachable branch and a hardcoded true, so manual-reset events are never honoured and already-signalled auto-reset events never clear.
 
 **Category:** correctness  |  **Location:** `basic/PlatformSDL.cpp:218`
@@ -2217,6 +2349,15 @@ basic/PlatformSDL.cpp:212-244. The fast path at lines 218-225 reads `if (event->
 **Failure scenario:** Code that creates a manual-reset event to broadcast "loading finished" to several waiters gets auto-reset behaviour: the first waiter through the slow path clears the flag and the rest block forever. Conversely a waiter that hits the fast path on an auto-reset event never consumes the signal, so its loop spins.
 
 **Recommendation:** Store manual_reset in platform_event_s, clear `signaled` on the fast path when manual_reset is 0, replace `if (!0)` with `if (!event->manual_reset)`, and wrap the condition wait in a while loop that re-checks `signaled`.
+
+> ✅ **Fixed** on branch `harden/high-severity-batch1`, going one step past the recommendation in two places because following it exactly would leave the finding's own failure scenario broken.
+>
+> - **`platform_event_signal` now broadcasts for manual-reset events.** Storing `manual_reset` fixes the flag, but `SDL_CondSignal` still wakes exactly one waiter — so the finding's "first waiter through clears the flag and the rest block forever" becomes "the flag stays set and the rest block forever". Only a broadcast actually releases them.
+> - **The timeout path uses a deadline rather than a bare `while`.** Naively wrapping `SDL_CondWaitTimeout` in a loop re-arms the full timeout on every spurious wakeup, so a 100 ms wait could block indefinitely — trading one bug for another. The remaining time is computed as an unsigned subtraction compared as signed, so it survives the ~49-day `SDL_GetTicks()` wrap.
+>
+> Behaviour change: an SDL failure on the infinite path now returns 1 instead of being silently ignored, and `timeout == 0` polls correctly instead of entering the wait.
+>
+> **Unverifiable on this machine, and the build proves nothing about it.** These functions live inside `#else /* !PLATFORM_WINDOWS */`; on Windows `platform_event_t` is a `HANDLE` and there is no definition here at all. The only in-tree callers are Win32-compatibility shims. Confirmed by reading the guard structure, not by compiling.
 
 #### 🟠 High -- platform_get_executable_dir has two separate one-byte buffer overflows: readlink's null terminator and the trailing '/' append.
 
@@ -2228,6 +2369,10 @@ In basic/PlatformSDL.cpp:309-337: (1) line 320-322 does `ssize_t count = readlin
 
 **Recommendation:** Use `readlink("/proc/self/exe", path, sizeof(path) - 1)` and change the length guard to `if (len + 2 > size) return 1;` (or build the string with snprintf(buffer, size, "%s/", dir) and check the return value).
 
+> ✅ **Fixed** on branch `harden/high-severity-batch1`, exactly as recommended — but **the finding is wrong that these are live paths.** It states "Both are on a live path: `basic/Directory.cpp:30-33` … and `basic/PlatformSDL.cpp:379-380`". `Directory.cpp` does compile on Windows, but `platform_get_executable_dir` has **no Windows definition at all**; that object links today only because nothing outside `basic/` references it, which this review records separately as a Medium. The second caller sits inside the same `#ifndef PLATFORM_WINDOWS` block. So on Windows this is unreachable code calling an undefined function, and on Linux the overflows are real but the file does not compile anyway.
+>
+> **A third defect in the same file, not in this review and not fixable by inspection alone:** `dirname()` is used on the Linux path but `<libgen.h>` was included only for macOS and Emscripten. glibc declares `dirname` nowhere else, so this is an undeclared-identifier hard error in C++ — another reason the "Linux should work" claim has never held. Fixed with the above.
+
 #### 🟠 High -- CMessageArray::Release deletes m_Filename without nulling it and skips the delete entirely when the log file failed to open, producing both a dangling pointer and a leak.
 
 **Category:** memory-safety  |  **Location:** `Client/CMessageArray.cpp:158`
@@ -2237,6 +2382,12 @@ Client/CMessageArray.cpp:153-162 guards the whole file-log teardown with `if (m_
 **Failure scenario:** g_pDebugMessage->Init(MAX_DEBUGMESSAGE, 256, logFile) is called at Client.cpp:2872 and again at Client.cpp:3408. The second Init calls Release(), which frees m_Filename; any subsequent GetFilename() call reads freed heap. If the log file could not be opened the first time, the allocation simply leaks on every re-init.
 
 **Recommendation:** Set `m_Filename = NULL` immediately after the delete, move the delete outside the `if (m_bLog)` guard so it runs whenever the pointer is non-null, and only allocate m_Filename after the file has actually opened.
+
+> ✅ **Fixed** on branch `harden/high-severity-batch1` — the first two clauses only. **The third recommendation was deliberately refused: following it would convert a leak into a crash.** Allocating `m_Filename` only after a successful open makes `GetFilename()` return NULL after a failed open, and `Client.cpp:2901` does `strcpy(logFile, g_pDebugMessage->GetFilename())` with no NULL check. Moving the `delete[]` out of the `m_bLog` guard fixes the leak without that risk.
+>
+> **All three "real code path" call sites the finding cites are dead**, so this is a regression guard rather than a reproduction: one is inside a `/* */` comment block, one is reachable only under `__METROTECH_TEST__`, and one only under `OUTPUT_DEBUG` — both macros commented out in their headers and neither defined by CMake. Further, all three are `delete g_pDebugMessage; g_pDebugMessage = new CMessageArray;` — object replacement, not the re-`Init()` on a live object the finding describes. The only live `Init()` calls pass no filename, so `m_Filename` is never allocated in the current build and both the leak and the dangling pointer are latent.
+>
+> Recorded separately: `Client/Client.cpp:2901` is an unbounded `strcpy` of a filename into a 128-byte stack buffer with no NULL check — dead today, but it is what makes the refused recommendation dangerous.
 
 #### 🟠 High -- TArray::LoadFromFile reads the element count straight from a game data file into the member and allocates from it with no validation or stream-state check; nested instantiations multiply the effect.
 
@@ -2496,6 +2647,8 @@ basic/CMakeLists.txt:16 uses `add_definitions(-DPLATFORM_USE_SDL)` and Client/DX
 
 **Recommendation:** Removing APICheck (see the critical finding above) resolves this. If any part is retained, check every `LoadLibrary`/`GetProcAddress` result before use, drop the `(FARPROC&)` reference casts in favour of an explicit `reinterpret_cast` of the returned value, and pair every `LoadLibrary` with a `FreeLibrary`.
 
+> ✅ **Fixed** in `c2f65b7` (branch `harden/text-format`), by the first branch of its own recommendation: `Client/APICheck.cpp` and `Client/APICheck.h` were deleted outright along with the global, the `init()` call and the per-frame `CheckApi()` call in `Client/Client.cpp`. Nothing in the tree references `APICheck` today. The unguarded `LoadLibrary`/`GetProcAddress` results, the type-punned `(FARPROC&)` casts and the never-paired `FreeLibrary` all went with it; no part was retained, so none of the fallback advice applies.
+
 #### 🟠 High -- USE_ASAN/USE_TSAN/USE_UBSAN are silently ignored on MSVC, so the documented primary dev command produces an unsanitized build.
 
 **Category:** build  |  **Location:** `CMakeLists.txt:28`
@@ -2520,6 +2673,8 @@ Line 602's comment reads "Remove files that are already compiled in VS_UI librar
 
 **Recommendation:** Prefix the entries of VS_UI_CLIENT_SOURCES with `${CMAKE_CURRENT_SOURCE_DIR}/` (or build a second absolute-path list for the removal), then rebuild clean and confirm each of those files appears in exactly one .vcxproj. A `foreach`/`list(APPEND)` loop that absolutises the list in one place is less error-prone than editing 35 lines.
 
+> **Still open, but re-measured 2026-09-01 against the generated tree.** The count is **46**, not ~35: `DarkEden.vcxproj` lists 1044 translation units and `VS_UI.vcxproj` 96, and 46 names appear in both — including `Client.cpp`, `Client_PCH.cpp`, `MGameStringTable.cpp` and `MCreatureTable.cpp` as well as the `MItem`/`MZone`/`MPlayer` group the finding named. The mechanism is exactly as described (relative paths in `VS_UI_CLIENT_SOURCES` versus absolute ones from `file(GLOB)`, so `list(REMOVE_ITEM)` matches nothing). This is the precondition for the `_LIB` ODR finding below, so the two want fixing together and in that order.
+
 #### 🟠 High -- _LIB is defined PRIVATE on VS_UI but not on DarkEden, giving inline functions in VS_UI headers two different bodies in the same link (ODR violation).
 
 **Category:** correctness  |  **Location:** `CMakeLists.txt:371`
@@ -2535,6 +2690,15 @@ Line 371 sets `target_compile_definitions(VS_UI PRIVATE _LIB)`; the DarkEden tar
 Six tracked sources use an uppercase extension: Client/BIT_RES.CPP, Client/COGGSTREAM.CPP, Client/MAttachZoneAroundEffectGenerator.CPP, Client/MBloodyBreakerEffectGenerator.CPP, Client/MTimeItemManager.CPP, Client/MWarManager.CPP, plus VS_UI/src/VS_UI_TITLE_SHOWCHAR.CPP. CMakeLists.txt names two of them explicitly with a lowercase extension — line 277 `Client/MTimeItemManager.cpp` and line 593 `Client/COGGSTREAM.cpp` — and every other one is picked up only by `file(GLOB ... Client/*.cpp)` (line 583) or `file(GLOB_RECURSE VS_UI/src/*.cpp)` (line 171). CMake's globbing is case-insensitive on Windows and macOS but case-sensitive on Linux. So on Windows/macOS everything resolves (confirmed: the checked-in macOS compile_commands.json contains all six .CPP files plus the lowercase MTimeItemManager entry), while on Linux the two explicit entries become a hard configure error ("Cannot find source file") and the remaining five are silently dropped from the build, producing a cascade of unresolved externals. CLAUDE.md states "Linux (should work)" and README/CLAUDE.md present the CMake build as cross-platform; neither is true today.
 
 **Recommendation:** `git mv` all seven files to a lowercase `.cpp` extension (use a two-step rename through a temporary name so Git on case-insensitive filesystems records it), then update lines 277 and 593. Adding a Linux configure job to CI would keep this class of breakage from recurring — it is invisible from Windows and macOS.
+
+> ✅ **Fixed** on branch `harden/high-severity-batch1`, and the finding **understated the problem**. `BIT_RES.CPP` was already gone (deleted with the orphaned MP3 decoder in `66d8637`), leaving six of the seven — but a full `git ls-files` sweep for `\.(CPP|H)$`, which the review did not do, turned up seven *more* case-broken headers the finding never named:
+>
+> - `Client/MWarManager.H` was included under **both** spellings — `"MWarManager.H"` from `CGameUpdate.cpp:53`, `GameInit.cpp:85` and `SizeOfObjects.cpp:113`, and `"MWarManager.h"` elsewhere — so no single on-disk name could satisfy every includer.
+> - All five vendored libjpeg headers under `Client/JpegLib/` are tracked uppercase (`JPEGLIB.H`, `JCONFIG.H`, `JERROR.H`, `JMORECFG.H`, `JPEGINT.H`) while every include of them, including their own internal cross-includes at `JPEGLIB.H:24,26,1092,1093`, is lowercase. `Client/UtilityFunction.cpp:594` reaches them through a live `extern "C"` block, and got the directory case wrong as well (`"jpegLib/jpeglib.h"` against a tracked `JpegLib/`).
+>
+> All thirteen files are renamed to their lowercase spelling and the four include sites corrected; `Client/Client.vcxproj.filters` is updated to match. One is deliberately left: `VS_UI/src/widget/PI.H`, included as `"PI.h"` from `VS_UI/src/header/VS_UI_Base.h:31` and `VS_UI/src/widget/u_window.h:17`.
+>
+> Two things this fix does **not** establish. The review's speculation that Windows lists these files twice and risks LNK2005 is wrong — each appears exactly once in the generated `DarkEden.vcxproj`/`VS_UI.vcxproj`, because CMake de-duplicates the glob against the explicit entry. And **no build on this machine can verify any of it**: the Windows filesystem resolves either case, so the tree is green before and after. The change is verified by `git ls-files` and by inspection of every include site, not by a compiler. Only a Linux configure would actually prove it, which is why the finding's CI recommendation still stands.
 
 #### 🟡 Medium -- .gitignore ignores `Makefile` — the repo's own tracked build entry point — and `*.cmake`, which would swallow any future CMake module.
 
