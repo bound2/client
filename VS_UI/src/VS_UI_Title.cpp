@@ -4555,16 +4555,11 @@ void C_VS_UI_LOGIN::KeyboardControl(UINT message, UINT key, long extra)
 
 	// On macOS/SDL2, bypass the Windows IME system
 #ifndef PLATFORM_WINDOWS
-	// Route SDL text input events directly to LineEditor
-	if (message == WM_TEXTINPUT) {
-		// SDL_TEXTINPUT event (committed text)
-		const char* text = (const char*)extra;
-		if (m_lev_id.IsAcquire()) {
-			m_lev_id.m_Editor.HandleTextInput(text);
-		} else if (m_lev_password.IsAcquire()) {
-			m_lev_password.m_Editor.HandleTextInput(text);
-		}
-	} else if (message == WM_TEXTEDITING) {
+	// Committed text (SDL_TEXTINPUT) is not handled here: the SDL backend
+	// hands it to InputFocusManager, which calls LineEditor::HandleTextInput()
+	// with the UTF-8 buffer as a const char*. It must not be carried in
+	// `extra`, which is a `long` and truncates a pointer on LLP64.
+	if (message == WM_TEXTEDITING) {
 		// SDL_TEXTEDITING event (IME composition in progress)
 		int start = (int)key;
 		int length = (int)extra;

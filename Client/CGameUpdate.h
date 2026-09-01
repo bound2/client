@@ -27,7 +27,6 @@ class CGameUpdate : public CWinUpdate {
 
 		static void	DXMouseEvent(CSDLInput::E_MOUSE_EVENT event, int x, int y, int z);
 		static void	DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT, DWORD);
-		static void	SDLTextInputEvent(const char* text, int* window_coords);
 };
 
 extern CGameUpdate*		g_pCGameUpdate;

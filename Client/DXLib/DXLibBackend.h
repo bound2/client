@@ -104,33 +104,14 @@ int dxlib_input_pop_mouse_button(int* button, int* down, int* x, int* y);
  */
 void dxlib_input_set_mouse_pos(int x, int y);
 
-/**
- * Text input event callback
- * @param text UTF-8 encoded text input (one or more characters)
- * @param window_coords Window coordinates array [x, y] for cursor position
+/*
+ * There is deliberately no text-input callback here. The SDL backend
+ * dispatches SDL_TEXTINPUT/SDL_TEXTEDITING straight to InputFocusManager,
+ * which receives the UTF-8 buffer as a const char*. The callback registration
+ * that used to live here was only ever forwarded on through the
+ * KeyboardControl `long extra` parameter, which is 32-bit on LLP64 and cannot
+ * carry a pointer, so it was removed rather than repaired.
  */
-typedef void (*dxlib_textinput_callback)(const char* text, int* window_coords);
-
-/**
- * Set text input event receiver callback
- * @param callback Function to call when text is entered
- */
-void dxlib_input_set_textinput_callback(dxlib_textinput_callback callback);
-
-/**
- * Text editing event callback (for IME composition)
- * @param text UTF-8 encoded text being composed
- * @param start Start position of composition text
- * @param length Length of composition text
- * @param window_coords Window coordinates array [x, y] for cursor position
- */
-typedef void (*dxlib_textediting_callback)(const char* text, int start, int length, int* window_coords);
-
-/**
- * Set text editing event receiver callback
- * @param callback Function to call when text is being composed (IME)
- */
-void dxlib_input_set_textediting_callback(dxlib_textediting_callback callback);
 
 /**
  * Start text input (enables SDL_TEXTINPUT events)
