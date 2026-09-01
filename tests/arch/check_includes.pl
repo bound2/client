@@ -1,14 +1,24 @@
 #!/usr/bin/env perl
 #----------------------------------------------------------------------
 # check_includes.pl - include-graph architecture rules
-# (docs/RESTRUCTURING.md, task 0.3)
+# (docs/RESTRUCTURING.md, tasks 0.3 and 2.4)
 #----------------------------------------------------------------------
 #
 # Walks the quote-include closure of every packetwire member and fails
 # on forbidden edges. Perl, not python: the dev machines have Git for
 # Windows' perl, and the wire-inventory generator is already perl.
 #
+# Membership is tests/arch/packetwire_files.txt - the same file the
+# CMake target and the ratchet script read, so the three cannot
+# disagree about what "the library" is.
+#
 # Rules:
+#   W0  Every .cpp under Client/Packet is listed in exactly one of
+#       tests/arch/packetwire_files.txt and
+#       tests/arch/packetwire_holdouts.txt, and every listed file
+#       exists. The directory is wire-only by construction: a new
+#       packet source is a library member unless a holdout line says
+#       why not, and a deleted one cannot linger in a list.
 #   W1  A file in the packetwire closure may quote-include only files
 #       under Client/Packet/ or basic/, or Client/Client_PCH.h (the
 #       shared precompiled header - its own includes are walked too).
@@ -18,12 +28,19 @@
 #       anywhere in the closure, so the library stays linkable into a
 #       test binary without game stubs.
 #
+# W1/W2 look at the lines the library's compile actually sees. The
+# packet sources are the once-shared client/server copies and still
+# carry the server halves behind #ifdef __GAME_SERVER__ /
+# #ifndef __GAME_CLIENT__, and those halves include server headers
+# that do not exist in this repo. Those macros have exactly one meaning
+# in every target of this build (__GAME_CLIENT__ defined, the server
+# macros never), so the walk evaluates conditionals on them and skips
+# the dead branches; every other macro is unknown and BOTH branches are
+# checked. Nothing else is evaluated - an include that is dead only
+# under some other macro is still a violation.
+#
 # An include that cannot be resolved against the search path at all is
 # reported as a violation too - a silent skip is how a rule rots.
-#
-# Membership is parsed from the PACKETWIRE_SOURCES list in the
-# top-level CMakeLists.txt, so the CMake target and this checker cannot
-# disagree about what "the library" is.
 #
 # Grandfathered violations, if ever needed, live one per line in
 # tests/arch/baseline.txt as "RULE|includer|include" - the list is
@@ -34,27 +51,53 @@
 use strict;
 use warnings;
 use File::Basename qw(dirname);
+use File::Find qw(find);
 
 my $root = dirname(__FILE__) . "/../..";
 chdir $root or die "cannot chdir to repo root: $!";
 
-#----------------------------------------------------------------------
-# Membership from CMakeLists.txt
-#----------------------------------------------------------------------
-my @members;
-{
-	open my $fh, '<', 'CMakeLists.txt' or die "CMakeLists.txt: $!";
-	my $in = 0;
+my $members_file  = 'tests/arch/packetwire_files.txt';
+my $holdouts_file = 'tests/arch/packetwire_holdouts.txt';
+
+my @violations;
+
+sub read_list {
+	my ($path) = @_;
+	my @out;
+	open my $fh, '<', $path or die "$path: $!";
 	while (<$fh>) {
-		$in = 1 if /^set\(PACKETWIRE_SOURCES/;
-		if ($in) {
-			push @members, $1 if m{(Client/Packet/[A-Za-z0-9_/]+\.cpp)};
-			last if /^\)/;
-		}
+		s/\r?\n$//;	# belt and braces beside the .gitattributes eol=lf
+		s/#.*//;
+		s/^\s+|\s+$//g;
+		push @out, $_ if length;
 	}
 	close $fh;
+	return @out;
 }
-die "no PACKETWIRE_SOURCES found in CMakeLists.txt" unless @members >= 10;
+
+my @members  = read_list($members_file);
+my @holdouts = read_list($holdouts_file);
+die "$members_file lists too few files to be the library" unless @members >= 10;
+
+#----------------------------------------------------------------------
+# W0 - membership completeness
+#----------------------------------------------------------------------
+{
+	my %listed;
+	for my $f (@members, @holdouts) {
+		push @violations, "W0|$f|listed twice" if $listed{$f}++;
+		push @violations, "W0|$f|listed but missing" unless -f $f;
+		push @violations, "W0|$f|listed but not under Client/Packet"
+			unless $f =~ m{^Client/Packet/};
+	}
+	my @unlisted;
+	find({ no_chdir => 1, wanted => sub {
+		return unless -f $_ && /\.cpp$/;
+		(my $p = $_) =~ s{\\}{/}g;
+		push @unlisted, $p unless $listed{$p};
+	} }, 'Client/Packet');
+	push @violations, "W0|$_|not in $members_file or $holdouts_file" for sort @unlisted;
+}
 
 #----------------------------------------------------------------------
 # Include resolution: the file's own directory first (how the compiler
@@ -85,12 +128,89 @@ sub resolve_include {
 }
 
 #----------------------------------------------------------------------
+# Preprocessor conditionals on the macros with one build-wide meaning.
+# Three-valued: 1 = live, 0 = dead, undef = unknown (both branches
+# checked). Expressions are the forms this tree uses - defined(X),
+# !defined(X), bare X, !, &&, || and parentheses; anything else is
+# unknown.
+#----------------------------------------------------------------------
+my %defined = (
+	'__GAME_CLIENT__'   => 1,
+	'__GAME_SERVER__'   => 0,
+	'__LOGIN_SERVER__'  => 0,
+	'__SHARED_SERVER__' => 0,
+	'__UPDATE_SERVER__' => 0,
+);
+
+sub tv_not { my ($v) = @_; return defined $v ? ($v ? 0 : 1) : undef; }
+sub tv_and {
+	my ($a, $b) = @_;
+	return 0 if (defined $a && !$a) || (defined $b && !$b);
+	return 1 if defined $a && defined $b;
+	return undef;
+}
+sub tv_or {
+	my ($a, $b) = @_;
+	return 1 if (defined $a && $a) || (defined $b && $b);
+	return 0 if defined $a && defined $b;
+	return undef;
+}
+
+sub eval_expr {
+	my ($expr) = @_;
+	$expr =~ s{/\*.*?\*/}{}g;
+	$expr =~ s{//.*}{};
+	my @tok = $expr =~ /(\|\||&&|!|\(|\)|defined|[A-Za-z_]\w*|\d+|\S)/g;
+	my $i = 0;
+	my ($or, $and, $unary, $primary);
+	$primary = sub {
+		my $t = $tok[$i++];
+		return undef unless defined $t;
+		if ($t eq '(') { my $v = $or->(); $i++ if defined $tok[$i] && $tok[$i] eq ')'; return $v; }
+		if ($t eq 'defined') {
+			my $paren = defined $tok[$i] && $tok[$i] eq '(';
+			$i++ if $paren;
+			my $name = $tok[$i++];
+			$i++ if $paren && defined $tok[$i] && $tok[$i] eq ')';
+			return defined $name && exists $defined{$name} ? $defined{$name} : undef;
+		}
+		if ($t =~ /^\d+$/) { return $t ? 1 : 0; }
+		if ($t =~ /^[A-Za-z_]\w*$/) { return exists $defined{$t} ? $defined{$t} : undef; }
+		return undef;
+	};
+	$unary = sub {
+		if (defined $tok[$i] && $tok[$i] eq '!') { $i++; return tv_not($unary->()); }
+		return $primary->();
+	};
+	$and = sub {
+		my $v = $unary->();
+		while (defined $tok[$i] && $tok[$i] eq '&&') { $i++; $v = tv_and($v, $unary->()); }
+		return $v;
+	};
+	$or = sub {
+		my $v = $and->();
+		while (defined $tok[$i] && $tok[$i] eq '||') { $i++; $v = tv_or($v, $and->()); }
+		return $v;
+	};
+	my $v = $or->();
+	return undef if $i < @tok;	# trailing junk: do not pretend to understand it
+	return $v;
+}
+
+sub directive_value {
+	my ($kw, $rest) = @_;
+	return eval_expr("defined($rest)")  if $kw eq 'ifdef';
+	return eval_expr("!defined($rest)") if $kw eq 'ifndef';
+	return eval_expr($rest);
+}
+
+#----------------------------------------------------------------------
 # Baseline (frozen, shrink-only)
 #----------------------------------------------------------------------
 my %baseline;
 if (open my $fh, '<', 'tests/arch/baseline.txt') {
 	while (<$fh>) {
-		s/\r?\n$//;	# belt and braces beside the .gitattributes eol=lf
+		s/\r?\n$//;
 		next if /^\s*(#|$)/;
 		$baseline{$_} = 0;	# 0 = not yet seen this run
 	}
@@ -102,7 +222,6 @@ if (open my $fh, '<', 'tests/arch/baseline.txt') {
 #----------------------------------------------------------------------
 my %banned = map { $_ => 1 } qw(MinTr.h DebugInfo.h DebugKit.h);
 
-my @violations;
 my %seen;
 my @queue = @members;
 
@@ -120,9 +239,34 @@ while (@queue) {
 	next if $seen{$file}++;
 
 	open my $fh, '<', $file or next;
+	# Each frame: [value of this branch, has an earlier branch in the
+	# group been definitely live]. A line is live when no enclosing
+	# frame is definitely dead.
+	my @stack;
 	while (<$fh>) {
+		s/\r?\n$//;
+		if (/^\s*#\s*(ifdef|ifndef|if)\b\s*(.*)$/) {
+			my $v = directive_value($1, $2);
+			push @stack, [ $v, (defined $v && $v) ? 1 : 0 ];
+			next;
+		}
+		if (/^\s*#\s*elif\b\s*(.*)$/) {
+			next unless @stack;
+			my $v = $stack[-1][1] ? 0 : eval_expr($1);
+			$stack[-1][0] = $v;
+			$stack[-1][1] ||= (defined $v && $v) ? 1 : 0;
+			next;
+		}
+		if (/^\s*#\s*else\b/) {
+			next unless @stack;
+			$stack[-1][0] = $stack[-1][1] ? 0 : tv_not($stack[-1][0]);
+			next;
+		}
+		if (/^\s*#\s*endif\b/) { pop @stack; next; }
+
 		next unless /^\s*#\s*include\s*"([^"]+)"/;
 		my $inc = $1;
+		next if grep { defined $_->[0] && !$_->[0] } @stack;	# dead branch
 
 		my ($base) = $inc =~ m{([^/\\]+)$};
 		if ($banned{$base}) {
@@ -163,9 +307,10 @@ for my $b (sort keys %baseline) {
 }
 
 my $count = scalar keys %seen;
+my $nmembers = scalar @members;
 if ($fail) {
-	print "arch_includes: FAILED ($count files walked)\n";
+	print "arch_includes: FAILED ($nmembers members, $count files walked)\n";
 	exit 1;
 }
-print "arch_includes: OK ($count files walked, W1/W2 clean)\n";
+print "arch_includes: OK ($nmembers members, $count files walked, W0/W1/W2 clean)\n";
 exit 0;

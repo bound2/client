@@ -1,0 +1,17 @@
+# Client/Packet sources compiled into the DarkEden executable, not the
+# packetwire library: the receive loops and connection state machines,
+# which include game headers (MZone.h, UserInformation.h, ClientConfig.h)
+# and the executable's debug facilities. They become library candidates
+# only when those includes go (docs/RESTRUCTURING.md task 5.1 for the
+# debug facilities). Rule W0 in tests/arch/check_includes.pl requires every
+# .cpp under Client/Packet to be in exactly one of this file and
+# tests/arch/packetwire_files.txt.
+
+Client/Packet/ClientCommunicationManager.cpp
+Client/Packet/ClientPlayer.cpp
+Client/Packet/DatagramSocket.cpp
+Client/Packet/Player.cpp
+Client/Packet/RequestClientPlayer.cpp
+Client/Packet/RequestClientPlayerManager.cpp
+Client/Packet/RequestServerPlayer.cpp
+Client/Packet/RequestServerPlayerManager.cpp

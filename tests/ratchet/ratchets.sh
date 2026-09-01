@@ -43,12 +43,15 @@ check () {
 # passed in, then the day-to-day tree. On generators that produce no
 # .vcxproj the ratchet is skipped with a message - skipped, not passed.
 #----------------------------------------------------------------------
-# 992: 993 - 1. Task 2.2's registry (PacketHandlerRegistry.cpp, a
-# recorded +1: composition-root wiring, not legacy debt) is offset by
-# the finished migration deleting CGHandlersStub.cpp, whose no-op CG
-# handler stubs existed only to satisfy the now-deleted execute()
-# bodies.
-R1_BASELINE=992
+# 529: 992 - 463. Task 2.4 moved every packet class, the factory/
+# validator tables and the last held-back info classes (465 .cpp files,
+# tests/arch/packetwire_files.txt) into packetwire; the exe gained the
+# split-out GCExchangeBuyHandler.cpp (+1) and the five root info classes
+# that moved under Client/Packet were already counted before (0 net).
+# History: 992 = 993 - 1 (task 2.2's PacketHandlerRegistry.cpp, a
+# recorded +1, offset by the finished migration deleting
+# CGHandlersStub.cpp).
+R1_BASELINE=529
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do
@@ -94,7 +97,10 @@ R2=$(grep -rlE '^void\s+\w+::execute\s*\(\s*Player' \
 check "R2 (packet cpps defining execute)" "$R2" "$R2_BASELINE"
 
 #----------------------------------------------------------------------
-# R3 - live sprintf/strcpy/strcat lines under Client/Packet.
+# R3 - live sprintf/strcpy/strcat lines in the packet tree: the wire
+# classes under Client/Packet AND the handlers under Client/PacketHandler
+# (task 2.4 moved the handlers out; they are where most of the strcpy
+# targets fed by server strings live, so the metric follows them).
 # (snprintf does not match: \b rejects the preceding 'n'. Lines whose
 # match sits behind a // comment are excluded - a quarter of the first
 # baseline was commented-out code, and deleting a comment must not
@@ -103,19 +109,35 @@ check "R2 (packet cpps defining execute)" "$R2" "$R2_BASELINE"
 #----------------------------------------------------------------------
 R3_BASELINE=46
 
-R3=$(grep -rE '\b(sprintf|strcpy|strcat)\s*\(' Client/Packet --include='*.cpp' \
+for d in Client/Packet Client/PacketHandler; do
+	if [ ! -d "$d" ]; then
+		echo "FAIL R3: directory $d is missing - fix the path list in this script"
+		FAIL=1
+	fi
+done
+
+R3=$(grep -rE '\b(sprintf|strcpy|strcat)\s*\(' Client/Packet Client/PacketHandler --include='*.cpp' \
 	| grep -vE ':\s*//|//.*\b(sprintf|strcpy|strcat)' | wc -l)
-check "R3 (unsafe format/copy lines in Client/Packet)" "$R3" "$R3_BASELINE"
+check "R3 (unsafe format/copy lines in Client/Packet + Client/PacketHandler)" "$R3" "$R3_BASELINE"
 
 #----------------------------------------------------------------------
 # R4 - library-compiled .cpp files referencing g_p* client globals.
 #
 # Membership: every .cpp under the whole-directory library trees, plus
-# the two explicit source lists in the top-level CMakeLists.txt
-# (VS_UI_CLIENT_SOURCES and PACKETWIRE_SOURCES). Extraction work
-# (Phase 4) shrinks this by cutting the global seams.
+# the VS_UI_CLIENT_SOURCES list in the top-level CMakeLists.txt, plus
+# the packetwire membership file (tests/arch/packetwire_files.txt -
+# the CMake target and the include checker read the same file).
+# Extraction work (Phase 4) shrinks this by cutting the global seams.
+#
+# 61: 81 - 20. Task 2.4 grew the membership from 52 to 517 files, and
+# the count still went DOWN because the measurement was refined with it
+# (see the R4 loop): a file referencing only globals it defines itself
+# no longer counts. The two dead server-only blocks that referenced
+# game globals (GCSelectQuestID's PlayerCreature constructor,
+# GCStashList::setStashItem from a live Item*) were deleted rather than
+# grandfathered.
 #----------------------------------------------------------------------
-R4_BASELINE=81
+R4_BASELINE=61
 
 lib_members () {
 	# The directory trees minus the files CMake excludes from the
@@ -127,12 +149,23 @@ lib_members () {
 		| grep -vE 'VS_UI/WinMain\.cpp$|VS_UI/src/hangul/(Ci|FL2)\.cpp$'
 	sed -n '/set(VS_UI_CLIENT_SOURCES/,/^	)/p' CMakeLists.txt \
 		| grep -oE 'Client/[A-Za-z0-9_/]+\.cpp'
-	sed -n '/set(PACKETWIRE_SOURCES/,/^)/p' CMakeLists.txt \
+	sed -e 's/#.*//' tests/arch/packetwire_files.txt \
 		| grep -oE 'Client/Packet/[A-Za-z0-9_/]+\.cpp'
 }
 
+# A file that references only globals it DEFINES itself is not a seam
+# into the executable (the packet tables own g_pPacketFactoryManager /
+# g_pPacketValidator, and they moved into the library with task 2.4);
+# those are subtracted per file.
 R4=$(lib_members | sort -u | while read -r f; do
-	[ -f "$f" ] && grep -lE '\bg_p[A-Z]' "$f"
+	[ -f "$f" ] || continue
+	refs=$(grep -oE '\bg_p[A-Z]\w*' "$f" | sort -u)
+	[ -n "$refs" ] || continue
+	defs=$(grep -oE '^[A-Za-z_][A-Za-z0-9_:<>]*[[:space:]]*\*?[[:space:]]*g_p[A-Z]\w*[[:space:]]*(=|;)' "$f" \
+		| grep -oE '\bg_p[A-Z]\w*' | sort -u)
+	if [ -n "$(comm -23 <(echo "$refs") <(echo "$defs"))" ]; then
+		echo "$f"
+	fi
 done | wc -l)
 check "R4 (library cpps referencing g_p globals)" "$R4" "$R4_BASELINE"
 
@@ -147,13 +180,16 @@ check "R4 (library cpps referencing g_p globals)" "$R4" "$R4_BASELINE"
 # PacketDispatcher::dispatch. The baseline of 1 is the commented-out
 # PacketAttackMelee block in CGameUpdate.cpp (~line 5867), which lives
 # inside a /* */ block this line-based grep cannot see; it leaves with
-# that dead block's deletion.
+# that dead block's deletion. Client/PacketHandler is excluded with
+# Client/Packet: the handlers lived there when the baseline was taken
+# (task 2.4 moved them), and the metric is about callers outside the
+# packet layer.
 #----------------------------------------------------------------------
 R5_BASELINE=1
 
 R5=$(grep -rnE '(\.|->)execute\s*\(\s*(g_pSocket|NULL|this|0)\s*\)' \
 	Client VS_UI --include='*.cpp' 2>/dev/null \
-	| grep -v 'Client/Packet/' | grep -vE ':\s*//' | wc -l)
+	| grep -vE 'Client/Packet(Handler)?/' | grep -vE ':\s*//' | wc -l)
 check "R5 (direct packet execute callers outside Client/Packet)" "$R5" "$R5_BASELINE"
 
 #----------------------------------------------------------------------
