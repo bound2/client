@@ -62,8 +62,10 @@ private :
 	// list of string
 	std::list<std::string> m_Strings;
 
-	// size of string which will be generated
-	ushort m_Size;
+	// size of string which will be generated. size_t, not ushort: the
+	// accumulator wrapped at 64 KiB, making isEmpty() report an empty
+	// stream over real content and toString()'s reserve() under-reserve.
+	size_t m_Size;
 	
 	// inserted flag 
 	mutable bool m_bInserted;

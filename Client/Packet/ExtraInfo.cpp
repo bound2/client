@@ -59,9 +59,10 @@ void ExtraInfo::read ( SocketInputStream & iStream )
 	iStream.read( m_ListNum );
 
 	for( int i = 0; i < m_ListNum; i++ ) {
+		// Ownership before read() - see InventoryInfo::read.
 		ExtraSlotInfo * pExtraSlotInfo = new ExtraSlotInfo();
-		pExtraSlotInfo->read( iStream );
 		m_ExtraSlotInfoList.push_back( pExtraSlotInfo );
+		pExtraSlotInfo->read( iStream );
 
 	}
 

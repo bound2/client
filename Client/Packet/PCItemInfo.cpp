@@ -87,9 +87,10 @@ void PCItemInfo::read ( SocketInputStream & iStream )
 
 	for (int i = 0; i < m_ListNum; i++) 
 	{
+		// Ownership before read() - see InventoryInfo::read.
 		SubItemInfo* pSubItemInfo = new SubItemInfo();
-		pSubItemInfo->read(iStream);
 		m_SubItemInfoList.push_back( pSubItemInfo );
+		pSubItemInfo->read(iStream);
 	}
 
 	__END_CATCH

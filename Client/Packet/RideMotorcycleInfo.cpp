@@ -68,9 +68,10 @@ void RideMotorcycleInfo::read ( SocketInputStream & iStream )
 
 	for( int i = 0; i < m_ListNum; i++ ) 
 	{
+		// Ownership before read() - see InventoryInfo::read.
 		RideMotorcycleSlotInfo * pRideMotorcycleSlotInfo = new RideMotorcycleSlotInfo();
-		pRideMotorcycleSlotInfo->read( iStream );
 		m_RideMotorcycleSlotInfoList.push_back( pRideMotorcycleSlotInfo );
+		pRideMotorcycleSlotInfo->read( iStream );
 	}
 
 	__END_CATCH
