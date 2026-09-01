@@ -54,15 +54,24 @@ the output and hides all progress.
 ### What can be tested
 
 Only code compiled into a **static library**: `basic`, `SpriteLib`, `dxlib`,
-`framelib`, `TextSystem`, `VS_UI`. Game logic compiled straight into the `DarkEden`
-executable cannot be linked into a test binary. That is a structural limit, and it is
-the single biggest constraint on how work gets verified here.
+`framelib`, `TextSystem`, `VS_UI`, and `packetwire` — the whole wire layer: socket
+streams, the encrypter, the info classes, every packet class in every direction and
+the factory/validator tables (`docs/RESTRUCTURING.md` tasks 1.1 and 2.4; membership
+is `tests/arch/packetwire_files.txt`, read by CMake, the include checker and the
+ratchet script). Game logic compiled straight into the `DarkEden` executable —
+including the packet *handlers* under `Client/PacketHandler/` — cannot be linked into
+a test binary. That is a structural limit, and it is the single biggest constraint on
+how work gets verified here.
 
-`unit_tests` currently links `basic` and `SpriteLib` only. Covering something in
-`dxlib`, `TextSystem` or `VS_UI` means adding it to `target_link_libraries` in
-`tests/CMakeLists.txt` first.
+`unit_tests` links `basic`, `SpriteLib`, `TextSystem` and `packetwire`. Covering
+something in `dxlib` or `VS_UI` means adding it to `target_link_libraries` in
+`tests/CMakeLists.txt` first. Packet tests construct real packets through the real
+factories and pin their bytes against `tests/golden/*.hex` — 39 of those files are
+byte-identical copies of the server repo's goldens, so `diff -r` of the two golden
+directories is the cross-repo wire check (`tests/unit/test_packet_goldens.cpp` has
+the recipe and the `UPDATE_GOLDENS=1` re-record rule).
 
-The one exception to the rule is the **wire-layout inventory**
+The **wire-layout inventory** predates the packet classes being linkable
 (`tests/unit/test_wire_layout.cpp`, `tests/wire-layout.txt`): packet id, name and
 max body size for every factory under `Client/Packet`, without linking a single
 packet `.cpp`. `tests/tools/gen_wire_inventory.pl` lifts each factory's
@@ -118,7 +127,7 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **114 tests, 441 checks, 0 failed** in both trees.
+baseline: **146 tests, 1,045 checks, 0 failed** in both trees.
 
 ## Traps
 
@@ -172,7 +181,8 @@ baseline: **114 tests, 441 checks, 0 failed** in both trees.
 | Path | What |
 |---|---|
 | `Client/` | game logic — `GameMain`, `MZone`, `MCreature`, `MPlayer`, `MItem`, `MSkill` |
-| `Client/Packet/` | packet definitions and handlers; `Gpackets/` is server → client |
+| `Client/Packet/` | the wire layer, compiled once as `packetwire`; `Gpackets/` is server → client |
+| `Client/PacketHandler/` | packet handlers, executable-side, bound to ids in `Client/PacketHandlerRegistry.cpp` |
 | `Client/SpriteLib/` | sprite decode and blitting, SDL backend, the 555/565 variants |
 | `Client/DXLib/` | input, sound and music behind a DirectX-shaped interface, SDL underneath |
 | `Client/TextSystem/`, `TextLib/` | UTF-8 text rendering on SDL + freetype2 |

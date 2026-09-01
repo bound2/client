@@ -98,7 +98,7 @@ Shrink it when a task extracts a seam, and record the removal here.
 | `GameMain.cpp`, `GameInit.cpp`, `Client.cpp`, `SDLMain.cpp` | process lifecycle, DLL whitelist, render loop |
 | `MZone` rendering / `TileRenderer` draw paths | draws through live surfaces; viewer tools cover some of it |
 | `VS_UI/src/**` widgets and dialogs | deep two-way coupling with game globals; UI verified visually |
-| `Gpackets/*Handler.cpp` bodies | mutate `g_pZone`/creature state; the *parsers* they consume are in scope, the mutations are not (yet) |
+| `Client/PacketHandler/*Handler.cpp` bodies (moved out of `Gpackets/` etc. by task 2.4) | mutate `g_pZone`/creature state; the *parsers* they consume are in `packetwire` and testable, the mutations are not (yet) |
 | `PacketFunction.cpp`, `ClientCommunicationManager` connect paths | Winsock + connection state machine |
 
 Everything else under `Client/*.cpp` and `Client/Packet/**` is presumed
@@ -113,11 +113,11 @@ an unrecorded drop, so tightening lands in the same commit as the progress.
 
 | # | Metric | Baseline | Command |
 |---|--------|---------:|---------|
-| R1 | Translation units compiled directly into the DarkEden target | 992 (1,044 before task 1.1's `packetwire` move; the task-2.2 composition root `PacketHandlerRegistry.cpp` was a recorded +1, offset when finishing the migration deleted `CGHandlersStub.cpp`) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` — `ratchets.sh` reads the generated vcxproj, preferring the ctest run's own build dir; on generators with no vcxproj it reports SKIP, not PASS |
+| R1 | Translation units compiled directly into the DarkEden target | **529** (992 before task 2.4 moved the 465 packet/table/info sources into `packetwire`, +1 for the split-out `GCExchangeBuyHandler.cpp`; 1,044 before task 1.1; the task-2.2 composition root `PacketHandlerRegistry.cpp` was a recorded +1, offset when finishing the migration deleted `CGHandlersStub.cpp`) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` — `ratchets.sh` reads the generated vcxproj, preferring the ctest run's own build dir; on generators with no vcxproj it reports SKIP, not PASS |
 | R2 | Packet `.cpp` files still defining a packet-style `::execute(Player` | **0** (448 → 432 in slice 1 → 0 when 2.2/2.3 finished; regex refined at 0 to stop matching comments and the in-file handler body in `GCExchangeBuy.cpp`) | `grep -rlE '^void\s+\w+::execute\s*\(\s*Player' Client/Packet/{Gpackets,Cpackets,Lpackets,Rpackets,Upackets} --include='*.cpp' \| grep -v Handler \| wc -l` |
-| R3 | Live `sprintf`/`strcpy`/`strcat` lines under `Client/Packet` | 46 (61 at first measurement; the 2026-09-01 adversarial review showed a quarter of that was commented-out code, so the measurement now excludes `//` matches) | see `ratchets.sh` — the grep excludes comment-prefixed matches |
-| R4 | Library-compiled `.cpp` files referencing `g_p*` client globals | 81 (83 at first measurement; the review found the raw directory `find` counted two files CMake excludes from the library builds — `VS_UI/WinMain.cpp`, `hangul/Ci.cpp` — now filtered) | `ratchets.sh` computes it over the library dirs (minus CMake-excluded files) plus the `VS_UI_CLIENT_SOURCES` and `PACKETWIRE_SOURCES` lists parsed from `CMakeLists.txt` |
-| R5 | Direct packet `execute()` call sites outside `Client/Packet` | 1 (a commented-out block in `CGameUpdate.cpp`; added 2026-09-01 after the review found live local-echo callers the receive-loop enumeration had missed) | see `ratchets.sh` |
+| R3 | Live `sprintf`/`strcpy`/`strcat` lines under `Client/Packet` **and `Client/PacketHandler`** | 46 (unchanged by task 2.4, which widened the scope to follow the handlers out of `Client/Packet`; 61 at first measurement — the 2026-09-01 adversarial review showed a quarter of that was commented-out code, so the measurement now excludes `//` matches) | see `ratchets.sh` — the grep excludes comment-prefixed matches |
+| R4 | Library-compiled `.cpp` files referencing `g_p*` client globals **they do not define themselves** | **61** (81 before task 2.4 grew the membership from 52 to 518 files; the number fell because the measurement stopped counting a file's references to globals it defines — the packet tables own `g_pPacketFactoryManager`/`g_pPacketValidator` — and the two dead server-only bodies that reached game globals were deleted; 83 at first measurement, before two never-compiled files were filtered) | `ratchets.sh` computes it over the library dirs (minus CMake-excluded files) plus the `VS_UI_CLIENT_SOURCES` list parsed from `CMakeLists.txt` and the `packetwire` membership file |
+| R5 | Direct packet `execute()` call sites outside `Client/Packet` (handlers under `Client/PacketHandler` are in scope) | 1 (a commented-out block in `CGameUpdate.cpp`; added 2026-09-01 after the review found live local-echo callers the receive-loop enumeration had missed; task 2.4 found two more inside handlers — `GCReconnectLoginHandler`/`LCReconnectHandler` fabricating a `CGConnectSetKey` — invisible while handlers lived under the excluded `Client/Packet`, caught by the compiler once `Packet::execute` was deleted, and routed through the dispatcher; a live caller is now a compile error before it is a ratchet failure) | see `ratchets.sh` |
 
 R1 is the headline number: it counts what still cannot be unit-tested. R2 is
 the client twin of the server's R4 (which it drove to 0). R3 tracks
@@ -467,9 +467,14 @@ the server's status notes. This is what makes the ~509 `Gpackets` parsers
   > with R2 = 0 the fallback reaches only the base default, which
   > throws exactly like `dispatch()` — flipping the loops and deleting
   > `tryDispatch` is a cosmetic follow-up once live verification passes.
+  > **Follow-up done with 2.4** (PR #39 was the live verification): the
+  > five receive loops call `PacketDispatcher::dispatch` unconditionally,
+  > `tryDispatch` is deleted, and so is `Packet::execute` itself — the
+  > base class carries no handler entry point at all, as on the server.
+  > R2 stays as the guard against an override coming back.
   - Owner: R2 ratchet reaching ~0.
 
-- [ ] **2.4 Move the packet classes into `packetwire`** (now that nothing in
+- [x] **2.4 Move the packet classes into `packetwire`** (now that nothing in
   them references handlers), plus `PacketFactoryManager` /
   `PacketValidator` / `PacketIDSet`, and the held-back root files whose
   vestigial includes get removed on the way (`NPCInfo.cpp` etc.). Handlers
@@ -479,8 +484,63 @@ the server's status notes. This is what makes the ~509 `Gpackets` parsers
   real factories: add golden-fixture round-trips for the highest-risk GC
   packets (server task 1.2 has the recipe and the canonical-value rules —
   field values ≥ 128, distinct per field).
-  > **Status:** not started.
-  - Owner: W1 extended to the whole `Client/Packet` tree; the goldens.
+  > **Status:** done (2026-09-01,
+  > `restructuring/packet-classes-to-packetwire`; live verification of a
+  > play session gates the merge). `Client/Packet` is wire-only and
+  > compiled once: `packetwire` = 518 files, membership held by
+  > `tests/arch/packetwire_files.txt` (read by CMake, the include checker
+  > and the ratchet script — one file, three readers, as the server's
+  > `kernel_files.txt`), with the eight receive-loop sources named in
+  > `packetwire_holdouts.txt`. The 284 live handlers moved to
+  > `Client/PacketHandler/` by pure `git mv` after one prep commit
+  > qualified their includes (`"Gpackets/GCSay.h"`); the 35 never-compiled
+  > CG handlers were deleted (the server's step 1); `GCExchangeBuy.cpp`'s
+  > in-file handler was split out. The last game reaches came out
+  > test-first or by seam: `CLLogin`'s `g_pUserInformation` read became a
+  > packet member the sender sets, `WHISPER_MESSAGE` moved beside
+  > `CRWhisper`, five root info classes (`NicknameInfo`, `StoreInfo`,
+  > `GuildInfo`, `GuildMemberInfo`, `BloodBibleSignInfo`) moved under
+  > `Client/Packet`, seven vestigial includes went, and two dead
+  > `__GAME_SERVER__` bodies that built wire fields from live game
+  > objects were deleted (`GCSelectQuestID(PlayerCreature*)`,
+  > `GCStashList::setStashItem`). The include checker gained **W0**
+  > (every `.cpp` under `Client/Packet` is in exactly one of the two
+  > files) and evaluates `#if`/`#ifdef` on the one-meaning macros
+  > (`__GAME_CLIENT__` defined, server macros never) so the 58 server
+  > headers behind dead branches are skipped as the compiler skips them;
+  > 1,068 files walk clean. R1 992 → 529.
+  > **The first standalone link found the last seam**: `Datagram::read`
+  > called `SendBugReport` (exe-defined, declared ad hoc so no include
+  > rule saw it). `PacketDiagnostics` is the hook — the library formats,
+  > the exe installs `SendBugReport` at the composition root.
+  > **Goldens (the owner):** `test_packet_goldens.cpp` writes through the
+  > real streams (a `SocketOutputStreamTestAccess` friend, the twin of
+  > 1.2's input seam) and pins 45 `.hex` files, **39 byte-identical copies
+  > of the server's** with its fixture values (GCMoveOK incl. framed,
+  > GCMoveError, the GCAddItemToZone family, CGMove, CGSay, CGWhisper) —
+  > `diff -r` of the two golden directories is the cross-repo check — plus
+  > six client-authored (GCSay, GCGuildChat ×2, GCSystemMessage, CLLogin
+  > ×2). 38 of 39 matched on the first run; **the 39th was a real wire
+  > defect**: `CGMove` at encrypt code 0 wrote x,y,dir where the server
+  > reads dir,x,y (codes 1–5 agreed), and code 0 is reachable — the
+  > session code `((zone>>8)^zone)^((server+1)<<4)` cancels for some
+  > zones. Fixed test-first on the client (the reading side is the
+  > authority); the server needs no change. `test_packet_factories.cpp`
+  > is the link proof (one `PacketFactoryManager::init()` pulls every
+  > packet object) and pins that the manager refuses CG and out-of-range
+  > ids. Two asymmetries stated as fact-tests, server-style: this repo's
+  > `CLLogin::read` is one byte short of the login server's (the client
+  > never reads one), and `GCDropItemToZone` round-trips here while the
+  > server pins only its `write()`. Suite: 146 tests green in the plain
+  > and ASan trees; all four ctests green.
+  > **Deliberately not done here:** the 186 remaining
+  > `__GAME_SERVER__`/`__GAME_CLIENT__` conditionals in 157 packet
+  > sources (the server's K2 rule bans them; here they have one meaning
+  > in every target, so the checker evaluates them instead — sweep the
+  > dead server halves under 5.2), and goldens for the ~500 unpinned
+  > packets (2.5 builds on the real factories now).
+  - Owner: W0/W1 over the whole `Client/Packet` tree (membership file);
+    the goldens; the factory link test.
 
 - [ ] **2.5 Retire the wire-inventory workaround.** With packet `.cpp`s
   linkable, `test_wire_layout.cpp` can call the real factories instead of
