@@ -73,7 +73,7 @@
 #include "Packet/Properties.h"
 #include "ServerInfo.h"
 #include "MTestDef.h"
-#include "Resource.h"
+#include "resource.h"
 #include "UserInformation.h"
 #include "MFileDef.h"
 #include "SoundSetting.h"
@@ -3346,7 +3346,7 @@ WinMain(HINSTANCE hInstance,
 #endif
 
 	/*
-#include "packet\ServerSocket.h"
+#include "Packet/ServerSocket.h"
 
 	// 한 Client는 동시에 다른 한 Client와 통신한다.
 	// 여러군데의 resource(길드마크, profile...)가 필요한 경우 

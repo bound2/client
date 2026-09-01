@@ -14,7 +14,7 @@
 #include "EffectSpriteTypeDef.h"
 #include "MItemOptionTable.h"
 #include "PacketFunction.h"
-#include "MinTR.H"
+#include "MinTr.h"
 #include "MTopView.h"
 
 int defaultSkinColor		= 410;					

@@ -1,4 +1,4 @@
-#include "client_PCH.h"
+#include "Client_PCH.h"
 #include "CSpritePalBase.h"
 #include "CSpriteSurface.h"
 

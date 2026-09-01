@@ -13,7 +13,7 @@
 
 #pragma warning(disable:4786)
 
-#include "VS_UI_Descriptor.h"
+#include "VS_UI_descriptor.h"
 
 // descriptor id
 const id_t DID_ITEM = 1;

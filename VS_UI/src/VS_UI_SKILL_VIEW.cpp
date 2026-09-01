@@ -2,14 +2,14 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "client_PCH.h"
+#include "Client_PCH.h"
 
 /*
 #include "VS_UI_SKILL_VIEW.h"
 #include "VS_UI_GameCommon.h"
 #include "VS_UI_filepath.h"
-#include "VS_UI_description.h"
-#include "VS_UI_Mouse_pointer.h"
+#include "VS_UI_Description.h"
+#include "VS_UI_mouse_pointer.h"
 #include "VS_UI.h"
 
 

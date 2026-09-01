@@ -16,7 +16,7 @@
 	#include "MZone.h"
 	#include "MTimeItemManager.h"
 #else
-	#include "VS_UI.H"
+	#include "VS_UI.h"
 #endif
 
 #define CHARGE_PRICE		5000

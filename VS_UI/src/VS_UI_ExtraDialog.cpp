@@ -1,14 +1,14 @@
 ﻿// VS_UI_ExtraDialog.cpp
 
-#include "client_PCH.h"
+#include "Client_PCH.h"
 #define assert(e) ((void)(e))
 // Disabled assert for macOS
 
 #pragma warning(disable:4786)
 
 #include "VS_UI_ExtraDialog.h"
-#include "VS_UI_Filepath.h"
-#include "VS_UI_Mouse_pointer.h"
+#include "VS_UI_filepath.h"
+#include "VS_UI_mouse_pointer.h"
 
 #include "MMoneyManager.h"
 #include "MItemOptionTable.h"
@@ -16,9 +16,9 @@
 #include "MPriceManager.h"
 #include "MCreatureTable.h"
 #include "UtilityFunction.h"
-#include "MGameStringTable.H"
-#include "ClientConfig.H"
-#include "MNpcTable.h"
+#include "MGameStringTable.h"
+#include "ClientConfig.h"
+#include "MNPCTable.h"
 #include "TextSystem/TextService.h"
 #include "TextSystem/RenderTargetSpriteSurface.h"
 extern RECT g_GameRect;

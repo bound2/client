@@ -14,6 +14,6 @@
 #include "u_window.h"
 #include "u_button.h"
 #include "u_scrollbar.h"
-#include "u_edit.h"
+#include "U_edit.h"
 
 #endif

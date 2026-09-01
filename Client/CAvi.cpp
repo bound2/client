@@ -1,5 +1,5 @@
 #include "Client_PCH.h"
-#include "CAvi.H"
+#include "CAvi.h"
 
 CAVI::CAVI()
 {

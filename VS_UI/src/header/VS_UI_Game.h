@@ -21,14 +21,14 @@
 #include "VS_UI_GameSlayer.h"
 #include "VS_UI_GameVampire.h"
 #include "VS_UI_GameOusters.h"
-#include "VS_UI_Widget.h"
+#include "VS_UI_widget.h"
 
 #include "VS_UI_Shop.h"
 #include "VS_UI_Storage.h"
 #include "VS_UI_Exchange.h"
 #include "VS_UI_PointExchange.h"
 #include "VS_UI_Tutorial.h" //by larosel
-#include "VS_UI_Title.h"
+#include "VS_UI_title.h"
 //#include "VS_UI_SKILL_VIEW.h"
 #include "VS_UI_ELEVATOR.h"
 #include "VS_UI_PetStorage.h"

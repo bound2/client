@@ -74,7 +74,7 @@ extern "C" void spritectl_window_to_game_coords(int* x, int* y);
 #include "Profiler.h"
 #include "CMP3.h"
 #include "MEventManager.h"
-#include "MNpc.h"
+#include "MNPC.h"
 #include "UtilityFunction.h"
 
 // 2002.6.28 [UDP수정]

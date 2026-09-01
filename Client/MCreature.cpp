@@ -12,7 +12,7 @@
 #include "MCreatureTable.h"
 #include "MSoundTable.h"
 #include "MEffectStatusTable.h"
-#include "FL2.h"
+#include "Fl2.h"
 #include "ClientConfig.h"
 #include "ServerInfo.h"
 #include "DebugInfo.h"
@@ -28,7 +28,7 @@
 #include "UserInformation.h"
 //#include "RequestClientPlayerManager.h"
 //#include "packet\Rpackets\CRRequest.h"
-#include "VS_UI_base.h"
+#include "VS_UI_Base.h"
 #include "MSkillManager.h"	// [새기술3]
 #include "UIFunction.h"
 #include "MEventManager.h"
@@ -44,7 +44,7 @@
 #include "MFakeCreature.h"
 #include "SystemAvailabilities.h"
 #include "MGameStringTable.h"
-#include "vs_ui.h"
+#include "VS_UI.h"
 #include "Client.h"
 
 #define ATTACHEFFECTCOLOR_NULL	0xFFFF

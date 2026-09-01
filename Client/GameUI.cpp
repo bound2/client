@@ -12,7 +12,7 @@
 #include "Client.h"
 #include "UIFunction.h"
 #include "VS_UI.h" 
-#include "VS_UI_Mouse_pointer.h"
+#include "VS_UI_mouse_pointer.h"
 #include "PacketDef.h"
 #include "TalkBox.h"
 #include "MShopShelf.h"
@@ -67,7 +67,7 @@
 #include <string>
 
 #include "SoundSetting.h"
-#include "packet/GPackets/GCMiniGameScores.h"
+#include "Packet/Gpackets/GCMiniGameScores.h"
 #include "SystemAvailabilities.h"
 #include "VS_UI_GameCommon2.h"
 //add by viva : include friend file
@@ -78,7 +78,7 @@
 	#include <io.h>
 #endif
 
-#include "packet/Cpackets/CLGetWorldList.h"
+#include "Packet/Cpackets/CLGetWorldList.h"
 
 extern Race g_eRaceInterface;
 extern BOOL g_MyFull;

@@ -1,20 +1,20 @@
 // VS_UI_Shop.cpp
 
-#include "client_PCH.h"
+#include "Client_PCH.h"
 
 #pragma warning(disable:4786)
 
 #include "VS_UI_Shop.h"
 #include "VS_UI_filepath.h"
-#include "VS_UI_description.h"
-#include "VS_UI_Mouse_pointer.h"
+#include "VS_UI_Description.h"
+#include "VS_UI_mouse_pointer.h"
 
 #include "VS_UI_GameCommon.h"
-#include "VS_UI_Item.h"
+#include "VS_UI_item.h"
 
 #include "VS_UI.h"
 
-#include "MGameStringTABLE.h"
+#include "MGameStringTable.h"
 #include "SystemAvailabilities.h"
 
 

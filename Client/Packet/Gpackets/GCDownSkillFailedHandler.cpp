@@ -11,7 +11,7 @@
 #include "GCDownSkillFailed.h"
 #include "ClientDef.h"
 #include "UIFunction.h"
-#include "mgamestringtable.h"
+#include "MGameStringTable.h"
 
 #define DOMAIN_DIFFER 0
 #define NOT_OUSTERS 1

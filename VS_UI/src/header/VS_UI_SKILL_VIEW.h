@@ -8,8 +8,8 @@
 #ifndef __VS_UI_SKILL_VIEW_H__
 #define __VS_UI_SKILL_VIEW_H__
 
-#include "VS_UI_Widget.h"
-#include "VS_UI_Util.h"
+#include "VS_UI_widget.h"
+#include "VS_UI_util.h"
 
 #include "MSkillManager.h"
 

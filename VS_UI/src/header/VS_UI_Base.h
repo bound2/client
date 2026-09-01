@@ -9,7 +9,7 @@
 #ifndef __VS_UI_BASE_H__
 #define __VS_UI_BASE_H__
 
-#include "BasicS.h"
+#include "Basics.h"
 #include "DLL.h"
 /* The stale Client/DXLib.h duplicate this path used to disambiguate
    against is deleted (2026-08-31); the explicit path stays because it
@@ -18,9 +18,9 @@
    defines. */
 #include "DXLib/DXLib.h"
 #include "GL_import.h"
-#include "Timer2.h"
+#include "timer2.h"
 #ifdef PLATFORM_WINDOWS
-#include "Unicorn.h"
+#include "unicorn.h"
 #endif
 #include "SP.h"
 #include "../hangul/Fl2.h"  // For full PrintInfo definition

@@ -1,7 +1,7 @@
 #ifndef __VS_UI_UI_RESULT_RECEIVER_H__
 #define __VS_UI_UI_RESULT_RECEIVER_H__
 
-#include "typedef.h"
+#include "Typedef.h"
 #include "SimpleDataList.h"
 #include "VS_UI_UIMessage.h"
 

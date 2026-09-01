@@ -1,15 +1,15 @@
 // VS_UI_Tutorial.cpp by larosel
 
-#include "client_PCH.h"
-#include "VS_UI_Filepath.h"
+#include "Client_PCH.h"
+#include "VS_UI_filepath.h"
 //#include "VS_UI_GameCommon.h"
-#include "VS_UI_Mouse_Pointer.h"
+#include "VS_UI_mouse_pointer.h"
 #include "VS_UI.h"
 #include "VS_UI_Tutorial.h"
 //#include "ex\DebugInfo.h"
 #include "UserOption.h"
 //#include "debuginfo.h"
-#include "MGameStringTable.H"
+#include "MGameStringTable.h"
 //#define dSTRING_LEN 256 
 #include "SXml.h"
 extern RECT g_GameRect;

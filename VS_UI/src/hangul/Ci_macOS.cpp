@@ -10,9 +10,9 @@
 -----------------------------------------------------------------------------*/
 
 #include "Client_PCH.h"
-#include "CI.h"
-#include "Timer2.h"
-#include "Vs_ui.h"  // For C_VS_UI class
+#include "Ci.h"
+#include "timer2.h"
+#include "VS_UI.h"  // For C_VS_UI class
 #include "Fl2.h"    // For g_GetStringByMoney declaration
 #include <string>   // For std::string
 

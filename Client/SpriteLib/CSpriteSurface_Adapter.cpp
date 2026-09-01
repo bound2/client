@@ -14,7 +14,7 @@
 
 /* No #ifdef SPRITELIB_BACKEND_SDL here - included by SDL-only file */
 
-#include "client_PCH.h"
+#include "Client_PCH.h"
 #include "CSprite.h"
 #include "CAlphaSprite.h"
 #include "CIndexSprite.h"

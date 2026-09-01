@@ -12,10 +12,10 @@
 #define __VS_UI_GAMESLAYER_H__
 
 #include "VS_UI_GameCommon.h"
-#include "VS_UI_Util.h"
+#include "VS_UI_util.h"
 //#include "VS_UI_skill_tree.h"
 
-#include "MSlayergear.h"
+#include "MSlayerGear.h"
 
 /*
 //-----------------------------------------------------------------------------

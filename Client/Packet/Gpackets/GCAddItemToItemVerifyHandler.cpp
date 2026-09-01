@@ -15,7 +15,7 @@
 #include "MGameStringTable.h"
 #include "ClientFunction.h"
 #include "SkillDef.h"
-#include "MinTR.H"
+#include "MinTr.h"
 #include "UIFunction.h"
 
 #ifdef __GAME_CLIENT__

@@ -2,7 +2,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "client_PCH.h"
+#include "Client_PCH.h"
 #define assert(e) ((void)(e))
 // Disabled assert for macOS
 
@@ -10,10 +10,10 @@
 
 #include "VS_UI_ELEVATOR.h"
 #include "VS_UI_filepath.h"
-#include "VS_UI_description.h"
+#include "VS_UI_Description.h"
 #include "VS_UI.h" // include VS UI master header file.
 
-#include "MGameStringTable.H"
+#include "MGameStringTable.h"
 extern RECT g_GameRect;
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction

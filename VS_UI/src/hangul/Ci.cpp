@@ -1,9 +1,9 @@
 ﻿// CI.cpp
 
-#include "client_PCH.h"
+#include "Client_PCH.h"
 #include "DXLib/DXLib.h"
-#include "CI.h"
-#include "Timer2.h"
+#include "Ci.h"
+#include "timer2.h"
 
 extern void IME_StartComposition();
 extern void IME_EndComposition();

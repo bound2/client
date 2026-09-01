@@ -15,7 +15,7 @@
 #include "SP.h"
 #include "framelib/FR.h"
 //#include "rbt.h"
-#include "BasicS.h"
+#include "Basics.h"
 #include "SpriteLib/CSpritePack.h"
 #include "SpriteLib/CIndexSpritePack.h"
 

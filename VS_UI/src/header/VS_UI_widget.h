@@ -16,7 +16,7 @@
 #ifdef PLATFORM_WINDOWS
 #include "CImm.h"
 #endif
-#include "VS_UI_MOUSE_POINTER.h"
+#include "VS_UI_mouse_pointer.h"
 #include "../widget/u_button.h"  // For EventButton, Exec, Button classes
 
 // Stub definitions for non-Windows platforms (without Immersion library)

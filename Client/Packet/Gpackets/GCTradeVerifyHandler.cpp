@@ -20,7 +20,7 @@
 	#include "ClientPlayer.h"
 	#include "Cpackets/CGTradeAddItem.h"
 	#include "Cpackets/CGTradeFinish.h"
-	#include "cpackets/CGTradeRemoveItem.h"
+	#include "Cpackets/CGTradeRemoveItem.h"
 
 #endif
 

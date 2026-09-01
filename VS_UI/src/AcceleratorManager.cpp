@@ -2,7 +2,7 @@
 // AcceleratorManager.cpp
 //-----------------------------------------------------------------------------
 
-#include "client_PCH.h"
+#include "Client_PCH.h"
 #include "AcceleratorManager.h"
 #include "AcceleratorDef.h"
 #include "VS_UI.h"

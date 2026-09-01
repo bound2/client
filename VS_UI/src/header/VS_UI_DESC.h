@@ -2,7 +2,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "VS_UI_Util.h"
+#include "VS_UI_util.h"
 //#include "VS_UI_GameCommon.h"
 #include "../../RarFile.h"
 #include <vector>

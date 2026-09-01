@@ -27,7 +27,7 @@
 #include "ServerInfo.h"
 #include "PacketDef.h"
 #include "VS_UI.h"
-#include "VS_UI_Mouse_pointer.h"
+#include "VS_UI_mouse_pointer.h"
 #include "UIDialog.h"
 #include "DebugInfo.h"
 #include "CGameUpdate.h"
@@ -50,20 +50,20 @@
 #include "CMP3.h"
 #include "COGGSTREAM.h"
 #include "SystemAvailabilities.h"
-#include "MWarManager.H"
+#include "MWarManager.h"
 // EXECryptor and ThemidaSDK includes removed (SDL2) - Copy protection no longer needed
-#include "packet/Cpackets/CGVerifyTime.h"
+#include "Packet/Cpackets/CGVerifyTime.h"
 
 #ifdef OUTPUT_DEBUG
-	#include "packet/Gpackets/GCSkillFailed2.h"
-	#include "packet/Gpackets/GCSkillToObjectOK5.h"
-	#include "packet/Gpackets/GCSkillToSelfOK2.h"
-	#include "packet/Gpackets/GCSkillToTileOK2.h"
-	#include "packet/Cpackets/CGTypeStringList.h"
+	#include "Packet/Gpackets/GCSkillFailed2.h"
+	#include "Packet/Gpackets/GCSkillToObjectOK5.h"
+	#include "Packet/Gpackets/GCSkillToSelfOK2.h"
+	#include "Packet/Gpackets/GCSkillToTileOK2.h"
+	#include "Packet/Cpackets/CGTypeStringList.h"
 #endif
 
 //add by viva
-#include "packet/Gpackets/GCFriendChatting.h"
+#include "Packet/Gpackets/GCFriendChatting.h"
 
 #ifdef OUTPUT_DEBUG
 	bool g_bSlideScreenShot = false;
@@ -5849,8 +5849,8 @@ PacketTest()
 // AttackMelee
 //-----------------------------------------------------------------------------
 /*
-#include "packet\Gpackets\GCAttackMeleeOK2.h"
-#include "packet\Gpackets\GCAttackMeleeOK3.h"
+#include "Packet/Gpackets/GCAttackMeleeOK2.h"
+#include "Packet/Gpackets/GCAttackMeleeOK3.h"
 void
 PacketAttackMelee(int user, int target)
 {

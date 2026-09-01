@@ -1,10 +1,10 @@
 ﻿// VS_UI_Util.cpp
 
-#include "client_PCH.h"
+#include "Client_PCH.h"
 #include <assert.h>
 #include <fstream>
 #include <stdlib.h>
-#include "VS_UI_base.h"
+#include "VS_UI_Base.h"
 #include "VS_UI_util.h"
 #include "../../Client/SpriteLib/CSpriteOutlineManager.h"
 

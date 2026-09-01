@@ -13,7 +13,7 @@
 #ifndef __MOTHER_H__
 #define __MOTHER_H__
 
-#include "typedef.h"
+#include "Typedef.h"
 #include <math.h>
 
 #define PERCENTAGE						100

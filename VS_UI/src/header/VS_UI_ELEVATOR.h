@@ -4,8 +4,8 @@
 #ifndef _VS_UI_ELEVATOR_H_
 #define _VS_UI_ELEVATOR_H_
 
-#include "Unicorn.h"
-#include "VS_UI_Widget.h"
+#include "unicorn.h"
+#include "VS_UI_widget.h"
 
 class C_VS_UI_ELEVATOR : public Window, public Exec, public ButtonVisual
 {

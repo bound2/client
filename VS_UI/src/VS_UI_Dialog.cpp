@@ -7,13 +7,13 @@
 
 #include "VS_UI_Dialog.h"
 #include "VS_UI_GlobalResource.h"
-#include "VS_UI_description.h"
+#include "VS_UI_Description.h"
 #include "ClientFunction.h"
 #include "UserOption.h"
 #include "TextSystem/TextService.h"
 #include "TextSystem/RenderTargetSpriteSurface.h"
 
-#include "mgamestringtable.h"
+#include "MGameStringTable.h"
 #include "UserInformation.h"
 extern RECT g_GameRect;
 //-----------------------------------------------------------------------------

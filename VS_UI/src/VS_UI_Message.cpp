@@ -1,12 +1,12 @@
 // VS_UI_Message.cpp
 
-#include "client_PCH.h"
+#include "Client_PCH.h"
 
 #pragma warning(disable:4786)
 
 #define DEBUG_OUTPUT
 #include "VS_UI_Message.h"
-#include "MGameStringTable.H"
+#include "MGameStringTable.h"
 //#include "ex\debuginfo.h"
 //-----------------------------------------------------------------------------
 // Global

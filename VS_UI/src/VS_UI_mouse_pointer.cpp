@@ -1,15 +1,15 @@
 // VS_UI_Mouse_pointer.cpp
 
-#include "client_PCH.h"
+#include "Client_PCH.h"
 #include "VS_UI_mouse_pointer.h"
 #include "VS_UI_filepath.h"
-#include "VS_UI_Item.h"
-#include "VS_UI_description.h"
+#include "VS_UI_item.h"
+#include "VS_UI_Description.h"
 #include "VS_UI.h"
 #include "UserOption.h"
 #include "MZoneTable.h"
 
-#include "MGameStringTable.H"
+#include "MGameStringTable.h"
 
 /*-----------------------------------------------------------------------------
   Gloabls

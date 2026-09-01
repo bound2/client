@@ -13,7 +13,7 @@
 #include "MNPC.h"
 #include "MGuildType.h"
 #include "EffectSpriteTypeDef.h"
-#include "MINtr.h"
+#include "MinTr.h"
 
 extern int					g_nZoneLarge;
 extern int					g_nZoneSmall;

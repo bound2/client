@@ -17,10 +17,10 @@
 #define __VS_UI_GAME_COMMON_H__
 
 #include "VS_UI_Base.h"
-#include "VS_UI_Util.h"
-#include "VS_UI_description.h"
+#include "VS_UI_util.h"
+#include "VS_UI_Description.h"
 #include "VS_UI_ExtraDialog.h"
-#include "VS_UI_Title.h" // for S_SLOT
+#include "VS_UI_title.h" // for S_SLOT
 
 //#include "VS_UI_GameSlayer.h"
 class C_VS_UI_SLAYER_QUICKITEM;

@@ -13,7 +13,7 @@
 #include "ClientDef.h"
 #include "SkillDef.h"
 #include "MSkillManager.h"
-#include "Mintr.h"
+#include "MinTr.h"
 #include "UIFunction.h"
 
 //////////////////////////////////////////////////////////////////////

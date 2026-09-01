@@ -8,7 +8,7 @@
 
 -----------------------------------------------------------------------------*/
 
-#include "Timer2.h"
+#include "timer2.h"
 #include <cstring>
 #include <cstdlib>
 

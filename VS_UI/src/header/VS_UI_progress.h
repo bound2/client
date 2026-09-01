@@ -13,7 +13,7 @@
 
 #include "VS_UI_Base.h"
 #include "VS_UI_util.h"
-#include "VS_UI_extradialog.h"
+#include "VS_UI_ExtraDialog.h"
 /*
 enum PROGRESS_SPK_INDEX
 {

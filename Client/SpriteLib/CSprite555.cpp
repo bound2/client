@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // CSprite555.cpp
 //----------------------------------------------------------------------
-#include "client_PCH.h"
+#include "Client_PCH.h"
 #include "CSpriteSurface.h"
 #include "CSprite.h"
 #include "CSprite555.h"

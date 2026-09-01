@@ -2,10 +2,10 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "client_PCH.h"
+#include "Client_PCH.h"
 
 #include "CImm.h"
-#include "VS_UI_Filepath.h"
+#include "VS_UI_filepath.h"
 #include "CSoundPartManager.h"
 #include "MSoundTable.h"
 

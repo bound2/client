@@ -11,7 +11,7 @@
 #define __TARGA__
 
 #include "Basics.h"
-#include "2D.h"
+#include "2d.h"
 #include "DLL.h"
 
 //----------------------------------------------------------------------------

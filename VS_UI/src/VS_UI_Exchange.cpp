@@ -1,20 +1,20 @@
 ﻿// VS_UI_Exchange.cpp
 
-#include "client_PCH.h"
+#include "Client_PCH.h"
 #define assert(e) ((void)(e))
 // Disabled assert for macOS
 
 #pragma warning(disable:4786)
 
 #include "VS_UI_Exchange.h"
-#include "VS_UI_Filepath.h"
+#include "VS_UI_filepath.h"
 #include "VS_UI_GameCommon.h"
-#include "VS_UI_Item.h"
-#include "VS_UI_Mouse_Pointer.h"
+#include "VS_UI_item.h"
+#include "VS_UI_mouse_pointer.h"
 #include "VS_UI.h"
 #include "UserOption.h"
 
-#include "MGameStringTable.H"
+#include "MGameStringTable.h"
 
 #define	DARKBITS_NOT_TRADE_BACKGROUND		2
 #define	DARKBITS_NOT_TRADE					1

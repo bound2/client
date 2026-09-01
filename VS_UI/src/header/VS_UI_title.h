@@ -21,8 +21,8 @@
 #define __VS_UI_TITLE_H__
 
 #include "VS_UI_Base.h"
-#include "VS_UI_Util.h"
-#include "VS_UI_Widget.h"
+#include "VS_UI_util.h"
+#include "VS_UI_widget.h"
 #include "VS_UI_Dialog.h"
 #include "VS_UI_DESC.h"
 

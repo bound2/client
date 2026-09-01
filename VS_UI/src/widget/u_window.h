@@ -17,7 +17,7 @@
 #include "PI.h"
 #include <list>
 
-#include "u_edit.h"
+#include "U_edit.h"
 
 #define SCR2WIN_X(screen_x)			((screen_x)-x)
 #define SCR2WIN_Y(screen_y)			((screen_y)-y)

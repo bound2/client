@@ -19,8 +19,8 @@
 #ifdef __GAME_CLIENT__
 #include "ClientPlayer.h"
 #include "MZoneTable.h"
-#include "MZone.H"
-#include "UiFunction.h"
+#include "MZone.h"
+#include "UIFunction.h"
 #include "PacketFunction.h"
 #endif
 

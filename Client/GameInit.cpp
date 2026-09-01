@@ -82,7 +82,7 @@
 #include "MMonsterKillQuestInfo.h"
 #include "MTimeItemManager.h"
 #include "FameInfo.h"
-#include "MWarManager.H"
+#include "MWarManager.h"
 #include "CSprite555.h"
 #include "CSprite565.h"
 #include "Properties.h"

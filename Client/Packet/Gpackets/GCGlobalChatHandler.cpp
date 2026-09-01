@@ -14,7 +14,7 @@
 #include "UserInformation.h"
 #include "MSkillManager.h"
 #include "MZone.h"
-#include "MZoneTable.H"
+#include "MZoneTable.h"
 #include "UIFunction.h"
 #include "MGameStringTable.h"
 

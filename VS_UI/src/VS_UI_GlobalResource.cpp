@@ -1,6 +1,6 @@
 // VS_UI_GlobalResource.cpp
 
-#include "client_PCH.h"
+#include "Client_PCH.h"
 #include "VS_UI_GlobalResource.h"
 #include "VS_UI_filepath.h"
 #include "ClientFunction.h"

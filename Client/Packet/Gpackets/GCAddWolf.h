@@ -11,7 +11,7 @@
 // include files
 #include "Packet.h"
 #include "PacketFactory.h"
-#include "types/GuildTypes.h"
+#include "Types/GuildTypes.h"
 
 //--------------------------------------------------------------------------------
 //

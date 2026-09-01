@@ -9,9 +9,9 @@
 //////////////////////////////////////////////////////////////////////////////
 
 //#include "SFCPCH.h"
-#include "client_PCH.h"
+#include "Client_PCH.h"
 
-#include "SXML.h"
+#include "SXml.h"
 #include "PacketAssert.h"
 using namespace std;
 

@@ -11,7 +11,7 @@
 #ifndef __FL2_H__
 #define __FL2_H__
 
-#include "CI.h"
+#include "Ci.h"
 #include <string>
 
 // NOTE: Do not include SP.h here as it defines a stub PrintInfo that conflicts

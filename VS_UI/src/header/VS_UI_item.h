@@ -11,8 +11,8 @@
 #ifndef __VS_UI_ITEM_H__
 #define __VS_UI_ITEM_H__
 
-#include "VS_UI_Util.h"
-#include "VS_UI_base.h"
+#include "VS_UI_util.h"
+#include "VS_UI_Base.h"
 
 #include "MItemTable.h"
 #include "MItem.h"

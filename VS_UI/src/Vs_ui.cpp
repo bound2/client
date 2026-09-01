@@ -1,11 +1,11 @@
 ﻿// VS_UI.cpp
 
-#include "client_PCH.h"
+#include "Client_PCH.h"
 #include "VS_UI.h"
-#include "VS_UI_Mouse_pointer.h"
+#include "VS_UI_mouse_pointer.h"
 #include "VS_UI_Message.h"
 #include "VS_UI_Description.h"
-#include "VS_UI_Filepath.h"
+#include "VS_UI_filepath.h"
 #include "KeyAccelerator.h"
 #include "UserOption.h"
 #include "AcceleratorManager.h"
@@ -14,9 +14,9 @@
 #include "CImm.h"
 #endif
 #include "MZoneTable.h"
-#include "debuginfo.h"
+#include "DebugInfo.h"
 #include "MEventManager.h"
-#include "MGameStringTable.H"
+#include "MGameStringTable.h"
 #include "SkinManager.h"
 #include "assert.h"
 #include "MHelpDef.h"
@@ -1468,9 +1468,9 @@ void C_VS_UI::SelectSkill(int id)
 // -> ONLY TEST <-
 //-----------------------------------------------------------------------------
 #ifndef _LIB
-#include "VS_UI_Mouse_pointer.h"
-#include "VS_UI_Item.h"
-#include "Mitem.h"
+#include "VS_UI_mouse_pointer.h"
+#include "VS_UI_item.h"
+#include "MItem.h"
 //extern MItemManager	g_item_manager;
 extern MItemManager		g_item_manager;
 extern int				g_item_list_size;

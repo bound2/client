@@ -60,7 +60,7 @@
 
 #include <string>
 #include "MObject.h"
-#include "MITemTable.h"
+#include "MItemTable.h"
 #include "MGridItemManager.h"
 #include "MSlotItemManager.h"
 #include "ItemClassDef.h"

@@ -30,7 +30,7 @@
 #include "UserOption.h"
 #include "MCreatureTable.h"
 #include "ClientConfig.h"
-#include "VS_UI_Mouse_pointer.h"
+#include "VS_UI_mouse_pointer.h"
 #include "MTradeManager.h"
 #include "VS_UI_filepath.h"
 #include "MNPCTable.h"
@@ -44,7 +44,7 @@
 #include "MGuildInfoMapper.h"
 #include "UserInformation.h"
 #include "UtilityFunction.h"
-#include "MGameStringTable.H"
+#include "MGameStringTable.h"
 #include "MTimeItemManager.h"
 #include "MMonsterKillQuestInfo.h"
 

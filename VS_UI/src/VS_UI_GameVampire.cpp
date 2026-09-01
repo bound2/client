@@ -1,9 +1,9 @@
 // VS_UI_GameVampire.cpp
 
-#include "client_PCH.h"
+#include "Client_PCH.h"
 #include "VS_UI_GameVampire.h"
 #include "VS_UI_filepath.h"
-#include "VS_UI_Mouse_pointer.h"
+#include "VS_UI_mouse_pointer.h"
 #include "VS_UI.h"
 #include "UserInformation.h"
 extern RECT g_GameRect;

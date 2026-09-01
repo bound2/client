@@ -1,13 +1,13 @@
-#include "client_PCH.h"
+#include "Client_PCH.h"
 
 #include "VS_UI_progress.h"
 #include "VS_UI_filepath.h"
-#include "VS_UI_description.h"
+#include "VS_UI_Description.h"
 #include "UserInformation.h"
 #include "VS_UI.h"
 #include <time.h>
 
-#include "MGameStringTable.H"
+#include "MGameStringTable.h"
 
 #define PROGRESS_MAX 25
 extern	BOOL g_MyFull;

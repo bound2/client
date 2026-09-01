@@ -1,6 +1,6 @@
 ﻿// VS_UI_Description.cpp
 
-#include "client_PCH.h"
+#include "Client_PCH.h"
 #include <assert.h>
 #define assert(e) ((void)(e))
 // Disabled assert for macOS
@@ -13,9 +13,9 @@
 #include "MPriceManager.h"
 #include "MItemOptionTable.h"
 #include "UserOption.h"
-#include "ClientConfig.H"
+#include "ClientConfig.h"
 
-#include "MGameStringTable.H"
+#include "MGameStringTable.h"
 #include "MZoneTable.h"
 #include "MTimeItemManager.h"
 #include "SystemAvailabilities.h"

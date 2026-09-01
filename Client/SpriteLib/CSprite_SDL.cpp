@@ -11,7 +11,7 @@
 
 #ifdef SPRITELIB_BACKEND_SDL
 
-#include "client_PCH.h"
+#include "Client_PCH.h"
 #include "CSprite.h"
 #include "CFilter.h"
 #include "SpriteLibBackend.h"
