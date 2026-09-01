@@ -113,7 +113,14 @@ public :
 // attributes
 //////////////////////////////////////////////////
 private :
-	
+
+	// Test seam: lets tests/unit preload the ring buffer with hostile
+	// bytes without a connected socket (fill() is the only production
+	// writer, and it needs a live peer). Friendship changes access only -
+	// no layout, no behavior - and is declared unconditionally so the
+	// class definition stays identical in every translation unit.
+	friend class SocketInputStreamTestAccess;
+
 	// socket
 	Socket * m_pSocket;
 	

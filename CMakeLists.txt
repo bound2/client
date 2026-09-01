@@ -275,9 +275,10 @@ add_subdirectory(Client/framelib)
 # ClientPlayer/ClientCommunicationManager/Player/Request*Player* are
 # receive loops with game includes (Phase 2); PacketFactoryManager/
 # PacketIDSet/PacketValidator drag every packet's execute() (task 2.4);
-# NPCInfo (MZone.h), OustersSkillInfo (ClientDef.h), SocketAPI/
-# DatagramSocket/PacketFileAPI (DebugInfo.h) are one vestigial include
-# away each (tasks 1.1 follow-ups / 5.1).
+# NPCInfo (MZone.h) and OustersSkillInfo (ClientDef.h) are one
+# vestigial include away each; DatagramSocket.cpp calls DEBUG_ADD for
+# real (task 5.1). PacketFileAPI.cpp is include-clean but nothing needs
+# it yet - it joins with the Rpackets file-transfer work.
 set(PACKETWIRE_SOURCES
 	# Streams / framing / crypto
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/Datagram.cpp
@@ -290,9 +291,13 @@ set(PACKETWIRE_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SocketOutputStream.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/StringStream.cpp
 
-	# Sockets
+	# Sockets. SocketAPI.cpp's DebugInfo.h include is commented out, so it
+	# is include-clean; it is also required here, because SocketImpl's
+	# destructor calls SocketAPI::closesocket_ex - without it, any test
+	# binary that constructs a Socket would fail to link.
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/ServerSocket.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/Socket.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SocketAPI.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SocketImpl.cpp
 
 	# Wire info classes (parsers for server-supplied sub-structures)

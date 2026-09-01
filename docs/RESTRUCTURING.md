@@ -113,7 +113,7 @@ an unrecorded drop, so tightening lands in the same commit as the progress.
 
 | # | Metric | Baseline | Command |
 |---|--------|---------:|---------|
-| R1 | Translation units compiled directly into the DarkEden target | 993 (was 1,044 before task 1.1's `packetwire` move) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` (machine-local tree; the ratchet script recomputes it from the CMake lists when the vcxproj is absent) |
+| R1 | Translation units compiled directly into the DarkEden target | 992 (1,044 before task 1.1's `packetwire` move; 993 before `SocketAPI.cpp` joined in 1.2) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` (machine-local tree; the ratchet script recomputes it from the CMake lists when the vcxproj is absent) |
 | R2 | Packet `.cpp` files still defining `::execute(` (non-Handler) | 448 | `grep -rlE '::execute\s*\(' Client/Packet/Gpackets Client/Packet/Cpackets Client/Packet/Lpackets Client/Packet/Rpackets Client/Packet/Upackets --include='*.cpp' \| grep -v Handler \| wc -l` |
 | R3 | `sprintf`/`strcpy`/`strcat` call sites under `Client/Packet` | 70 | `grep -rE '\b(sprintf\|strcpy\|strcat)\s*\(' Client/Packet --include='*.cpp' \| wc -l` |
 | R4 | Files in static libraries referencing `g_p*` client globals | measure in 0.2 | `ratchets.sh` computes it over the union of the libraries' explicit source lists |
@@ -175,9 +175,12 @@ result immediately covers the top-risk area's foundations. This is the
     `SocketOutputStream.cpp`, `SocketEncryptInputStream.cpp`,
     `SocketEncryptOutputStream.cpp`, `Encrypter.cpp`, `StringStream.cpp`,
     `Exception.cpp`, `PacketAssert.cpp`, `Datagram.cpp`
-  - **Sockets:** `Socket.cpp`, `SocketImpl.cpp`, `ServerSocket.cpp`
-    (`SocketAPI.cpp` and `DatagramSocket.cpp` include `DebugInfo.h` — they
-    stay in the exe until their debug calls are sorted; W2 enforces this)
+  - **Sockets:** `Socket.cpp`, `SocketImpl.cpp`, `ServerSocket.cpp`,
+    `SocketAPI.cpp` (its `DebugInfo.h` include turned out to be commented
+    out — it joined in 1.2 because `~SocketImpl` calls
+    `SocketAPI::closesocket_ex`, so test binaries constructing a `Socket`
+    need it to link; `DatagramSocket.cpp` calls `DEBUG_ADD` for real and
+    stays out until 5.1)
   - **Info classes (wire sub-structures, the parsers the GC packets
     delegate to):** `EffectInfo.cpp`, `ExtraInfo.cpp`, `ExtraSlotInfo.cpp`,
     `GameTime.cpp`, `GearInfo.cpp`, `GearSlotInfo.cpp`, `GuildWarInfo.cpp`,
@@ -203,10 +206,11 @@ result immediately covers the top-risk area's foundations. This is the
   - `PacketFactoryManager.cpp`, `PacketIDSet.cpp`, `PacketValidator.cpp` —
     reference every packet factory, which today drags every packet's
     `execute()` and therefore every handler; they move in 2.4.
-  - `NPCInfo.cpp` (includes `MZone.h`/`MCreatureTable.h`),
-    `OustersSkillInfo.cpp` (includes `ClientDef.h`), `SocketAPI.cpp`,
-    `DatagramSocket.cpp`, `PacketFileAPI.cpp` — one vestigial include each
-    away from eligibility; each is its own small follow-up commit.
+  - `NPCInfo.cpp` (includes `MZone.h`/`MCreatureTable.h`) and
+    `OustersSkillInfo.cpp` (includes `ClientDef.h`) — one vestigial
+    include each away from eligibility; `DatagramSocket.cpp` (live
+    `DEBUG_ADD` calls, task 5.1); `PacketFileAPI.cpp` (include-clean but
+    unneeded until the Rpackets file-transfer work).
 
   Build wiring: `packetwire` gets the same defines the exe gives these files
   today (`__GAME_CLIENT__` comes from `Client_PCH.h`; add `__WIN32__` and
@@ -233,10 +237,22 @@ result immediately covers the top-risk area's foundations. This is the
   the same suite under ASan per house rules), and a `SocketInputStream`
   framing test (a length that exceeds the buffer must not read past it).
   Note for stream construction in tests: the streams read from a real
-  socket handle in production; tests exercise the buffer-manipulation API
-  (`read(char*, len)` over a pre-filled ring) — if a seam is missing, add a
-  test-only fill helper in the test, not a change to the stream.
-  > **Status:** not started.
+  socket handle in production and `fill()` is the only production writer
+  of the ring, so the seam is a one-line `friend class
+  SocketInputStreamTestAccess;` in the stream header — access-only, no
+  layout or behavior change, declared unconditionally so the class
+  definition is identical in every TU. The helper itself lives in the
+  test file. Test TUs must compile with the library's own defines
+  (`__GAME_CLIENT__=1`, Windows wire macros): `Packet`'s virtual set
+  changes under them, so a mismatch is a real vtable/ODR break.
+  > **Status:** done (2026-09-01, `restructuring/packetwire`) —
+  > `unit_tests` links `packetwire`; 7 parser/stream tests landed:
+  > stream bounds (zero-length rejected, over-read throws
+  > `InsufficientDataException` and consumes nothing, wrap-around
+  > reassembly), `ModifyInfo` (happy-path parse, hostile count hits the
+  > underflow guard), `InventoryInfo` (zero count, hostile count).
+  > `SocketAPI.cpp` joined the library (see 1.1 membership note). Suite
+  > green in the plain and ASan test trees.
   - Owner: the tests themselves; `unit_tests` link line.
 
 - [ ] **1.3 First test-first fix: `StringStream` stack overflow.**

@@ -41,6 +41,7 @@ target_link_libraries(unit_tests PRIVATE
 	basic
 	SpriteLib
 	TextSystem
+	packetwire
 )
 
 target_include_directories(unit_tests PRIVATE
@@ -66,6 +67,24 @@ set_source_files_properties(
 	PROPERTIES
 		INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/Client/Packet;${CMAKE_CURRENT_SOURCE_DIR}/generated"
 		COMPILE_DEFINITIONS "__GAME_CLIENT__=1;WIRE_LAYOUT_FILE=\"${CMAKE_CURRENT_SOURCE_DIR}/wire-layout.txt\""
+)
+
+#----------------------------------------------------------------------
+# packetwire tests compile against class definitions the library built
+# with __GAME_CLIENT__=1 (and the Windows wire macros); the test TUs
+# must see the identical definitions - Packet's virtual set changes
+# under these macros, so a mismatch would be a real ODR/vtable break,
+# not a style issue. Include dirs come from packetwire's PUBLIC dirs.
+#----------------------------------------------------------------------
+set(PACKETWIRE_TEST_DEFINITIONS "__GAME_CLIENT__=1")
+if(WIN32)
+	list(APPEND PACKETWIRE_TEST_DEFINITIONS "__WIN32__" "__WINDOWS__")
+endif()
+set_source_files_properties(
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packetwire_parsers.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_stringstream.cpp
+	PROPERTIES
+		COMPILE_DEFINITIONS "${PACKETWIRE_TEST_DEFINITIONS}"
 )
 
 add_test(NAME unit_tests COMMAND unit_tests)
