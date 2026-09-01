@@ -820,6 +820,10 @@ add_executable(effect_viewer
 target_include_directories(effect_viewer PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/Client
+	# The Client/*.cpp game sources this tool compiles resolve wire
+	# vocabulary headers (RaceType.h via MCreature.h) from Client/Packet,
+	# the same include path they compile with in the DarkEden target.
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/SpriteLib
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/DXLib
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/framelib

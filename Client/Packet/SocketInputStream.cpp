@@ -16,7 +16,6 @@
 #include <errno.h>
 #include "PacketAssert.h"
 #include "Packet.h"
-#include "MinTr.h"
 #include <cstdio>
 
 #if __LINUX__
