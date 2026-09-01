@@ -44,21 +44,6 @@ void UCRequestLoginMode::write ( Socket * pSocket ) const
 	__END_CATCH
 }
 
-
-//--------------------------------------------------------------------------------
-// execute packet's handler
-//--------------------------------------------------------------------------------
-void UCRequestLoginMode::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	UCRequestLoginModeHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
-
 //--------------------------------------------------------------------------------
 // get debug string
 //--------------------------------------------------------------------------------

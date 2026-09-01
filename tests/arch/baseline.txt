@@ -1,0 +1,10 @@
+# Grandfathered include-graph violations, one per line, as
+# "RULE|includer|include" exactly as check_includes.pl prints them.
+# Frozen shrink-only: entries may only be deleted, never added - a new
+# violation means the file is in the wrong target, not that this list
+# grows. An entry that stops matching fails the run until it is
+# deleted.
+#
+# Empty by design since 2026-09-01: the packetwire closure walks clean
+# (the two vestigial debug includes were removed and RaceType.h - pure
+# wire vocabulary - moved under Client/Packet).

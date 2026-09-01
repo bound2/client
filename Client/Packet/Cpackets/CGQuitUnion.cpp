@@ -29,15 +29,6 @@ void CGQuitUnion::write (SocketOutputStream & oStream) const
 	__END_CATCH
 }
 
-void CGQuitUnion::execute (Player* pPlayer) 
-	 throw (ProtocolException , Error)
-{
-	__BEGIN_TRY
-#ifndef __GAME_CLIENT__		
-	CGQuitUnionHandler::execute(this , pPlayer);
-#endif
-	__END_CATCH
-}
 #ifdef __DEBUG_OUTPUT__
 string CGQuitUnion::toString () const
        throw ()

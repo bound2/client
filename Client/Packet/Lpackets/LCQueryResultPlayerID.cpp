@@ -74,21 +74,6 @@ void LCQueryResultPlayerID::write ( SocketOutputStream & oStream ) const
 	__END_CATCH
 }
 
-
-//--------------------------------------------------------------------------------
-// execute packet's handler
-//--------------------------------------------------------------------------------
-void LCQueryResultPlayerID::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	LCQueryResultPlayerIDHandler::execute ( this , pPlayer );
-		
-	__END_CATCH
-}
-
-
 //--------------------------------------------------------------------------------
 // get debug string
 //--------------------------------------------------------------------------------

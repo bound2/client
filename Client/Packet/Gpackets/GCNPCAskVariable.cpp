@@ -135,19 +135,6 @@ std::string GCNPCAskVariable::getValue( const std::string& name ) const
 }
 
 
-//////////////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////////////
-void GCNPCAskVariable::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCNPCAskVariableHandler::execute( this , pPlayer );
-
-	__END_CATCH
-}
-
 PacketSize_t GCNPCAskVariable::getPacketSize() const
 	throw()
 {

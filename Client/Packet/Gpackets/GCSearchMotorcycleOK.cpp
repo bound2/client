@@ -43,19 +43,6 @@ void GCSearchMotorcycleOK::write ( SocketOutputStream & oStream ) const
 }
 
 //--------------------------------------------------------------------------------
-// execute packet's handler
-//--------------------------------------------------------------------------------
-void GCSearchMotorcycleOK::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCSearchMotorcycleOKHandler::execute( this , pPlayer );
-
-	__END_CATCH
-}
-
-//--------------------------------------------------------------------------------
 // get packet's debug std::string
 //--------------------------------------------------------------------------------
 #ifdef __DEBUG_OUTPUT__

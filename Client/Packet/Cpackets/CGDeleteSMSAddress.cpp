@@ -40,16 +40,6 @@ void CGDeleteSMSAddress::write (SocketOutputStream & oStream) const
 	__END_CATCH
 }
 
-void CGDeleteSMSAddress::execute (Player* pPlayer) 
-	 throw (ProtocolException , Error)
-{
-	__BEGIN_TRY
-#ifndef __GAME_CLIENT__
-	CGDeleteSMSAddressHandler::execute (this , pPlayer);
-#endif		
-	__END_CATCH
-}
-
 string CGDeleteSMSAddress::toString () 
 	const throw ()
 {

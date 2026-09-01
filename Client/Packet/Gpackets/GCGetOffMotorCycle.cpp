@@ -66,23 +66,6 @@ void GCGetOffMotorCycle::write ( SocketOutputStream & oStream )
 	__END_CATCH
 }
 
-
-//////////////////////////////////////////////////////////////////////
-//
-// execute packet's handler
-//
-//////////////////////////////////////////////////////////////////////
-void GCGetOffMotorCycle::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCGetOffMotorCycleHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
-
 //////////////////////////////////////////////////////////////////////
 //
 // get packet's debug std::string

@@ -36,8 +36,6 @@ enum
 	//add by svi 2009-07-15
 	ADD_ITEM_TO_ITEM_REMOVE_OPTION_OK,
 
-
-
     ADD_ITEM_TO_ITEM_VERIFY_MAX
 };
 
@@ -55,7 +53,6 @@ public:
 public:
 	void read(SocketInputStream & iStream) throw(ProtocolException, Error);
 	void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	void execute(Player* pPlayer) throw(ProtocolException, Error);
 
 	PacketID_t getPacketID() const throw() { return PACKET_GC_ADD_ITEM_TO_ITEM_VERIFY; }
 	PacketSize_t getPacketSize() const throw();

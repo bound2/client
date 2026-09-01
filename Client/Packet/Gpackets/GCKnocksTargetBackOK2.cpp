@@ -80,21 +80,6 @@ void GCKnocksTargetBackOK2::write ( SocketOutputStream & oStream )
 	__END_CATCH
 }
 
-//////////////////////////////////////////////////////////////////////
-//
-// execute packet's handler
-//
-//////////////////////////////////////////////////////////////////////
-void GCKnocksTargetBackOK2::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCKnocksTargetBackOK2Handler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 
 //////////////////////////////////////////////////////////////////////
 //

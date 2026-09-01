@@ -10,6 +10,7 @@
 #include "ClientPlayer.h"
 #include "PacketAssert.h"
 #include "Packet.h"
+#include "PacketDispatcher.h"
 #include "PacketFactoryManager.h"
 #include "PacketValidator.h"
 #include "ClientConfig.h"
@@ -290,10 +291,15 @@ void ClientPlayer::processCommand ()
 
 //					_MinTrace("Incomming Packet ID : %d\n",pPacket->getPacketID());
 
-					pPacket->execute( this );
+					// Dispatch-first (RESTRUCTURING.md task 2.1): migrated
+					// packets run through the dispatch table; unmigrated
+					// ones fall back to the legacy virtual until ratchet
+					// R2 reaches 0 and the fallback is deleted.
+					if ( !PacketDispatcher::tryDispatch( pPacket , this ) )
+						pPacket->execute( this );
 
 					//DEBUG_ADD_FORMAT("[Executed] %s", pPacket->toString().c_str());
-					DEBUG_ADD("[PacketExecute OK1]");				
+					DEBUG_ADD("[PacketExecute OK1]");
 				}
 				
 				

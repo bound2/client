@@ -68,21 +68,6 @@ void GCAttackMeleeOK2::write ( SocketOutputStream & oStream )
 	
 	__END_CATCH
 }
-//////////////////////////////////////////////////////////////////////
-//
-// execute packet's handler
-//
-//////////////////////////////////////////////////////////////////////
-void GCAttackMeleeOK2::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCAttackMeleeOK2Handler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 
 //////////////////////////////////////////////////////////////////////
 //

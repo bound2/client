@@ -42,21 +42,6 @@ void GCRegenZoneStatus::write ( SocketOutputStream & oStream ) const
 	__END_CATCH
 }
 
-
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void GCRegenZoneStatus::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCRegenZoneStatusHandler::execute( this , pPlayer );
-
-	__END_CATCH
-}
-
-
 #ifdef __DEBUG_OUTPUT__
 //////////////////////////////////////////////////////////////////////
 // get packet's debug string

@@ -73,21 +73,6 @@ void GCShowGuildMemberInfo::write ( SocketOutputStream & oStream ) const
 	__END_CATCH
 }
 
-
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void GCShowGuildMemberInfo::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCShowGuildMemberInfoHandler::execute( this , pPlayer );
-
-	__END_CATCH
-}
-
-
 #ifdef __DEBUG_OUTPUT__
 //////////////////////////////////////////////////////////////////////
 // get packet's debug std::string

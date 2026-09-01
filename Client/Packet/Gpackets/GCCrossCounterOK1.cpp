@@ -74,21 +74,6 @@ void GCCrossCounterOK1::write ( SocketOutputStream & oStream )
 
 	__END_CATCH
 }
-//////////////////////////////////////////////////////////////////////
-//
-// execute packet's handler
-//
-//////////////////////////////////////////////////////////////////////
-void GCCrossCounterOK1::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCCrossCounterOK1Handler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 
 //////////////////////////////////////////////////////////////////////
 //

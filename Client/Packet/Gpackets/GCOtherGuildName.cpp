@@ -63,21 +63,6 @@ void GCOtherGuildName::write ( SocketOutputStream & oStream ) const
 	__END_CATCH
 }
 
-
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void GCOtherGuildName::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCOtherGuildNameHandler::execute( this , pPlayer );
-
-	__END_CATCH
-}
-
-
 #ifdef __DEBUG_OUTPUT__
 //////////////////////////////////////////////////////////////////////
 // get packet's debug string

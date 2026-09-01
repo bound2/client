@@ -26,17 +26,6 @@ void CGGQuestCancel::write (SocketOutputStream & oStream) const
 	__END_CATCH
 }
 
-void CGGQuestCancel::execute (Player* pPlayer) 
-	 throw (ProtocolException , Error)
-{
-#ifndef __GAME_CLIENT__
-	__BEGIN_TRY
-		
-	CGGQuestCancelHandler::execute(this , pPlayer);
-
-	__END_CATCH
-#endif
-}
 #ifdef __DEBUG_OUTPUT__
 string CGGQuestCancel::toString () const
        throw ()

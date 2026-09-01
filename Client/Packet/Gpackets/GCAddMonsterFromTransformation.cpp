@@ -95,21 +95,6 @@ void GCAddMonsterFromTransformation::write ( SocketOutputStream & oStream ) cons
 	__END_CATCH
 }
 
-
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void GCAddMonsterFromTransformation::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCAddMonsterFromTransformationHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
-
 //////////////////////////////////////////////////////////////////////
 //
 // get packet's debug std::string

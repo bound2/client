@@ -53,8 +53,10 @@ public :
 	// Datagram 객체로 패킷의 바이너리 이미지를 보낸다.
 	virtual void write ( Datagram & oDatagram ) const throw ( ProtocolException , Error ) = 0;
 	
-	// execute packet's handler
-	virtual void execute ( Player * pPlayer ) throw ( ProtocolException , Error ) = 0;
+	// execute() is no longer redeclared pure here: every DatagramPacket
+	// subclass migrated onto PacketDispatcher (task 2.2), so the Packet
+	// base's throwing default is the correct behavior for an id that
+	// arrives unregistered.
 	
 	// get packet's DatagramPacketID	
 	virtual PacketID_t getPacketID () const throw () = 0;

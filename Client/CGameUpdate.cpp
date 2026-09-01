@@ -22,6 +22,7 @@
 #include <string>
 #include "TextSystem/TextService.h"
 #include "Client.h"
+#include "PacketDispatcher.h"
 #include "GameObject.h"
 #include "UserInformation.h"
 #include "ServerInfo.h"
@@ -885,7 +886,11 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 
 //										DEBUG_ADD_FORMAT("[Execute] %s", gcSkillToTileOK2.toString().c_str());
 
-										gcSkillToTileOK2.execute( g_pSocket );
+										// Local echo through the dispatcher: the packet's
+										// virtual execute() is gone (RESTRUCTURING.md 2.2)
+										// and the registered handler is the same code it
+										// used to delegate to.
+										PacketDispatcher::dispatch( &gcSkillToTileOK2, g_pSocket );
 										
 										DEBUG_ADD("TileOK2OKOK");
 									}
@@ -913,10 +918,10 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 										DEBUG_ADD_FORMAT("[Execute] %s", gcSkillToObjectOK5.toString().c_str());
 
 										#ifdef CONNECT_SERVER
-											gcSkillToObjectOK5.execute( g_pSocket );
+											PacketDispatcher::dispatch( &gcSkillToObjectOK5, g_pSocket );
 										#else
-											gcSkillToObjectOK5.execute( NULL );
-										#endif	
+											PacketDispatcher::dispatch( &gcSkillToObjectOK5, NULL );
+										#endif
 									}
 									else if (rand()%2==0)
 									{										
@@ -934,10 +939,10 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 											DEBUG_ADD_FORMAT("[Execute] %s", gcSkillToSelfOK2.toString().c_str());
 
 											#ifdef CONNECT_SERVER
-												gcSkillToSelfOK2.execute( g_pSocket );
+												PacketDispatcher::dispatch( &gcSkillToSelfOK2, g_pSocket );
 											#else
-												gcSkillToSelfOK2.execute( NULL );
-											#endif	
+												PacketDispatcher::dispatch( &gcSkillToSelfOK2, NULL );
+											#endif
 										}
 									}
 									else
@@ -961,9 +966,9 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 										DEBUG_ADD_FORMAT("[Execute] %s", gcSkillFailed2.toString().c_str());
 										
 										#ifdef CONNECT_SERVER
-											gcSkillFailed2.execute( g_pSocket );
+											PacketDispatcher::dispatch( &gcSkillFailed2, g_pSocket );
 										#else
-											gcSkillFailed2.execute( NULL );
+											PacketDispatcher::dispatch( &gcSkillFailed2, NULL );
 										#endif
 									}
 									*/

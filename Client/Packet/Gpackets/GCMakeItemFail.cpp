@@ -65,23 +65,6 @@ void GCMakeItemFail::write ( SocketOutputStream & oStream )
 	__END_CATCH
 }
 
-
-//////////////////////////////////////////////////////////////////////
-//
-// execute packet's handler
-//
-//////////////////////////////////////////////////////////////////////
-void GCMakeItemFail::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCMakeItemFailHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
-
 //////////////////////////////////////////////////////////////////////
 //
 // get packet's debug std::string

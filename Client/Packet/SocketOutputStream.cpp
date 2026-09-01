@@ -13,7 +13,6 @@
 #include "SocketOutputStream.h"
 #include "PacketAssert.h"
 #include "Packet.h"
-#include "DebugInfo.h"
 
 //////////////////////////////////////////////////////////////////////
 // constructor

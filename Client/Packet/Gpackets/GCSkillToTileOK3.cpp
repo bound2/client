@@ -13,8 +13,6 @@
 #include "Client_PCH.h"
 #include "GCSkillToTileOK3.h"
 
-
-
 //////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////
@@ -139,21 +137,6 @@ void GCSkillToTileOK3::deleteCListElement()
 	__END_CATCH
 }
 */
-
-//////////////////////////////////////////////////////////////////////
-//
-// GCSkillToTileOK3::execute()
-// 
-//////////////////////////////////////////////////////////////////////
-void GCSkillToTileOK3::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCSkillToTileOK3Handler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
 
 
 #ifdef __DEBUG_OUTPUT__

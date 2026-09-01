@@ -113,10 +113,11 @@ an unrecorded drop, so tightening lands in the same commit as the progress.
 
 | # | Metric | Baseline | Command |
 |---|--------|---------:|---------|
-| R1 | Translation units compiled directly into the DarkEden target | 992 (1,044 before task 1.1's `packetwire` move; 993 before `SocketAPI.cpp` joined in 1.2) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` (machine-local tree; the ratchet script recomputes it from the CMake lists when the vcxproj is absent) |
-| R2 | Packet `.cpp` files still defining `::execute(` (non-Handler) | 448 | `grep -rlE '::execute\s*\(' Client/Packet/Gpackets Client/Packet/Cpackets Client/Packet/Lpackets Client/Packet/Rpackets Client/Packet/Upackets --include='*.cpp' \| grep -v Handler \| wc -l` |
-| R3 | `sprintf`/`strcpy`/`strcat` call sites under `Client/Packet` | 70 | `grep -rE '\b(sprintf\|strcpy\|strcat)\s*\(' Client/Packet --include='*.cpp' \| wc -l` |
-| R4 | Files in static libraries referencing `g_p*` client globals | measure in 0.2 | `ratchets.sh` computes it over the union of the libraries' explicit source lists |
+| R1 | Translation units compiled directly into the DarkEden target | 992 (1,044 before task 1.1's `packetwire` move; the task-2.2 composition root `PacketHandlerRegistry.cpp` was a recorded +1, offset when finishing the migration deleted `CGHandlersStub.cpp`) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` — `ratchets.sh` reads the generated vcxproj, preferring the ctest run's own build dir; on generators with no vcxproj it reports SKIP, not PASS |
+| R2 | Packet `.cpp` files still defining a packet-style `::execute(Player` | **0** (448 → 432 in slice 1 → 0 when 2.2/2.3 finished; regex refined at 0 to stop matching comments and the in-file handler body in `GCExchangeBuy.cpp`) | `grep -rlE '^void\s+\w+::execute\s*\(\s*Player' Client/Packet/{Gpackets,Cpackets,Lpackets,Rpackets,Upackets} --include='*.cpp' \| grep -v Handler \| wc -l` |
+| R3 | Live `sprintf`/`strcpy`/`strcat` lines under `Client/Packet` | 46 (61 at first measurement; the 2026-09-01 adversarial review showed a quarter of that was commented-out code, so the measurement now excludes `//` matches) | see `ratchets.sh` — the grep excludes comment-prefixed matches |
+| R4 | Library-compiled `.cpp` files referencing `g_p*` client globals | 81 (83 at first measurement; the review found the raw directory `find` counted two files CMake excludes from the library builds — `VS_UI/WinMain.cpp`, `hangul/Ci.cpp` — now filtered) | `ratchets.sh` computes it over the library dirs (minus CMake-excluded files) plus the `VS_UI_CLIENT_SOURCES` and `PACKETWIRE_SOURCES` lists parsed from `CMakeLists.txt` |
+| R5 | Direct packet `execute()` call sites outside `Client/Packet` | 1 (a commented-out block in `CGameUpdate.cpp`; added 2026-09-01 after the review found live local-echo callers the receive-loop enumeration had missed) | see `ratchets.sh` |
 
 R1 is the headline number: it counts what still cannot be unit-tested. R2 is
 the client twin of the server's R4 (which it drove to 0). R3 tracks
@@ -130,7 +131,7 @@ code-health priority 2 mechanically.
   > **Status:** done (2026-09-01).
   - Owner: the status-line discipline itself; CLAUDE.md points here.
 
-- [ ] **0.2 Ratchet script.** `tests/ratchet/ratchets.sh`, registered in
+- [x] **0.2 Ratchet script.** `tests/ratchet/ratchets.sh`, registered in
   `tests/CMakeLists.txt` as a ctest, ports the server's script shape: fails
   on increase and on unrecorded decrease; generates into scratch space, never
   overwrites tracked files in place. Measure and record the R4 baseline.
@@ -138,10 +139,17 @@ code-health priority 2 mechanically.
   review" list (CRLF on committed test data, `UPDATE_GOLDENS` accepting any
   value) — apply those lessons on day one: `.gitattributes` `eol=lf` for any
   new committed test-data files.
-  > **Status:** not started.
+  > **Status:** done (2026-09-01, `restructuring/enforcement`) — the
+  > `ratchets` ctest runs R1–R4 with baselines inline in the script;
+  > measurements are grep-only (nothing generated, nothing overwritten).
+  > R1 reads the generated `DarkEden.vcxproj`, preferring the ctest
+  > run's own build dir so the number always reflects the tree just
+  > configured, and SKIPs (never passes) where no vcxproj exists. R4
+  > measured at 83. `.gitattributes` got `eol=lf` for the new committed
+  > test data and scripts.
   - Owner: the ratchet test.
 
-- [ ] **0.3 Include-graph checker.** `tests/arch/check_includes.pl` (perl —
+- [x] **0.3 Include-graph checker.** `tests/arch/check_includes.pl` (perl —
   Git for Windows ships it, and the wire-inventory generator is already
   perl), run by ctest. Rules, extended per phase:
   - **W1**: a `packetwire` member (membership = the target's explicit source
@@ -153,7 +161,22 @@ code-health priority 2 mechanically.
     back live via a lib file).
   Grandfathered violations go in a frozen shrink-only baseline file, exactly
   like the server's `tests/arch/baseline.txt`.
-  > **Status:** not started.
+  > **Status:** done (2026-09-01, `restructuring/enforcement`) — the
+  > `arch_includes` ctest walks the full quote-include closure of the
+  > membership parsed from `CMakeLists.txt` (133 files) with the
+  > compiler's own resolution order; unresolvable includes are
+  > violations too, and an unmatched baseline entry fails the run
+  > (shrink-only). Getting to a clean walk took three source changes,
+  > landed with it: the two vestigial debug includes came out of the
+  > streams (`MinTr.h` in `SocketInputStream.cpp`, `DebugInfo.h` in
+  > `SocketOutputStream.cpp` — both referenced only from comments), and
+  > W1's one real finding, `Types/ItemTypes.h` → `Client/RaceType.h`,
+  > was fixed the way the server fixed `SkillTypes`: `RaceType.h` is
+  > pure wire vocabulary (the `Race` enum, `Race_t`, `szRace`) and
+  > moved to `Client/Packet/RaceType.h`; every includer resolves it via
+  > the `Client/Packet` include dir, which `effect_viewer` — the one
+  > target compiling game sources without it — now also carries.
+  > `tests/arch/baseline.txt` is empty by design.
   - Owner: the `arch_includes` ctest.
 
 ---
@@ -165,7 +188,7 @@ change to move** (bytes-identical relocation into a new target) and the
 result immediately covers the top-risk area's foundations. This is the
 "first candidate" — task 1.1 below names the exact membership.
 
-- [ ] **1.1 Create the `packetwire` static library** from the game-free
+- [x] **1.1 Create the `packetwire` static library** from the game-free
   subset of the `Client/Packet` root (verified 2026-09-01: every file below
   includes only `Client_PCH.h`, packet-internal headers, and system headers;
   the debug-trace references in the streams are commented out).
@@ -218,15 +241,15 @@ result immediately covers the top-risk area's foundations. This is the
   exist in this family), include dirs `Client/Packet`, `Client`, `basic`.
   `DarkEden` and `VS_UI` link it; the files leave `CLIENT_MAIN_SOURCES` via
   `list(REMOVE_ITEM)`. Zero source-file edits in the move commit.
-  > **Status:** in progress (owner missing — the explicit source list
-  > exists, but the W1/W2 include rules (0.3) and the R1 ratchet test
-  > (0.2) do not yet enforce it). The move itself landed: 51 files (the
+  > **Status:** done (2026-09-01 — the owners landed with 0.2/0.3: the
+  > R1 ratchet and the W1/W2 include rules now enforce the boundary;
+  > runtime-verified against a live server and merged in PR #34).
+  > History: the move landed first with the owners missing: 51 files (the
   > membership above, minus a few counted twice in the "~57" estimate)
   > compile as `packetwire`, DarkEden dropped 1,044 → 993 TUs with zero
   > source edits and zero double-compiled members (verified against the
   > generated .vcxproj), both Debug trees build with 0 errors, and the
-  > existing test suite is green. Runtime verification against a live
-  > server pending (user-run).
+  > existing test suite stayed green.
   - Owner: the explicit source list + W1/W2 in the include checker + R1
     dropping by the member count.
 
@@ -315,7 +338,7 @@ migration recipe, the dispatcher design, and the traps are all recorded in
 the server's status notes. This is what makes the ~509 `Gpackets` parsers
 (priority 1 in the code-health review) directly unit-testable.
 
-- [ ] **2.1 `PacketDispatcher` in `packetwire`.** Table of packet id →
+- [x] **2.1 `PacketDispatcher` in `packetwire`.** Table of packet id →
   `void(*)(Packet*, Player*)`, written only at startup, consulted before the
   legacy virtual. Port the server's `PacketDispatcher.h` shape (including
   the `DE_REGISTER_PACKET_HANDLER` macros) rather than inventing a new one.
@@ -323,11 +346,28 @@ the server's status notes. This is what makes the ~509 `Gpackets` parsers
   `ClientPlayer.cpp:293`, `Player.cpp:201`, `RequestClientPlayer.cpp:235`,
   `RequestServerPlayer.cpp:215`, `ClientCommunicationManager.cpp:212`
   (datagram, `NULL` player).
-  > **Status:** not started.
+  > **Status:** done (2026-09-01, `restructuring/packet-dispatcher`) —
+  > `Client/Packet/PacketDispatcher.{h,cpp}` is the server's design
+  > verbatim (fixed `PACKET_MAX` table, startup-only writes, assert on
+  > double registration, `InvalidProtocolException` from `dispatch` on
+  > an unregistered id, both `DE_REGISTER_PACKET_HANDLER` macros) plus
+  > one client-only transitional entry: `tryDispatch`, which reports an
+  > unregistered id instead of throwing so the five receive loops —
+  > all converted, `DatagramPacket` is a `Packet` so the datagram loop
+  > uses the same table — fall back to the legacy virtual until R2
+  > reaches 0, at which point the loops switch to `dispatch()` and
+  > `tryDispatch` is deleted. Five unit tests pin the contract
+  > (registered handler runs with the given packet/player, tryDispatch
+  > true/false split, dispatch throws on unregistered, double
+  > registration refused via `AssertionError`). With no handlers
+  > registered yet the change is behaviorally inert — every packet
+  > still takes the fallback — so the runtime risk of this landing
+  > alone is nil; each 2.2 slice carries its own live verification.
+  > Suite 119/450/0 in plain and ASan trees; both client trees 0 errors.
   - Owner: R2 ratchet + a dispatcher unit test (unknown id → protocol
     exception).
 
-- [ ] **2.2 Migrate the GC direction** (the risk direction: 251 handlers).
+- [x] **2.2 Migrate the GC direction** (the risk direction: 251 handlers).
   Per batch: register the handler function at the composition root
   (`GamePacketDispatch.cpp` analog compiled into the exe), delete
   `execute()` from the packet class, leave the handler `.cpp` where it is.
@@ -335,16 +375,98 @@ the server's status notes. This is what makes the ~509 `Gpackets` parsers
   it per batch. R2 448 → tracks progress; do it in mergeable slices
   (~25 packets each), highest-risk parsers first (shop/stash/chat/guild —
   the fixed findings already name them).
-  > **Status:** not started.
+  > **Status:** in progress (slice 1 landed 2026-09-01,
+  > `restructuring/gc-slice-1`; 235 GC packets remain). Slice 1 = the 16
+  > shop/stash/say/guild packets (`GCSay`, `GCGuildChat`,
+  > `GCGuildMemberList`, `GCGuildResponse`, the 10 `GCShop*`,
+  > `GCStashList`, `GCStashSell`). `Packet::execute` is no longer pure:
+  > the default throws `InvalidProtocolException`, so a migrated id
+  > received with no registration disconnects instead of silently
+  > no-opping — a mis-migration surfaces in the first live run.
+  > `Client/PacketHandlerRegistry.cpp` is the composition root, called
+  > from `InitGame()` beside the `PacketFactoryManager` creation,
+  > idempotent against a second init pass; the two stash packets keep
+  > their `__BEGIN_DEBUG` wrapper via explicit thunks (no-op on
+  > `__WIN32__`, preserved for the cout-branch platforms — the server's
+  > `CGStashList` precedent). Every deleted `execute()` was verified
+  > pure delegation before deletion. R2 448 → 432; live verification of
+  > chat/shop/stash/guild flows gates the merge.
+  > **Completed 2026-09-01** (`restructuring/packet-migration-2`, with
+  > 2.3 below): every `execute()` body in every packet direction was
+  > mechanically classified (pure delegation / delegation-with-debug /
+  > packet-only-handler / empty / fully-preprocessor-guarded / other)
+  > and all 432 remaining were stripped. The GC/LC/CR-RC/U directions
+  > are registered in `PacketHandlerRegistry.cpp`: 271 standard
+  > delegations (including `GCUseSkillCardOK`, a second packet class
+  > hiding in `GCUseOK.cpp` that filename-based tooling missed), 7
+  > packet-only handlers (the datagram connection family), 6
+  > `__BEGIN_DEBUG` thunks, `GLIncomingConnectionError`'s cout trace
+  > preserved verbatim, and `GCExchangeList` as an explicit no-op (its
+  > execute was empty on purpose — the exchange UI consumes the parsed
+  > packet elsewhere). R2 = 0, held by the ratchet with a refined regex.
+  > **Adversarial review round (2026-09-01, 8 Opus reviewers — 2 per
+  > stack branch, behavior + claims lenses; 3 of 8 NO-SHIP):** the
+  > review earned its keep. Fixed on the branch, most severe first:
+  > 1. **The registry registered all 271 standard handlers twice** (a
+  >    script assembly fault duplicated the block verbatim) — the
+  >    client would have thrown out of startup on the first run.
+  > 2. **The receive loops were never the whole story**: the client
+  >    fabricates packets locally and calls `execute()` on them
+  >    directly — 12 live sites (skill echoes in `CGameUpdate.cpp`, GM
+  >    system messages in `Client.cpp`, and `CGConnectSetKey` on the
+  >    login paths in `UIMessageManager.cpp`). All would have hit the
+  >    new throwing default; login and skill feedback were broken. All
+  >    12 now route through `PacketDispatcher::dispatch`,
+  >    `CGConnectSetKey` is registered as the explicit no-op its
+  >    linked stub always was, and new ratchet **R5** owns the rule.
+  > 3. **`CRRequest2` collided with `CRRequest`** — both claim
+  >    `PACKET_CR_REQUEST`; the orphan duplicate (no factory, no
+  >    callers) is no longer registered and is flagged for 5.2.
+  > 4. The claimed CG-deletion safety rationale was **false as
+  >    stated**: `PacketValidator`'s `CPS_NORMAL` accepts any id and
+  >    `Player::processCommand` has no validator. The honest basis
+  >    (documented in the registry header now): the server never sends
+  >    CG/CL ids and the deleted bodies were no-ops, so the only
+  >    change is that a protocol-violating peer now disconnects — the
+  >    same trade the server repo made. Also: 16 of the 163 deleted
+  >    "CG" files are actually CL packets.
+  > 5. `registerHandler`'s guards were `Assert` (gone under NDEBUG) —
+  >    now unconditional throws; the registry's idempotency flag is
+  >    set after success, not before; the `DE_REGISTER` thunks carry
+  >    `__BEGIN_TRY`/`__END_CATCH` so the per-packet stack-annotation
+  >    frame the deleted `execute()`s had is preserved; the
+  >    composition root's caller is correctly documented as
+  >    `InitSocket()` (per login attempt), not `InitGame()`.
+  > 6. Ratchet hygiene: R2 asserts its directories exist (a rename
+  >    would have fail-opened at baseline 0), R3 stops counting
+  >    commented-out code (61 → 46), R4 stops counting two files CMake
+  >    never compiles (83 → 81), and the dispatcher tests gained the
+  >    coverage the review showed missing (non-null player
+  >    pass-through, out-of-range everywhere, the base-default throw).
   - Owner: R2 ratchet.
 
-- [ ] **2.3 Migrate CG / LC / CR-RC / U directions.** CG handlers
+- [x] **2.3 Migrate CG / LC / CR-RC / U directions.** CG handlers
   (35 files) are already excluded from the build — on the client, CG
   `execute()` bodies are server-side vestiges; delete them with the same
   layout proof. The server deleted its no-op halves outright (its 2.4 step
   1) — mirror that: what the client never executes gets deleted, not
   migrated.
-  > **Status:** not started.
+  > **Status:** done (2026-09-01, `restructuring/packet-migration-2`,
+  > landed together with the 2.2 completion) — LC (17 + 1 packet-only)
+  > and CR/RC (12) and U (2) are registered like GC; all 163 CG
+  > `execute()` bodies are deleted unregistered, which is
+  > behavior-preserving because `PacketValidator` rejects CG ids on
+  > every receive path before dispatch, and the bodies were empty on
+  > the client anyway — 138 fully `#ifndef __GAME_CLIENT__`-guarded, 5
+  > empty, 6 guarded-with-debug-wrapper, and 14 whose unguarded
+  > delegation went to the no-op stubs in `CGHandlersStub.cpp`, which
+  > is now **deleted** (that stub file existed only to satisfy those
+  > calls). `DatagramPacket` lost its pure `execute` redeclaration —
+  > every subclass migrated, so the `Packet` base's throwing default is
+  > correct. The receive loops keep the `tryDispatch` fallback for now:
+  > with R2 = 0 the fallback reaches only the base default, which
+  > throws exactly like `dispatch()` — flipping the loops and deleting
+  > `tryDispatch` is a cosmetic follow-up once live verification passes.
   - Owner: R2 ratchet reaching ~0.
 
 - [ ] **2.4 Move the packet classes into `packetwire`** (now that nothing in

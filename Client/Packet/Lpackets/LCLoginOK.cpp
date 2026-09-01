@@ -47,21 +47,6 @@ void LCLoginOK::write ( SocketOutputStream & oStream ) const
 	__END_CATCH
 }
 
-
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void LCLoginOK::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	LCLoginOKHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
-
 PacketSize_t LCLoginOK::getPacketSize() const throw() 
 { 
 	return szBYTE + szBYTE + szBYTE + szWORD; 

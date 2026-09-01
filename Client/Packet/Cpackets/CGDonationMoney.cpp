@@ -28,15 +28,6 @@ void CGDonationMoney::write (SocketOutputStream & oStream) const
 	__END_CATCH
 }
 
-void CGDonationMoney::execute (Player* pPlayer) 
-	 throw (ProtocolException , Error)
-{
-	__BEGIN_TRY
-
-	CGDonationMoneyHandler::execute (this , pPlayer);
-		
-	__END_CATCH
-}
 #ifdef __DEBUG_OUTPUT__
 string CGDonationMoney::toString () 
 	const throw ()

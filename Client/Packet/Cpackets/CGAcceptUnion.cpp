@@ -27,15 +27,6 @@ void CGAcceptUnion::write (SocketOutputStream & oStream) const
 	__END_CATCH
 }
 
-void CGAcceptUnion::execute (Player* pPlayer) 
-	 throw (ProtocolException , Error)
-{
-	__BEGIN_TRY
-#ifndef __GAME_CLIENT__		
-	CGAcceptUnionHandler::execute(this , pPlayer);
-#endif
-	__END_CATCH
-}
 #ifdef __DEBUG_OUTPUT__
 string CGAcceptUnion::toString () const
        throw ()

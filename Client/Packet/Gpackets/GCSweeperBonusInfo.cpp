@@ -76,9 +76,6 @@ void GCSweeperBonusInfo::write ( SocketOutputStream & oStream ) const
 }
 
 
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
 void GCSweeperBonusInfo::clearSweeperBonusInfoList()
 	throw()
 {
@@ -94,21 +91,6 @@ void GCSweeperBonusInfo::clearSweeperBonusInfoList()
 
 	__END_CATCH
 }
-
-
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void GCSweeperBonusInfo::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCSweeperBonusInfoHandler::execute( this , pPlayer );
-
-	__END_CATCH
-}
-
 
 //////////////////////////////////////////////////////////////////////
 // get packet size

@@ -13,8 +13,6 @@
 #include "Client_PCH.h"
 #include "GCMiniGameScores.h"
 
-
-
 //////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////
@@ -110,21 +108,6 @@ PacketSize_t GCMiniGameScores::getPacketSize() const throw()
 		ret += szBYTE + (*itr).first.size() + szWORD;
 	}
 	return ret;
-}
-
-//////////////////////////////////////////////////////////////////////
-//
-// execute packet's handler
-//
-//////////////////////////////////////////////////////////////////////
-void GCMiniGameScores::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCMiniGameScoresHandler::execute( this , pPlayer );
-		
-	__END_CATCH
 }
 
 

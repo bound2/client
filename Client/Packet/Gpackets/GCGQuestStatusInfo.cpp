@@ -99,21 +99,6 @@ const throw()
 { 
 	return std::accumulate( m_Infos.begin(), m_Infos.end(), szBYTE, addSize ); 
 }
-//////////////////////////////////////////////////////////////////////
-//
-// execute packet's handler
-//
-//////////////////////////////////////////////////////////////////////
-void GCGQuestStatusInfo::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCGQuestStatusInfoHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 
 //////////////////////////////////////////////////////////////////////
 //

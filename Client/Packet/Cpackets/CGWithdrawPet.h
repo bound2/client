@@ -24,7 +24,6 @@ class CGWithdrawPet : public Packet
 public:
     void read(SocketInputStream & iStream) throw(ProtocolException, Error);
     void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	void execute(Player* pPlayer) throw(ProtocolException, Error);
 	PacketID_t getPacketID() const throw() { return PACKET_CG_WITHDRAW_PET; }
 	PacketSize_t getPacketSize() const throw() { return szObjectID + szBYTE; }
 	string getPacketName() const throw() { return "CGWithdrawPet"; }

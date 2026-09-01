@@ -285,6 +285,7 @@ set(PACKETWIRE_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/Encrypter.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/Exception.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PacketAssert.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PacketDispatcher.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SocketEncryptInputStream.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SocketEncryptOutputStream.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SocketInputStream.cpp
@@ -820,6 +821,10 @@ add_executable(effect_viewer
 target_include_directories(effect_viewer PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/Client
+	# The Client/*.cpp game sources this tool compiles resolve wire
+	# vocabulary headers (RaceType.h via MCreature.h) from Client/Packet,
+	# the same include path they compile with in the DarkEden target.
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/SpriteLib
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/DXLib
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/framelib

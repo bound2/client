@@ -75,21 +75,6 @@ void GCAttackArmsOK3::write ( SocketOutputStream & oStream )
 	__END_CATCH
 }
 
-//////////////////////////////////////////////////////////////////////
-//
-// execute packet's handler
-//
-//////////////////////////////////////////////////////////////////////
-void GCAttackArmsOK3::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCAttackArmsOK3Handler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 
 //////////////////////////////////////////////////////////////////////
 //

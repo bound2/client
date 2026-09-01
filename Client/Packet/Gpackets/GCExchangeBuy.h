@@ -28,7 +28,6 @@ public:
 
 	void read(SocketInputStream & iStream);
 	void write(SocketOutputStream & oStream) const;
-	void execute(Player* pPlayer);
 
 	// uint8 success + bstr message (length byte always written, body clamped
 	// to kMaxMessage exactly as write() clamps it) + uint64 orderID

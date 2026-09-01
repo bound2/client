@@ -7,16 +7,3 @@
 #include "Client_PCH.h"
 #include "GCModifyInformation.h"
 
-//////////////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////////////
-void GCModifyInformation::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCModifyInformationHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-

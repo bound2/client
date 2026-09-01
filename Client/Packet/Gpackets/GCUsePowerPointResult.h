@@ -53,8 +53,6 @@ public :
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
     void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
 
-	// execute packet's handler
-	void execute(Player* pPlayer) throw(ProtocolException, Error);
 
 	// get packet id
 	PacketID_t getPacketID() const throw() { return PACKET_GC_USE_POWER_POINT_RESULT; }
@@ -120,8 +118,6 @@ public :
 	// const static GCUsePowerPointResultPacketMaxSize 를 정의, 리턴하라.
 	PacketSize_t getPacketMaxSize() const throw() { return szBYTE + szBYTE + szDWORD; }
 };
-
-
 
 //--------------------------------------------------------------------------------
 //

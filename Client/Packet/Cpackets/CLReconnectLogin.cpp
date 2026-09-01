@@ -45,23 +45,6 @@ void CLReconnectLogin::write ( SocketOutputStream & oStream ) const
 	__END_CATCH
 }
 
-
-//----------------------------------------------------------------------
-// execute packet's handler
-//----------------------------------------------------------------------
-void CLReconnectLogin::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-
-	#ifndef __GAME_CLIENT__
-		CLReconnectLoginHandler::execute( this , pPlayer );
-	#endif
-
-	__END_CATCH
-}
-
-
 //----------------------------------------------------------------------
 // get packet's debug std::string
 //----------------------------------------------------------------------

@@ -12,8 +12,6 @@
 #include "Client_PCH.h"
 #include "CGGetEventItem.h"
 
-
-
 void CGGetEventItem::read (SocketInputStream & iStream) 
 
 	 throw (ProtocolException , Error)
@@ -22,17 +20,11 @@ void CGGetEventItem::read (SocketInputStream & iStream)
 
 	__BEGIN_TRY
 
-
-
 	iStream.read(m_EventType);
-
-
 
 	__END_CATCH
 
 }
-
-
 
 void CGGetEventItem::write (SocketOutputStream & oStream) const 
 
@@ -42,37 +34,11 @@ void CGGetEventItem::write (SocketOutputStream & oStream) const
 
 	__BEGIN_TRY
 
-
-
 	oStream.write(m_EventType);
 
-
-
 	__END_CATCH
 
 }
-
-
-
-void CGGetEventItem::execute (Player* pPlayer) 
-
-	 throw (ProtocolException , Error)
-
-{
-
-	__BEGIN_TRY
-
-
-
-//	CGGetEventItemHandler::execute (this , pPlayer);
-
-		
-
-	__END_CATCH
-
-}
-
-
 
 string CGGetEventItem::toString () 
 
@@ -82,8 +48,6 @@ string CGGetEventItem::toString ()
 
 	__BEGIN_TRY
 
-
-
 	StringStream msg;
 
 	msg << "CGGetEventItem(EventType:" << (int)m_EventType
@@ -91,8 +55,6 @@ string CGGetEventItem::toString ()
 		<< ")";
 
 	return msg.toString();
-
-
 
 	__END_CATCH
 

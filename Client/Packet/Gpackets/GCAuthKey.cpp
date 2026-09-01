@@ -26,15 +26,6 @@ void GCAuthKey::write ( SocketOutputStream & oStream ) const
 	__END_CATCH
 }
 
-void GCAuthKey::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCAuthKeyHandler::execute( this , pPlayer );
-
-	__END_CATCH
-}
 #ifdef __DEBUG_OUTPUT__
 string GCAuthKey::toString () const
        throw ()

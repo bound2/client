@@ -13,8 +13,6 @@
 #include "Client_PCH.h"
 #include "GCPetUseSkill.h"
 
-
-
 //////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////
@@ -63,21 +61,6 @@ void GCPetUseSkill::write ( SocketOutputStream & oStream )
 	oStream.write(m_Attacker);
 	oStream.write(m_Target);
 	
-	__END_CATCH
-}
-
-//////////////////////////////////////////////////////////////////////
-//
-// execute packet's handler
-//
-//////////////////////////////////////////////////////////////////////
-void GCPetUseSkill::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCPetUseSkillHandler::execute( this , pPlayer );
-		
 	__END_CATCH
 }
 

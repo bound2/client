@@ -34,18 +34,6 @@ void GCAddressListVerify::write ( SocketOutputStream & oStream ) const
 	__END_CATCH
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////////////
-void GCAddressListVerify::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCAddressListVerifyHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
 #ifdef __DEBUG_OUTPUT__
 //////////////////////////////////////////////////////////////////////////////
 // get packet's debug string

@@ -28,7 +28,6 @@ public:
 
 	void read(SocketInputStream& iStream);
 	void write(SocketOutputStream& oStream) const;
-	void execute(Player* pPlayer);
 
 	// page + pageSize + minPrice + maxPrice (4 ints) + itemClass (BYTE)
 	// + itemType (ushort) + sellerFilter length byte + clamped filter body.

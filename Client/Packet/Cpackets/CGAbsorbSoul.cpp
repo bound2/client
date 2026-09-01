@@ -54,18 +54,6 @@ void CGAbsorbSoul::write (SocketOutputStream & oStream) const
 	__END_CATCH
 }
 
-void CGAbsorbSoul::execute (Player* pPlayer) 
-	 throw (ProtocolException , Error)
-{
-	__BEGIN_TRY
-
-#ifndef __GAME_CLIENT__
-	CGAbsorbSoulHandler::execute (this , pPlayer);
-#endif
-
-	__END_CATCH
-}
-
 #ifdef __DEBUG_OUTPUT__
 std::string CGAbsorbSoul::toString () const
     throw ()

@@ -23,7 +23,6 @@ public:
 public:
     void read(SocketInputStream & iStream) throw(ProtocolException, Error);
     void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	void execute(Player* pPlayer) throw(ProtocolException, Error);
 	PacketID_t getPacketID() const throw() { return PACKET_CG_ADD_SMS_ADDRESS; }
 	PacketSize_t getPacketSize() const throw() { return szBYTE + m_CharacterName.size() + szBYTE + m_CustomName.size() + szBYTE + m_Number.size(); }
 	string getPacketName() const throw() { return "CGAddSMSAddress"; }

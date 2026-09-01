@@ -93,23 +93,6 @@ void GLIncomingConnectionError::write ( Datagram & oDatagram ) const
 	__END_CATCH
 }
 
-
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void GLIncomingConnectionError::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	cout << "GLIncomingConnectionError::execute() called." << endl;
-
-	GLIncomingConnectionErrorHandler::execute( this );
-		
-	__END_CATCH
-}
-
-
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__

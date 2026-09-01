@@ -48,16 +48,6 @@ void GCAddInjuriousCreature::write (SocketOutputStream & oStream) const
 	__END_CATCH
 }
 
-void GCAddInjuriousCreature::execute (Player* pPlayer) 
-	 throw (ProtocolException , Error)
-{
-	__BEGIN_TRY
-		
-	GCAddInjuriousCreatureHandler::execute(this , pPlayer);
-
-	__END_CATCH
-}
-
 
 #ifdef __DEBUG_OUTPUT__
 	std::string GCAddInjuriousCreature::toString () const

@@ -79,16 +79,6 @@ void GCAddBat::write ( SocketOutputStream & oStream ) const
 	__END_CATCH
 }
 
-void GCAddBat::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCAddBatHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 #ifdef __DEBUG_OUTPUT__
 	
 	std::string GCAddBat::toString () const

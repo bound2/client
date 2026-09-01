@@ -37,8 +37,6 @@ public :
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
     void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
 
-	// execute packet's handler
-	void execute ( Player * pPlayer ) throw ( ProtocolException , Error );
 
 	// get packet id
 	PacketID_t getPacketID () const throw () { return PACKET_GC_USE_OK; }
@@ -106,8 +104,6 @@ public :
 	static void execute ( GCUseOK * pPacket , Player * player ) throw ( ProtocolException , Error );
 };
 
-
-
 //-------------------------------------------GCUseSkillCardOK----------------
 
 //////////////////////////////////////////////////////////////////////
@@ -132,8 +128,6 @@ public :
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
     void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
 
-	// execute packet's handler
-	void execute ( Player * pPlayer ) throw ( ProtocolException , Error );
 
 	void setCardType(BYTE CardType) throw() {	m_CardType = CardType;  }
 

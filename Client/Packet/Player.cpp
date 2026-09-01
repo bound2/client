@@ -14,6 +14,7 @@
 #include "SocketOutputStream.h"
 #include "PacketAssert.h"
 #include "Packet.h"
+#include "PacketDispatcher.h"
 #include "PacketFactoryManager.h"
 #include "DebugInfo.h"
 
@@ -196,9 +197,11 @@ void Player::processCommand ()
 			fclose(fp);
 	#endif
 */		
-			// 이제 이 패킷스트럭처를 가지고 패킷핸들러를 수행하면 된다.
-			// 패킷아이디가 잘못될 경우는 패킷핸들러매니저에서 처리한다.
-			pPacket->execute( this );
+			// Now run the packet's handler: dispatch-first
+			// (RESTRUCTURING.md task 2.1), legacy virtual as fallback
+			// until ratchet R2 reaches 0.
+			if ( !PacketDispatcher::tryDispatch( pPacket , this ) )
+				pPacket->execute( this );
 			
 			// 패킷을 삭제한다
 			delete pPacket;

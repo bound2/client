@@ -13,9 +13,6 @@
 #include "Client_PCH.h"
 #include "GCQuestStatus.h"
 
-
-
-
 //////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////
@@ -70,21 +67,6 @@ void GCQuestStatus::write ( SocketOutputStream & oStream )
 	__END_CATCH
 }
 
-
-//////////////////////////////////////////////////////////////////////
-//
-// execute packet's handler
-//
-//////////////////////////////////////////////////////////////////////
-void GCQuestStatus::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCQuestStatusHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
 
 #ifdef __DEBUG_OUTPUT__
 

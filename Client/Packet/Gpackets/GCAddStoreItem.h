@@ -25,7 +25,6 @@ public:
 public:
 	void read(SocketInputStream & iStream) throw(ProtocolException, Error);
 	void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	void execute(Player* pPlayer) throw(ProtocolException, Error);
 	PacketID_t getPacketID() const throw() { return PACKET_GC_ADD_STORE_ITEM; }
 	PacketSize_t getPacketSize() const throw() { return szObjectID + szBYTE + m_Item.getSize(); }
 #ifdef __DEBUG_OUTPUT__	

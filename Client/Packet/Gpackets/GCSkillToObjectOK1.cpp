@@ -14,8 +14,6 @@
 #include "Client_PCH.h"
 #include "GCSkillToObjectOK1.h"
 
-
-
 //////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////
@@ -79,21 +77,6 @@ void GCSkillToObjectOK1::write ( SocketOutputStream & oStream )
 	
 	__END_CATCH
 }
-//////////////////////////////////////////////////////////////////////
-//
-// execute packet's handler
-//
-//////////////////////////////////////////////////////////////////////
-void GCSkillToObjectOK1::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCSkillToObjectOK1Handler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 
 #ifdef __DEBUG_OUTPUT__
 //////////////////////////////////////////////////////////////////////
@@ -119,7 +102,5 @@ std::string GCSkillToObjectOK1::toString ()
 
 	__END_CATCH
 }
-
-
 
 #endif

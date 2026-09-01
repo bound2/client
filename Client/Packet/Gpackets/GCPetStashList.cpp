@@ -46,8 +46,6 @@ GCPetStashList::~GCPetStashList()
 {
 	__BEGIN_TRY
 
-	
-
 	__END_CATCH
 }
 
@@ -105,21 +103,6 @@ void GCPetStashList::write ( SocketOutputStream & oStream ) const
 		oStream.write( m_PetStashItemInfos[i]->KeepDays );
 	}
 	
-	__END_DEBUG
-	__END_CATCH
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////////////
-void GCPetStashList::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-	__BEGIN_DEBUG
-		
-	GCPetStashListHandler::execute( this , pPlayer );
-
 	__END_DEBUG
 	__END_CATCH
 }

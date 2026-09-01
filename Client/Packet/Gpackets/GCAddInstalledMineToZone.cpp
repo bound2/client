@@ -31,19 +31,6 @@ GCAddInstalledMineToZone::~GCAddInstalledMineToZone()
 	__END_CATCH
 }
 
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void GCAddInstalledMineToZone::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCAddInstalledMineToZoneHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 
 #ifdef __DEBUG_OUTPUT__	
 //////////////////////////////////////////////////////////////////////

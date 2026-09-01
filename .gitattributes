@@ -2,3 +2,9 @@
 # ctest; a CRLF checkout would report every line as a protocol change.
 tests/wire-layout.txt text eol=lf
 tests/generated/*.inc text eol=lf
+
+# Parsed line-by-line by check_includes.pl / executed by bash; keep LF so
+# a CRLF checkout cannot corrupt baseline keys or the shebang line.
+tests/arch/baseline.txt text eol=lf
+tests/arch/*.pl text eol=lf
+tests/ratchet/*.sh text eol=lf

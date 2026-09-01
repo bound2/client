@@ -136,23 +136,6 @@ void GCMineExplosionOK2::deleteCListElement()
 }
 */
 
-
-//////////////////////////////////////////////////////////////////////
-//
-// execute packet's handler
-//
-//////////////////////////////////////////////////////////////////////
-void GCMineExplosionOK2::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCMineExplosionOK2Handler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
-
 //////////////////////////////////////////////////////////////////////
 //
 // get packet's debug std::string
@@ -177,8 +160,6 @@ void GCMineExplosionOK2::execute ( Player * pPlayer )
 		}
 
 		msg << ")";
-
-
 
 		return msg.toString();
 

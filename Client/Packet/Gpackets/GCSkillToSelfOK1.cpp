@@ -14,8 +14,6 @@
 #include "Client_PCH.h"
 #include "GCSkillToSelfOK1.h"
 
-
-
 //////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////
@@ -75,21 +73,6 @@ void GCSkillToSelfOK1::write ( SocketOutputStream & oStream )
 
 	ModifyInfo::write( oStream);
 	
-	__END_CATCH
-}
-
-//////////////////////////////////////////////////////////////////////
-//
-// execute packet's handler
-//
-//////////////////////////////////////////////////////////////////////
-void GCSkillToSelfOK1::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCSkillToSelfOK1Handler::execute( this , pPlayer );
-		
 	__END_CATCH
 }
 

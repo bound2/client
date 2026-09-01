@@ -13,8 +13,6 @@
 #include "Client_PCH.h"
 #include "GCFlagWarStatus.h"
 
-
-
 //////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////
@@ -66,21 +64,6 @@ void GCFlagWarStatus::write ( SocketOutputStream & oStream )
 
 	for( int i = 0; i < RACE_MAX ; i++ )
 		oStream.write(m_FlagCount[i]);
-		
-	__END_CATCH
-}
-
-//////////////////////////////////////////////////////////////////////
-//
-// execute packet's handler
-//
-//////////////////////////////////////////////////////////////////////
-void GCFlagWarStatus::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCFlagWarStatusHandler::execute( this , pPlayer );
 		
 	__END_CATCH
 }

@@ -27,15 +27,6 @@ void CGDenyUnion::write (SocketOutputStream & oStream) const
 	__END_CATCH
 }
 
-void CGDenyUnion::execute (Player* pPlayer) 
-	 throw (ProtocolException , Error)
-{
-	__BEGIN_TRY
-#ifndef __GAME_CLIENT__			
-	CGDenyUnionHandler::execute(this , pPlayer);
-#endif
-	__END_CATCH
-}
 #ifdef __DEBUG_OUTPUT__
 string CGDenyUnion::toString () const
        throw ()

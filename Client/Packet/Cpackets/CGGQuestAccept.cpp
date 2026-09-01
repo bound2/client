@@ -26,15 +26,6 @@ void CGGQuestAccept::write (SocketOutputStream & oStream) const
 	__END_CATCH
 }
 
-void CGGQuestAccept::execute (Player* pPlayer) 
-	 throw (ProtocolException , Error)
-{
-	__BEGIN_TRY
-#ifndef __GAME_CLIENT__		
-	CGGQuestAcceptHandler::execute(this , pPlayer);
-#endif
-	__END_CATCH
-}
 #ifdef __DEBUG_OUTPUT__
 string CGGQuestAccept::toString () const
        throw ()

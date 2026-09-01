@@ -27,15 +27,6 @@ void CGRequestUnion::write (SocketOutputStream & oStream) const
 	__END_CATCH
 }
 
-void CGRequestUnion::execute (Player* pPlayer) 
-	 throw (ProtocolException , Error)
-{
-	__BEGIN_TRY
-#ifndef __GAME_CLIENT__			
-	CGRequestUnionHandler::execute(this , pPlayer);
-#endif
-	__END_CATCH
-}
 #ifdef __DEBUG_OUTPUT__
 string CGRequestUnion::toString () const
        throw ()

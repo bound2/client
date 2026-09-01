@@ -60,19 +60,6 @@ void GCUseBonusPointOK::write ( SocketOutputStream & oStream ) const
 }
 
 //////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void GCUseBonusPointOK::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCUseBonusPointOKHandler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
-//////////////////////////////////////////////////////////////////////
 //
 // get packet's debug string
 //

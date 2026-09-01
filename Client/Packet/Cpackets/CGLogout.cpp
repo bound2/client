@@ -31,17 +31,3 @@ void CGLogout::write ( SocketOutputStream & oStream ) const
 }
 
 
-//////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////
-void CGLogout::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	#ifndef __GAME_CLIENT__
-		CGLogoutHandler::execute ( this , pPlayer );
-	#endif
-		
-	__END_CATCH
-}

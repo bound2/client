@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include "Client.h"
 #include "UIMessageManager.h"
+#include "PacketDispatcher.h"
 #include "UIFunction.h"
 #include "VS_UI.h" 
 #include "VS_UI_mouse_pointer.h"
@@ -1374,7 +1375,9 @@ RegisterNewUser(LOGIN* pLogin)
 		cgConnectSetKey.setHashKey(rand());
 		g_pSocket->sendPacket(&cgConnectSetKey);
 		UpdateSocketOutput();
-		cgConnectSetKey.execute(g_pSocket);
+		// Registered as an explicit no-op (see PacketHandlerRegistry.cpp) -
+		// the linked handler was always the empty stub.
+		PacketDispatcher::dispatch(&cgConnectSetKey, g_pSocket);
 		Sleep(500);
 
 		//--------------------------------------------------
@@ -2102,7 +2105,8 @@ UIMessageManager::Execute_UI_LOGIN(intptr_t left, intptr_t right, void* void_ptr
 					cgConnectSetKey.setHashKey(rand());
 					g_pSocket->sendPacket(&cgConnectSetKey);
 					UpdateSocketOutput();
-					cgConnectSetKey.execute(g_pSocket);
+					// See PacketHandlerRegistry.cpp: registered explicit no-op.
+					PacketDispatcher::dispatch(&cgConnectSetKey, g_pSocket);
 					Sleep(500);
 					//--------------------------------------------------
 					// CLLogin

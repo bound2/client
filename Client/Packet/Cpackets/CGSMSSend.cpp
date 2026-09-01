@@ -94,16 +94,6 @@ PacketSize_t CGSMSSend::getPacketSize() const throw()
 	__END_CATCH
 }
 
-void CGSMSSend::execute (Player* pPlayer) 
-	 throw (ProtocolException , Error)
-{
-	__BEGIN_TRY
-#ifndef __GAME_CLIENT__		
-	CGSMSSendHandler::execute (this , pPlayer);
-#endif		
-	__END_CATCH
-}
-
 string CGSMSSend::toString () const
     throw ()
 {

@@ -31,18 +31,6 @@ void CGAddItemToItem::write (SocketOutputStream & oStream) const
 	__END_CATCH
 }
 
-void CGAddItemToItem::execute (Player* pPlayer) 
-	throw (ProtocolException , Error)
-{
-	__BEGIN_TRY
-		
-#ifndef __GAME_CLIENT__
-	CGAddItemToItemHandler::execute(this , pPlayer);
-#endif
-
-	__END_CATCH
-}
-
 #ifdef __DEBUG_OUTPUT__
 std::string CGAddItemToItem::toString () const
 	throw ()

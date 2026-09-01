@@ -130,22 +130,6 @@ PacketSize_t GCSkillInfo::getPacketSize() const
 
 }
 
-
-
-//--------------------------------------------------------------------------------
-// execute packet's handler
-//--------------------------------------------------------------------------------
-void GCSkillInfo::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCSkillInfoHandler::execute( this , pPlayer );
-
-	__END_CATCH
-}
-
-
 //--------------------------------------------------------------------------------
 // get packet's debug std::string
 //--------------------------------------------------------------------------------

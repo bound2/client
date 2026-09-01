@@ -72,21 +72,6 @@ void GCSkillToInventoryOK2::write ( SocketOutputStream & oStream )
 	__END_CATCH
 }
 
-//////////////////////////////////////////////////////////////////////
-//
-// GCSkillToInventoryOK2::execute()
-// 
-//////////////////////////////////////////////////////////////////////
-void GCSkillToInventoryOK2::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCSkillToInventoryOK2Handler::execute( this , pPlayer );
-		
-	__END_CATCH
-}
-
 
 //////////////////////////////////////////////////////////////////////
 //

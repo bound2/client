@@ -39,23 +39,6 @@ void CGRequestRepair::write ( SocketOutputStream & oStream ) const
 	__END_CATCH
 }
 
-
-//--------------------------------------------------------------------------------
-// execute packet's handler
-//--------------------------------------------------------------------------------
-void CGRequestRepair::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-
-	#ifndef __GAME_CLIENT__
-		CGRequestRepairHandler::execute ( this , pPlayer );
-	#endif
-		
-	__END_CATCH
-}
-
-
 //--------------------------------------------------------------------------------
 // get debug std::string
 //--------------------------------------------------------------------------------

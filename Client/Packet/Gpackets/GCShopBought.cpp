@@ -112,19 +112,6 @@ void GCShopBought::write ( SocketOutputStream & oStream ) const
 	__END_CATCH
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// execute packet's handler
-//////////////////////////////////////////////////////////////////////////////
-void GCShopBought::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCShopBoughtHandler::execute( this , pPlayer );
-
-	__END_CATCH
-}
-
 #ifdef __DEBUG_OUTPUT__	
 //////////////////////////////////////////////////////////////////////////////
 // get packet's debug std::string

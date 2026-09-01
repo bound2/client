@@ -375,12 +375,3 @@ string GCExchangeList::toString() const
 	return msg.toString();
 }
 
-void GCExchangeList::execute(Player* pPlayer)
-{
-	__BEGIN_TRY
-
-	// Client-side packet handling
-	// This will be implemented to update the UI
-
-	__END_CATCH
-}

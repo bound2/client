@@ -124,21 +124,6 @@ void LCReconnect::write ( SocketOutputStream & oStream ) const
 	__END_CATCH
 }
 
-
-//----------------------------------------------------------------------
-// execute packet's handler
-//----------------------------------------------------------------------
-void LCReconnect::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	LCReconnectHandler::execute( this , pPlayer );
-
-	__END_CATCH
-}
-
-
 //----------------------------------------------------------------------
 // get packet's debug string
 //----------------------------------------------------------------------

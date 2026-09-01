@@ -34,8 +34,6 @@ public :
     void read(SocketInputStream & iStream) throw(ProtocolException, Error);
     void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
 
-	// execute packet's handler
-	void execute(Player* pPlayer) throw(ProtocolException, Error);
 
 	// get packet id
 	PacketID_t getPacketID() const throw() { return PACKET_GC_DROP_ITEM_TO_ZONE; }

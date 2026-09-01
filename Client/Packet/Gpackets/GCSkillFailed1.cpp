@@ -7,8 +7,6 @@
 #include "Client_PCH.h"
 #include "GCSkillFailed1.h"
 
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
 
 GCSkillFailed1::GCSkillFailed1 () 
      throw ()
@@ -45,16 +43,6 @@ void GCSkillFailed1::write ( SocketOutputStream & oStream ) const
 	oStream.write(m_Grade);
 	ModifyInfo::write( oStream);
 
-	__END_CATCH
-}
-
-void GCSkillFailed1::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCSkillFailed1Handler::execute( this , pPlayer );
-		
 	__END_CATCH
 }
 

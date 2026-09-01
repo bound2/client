@@ -7,8 +7,6 @@
 #include "Client_PCH.h"
 #include "GCKnockBack.h"
 
-
-
 void GCKnockBack::read ( SocketInputStream & iStream )
 	 throw ( ProtocolException , Error )
 {
@@ -34,16 +32,6 @@ void GCKnockBack::write ( SocketOutputStream & oStream )
 	oStream.write( m_TargetX );
 	oStream.write( m_TargetY );
 
-	__END_CATCH
-}
-
-void GCKnockBack::execute ( Player * pPlayer ) 
-	 throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-		
-	GCKnockBackHandler::execute( this , pPlayer );
-		
 	__END_CATCH
 }
 
