@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCAddSlayer.h"
+#include "Gpackets/GCAddSlayer.h"
 #include "ClientDef.h"
 #include "AddonDef.h"
 #include "MCreatureTable.h"

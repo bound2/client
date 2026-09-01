@@ -6,7 +6,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCGoodsList.h"
+#include "Gpackets/GCGoodsList.h"
 #include "ClientDef.h"
 #include "UIFunction.h"
 

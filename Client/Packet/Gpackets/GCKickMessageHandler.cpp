@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCKickMessage.h"
+#include "Gpackets/GCKickMessage.h"
 
 #ifdef __GAME_CLIENT__
 	#include "MGameStringTable.h"

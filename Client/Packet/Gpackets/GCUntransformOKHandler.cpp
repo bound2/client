@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCUntransformOK.h"
+#include "Gpackets/GCUntransformOK.h"
 #include "ClientDef.h"
 #include "SkillDef.h"
 #include "MVampireGear.h"

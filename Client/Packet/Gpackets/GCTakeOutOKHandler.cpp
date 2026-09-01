@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCTakeOutOK.h"
+#include "Gpackets/GCTakeOutOK.h"
 #include "UIDialog.h"
 #include "MGameStringTable.h"
 

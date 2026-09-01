@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "LCDeletePCError.h"
+#include "Lpackets/LCDeletePCError.h"
 #include "ClientDef.h"
 
 extern void		PopupErrorMessage(ErrorID errorID);

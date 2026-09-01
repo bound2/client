@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCMPRecoveryStart.h"
+#include "Gpackets/GCMPRecoveryStart.h"
 #include "ClientDef.h"
 
 //////////////////////////////////////////////////////////////////////

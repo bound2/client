@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCLightning.h"
+#include "Gpackets/GCLightning.h"
 
 #ifdef __GAME_CLIENT__
 	#include "ClientPlayer.h"

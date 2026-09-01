@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "CRWhisper.h"
+#include "Rpackets/CRWhisper.h"
 #include "ClientDef.h"
 #include "UserInformation.h"
 #include "MChatManager.h"

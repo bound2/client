@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCReconnect.h"
+#include "Gpackets/GCReconnect.h"
 #include "PacketAssert.h"
 
 #ifdef __GAME_SERVER__

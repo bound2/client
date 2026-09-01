@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCMoveOK.h"
+#include "Gpackets/GCMoveOK.h"
 #include "ClientDef.h"
 #include "VS_UI.h"
 

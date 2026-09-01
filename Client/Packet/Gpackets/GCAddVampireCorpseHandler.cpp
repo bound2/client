@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCAddVampireCorpse.h"
+#include "Gpackets/GCAddVampireCorpse.h"
 #include "ClientDef.h"
 #include "MItem.h"
 

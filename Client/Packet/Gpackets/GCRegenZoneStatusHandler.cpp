@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCRegenZoneStatus.h"
+#include "Gpackets/GCRegenZoneStatus.h"
 #include "ShrineInfoManager.h"
 
 //////////////////////////////////////////////////////////////////////

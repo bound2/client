@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCUseOK.h"
+#include "Gpackets/GCUseOK.h"
 #include "ClientDef.h"
 #include "MInventory.h"
 #include "MQuickSlot.h"

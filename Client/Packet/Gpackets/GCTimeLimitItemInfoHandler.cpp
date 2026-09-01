@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCTimeLimitItemInfo.h"
+#include "Gpackets/GCTimeLimitItemInfo.h"
 #include "MTimeItemManager.h"
 #include "MSlayerGear.h"
 #include "MVampireGear.h"

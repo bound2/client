@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCDisconnect.h"
+#include "Gpackets/GCDisconnect.h"
 
 //////////////////////////////////////////////////////////////////////
 //

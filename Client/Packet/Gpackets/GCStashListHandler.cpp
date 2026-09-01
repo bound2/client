@@ -6,7 +6,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCStashList.h"
+#include "Gpackets/GCStashList.h"
 #include "ClientDef.h"
 #include "MStorage.h"
 #include "UIDialog.h"

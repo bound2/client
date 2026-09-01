@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCAddBat.h"
+#include "Gpackets/GCAddBat.h"
 #include "ClientDef.h"
 #include "SkillDef.h"
 

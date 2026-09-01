@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCNicknameVerify.h"
+#include "Gpackets/GCNicknameVerify.h"
 
 #ifdef __GAME_CLIENT__
 	#include "ClientPlayer.h"

@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCDeleteInventoryItem.h"
+#include "Gpackets/GCDeleteInventoryItem.h"
 #include "ClientDef.h"
 #include "MInventory.h"
 #include "UIFunction.h"

@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCSkillToSelfOK3.h"
+#include "Gpackets/GCSkillToSelfOK3.h"
 #include "ClientDef.h"
 
 //////////////////////////////////////////////////////////////////////

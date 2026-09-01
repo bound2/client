@@ -9,7 +9,7 @@
 
 #include "Client_PCH.h"
 // include files
-#include "GCPetStashVerify.h"
+#include "Gpackets/GCPetStashVerify.h"
 
 #ifdef __GAME_CLIENT__
 	#include "ClientPlayer.h"

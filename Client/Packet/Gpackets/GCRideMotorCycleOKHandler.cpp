@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCRideMotorCycleOK.h"
+#include "Gpackets/GCRideMotorCycleOK.h"
 #include "ClientDef.h"
 #include "MItem.h"
 #include "SoundDef.h"

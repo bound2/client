@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCSkillFailed2.h"
+#include "Gpackets/GCSkillFailed2.h"
 #include "ClientDef.h"
 #include "SkillDef.h"
 

@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCTeachSkillInfo.h"
+#include "Gpackets/GCTeachSkillInfo.h"
 #include "TempInformation.h"
 #include "ClientDef.h"
 #include "UIFunction.h"

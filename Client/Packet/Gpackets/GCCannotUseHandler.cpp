@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCCannotUse.h"
+#include "Gpackets/GCCannotUse.h"
 #include "ClientDef.h"
 #include "MSlayerGear.h"
 #include "MVampireGear.h"

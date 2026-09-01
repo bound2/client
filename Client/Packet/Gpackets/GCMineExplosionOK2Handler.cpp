@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCMineExplosionOK2.h"
+#include "Gpackets/GCMineExplosionOK2.h"
 #include "ClientDef.h"
 #include "SkillDef.h"
 

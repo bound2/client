@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCSMSAddressList.h"
+#include "Gpackets/GCSMSAddressList.h"
 
 #include "ClientDef.h"
 #include "PacketFunction.h"

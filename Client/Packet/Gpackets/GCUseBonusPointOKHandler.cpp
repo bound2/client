@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCUseBonusPointOK.h"
+#include "Gpackets/GCUseBonusPointOK.h"
 #include "Cpackets/CGUseBonusPoint.h"
 #include "TempInformation.h"
 #include "ClientDef.h"

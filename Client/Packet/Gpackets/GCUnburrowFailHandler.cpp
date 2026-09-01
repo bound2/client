@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCUnburrowFail.h"
+#include "Gpackets/GCUnburrowFail.h"
 #include "ClientDef.h"
 
 //////////////////////////////////////////////////////////////////////

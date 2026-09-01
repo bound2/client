@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCModifyGuildMemberInfo.h"
+#include "Gpackets/GCModifyGuildMemberInfo.h"
 #include "UserInformation.h"
 #include "ClientDef.h"
 #include "UIFunction.h"

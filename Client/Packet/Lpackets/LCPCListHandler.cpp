@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "LCPCList.h"
+#include "Lpackets/LCPCList.h"
 #include "ClientDef.h"
 #include "UIFunction.h"
 #include "MStorage.h"

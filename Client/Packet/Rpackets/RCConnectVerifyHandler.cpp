@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "RCConnectVerify.h"
+#include "Rpackets/RCConnectVerify.h"
 #include "RequestClientPlayer.h"
 //#include "CRRequest.h"
 //#include "MZone.h"

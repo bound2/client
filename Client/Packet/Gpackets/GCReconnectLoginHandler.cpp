@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCReconnectLogin.h"
+#include "Gpackets/GCReconnectLogin.h"
 #include "ClientDef.h"
 
 #ifdef __GAME_CLIENT__

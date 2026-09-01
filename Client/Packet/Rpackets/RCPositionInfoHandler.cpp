@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "RCPositionInfo.h"
+#include "Rpackets/RCPositionInfo.h"
 #include "MParty.h"
 #include "RequestUserManager.h"
 #include "ClientDef.h"

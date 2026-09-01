@@ -9,7 +9,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCAuthKey.h"
+#include "Gpackets/GCAuthKey.h"
 #ifdef __GAME_CLIENT__
 	#include "Client.h"
 #endif

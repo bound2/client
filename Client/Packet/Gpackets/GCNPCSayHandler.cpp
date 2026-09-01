@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCNPCSay.h"
+#include "Gpackets/GCNPCSay.h"
 #include "ClientDef.h"
 #include "MChatManager.h"
 #include "MNPCScriptTable.h"

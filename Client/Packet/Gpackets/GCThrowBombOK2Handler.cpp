@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCThrowBombOK2.h"
+#include "Gpackets/GCThrowBombOK2.h"
 #include "ClientDef.h"
 #include "MEffectStatusDef.h"
 #include "PacketFunction2.h"

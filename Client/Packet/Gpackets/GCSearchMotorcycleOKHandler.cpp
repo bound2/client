@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCSearchMotorcycleOK.h"
+#include "Gpackets/GCSearchMotorcycleOK.h"
 #include "ClientDef.h"
 #include "UIDialog.h"
 #include "MZoneTable.h"

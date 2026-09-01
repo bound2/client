@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCDropItemToZone.h"
+#include "Gpackets/GCDropItemToZone.h"
 #include "ClientDef.h"
 #include "MFakeCreature.h"
 #include "UserInformation.h"

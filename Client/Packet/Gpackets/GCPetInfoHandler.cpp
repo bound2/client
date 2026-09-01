@@ -7,7 +7,7 @@
 
 // include 
 #include "Client_PCH.h"
-#include "GCPetInfo.h"
+#include "Gpackets/GCPetInfo.h"
 #include "MFakeCreature.h"
 #include "PacketFunction.h"
 

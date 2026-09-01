@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCWarScheduleList.h"
+#include "Gpackets/GCWarScheduleList.h"
 #include "ClientDef.h"
 #include "UIFunction.h"
 

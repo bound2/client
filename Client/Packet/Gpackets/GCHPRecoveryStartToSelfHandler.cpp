@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCHPRecoveryStartToSelf.h"
+#include "Gpackets/GCHPRecoveryStartToSelf.h"
 #include "ClientDef.h"
 
 //////////////////////////////////////////////////////////////////////

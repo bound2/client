@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCAddBurrowingCreature.h"
+#include "Gpackets/GCAddBurrowingCreature.h"
 #include "ClientDef.h"
 
 //////////////////////////////////////////////////////////////////////

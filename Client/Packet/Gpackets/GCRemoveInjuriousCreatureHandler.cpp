@@ -5,7 +5,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "Client_PCH.h"
-#include "GCRemoveInjuriousCreature.h"
+#include "Gpackets/GCRemoveInjuriousCreature.h"
 #include "MJusticeAttackManager.h"
 #include "DebugInfo.h"
 

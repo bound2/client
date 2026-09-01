@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCAddMonsterFromBurrowing.h"
+#include "Gpackets/GCAddMonsterFromBurrowing.h"
 #include "ClientDef.h"
 #include "SkillDef.h"
 

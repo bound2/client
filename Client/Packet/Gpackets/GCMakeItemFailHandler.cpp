@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCMakeItemFail.h"
+#include "Gpackets/GCMakeItemFail.h"
 #include "TempInformation.h"
 #include "ClientDef.h"
 #include "UIFunction.h"

@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCLearnSkillOK.h"
+#include "Gpackets/GCLearnSkillOK.h"
 #include "ClientDef.h"
 #include "MSkillManager.h"
 #include "MGameStringTable.h"

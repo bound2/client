@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCSetPosition.h"
+#include "Gpackets/GCSetPosition.h"
 #include "ClientDef.h"
 
 #ifdef __GAME_CLIENT__

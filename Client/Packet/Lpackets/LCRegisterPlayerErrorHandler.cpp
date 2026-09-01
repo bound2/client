@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "LCRegisterPlayerError.h"
+#include "Lpackets/LCRegisterPlayerError.h"
 #include "ClientDef.h"
 #include "MGameStringTable.h"
 #include "VS_UI_Message.h"

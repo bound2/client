@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCDeleteandPickUpOK.h"
+#include "Gpackets/GCDeleteandPickUpOK.h"
 #include "ClientDef.h"
 #include "MItem.h"
 #include "MInventory.h"

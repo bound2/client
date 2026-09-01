@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "RCStatusHP.h"
+#include "Rpackets/RCStatusHP.h"
 #include "MParty.h"
 #include "RequestUserManager.h"
 #include "ClientDef.h"

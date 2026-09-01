@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCRemoveStoreItem.h"
+#include "Gpackets/GCRemoveStoreItem.h"
 #include "MStorage.h"
 #include "MPlayer.h"
 #include "VS_UI.h"

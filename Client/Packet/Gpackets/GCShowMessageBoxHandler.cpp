@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCShowMessageBox.h"
+#include "Gpackets/GCShowMessageBox.h"
 
 //////////////////////////////////////////////////////////////////////
 //

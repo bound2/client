@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCSkillToTileOK6.h"
+#include "Gpackets/GCSkillToTileOK6.h"
 #include "ClientDef.h"
 #include "PacketFunction2.h"
 #include "SkillDef.h"

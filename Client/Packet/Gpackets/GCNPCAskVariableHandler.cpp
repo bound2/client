@@ -9,7 +9,7 @@
 // include files
 #include "Client_PCH.h"
 #include "MNPCScriptTable.h"
-#include "GCNPCAskVariable.h"
+#include "Gpackets/GCNPCAskVariable.h"
 
 #include "ClientDef.h"
 #include "TalkBox.h"

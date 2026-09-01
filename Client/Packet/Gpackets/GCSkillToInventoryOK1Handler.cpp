@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCSkillToInventoryOK1.h"
+#include "Gpackets/GCSkillToInventoryOK1.h"
 #include "ClientDef.h"
 #include "ClientFunction.h"
 #include "MInventory.h"

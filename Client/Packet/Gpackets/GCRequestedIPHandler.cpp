@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCRequestedIP.h"
+#include "Gpackets/GCRequestedIP.h"
 //#include "MParty.h"
 //#include "RequestFunction.h"
 

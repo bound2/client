@@ -5,7 +5,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "Client_PCH.h"
-#include "GCOtherModifyInfo.h"
+#include "Gpackets/GCOtherModifyInfo.h"
 #include "ClientDef.h"
 #include "UIFunction.h"
 

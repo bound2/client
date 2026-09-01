@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCAttack.h"
+#include "Gpackets/GCAttack.h"
 #include "ClientDef.h"
 
 //////////////////////////////////////////////////////////////////////

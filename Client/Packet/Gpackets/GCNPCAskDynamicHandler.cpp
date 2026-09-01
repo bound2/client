@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCNPCAskDynamic.h"
+#include "Gpackets/GCNPCAskDynamic.h"
 #include "ClientDef.h"
 #include "TalkBox.h"
 #include "UIDialog.h"

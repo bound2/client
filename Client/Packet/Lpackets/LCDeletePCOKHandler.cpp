@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "LCDeletePCOK.h"
+#include "Lpackets/LCDeletePCOK.h"
 
 #ifdef __GAME_CLIENT__
 	#include "ClientPlayer.h"

@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCCastingSkill.h"
+#include "Gpackets/GCCastingSkill.h"
 #include "ClientDef.h"
 
 //////////////////////////////////////////////////////////////////////

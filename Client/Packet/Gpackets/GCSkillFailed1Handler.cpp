@@ -9,7 +9,7 @@
 // include files
 
 #include "Client_PCH.h"
-#include "GCSkillFailed1.h"
+#include "Gpackets/GCSkillFailed1.h"
 #include "ClientDef.h"
 #include "SkillDef.h"
 #include "MSkillManager.h"

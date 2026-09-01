@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCSelectRankBonusFailed.h"
+#include "Gpackets/GCSelectRankBonusFailed.h"
 #include "ClientDef.h"
 #include "MGameStringTable.h"
 #include "TempInformation.h"

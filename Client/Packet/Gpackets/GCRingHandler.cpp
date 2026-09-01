@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCRing.h"
+#include "Gpackets/GCRing.h"
 #include "UserInformation.h"
 #include "ClientDef.h"
 

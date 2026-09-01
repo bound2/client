@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCMoveError.h"
+#include "Gpackets/GCMoveError.h"
 #include "ClientDef.h"
 
 #ifdef __GAME_CLIENT__

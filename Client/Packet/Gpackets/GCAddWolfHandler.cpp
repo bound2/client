@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCAddWolf.h"
+#include "Gpackets/GCAddWolf.h"
 #include "ClientDef.h"
 #include "SkillDef.h"
 

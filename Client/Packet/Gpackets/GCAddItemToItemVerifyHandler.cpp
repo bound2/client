@@ -7,7 +7,7 @@
 //--------------------------------------------------------------------------------
 #include "Client_PCH.h"
 // include files
-#include "GCAddItemToItemVerify.h"
+#include "Gpackets/GCAddItemToItemVerify.h"
 #include "ClientDef.h"
 #include "TempInformation.h"
 #include "MInventory.h"

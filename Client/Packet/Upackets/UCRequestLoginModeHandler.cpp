@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "UCRequestLoginMode.h"
+#include "Upackets/UCRequestLoginMode.h"
 
 #ifdef __UPDATE_CLIENT__
 

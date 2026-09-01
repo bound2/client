@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "CRDisconnect.h"
+#include "Rpackets/CRDisconnect.h"
 #include "RequestServerPlayer.h"
 #include "RequestFunction.h"
 

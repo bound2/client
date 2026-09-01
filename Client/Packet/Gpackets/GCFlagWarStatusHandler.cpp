@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCFlagWarStatus.h"
+#include "Gpackets/GCFlagWarStatus.h"
 #include "ClientDef.h"
 #include "UIFunction.h"
 

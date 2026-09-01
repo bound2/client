@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCRemoveCorpseHead.h"
+#include "Gpackets/GCRemoveCorpseHead.h"
 #include "ClientDef.h"
 
 #ifdef __GAME_CLIENT__

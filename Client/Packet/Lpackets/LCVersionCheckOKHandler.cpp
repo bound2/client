@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "LCVersionCheckOK.h"
+#include "Lpackets/LCVersionCheckOK.h"
 #include "ClientDef.h"
 
 

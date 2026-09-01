@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCAttackArmsOK4.h"
+#include "Gpackets/GCAttackArmsOK4.h"
 #include "ClientDef.h"
 #include "MActionInfoTable.h"
 #include "MSlayerGear.h"

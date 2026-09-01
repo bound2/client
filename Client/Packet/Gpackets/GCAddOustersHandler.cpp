@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCAddOusters.h"
+#include "Gpackets/GCAddOusters.h"
 #include "ClientDef.h"
 #include "MCreatureTable.h"
 #include "MTestDef.h"

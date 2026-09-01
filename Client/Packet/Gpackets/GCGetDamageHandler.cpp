@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCGetDamage.h"
+#include "Gpackets/GCGetDamage.h"
 #include "ClientDef.h"
 #include "MActionInfoTable.h"
 #include "SkillDef.h"

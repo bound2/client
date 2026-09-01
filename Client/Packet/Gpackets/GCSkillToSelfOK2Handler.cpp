@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCSkillToSelfOK2.h"
+#include "Gpackets/GCSkillToSelfOK2.h"
 #include "ClientDef.h"
 #include "PacketFunction2.h"
 

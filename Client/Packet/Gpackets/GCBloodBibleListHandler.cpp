@@ -8,7 +8,7 @@
 #include "Client_PCH.h"
 #pragma warning(disable:4786)
 // include files
-#include "GCBloodBibleList.h"
+#include "Gpackets/GCBloodBibleList.h"
 
 
 #include "ClientDef.h"

@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCVisibleFail.h"
+#include "Gpackets/GCVisibleFail.h"
 #include "ClientDef.h"
 
 

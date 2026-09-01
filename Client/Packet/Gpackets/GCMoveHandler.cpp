@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCMove.h"
+#include "Gpackets/GCMove.h"
 #include "Player.h"
 #include "ClientDef.h"
 

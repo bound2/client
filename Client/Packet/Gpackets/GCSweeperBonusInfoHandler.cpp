@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCSweeperBonusInfo.h"
+#include "Gpackets/GCSweeperBonusInfo.h"
 #include "ClientDef.h"
 #include "MSkillManager.h"
 #include "VS_UI.h" 

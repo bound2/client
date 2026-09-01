@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "RCSay.h"
+#include "Rpackets/RCSay.h"
 #include "ClientDef.h"
 #include "UserInformation.h"
 #include "MChatManager.h"

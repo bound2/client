@@ -8,7 +8,7 @@
 
 #include "Client_PCH.h"
 // include files
-#include "GCRealWearingInfo.h"
+#include "Gpackets/GCRealWearingInfo.h"
 #include "ClientDef.h"
 #include "MSlayerGear.h"
 #include "MVampireGear.h"

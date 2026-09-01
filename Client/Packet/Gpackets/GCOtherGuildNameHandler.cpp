@@ -5,7 +5,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "Client_PCH.h"
-#include "GCOtherGuildName.h"
+#include "Gpackets/GCOtherGuildName.h"
 #include "ClientDef.h"
 #include "UIFunction.h"
 

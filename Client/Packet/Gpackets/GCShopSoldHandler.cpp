@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCShopSold.h"
+#include "Gpackets/GCShopSold.h"
 #include "ClientDef.h"
 #include "MNPC.h"
 #include "MShop.h"

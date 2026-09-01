@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCShowUnionInfo.h"
+#include "Gpackets/GCShowUnionInfo.h"
 #include "ClientDef.h"
 #include "UIFunction.h"
 

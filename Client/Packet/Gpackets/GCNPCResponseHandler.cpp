@@ -9,7 +9,7 @@
 // include files
 
 #include "Client_PCH.h"
-#include "GCNPCResponse.h"
+#include "Gpackets/GCNPCResponse.h"
 #include "ClientDef.h"
 #include "MStorage.h"
 #include "MInventory.h"

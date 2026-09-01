@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCCannotAdd.h"
+#include "Gpackets/GCCannotAdd.h"
 #include "ClientDef.h"
 #include "UIFunction.h"
 

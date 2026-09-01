@@ -6,7 +6,7 @@
 //////////////////////////////////////////////////////////////////////
 #include "Client_PCH.h"
 // include files
-#include "GCHolyLandBonusInfo.h"
+#include "Gpackets/GCHolyLandBonusInfo.h"
 #include "ClientDef.h"
 #include "MSkillManager.h"
 

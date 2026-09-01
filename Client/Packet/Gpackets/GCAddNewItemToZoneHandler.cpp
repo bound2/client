@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCAddNewItemToZone.h"
+#include "Gpackets/GCAddNewItemToZone.h"
 #include "ClientDef.h"
 #include "MItem.h"
 

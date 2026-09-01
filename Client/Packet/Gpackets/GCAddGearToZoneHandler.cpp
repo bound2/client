@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCAddGearToZone.h"
+#include "Gpackets/GCAddGearToZone.h"
 #include "ClientDef.h"
 #include "MSlayerGear.h"
 #include "MVampireGear.h"

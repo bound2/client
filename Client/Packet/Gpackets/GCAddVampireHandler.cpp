@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCAddVampire.h"
+#include "Gpackets/GCAddVampire.h"
 #include "ClientDef.h"
 #include "MCreatureTable.h"
 #include "MTestDef.h"

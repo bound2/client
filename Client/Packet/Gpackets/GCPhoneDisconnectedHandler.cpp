@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCPhoneDisconnected.h"
+#include "Gpackets/GCPhoneDisconnected.h"
 #include "UserInformation.h"
 #include "ClientDef.h"
 

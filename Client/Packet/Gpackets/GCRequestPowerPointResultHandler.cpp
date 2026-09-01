@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCRequestPowerPointResult.h"
+#include "Gpackets/GCRequestPowerPointResult.h"
 
 #ifdef __GAME_CLIENT__
 #include "VS_UI_GameCommon.h"

@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "LCQueryResultCharacterName.h"
+#include "Lpackets/LCQueryResultCharacterName.h"
 #include "ClientDef.h"
 #include "UserInformation.h"
 #include "MGameStringTable.h"

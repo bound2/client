@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCWarList.h"
+#include "Gpackets/GCWarList.h"
 #include "MWarManager.h"
 #include "MZone.h"
 #include "MEventManager.h"

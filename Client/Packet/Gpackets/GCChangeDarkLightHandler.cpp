@@ -8,7 +8,7 @@
 // include files
 #include "Client_PCH.h"
 #include "MTopView.h"
-#include "GCChangeDarkLight.h"
+#include "Gpackets/GCChangeDarkLight.h"
 #include "UserInformation.h"
 
 #ifdef __GAME_CLIENT__

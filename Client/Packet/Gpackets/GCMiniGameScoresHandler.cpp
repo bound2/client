@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCMiniGameScores.h"
+#include "Gpackets/GCMiniGameScores.h"
 #include "ClientDef.h"
 #include "UIFunction.h"
 

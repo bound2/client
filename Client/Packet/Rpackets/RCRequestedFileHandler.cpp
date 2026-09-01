@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "RCRequestedFile.h"
+#include "Rpackets/RCRequestedFile.h"
 #include "RequestClientPlayer.h"
 #include "RequestFileManager.h"
 #include "ClientDef.h"

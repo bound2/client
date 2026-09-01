@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCStatusCurrentHP.h"
+#include "Gpackets/GCStatusCurrentHP.h"
 #include "ClientDef.h"
 
 //////////////////////////////////////////////////////////////////////

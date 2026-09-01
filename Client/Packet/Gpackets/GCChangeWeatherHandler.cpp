@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCChangeWeather.h"
+#include "Gpackets/GCChangeWeather.h"
 
 #ifdef __GAME_CLIENT__
 	#include "ClientPlayer.h"

@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCSystemAvailabilities.h"
+#include "Gpackets/GCSystemAvailabilities.h"
 #include <bitset>
 #include "SystemAvailabilities.h"
 

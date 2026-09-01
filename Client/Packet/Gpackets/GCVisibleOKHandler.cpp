@@ -8,7 +8,7 @@
 
 #include "Client_PCH.h"
 // include files
-#include "GCVisibleOK.h"
+#include "Gpackets/GCVisibleOK.h"
 #include "ClientDef.h"
 
 //--------------------------------------------------------------------------------

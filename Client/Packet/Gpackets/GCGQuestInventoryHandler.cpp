@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCGQuestInventory.h"
+#include "Gpackets/GCGQuestInventory.h"
 #include "Client.h"
 #include "VS_UI.h"
 //////////////////////////////////////////////////////////////////////

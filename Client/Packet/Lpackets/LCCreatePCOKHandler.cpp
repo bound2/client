@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "LCCreatePCOK.h"
+#include "Lpackets/LCCreatePCOK.h"
 #include "ClientDef.h"
 #include "UIFunction.h"
 

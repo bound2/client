@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCGetOffMotorCycleFailed.h"
+#include "Gpackets/GCGetOffMotorCycleFailed.h"
 #include "ClientDef.h"
 
 //////////////////////////////////////////////////////////////////////

@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCWaitGuildList.h"
+#include "Gpackets/GCWaitGuildList.h"
 #include "ClientDef.h"
 #include "UIFunction.h"
 //////////////////////////////////////////////////////////////////////

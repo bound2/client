@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCMorph1.h"
+#include "Gpackets/GCMorph1.h"
 #include "ClientDef.h"
 #include "CDirectSound.h"
 #include "MQuickSlot.h"

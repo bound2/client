@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCFakeMove.h"
+#include "Gpackets/GCFakeMove.h"
 #include "Player.h"
 #include "ClientDef.h"
 #include "MFakeCreature.h"

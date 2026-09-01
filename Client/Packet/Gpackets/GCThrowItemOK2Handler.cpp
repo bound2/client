@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCThrowItemOK2.h"
+#include "Gpackets/GCThrowItemOK2.h"
 #include "ClientDef.h"
 #include "SkillDef.h"
 

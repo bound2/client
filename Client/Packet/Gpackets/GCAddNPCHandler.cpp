@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCAddNPC.h"
+#include "Gpackets/GCAddNPC.h"
 #include "ClientDef.h"
 #include "MNPC.h"
 #include "MGuildType.h"

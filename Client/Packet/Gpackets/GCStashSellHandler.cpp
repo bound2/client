@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCStashSell.h"
+#include "Gpackets/GCStashSell.h"
 #include "ClientDef.h"
 #include "MGameStringTable.h"
 #include "TempInformation.h"

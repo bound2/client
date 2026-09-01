@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCTradeError.h"
+#include "Gpackets/GCTradeError.h"
 #include "ClientDef.h"
 #include "UIDialog.h"
 #include "MGameStringTable.h"

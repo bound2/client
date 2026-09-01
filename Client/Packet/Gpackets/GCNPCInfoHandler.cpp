@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCNPCInfo.h"
+#include "Gpackets/GCNPCInfo.h"
 
 #ifdef __GAME_CLIENT__
 

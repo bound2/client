@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "LCRegisterPlayerOK.h"
+#include "Lpackets/LCRegisterPlayerOK.h"
 #include "UserInformation.h"
 #include "ClientDef.h"
 #include "UIFunction.h"

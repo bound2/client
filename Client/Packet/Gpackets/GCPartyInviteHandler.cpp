@@ -5,7 +5,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "Client_PCH.h"
-#include "GCPartyInvite.h"
+#include "Gpackets/GCPartyInvite.h"
 #include "Cpackets/CGPartyInvite.h"
 #include "ClientPlayer.h"
 #include "MGameStringTable.h"

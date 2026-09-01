@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "RCRequestVerify.h"
+#include "Rpackets/RCRequestVerify.h"
 #include "MGameStringTable.h"
 #include "RequestClientPlayer.h"
 #include "RequestUserManager.h"

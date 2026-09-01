@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCCreatureDied.h"
+#include "Gpackets/GCCreatureDied.h"
 #include "ClientDef.h"
 
 //////////////////////////////////////////////////////////////////////

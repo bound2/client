@@ -7,7 +7,7 @@
 //--------------------------------------------------------------------------------
 #include "Client_PCH.h"
 // include files
-#include "GCGuildResponse.h"
+#include "Gpackets/GCGuildResponse.h"
 #include "ClientDef.h"
 #include "UIFunction.h"
 #include "MGameStringTable.h"

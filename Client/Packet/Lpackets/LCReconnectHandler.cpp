@@ -9,7 +9,7 @@
 // include files
 
 #include "Client_PCH.h"
-#include "LCReconnect.h"
+#include "Lpackets/LCReconnect.h"
 #include "ClientDef.h"
 #include "ServerInfoFileParser.h"
 

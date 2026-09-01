@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCHPRecoveryStartToOthers.h"
+#include "Gpackets/GCHPRecoveryStartToOthers.h"
 #include "ClientDef.h"
 
 //////////////////////////////////////////////////////////////////////

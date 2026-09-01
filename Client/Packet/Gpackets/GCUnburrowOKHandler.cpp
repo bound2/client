@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCUnburrowOK.h"
+#include "Gpackets/GCUnburrowOK.h"
 #include "ClientDef.h"
 #include "SkillDef.h"
 

@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCAddMonsterFromTransformation.h"
+#include "Gpackets/GCAddMonsterFromTransformation.h"
 #include "ClientDef.h"
 #include "SkillDef.h"
 

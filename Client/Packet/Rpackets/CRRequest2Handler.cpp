@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "CRRequest2.h"
+#include "Rpackets/CRRequest2.h"
 #include "ClientDef.h"
 #include "UserInformation.h"
 #include "ProfileManager.h"

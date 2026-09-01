@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "LCLoginOK.h"
+#include "Lpackets/LCLoginOK.h"
 
 #ifdef __GAME_CLIENT__
 

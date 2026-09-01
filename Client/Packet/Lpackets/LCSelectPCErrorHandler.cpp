@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "LCSelectPCError.h"
+#include "Lpackets/LCSelectPCError.h"
 #include "UIDialog.h"
 #include "ClientDef.h"
 #include "MGameStringTable.h"

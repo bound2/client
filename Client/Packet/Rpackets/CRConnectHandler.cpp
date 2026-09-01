@@ -8,11 +8,11 @@
 
 // include files
 #include "Client_PCH.h"
-#include "CRConnect.h"
+#include "Rpackets/CRConnect.h"
 #include "ClientDef.h"
 #include "UserInformation.h"
 #include "RequestServerPlayer.h"
-#include "RCConnectVerify.h"
+#include "Rpackets/RCConnectVerify.h"
 
 
 #if defined(_DEBUG) && defined(OUTPUT_DEBUG)

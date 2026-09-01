@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "LCQueryResultPlayerID.h"
+#include "Lpackets/LCQueryResultPlayerID.h"
 #include "ClientDef.h"
 #include "UIDialog.h"
 #include "UIFunction.h"

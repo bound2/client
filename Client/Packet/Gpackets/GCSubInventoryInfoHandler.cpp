@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCSubInventoryInfo.h"
+#include "Gpackets/GCSubInventoryInfo.h"
 	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
 		#include "ClientDef.h"
 		#include "UIFunction.h"

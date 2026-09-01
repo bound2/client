@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "CURequestLoginMode.h"
+#include "Upackets/CURequestLoginMode.h"
 
 #ifdef __UPDATE_SERVER__
 	#include <sys/dir.h>

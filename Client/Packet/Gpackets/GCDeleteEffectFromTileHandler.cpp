@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCDeleteEffectFromTile.h"
+#include "Gpackets/GCDeleteEffectFromTile.h"
 #include "ClientDef.h"
 #include "SkillDef.h"
 #include "MinTr.h"

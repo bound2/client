@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCQuestStatus.h"
+#include "Gpackets/GCQuestStatus.h"
 #include "MGameStringTable.h"
 #include "MEventManager.h"
 #include "DebugInfo.h"

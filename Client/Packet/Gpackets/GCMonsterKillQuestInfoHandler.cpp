@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCMonsterKillQuestInfo.h"
+#include "Gpackets/GCMonsterKillQuestInfo.h"
 #include "MMonsterKillQuestInfo.h"
 #include "MCreatureTable.h"
 

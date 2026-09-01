@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCSelectRankBonusOK.h"
+#include "Gpackets/GCSelectRankBonusOK.h"
 #include "RankBonusTable.h"
 #include "TempInformation.h"
 #include "RankBonusDef.h"

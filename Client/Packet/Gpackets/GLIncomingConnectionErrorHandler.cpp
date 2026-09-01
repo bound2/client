@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GLIncomingConnectionError.h"
+#include "Gpackets/GLIncomingConnectionError.h"
 
 #ifdef __LOGIN_SERVER__
 	#include "LoginPlayer.h"

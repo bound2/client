@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCPetUseSkill.h"
+#include "Gpackets/GCPetUseSkill.h"
 #include "MZone.h"
 #include "MFakeCreature.h"
 #include "DebugInfo.h"

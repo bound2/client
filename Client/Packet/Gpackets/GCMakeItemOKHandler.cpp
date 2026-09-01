@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCMakeItemOK.h"
+#include "Gpackets/GCMakeItemOK.h"
 #include "ClientDef.h"
 #include "TempInformation.h"
 #include "MInventory.h"

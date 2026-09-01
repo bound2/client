@@ -9,7 +9,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCSelectQuestID.h"
+#include "Gpackets/GCSelectQuestID.h"
 #include "ClientDef.h"
 #include "TempInformation.h"
 #include "UIFunction.h"

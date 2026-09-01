@@ -6,7 +6,7 @@
 //////////////////////////////////////////////////////////////////////
 #include "Client_PCH.h"
 // include files
-#include "GCBloodBibleStatus.h"
+#include "Gpackets/GCBloodBibleStatus.h"
 #include "ClientDef.h"
 #include "UIFunction.h"
 

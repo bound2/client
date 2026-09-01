@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCGlobalChat.h"
+#include "Gpackets/GCGlobalChat.h"
 #include "ClientDef.h"
 #include "MChatManager.h"
 #include "UserInformation.h"

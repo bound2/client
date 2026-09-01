@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCCrossCounterOK1.h"
+#include "Gpackets/GCCrossCounterOK1.h"
 #include "ClientDef.h"
 #include "MFakeCreature.h"
 

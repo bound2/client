@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCAddEffectToTile.h"
+#include "Gpackets/GCAddEffectToTile.h"
 #include "ClientDef.h"
 #include "MEffectStatusTable.h"
 #include "SkillDef.h"

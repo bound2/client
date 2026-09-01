@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCAddEffect.h"
+#include "Gpackets/GCAddEffect.h"
 #include "ClientDef.h"
 #include "PacketFunction.h"
 #include "MEffectStatusDef.h"

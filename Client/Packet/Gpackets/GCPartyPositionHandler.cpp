@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCPartyPosition.h"
+#include "Gpackets/GCPartyPosition.h"
 #include "Player.h"
 #include "MParty.h"
 #include "RequestUserManager.h"

@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCNoticeEvent.h"
+#include "Gpackets/GCNoticeEvent.h"
 #include "MEventManager.h"
 #include "MGameStringTable.h"
 #include "CMessageArray.h"

@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCAddVampireFromTransformation.h"
+#include "Gpackets/GCAddVampireFromTransformation.h"
 #include "ClientDef.h"
 #include "SkillDef.h"
 #include "MCreatureTable.h"

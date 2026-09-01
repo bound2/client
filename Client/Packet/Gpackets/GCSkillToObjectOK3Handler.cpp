@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCSkillToObjectOK3.h"
+#include "Gpackets/GCSkillToObjectOK3.h"
 #include "ClientDef.h"
 
 //////////////////////////////////////////////////////////////////////

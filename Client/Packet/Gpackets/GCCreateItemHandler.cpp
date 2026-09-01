@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCCreateItem.h"
+#include "Gpackets/GCCreateItem.h"
 #include "ClientDef.h"
 #include "MInventory.h"
 #include "UIFunction.h"

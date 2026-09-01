@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCKnocksTargetBackOK1.h"
+#include "Gpackets/GCKnocksTargetBackOK1.h"
 #include "ClientDef.h"
 #include "MSlayerGear.h"
 #include "SkillDef.h"

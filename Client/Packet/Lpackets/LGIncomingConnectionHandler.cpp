@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "LGIncomingConnection.h"
+#include "Lpackets/LGIncomingConnection.h"
 #include "Properties.h"
 
 #ifdef __GAME_SERVER__

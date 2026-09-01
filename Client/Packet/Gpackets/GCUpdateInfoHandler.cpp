@@ -9,7 +9,7 @@
 // include files
 #include "Client_PCH.h"
 #include "MTopView.h"
-#include "GCUpdateInfo.h"
+#include "Gpackets/GCUpdateInfo.h"
 #include "ClientDef.h"
 #include "AddonDef.h"
 #include "MGameTime.h"

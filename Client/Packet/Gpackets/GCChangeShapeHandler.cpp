@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCChangeShape.h"
+#include "Gpackets/GCChangeShape.h"
 #include "ClientDef.h"
 #include "MItem.h"
 

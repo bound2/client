@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCMyStoreInfo.h"
+#include "Gpackets/GCMyStoreInfo.h"
 #include "MStorage.h"
 #include "MPlayer.h"
 #include "PCItemInfo.h"

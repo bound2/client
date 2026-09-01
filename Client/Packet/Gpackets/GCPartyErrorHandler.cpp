@@ -5,7 +5,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "Client_PCH.h"
-#include "GCPartyError.h"
+#include "Gpackets/GCPartyError.h"
 #include "ClientDef.h"
 #include "UIDialog.h"
 #include "MGameStringTable.h"

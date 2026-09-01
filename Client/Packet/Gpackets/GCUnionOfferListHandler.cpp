@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCUnionOfferList.h"
+#include "Gpackets/GCUnionOfferList.h"
 #include "MGameStringTable.h"
 #include "VS_UI.h"
 #include "DebugInfo.h"

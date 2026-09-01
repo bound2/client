@@ -9,7 +9,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCNotifyWin.h"
+#include "Gpackets/GCNotifyWin.h"
 #include "ClientDef.h"
 #include "UIFunction.h"
 

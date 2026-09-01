@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCModifyInformation.h"
+#include "Gpackets/GCModifyInformation.h"
 #include "ClientDef.h"
 
 //////////////////////////////////////////////////////////////////////

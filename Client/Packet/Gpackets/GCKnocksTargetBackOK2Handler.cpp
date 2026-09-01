@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCKnocksTargetBackOK2.h"
+#include "Gpackets/GCKnocksTargetBackOK2.h"
 #include "ClientDef.h"
 
 //////////////////////////////////////////////////////////////////////

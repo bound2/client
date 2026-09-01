@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCAddGearToInventory.h"
+#include "Gpackets/GCAddGearToInventory.h"
 #include "ClientDef.h"
 #include "MSlayerGear.h"
 #include "MVampireGear.h"

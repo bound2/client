@@ -7,7 +7,7 @@
 //--------------------------------------------------------------------------------
 #include "Client_PCH.h"
 // include files
-#include "GCAddressListVerify.h"
+#include "Gpackets/GCAddressListVerify.h"
 
 #ifdef __GAME_CLIENT__
 	#include "ClientPlayer.h"

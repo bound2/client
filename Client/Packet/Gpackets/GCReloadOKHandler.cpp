@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCReloadOK.h"
+#include "Gpackets/GCReloadOK.h"
 #include "ClientDef.h"
 #include "MSlayerGear.h"
 #include "MInventory.h"

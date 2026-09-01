@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCAttackMeleeOK3.h"
+#include "Gpackets/GCAttackMeleeOK3.h"
 #include "ClientDef.h"
 #include "MActionInfoTable.h"
 #include "SkillDef.h"

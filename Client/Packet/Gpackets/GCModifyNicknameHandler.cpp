@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCModifyNickname.h"
+#include "Gpackets/GCModifyNickname.h"
 #include "ClientDef.h"
 #include "VS_UI.h"
 #include "MGameStringTable.h"

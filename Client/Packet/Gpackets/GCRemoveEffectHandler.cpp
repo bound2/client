@@ -8,7 +8,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "GCRemoveEffect.h"
+#include "Gpackets/GCRemoveEffect.h"
 #include "ClientDef.h"
 #include "MEffectStatusDef.h"
 #include "MEventManager.h"
