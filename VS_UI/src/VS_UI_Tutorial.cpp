@@ -1649,7 +1649,7 @@ int	C_VS_UI_COMPUTER::PrintTree(int _x, int _y, int y_distance, int depth, int &
 					if(strcmp(pItem->GetName(), (*g_pGameStringTable)[UI_STRING_MESSAGE_INFRA_RED_HELMET].GetString()) == 0)
 					{
 						char sz_temp[50];
-						wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_INFRA_HELMET].GetString());
+						snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_INFRA_HELMET));
 						g_PrintColorStr(x + m_index_x + _x, y + m_index_y + _y + (i+y_plus-m_tree_scroll)*y_distance, sz_temp, gpC_base->m_chatting_pi, color[depth]);
 					}
 					else

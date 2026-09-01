@@ -550,40 +550,40 @@ void	C_VS_UI_ITEM_LIST::Show()
 		switch(pCurrentFocusItem->GetItemClass())
 		{
 		case ITEM_CLASS_SWORD:
-			wsprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_CLASS_SWORD].GetString());
+			snprintf(sz_buf, sizeof(sz_buf), "%s", GetGameString(UI_STRING_MESSAGE_ITEM_CLASS_SWORD));
 			break;			
 		case ITEM_CLASS_BLADE:
-			wsprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_CLASS_BLADE].GetString());
+			snprintf(sz_buf, sizeof(sz_buf), "%s", GetGameString(UI_STRING_MESSAGE_ITEM_CLASS_BLADE));
 			break;			
 		case ITEM_CLASS_CROSS:
-			wsprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_CLASS_CROSS].GetString());
+			snprintf(sz_buf, sizeof(sz_buf), "%s", GetGameString(UI_STRING_MESSAGE_ITEM_CLASS_CROSS));
 			break;			
 		case ITEM_CLASS_MACE:
-			wsprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_CLASS_MACE].GetString());
+			snprintf(sz_buf, sizeof(sz_buf), "%s", GetGameString(UI_STRING_MESSAGE_ITEM_CLASS_MACE));
 			break;			
 		case ITEM_CLASS_MINE:
-			wsprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_CLASS_MINE].GetString());
+			snprintf(sz_buf, sizeof(sz_buf), "%s", GetGameString(UI_STRING_MESSAGE_ITEM_CLASS_MINE));
 			break;			
 		case ITEM_CLASS_BOMB:
-			wsprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_CLASS_BOMB].GetString());
+			snprintf(sz_buf, sizeof(sz_buf), "%s", GetGameString(UI_STRING_MESSAGE_ITEM_CLASS_BOMB));
 			break;			
 		case ITEM_CLASS_BOMB_MATERIAL:
 			if(pCurrentFocusItem->GetItemType() < 5)
-				wsprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_CLASS_BOMB_MATERIAL].GetString());
+				snprintf(sz_buf, sizeof(sz_buf), "%s", GetGameString(UI_STRING_MESSAGE_ITEM_CLASS_BOMB_MATERIAL));
 			else
-				wsprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_CLASS_MINE_MATERIAL].GetString());
+				snprintf(sz_buf, sizeof(sz_buf), "%s", GetGameString(UI_STRING_MESSAGE_ITEM_CLASS_MINE_MATERIAL));
 			break;			
 		case ITEM_CLASS_SG:
-			wsprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_CLASS_SG].GetString());
+			snprintf(sz_buf, sizeof(sz_buf), "%s", GetGameString(UI_STRING_MESSAGE_ITEM_CLASS_SG));
 			break;			
 		case ITEM_CLASS_SMG:
-			wsprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_CLASS_SMG].GetString());
+			snprintf(sz_buf, sizeof(sz_buf), "%s", GetGameString(UI_STRING_MESSAGE_ITEM_CLASS_SMG));
 			break;			
 		case ITEM_CLASS_AR:
-			wsprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_CLASS_AR].GetString());
+			snprintf(sz_buf, sizeof(sz_buf), "%s", GetGameString(UI_STRING_MESSAGE_ITEM_CLASS_AR));
 			break;			
 		case ITEM_CLASS_SR:
-			wsprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_CLASS_SR].GetString());
+			snprintf(sz_buf, sizeof(sz_buf), "%s", GetGameString(UI_STRING_MESSAGE_ITEM_CLASS_SR));
 			break;			
 		default:
 			wsprintf(sz_buf, "");
@@ -712,7 +712,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 			}
 			else
 			{
-				sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NOT_EXIST].GetString());
+				snprintf(sz_buf, sizeof(sz_buf), "%s", GetGameString(UI_STRING_MESSAGE_DESC_NOT_EXIST));
 				g_PrintColorStr(vx, strY, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
 				strY += line_gap;
 			}
@@ -15866,6 +15866,69 @@ void	C_VS_UI_QUEST_MISSION::Finish()
 	gpC_window_manager->DisappearWindow(this);	
 }
 
+//-----------------------------------------------------------------------------
+// g_ExpandGQuestMissionTitle
+//
+// A guild quest mission title is a template that comes from data: it may carry
+// one "%s" for the string argument and one "%d" for the numeric argument the
+// server sent with the mission. Handing that template to sprintf as a format
+// string let every other conversion in it walk the stack, so the two supported
+// placeholders are substituted here by hand and everything else - a lone '%'
+// included - is copied literally. The output is always NUL terminated and never
+// exceeds nDestSize bytes.
+//-----------------------------------------------------------------------------
+static void	g_ExpandGQuestMissionTitle(char* pDest, size_t nDestSize, const char* pTitle, const char* pStrArg, DWORD dwNumArg)
+{
+	if(NULL == pDest || 0 == nDestSize)
+		return;
+
+	// "%d" and the signed cast are what the old sprintf did with this DWORD, so a
+	// value that wrapped past INT_MAX still reads the way it always did.
+	char szNumArg[16];
+	snprintf(szNumArg, sizeof(szNumArg), "%d", (int)dwNumArg);
+
+	const char*	pCur		= (NULL != pTitle) ? pTitle : "";
+	bool		bStrArgDone	= false;
+	bool		bNumArgDone	= false;
+	size_t		nOut		= 0;
+
+	while('\0' != *pCur && nOut + 1 < nDestSize)
+	{
+		const char* pInsert = NULL;
+
+		if('%' == pCur[0])
+		{
+			if('s' == pCur[1] && !bStrArgDone)
+			{
+				pInsert = (NULL != pStrArg) ? pStrArg : "";
+				bStrArgDone = true;
+			}
+			else if('d' == pCur[1] && !bNumArgDone)
+			{
+				pInsert = szNumArg;
+				bNumArgDone = true;
+			}
+			else if('%' == pCur[1])
+			{
+				pInsert = "%";
+			}
+		}
+
+		if(NULL != pInsert)
+		{
+			while('\0' != *pInsert && nOut + 1 < nDestSize)
+				pDest[nOut++] = *pInsert++;
+			pCur += 2;
+		}
+		else
+		{
+			pDest[nOut++] = *pCur++;
+		}
+	}
+
+	pDest[nOut] = '\0';
+}
+
 void	C_VS_UI_QUEST_MISSION::Show()
 {
 	static char szMissionPopupString[512];
@@ -15908,7 +15971,6 @@ void	C_VS_UI_QUEST_MISSION::Show()
 			C_VS_UI_QUEST_MANAGER::_GMissionInfo* TempInfo = (C_VS_UI_QUEST_MANAGER::_GMissionInfo*)m_QuestMissionInfo[i];
 			if(TempInfo != NULL)
 			{
-				sprintf(szString,(*g_pGameStringTable)[UI_STRING_GQUEST_MISSION].GetString(), i+1, TempInfo->szMissionTitle.c_str());
 				DWORD TempValue = TempInfo->m_NumArg;
 				if(TempInfo->dwTimeLimit)
 				{
@@ -15926,7 +15988,14 @@ void	C_VS_UI_QUEST_MISSION::Show()
 						TempInfo->m_NumArg = 0;
 					}
 				}
-				sprintf(szString2, szString, TempInfo->m_StrArg.c_str(), TempValue);
+				// The mission title carries the placeholders, so it is expanded on its
+				// own; the format below is the game string table entry, which comes from
+				// Data/Info/String.inf and is gated only by the load-time sanitiser.
+				// GetGameString() is used because GetString() returns NULL for an entry
+				// the file left empty, and a NULL format reaches the UCRT invalid
+				// parameter handler.
+				g_ExpandGQuestMissionTitle(szString, sizeof(szString), TempInfo->szMissionTitle.c_str(), TempInfo->m_StrArg.c_str(), TempValue);
+				snprintf(szString2, sizeof(szString2), GetGameString(UI_STRING_GQUEST_MISSION), i+1, szString);
 				if(strlen(szString2)>36)
 				{
 					if(i == m_SelectPos)

@@ -21704,7 +21704,7 @@ bool C_VS_UI_EFFECT_STATUS::MouseControl(UINT message, int _x, int _y)
 						}
 						else
 						{
-							wsprintf(temp_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_CHANGE_VAMPIRE_SOON].GetString());
+							snprintf(temp_string, sizeof(temp_string), "%s", GetGameString(UI_STRING_MESSAGE_HPBAR_CHANGE_VAMPIRE_SOON));
 							color = RGB_RED;
 						}
 						effectstatus_string[1] = temp_string;
@@ -26668,7 +26668,7 @@ void C_VS_UI_TEAM_INFO::Show()
 				py += print_gap;
 		}
 		
-		wsprintf(sz_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_MEMBERS].GetString());
+		snprintf(sz_string, sizeof(sz_string), "%s", GetGameString(UI_STRING_MESSAGE_TEAM_INFO_MEMBERS));
 		vx = g_PrintColorStr(print_x, py, sz_string, gpC_base->m_chatting_pi, RGB_BLACK);
 		const int old_vx = vx;
 		bool b_member_num = false;
@@ -26709,7 +26709,7 @@ void C_VS_UI_TEAM_INFO::Show()
 		
 		int next = 0;
 		
-		wsprintf(sz_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_INTRODUCTION].GetString());//, m_ready_info.INTRODUCTION.c_str());
+		snprintf(sz_string, sizeof(sz_string), "%s", GetGameString(UI_STRING_MESSAGE_TEAM_INFO_INTRODUCTION));//, m_ready_info.INTRODUCTION.c_str());
 		vx = g_PrintColorStr(print_x, py, sz_string, gpC_base->m_chatting_pi, RGB_BLACK);
 		gpC_base->m_p_DDSurface_back->HLine(print_x, py+line_gap, w - (print_x - x) -30, 0);
 		
@@ -26796,7 +26796,7 @@ void C_VS_UI_TEAM_INFO::Show()
 		
 		if(m_scroll < 5)
 		{
-			wsprintf(sz_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_INTRODUCTION].GetString());//, m_ready_info.INTRODUCTION.c_str());
+			snprintf(sz_string, sizeof(sz_string), "%s", GetGameString(UI_STRING_MESSAGE_TEAM_INFO_INTRODUCTION));//, m_ready_info.INTRODUCTION.c_str());
 			vx = g_PrintColorStr(print_x, py, sz_string, gpC_base->m_chatting_pi, RGB_BLACK);
 			gpC_base->m_p_DDSurface_back->HLine(print_x, py+line_gap, w - (print_x - x) -30, 0);
 		}
@@ -27360,7 +27360,7 @@ void C_VS_UI_TEAM_MEMBER_INFO::Show()
 	
 	if(m_scroll < 3)
 	{
-		wsprintf(sz_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_INTRODUCTION].GetString());//, m_member_info.INTRODUCTION.c_str());
+		snprintf(sz_string, sizeof(sz_string), "%s", GetGameString(UI_STRING_MESSAGE_TEAM_INFO_INTRODUCTION));//, m_member_info.INTRODUCTION.c_str());
 		vx = g_PrintColorStr(print_x, py, sz_string, gpC_base->m_chatting_pi, RGB_BLACK);
 	}
 	gpC_base->m_p_DDSurface_back->HLine(print_x, py+line_gap, w - (print_x - x) -30, 0);
@@ -27944,7 +27944,7 @@ void C_VS_UI_TEAM_REGIST::Show()
 			py += m_print_gap;
 		}
 		
-		wsprintf(sz_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_SELF_INTRODUCTION].GetString());
+		snprintf(sz_string, sizeof(sz_string), "%s", GetGameString(UI_STRING_MESSAGE_TEAM_INFO_SELF_INTRODUCTION));
 		g_PrintColorStr(m_print_x, py, sz_string, gpC_base->m_chatting_pi, RGB_BLACK);
 		m_pC_button_group->ShowDescription();
 		
@@ -28050,15 +28050,15 @@ void C_VS_UI_TEAM_REGIST::Show()
 		switch(g_eRaceInterface)
 		{
 		case RACE_SLAYER:
-			wsprintf(sz_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_TEAM_INTRODUCTION].GetString());
+			snprintf(sz_string, sizeof(sz_string), "%s", GetGameString(UI_STRING_MESSAGE_TEAM_INFO_TEAM_INTRODUCTION));
 			break;
 			
 		case RACE_VAMPIRE:
-			wsprintf(sz_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_CLAN_INTRODUCTION].GetString());
+			snprintf(sz_string, sizeof(sz_string), "%s", GetGameString(UI_STRING_MESSAGE_TEAM_INFO_CLAN_INTRODUCTION));
 			break;
 			
 		case RACE_OUSTERS:
-			wsprintf(sz_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_GUILD_INTRODUCTION].GetString());
+			snprintf(sz_string, sizeof(sz_string), "%s", GetGameString(UI_STRING_MESSAGE_TEAM_INFO_GUILD_INTRODUCTION));
 			break;
 		}
 		
@@ -33203,7 +33203,7 @@ void	C_VS_UI_QUEST_STATUS::Show()
 		if( QuestInfo->GetType() == QUEST_INFO_TYPE_NULL || !m_bl_active )
 		{
 			//퀘스트중이 아닐때
-			wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_NOT_IN_QUEST].GetString() );
+			snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_NOT_IN_QUEST) );
 		} else
 		{
 			// 퀘스트 중이면 시간이 다 되었거나, 완료 되었거나, 진행중
@@ -33218,7 +33218,7 @@ void	C_VS_UI_QUEST_STATUS::Show()
 						BackTitle = RGB(150,150,60);
 					}					
 				}
-				wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_FAIL_QUEST].GetString() );
+				snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_FAIL_QUEST) );
 			} else
 			if( m_quest_status.current_point >= QuestInfo->GetGoal() && QuestInfo->GetType() == QUEST_INFO_MONSTER_KILL) 
 			{
@@ -33231,7 +33231,7 @@ void	C_VS_UI_QUEST_STATUS::Show()
 						BackTitle = RGB(24,146,247);
 					}				
 				}
-				wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_COMPLETE_QUEST].GetString() );
+				snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_COMPLETE_QUEST) );
 				if(SECOND_PET_QUEST == QuestInfo->GetID())
 				{// 2차펫 퀘스트 목표 달성 했을 때
 					g_PrintColorStrOut( x+20+tab_x, y+20+tab_y, sz_temp, gpC_base->m_chatting_pi, ColorTitle, BackTitle);		
@@ -33265,11 +33265,11 @@ void	C_VS_UI_QUEST_STATUS::Show()
 					break;
 
 				case QUEST_INFO_MEET_NPC:
-					wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_QUEST_MEET_NPC].GetString());
+					snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_QUEST_MEET_NPC));
 					break;
 
 				case QUEST_INFO_GATHER_ITEM:
-					wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_QUEST_GATHER_ITEM].GetString());					
+					snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_QUEST_GATHER_ITEM));
 					break;					
 				}
 			}		
@@ -33278,7 +33278,7 @@ void	C_VS_UI_QUEST_STATUS::Show()
 		
 		if( QuestInfo->GetTimeLimit() && QuestInfo->GetType() == QUEST_INFO_MONSTER_KILL)
 		{
-			wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_STATUS_LEFT_TIME].GetString());
+			snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_STATUS_LEFT_TIME));
 			g_PrintColorStrOut( x+20+tab_x, y+55+tab_y, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE, RGB_BLACK);
 		}
 		// 타이틀 게이지 쪽에 출력되는 부분
@@ -33322,9 +33322,9 @@ void	C_VS_UI_QUEST_STATUS::Show()
 //				} else
 				{
 					if( QuestInfo->GetGameType() == MINI_GAME_TYPE_MINE )
-						wsprintf(sz_temp,(*g_pGameStringTable)[UI_STRING_MESSAGE_QUEST_STATUS_CRAZY_MINE].GetString());
+						snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_QUEST_STATUS_CRAZY_MINE));
 					else if (QuestInfo->GetGameType() == MINI_GAME_TYPE_ARROW )
-						wsprintf(sz_temp,(*g_pGameStringTable)[UI_STRING_MESSAGE_QUEST_STATUS_ARROW_TILES].GetString());
+						snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_QUEST_STATUS_ARROW_TILES));
 					else
 						wsprintf(sz_temp,"Unknown");
 				}
@@ -33378,7 +33378,7 @@ void	C_VS_UI_QUEST_STATUS::Show()
 			else 
 			{
 				//제한 시간 초과
-				wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_FAIL_TIME_OVER_QUEST].GetString());
+				snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_FAIL_TIME_OVER_QUEST));
 				Timer2(6000);
 				time_check = Timer2();
 
@@ -33650,14 +33650,14 @@ void	C_VS_UI_QUEST_STATUS::ShowQuestDescription(int _x, int _y)
 		case QUEST_INFO_MONSTER_KILL:
 			// 몬스터 사냥 퀘스트
 			// %s (%d/%d)
-			wsprintf(temp_str[0], (*g_pGameStringTable)[UI_STRING_MESSAGE_QUEST_MONSTER_KILL].GetString());
+			snprintf(temp_str[0], sizeof(temp_str[0]), "%s", GetGameString(UI_STRING_MESSAGE_QUEST_MONSTER_KILL));
 			if( m_quest_status.quest_time < timeGetTime()/1000)	
 			{
-				wsprintf(temp_str[1], (*g_pGameStringTable)[UI_STRING_MESSAGE_FAIL_TIME_OVER_QUEST].GetString());				
+				snprintf(temp_str[1], sizeof(temp_str[1]), "%s", GetGameString(UI_STRING_MESSAGE_FAIL_TIME_OVER_QUEST));
 			} else
 			if( m_quest_status.current_point >= QuestInfo->GetGoal() )
 			{
-				wsprintf(temp_str[1], (*g_pGameStringTable)[UI_STRING_MESSAGE_COMPLETE_QUEST].GetString());
+				snprintf(temp_str[1], sizeof(temp_str[1]), "%s", GetGameString(UI_STRING_MESSAGE_COMPLETE_QUEST));
 			}
 			else
 				wsprintf(temp_str[1], "%s (%d/%d)", QuestInfo->GetName(), min(m_quest_status.current_point,QuestInfo->GetGoal()), QuestInfo->GetGoal());					
@@ -33665,13 +33665,13 @@ void	C_VS_UI_QUEST_STATUS::ShowQuestDescription(int _x, int _y)
 		case QUEST_INFO_MEET_NPC :
 			// NPC 만나기 퀘스트
 			// %s
-			wsprintf(temp_str[0], (*g_pGameStringTable)[UI_STRING_MESSAGE_QUEST_MEET_NPC].GetString());
+			snprintf(temp_str[0], sizeof(temp_str[0]), "%s", GetGameString(UI_STRING_MESSAGE_QUEST_MEET_NPC));
 			wsprintf(temp_str[1], "%s", (*g_pCreatureTable)[QuestInfo->GetCreatureType()].Name.GetString());
 			break;
 		case QUEST_INFO_GATHER_ITEM :
 			// 아이템 구하기 퀘스트
 			// %s
-			wsprintf(temp_str[0], (*g_pGameStringTable)[UI_STRING_MESSAGE_QUEST_GATHER_ITEM].GetString());
+			snprintf(temp_str[0], sizeof(temp_str[0]), "%s", GetGameString(UI_STRING_MESSAGE_QUEST_GATHER_ITEM));
 			wsprintf(temp_str[1], "%s", QuestInfo->GetName());				
 			break;
 		
@@ -33706,9 +33706,9 @@ void	C_VS_UI_QUEST_STATUS::ShowQuestDescription(int _x, int _y)
 		time_table[1] = QuestInfo->GetTimeLimit() - (m_quest_status.quest_time - timeGetTime()/1000);
 		time_table[2] = m_quest_status.quest_time - timeGetTime()/1000;
 		
-		wsprintf(temp_str[0], (*g_pGameStringTable)[UI_STRING_MESSAGE_QUEST_DESCRIPTION_TIME_TOTAL]);
-		wsprintf(temp_str[1], (*g_pGameStringTable)[UI_STRING_MESSAGE_QUEST_DESCRIPTION_TIME_ELAPSE]);
-		wsprintf(temp_str[2], (*g_pGameStringTable)[UI_STRING_MESSAGE_QUEST_DESCRIPTION_TIME_REMAIN]);
+		snprintf(temp_str[0], sizeof(temp_str[0]), "%s", GetGameString(UI_STRING_MESSAGE_QUEST_DESCRIPTION_TIME_TOTAL));
+		snprintf(temp_str[1], sizeof(temp_str[1]), "%s", GetGameString(UI_STRING_MESSAGE_QUEST_DESCRIPTION_TIME_ELAPSE));
+		snprintf(temp_str[2], sizeof(temp_str[2]), "%s", GetGameString(UI_STRING_MESSAGE_QUEST_DESCRIPTION_TIME_REMAIN));
 		
 		for(int i=0; i<3; i++)
 		{
@@ -33716,13 +33716,13 @@ void	C_VS_UI_QUEST_STATUS::ShowQuestDescription(int _x, int _y)
 			{
 				if(i ==1)
 				{
-					wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_FAIL_TIME_OVER_QUEST].GetString());
+					snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_FAIL_TIME_OVER_QUEST));
 					strcat(temp_str[i], sz_temp);
 					continue;
 				}
 				else if(i == 2)
 				{
-					wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_QUEST_DESCRIPTION_TIME_NO_REMAIN]);
+					snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_QUEST_DESCRIPTION_TIME_NO_REMAIN));
 					strcat(temp_str[i], sz_temp);
 					continue;
 				}
@@ -34250,20 +34250,20 @@ void	C_VS_UI_LOTTERY_CARD::Show()
 			break;
 			
 		case LOTTERY_TYPE_SCRATCH:
-			wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_PLEASE_SCRATCH_IMAGE].GetString());
+			snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_PLEASE_SCRATCH_IMAGE));
 			g_PrintColorStrOut( x+25, y+90, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE, RGB_BLACK);
-			wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_WIN_A_PRIZE_SAME_IMAGE].GetString());
+			snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_WIN_A_PRIZE_SAME_IMAGE));
 			g_PrintColorStrOut( x+25, y+90+30, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE, RGB_BLACK);
 			break;
 			
 		case LOTTERY_TYPE_CLOSE:
 			if(m_bl_result)
 			{
-				wsprintf(sz_temp,(*g_pGameStringTable)[UI_STRING_MESSAGE_CONGRATULATIONS].GetString());
+				snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_CONGRATULATIONS));
 				g_PrintColorStrOut( x+25, y+90, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE, RGB_BLACK);
 				wsprintf(sz_temp, "%s", m_GiftList[m_radio_select-1]->name.c_str());
 				g_PrintColorStrOut( x+25, y+90+30, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE, RGB_BLACK);
-				wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_WIN_A_PRIZE].GetString());
+				snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_WIN_A_PRIZE));
 				g_PrintColorStrOut( x+25, y+90+30+16, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE, RGB_BLACK);
 			} else
 			{

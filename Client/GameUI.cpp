@@ -4054,16 +4054,16 @@ void		UI_RunQuestList(GCSelectQuestID *pPacket)
 				case QUEST_INFO_MEET_NPC :
 					if( g_pPlayer->IsVampire() )
 					{
-						wsprintf(str, (*g_pGameStringTable)[STRING_MESSAGE_MEET_NPC_VAMPIRE].GetString() );
+						snprintf(str, sizeof(str), "%s", GetGameString(STRING_MESSAGE_MEET_NPC_VAMPIRE));
 					} else
 					{
-						wsprintf(str, (*g_pGameStringTable)[STRING_MESSAGE_MEET_NPC_SLAYER].GetString() );				
+						snprintf(str, sizeof(str), "%s", GetGameString(STRING_MESSAGE_MEET_NPC_SLAYER));				
 					}
 					break;
 				case QUEST_INFO_GATHER_ITEM :
 					break;
 				case QUEST_INFO_MINI_GAME :
-					wsprintf(str, (*g_pGameStringTable)[STRING_MESSAGE_SELECT_MINI_GAME].GetString() );
+					snprintf(str, sizeof(str), "%s", GetGameString(STRING_MESSAGE_SELECT_MINI_GAME));
 					selectType = 1;
 					break;
 				}		

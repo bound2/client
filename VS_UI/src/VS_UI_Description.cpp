@@ -265,55 +265,60 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 //		if(p_item->IsGunItem())
 		{
 
+			//
+			// The class label is data, not a format string. Printing it through
+			// a literal "%s" keeps any '%' the data file happens to contain from
+			// being read as a conversion, and snprintf bounds the copy to sz_buf.
+			//
 			switch(p_item->GetItemClass())
 			{
 			case ITEM_CLASS_SWORD:
-				wsprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_CLASS_SWORD].GetString());
+				snprintf(sz_buf, sizeof(sz_buf), "%s", GetGameString(UI_STRING_MESSAGE_ITEM_CLASS_SWORD));
 				break;
-				
+
 			case ITEM_CLASS_BLADE:
-				wsprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_CLASS_BLADE].GetString());
+				snprintf(sz_buf, sizeof(sz_buf), "%s", GetGameString(UI_STRING_MESSAGE_ITEM_CLASS_BLADE));
 				break;
-				
+
 			case ITEM_CLASS_CROSS:
-				wsprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_CLASS_CROSS].GetString());
+				snprintf(sz_buf, sizeof(sz_buf), "%s", GetGameString(UI_STRING_MESSAGE_ITEM_CLASS_CROSS));
 				break;
-				
+
 			case ITEM_CLASS_MACE:
-				wsprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_CLASS_MACE].GetString());
+				snprintf(sz_buf, sizeof(sz_buf), "%s", GetGameString(UI_STRING_MESSAGE_ITEM_CLASS_MACE));
 				break;
-				
+
 			case ITEM_CLASS_MINE:
-				wsprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_CLASS_MINE].GetString());
+				snprintf(sz_buf, sizeof(sz_buf), "%s", GetGameString(UI_STRING_MESSAGE_ITEM_CLASS_MINE));
 				break;
-				
+
 			case ITEM_CLASS_BOMB:
-				wsprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_CLASS_BOMB].GetString());
+				snprintf(sz_buf, sizeof(sz_buf), "%s", GetGameString(UI_STRING_MESSAGE_ITEM_CLASS_BOMB));
 				break;
-				
+
 			case ITEM_CLASS_BOMB_MATERIAL:
 				if(p_item->GetItemType() < 5)
-					wsprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_CLASS_BOMB_MATERIAL].GetString());
+					snprintf(sz_buf, sizeof(sz_buf), "%s", GetGameString(UI_STRING_MESSAGE_ITEM_CLASS_BOMB_MATERIAL));
 				else
-					wsprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_CLASS_MINE_MATERIAL].GetString());
+					snprintf(sz_buf, sizeof(sz_buf), "%s", GetGameString(UI_STRING_MESSAGE_ITEM_CLASS_MINE_MATERIAL));
 				break;
-				
+
 			case ITEM_CLASS_SG:
-				wsprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_CLASS_SG].GetString());
+				snprintf(sz_buf, sizeof(sz_buf), "%s", GetGameString(UI_STRING_MESSAGE_ITEM_CLASS_SG));
 				break;
-				
+
 			case ITEM_CLASS_SMG:
-				wsprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_CLASS_SMG].GetString());
+				snprintf(sz_buf, sizeof(sz_buf), "%s", GetGameString(UI_STRING_MESSAGE_ITEM_CLASS_SMG));
 				break;
-				
+
 			case ITEM_CLASS_AR:
-				wsprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_CLASS_AR].GetString());
+				snprintf(sz_buf, sizeof(sz_buf), "%s", GetGameString(UI_STRING_MESSAGE_ITEM_CLASS_AR));
 				break;
-				
+
 			case ITEM_CLASS_SR:
-				wsprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_CLASS_SR].GetString());
+				snprintf(sz_buf, sizeof(sz_buf), "%s", GetGameString(UI_STRING_MESSAGE_ITEM_CLASS_SR));
 				break;
-				
+
 			default:
 				wsprintf(sz_buf, "");
 				break;
@@ -966,7 +971,9 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			}
 			else
 			{
-				sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NOT_EXIST].GetString());
+				// Data-file text with no arguments of its own: copy it through a
+				// literal "%s" so a '%' in the entry cannot consume a stack word.
+				snprintf(sz_buf, sizeof(sz_buf), "%s", GetGameString(UI_STRING_MESSAGE_DESC_NOT_EXIST));
 				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
 			}
 			py += SMALL_FONT_Y_GAP;
@@ -1483,7 +1490,9 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				}
 				else
 				{
-					wsprintf(sz_buf, (*g_pGameStringTable)[STRING_MESSAGE_CANNOT_BUY].GetString());
+					// Data-file text with no arguments of its own: copy it through a
+					// literal "%s" so a '%' in the entry cannot consume a stack word.
+					snprintf(sz_buf, sizeof(sz_buf), "%s", GetGameString(STRING_MESSAGE_CANNOT_BUY));
 				}
 			}
 			else
@@ -3567,6 +3576,58 @@ void _BloodBible_Description_Calculator(void (*fp_show)(Rect, void *, long, long
 
 
 //-----------------------------------------------------------------------------
+// g_CountMultilineRows
+//
+// Counts the rows _Multiline_Info_Show will actually paint for pString at a
+// column of nColumn bytes. It repeats that function's walk step for step - the
+// same g_PossibleStringCut test, the same "cut = nColumn - check", the same
+// skip of a space at the seam, the same termination - so the height computed
+// by _Multiline_Info_Calculator and the rows drawn by Show cannot disagree.
+// Show is the reference: if its loop changes, this has to change with it.
+//
+// Only reads pString. Show's temporary NUL is written after it has decided
+// where to cut and is restored before the next pass, so it never influences
+// any of the decisions reproduced here.
+//-----------------------------------------------------------------------------
+static int g_CountMultilineRows(const char * pString, int nColumn)
+{
+	if(NULL == pString || nColumn <= 0)
+		return 0;
+
+	const char *	cur		= pString;
+	int				nRows	= 0;
+
+	for(;;)
+	{
+		int remain = (int)strlen(cur);
+
+		if(remain <= nColumn) // what is left fits on one line - no cut needed
+		{
+			if(remain > 0)
+				nRows++;
+			break;
+		}
+
+		int check;
+		if(g_PossibleStringCut(cur, nColumn))
+			check = 0;
+		else
+			check = 1;
+
+		int cut = nColumn - check;
+		if(cut <= 0) // cutting here would not advance - give up rather than spin
+			break;
+
+		nRows++;
+
+		cur += cut;
+		if(*cur == ' ')cur++;
+	}
+
+	return nRows;
+}
+
+//-----------------------------------------------------------------------------
 // _Multiline_Description_Calculator
 //
 // void_ptr = S_DEFAULT_HELP_STRING *
@@ -3584,10 +3645,30 @@ void _Multiline_Info_Calculator(void (*fp_show)(Rect, void *, long, long), int x
 	{
 		if(NULL != void_ptr)
 		{	
-			line_count = (strlen((char*)void_ptr)/right) + 1;
+			//
+			// Ask for the row count _Multiline_Info_Show will actually paint
+			// instead of strlen/right + 1. Show advances one byte less than the
+			// column whenever g_PossibleStringCut refuses the seam, so the old
+			// estimate could size the box one row short and leave the last row
+			// painting below the tooltip background.
+			//
+			line_count = g_CountMultilineRows((const char *)void_ptr, (int)right);
 
+			//
+			// Measure the width of one full column. The copy is bounded by the
+			// string that is really there and by the scratch buffer, so neither a
+			// string shorter than the column nor a column wider than the buffer
+			// can read or write past an end. The result stays NUL terminated.
+			//
 			char szTempBuf[128] = {0,};
-			memcpy(szTempBuf, void_ptr, right);
+			size_t nLen  = strlen((const char *)void_ptr);
+			size_t nCopy = (right > 0) ? (size_t)right : 0;
+			if(nCopy > nLen)
+				nCopy = nLen;
+			if(nCopy > sizeof(szTempBuf)-1)
+				nCopy = sizeof(szTempBuf)-1;
+			memcpy(szTempBuf, void_ptr, nCopy);
+			szTempBuf[nCopy] = '\0';
 			rect.w = g_GetStringWidth((const char *)szTempBuf, gpC_base->m_item_name_pi.hfont);
 		}
 		else
@@ -3677,34 +3758,49 @@ void	_Multiline_Info_Show(Rect rect, void * void_ptr, long left, long right)
 
 	int CurrentPos = right;
 
-	int LineCount = (strlen((char*)void_ptr)/right) + 1;
-
-	char sz_temp[4048];
 	char *cur = (char*)void_ptr;
 	char char_temp;
-	
-	strcpy(sz_temp, cur);
-	int TempCount = 0;
-	while(TempCount<LineCount)
+
+	//
+	// Walk the string one rendered line at a time, bounded by what is actually left
+	// of it rather than by a precomputed line count. The cut position is only ever
+	// overwritten with a NUL once we know a character really lives there, so the
+	// trailing chunk no longer terminates past the end of the caller's buffer.
+	// CurrentPos of zero would leave no room to advance, so it renders nothing.
+	//
+	while(CurrentPos > 0)
 	{
+		int remain = (int)strlen(cur);
+
+		if(remain <= CurrentPos) // what is left fits on one line - no cut needed
+		{
+			if(remain > 0)
+			{
+				g_PrintColorStr(px, py, cur, gpC_base->m_item_name_pi, left);
+				py += NORMAL_FONT_Y_GAP;
+			}
+			break;
+		}
+
 		int check;
 		if(g_PossibleStringCut(cur, CurrentPos))
-			check = 0; 
-		else 
+			check = 0;
+		else
 			check = 1;
-		
-		char_temp = cur[CurrentPos - check];
-		cur[CurrentPos - check] = '\0';
-		
+
+		int cut = CurrentPos - check;
+		if(cut <= 0) // cutting here would not advance - give up rather than spin
+			break;
+
+		char_temp = cur[cut];
+		cur[cut] = '\0';
+
 		g_PrintColorStr(px, py, cur, gpC_base->m_item_name_pi, left);
 		py += NORMAL_FONT_Y_GAP;
-		
-		if(strlen(cur) < CurrentPos-check) 
-			break;
-		cur += CurrentPos-check;
+
+		cur += cut;
 		*cur = char_temp;
 		if(*cur == ' ')cur++;
-		TempCount ++;
 	}
 }
 //-----------------------------------------------------------------------------

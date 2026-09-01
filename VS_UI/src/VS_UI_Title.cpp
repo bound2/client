@@ -2512,7 +2512,7 @@ void C_VS_UI_NEWCHAR::Show()
 
 	
 	if (g_LeftPremiumDays == 0xFFFE )
-		sprintf( szBuffer, (*g_pGameStringTable)[UI_STRING_MESSAGE_NOT_PREMIUM_USER].GetString() );
+		snprintf( szBuffer, sizeof(szBuffer), "%s", GetGameString(UI_STRING_MESSAGE_NOT_PREMIUM_USER) );
 	else if ( g_LeftPremiumDays > 0 )
 	{
 		if(g_bFamily)
@@ -2523,9 +2523,9 @@ void C_VS_UI_NEWCHAR::Show()
 	else
 	{
 		if(g_bFamily)
-			sprintf( szBuffer, (*g_pGameStringTable)[UI_STRING_MESSAGE_EXPIRE_FAMILY_TODAY].GetString() );	
+			snprintf( szBuffer, sizeof(szBuffer), "%s", GetGameString(UI_STRING_MESSAGE_EXPIRE_FAMILY_TODAY) );
 		else
-			sprintf( szBuffer, (*g_pGameStringTable)[UI_STRING_MESSAGE_EXPIRE_PREMIUM_SERVICE_TODAY].GetString() );	
+			snprintf( szBuffer, sizeof(szBuffer), "%s", GetGameString(UI_STRING_MESSAGE_EXPIRE_PREMIUM_SERVICE_TODAY) );
 	}
 
 	if( g_LeftPremiumDays != 0xFFFF )
@@ -3508,7 +3508,7 @@ void C_VS_UI_CHAR_MANAGER::Show()
 	char szBuffer[256];
 		
 	if (g_LeftPremiumDays == 0xFFFE )
-		sprintf( szBuffer, (*g_pGameStringTable)[UI_STRING_MESSAGE_NOT_PREMIUM_USER].GetString() );
+		snprintf( szBuffer, sizeof(szBuffer), "%s", GetGameString(UI_STRING_MESSAGE_NOT_PREMIUM_USER) );
 	else if ( g_LeftPremiumDays > 0 )
 	{
 		if(g_bFamily)
@@ -3519,9 +3519,9 @@ void C_VS_UI_CHAR_MANAGER::Show()
 	else
 	{
 		if(g_bFamily)
-			sprintf( szBuffer, (*g_pGameStringTable)[UI_STRING_MESSAGE_EXPIRE_FAMILY_TODAY].GetString() );	
+			snprintf( szBuffer, sizeof(szBuffer), "%s", GetGameString(UI_STRING_MESSAGE_EXPIRE_FAMILY_TODAY) );
 		else
-			sprintf( szBuffer, (*g_pGameStringTable)[UI_STRING_MESSAGE_EXPIRE_PREMIUM_SERVICE_TODAY].GetString() );	
+			snprintf( szBuffer, sizeof(szBuffer), "%s", GetGameString(UI_STRING_MESSAGE_EXPIRE_PREMIUM_SERVICE_TODAY) );
 	}
 
 	if( g_LeftPremiumDays != 0xFFFF )
@@ -4024,7 +4024,7 @@ void C_VS_UI_SERVER_SELECT::Show()
 
 	
 	if (g_LeftPremiumDays == 0xFFFE )
-		sprintf( szBuffer, (*g_pGameStringTable)[UI_STRING_MESSAGE_NOT_PREMIUM_USER].GetString() );
+		snprintf( szBuffer, sizeof(szBuffer), "%s", GetGameString(UI_STRING_MESSAGE_NOT_PREMIUM_USER) );
 	else if ( g_LeftPremiumDays > 0 )
 	{
 		if(g_bFamily)
@@ -4035,9 +4035,9 @@ void C_VS_UI_SERVER_SELECT::Show()
 	else
 	{
 		if(g_bFamily)
-			sprintf( szBuffer, (*g_pGameStringTable)[UI_STRING_MESSAGE_EXPIRE_FAMILY_TODAY].GetString() );	
+			snprintf( szBuffer, sizeof(szBuffer), "%s", GetGameString(UI_STRING_MESSAGE_EXPIRE_FAMILY_TODAY) );
 		else
-			sprintf( szBuffer, (*g_pGameStringTable)[UI_STRING_MESSAGE_EXPIRE_PREMIUM_SERVICE_TODAY].GetString() );	
+			snprintf( szBuffer, sizeof(szBuffer), "%s", GetGameString(UI_STRING_MESSAGE_EXPIRE_PREMIUM_SERVICE_TODAY) );
 	}
 
 	if( g_LeftPremiumDays != 0xFFFF )
