@@ -34,16 +34,6 @@ void GCShopBuyFail::write (SocketOutputStream & oStream) const
 	__END_CATCH
 }
 
-void GCShopBuyFail::execute (Player * pPlayer) 
-	 throw (ProtocolException , Error)
-{
-	__BEGIN_TRY
-		
-	GCShopBuyFailHandler::execute(this , pPlayer);
-
-	__END_CATCH
-}
-
 #ifdef __DEBUG_OUTPUT__
 	std::string GCShopBuyFail::toString () const
 		   throw ()

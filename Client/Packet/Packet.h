@@ -608,8 +608,19 @@ public :
 		}
 	}
 	
-	// execute packet's handler
-	virtual void execute (Player* pPlayer)  = 0;
+	// execute packet's handler.
+	//
+	// No longer pure (RESTRUCTURING.md task 2.2): migrated packets carry
+	// no override - they run through PacketDispatcher, registered at the
+	// composition root (Client/PacketHandlerRegistry.cpp). Reaching this
+	// default therefore means a migrated id arrived with no registered
+	// handler, which is a protocol violation, not a no-op. Unmigrated
+	// packets still override it; the receive loops try the dispatcher
+	// first and fall back here until ratchet R2 reaches 0.
+	virtual void execute (Player* /*pPlayer*/)
+	{
+		throw InvalidProtocolException("packet has no registered handler and no legacy execute()");
+	}
 	
 	// get packet's PacketID	
 	virtual PacketID_t getPacketID () const  = 0;

@@ -113,8 +113,8 @@ an unrecorded drop, so tightening lands in the same commit as the progress.
 
 | # | Metric | Baseline | Command |
 |---|--------|---------:|---------|
-| R1 | Translation units compiled directly into the DarkEden target | 992 (1,044 before task 1.1's `packetwire` move; 993 before `SocketAPI.cpp` joined in 1.2) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` — `ratchets.sh` reads the generated vcxproj, preferring the ctest run's own build dir; on generators with no vcxproj it reports SKIP, not PASS |
-| R2 | Packet `.cpp` files still defining `::execute(` (non-Handler) | 448 | `grep -rlE '::execute\s*\(' Client/Packet/Gpackets Client/Packet/Cpackets Client/Packet/Lpackets Client/Packet/Rpackets Client/Packet/Upackets --include='*.cpp' \| grep -v Handler \| wc -l` |
+| R1 | Translation units compiled directly into the DarkEden target | 993 (1,044 before task 1.1's `packetwire` move; 992 after `SocketAPI.cpp` joined in 1.2; +1 recorded 2026-09-01 for `PacketHandlerRegistry.cpp`, the task-2.2 composition root — new wiring that must live in the exe, not legacy debt; slices only append lines to it) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` — `ratchets.sh` reads the generated vcxproj, preferring the ctest run's own build dir; on generators with no vcxproj it reports SKIP, not PASS |
+| R2 | Packet `.cpp` files still defining `::execute(` (non-Handler) | 432 (448 before task 2.2 slice 1 migrated the 16 shop/stash/say/guild packets) | `grep -rlE '::execute\s*\(' Client/Packet/Gpackets Client/Packet/Cpackets Client/Packet/Lpackets Client/Packet/Rpackets Client/Packet/Upackets --include='*.cpp' \| grep -v Handler \| wc -l` |
 | R3 | `sprintf`/`strcpy`/`strcat` call sites under `Client/Packet` | 61 (70 at first measurement; task 1.3's snprintf switch shrank it) | `grep -rE '\b(sprintf\|strcpy\|strcat)\s*\(' Client/Packet --include='*.cpp' \| wc -l` |
 | R4 | Library-compiled `.cpp` files referencing `g_p*` client globals | 83 (measured when 0.2 landed) | `ratchets.sh` computes it over the library dirs plus the `VS_UI_CLIENT_SOURCES` and `PACKETWIRE_SOURCES` lists parsed from `CMakeLists.txt` |
 
@@ -374,7 +374,22 @@ the server's status notes. This is what makes the ~509 `Gpackets` parsers
   it per batch. R2 448 → tracks progress; do it in mergeable slices
   (~25 packets each), highest-risk parsers first (shop/stash/chat/guild —
   the fixed findings already name them).
-  > **Status:** not started.
+  > **Status:** in progress (slice 1 landed 2026-09-01,
+  > `restructuring/gc-slice-1`; 235 GC packets remain). Slice 1 = the 16
+  > shop/stash/say/guild packets (`GCSay`, `GCGuildChat`,
+  > `GCGuildMemberList`, `GCGuildResponse`, the 10 `GCShop*`,
+  > `GCStashList`, `GCStashSell`). `Packet::execute` is no longer pure:
+  > the default throws `InvalidProtocolException`, so a migrated id
+  > received with no registration disconnects instead of silently
+  > no-opping — a mis-migration surfaces in the first live run.
+  > `Client/PacketHandlerRegistry.cpp` is the composition root, called
+  > from `InitGame()` beside the `PacketFactoryManager` creation,
+  > idempotent against a second init pass; the two stash packets keep
+  > their `__BEGIN_DEBUG` wrapper via explicit thunks (no-op on
+  > `__WIN32__`, preserved for the cout-branch platforms — the server's
+  > `CGStashList` precedent). Every deleted `execute()` was verified
+  > pure delegation before deletion. R2 448 → 432; live verification of
+  > chat/shop/stash/guild flows gates the merge.
   - Owner: R2 ratchet.
 
 - [ ] **2.3 Migrate CG / LC / CR-RC / U directions.** CG handlers

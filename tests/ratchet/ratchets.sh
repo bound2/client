@@ -43,7 +43,12 @@ check () {
 # passed in, then the day-to-day tree. On generators that produce no
 # .vcxproj the ratchet is skipped with a message - skipped, not passed.
 #----------------------------------------------------------------------
-R1_BASELINE=992
+# 993, not 992: task 2.2 added Client/PacketHandlerRegistry.cpp, the
+# composition root every migration slice registers into - new wiring
+# that must live in the executable, not legacy debt escaping to it.
+# Recorded 2026-09-01; later slices only append lines to that file, so
+# this is a one-time +1.
+R1_BASELINE=993
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do
@@ -64,7 +69,7 @@ fi
 # R2 - packet .cpp files still defining ::execute( (non-Handler).
 # The client twin of the server's R4; Phase 2 drives it to ~0.
 #----------------------------------------------------------------------
-R2_BASELINE=448
+R2_BASELINE=432
 
 R2=$(grep -rlE '::execute\s*\(' \
 	Client/Packet/Gpackets Client/Packet/Cpackets Client/Packet/Lpackets \

@@ -25,6 +25,7 @@
 #include "AddonDef.h"
 #include "ServerInfo.h"
 #include "PacketDef.h"
+#include "PacketHandlerRegistry.h"
 #include "VS_UI.h"
 #include "COpeningUpdate.h"
 #include "CGameUpdate.h"
@@ -1974,8 +1975,13 @@ InitSocket()
 	try {		
 		DEBUG_ADD("[ InitGame ]  Socket - Before new PacketFactoryManager");
 
-		// 패킷 팩토리 매니저를 생성, 초기화한다. 
+		// 패킷 팩토리 매니저를 생성, 초기화한다.
 		g_pPacketFactoryManager = new PacketFactoryManager();
+
+		// Composition root for migrated packet handlers (RESTRUCTURING.md
+		// task 2.2): fill the PacketDispatcher table before any
+		// connection can deliver a packet.
+		registerClientPacketHandlers();
 
 		DEBUG_ADD("[ InitGame ]  Socket - Before new PacketValidator");
 
