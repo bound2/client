@@ -76,7 +76,11 @@ void EnsureSocketsInitialised()
 	if (!bDone)
 	{
 		WSADATA data;
-		WSAStartup(MAKEWORD(2, 2), &data);
+		// Fail visibly here rather than as an Error thrown out of
+		// ~SocketImpl during fixture teardown (which would terminate the
+		// process with no pointer at the cause). CHECK only records into
+		// the framework's counters, so it is safe during fixture setup.
+		CHECK(WSAStartup(MAKEWORD(2, 2), &data) == 0);
 		bDone = true;
 	}
 #endif
@@ -176,6 +180,65 @@ TEST(SocketInputStream, WrappedReadReassemblesAcrossBufferEnd)
 }
 
 //----------------------------------------------------------------------
+// read(std::string&, len) - the overload the Gpackets chat/guild/name
+// parsers feed server-supplied lengths into.
+//----------------------------------------------------------------------
+
+TEST(SocketInputStream, StringReadZeroLengthIsRejected)
+{
+	StreamFixture f;
+	const unsigned char bytes[] = { 0x41 };
+	f.Preload(bytes, sizeof(bytes));
+
+	bool bThrew = false;
+	std::string str;
+	try {
+		f.m_Stream.read(str, 0);
+	} catch (InvalidProtocolException&) {
+		bThrew = true;
+	}
+	CHECK(bThrew);
+}
+
+TEST(SocketInputStream, StringReadBeyondAvailableThrowsAndConsumesNothing)
+{
+	StreamFixture f;
+	const unsigned char bytes[] = { 'a', 'b', 'c' };
+	f.Preload(bytes, sizeof(bytes));
+
+	bool bThrew = false;
+	std::string str;
+	try {
+		f.m_Stream.read(str, 4);
+	} catch (InsufficientDataException&) {
+		bThrew = true;
+	}
+	CHECK(bThrew);
+
+	// Guard fires before the copy: the 3 bytes are still readable.
+	CHECK_EQ(3, f.m_Stream.length());
+	f.m_Stream.read(str, 3);
+	CHECK(str == std::string("abc"));
+}
+
+TEST(SocketInputStream, StringReadTruncatesAtEmbeddedNulButConsumesFullLength)
+{
+	// Contract worth pinning because returned size != consumed size: the
+	// string is cut at the first embedded NUL, but m_Head still advances
+	// by the full requested length. A parser that frames on str.size()
+	// instead of the length it asked for desyncs here.
+	StreamFixture f;
+	const unsigned char bytes[] = { 'a', 'b', 0x00, 'c', 'd' };
+	f.Preload(bytes, sizeof(bytes));
+
+	std::string str;
+	f.m_Stream.read(str, 5);
+	CHECK_EQ(2, str.size());
+	CHECK(str == std::string("ab"));
+	CHECK(f.m_Stream.isEmpty());
+}
+
+//----------------------------------------------------------------------
 // ModifyInfo::read - [shortCount:1][(type:1,value:2)...]
 //                    [longCount:1][(type:1,value:4)...]
 //----------------------------------------------------------------------
@@ -221,6 +284,12 @@ TEST(ModifyInfo, OversizedShortCountHitsTheUnderflowGuard)
 
 	// A hostile count with no data behind it: the first entry's read
 	// must throw instead of parsing garbage.
+	//
+	// Contract note: a thrown read leaves the object INCONSISTENT -
+	// m_ShortCount is already 200 over an empty list, and popShortData
+	// on it would call front() on that empty list (undefined behavior).
+	// A packet whose read threw must be discarded, never popped; every
+	// current caller does exactly that.
 	const unsigned char bytes[] = { 0xC8 };	// shortCount = 200
 	f.Preload(bytes, sizeof(bytes));
 
