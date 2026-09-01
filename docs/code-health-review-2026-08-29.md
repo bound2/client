@@ -60,7 +60,9 @@ A subsystem-by-subsystem review surfaced **197 findings**. Every area graded **D
 
 ## Remediation Status
 
-**Updated 2026-09-01 (text/format pass).** 53 of the 197 findings have been fixed: 11 on branch `harden/library-code-fixes` ([PR #1](https://github.com/bound2/client/pull/1)), 2 on `harden/packet-index-bounds` ([PR #4](https://github.com/bound2/client/pull/4)), 11 on `harden/network-input`, 4 by the earlier SDL_mixer wiring commit `c0670ae` (recorded retroactively during the audio pass), 17 on `harden/audio-media`, and 8 on `harden/text-format`. Fixed findings carry a ✅ marker in the sections below, naming the commit and the tests covering them.
+**Updated 2026-09-01 (pointer-truncation pass).** 55 of the 197 findings have been fixed: 11 on branch `harden/library-code-fixes` ([PR #1](https://github.com/bound2/client/pull/1)), 2 on `harden/packet-index-bounds` ([PR #4](https://github.com/bound2/client/pull/4)), 11 on `harden/network-input`, 4 by the earlier SDL_mixer wiring commit `c0670ae` (recorded retroactively during the audio pass), 17 on `harden/audio-media`, 8 on `harden/text-format`, and 2 on `harden/pointer-truncation`. Fixed findings carry a ✅ marker in the sections below, naming the commit and the tests covering them.
+
+**Every finding the review rated Critical is now closed or explicitly narrowed** (C19 is narrowed — see its entry). That does not mean the client is free of critical defects: the pointer-truncation pass found a whole family of the same class that the review never recorded, described under *Open, not in this review* below.
 
 The test-driven work is confined to code compiled into a static library, since that is the only code a test binary can link against. A second phase has since fixed seven defects in the `DarkEden` executable itself, listed under Runtime defects below; those were found by running the client rather than by this review, and none of them are among the 197 findings.
 
@@ -128,6 +130,34 @@ The audio branch was put through the same adversarial review as the earlier phas
 | Guild-quest mission title used as a printf format string (C22) | 🔴 Critical | `31f5f2f` |
 | `_Multiline_Info_Show` fixed-offset NUL write past the caller's buffer (C24) | 🔴 Critical | `31f5f2f` |
 | Data-file strings as printf formats: 100 zero-argument call sites bounded, load-time gate added (C19, partial) | 🔴 Critical | `31f5f2f` |
+| Gear tooltip's second item passed through a 32-bit `long` and dereferenced (C21) | 🔴 Critical | `c0df91c` |
+| SDL text pointer passed through a 32-bit `long` (C23, dead path, removed) | 🔴 Critical | `2a531a9` |
+
+### Open, not in this review: the `SendMessage` pointer-truncation family
+
+Found while fixing C21, and **not among the 197 findings** — the review caught the
+`DescriptorManager` instance of this defect but missed the same pattern in a
+second, larger mechanism.
+
+`C_VS_UI_BASE::SendMessage(DWORD message, int left = 0, int right = 0, void* void_ptr = NULL)`
+(`VS_UI/src/header/VS_UI_Base.h:319`) takes its two payload slots as `int`. Nine
+call sites cast a pointer into one of them, and the receiving handlers cast it
+back:
+
+- `VS_UI/src/VS_UI_Game.cpp:525` sends an `MItem*`; `UIMessageManager::Execute_UI_RUN_NAMING_CHANGE`
+  (`Client/UIMessageManager.cpp:11036`) recovers it with `MItem* pItem = (MItem*)left;`.
+  A second `MItem*` recovery sits at `Client/UIMessageManager.cpp:9784`.
+- Seven more in `VS_UI/src/vs_ui_gamecommon2.cpp` (1562, 1570, 9910, 12107, 12512,
+  13024, 13825) and two in `VS_UI/src/VS_UI_ExtraDialog.cpp` (1280, 2020) push
+  `MItem*` or `std::string::c_str()` results through `int`.
+
+On MSVC x64 `int` is 32 bits, so every one of these truncates a heap pointer and
+sign-extends it back. This is the same defect as C21 with the same consequence,
+and at least the item-rename path is reachable in ordinary play. The `(int)(intptr_t)`
+casts present at these sites silence the truncation warning without preserving the
+value — the same false-reassurance C21 called out.
+
+Not fixed here; this branch was scoped to the two findings the review does list.
 
 ### Also fixed, not in this review
 
@@ -444,6 +474,10 @@ Both `AddFormat` (line 320) and `AddFormatVL` (line 259) declare `static char Bu
 
 **Recommendation:** Change `DescriptorManager::Set`/`RectCalculationFinished`/the `fp_show` signature to take a typed second payload pointer (e.g. `void* void_ptr2`) instead of overloading the `long right` field, and update the DID_ITEM path. Audit the other `Set(...)` call sites for the same pattern.
 
+> ✅ **Fixed** in `c0df91c` (branch `harden/pointer-truncation`). `DescriptorManager` gained a typed secondary payload pointer and an accessor, passed as a trailing defaulted parameter on `Set()` so all 201 existing call sites compile untouched and the shared `fp_show`/`fp_rect_calculator` typedefs — implemented by dozens of unrelated renderers — stay as they are. The audit the recommendation asks for found this to be the only one of those 201 sites putting a pointer in `left`/`right`, but **two** consumers rather than the one named: `_Item_Description_Calculator` read the same truncated pointer to size the tooltip, so fixing only `_Item_Description_Show` would have left the crash and desynchronised the box from its contents. `Unset()` now tests both payloads — it is the item-destruction hook, and the gear tooltip is the one place where the two payloads are different objects, so matching only the primary left the secondary dangling for the next `Show()`; that use-after-free was found by the adversarial review, not by the original pass. Regression guard; the crash was not reproduced.
+>
+> Recorded latent: the secondary pointer lives outside `FP_SHOW_PARAM`, so it stays consistent with the descriptor being drawn only because `Set()` early-returns while one is showing. That guard is now commented as load-bearing. Anyone relaxing it — letting a new hover replace a live descriptor is the obvious future change — must move the pointer into `FP_SHOW_PARAM` at the same time.
+
 ### C22. A runtime-built string containing server-supplied quest text is used as the format string of sprintf, giving a remote format-string vulnerability.
 
 **Area:** UI Framework  |  **Category:** security  |  **Location:** `VS_UI/src/vs_ui_gamecommon2.cpp:15911`
@@ -465,6 +499,8 @@ Line 15893 builds `szString` with `sprintf(szString, <table format>, i+1, TempIn
 **Failure scenario:** On the Windows x64 build, typing any character with a chat box or the login ID field focused delivers a truncated pointer to `LineEditor::HandleTextInput`, which then runs `utf8_to_utf32` over an unmapped address -> access violation.
 
 **Recommendation:** Widen the `extra` parameter to `intptr_t`/`LPARAM` through `C_VS_UI::KeyboardControl`, `WindowManager::KeyboardControl`, `Window::KeyboardControl` and `LineEditor::KeyboardControl`, or (better) route text input exclusively through `InputFocusManager::HandleTextInput(const char*)`, which already takes a proper pointer and is used by the SDL backend.
+
+> ✅ **Fixed by removal** in `2a531a9` (branch `harden/pointer-truncation`), and **the severity stated above is wrong**. Text entry works in this build. `g_textinput_callback` and `g_textediting_callback` have exactly four references in the tree — two definitions and two assignments — and are never invoked, so the callback that would have reached the truncating sender was dead, and with it the only site in the client that constructs a `WM_TEXTINPUT` message. The live path is the one the recommendation prefers: the SDL backend calls `InputFocusManager::HandleTextInput()` directly and the pointer stays a `const char*` all the way to the focused `LineEditor`. The dead plumbing, the three callback implementations and the `WM_TEXTINPUT` receivers that recover a pointer from `extra` are therefore deleted rather than repaired — a truncating sender wired to a callback nobody calls is a landmine for whoever reconnects it, and the receivers cannot be made safe while the parameter is a `long`. Widening `extra` across ~90 declarations was deliberately not done: a missed override silently becomes an overload that never fires, which is a worse failure than the one being fixed, and nothing is left to carry.
 
 ### C24. _Multiline_Info_Show writes a NUL terminator at a fixed offset into the caller's buffer before checking that the remaining string is that long, walking past the end of the buffer.
 
@@ -1842,6 +1878,8 @@ The original in VS_UI/src/hangul/FL2.cpp:38 walked the string counting DBCS lead
 
 **Recommendation:** Widen the `extra` parameter to `intptr_t`/`LPARAM` through `C_VS_UI::KeyboardControl`, `WindowManager::KeyboardControl`, `Window::KeyboardControl` and `LineEditor::KeyboardControl`, or (better) route text input exclusively through `InputFocusManager::HandleTextInput(const char*)`, which already takes a proper pointer and is used by the SDL backend.
 
+> ✅ **Fixed by removal** in `2a531a9` (branch `harden/pointer-truncation`), and **the severity stated above is wrong**. Text entry works in this build. `g_textinput_callback` and `g_textediting_callback` have exactly four references in the tree — two definitions and two assignments — and are never invoked, so the callback that would have reached the truncating sender was dead, and with it the only site in the client that constructs a `WM_TEXTINPUT` message. The live path is the one the recommendation prefers: the SDL backend calls `InputFocusManager::HandleTextInput()` directly and the pointer stays a `const char*` all the way to the focused `LineEditor`. The dead plumbing, the three callback implementations and the `WM_TEXTINPUT` receivers that recover a pointer from `extra` are therefore deleted rather than repaired — a truncating sender wired to a callback nobody calls is a landmine for whoever reconnects it, and the receivers cannot be made safe while the parameter is a `long`. Widening `extra` across ~90 declarations was deliberately not done: a missed override silently becomes an overload that never fires, which is a worse failure than the one being fixed, and nothing is left to carry.
+
 #### 🔴 Critical -- An inventory item is deleted without clearing the tooltip descriptor that may still hold its raw pointer, leaving a use-after-free the renderer dereferences next frame.
 
 **Category:** memory-safety  |  **Location:** `Client/Packet/Gpackets/GCDeleteInventoryItemHandler.cpp:64`
@@ -1875,6 +1913,10 @@ In the loop at lines 3688-3708, `char_temp = cur[CurrentPos - check]; cur[Curren
 **Failure scenario:** Player hovers a gear slot that holds a Core Zap item while a compatible item is equipped. `pAddedItem` (a heap MItem*, e.g. 0x000001F4_A2B10040) is truncated to 0xA2B10040, stored in `right`, sign-extended to 0xFFFFFFFFA2B10040 and dereferenced in the tooltip renderer -> access violation on the next frame, every time.
 
 **Recommendation:** Change `DescriptorManager::Set`/`RectCalculationFinished`/the `fp_show` signature to take a typed second payload pointer (e.g. `void* void_ptr2`) instead of overloading the `long right` field, and update the DID_ITEM path. Audit the other `Set(...)` call sites for the same pattern.
+
+> ✅ **Fixed** in `c0df91c` (branch `harden/pointer-truncation`). `DescriptorManager` gained a typed secondary payload pointer and an accessor, passed as a trailing defaulted parameter on `Set()` so all 201 existing call sites compile untouched and the shared `fp_show`/`fp_rect_calculator` typedefs — implemented by dozens of unrelated renderers — stay as they are. The audit the recommendation asks for found this to be the only one of those 201 sites putting a pointer in `left`/`right`, but **two** consumers rather than the one named: `_Item_Description_Calculator` read the same truncated pointer to size the tooltip, so fixing only `_Item_Description_Show` would have left the crash and desynchronised the box from its contents. `Unset()` now tests both payloads — it is the item-destruction hook, and the gear tooltip is the one place where the two payloads are different objects, so matching only the primary left the secondary dangling for the next `Show()`; that use-after-free was found by the adversarial review, not by the original pass. Regression guard; the crash was not reproduced.
+>
+> Recorded latent: the secondary pointer lives outside `FP_SHOW_PARAM`, so it stays consistent with the descriptor being drawn only because `Set()` early-returns while one is showing. That guard is now commented as load-bearing. Anyone relaxing it — letting a new hover replace a live descriptor is the obvious future change — must move the pointer into `FP_SHOW_PARAM` at the same time.
 
 #### 🔴 Critical -- A runtime-built string containing server-supplied quest text is used as the format string of sprintf, giving a remote format-string vulnerability.
 
