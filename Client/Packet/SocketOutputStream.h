@@ -116,13 +116,12 @@ private :
 	uint m_Tail;
 	// 룐관埼죗
 	BYTE m_Sequence;
-//add by viva 2008-12-31
 public :
-	WORD m_EncryptKey;
-	BYTE* m_HashTable;
-	void setKey(WORD EncryptKey, BYTE* HashTable) throw() { m_EncryptKey = EncryptKey; m_HashTable = HashTable;};
-	WORD EncryptData(WORD EncryptKey, char* buf, int len) throw();
-//end
+
+	// There is no transport encryption on this stream -- see the same note in
+	// SocketInputStream.h. Everything this client sends, the login password
+	// included, goes out in cleartext.
+	void setKey(WORD /*EncryptKey*/, BYTE* /*HashTable*/) throw() {}
 };
 
 #endif

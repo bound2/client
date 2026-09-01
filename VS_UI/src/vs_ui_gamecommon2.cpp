@@ -1,11 +1,11 @@
 ﻿  // VS_UI_GameCommon.cpp
 
-#include "client_PCH.h"
+#include "Client_PCH.h"
 #include "VS_UI_GameCommon.h"
 #include "VS_UI_GameCommon2.h"
 #include "VS_UI_GlobalResource.h"
 #include "VS_UI_filepath.h"
-#include "VS_UI_Mouse_pointer.h"
+#include "VS_UI_mouse_pointer.h"
 //#include "VS_UI_Item.h"
 
 #include "DebugInfo.h"
@@ -14,14 +14,14 @@
 //#include "MCreatureTable.h"
 #include "CDirectInput.h"
 #include "MParty.h"
-#include "VS_UI_Title.h"
+#include "VS_UI_title.h"
 #include "ExperienceTable.h"
 #include "UserOption.h"
 #include "UserInformation.h"
 #include "MItemOptionTable.h"
-#include "MGameStringTable.H"
+#include "MGameStringTable.h"
 #include "KeyAccelerator.h"
-#include "ClientConfig.H"
+#include "ClientConfig.h"
 #include "MTimeItemManager.h"
 #include "SystemAvailabilities.h"
 #include "ShrineInfoManager.h"
@@ -10377,8 +10377,9 @@ void C_VS_UI_HELPDESC::Show()
 //	const MHelpMessage& message = MHelpMessageManager::Instance().getMessage(m_helpindex);
 	std::string content  = m_title;
 	
+	// m_title has no length cap of its own, so the buffer supplies the bound.
 	char buf[1024];
-	sprintf(buf, "제목 : %s", content.c_str());
+	snprintf(buf, sizeof(buf), "제목 : %s", content.c_str());
 	g_PrintColorStr(x+30, y+10, buf , gpC_base->m_dialog_msg_pi, RGB_GOLD);
 	
 	int NullSizex,NullSizey;
@@ -10510,8 +10511,9 @@ void C_VS_UI_HELPDESC::Show()
 
 	g_FL2_GetDC();
 
+	// content is the help-message body and is not length limited on the way in.
 	char buf[1024];
-	sprintf(buf, "%s", content.c_str());
+	snprintf(buf, sizeof(buf), "%s", content.c_str());
 	g_PrintColorStr(x+30, y+10, buf , gpC_base->m_dialog_msg_pi, RGB_GOLD);
 	
 	const int char_width = g_GetStringWidth("a", gpC_base->m_dialog_msg_pi.hfont);
@@ -11063,8 +11065,18 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 		{
 //			if(!content.empty())
 //			{
+			// cur is the offset of the next CRLF, so it is the length of the
+			// line about to be copied - a property of the help text, not of
+			// sztemp. Clamp it so an over-long line truncates rather than
+			// running off a 20 KB stack buffer.
+			int nCopy = cur;
+			if (nCopy < 0)
+				nCopy = 0;
+			else if (nCopy > MAXBUFFER - 1)
+				nCopy = MAXBUFFER - 1;
+
 			memset( sztemp, 0, MAXBUFFER );
-			memcpy( sztemp, content.c_str(), cur );
+			memcpy( sztemp, content.c_str(), nCopy );
 			content.erase(0,cur+2);
 //			}
 		}
@@ -11152,7 +11164,10 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 			}
 		}
 */
-		strcpy(sztemp,szParsingData.c_str());       // 커스톰 스트링이 적용된문자열//
+		// The line with the custom strings substituted in. Substitution can
+		// make it longer than the line that was read, and nothing ties its
+		// length to MAXBUFFER.
+		snprintf(sztemp, sizeof(sztemp), "%s", szParsingData.c_str());
 		int len = strlen(sztemp);					// 한라인의 길이를 구한다.
 		for(int  i = len ; i >= 0; i--)					// 마지막라인의 마지막에 /r,/n 의 공백을 지워주기 위해서
 		{
@@ -11588,10 +11603,14 @@ C_VS_UI_SMS_MESSAGE::C_VS_UI_SMS_MESSAGE()
 	AttrPin(true);
 
 	char* TempNum = gpC_vs_ui_window_manager->GetSMSMyNum();
-	if(strlen(TempNum)>0)
+	// The stored number is split as a 3-character prefix plus the rest, so both
+	// TempNum+3 below and TempNum[2] further down need those three characters
+	// to be there; a merely non-empty string does not guarantee it, and a
+	// one- or two-character one puts TempNum+3 past the terminator.
+	if(strlen(TempNum)>=3)
 	{
 		char Num[16];
-		wsprintf(Num, "%s", TempNum+3);
+		snprintf(Num, sizeof(Num), "%s", TempNum+3);
 		m_lev_MyNum.AddString(Num);
 		for(int j = 0; j< 6; j++)
 		{
@@ -12373,13 +12392,16 @@ void C_VS_UI_SMS_LIST::Show()
 //				if(i == m_SelectPos)
 //					TempColor = RGB_BLACK;
 
+				// Three std::string address-book fields into a 32-byte buffer.
+				// None of them is length limited where it is stored, and a
+				// name in CP949 reaches 32 bytes in sixteen characters.
 				wsprintf(szString, "%d" , i+1);
 				g_PrintColorStr(m_Main.cx+12, m_Main.cy+27 + (i-ScrPos)*17, szString, gpC_base->m_chatting_pi, RGB_BLACK);
-				wsprintf(szString, "%s" , TempInfo->CharacterName.c_str());
+				snprintf(szString, sizeof(szString), "%s" , TempInfo->CharacterName.c_str());
 				g_PrintColorStr(m_Main.cx+30, m_Main.cy+27 + (i-ScrPos)*17, szString, gpC_base->m_chatting_pi, RGB_BLACK);
-				wsprintf(szString, "%s" , TempInfo->CustomName.c_str());
+				snprintf(szString, sizeof(szString), "%s" , TempInfo->CustomName.c_str());
 				g_PrintColorStr(m_Main.cx+92, m_Main.cy+27 + (i-ScrPos)*17, szString, gpC_base->m_chatting_pi, RGB_BLACK);
-				wsprintf(szString, "%s" , TempInfo->Number.c_str());
+				snprintf(szString, sizeof(szString), "%s" , TempInfo->Number.c_str());
 				g_PrintColorStr(m_Main.cx+206, m_Main.cy+27 + (i-ScrPos)*17, szString, gpC_base->m_chatting_pi, RGB_BLACK);
 			}
 		}
@@ -13268,7 +13290,9 @@ void	C_VS_UI_NAMING::Show()
 					break;
 					
 				}
-				wsprintf(szString, "%s" , (TempInfo->getNickname()).c_str());
+				// A nickname is a std::string filled from the server; szString
+				// is 64 bytes.
+				snprintf(szString, sizeof(szString), "%s" , (TempInfo->getNickname()).c_str());
 				if(i == m_SelectPos)
 					g_PrintColorStr(x+24, y+78 + (i-ScrPos)*17, szString, gpC_base->m_user_id_pi, CustomColor);
 				else
@@ -15038,14 +15062,25 @@ void	C_VS_UI_QUEST_LIST::Show()
 			C_VS_UI_QUEST_MANAGER::_GQuestInfo* TempInfo = (C_VS_UI_QUEST_MANAGER::_GQuestInfo*) m_QuestListInfo[m_TabID][i];
 			if(TempInfo != NULL)
 			{
-				sprintf(szString,"%s", TempInfo->szQuestTitle.c_str());
+				// The quest title is a std::string with no length bound; the
+				// strlen test below only decides whether to abbreviate, and
+				// runs after the copy either way.
+				snprintf(szString, sizeof(szString), "%s", TempInfo->szQuestTitle.c_str());
 				if(strlen(szString)>34)
 					ReduceString2(szString,32);
 				DWORD NormalColor = RGB_WHITE;
 				if(i== m_SelectContents)
 					NormalColor = RGB(200, 200, 255);
 				g_PrintColorStr(x+7, y+72 + (i-ScrPos)*17, szString, gpC_base->m_chatting_pi, NormalColor);
-				sprintf(szString,"%s", szQuestStatus[TempInfo->bStatus]);
+				// bStatus is a BYTE off the quest packet and nothing between
+				// there and here narrows it, so it has to be checked against
+				// the table it indexes - the sibling loop below does test it,
+				// this one never did.
+				const int nStatusCount = (int)(sizeof(szQuestStatus) / sizeof(szQuestStatus[0]));
+				if(TempInfo->bStatus < nStatusCount)
+					snprintf(szString, sizeof(szString), "%s", szQuestStatus[TempInfo->bStatus]);
+				else
+					szString[0] = '\0';
 				g_PrintColorStr(x+215, y+72 + (i-ScrPos)*17, szString, gpC_base->m_chatting_pi, RGB_YELLOW);
 			}
 		}
@@ -15484,8 +15519,12 @@ void	C_VS_UI_QUEST_DETAIL::Show()
 	ShowDesc(x,y);
 	if(g_FL2_GetDC())
 	{
+		// m_szTitle is a std::string assigned straight from the quest
+		// description with no length bound. The strlen test below decides
+		// whether to abbreviate the result; it cannot undo an overflow that
+		// has already happened, so the bound has to be on the copy.
 		char szString[64];
-		sprintf(szString,"%s", m_szTitle.c_str());
+		snprintf(szString, sizeof(szString), "%s", m_szTitle.c_str());
 		if(strlen(szString)>40)
 			ReduceString2(szString,38);
 		g_PrintColorStr(x+9, y+31+m_OustersOffset, szString, gpC_base->m_user_id_pi, RGB_YELLOW);
@@ -17108,8 +17147,10 @@ void	C_VS_UI_RANGER_CHAT::Show()
 	{
 		int TempX = g_PrintColorStr(x+4, y+m_Offset , (*g_pGameStringTable)[UI_STRING_MESSAGE_RANGER_SAY2].GetString(), gpC_base->m_user_id_pi, RGB_GRAY);
 		
+		// m_Str is a std::string; ReduceString3 shortens what is already in
+		// the buffer and so cannot bound what goes into it.
 		char szString[128];
-		strcpy(szString, m_Str.c_str());
+		snprintf(szString, sizeof(szString), "%s", m_Str.c_str());
 		ReduceString3(szString,80);
 		g_PrintColorStr(TempX + 4, y+m_Offset , szString, gpC_base->m_user_id_pi, RGB_GREEN);
 		m_pC_button_group->ShowDescription();
@@ -17353,7 +17394,9 @@ void	C_VS_UI_PERSNALSHOP_MESSAGE::Show()
 
 		while(str.size() > next)
 		{
-			strcpy(sz_string, str.c_str()+next);
+			// The remaining tail of str, which is unbounded; sz_string is 512
+			// bytes and only ever needs the part that fits on one line.
+			snprintf(sz_string, sizeof(sz_string), "%s", str.c_str()+next);
 			
 			char *sz_string2 = sz_string;
 			

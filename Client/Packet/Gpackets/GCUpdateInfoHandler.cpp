@@ -787,7 +787,11 @@ throw ( ProtocolException , Error )
 			break;
 		}
 
-		const char* pName = pInfo->getName().c_str();
+		// NPCInfo::getName() returns std::string by value; bind it so pName is
+		// not into a temporary that died on this line. The zone check below may
+		// still repoint pName at the creature table.
+		const std::string npcName = pInfo->getName();
+		const char* pName = npcName.c_str();
 		int npcID = pInfo->getNPCID();
 		int x = pInfo->getX();
 		int y = pInfo->getY();

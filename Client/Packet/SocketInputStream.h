@@ -126,13 +126,17 @@ private :
 	// buffer head/tail
 	uint m_Head;
 	uint m_Tail;
-//add by viva 2008-12-31
 public :
-	WORD m_EncryptKey;
-	BYTE* m_HashTable;
-	void setKey(WORD EncryptKey, BYTE* HashTable) throw() {m_EncryptKey = EncryptKey; m_HashTable = HashTable; }
-	WORD EncryptData(WORD EncryptKey, char* buf, int len) throw();
-//end
+
+	// There is no transport encryption on this stream. The EncryptData that
+	// used to live here returned its key before reaching its own XOR loop, so
+	// every call in fill() was a no-op and the socket has always carried
+	// cleartext -- including the account password that CLLogin::write sends.
+	// Both the dead function and its call sites are gone so the absence is
+	// visible rather than implied. setKey survives only because Player::setKey
+	// still calls it after CGConnectSetKey; adding real encryption is a
+	// protocol change that has to be agreed with the server repository first.
+	void setKey(WORD /*EncryptKey*/, BYTE* /*HashTable*/) throw() {}
 };
 
 #endif

@@ -40,6 +40,10 @@
 #ifdef PLATFORM_LINUX
 	#include <limits.h>
 	#include <stdlib.h>
+	/* dirname(), used by platform_get_executable_dir() below. glibc declares
+	   it only here, so without this the Linux build fails to compile rather
+	   than falling back to anything. */
+	#include <libgen.h>
 #endif
 
 #ifdef PLATFORM_MACOS
@@ -66,6 +70,11 @@ struct platform_event_s {
 	SDL_mutex* mutex;
 	SDL_cond* cond;
 	int signaled;
+	/* Win32 CreateEvent() semantics, which this layer mirrors: a manual-reset
+	   event stays signalled until platform_event_reset(), while an auto-reset
+	   event is consumed by the single waiter that observes it.
+	   platform_event_wait() cannot tell the two apart without this. */
+	int manual_reset;
 };
 
 /*=============================================================================
@@ -198,6 +207,7 @@ platform_event_t platform_event_create(int manual_reset, int initial_state) {
 	event->mutex = SDL_CreateMutex();
 	event->cond = SDL_CreateCond();
 	event->signaled = initial_state ? 1 : 0;
+	event->manual_reset = manual_reset ? 1 : 0;
 
 	if (event->mutex == NULL || event->cond == NULL) {
 		if (event->mutex) SDL_DestroyMutex(event->mutex);
@@ -214,27 +224,51 @@ int platform_event_wait(platform_event_t event, DWORD timeout) {
 
 	SDL_LockMutex(event->mutex);
 
-	/* If already signaled, return immediately */
-	if (event->signaled) {
-		if (!event->signaled) {
-			/* Auto-reset: clear signal */
-			event->signaled = 0;
-		}
-		SDL_UnlockMutex(event->mutex);
-		return 0;
-	}
-
-	/* Wait for signal */
 	int result = 0;
+
+	/* The condition variable can return without the flag being set - a
+	   spurious wakeup, or another waiter having already consumed an
+	   auto-reset signal - so the flag is the loop's predicate and the wait's
+	   own return only ends the loop on failure. An event that is already
+	   signalled never enters the loop, which is the old fast path. */
 	if (timeout == PLATFORM_INFINITE) {
-		SDL_CondWait(event->cond, event->mutex);
+		while (!event->signaled) {
+			if (SDL_CondWait(event->cond, event->mutex) != 0) {
+				result = 1;
+				break;
+			}
+		}
 	} else {
-		result = SDL_CondWaitTimeout(event->cond, event->mutex, timeout);
+		/* Re-waiting must not restart the caller's timeout, so the remaining
+		   time is measured against a deadline taken before the first wait. */
+		const Uint32 deadline = SDL_GetTicks() + (Uint32)timeout;
+
+		while (!event->signaled) {
+			/* Unsigned subtraction, then a signed compare, so this stays
+			   correct across the ~49-day SDL_GetTicks() wrap. */
+			const Sint32 remaining = (Sint32)(deadline - SDL_GetTicks());
+
+			if (remaining <= 0) {
+				result = SDL_MUTEX_TIMEDOUT;
+				break;
+			}
+
+			result = SDL_CondWaitTimeout(event->cond, event->mutex,
+			                             (Uint32)remaining);
+
+			/* SDL_MUTEX_TIMEDOUT goes back round so the flag is re-checked
+			   against the deadline; a negative return is a real SDL error. */
+			if (result < 0) {
+				break;
+			}
+		}
 	}
 
+	/* Whoever observes the flag consumes it, unless the event is manual-reset
+	   and therefore stays signalled until platform_event_reset(). */
 	if (event->signaled) {
 		result = 0;
-		if (!0) { /* Auto-reset if manual_reset == 0 */
+		if (!event->manual_reset) {
 			event->signaled = 0;
 		}
 	}
@@ -248,7 +282,17 @@ int platform_event_signal(platform_event_t event) {
 
 	SDL_LockMutex(event->mutex);
 	event->signaled = 1;
-	SDL_CondSignal(event->cond);
+
+	/* A manual-reset event stays signalled for every waiter, so every waiter
+	   has to be woken: SDL_CondSignal() releases exactly one and leaves the
+	   rest blocked on the condition even though the flag is set. An auto-reset
+	   signal is consumed by a single waiter, so waking one is what it means. */
+	if (event->manual_reset) {
+		SDL_CondBroadcast(event->cond);
+	} else {
+		SDL_CondSignal(event->cond);
+	}
+
 	SDL_UnlockMutex(event->mutex);
 
 	return 0;
@@ -317,7 +361,10 @@ int platform_get_executable_dir(char* buffer, size_t size) {
 			return 1;
 		}
 	#elif defined(PLATFORM_LINUX)
-		ssize_t count = readlink("/proc/self/exe", path, sizeof(path));
+		/* readlink() does not terminate, and returns as many bytes as it was
+		   given room for - so one byte has to be held back for the terminator
+		   that is written at path[count] below. */
+		ssize_t count = readlink("/proc/self/exe", path, sizeof(path) - 1);
 		if (count < 0) return 1;
 		path[count] = '\0';
 	#else
@@ -328,8 +375,11 @@ int platform_get_executable_dir(char* buffer, size_t size) {
 	char* dir = dirname(path);
 	if (dir == NULL) return 1;
 
+	/* buffer receives dir, the separator and the terminator: len + 2 bytes.
+	   The caller's buffer is only sized by `size`, so a directory whose length
+	   is exactly size - 1 must be rejected, not truncated into it. */
 	size_t len = strlen(dir);
-	if (len + 1 > size) return 1;
+	if (len + 2 > size) return 1;
 
 	strcpy(buffer, dir);
 	strcat(buffer, "/");

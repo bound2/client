@@ -71,6 +71,16 @@ void ClientCommunicationManager::sendDatagram ( Datagram * pDatagram )
 {
     __BEGIN_TRY
 
+	// The constructor leaves the socket NULL when the UDP bind fails (port
+	// already taken by a second client instance, for example) and the client is
+	// meant to run on without peer-to-peer. Every user of the socket therefore
+	// has to tolerate its absence.
+	if (m_pDatagramSocket == NULL)
+	{
+		DEBUG_ADD("[Error] ClientCommunicationManager-sendDatagram-no UDP socket");
+		return;
+	}
+
     try
     {
         m_pDatagramSocket->send( pDatagram );
@@ -96,6 +106,14 @@ void ClientCommunicationManager::sendPacket ( const std::string& host , uint por
 	if (host.size()==0)
 	{
 		DEBUG_ADD("[Error] ClientCommunicationManager-sendPacket-host NULL");
+		return;
+	}
+
+	// See sendDatagram: the socket is optional, so peer-to-peer sends are
+	// dropped rather than dereferencing NULL.
+	if (m_pDatagramSocket == NULL)
+	{
+		DEBUG_ADD("[Error] ClientCommunicationManager-sendPacket-no UDP socket");
 		return;
 	}
 
@@ -142,9 +160,15 @@ void ClientCommunicationManager::sendPacket ( const std::string& host , uint por
 //--------------------------------------------------------------------------------
 void
 ClientCommunicationManager::Update()
-{	
+{
+	// See sendDatagram: the socket is optional. This runs once per frame from
+	// the main loop, so it stays silent -- a failed bind would otherwise write a
+	// log line every frame for the lifetime of the process.
+	if (m_pDatagramSocket == NULL)
+		return;
+
 	const int maxPacket = g_pClientConfig->MAX_PROCESS_PACKET;
-	
+
 	for (int i=0; i<maxPacket; i++)
 	{
 		//DEBUG_ADD_FORMAT("[CC-Update] %d", i);

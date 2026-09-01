@@ -23,7 +23,7 @@
 #include "MItem.h"
 #include "MEffectGeneratorTable.h"
 #include "ClientConfig.h"
-#include "MitemOptionTable.h"
+#include "MItemOptionTable.h"
 #include "AddonDef.h"
 #include "MItem.h"
 #include "MInventory.h"
@@ -32,7 +32,7 @@
 #include "MOustersGear.h"
 #include "MMoneyManager.h"
 #include "MGameStringTable.h"
-#include "VS_UI_Mouse_pointer.h"
+#include "VS_UI_mouse_pointer.h"
 #include "VS_UI.h"
 #include "UIDialog.h"
 #include "CServerInformation.h"
@@ -45,13 +45,13 @@
 #include "UIFunction.h"
 #include "ServerInfo.h"
 // packet
-#include "packet/PetInfo.h"
+#include "Packet/PetInfo.h"
 #include "Packet/PCSlayerInfo3.h"
 #include "Packet/PCOustersInfo3.h"
 #include "ExperienceTable.h"
 
-#include "Packet/GPackets/GCAddItemToZone.h"
-#include "Packet/GPackets/GCAddMonster.h"
+#include "Packet/Gpackets/GCAddItemToZone.h"
+#include "Packet/Gpackets/GCAddMonster.h"
 #include "Packet/PCSlayerInfo2.h"
 #include "Packet/PCVampireInfo2.h"
 #include "Packet/PCOustersInfo2.h"
@@ -59,7 +59,7 @@
 #include "Packet/GearInfo.h"
 #include "Packet/ExtraInfo.h"
 #include "Packet/Cpackets/CGSay.h"
-#include "Packet/cpackets/CGCrashReport.h"
+#include "Packet/Cpackets/CGCrashReport.h"
 #include "EffectInfo.h"
 #include "MScreenEffectManager.h"
 #include "TempInformation.h"
@@ -82,7 +82,7 @@
 #include "MEffectSpriteTypeTable.h"
 #include "EffectSpriteTypeDef.h"
 
-#include "Packet/cpackets/CGAuthKey.h"
+#include "Packet/Cpackets/CGAuthKey.h"
 #include "BloodBibleSignInfo.h"
 
 #ifdef __NPROTECT__
@@ -6172,7 +6172,12 @@ void Add_Race_OustersMonster(GCAddMonster * pPacket)
 			delete pCreature;
 			pCreature = NULL;
 		}
-		if(pPacket->getMonsterType() == 795)
+		// AddCreature rejects a creature it could not place -- an out-of-zone
+		// position, or a move type it has no sector list for -- and the branch
+		// above nulls the pointer, so the type-795 follow-up below cannot run
+		// unconditionally. It read through the null before AddCreature had a
+		// reject path at all.
+		if(pCreature != NULL && pPacket->getMonsterType() == 795)
 		{
 			pCreature->AddEffectStatus(EFFECTSTATUS_CAUSE_CRITICAL_WOUNDS, 0xffff);
 			ExecuteActionInfoFromMainNode(RESULT_MAGIC_CAUSE_CRITICAL_WOUNDS,pCreature->GetX(), pCreature->GetY(), 0,2,	pCreature->GetID(),	

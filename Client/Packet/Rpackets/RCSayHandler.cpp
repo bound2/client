@@ -34,10 +34,16 @@ throw ( ProtocolException , Error )
 		&& g_pChatManager!=NULL)
 	{
 		//g_pClientCommunicationManager->sendPacket( pPacket->getHost() , pPacket->getPort() , &glIncomingConnectionOK );
-		char str[128];
-		char strName[128];
-		strcpy(str, pPacket->getMessage().c_str());
-		strcpy(strName, pPacket->getName().c_str());
+		// RCSay::read admits a name of exactly 20 bytes and a message of exactly
+		// 128 (RCSay.cpp:30,43), and RCSayFactory::getPacketMaxSize budgets the
+		// same two numbers -- so the buffers need room for that many characters
+		// plus the terminator, and the old char[128] was one byte short for the
+		// message. The sender here is a peer client over UDP, so the length is
+		// not even nominally trustworthy.
+		char str[128 + 1];
+		char strName[20 + 1];
+		snprintf(str, sizeof(str), "%s", pPacket->getMessage().c_str());
+		snprintf(strName, sizeof(strName), "%s", pPacket->getName().c_str());
 
 		//bool bMasterWords = (strstr(strName, "GM")!=NULL);
 		bool bMasterWords = strncmp( strName, (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetString(), (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetLength() ) == 0;

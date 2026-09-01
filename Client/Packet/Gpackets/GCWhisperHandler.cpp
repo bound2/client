@@ -32,10 +32,17 @@ throw ( ProtocolException , Error )
 
 
 	
-	char str[128];
-	char strName[128];
-	strcpy(str, pPacket->getMessage().c_str());
-	strcpy(strName, pPacket->getName().c_str());
+	// GCWhisper::read admits a name of exactly 10 bytes and a message of exactly
+	// 128 (GCWhisper.cpp:29,43), and GCWhisperFactory::getPacketMaxSize budgets
+	// the same two numbers -- so the buffers need room for that many characters
+	// plus the terminator, and the old char[128] was one byte short for the
+	// message. The bound cannot be moved to the packet instead: a 128-byte
+	// message is what the wire layout declares legal and what GCWhisper::write
+	// on the server side happily produces.
+	char str[128 + 1];
+	char strName[10 + 1];
+	snprintf(str, sizeof(str), "%s", pPacket->getMessage().c_str());
+	snprintf(strName, sizeof(strName), "%s", pPacket->getName().c_str());
 
 //	bool bMasterWords = (strstr(strName, "GM")!=NULL);
 	bool bMasterWords = strncmp( strName, (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetString(), (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetLength() ) == 0;
@@ -95,7 +102,7 @@ throw ( ProtocolException , Error )
 
 		// 귓속말 대상 설정 ID+' '
 		char strWhisperID[128];
-		sprintf(strWhisperID, "%s ", pPacket->getName().c_str());
+		snprintf(strWhisperID, sizeof(strWhisperID), "%s ", pPacket->getName().c_str());
 		g_pUserInformation->WhisperID = strWhisperID;
 
 		// [도움말] 귓속말 받을 때

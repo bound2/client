@@ -32,29 +32,61 @@ extern CSpriteSurface* g_pLast;  // UI renders to g_pLast, not g_pBack!
 // UTF-8 <-> UTF-32 Conversion (from textbox_demo.c)
 // ============================================================================
 
+// Decodes a NUL terminated UTF-8 string into UTF-32.
+//
+// The length a lead byte promises is a claim about the input, not a fact, and
+// there is no length parameter here to check it against - so every
+// continuation byte is tested before it is read. Consuming them on the lead
+// byte's word alone steps over the terminator and keeps going until some
+// later byte happens to be zero, which is a read off the end of whatever the
+// caller owns: SDL_TEXTEDITING supplies a 32-byte event field that a chunked
+// IME composition can end mid sequence, and AddString takes arbitrary caller
+// strings.
+//
+// A sequence that ends early or is followed by a non-continuation byte is
+// dropped, which is what the original did for an unusable lead byte. The
+// review that found this suggested emitting U+FFFD instead; that is right for
+// a rendering decoder - TextService::Utf8Decode does exactly that - but this
+// one fills an edit buffer whose contents are echoed back to the user and
+// sent to the server, and a replacement character typed into someone's chat
+// line is worse than a byte that never arrives. Decoding of well formed input
+// is unchanged.
 static int utf8_to_utf32(const char* s, uint32_t* out, int cap) {
 	int n = 0;
+
+	if (s == NULL || out == NULL)
+		return 0;
+
 	while (*s && n < cap) {
-		uint32_t c;
-		unsigned char b = *s++;
+		unsigned char b = (unsigned char)*s++;
+		uint32_t c = 0;
+		int need = 0;
 
 		if (b < 0x80) {
-			c = b;
+			out[n++] = b;
+			continue;
 		} else if ((b >> 5) == 0x6) {
-			c = ((b & 0x1F) << 6) | (*s++ & 0x3F);
+			c = b & 0x1F;
+			need = 1;
 		} else if ((b >> 4) == 0xE) {
-			c = ((b & 0x0F) << 12) |
-			    ((*s++ & 0x3F) << 6) |
-			    (*s++ & 0x3F);
+			c = b & 0x0F;
+			need = 2;
 		} else if ((b >> 3) == 0x1E) {
-			c = ((b & 0x07) << 18) |
-			    ((*s++ & 0x3F) << 12) |
-			    ((*s++ & 0x3F) << 6) |
-			    (*s++ & 0x3F);
+			c = b & 0x07;
+			need = 3;
 		} else {
-			continue;  // Invalid UTF-8
+			continue;  // Continuation byte or 0xF8..0xFF: not a lead byte
 		}
-		out[n++] = c;
+
+		// A NUL is not 0b10xxxxxx, so the terminator ends this loop instead
+		// of being consumed, and the outer loop then sees it and stops.
+		while (need > 0 && ((unsigned char)*s & 0xC0) == 0x80) {
+			c = (c << 6) | ((unsigned char)*s++ & 0x3F);
+			--need;
+		}
+
+		if (need == 0)
+			out[n++] = c;
 	}
 	return n;
 }

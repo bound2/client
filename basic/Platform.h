@@ -725,25 +725,130 @@ typedef WORD			char_t;
 		return 0;
 	}
 
-	/* WideCharToMultiByte stub - basic conversion for non-Windows */
+	/* Reads one code point out of a wide string, advancing *pIndex past the
+	 * units it consumed.
+	 *
+	 * wchar_t is 16 bits on Windows and 32 on the platforms this block is
+	 * compiled for, so the source is UTF-16 in one case and UTF-32 in the
+	 * other. Both are handled by the same walk: surrogate halves only ever
+	 * appear in UTF-16 input, because a UTF-32 unit in D800-DFFF is not a
+	 * code point in the first place. Anything that is not a well formed
+	 * code point becomes U+FFFD, and it must do so identically in both
+	 * passes of the conversion below or their byte counts diverge. */
+	static inline unsigned int Platform_WideNextCodePoint(LPCWSTR pSrc, int nCount, int* pIndex) {
+		unsigned int cp = (unsigned int)pSrc[(*pIndex)++];
+
+		if (cp >= 0xD800 && cp <= 0xDBFF) {
+			if (*pIndex < nCount) {
+				unsigned int lo = (unsigned int)pSrc[*pIndex];
+				if (lo >= 0xDC00 && lo <= 0xDFFF) {
+					++(*pIndex);
+					return 0x10000u + ((cp - 0xD800u) << 10) + (lo - 0xDC00u);
+				}
+			}
+			return 0xFFFD;		/* high surrogate with no pair */
+		}
+		if (cp >= 0xDC00 && cp <= 0xDFFF)
+			return 0xFFFD;		/* stray low surrogate */
+		if (cp > 0x10FFFF)
+			return 0xFFFD;		/* out of range, or a negative wchar_t */
+
+		return cp;
+	}
+
+	/* Encodes one code point as UTF-8. Writes only when pOut is non-NULL and
+	 * nRoom bytes are free, but returns the length either way, so the
+	 * measuring pass and the writing pass below cannot disagree. */
+	static inline int Platform_Utf8Encode(unsigned int cp, LPSTR pOut, int nRoom) {
+		int n;
+
+		if (cp < 0x80)			n = 1;
+		else if (cp < 0x800)	n = 2;
+		else if (cp < 0x10000)	n = 3;
+		else					n = 4;
+
+		if (pOut == NULL || nRoom < n)
+			return n;
+
+		switch (n) {
+		case 1:
+			pOut[0] = (char)cp;
+			break;
+		case 2:
+			pOut[0] = (char)(0xC0 | (cp >> 6));
+			pOut[1] = (char)(0x80 | (cp & 0x3F));
+			break;
+		case 3:
+			pOut[0] = (char)(0xE0 | (cp >> 12));
+			pOut[1] = (char)(0x80 | ((cp >> 6) & 0x3F));
+			pOut[2] = (char)(0x80 | (cp & 0x3F));
+			break;
+		default:
+			pOut[0] = (char)(0xF0 | (cp >> 18));
+			pOut[1] = (char)(0x80 | ((cp >> 12) & 0x3F));
+			pOut[2] = (char)(0x80 | ((cp >> 6) & 0x3F));
+			pOut[3] = (char)(0x80 | (cp & 0x3F));
+			break;
+		}
+		return n;
+	}
+
+	/* WideCharToMultiByte - UTF-8 conversion for non-Windows.
+	 *
+	 * Callers branch on the return value, so the Win32 contract is what this
+	 * has to reproduce, not just the transcoding:
+	 *
+	 *   - cbMultiByte == 0 is a size query. Nothing is written and the byte
+	 *     count the conversion needs is returned.
+	 *   - A destination too small for the whole conversion returns 0
+	 *     (ERROR_INSUFFICIENT_BUFFER on Win32), never a length. A caller that
+	 *     indexes with the return value therefore stays inside its buffer.
+	 *   - cchWideChar == -1 means the source is NUL terminated; the
+	 *     terminator is converted and counted. A non-negative cchWideChar
+	 *     converts exactly that many units and appends no terminator.
+	 *
+	 * CodePage is honoured only as far as it matters here: every caller in
+	 * this tree asks for CP_UTF8 and UTF-8 is what this produces. */
 	static inline int WideCharToMultiByte(UINT CodePage, DWORD dwFlags,
 		LPCWSTR lpWideCharStr, int cchWideChar,
 		LPSTR lpMultiByteStr, int cbMultiByte,
 		LPCSTR lpDefaultChar, BOOL* lpUsedDefaultChar) {
-		(void)CodePage; (void)dwFlags; (void)lpDefaultChar; (void)lpUsedDefaultChar;
-		/* Basic UTF-16 to UTF-8 conversion for non-Windows platforms */
+		int nNeeded = 0;
+		int nWritten = 0;
+		int i = 0;
+
+		(void)CodePage; (void)dwFlags; (void)lpDefaultChar;
+
+		if (lpUsedDefaultChar != NULL)
+			*lpUsedDefaultChar = FALSE;
+
+		if (lpWideCharStr == NULL || cchWideChar < -1 || cbMultiByte < 0)
+			return 0;
+
 		if (cchWideChar == -1) {
-			/* Find null terminator */
 			int len = 0;
 			while (lpWideCharStr[len]) len++;
-			cchWideChar = len;
+			cchWideChar = len + 1;	/* the terminator converts too */
 		}
-		/* Simple conversion - just copy lower byte (works for ASCII) */
-		for (int i = 0; i < cchWideChar && i < cbMultiByte - 1; i++) {
-			lpMultiByteStr[i] = (char)(lpWideCharStr[i] & 0xFF);
+
+		while (i < cchWideChar) {
+			unsigned int cp = Platform_WideNextCodePoint(lpWideCharStr, cchWideChar, &i);
+			nNeeded += Platform_Utf8Encode(cp, NULL, 0);
 		}
-		lpMultiByteStr[cchWideChar < cbMultiByte ? cchWideChar : cbMultiByte - 1] = '\0';
-		return cchWideChar;
+
+		if (cbMultiByte == 0)
+			return nNeeded;
+
+		if (lpMultiByteStr == NULL || nNeeded > cbMultiByte)
+			return 0;
+
+		i = 0;
+		while (i < cchWideChar) {
+			unsigned int cp = Platform_WideNextCodePoint(lpWideCharStr, cchWideChar, &i);
+			nWritten += Platform_Utf8Encode(cp, lpMultiByteStr + nWritten, cbMultiByte - nWritten);
+		}
+
+		return nWritten;
 	}
 
 	/* SetWindowText stub - no-op on non-Windows */

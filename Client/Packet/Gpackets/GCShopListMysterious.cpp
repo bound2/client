@@ -61,6 +61,15 @@ void GCShopListMysterious::read ( SocketInputStream & iStream )
 	for (i=0; i<nTotal; i++)
 	{
 		iStream.read(index);
+
+		// index picks a slot in m_pBuffer[SHOP_RACK_INDEX_MAX] and arrives as a
+		// raw BYTE from the server, so it can name a slot up to 235 elements
+		// past the end, and the three writes below go through it. The packet
+		// size check in ClientPlayer does not help: a packet of legal declared
+		// size can carry index=255. Same defect and same remedy as GCShopList.
+		if (index >= SHOP_RACK_INDEX_MAX)
+			throw InvalidProtocolException("GCShopListMysterious: shop rack index out of range");
+
 		iStream.read(m_pBuffer[index].itemClass);
 		iStream.read(m_pBuffer[index].itemType);
 

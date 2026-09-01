@@ -22,7 +22,10 @@ throw ( ProtocolException , Error )
 
 	int serverID = pPacket->getObjectID();
 
-	const char* ownerName = pPacket->getOwnerID().c_str();
+	// getOwnerID() returns std::string by value; bind it so the pointer handed
+	// to AddVampirePortal below is not into a destroyed temporary.
+	const std::string ownerID = pPacket->getOwnerID();
+	const char* ownerName = ownerID.c_str();
 	TYPE_SECTORPOSITION sX = pPacket->getX();
 	TYPE_SECTORPOSITION sY = pPacket->getY();
 

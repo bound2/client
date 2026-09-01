@@ -126,9 +126,8 @@ CMessageArray::Init(int max, int length, const char* filename)
 void
 CMessageArray::Release()
 {
-	// 자꾸 여기서 에러나서리..
-	// 음냐.. 도대체 어디서 문제가 생기는걸까.
-	// 못찾겠다.. 아이고..
+	// (upstream note) This kept erroring out here.. hmm.. where on earth does
+	// the problem come from. Can't find it.. oh dear..
 	//#ifndef _DEBUG
 		if (m_ppMessage!=NULL)
 		{
@@ -154,11 +153,18 @@ CMessageArray::Release()
 	{
 		PLATFORM_CLOSE(m_LogFile);
 		m_bLog = false;
+	}
 
-		if (m_Filename != NULL)
-		{
-			delete [] m_Filename;
-		}
+	// Init() allocates m_Filename before it attempts the open and only raises
+	// m_bLog once the open has succeeded, so the name outlives a failed open
+	// and cannot be released under m_bLog. Clearing the pointer is what keeps
+	// GetFilename() from handing back freed memory: Init() reassigns
+	// m_Filename only when it is given a filename, so a later Init() without
+	// one would otherwise leave the freed pointer in place.
+	if (m_Filename != NULL)
+	{
+		delete [] m_Filename;
+		m_Filename = NULL;
 	}
 }
 
