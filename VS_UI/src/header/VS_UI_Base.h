@@ -182,11 +182,10 @@ struct MOUSEPOINTER_INFO
 	int		height;
 };
 
-// Client로 login을 보내기 위한 구조체.
+// Structure for asking the client to delete a character. The name check
+// happens in the delete dialog before this is sent, so only the slot travels.
 struct DELETE_CHARACTER
 {
-	char *	sz_part1;
-	char *	sz_part2;
 	int		slot;
 };
 

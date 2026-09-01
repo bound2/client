@@ -2586,12 +2586,8 @@ void UI_ResultReceiver(DWORD message, int dw_left, int dw_right, void *void_ptr)
 
 		case UI_DELETE_CHARACTER:
 			//
-			// ((DELETE_CHARACTER *)void_ptr) = sz_part1, sz_part2, slot
+			// ((DELETE_CHARACTER *)void_ptr) = slot
 			//
-			DeleteNewArray(((DELETE_CHARACTER *)void_ptr)->sz_part1);
-			DeleteNewArray(((DELETE_CHARACTER *)void_ptr)->sz_part2);
-
-			//gC_vs_ui.Invalid_SSN_Message();
 			gC_vs_ui.DeleteCharacter(((DELETE_CHARACTER *)void_ptr)->slot);
 			break;
 
