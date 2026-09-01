@@ -230,7 +230,7 @@ result immediately covers the top-risk area's foundations. This is the
   - Owner: the explicit source list + W1/W2 in the include checker + R1
     dropping by the member count.
 
-- [ ] **1.2 Link `packetwire` into `unit_tests`** and land the first parser
+- [x] **1.2 Link `packetwire` into `unit_tests`** and land the first parser
   tests: hostile-input tests for `ModifyInfo::read` and
   `InventoryInfo::read` (oversized counts, zero/overlong string lengths —
   assert the rejected input / thrown `InvalidProtocolException`, then run
@@ -253,9 +253,22 @@ result immediately covers the top-risk area's foundations. This is the
   > underflow guard), `InventoryInfo` (zero count, hostile count).
   > `SocketAPI.cpp` joined the library (see 1.1 membership note). Suite
   > green in the plain and ASan test trees.
+  > **Review round (2026-09-01, PR #34):** the review found the task's
+  > promised string-length coverage missing and a leak on the very
+  > guard path the hostile-count tests pin. Both fixed on the branch:
+  > three `read(std::string&, len)` tests added (zero length rejected,
+  > over-read throws and consumes nothing, and the
+  > truncate-at-embedded-NUL-but-consume-full-length asymmetry that a
+  > parser framing on `str.size()` would desync on), and the five
+  > allocate → read → push_back parser sites (`InventoryInfo`,
+  > `GearInfo`, `ExtraInfo`, `RideMotorcycleInfo`, `PCItemInfo`) now
+  > push_back before read so the destructor frees the in-flight slot
+  > when a truncated payload makes the nested read throw. The leak fix
+  > is a **regression guard** — MSVC's Windows ASan does no leak
+  > detection, so no test observes it.
   - Owner: the tests themselves; `unit_tests` link line.
 
-- [ ] **1.3 First test-first fix: `StringStream` stack overflow.**
+- [x] **1.3 First test-first fix: `StringStream` stack overflow.**
   `StringStream.cpp` `operator<<(float)` does `sprintf(buf, "%f", T)` into
   `char buf[12]` — any float ≥ 10,000 writes 12+ chars plus NUL and smashes
   the stack; `operator<<(double)` has the same pattern into `buf[22]`
@@ -274,10 +287,18 @@ result immediately covers the top-risk area's foundations. This is the
   > overrun fast-fail (0xc0000409). Fix: the whole nine-operator numeric
   > family switched to `snprintf` with range-sized buffers (`short` 8,
   > 32/64-bit integers 24, `float` 64, `double` 352 — `%f` of `-DBL_MAX`
-  > is 317 characters). 8 tests pin the boundaries, including exact
+  > is 317 characters). 7 tests pin the boundaries, including exact
   > formatting at each old overflow threshold and `INT_MIN`/
-  > `ULLONG_MAX`. Suite: 110 tests / 428 checks / 0 failed in the plain
-  > tree AND the ASan tree; both full client trees rebuild clean.
+  > `ULLONG_MAX`. Suite green in the plain tree AND the ASan tree; both
+  > full client trees rebuild clean.
+  > **Review round (2026-09-01, PR #34):** with 300+ character entries
+  > now real instead of a crash, the review caught that `m_Size` was
+  > `ushort` and wrapped at 64 KiB — `isEmpty()` reported an empty
+  > stream over real content and `toString()`'s `reserve()`
+  > under-reserved. Fixed test-first (`size_t` now): the new test's 64 ×
+  > 1024-character insertions ran red (`isEmpty()` true at exactly
+  > 65,536) before the one-line header fix, green after. Also clears
+  > the file's C4267 warnings.
   - Owner: the unit test.
 
 **Phase exit criteria:** `packetwire` builds in both Debug trees; DarkEden
