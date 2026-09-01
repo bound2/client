@@ -101,10 +101,17 @@ public :
 // attributes
 //////////////////////////////////////////////////
 private :
-	
+
+	// Test seam (tests/support/packet_stream_access.h): unit tests copy
+	// the ring out without a socket to flush to - flush() is the only
+	// production reader. Access only, no layout or behavior change;
+	// declared unconditionally so the class definition stays identical
+	// in every translation unit (the same seam SocketInputStream has).
+	friend class SocketOutputStreamTestAccess;
+
 	// socket
 	Socket * m_Socket;
-	
+
 	// output buffer
 	char * m_Buffer;
 	
