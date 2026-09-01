@@ -911,11 +911,6 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# (the existing LNK4217 double-compilation trap).
 	list(REMOVE_ITEM CLIENT_MAIN_SOURCES ${PACKETWIRE_SOURCES})
 
-	# Note: Cpackets contains CG (Client to Game) handlers
-	# These are server-side handlers that shouldn't be compiled in the client
-	# The client-side packet handling is done through different mechanisms
-	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*Cpackets/.*Handler\\.cpp")
-
 	# CAvi.cpp is NOT excluded (re-checked 2026-08-22): the "never
 	# instantiated" claim this exclusion used to be based on doesn't hold -
 	# COpeningUpdate::PlayMPG() does instantiate CAVI and call OpenMPG()/
