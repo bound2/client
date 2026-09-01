@@ -13,8 +13,7 @@
 #include "PacketFactoryManager.h"
 #include "DatagramPacket.h"
 #include "Packet.h"
-
-void	SendBugReport(const char *bug, ...);
+#include "PacketDiagnostics.h"
 
 //////////////////////////////////////////////////////////////////////
 // constructor
@@ -140,7 +139,7 @@ void Datagram::read ( DatagramPacket * & pPacket )
 	// 패킷 사이즈가 이상할 경우
 	if ( packetSize > g_pPacketFactoryManager->getPacketMaxSize(packetID) )
 	{
-		SendBugReport("too large PacketSize ID)%d %d/%d", packetID, packetSize, g_pPacketFactoryManager->getPacketMaxSize( packetID ) );
+		PacketDiagnostics::reportBug("too large PacketSize ID)%d %d/%d", packetID, packetSize, g_pPacketFactoryManager->getPacketMaxSize( packetID ) );
 		throw InvalidProtocolException("too large packet size(DataGram)");
 	}
 

@@ -17,6 +17,7 @@ Client/Packet/Datagram.cpp
 Client/Packet/Encrypter.cpp
 Client/Packet/Exception.cpp
 Client/Packet/PacketAssert.cpp
+Client/Packet/PacketDiagnostics.cpp
 Client/Packet/PacketDispatcher.cpp
 Client/Packet/PacketFileAPI.cpp
 Client/Packet/SocketEncryptInputStream.cpp
