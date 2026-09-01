@@ -113,10 +113,10 @@ an unrecorded drop, so tightening lands in the same commit as the progress.
 
 | # | Metric | Baseline | Command |
 |---|--------|---------:|---------|
-| R1 | Translation units compiled directly into the DarkEden target | 992 (1,044 before task 1.1's `packetwire` move; 993 before `SocketAPI.cpp` joined in 1.2) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` (machine-local tree; the ratchet script recomputes it from the CMake lists when the vcxproj is absent) |
+| R1 | Translation units compiled directly into the DarkEden target | 992 (1,044 before task 1.1's `packetwire` move; 993 before `SocketAPI.cpp` joined in 1.2) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` — `ratchets.sh` reads the generated vcxproj, preferring the ctest run's own build dir; on generators with no vcxproj it reports SKIP, not PASS |
 | R2 | Packet `.cpp` files still defining `::execute(` (non-Handler) | 448 | `grep -rlE '::execute\s*\(' Client/Packet/Gpackets Client/Packet/Cpackets Client/Packet/Lpackets Client/Packet/Rpackets Client/Packet/Upackets --include='*.cpp' \| grep -v Handler \| wc -l` |
-| R3 | `sprintf`/`strcpy`/`strcat` call sites under `Client/Packet` | 70 | `grep -rE '\b(sprintf\|strcpy\|strcat)\s*\(' Client/Packet --include='*.cpp' \| wc -l` |
-| R4 | Files in static libraries referencing `g_p*` client globals | measure in 0.2 | `ratchets.sh` computes it over the union of the libraries' explicit source lists |
+| R3 | `sprintf`/`strcpy`/`strcat` call sites under `Client/Packet` | 61 (70 at first measurement; task 1.3's snprintf switch shrank it) | `grep -rE '\b(sprintf\|strcpy\|strcat)\s*\(' Client/Packet --include='*.cpp' \| wc -l` |
+| R4 | Library-compiled `.cpp` files referencing `g_p*` client globals | 83 (measured when 0.2 landed) | `ratchets.sh` computes it over the library dirs plus the `VS_UI_CLIENT_SOURCES` and `PACKETWIRE_SOURCES` lists parsed from `CMakeLists.txt` |
 
 R1 is the headline number: it counts what still cannot be unit-tested. R2 is
 the client twin of the server's R4 (which it drove to 0). R3 tracks
@@ -130,7 +130,7 @@ code-health priority 2 mechanically.
   > **Status:** done (2026-09-01).
   - Owner: the status-line discipline itself; CLAUDE.md points here.
 
-- [ ] **0.2 Ratchet script.** `tests/ratchet/ratchets.sh`, registered in
+- [x] **0.2 Ratchet script.** `tests/ratchet/ratchets.sh`, registered in
   `tests/CMakeLists.txt` as a ctest, ports the server's script shape: fails
   on increase and on unrecorded decrease; generates into scratch space, never
   overwrites tracked files in place. Measure and record the R4 baseline.
@@ -138,10 +138,17 @@ code-health priority 2 mechanically.
   review" list (CRLF on committed test data, `UPDATE_GOLDENS` accepting any
   value) — apply those lessons on day one: `.gitattributes` `eol=lf` for any
   new committed test-data files.
-  > **Status:** not started.
+  > **Status:** done (2026-09-01, `restructuring/enforcement`) — the
+  > `ratchets` ctest runs R1–R4 with baselines inline in the script;
+  > measurements are grep-only (nothing generated, nothing overwritten).
+  > R1 reads the generated `DarkEden.vcxproj`, preferring the ctest
+  > run's own build dir so the number always reflects the tree just
+  > configured, and SKIPs (never passes) where no vcxproj exists. R4
+  > measured at 83. `.gitattributes` got `eol=lf` for the new committed
+  > test data and scripts.
   - Owner: the ratchet test.
 
-- [ ] **0.3 Include-graph checker.** `tests/arch/check_includes.pl` (perl —
+- [x] **0.3 Include-graph checker.** `tests/arch/check_includes.pl` (perl —
   Git for Windows ships it, and the wire-inventory generator is already
   perl), run by ctest. Rules, extended per phase:
   - **W1**: a `packetwire` member (membership = the target's explicit source
@@ -153,7 +160,22 @@ code-health priority 2 mechanically.
     back live via a lib file).
   Grandfathered violations go in a frozen shrink-only baseline file, exactly
   like the server's `tests/arch/baseline.txt`.
-  > **Status:** not started.
+  > **Status:** done (2026-09-01, `restructuring/enforcement`) — the
+  > `arch_includes` ctest walks the full quote-include closure of the
+  > membership parsed from `CMakeLists.txt` (133 files) with the
+  > compiler's own resolution order; unresolvable includes are
+  > violations too, and an unmatched baseline entry fails the run
+  > (shrink-only). Getting to a clean walk took three source changes,
+  > landed with it: the two vestigial debug includes came out of the
+  > streams (`MinTr.h` in `SocketInputStream.cpp`, `DebugInfo.h` in
+  > `SocketOutputStream.cpp` — both referenced only from comments), and
+  > W1's one real finding, `Types/ItemTypes.h` → `Client/RaceType.h`,
+  > was fixed the way the server fixed `SkillTypes`: `RaceType.h` is
+  > pure wire vocabulary (the `Race` enum, `Race_t`, `szRace`) and
+  > moved to `Client/Packet/RaceType.h`; every includer resolves it via
+  > the `Client/Packet` include dir, which `effect_viewer` — the one
+  > target compiling game sources without it — now also carries.
+  > `tests/arch/baseline.txt` is empty by design.
   - Owner: the `arch_includes` ctest.
 
 ---
@@ -165,7 +187,7 @@ change to move** (bytes-identical relocation into a new target) and the
 result immediately covers the top-risk area's foundations. This is the
 "first candidate" — task 1.1 below names the exact membership.
 
-- [ ] **1.1 Create the `packetwire` static library** from the game-free
+- [x] **1.1 Create the `packetwire` static library** from the game-free
   subset of the `Client/Packet` root (verified 2026-09-01: every file below
   includes only `Client_PCH.h`, packet-internal headers, and system headers;
   the debug-trace references in the streams are commented out).
@@ -218,15 +240,15 @@ result immediately covers the top-risk area's foundations. This is the
   exist in this family), include dirs `Client/Packet`, `Client`, `basic`.
   `DarkEden` and `VS_UI` link it; the files leave `CLIENT_MAIN_SOURCES` via
   `list(REMOVE_ITEM)`. Zero source-file edits in the move commit.
-  > **Status:** in progress (owner missing — the explicit source list
-  > exists, but the W1/W2 include rules (0.3) and the R1 ratchet test
-  > (0.2) do not yet enforce it). The move itself landed: 51 files (the
+  > **Status:** done (2026-09-01 — the owners landed with 0.2/0.3: the
+  > R1 ratchet and the W1/W2 include rules now enforce the boundary;
+  > runtime-verified against a live server and merged in PR #34).
+  > History: the move landed first with the owners missing: 51 files (the
   > membership above, minus a few counted twice in the "~57" estimate)
   > compile as `packetwire`, DarkEden dropped 1,044 → 993 TUs with zero
   > source edits and zero double-compiled members (verified against the
   > generated .vcxproj), both Debug trees build with 0 errors, and the
-  > existing test suite is green. Runtime verification against a live
-  > server pending (user-run).
+  > existing test suite stayed green.
   - Owner: the explicit source list + W1/W2 in the include checker + R1
     dropping by the member count.
 

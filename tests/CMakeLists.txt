@@ -95,11 +95,46 @@ set_source_files_properties(
 add_test(NAME unit_tests COMMAND unit_tests)
 
 #----------------------------------------------------------------------
-# The committed WireInventory.inc must match a fresh generation, so a
-# new or changed factory cannot go uninventoried. Needs perl (Git for
-# Windows ships one); without it the check is skipped, not passed.
+# Shrink-only ratchets (tests/ratchet/ratchets.sh) - fails when a debt
+# metric rises AND when it falls unrecorded (tighten the baseline in
+# the same commit). Needs bash (Git for Windows ships one); without it
+# the check is skipped, not passed.
+#----------------------------------------------------------------------
+find_program(BASH_EXECUTABLE bash)
+if(BASH_EXECUTABLE)
+	add_test(
+		NAME ratchets
+		COMMAND ${BASH_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/ratchet/ratchets.sh ${CMAKE_BINARY_DIR}
+	)
+else()
+	message(STATUS "bash not found: the ratchets test is not registered")
+endif()
+
+#----------------------------------------------------------------------
+# Include-graph architecture rules (tests/arch/check_includes.pl) -
+# walks the packetwire quote-include closure and fails on forbidden
+# edges (W1: only Client/Packet, basic, Client_PCH.h; W2: no
+# exe-defined debug facilities). Skipped without perl, not passed.
+# find_program lives here, above every block that tests the variable -
+# it used to sit further down, which would leave any earlier test
+# silently unregistered on the first configure of a fresh tree.
 #----------------------------------------------------------------------
 find_program(PERL_EXECUTABLE perl)
+if(PERL_EXECUTABLE)
+	add_test(
+		NAME arch_includes
+		COMMAND ${PERL_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/arch/check_includes.pl
+	)
+else()
+	message(STATUS "perl not found: the arch_includes test is not registered")
+endif()
+
+#----------------------------------------------------------------------
+# The committed WireInventory.inc must match a fresh generation, so a
+# new or changed factory cannot go uninventoried. Needs perl (Git for
+# Windows ships one, found above); without it the check is skipped,
+# not passed.
+#----------------------------------------------------------------------
 if(PERL_EXECUTABLE)
 	add_test(
 		NAME wire_inventory_fresh
