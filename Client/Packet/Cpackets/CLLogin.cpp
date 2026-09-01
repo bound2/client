@@ -9,7 +9,6 @@
 // include files
 #include "Client_PCH.h"
 #include "CLLogin.h"
-#include "UserInformation.h"
 
 
 //////////////////////////////////////////////////////////////////////
@@ -58,7 +57,7 @@ void CLLogin::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 
-	if( g_pUserInformation == NULL || !g_pUserInformation->IsNetmarble )
+	if( !m_bNetmarble )
 	{
 		BYTE szID = m_ID.size();
 
@@ -137,7 +136,7 @@ void CLLogin::write ( SocketOutputStream & oStream ) const
 
 PacketSize_t CLLogin::getPacketSize () const throw ()
 {
-	if( g_pUserInformation == NULL || !g_pUserInformation->IsNetmarble )
+	if( !m_bNetmarble )
 	{
 		return szBYTE + m_ID.size() + szBYTE + m_Password.size() + 6 + szBYTE;
 	}

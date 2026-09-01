@@ -12,7 +12,8 @@
 //////////////////////////////////////////////////////////////////////
 #include "Client_PCH.h"
 #include "GCGQuestStatusInfo.h"
-#include "Client.h"
+
+#include <numeric>
 
 //////////////////////////////////////////////////////////////////////
 // constructor
@@ -37,7 +38,8 @@ GCGQuestStatusInfo::~GCGQuestStatusInfo ()
 
 	for ( ; itr != m_Infos.end() ; ++itr )
 	{
-		SAFE_DELETE( (*itr) );
+		delete *itr;
+		*itr = NULL;
 	}
 
 	__END_CATCH

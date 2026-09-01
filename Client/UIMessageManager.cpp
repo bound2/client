@@ -2112,6 +2112,10 @@ UIMessageManager::Execute_UI_LOGIN(intptr_t left, intptr_t right, void* void_ptr
 					// CLLogin
 					//--------------------------------------------------
 					CLLogin clLogin;
+					// The packet no longer reads g_pUserInformation itself
+					// (it compiles into packetwire); same null-guarded
+					// condition its write() used to evaluate.
+					clLogin.setNetmarble( g_pUserInformation != NULL && g_pUserInformation->IsNetmarble );
 
 					//clLogin.setID("Reiot");
 					//clLogin.setPassword("fpdldhxm");

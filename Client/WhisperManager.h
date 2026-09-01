@@ -111,11 +111,8 @@
 #include <string>
 #include <list>
 
-struct WHISPER_MESSAGE
-{
-	std::string msg;
-	DWORD color;
-};
+// WHISPER_MESSAGE - defined beside the packet that carries it
+#include "Packet/WhisperMessage.h"
 
 //----------------------------------------------------------------------
 // WhisperInfo

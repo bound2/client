@@ -17,8 +17,8 @@
 //
 // class CLLogin;
 //
-// 클라이언트가 로그인 서버에게 최초에 전송하는 패킷이다.
-// 아이디와 패스워드가 암호화되어 있다.
+// The first packet the client sends to the login server.
+// The ID and password are encrypted.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -26,10 +26,10 @@ class CLLogin : public Packet {
 
 public :
 	
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    // Reads data from the input stream (buffer) and initialises the packet.
     void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
 		    
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    // Sends the packet's binary image to the output stream (buffer).
     void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
 
 
@@ -61,12 +61,23 @@ public :
 	void setMacAddress( const BYTE* macAddress ) throw () { memcpy( m_MacAddress, macAddress, 6 * sizeof(BYTE) ); }
 
 	void SetLoginMode(BYTE n) { m_LoginMode = n;}
+
+	// Netmarble accounts log in with a different wire layout (a 4-byte
+	// ID length and no password). The sender sets this from the live
+	// user information; the packet itself no longer reads the game
+	// global, so it compiles into the packetwire library and can be
+	// pinned by a test in either mode.
+	bool isNetmarble () const throw () { return m_bNetmarble; }
+	void setNetmarble ( bool bNetmarble ) throw () { m_bNetmarble = bNetmarble; }
+
+	CLLogin () throw () : m_LoginMode(0) , m_bNetmarble(false) {}
+
 private :
 
-	// 플레이어 아이디
+	// player's id
 	std::string m_ID;
 
-	// 플레이어 패스워드
+	// player's password
 	std::string m_Password;
 
 	// Mac address
@@ -74,6 +85,9 @@ private :
 
 	// Login mode
 	BYTE m_LoginMode;
+
+	// Netmarble login layout (see setNetmarble)
+	bool m_bNetmarble;
 
 };
 

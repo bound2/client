@@ -9,7 +9,6 @@
 // include files
 #include "Client_PCH.h"
 #include "LCLoginOK.h"
-#include "UserInformation.h"
 
 //////////////////////////////////////////////////////////////////////
 //
