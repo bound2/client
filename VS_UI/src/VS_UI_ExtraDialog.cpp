@@ -1524,19 +1524,19 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 				switch(p_item->GetItemClass())
 				{
 				case ITEM_CLASS_SG:
-					wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_ITEM_CLASS_SG].GetString());
+					snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_ITEM_CLASS_SG));
 					break;
 					
 				case ITEM_CLASS_SMG:
-					wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_ITEM_CLASS_SMG].GetString());
+					snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_ITEM_CLASS_SMG));
 					break;
 					
 				case ITEM_CLASS_AR:
-					wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_ITEM_CLASS_AR].GetString());
+					snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_ITEM_CLASS_AR));
 					break;
 					
 				case ITEM_CLASS_SR:
-					wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_ITEM_CLASS_SR].GetString());
+					snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_ITEM_CLASS_SR));
 					break;
 				}
 				temp_string = sz_temp;
@@ -1856,9 +1856,9 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 				if (p_item->GetRequireSTR() > 0)
 				{
 					if(bl_required)
-						wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_EMPTY].GetString());
+						snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_EMPTY));
 					else
-						wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE].GetString());
+						snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE));
 					bl_required = true;
 					
 					wsprintf(sz_temp + strlen(sz_temp), (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_STR].GetString(), p_item->GetRequireSTR());
@@ -1874,9 +1874,9 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 				if (p_item->GetRequireDEX() > 0)
 				{
 					if(bl_required)
-						wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_EMPTY].GetString());
+						snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_EMPTY));
 					else
-						wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE].GetString());
+						snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE));
 					bl_required = true;
 					
 					wsprintf(sz_temp + strlen(sz_temp), (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_DEX].GetString(), p_item->GetRequireDEX());
@@ -1891,9 +1891,9 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 				if (p_item->GetRequireINT() > 0)
 				{
 					if(bl_required)
-						wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_EMPTY].GetString());
+						snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_EMPTY));
 					else
-						wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE].GetString());
+						snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE));
 					bl_required = true;
 					
 					wsprintf(sz_temp + strlen(sz_temp), (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_INT].GetString(), p_item->GetRequireINT());
@@ -1911,9 +1911,9 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 				p_item->GetRequireSUM() > p_item->GetRequireINT() )
 				{
 					if(bl_required)
-						wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_EMPTY].GetString());
+						snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_EMPTY));
 					else
-						wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE].GetString());
+						snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE));
 					bl_required = true;
 					
 					//				if (p_item->GetRequireLevel() > 0)
@@ -1929,9 +1929,9 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 				if (p_item->GetRequireLevel() > 0)
 				{
 					if(bl_required)
-						wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_EMPTY].GetString());
+						snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_EMPTY));
 					else
-						wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE].GetString());
+						snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE));
 					bl_required = true;
 					
 					wsprintf(sz_temp + strlen(sz_temp), (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_LEVEL].GetString(), p_item->GetRequireLevel());
@@ -1946,9 +1946,9 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 				)
 			{
 				if(bl_required)
-					wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_EMPTY].GetString());
+					snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_EMPTY));
 				else
-					wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE].GetString());
+					snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE));
 				bl_required = true;
 				
 				strcat(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_OTHER_TRIBE].GetString());
@@ -1959,9 +1959,9 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 			if (p_item->IsGenderForMale())
 			{
 				if(bl_required)
-						wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_EMPTY].GetString());
+						snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_EMPTY));
 					else
-						wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE].GetString());
+						snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE));
 				bl_required = true;
 
 				strcat(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ONLY_MALE].GetString());
@@ -1971,9 +1971,9 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 			else if (p_item->IsGenderForMale())
 			{
 				if(bl_required)
-						wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_EMPTY].GetString());
+						snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_EMPTY));
 					else
-						wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE].GetString());
+						snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE));
 				bl_required = true;
 
 				strcat(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ONLY_FEMALE].GetString());

@@ -1844,7 +1844,7 @@ UIMessageManager::Execute_UI_NEW_USER_REGISTRATION(int left, int right, void* vo
 				//--------------------------------------------------
 				if (!IsValidSSN( ssn1, ssn2 ))
 				{
-					sprintf(strTemp, (*g_pGameStringTable)[STRING_USER_REGISTER_INVALID_SSN].GetString());
+					snprintf(strTemp, sizeof(strTemp), "%s", GetGameString(STRING_USER_REGISTER_INVALID_SSN));
 					g_pUIDialog->PopupFreeMessageDlg( strTemp );
 					AllOK = FALSE;
 				}

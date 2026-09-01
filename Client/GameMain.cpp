@@ -282,10 +282,12 @@ UpdateSocketInput()
 
 		if( strstr( t.toString().c_str(), "InvalidProtocolException") != NULL )
 		{
+			// The exception text can embed packet derived data, so it is passed
+			// as an argument and never as the format string.
 			if( !strstr( t.toString().c_str(), "(datagram)" ) == NULL )
-				SendBugReport( t.toString().c_str() );
+				SendBugReport( "%s", t.toString().c_str() );
 		}
-		
+
 		LOG_ERROR( t.toString().c_str() );
 		LOG_ERROR("[Error] UpdateSocketInput");			
 		LOG_ERROR(t.toString().c_str());
@@ -432,10 +434,12 @@ UpdateSocketOutput()
 
 	} catch (Throwable &t) 	{
 
+		// The exception text can embed packet derived data, so it is passed as
+		// an argument and never as the format string.
 		if( strstr( t.toString().c_str(), "InvalidProtocolException") != NULL )
 			if( !strstr( t.toString().c_str(), "(datagram)" ) == NULL )
-				SendBugReport( t.toString().c_str() );
-		
+				SendBugReport( "%s", t.toString().c_str() );
+
 		DEBUG_ADD_ERR("[Error] UpdateSocketInput");
 		DEBUG_ADD(t.toString().c_str());
 		

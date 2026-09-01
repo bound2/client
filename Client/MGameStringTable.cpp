@@ -4,6 +4,7 @@
 #include "Client_PCH.h"
 #include "MGameStringTable.h"
 #include "Properties.h"
+#include "DebugLog.h"
 
 
 //----------------------------------------------------------------------
@@ -73,6 +74,347 @@ UseEnglishText()
 	fclose(pFile);
 
 	return (language == LANGUAGE_ENGLISH);
+}
+
+
+//----------------------------------------------------------------------
+// Does this table entry hold a printf conversion specification that is
+// unsafe to hand to sprintf as the format string?
+//
+// An entry is rejected when one of its specifications can write through an
+// argument, take its width from an argument, demand more argument-driven
+// expansion than the call sites' buffers can hold, or retype the argument
+// the call site actually passed:
+//
+//   %n          writes through a pointer argument - an arbitrary write
+//   %*d, %.*f   takes the width or precision from an argument; no call site
+//               passes one, so it is whatever happens to sit in the
+//               argument list
+//   %32d        one width or precision of MAX_CONVERSION_WIDTH or more. The
+//               built-in English table further down this file is the
+//               reference for what an entry legitimately needs: its whole
+//               specifier set is %d, %s and %02d, so the largest real width
+//               is 2. 32 leaves that enormous headroom and still sits well
+//               under the smallest buffer a call site prints into, the
+//               char sz_buf[50] in VS_UI/src/VS_UI_Description.cpp.
+//   %30d%30d...	widths compose - the check is per specification, so the
+//               widths and precisions of the whole entry are summed too and
+//               the entry is rejected once the sum passes
+//               MAX_ENTRY_WIDTH_BUDGET. 256 is two orders of magnitude above
+//               what any real entry asks for, and it is what bounds the
+//               entry as a whole rather than one specification at a time.
+//   %f %e %g    the floating point conversions need no width at all to be
+//   %a and the  huge: "%f" with a double of 1e300 prints 308 digits and
+//   uppercase   "%.512f" prints 814. They are also the one family that
+//   forms       changes which register the argument is read from - on x64 a
+//               %f reads an XMM register, so an entry that grew one reads a
+//               register the call site never set.
+//   %S %C       the wide conversions keep the argument count unchanged, so
+//   %ls %lc     every call site still "matches", but the CRT then reads a
+//   %ws %wc     char* argument as a wchar_t* and scans past the end of the
+//               buffer the call site passed. MSVC treats the uppercase S
+//               and C as wide in the narrow printf family, and l/w/I in
+//               front of s or c the same way.
+//
+// The length modifiers are parsed only so that they cannot hide the
+// conversion character behind them: without consuming "I64", "%I64n" would
+// scan as the conversion 'I' followed by the ordinary letters "64n" and the
+// %n would be missed. MSVC accepts the "I", "I32" and "I64" forms as well as
+// the standard ones, so all of them are skipped here.
+//
+// What this check does NOT do: it does not check that an entry's specifier
+// count matches the call site that formats it. The table does not know which
+// call site takes which entry, so arity is unknowable at load time, and an
+// entry carrying a %s that its call site passes no argument for still makes
+// sprintf read a stack word as a char*. That hole is closed per call site,
+// not here - the call sites that pass no varargs at all are being converted
+// to bounded "%s" copies separately.
+//
+// Multi-byte text is safe to walk one byte at a time: neither GBK nor CP949
+// uses 0x25 ('%') as a trail byte, so no character of the Korean or Chinese
+// data can be mistaken for the start of a conversion specification.
+//
+// A literal percent the data did not double is a conversion specification to
+// the CRT and to this check alike, so an entry reading "50% Sale" is rejected
+// - ' ' is a flag and 'S' is then the wide-string conversion. That is a false
+// positive in intent, but not in effect: the CRT really would read an
+// argument as a wchar_t* there.
+//----------------------------------------------------------------------
+static bool
+IsUnsafeFormatEntry(const char* pString)
+{
+	// Largest width or precision one specification may name, and the
+	// largest sum of them the whole entry may name. See the banner above
+	// for how both numbers were chosen.
+	enum { MAX_CONVERSION_WIDTH		= 32 };
+	enum { MAX_ENTRY_WIDTH_BUDGET	= 256 };
+
+	if (pString == NULL)
+	{
+		return false;
+	}
+
+	const char* p = pString;
+	int nTotalWidth = 0;
+
+	while (*p != '\0')
+	{
+		if (*p != '%')
+		{
+			p++;
+			continue;
+		}
+
+		p++;
+
+		//------------------------------------------------------
+		// "%%" is a literal percent and a trailing '%' formats
+		// nothing - neither starts a specification.
+		//------------------------------------------------------
+		if (*p == '\0')
+		{
+			break;
+		}
+
+		if (*p == '%')
+		{
+			p++;
+			continue;
+		}
+
+		//------------------------------------------------------
+		// flags
+		//------------------------------------------------------
+		while (*p=='-' || *p=='+' || *p==' ' || *p=='0' || *p=='#')
+		{
+			p++;
+		}
+
+		//------------------------------------------------------
+		// field width
+		//------------------------------------------------------
+		if (*p == '*')
+		{
+			return true;
+		}
+
+		int nWidth = 0;
+
+		while (*p >= '0' && *p <= '9')
+		{
+			// Stop accumulating once the cap is already reached, so
+			// that a very long run of digits cannot overflow the
+			// counter. The value is rejected below either way.
+			if (nWidth < MAX_CONVERSION_WIDTH)
+			{
+				nWidth = nWidth * 10 + (*p - '0');
+			}
+
+			p++;
+		}
+
+		if (nWidth >= MAX_CONVERSION_WIDTH)
+		{
+			return true;
+		}
+
+		//------------------------------------------------------
+		// precision
+		//------------------------------------------------------
+		int nPrecision = 0;
+
+		if (*p == '.')
+		{
+			p++;
+
+			if (*p == '*')
+			{
+				return true;
+			}
+
+			while (*p >= '0' && *p <= '9')
+			{
+				if (nPrecision < MAX_CONVERSION_WIDTH)
+				{
+					nPrecision = nPrecision * 10 + (*p - '0');
+				}
+
+				p++;
+			}
+
+			if (nPrecision >= MAX_CONVERSION_WIDTH)
+			{
+				return true;
+			}
+		}
+
+		//------------------------------------------------------
+		// whole-entry budget
+		//
+		// Each specification is under the per-conversion cap by
+		// here, but they add up: five "%30d" in one entry are five
+		// separate 30-byte expansions into the same buffer. Sum
+		// them and reject the entry once the total passes the
+		// budget. Both terms are already below
+		// MAX_CONVERSION_WIDTH, so the sum cannot overflow before
+		// the test fires.
+		//------------------------------------------------------
+		nTotalWidth += nWidth + nPrecision;
+
+		if (nTotalWidth > MAX_ENTRY_WIDTH_BUDGET)
+		{
+			return true;
+		}
+
+		//------------------------------------------------------
+		// length modifier
+		//
+		// cLength keeps the first byte of it, because l, w and I in
+		// front of s or c are what make those conversions wide.
+		//------------------------------------------------------
+		char cLength = '\0';
+
+		if (*p=='h' || *p=='l')
+		{
+			cLength = *p;
+
+			p++;
+
+			// "hh" and "ll"
+			if (*p == cLength)
+			{
+				p++;
+			}
+		}
+		else if (*p=='j' || *p=='z' || *p=='t' || *p=='L' || *p=='w')
+		{
+			cLength = *p;
+
+			p++;
+		}
+		else if (*p == 'I')
+		{
+			cLength = *p;
+
+			p++;
+
+			if ((p[0]=='6' && p[1]=='4') || (p[0]=='3' && p[1]=='2'))
+			{
+				p += 2;
+			}
+		}
+
+		//------------------------------------------------------
+		// conversion character
+		//------------------------------------------------------
+		const char cConversion = *p;
+
+		// Writes through an argument.
+		if (cConversion == 'n')
+		{
+			return true;
+		}
+
+		// Floating point: unbounded without a width, and read from a
+		// different register file than the integers the call sites pass.
+		if (cConversion=='e' || cConversion=='E'
+		 || cConversion=='f' || cConversion=='F'
+		 || cConversion=='g' || cConversion=='G'
+		 || cConversion=='a' || cConversion=='A')
+		{
+			return true;
+		}
+
+		// Wide: same argument count, but a char* argument is then read
+		// as a wchar_t* and scanned past the end of its buffer.
+		if (cConversion=='S' || cConversion=='C')
+		{
+			return true;
+		}
+
+		if ((cConversion=='s' || cConversion=='c')
+		 && (cLength=='l' || cLength=='w' || cLength=='I'))
+		{
+			return true;
+		}
+
+		if (cConversion != '\0')
+		{
+			p++;
+		}
+	}
+
+	return false;
+}
+
+
+//----------------------------------------------------------------------
+// Sanitize Game String Table
+//----------------------------------------------------------------------
+// Scrubs the format strings the game data supplies before anything can
+// print with them. Data/Info/String.inf is read straight off disk and its
+// entries reach sprintf all over the client, so a tampered - or merely
+// corrupt - file can turn a UI label into an arbitrary write. Every entry
+// IsUnsafeFormatEntry() rejects is replaced whole, because a specification
+// cannot be edited out of a string without changing how many arguments the
+// call site consumes.
+//
+// What this removes: entries that could write through an argument (%n),
+// take a width from an argument (%*d), demand large argument-driven
+// expansion (a big width or precision, singly or summed over the entry), or
+// retype an argument (the wide and the floating point conversions).
+//
+// What this does NOT do: it does not check that an entry's specifier count
+// matches the call site that formats it - the table does not know which
+// call site takes which entry, so arity is unknowable here. An entry that
+// carries a %s the call site passes no argument for survives this pass and
+// still makes sprintf read a stack word as a char*. What actually closes
+// that hole is converting the call sites that pass no varargs at all to
+// bounded "%s" copies, which is a separate change per call site.
+//
+// The placeholder is deliberately English and built in: the table that
+// would hold its translation is the one under suspicion.
+//----------------------------------------------------------------------
+void
+SanitizeGameStringTable()
+{
+	if (g_pGameStringTable == NULL)
+	{
+		return;
+	}
+
+	const int nSize = (*g_pGameStringTable).GetSize();
+	int nRemoved = 0;
+
+	for (int i=0; i<nSize; i++)
+	{
+		// GetString() is NULL only for an entry that was never set -
+		// MString's default constructor leaves m_pString NULL. An entry
+		// the file left empty is not NULL: MString::LoadFromFile gives a
+		// zero length string its own "" buffer. IsUnsafeFormatEntry
+		// handles both, the NULL by returning false and the "" by finding
+		// no '%'.
+		const char* pString = (*g_pGameStringTable)[i].GetString();
+
+		if (!IsUnsafeFormatEntry(pString))
+		{
+			continue;
+		}
+
+		(*g_pGameStringTable)[i] = "(removed unsafe string)";
+		nRemoved++;
+
+		// Logged at the error level, not a warning: log_init drops the
+		// level to LOG_LEVEL_ERROR in Release, so a warning here would be
+		// silent in exactly the build where a false positive - a UI string
+		// replaced by the placeholder - is hardest to explain.
+		DEBUG_ADD_FORMAT_ERR("[StringTable] entry %d holds an unsafe format string - replaced", i);
+	}
+
+	if (nRemoved != 0)
+	{
+		DEBUG_ADD_FORMAT_ERR("[StringTable] %d unsafe format string(s) replaced", nRemoved);
+	}
 }
 
 

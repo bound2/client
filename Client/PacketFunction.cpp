@@ -5057,9 +5057,16 @@ SendBugReport(const char *bug, ...)
 	char Buffer[256];
 
 	va_start(vl, bug);
-	vsprintf(Buffer, bug, vl);    
+	int written = vsnprintf(Buffer, sizeof(Buffer), bug, vl);
     va_end(vl);
-	
+
+	// vsnprintf NUL terminates within sizeof(Buffer), so a report longer than
+	// the buffer is truncated instead of overrunning the stack. That also makes
+	// the strlen and the Buffer[100] cut below safe, which they were not while
+	// vsprintf could already have run past the end. A negative return is an
+	// encoding error: nothing usable was produced, so send nothing.
+	if (written < 0)
+		return;
 
 #ifdef __DEBUG_OUTPUT__
 	DEBUG_ADD_FORMAT("[BUG_REPORT] %s",Buffer);

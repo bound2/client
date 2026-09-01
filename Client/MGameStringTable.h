@@ -36,13 +36,39 @@ extern void				InitGameStringTable();
 extern bool				UseEnglishText();
 
 //----------------------------------------------------------------------
+// Replaces every entry of the game string table that holds a printf
+// conversion specification too dangerous to hand to sprintf.
+//
+// Data/Info/String.inf supplies the entries and roughly 600 call sites pass
+// them as the FORMAT argument of sprintf/wsprintf. Removed are the entries
+// that could write through an argument ("%n"), take a field width from an
+// argument ("%*d"), demand large argument-driven expansion (a wide field
+// width or precision, whether in one specification or summed over the
+// entry), or retype an argument - the wide conversions ("%S", "%ls"), which
+// make the CRT read a char* as a wchar_t*, and the floating point ones
+// ("%f"), which are unbounded without a width and on x64 read a register
+// the call site never wrote. Call this once, right after the file has been
+// read and before anything can format with it.
+//
+// It does NOT verify that an entry's specifier count matches the call site
+// that formats it: the table does not know which call site takes which
+// entry, so arity cannot be checked at load time. An entry with a "%s" the
+// call site supplies no argument for therefore survives this pass and still
+// makes sprintf read a stack word as a char*. Closing that is a per-call-
+// site change - the call sites that pass no varargs at all are being
+// converted to bounded "%s" copies separately.
+//----------------------------------------------------------------------
+extern void				SanitizeGameStringTable();
+
+//----------------------------------------------------------------------
 // Reads one entry from the game string table, or "" when the table is too
 // short to hold it.
 //
 // String.inf decides how many entries the table has, so a data file built
-// for an older client can be shorter than GAME_STRINGID. CTypeTable only
-// range checks under _DEBUG, which the CMake build never defines, so ids
-// added after the shipped String.inf must be read through here.
+// for an older client can be shorter than GAME_STRINGID. CTypeTable range
+// checks only under _DEBUG - which MSVC defines for Debug builds but not
+// for Release - so in Release an out-of-range id indexes past the array and
+// ids added after the shipped String.inf must be read through here.
 //----------------------------------------------------------------------
 extern const char*		GetGameString(int stringID);
 

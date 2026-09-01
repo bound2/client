@@ -1,10 +1,7 @@
 ﻿#include "Client_PCH.h"
 #define __NPROTECT__
 // EXECryptor include removed (SDL2) - Copy protection no longer needed
-/* add by sonic 2006.9.14 start 增加对WPE屏蔽*/
-#include "APICheck.h"
-APICheck _APICheck;
-/* ***************************************** */
+// APICheck (legacy WPE anti-cheat probe) removed - see code health review C28
 //#undef __NPROTECT__
 //#define NO_GAMEGUARD
 //#define __NPROTECT_OLD_VERSION__
@@ -382,7 +379,14 @@ HRESULT InitFail(LPCTSTR szError,...)
     va_list		vl;
 
     va_start(vl, szError);
-    vsprintf(szBuff, szError, vl);
+    int written = vsnprintf(szBuff, sizeof(szBuff), szError, vl);
+
+	// vsnprintf NUL terminates within sizeof(szBuff), so an over long message
+	// is truncated rather than written past the end. A negative return is an
+	// encoding error, where nothing usable was produced, so the message logged
+	// below is made empty.
+	if (written < 0)
+		szBuff[0] = '\0';
 
     //ReleaseAllObjects();
 	DEBUG_ADD( szBuff );
@@ -4050,11 +4054,7 @@ WinMain(HINSTANCE hInstance,
 //#endif
 		}
 	}
-	//增加检测
-/* Add by sonic 2006.9.14 增加对WPE 检测 */
-_APICheck.init();
-/* ************************************* */
-//	FILE *fp = fopen("Data\\Info\\SuperUser.inf","rt");	
+//	FILE *fp = fopen("Data\\Info\\SuperUser.inf","rt");
 //	MessageBox(NULL,__TIME__,__TIME__,MB_OK);
 //	if(fp != NULL)
 //	{
@@ -4210,9 +4210,6 @@ _APICheck.init();
 		while (TRUE)
 		{
 //			Sleep(1);	//add by viva
-			/* add by sonic 增加对sock检测 */
-				_APICheck.CheckApi();
-			/* *************************** */
 			if (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
 			//if (GetMessage(&msg, NULL, 0, 0))
 			{	

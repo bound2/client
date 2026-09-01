@@ -1630,6 +1630,31 @@ InitGame()
 	if (FileOpenBinary(g_pFileDef->getProperty("FILE_INFO_STRING").c_str(), gameStringTableTable2))
 	{
 		(*g_pGameStringTable).LoadFromFile(gameStringTableTable2);
+
+		// The entries just read are used as sprintf format strings in
+		// hundreds of places, so drop the ones that could write through an
+		// argument, take a width from an argument, demand large argument
+		// driven expansion, or retype an argument. Only the file data needs
+		// this; the built-in table applied below is source.
+		//
+		// Note what this does and does not reach. English is this build's
+		// default (see UseEnglishText), and on that path InitGameStringTable
+		// below opens with (*g_pGameStringTable).Init(MAX_GAME_STRING + 1),
+		// whose CTypeTable::Init calls Release() and reallocates the array -
+		// so every entry this pass just scrubbed is destroyed a few lines
+		// later and rebuilt from the source literals. The scrub therefore has
+		// no effect in the default build; it protects LANGUAGE != 3, where
+		// String.inf really is the table the client formats with. The
+		// ordering is deliberate and stays: the built-in English strings are
+		// source, not data, and do not need gating.
+		//
+		// It also does not check that an entry's specifier count matches the
+		// call site - that is unknowable here - so an entry with a %s the
+		// call site passes no argument for still reads a stack word as a
+		// char*. The zero-vararg call sites are being converted to bounded
+		// "%s" copies separately, and that is what closes that hole.
+		SanitizeGameStringTable();
+
 		gameStringTableTable2.close();
 	}
 	else if (!bUseEnglishStrings)

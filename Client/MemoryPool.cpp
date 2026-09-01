@@ -47,7 +47,11 @@ MemoryPool::~MemoryPool()
 	while( m_pCurrentBlock != NULL )
 	{
 		CBlock *pPrev = m_pCurrentBlock->m_pPrev;
-		free( m_pCurrentBlock );
+
+		// Alloc() takes these chunks from ::operator new, so they have to go
+		// back through ::operator delete. Pairing them with free() is
+		// undefined behaviour.
+		::operator delete( m_pCurrentBlock );
 
 		m_pCurrentBlock = pPrev;
 	}
@@ -67,14 +71,14 @@ void*		MemoryPool::Alloc()
 
 	if( m_pCurrentBlock == NULL || m_pCurrentBlock->m_leftBlocks <= 0 )
 	{
-		// 메모리 Pool 이 할당되어 있지 않거나, 할당한 메모리를 다 사용하였을 경우에,
-		// 새로 할당하고, 기존의 포인터를 연결해 놓는다.
+		// The pool has not been allocated yet, or every block handed out by the
+		// current chunk is in use: allocate a new chunk and link the previous
+		// one behind it.
+		// ::operator new throws std::bad_alloc on failure and never returns
+		// NULL, so there is no null pointer to test for here. These pools back
+		// a throwing operator new (see MCreature::operator new), which must not
+		// hand a null block back to its caller either.
 		CBlock *pPool = (CBlock*)( ::operator new( sizeof(CBlock) + ( m_BlockSize * m_BlockCount )) );
-
-		if( pPool == NULL )
-		{
-			return NULL;
-		}
 
 #ifdef _DEBUG
 //		memset( (unsigned char*)(pPool) + sizeof( CBlock ), MEMORY_POOL_GARBAGE, m_BlockSize * m_BlockCount );

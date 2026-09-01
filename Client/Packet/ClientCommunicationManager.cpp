@@ -123,12 +123,14 @@ void ClientCommunicationManager::sendPacket ( const std::string& host , uint por
 		#endif
 
     } catch ( Throwable & t ) {
-		// -_- 어차피 튕기니까 스트링으로
+		// -_- it drops the connection anyway, so report it as a string.
+		// The exception text can embed packet derived data, so it is passed as
+		// an argument and never as the format string.
 		if( strstr( t.toString().c_str(), "InvalidProtocolException") != NULL )
 			if( !strstr( t.toString().c_str(), "(datagram)" ) == NULL )
-				SendBugReport( t.toString().c_str() );
-		
-        DEBUG_ADD( t.toString().c_str() );        
+				SendBugReport( "%s", t.toString().c_str() );
+
+        DEBUG_ADD( t.toString().c_str() );
     }
 
     __END_DEBUG
@@ -199,11 +201,13 @@ ClientCommunicationManager::Update()
 		}
 		catch ( Throwable & t )
 		{
-			// -_- 어차피 튕기니까 스트링으로
+			// -_- it drops the connection anyway, so report it as a string.
+			// The exception text can embed packet derived data, so it is passed
+			// as an argument and never as the format string.
 			if( strstr( t.toString().c_str(), "InvalidProtocolException") != NULL )
 				if( !strstr( t.toString().c_str(), "(datagram)" ) == NULL )
-					SendBugReport( t.toString().c_str() );
-		
+					SendBugReport( "%s", t.toString().c_str() );
+
 			DEBUG_ADD( t.toString().c_str() );
 
 			if (pDatagramPacket!=NULL)

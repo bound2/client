@@ -649,9 +649,6 @@
     <ClCompile Include="WavePackFileManager.cpp">
       <Filter>Source Files\Utility source</Filter>
     </ClCompile>
-    <ClCompile Include="APICheck.cpp">
-      <Filter>Source Files\GameLoop source</Filter>
-    </ClCompile>
     <ClCompile Include="CGameUpdate.cpp">
       <Filter>Source Files\GameLoop source</Filter>
     </ClCompile>
@@ -3731,9 +3728,6 @@
     </ClInclude>
     <ClInclude Include="UIMessageManager.h">
       <Filter>Header Files\GameObject Header</Filter>
-    </ClInclude>
-    <ClInclude Include="APICheck.h">
-      <Filter>Header Files\GameLoop</Filter>
     </ClInclude>
     <ClInclude Include="CGameUpdate.h">
       <Filter>Header Files\GameLoop</Filter>
