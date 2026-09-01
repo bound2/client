@@ -33,17 +33,6 @@
 #include "TextSystem/TextService.h"
 #endif
 
-// Helper function to compare char_t* with wchar_t* string
-static inline int char_t_wcscmp(const char_t* s1, const wchar_t* s2) {
-    if (!s1 || !s2) return (s1 ? 1 : (s2 ? -1 : 0));
-    while (*s1 && *s2) {
-        if (*s1 != *s2) return (*s1 < *s2) ? -1 : 1;
-        s1++;
-        s2++;
-    }
-    return (*s2) ? -1 : (*s1 ? 1 : 0);
-}
-
 #define LOGIN_ID_X 59 // 상대값
 #define LOGIN_ID_Y 49
 #define LOGIN_PASSWORD_X 59
@@ -539,20 +528,11 @@ void C_VS_UI_CHAR_APPEARANCE::Process()
 //-----------------------------------------------------------------------------
 void C_VS_UI_CHAR_DELETE::SendCharacterDeleteToClient()
 {
-	// static으로 하고 외부에서 string은 delete해준다.
-
 	static DELETE_CHARACTER S_delete_char;
 
-	// 넷마블용
-	if(!g_pUserInformation->IsNetmarble)
-	{
-		g_Convert_DBCS_Ascii2SingleByte(m_lev_ssn_part1.GetStringWide(), m_lev_ssn_part1.Size(), S_delete_char.sz_part1);
-		g_Convert_DBCS_Ascii2SingleByte(m_lev_ssn_part2.GetStringWide(), m_lev_ssn_part2.Size(), S_delete_char.sz_part2);
-	}
 	S_delete_char.slot = m_selected_slot;
 
 	gpC_base->SendMessage(UI_DELETE_CHARACTER, 0, 0, &S_delete_char);
-	
 }
 
 //-----------------------------------------------------------------------------
@@ -567,25 +547,13 @@ C_VS_UI_CHAR_DELETE::C_VS_UI_CHAR_DELETE()
 	AttrTopmost(true);
 	AttrKeyboardControl(true);
 
-	// 넷마블용
-	int w_h = 207;
-	if(g_pUserInformation->IsNetmarble)
-		w_h = 127;
+	const int w_h = 207;
 
-	int cancel_offset_x, cancel_offset_y;
-	int ok_offset_x, ok_offset_y;
-	int ssn_part1_x, ssn_y, ssn_part2_x;
-
-	{
-//		m_pC_image_spk = new C_SPRITE_PACK(SPK_CHAR_DELETE);
-		ok_offset_x = 189-26;
-		ok_offset_y = w_h-60;
-		cancel_offset_x = 253-24;
-		cancel_offset_y = w_h-60;
-		ssn_part1_x = 55;
-		ssn_part2_x = 175;
-		ssn_y = 108;
-	}
+	int ok_offset_x = 189-26;
+	int ok_offset_y = w_h-60;
+	int cancel_offset_x = 253-24;
+	int cancel_offset_y = w_h-60;
+	int name_y = 108;
 
 	Set(g_GameRect.right/2-324/2, g_GameRect.bottom/2-w_h/2, 324, w_h);
 
@@ -593,24 +561,15 @@ C_VS_UI_CHAR_DELETE::C_VS_UI_CHAR_DELETE()
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(x+ok_offset_x, y+ok_offset_y, gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_BUTTON_OK), gpC_global_resource->m_pC_assemble_box_button_spk->GetHeight(C_GLOBAL_RESOURCE::AB_BUTTON_OK), DELETE_OK, this, C_GLOBAL_RESOURCE::AB_BUTTON_OK));
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(x+cancel_offset_x, y+cancel_offset_y, gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_BUTTON_OK), gpC_global_resource->m_pC_assemble_box_button_spk->GetHeight(C_GLOBAL_RESOURCE::AB_BUTTON_OK), DELETE_CANCEL, this, C_GLOBAL_RESOURCE::AB_BUTTON_CANCEL));
 
-	if( gC_ci->IsChinese() )
-	{
-		m_lev_ssn_part1.SetPosition( x+ssn_part1_x+40, y+ssn_y );
-		m_lev_ssn_part1.SetByteLimit( 3 );
+	// One name box, centered. The bar sprite is drawn 10 pixels left of the
+	// editor, so shift the editor right by that much inside the centered bar.
+	int bar_w = gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_NAME_BAR);
+	m_lev_name.SetPosition(x+(w-bar_w)/2+10, y+name_y);
+	m_lev_name.SetByteLimit(10); // same limit as character creation
 
-		Attach( &m_lev_ssn_part1 );
-	}
-	else
-	{
-		m_lev_ssn_part1.SetPosition(x+ssn_part1_x, y+ssn_y);
-		m_lev_ssn_part1.SetByteLimit(SSN_PART1_CHAR_COUNT);
-		m_lev_ssn_part2.SetPosition(x+ssn_part2_x, y+ssn_y);
-		m_lev_ssn_part2.SetByteLimit(SSN_PART2_CHAR_COUNT);
-		m_lev_ssn_part2.PasswordMode(true);
+	Attach(&m_lev_name);
 
-		Attach(&m_lev_ssn_part1);
-		Attach(&m_lev_ssn_part2);
-	}
+	m_selected_slot = 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -622,13 +581,7 @@ C_VS_UI_CHAR_DELETE::~C_VS_UI_CHAR_DELETE()
 {
 	g_UnregisterWindow(this);
 
-	if( gC_ci->IsChinese() )
-		m_lev_ssn_part1.Unacquire();
-	else
-	{
-		m_lev_ssn_part1.Unacquire();
-		m_lev_ssn_part2.Unacquire();
-	}
+	m_lev_name.Unacquire();
 
 //	DeleteNew(m_pC_image_spk);
 	DeleteNew(m_pC_button_group);
@@ -685,20 +638,8 @@ void C_VS_UI_CHAR_DELETE::Start()
 {
 	PI_Processor::Start();
 
-	if( gC_ci->IsChinese() )
-	{
-		m_lev_ssn_part1.EraseAll();
-		m_lev_ssn_part1.Acquire();
-	}
-	else
-	{
-		m_lev_ssn_part1.EraseAll();
-		m_lev_ssn_part2.EraseAll();
-		m_lev_ssn_part1.Acquire();
-	}
-
-	m_bl_ssn_ip_part1 = true;
-	m_selected_slot = 0;
+	m_lev_name.EraseAll();
+	m_lev_name.Acquire();
 
 	gpC_window_manager->AppearWindow(this);
 
@@ -731,54 +672,24 @@ void C_VS_UI_CHAR_DELETE::Show()
 {
 //	m_pC_image_spk->Blt(x, y, DELETE_WINDOW);
 	gpC_global_resource->DrawDialog(x, y, w, h, GetAttributes()->alpha);
-	
+
 	g_FL2_GetDC();
-	g_PrintColorStr(x+w/2-g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_DELETE_CONFIRM].GetString(), gpC_base->m_char_name_pi.hfont)/2, 
+	g_PrintColorStr(x+w/2-g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_DELETE_CONFIRM].GetString(), gpC_base->m_char_name_pi.hfont)/2,
 		y+30, (*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_DELETE_CONFIRM].GetString(), gpC_base->m_char_name_pi, RGB_WHITE);
-	// 넷마블용
-	if(!g_pUserInformation->IsNetmarble)
-	{
-		g_PrintColorStr(x+w/2-g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_RE_INPUT_CORRECT_SSN].GetString(), gpC_base->m_char_name_pi.hfont)/2, 
-			y+50,(*g_pGameStringTable)[UI_STRING_MESSAGE_RE_INPUT_CORRECT_SSN].GetString(), gpC_base->m_char_name_pi, RGB_WHITE);
-	}
+	g_PrintColorStr(x+w/2-g_GetStringWidth(GetGameString(UI_STRING_MESSAGE_DELETE_INPUT_NAME), gpC_base->m_char_name_pi.hfont)/2,
+		y+50, GetGameString(UI_STRING_MESSAGE_DELETE_INPUT_NAME), gpC_base->m_char_name_pi, RGB_WHITE);
 	m_pC_button_group->ShowDescription();
 	g_FL2_ReleaseDC();
 
-	const int chineseSSNBoxSizeX = 165;
-
-	RECT chineseRect = {m_lev_ssn_part1.GetPosition().x-10, m_lev_ssn_part1.GetPosition().y-4,
-			m_lev_ssn_part1.GetPosition().x-10+chineseSSNBoxSizeX,m_lev_ssn_part1.GetPosition().y-4+25};	
-
-	if( gC_ci->IsChinese() )
-	{
-		gpC_base->m_p_DDSurface_back->FillRect(&chineseRect,0);
-	}
-
 	if(gpC_base->m_p_DDSurface_back->Lock())
 	{
-		// 넷마블용
-		if(!g_pUserInformation->IsNetmarble)
-		{
-			if( gC_ci->IsChinese() )
-			{
-//				gpC_global_resource->m_pC_assemble_box_button_spk->BltLocked( m_lev_ssn_chinese.GetPosition().x-10, m_lev_ssn_chinese.GetPosition().y-2, C_GLOBAL_RESOURCE::AB_MONEY_BAR );
-				Rect rect(chineseRect.left,chineseRect.top,chineseSSNBoxSizeX,25);
-				gpC_global_resource->DrawOutBoxLocked(rect);
-			}
-			else if( gC_ci->IsKorean() )
-			{
-				gpC_global_resource->m_pC_assemble_box_button_spk->BltLocked(m_lev_ssn_part1.GetPosition().x-10, m_lev_ssn_part1.GetPosition().y-2, C_GLOBAL_RESOURCE::AB_NAME_BAR);
-				gpC_global_resource->m_pC_assemble_box_button_spk->BltLocked(m_lev_ssn_part2.GetPosition().x-10, m_lev_ssn_part2.GetPosition().y-2, C_GLOBAL_RESOURCE::AB_NAME_BAR);
-			}
-		}
+		gpC_global_resource->m_pC_assemble_box_button_spk->BltLocked(m_lev_name.GetPosition().x-10, m_lev_name.GetPosition().y-2, C_GLOBAL_RESOURCE::AB_NAME_BAR);
 
 		m_pC_button_group->Show();
 		gpC_base->m_p_DDSurface_back->Unlock();
 	}
 
-	// 넷마블용
-	if(!g_pUserInformation->IsNetmarble)
-		Window::ShowWidget();
+	Window::ShowWidget();
 
 	SHOW_WINDOW_ATTR;
 }
@@ -793,23 +704,22 @@ void C_VS_UI_CHAR_DELETE::Run(id_t id)
 	switch (id)
 	{
 		case DELETE_OK:
-			// 넷마블용
 			{
-				// 제대로 입력하였는가?
-				if (
-					 ( ( gC_ci->IsKorean()&& (	m_lev_ssn_part1.Size() == SSN_PART1_CHAR_COUNT &&
-					 m_lev_ssn_part2.Size() == SSN_PART2_CHAR_COUNT ) ) ||
-					 ( !gC_ci->IsKorean() && ( char_t_wcscmp(m_lev_ssn_part1.GetStringWide(), L"DeletePc") == 0 ) )
-					 )
-					 || g_pUserInformation->IsNetmarble)
+				// The typed name has to match the character being deleted.
+				bool bl_match = false;
+
+				char * sz_typed = NULL;
+				int len = g_Convert_DBCS_Ascii2SingleByte(m_lev_name.GetStringWide(), m_lev_name.Size(), sz_typed);
+				if (sz_typed != NULL)
 				{
+					bl_match = (len > 0 && m_sz_target_name == sz_typed);
+					DeleteNewArray(sz_typed);
+				}
+
+				if (bl_match)
 					SendCharacterDeleteToClient();
-				}
 				else
-				{
-					// error message!
-					g_msg_wrong_ssn->Start();
-				}
+					g_ShowMessage(GetGameString(UI_STRING_MESSAGE_DELETE_NAME_MISMATCH));
 			}
 			break;
 
@@ -851,41 +761,8 @@ void C_VS_UI_CHAR_DELETE::KeyboardControl(UINT message, UINT key, long extra)
 				return;
 		}
 
-	// digit only
-	if (message == WM_CHAR && (!gC_ci->IsKorean() || gC_ci->IsKorean() && (key >= '0' && key <= '9')))
-	{
+	if (message == WM_CHAR || (message == WM_KEYDOWN && key == VK_BACK))
 		Window::KeyboardControl(message, key, extra);
-
-		if( gC_ci->IsKorean() )
-		{
-			if (m_bl_ssn_ip_part1)
-			{
-				if (m_lev_ssn_part1.Size() == SSN_PART1_CHAR_COUNT)
-				{
-					m_bl_ssn_ip_part1 = false;
-					m_lev_ssn_part2.Acquire();
-				}
-			}
-		}
-	}
-
-	if (message == WM_KEYDOWN)
-		if (key == VK_BACK)
-		{
-			if( gC_ci->IsKorean() )
-			{
-				if (!m_bl_ssn_ip_part1)
-				{
-					if (m_lev_ssn_part2.Size() == 0)
-					{
-						m_bl_ssn_ip_part1 = true;
-						m_lev_ssn_part1.Acquire();
-					}
-				}
-			}
-
-			Window::KeyboardControl(message, key, extra);
-		}
 }
 
 //-----------------------------------------------------------------------------
@@ -3190,10 +3067,10 @@ void C_VS_UI_CHAR_MANAGER::Run(id_t id)
 			if (m_slot[i].bl_set == true)
 			{
 				DeleteNew(m_pC_char_delete);
-				
+
 				m_pC_char_delete = new C_VS_UI_CHAR_DELETE();
+				m_pC_char_delete->SetTarget(i, m_slot[i].sz_name.c_str());
 				m_pC_char_delete->Start();
-				m_pC_char_delete->Slot(i);
 			}
 			break;
 		case CANNOT_PLAY_ID :

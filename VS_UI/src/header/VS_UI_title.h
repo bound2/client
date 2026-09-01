@@ -455,9 +455,9 @@ private:
 //	C_SPRITE_PACK *			m_pC_image_spk;
 	ButtonGroup *				m_pC_button_group;
 
-	LineEditorVisual			m_lev_ssn_part1;
-	LineEditorVisual			m_lev_ssn_part2;
-	bool							m_bl_ssn_ip_part1; // input position
+	// The user confirms deletion by typing the character's name.
+	LineEditorVisual			m_lev_name;
+	std::string					m_sz_target_name;
 
 	void	SendCharacterDeleteToClient();
 
@@ -480,7 +480,7 @@ public:
 	void	Run(id_t id);
 	bool	MouseControl(UINT message, int _x, int _y);
 	void	KeyboardControl(UINT message, UINT key, long extra);
-	void	Slot(int slot) { m_selected_slot = slot; }
+	void	SetTarget(int slot, const char * sz_name) { m_selected_slot = slot; m_sz_target_name = sz_name; }
 };
 
 //-----------------------------------------------------------------------------

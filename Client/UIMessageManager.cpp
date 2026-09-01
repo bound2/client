@@ -1610,73 +1610,24 @@ UIMessageManager::Execute_UI_DELETE_CHARACTER(int left, int right, void* void_pt
 	
 	DELETE_CHARACTER *pChar = (DELETE_CHARACTER*)void_ptr;
 
-	//--------------------------------------------------
-	// 주민등록번호 체크
-	//--------------------------------------------------
-	// 넷마블용
-	if (g_pUserInformation->IsNetmarble || g_pUserInformation->bChinese || IsValidSSN( pChar->sz_part1, pChar->sz_part2 ))
-	{
-		char strTemp[20];
-		
-		if( g_pUserInformation->bChinese )
-		{
-			sprintf(strTemp,"%s",pChar->sz_part1);
-		} else
-		if(!g_pUserInformation->IsNetmarble)
-		{
-			// xxxxxx-xxxxxxx 형식으로 만든다.
-			sprintf(strTemp, "%s-%s", pChar->sz_part1, pChar->sz_part2);
-		}
-		else
-			sprintf(strTemp, "1");
+	// The delete dialog already confirmed the request by making the user type
+	// the character's name. The SSN field the packet still carries is
+	// vestigial: the server's check has been retired, so send a placeholder.
+	CLDeletePC _CLDeletePC;
+	_CLDeletePC.setName( g_pUserInformation->Character[pChar->slot].GetString() );
+	_CLDeletePC.setSlot( pChar->slot==0? SLOT1 : pChar->slot==1? SLOT2 : SLOT3 );
+	_CLDeletePC.setSSN( "1" );
 
-			CLDeletePC _CLDeletePC;
-			//_CLDeletePC.setName( g_pUserInformation->CharacterW[pChar->slot].GetString() );
-			_CLDeletePC.setName( g_pUserInformation->Character[pChar->slot].GetString() );
-			_CLDeletePC.setSlot( pChar->slot==0? SLOT1 : pChar->slot==1? SLOT2 : SLOT3 );
-			
-			_CLDeletePC.setSSN( strTemp );
+	g_pSocket->sendPacket( &_CLDeletePC );
 
-			g_pSocket->sendPacket( &_CLDeletePC );
+	g_pSocket->setPlayerStatus( CPS_AFTER_SENDING_CL_DELETE_PC );
 
-			g_pSocket->setPlayerStatus( CPS_AFTER_SENDING_CL_DELETE_PC );
-			
+	//--------------------------------------------
+	// Remember which slot is being deleted.
+	//--------------------------------------------
+	g_pUserInformation->Slot = pChar->slot;
 
-		// 주민등록번호
-		//pChar->sz_part1
-		//pChar->sz_part2					
-
-		// 주민등록번호가 틀렸을 때의 message
-		//gC_vs_ui.Invalid_SSN_Message();
-
-		// 캐릭터 삭제
-		//gC_vs_ui.DeleteCharacter(slot);
-
-		//
-		// ((DELETE_CHARACTER *)void_ptr) = sz_part1, sz_part2, slot
-		//
-
-		// 넷마블용
-		if(!g_pUserInformation->IsNetmarble)
-		{
-			DeleteNewArray( pChar->sz_part1 );
-			DeleteNewArray( pChar->sz_part2 );
-		}
-
-		//gC_vs_ui.Invalid_SSN_Message();
-		//gC_vs_ui.DeleteCharacter( pChar->slot );
-
-		//--------------------------------------------
-		// 삭제할려는 slot저장
-		//--------------------------------------------
-		g_pUserInformation->Slot = pChar->slot;
-
-		SetMode( MODE_WAIT_DELETEPCOK );
-	}
-	else
-	{
-		g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_USER_REGISTER_INVALID_SSN].GetString() );
-	}
+	SetMode( MODE_WAIT_DELETEPCOK );
 }
 
 	

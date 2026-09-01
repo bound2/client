@@ -1697,6 +1697,9 @@ InitGameStringTable()
 	(*g_pGameStringTable)[UI_STRING_MESSAGE_GAME_MENU_LOGOUT] = "Log out (L)";
 	(*g_pGameStringTable)[UI_STRING_MESSAGE_GAME_MENU_CONTINUE] = "Continue playing (C)";
 
+	(*g_pGameStringTable)[UI_STRING_MESSAGE_DELETE_INPUT_NAME] = "Enter the character's name to confirm.";
+	(*g_pGameStringTable)[UI_STRING_MESSAGE_DELETE_NAME_MISMATCH] = "The name does not match the character you selected.";
+
 	return;
 }
 

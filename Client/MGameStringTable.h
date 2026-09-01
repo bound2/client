@@ -2043,6 +2043,12 @@ enum GAME_STRINGID
 	UI_STRING_MESSAGE_GAME_MENU_LOGOUT,						// Log out (L)
 	UI_STRING_MESSAGE_GAME_MENU_CONTINUE,					// Continue playing (C)
 
+	// The character-delete dialog confirms by asking for the character's
+	// name instead of the original ID-number check. Added after the shipped
+	// String.inf was generated, so read them through GetGameString().
+	UI_STRING_MESSAGE_DELETE_INPUT_NAME,					// Enter the character's name to confirm.
+	UI_STRING_MESSAGE_DELETE_NAME_MISMATCH,					// The name does not match the character you selected.
+
 	MAX_GAME_STRING,
 };
 
