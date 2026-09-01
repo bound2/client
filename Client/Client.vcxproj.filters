@@ -3849,9 +3849,6 @@
     <ClInclude Include="Profiler.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="RaceType.h">
-      <Filter>Header Files\Utility</Filter>
-    </ClInclude>
     <ClInclude Include="ShowTimeChecker.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>

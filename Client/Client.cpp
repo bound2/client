@@ -25,6 +25,7 @@
 #include "DebugInfo.h"
 #ifndef _DEBUG
 #include "CrashReport.h"
+#include "PacketDispatcher.h"
 #endif
 
 //add by zdj
@@ -1369,11 +1370,11 @@ color
 								GCSystemMessage _GCSystemMessage;
 								_GCSystemMessage.setMessage("GM[Coffee]>123456789012345678901234567890123456789012345678901234567890");
 								_GCSystemMessage.setType(SYSTEM_MESSAGE_PLAYER);
-								_GCSystemMessage.execute(NULL);
+								PacketDispatcher::dispatch(&_GCSystemMessage, NULL);
 								_GCSystemMessage.setMessage("GM[Coffee]>1234567890123456789012345678901234567890123456789012345678901");
-								_GCSystemMessage.execute(NULL);
+								PacketDispatcher::dispatch(&_GCSystemMessage, NULL);
 								_GCSystemMessage.setMessage("GM[Coffee]>12345678901234567890123456789012345678901234567890123456789012");
-								_GCSystemMessage.execute(NULL);
+								PacketDispatcher::dispatch(&_GCSystemMessage, NULL);
 							#endif
 						}
 						return 0L;						

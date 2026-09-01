@@ -115,8 +115,9 @@ an unrecorded drop, so tightening lands in the same commit as the progress.
 |---|--------|---------:|---------|
 | R1 | Translation units compiled directly into the DarkEden target | 992 (1,044 before task 1.1's `packetwire` move; the task-2.2 composition root `PacketHandlerRegistry.cpp` was a recorded +1, offset when finishing the migration deleted `CGHandlersStub.cpp`) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` — `ratchets.sh` reads the generated vcxproj, preferring the ctest run's own build dir; on generators with no vcxproj it reports SKIP, not PASS |
 | R2 | Packet `.cpp` files still defining a packet-style `::execute(Player` | **0** (448 → 432 in slice 1 → 0 when 2.2/2.3 finished; regex refined at 0 to stop matching comments and the in-file handler body in `GCExchangeBuy.cpp`) | `grep -rlE '^void\s+\w+::execute\s*\(\s*Player' Client/Packet/{Gpackets,Cpackets,Lpackets,Rpackets,Upackets} --include='*.cpp' \| grep -v Handler \| wc -l` |
-| R3 | `sprintf`/`strcpy`/`strcat` call sites under `Client/Packet` | 61 (70 at first measurement; task 1.3's snprintf switch shrank it) | `grep -rE '\b(sprintf\|strcpy\|strcat)\s*\(' Client/Packet --include='*.cpp' \| wc -l` |
-| R4 | Library-compiled `.cpp` files referencing `g_p*` client globals | 83 (measured when 0.2 landed) | `ratchets.sh` computes it over the library dirs plus the `VS_UI_CLIENT_SOURCES` and `PACKETWIRE_SOURCES` lists parsed from `CMakeLists.txt` |
+| R3 | Live `sprintf`/`strcpy`/`strcat` lines under `Client/Packet` | 46 (61 at first measurement; the 2026-09-01 adversarial review showed a quarter of that was commented-out code, so the measurement now excludes `//` matches) | see `ratchets.sh` — the grep excludes comment-prefixed matches |
+| R4 | Library-compiled `.cpp` files referencing `g_p*` client globals | 81 (83 at first measurement; the review found the raw directory `find` counted two files CMake excludes from the library builds — `VS_UI/WinMain.cpp`, `hangul/Ci.cpp` — now filtered) | `ratchets.sh` computes it over the library dirs (minus CMake-excluded files) plus the `VS_UI_CLIENT_SOURCES` and `PACKETWIRE_SOURCES` lists parsed from `CMakeLists.txt` |
+| R5 | Direct packet `execute()` call sites outside `Client/Packet` | 1 (a commented-out block in `CGameUpdate.cpp`; added 2026-09-01 after the review found live local-echo callers the receive-loop enumeration had missed) | see `ratchets.sh` |
 
 R1 is the headline number: it counts what still cannot be unit-tested. R2 is
 the client twin of the server's R4 (which it drove to 0). R3 tracks
@@ -403,6 +404,45 @@ the server's status notes. This is what makes the ~509 `Gpackets` parsers
   > preserved verbatim, and `GCExchangeList` as an explicit no-op (its
   > execute was empty on purpose — the exchange UI consumes the parsed
   > packet elsewhere). R2 = 0, held by the ratchet with a refined regex.
+  > **Adversarial review round (2026-09-01, 8 Opus reviewers — 2 per
+  > stack branch, behavior + claims lenses; 3 of 8 NO-SHIP):** the
+  > review earned its keep. Fixed on the branch, most severe first:
+  > 1. **The registry registered all 271 standard handlers twice** (a
+  >    script assembly fault duplicated the block verbatim) — the
+  >    client would have thrown out of startup on the first run.
+  > 2. **The receive loops were never the whole story**: the client
+  >    fabricates packets locally and calls `execute()` on them
+  >    directly — 12 live sites (skill echoes in `CGameUpdate.cpp`, GM
+  >    system messages in `Client.cpp`, and `CGConnectSetKey` on the
+  >    login paths in `UIMessageManager.cpp`). All would have hit the
+  >    new throwing default; login and skill feedback were broken. All
+  >    12 now route through `PacketDispatcher::dispatch`,
+  >    `CGConnectSetKey` is registered as the explicit no-op its
+  >    linked stub always was, and new ratchet **R5** owns the rule.
+  > 3. **`CRRequest2` collided with `CRRequest`** — both claim
+  >    `PACKET_CR_REQUEST`; the orphan duplicate (no factory, no
+  >    callers) is no longer registered and is flagged for 5.2.
+  > 4. The claimed CG-deletion safety rationale was **false as
+  >    stated**: `PacketValidator`'s `CPS_NORMAL` accepts any id and
+  >    `Player::processCommand` has no validator. The honest basis
+  >    (documented in the registry header now): the server never sends
+  >    CG/CL ids and the deleted bodies were no-ops, so the only
+  >    change is that a protocol-violating peer now disconnects — the
+  >    same trade the server repo made. Also: 16 of the 163 deleted
+  >    "CG" files are actually CL packets.
+  > 5. `registerHandler`'s guards were `Assert` (gone under NDEBUG) —
+  >    now unconditional throws; the registry's idempotency flag is
+  >    set after success, not before; the `DE_REGISTER` thunks carry
+  >    `__BEGIN_TRY`/`__END_CATCH` so the per-packet stack-annotation
+  >    frame the deleted `execute()`s had is preserved; the
+  >    composition root's caller is correctly documented as
+  >    `InitSocket()` (per login attempt), not `InitGame()`.
+  > 6. Ratchet hygiene: R2 asserts its directories exist (a rename
+  >    would have fail-opened at baseline 0), R3 stops counting
+  >    commented-out code (61 → 46), R4 stops counting two files CMake
+  >    never compiles (83 → 81), and the dispatcher tests gained the
+  >    coverage the review showed missing (non-null player
+  >    pass-through, out-of-range everywhere, the base-default throw).
   - Owner: R2 ratchet.
 
 - [x] **2.3 Migrate CG / LC / CR-RC / U directions.** CG handlers

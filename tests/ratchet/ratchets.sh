@@ -76,6 +76,17 @@ fi
 #----------------------------------------------------------------------
 R2_BASELINE=0
 
+# A zero baseline is fail-open if the measured tree silently is not
+# there (a directory rename would make grep count 0 of nothing and
+# PASS), so the directories are asserted first.
+for d in Client/Packet/Gpackets Client/Packet/Cpackets Client/Packet/Lpackets \
+	Client/Packet/Rpackets Client/Packet/Upackets; do
+	if [ ! -d "$d" ]; then
+		echo "FAIL R2: directory $d is missing - fix the path list in this script"
+		FAIL=1
+	fi
+done
+
 R2=$(grep -rlE '^void\s+\w+::execute\s*\(\s*Player' \
 	Client/Packet/Gpackets Client/Packet/Cpackets Client/Packet/Lpackets \
 	Client/Packet/Rpackets Client/Packet/Upackets \
@@ -83,13 +94,18 @@ R2=$(grep -rlE '^void\s+\w+::execute\s*\(\s*Player' \
 check "R2 (packet cpps defining execute)" "$R2" "$R2_BASELINE"
 
 #----------------------------------------------------------------------
-# R3 - sprintf/strcpy/strcat call sites under Client/Packet.
-# (snprintf does not match: \b rejects the preceding 'n'.)
+# R3 - live sprintf/strcpy/strcat lines under Client/Packet.
+# (snprintf does not match: \b rejects the preceding 'n'. Lines whose
+# match sits behind a // comment are excluded - a quarter of the first
+# baseline was commented-out code, and deleting a comment must not
+# demand a baseline edit, nor may a comment deletion mask a new live
+# call.)
 #----------------------------------------------------------------------
-R3_BASELINE=61
+R3_BASELINE=46
 
-R3=$(grep -rE '\b(sprintf|strcpy|strcat)\s*\(' Client/Packet --include='*.cpp' | wc -l)
-check "R3 (unsafe format/copy sites in Client/Packet)" "$R3" "$R3_BASELINE"
+R3=$(grep -rE '\b(sprintf|strcpy|strcat)\s*\(' Client/Packet --include='*.cpp' \
+	| grep -vE ':\s*//|//.*\b(sprintf|strcpy|strcat)' | wc -l)
+check "R3 (unsafe format/copy lines in Client/Packet)" "$R3" "$R3_BASELINE"
 
 #----------------------------------------------------------------------
 # R4 - library-compiled .cpp files referencing g_p* client globals.
@@ -99,11 +115,16 @@ check "R3 (unsafe format/copy sites in Client/Packet)" "$R3" "$R3_BASELINE"
 # (VS_UI_CLIENT_SOURCES and PACKETWIRE_SOURCES). Extraction work
 # (Phase 4) shrinks this by cutting the global seams.
 #----------------------------------------------------------------------
-R4_BASELINE=83
+R4_BASELINE=81
 
 lib_members () {
+	# The directory trees minus the files CMake excludes from the
+	# library builds (VS_UI/WinMain.cpp under WIN32; the hangul Ci/FL2
+	# pair under USE_SDL_BACKEND, which is forced ON) - the original
+	# raw find counted two never-compiled g_p-referencing files (WinMain, Ci) as library debt; FL2 is excluded for consistency though it references none.
 	find basic Client/SpriteLib Client/DXLib Client/framelib Client/TextSystem VS_UI \
-		-name '*.cpp' 2>/dev/null
+		-name '*.cpp' 2>/dev/null \
+		| grep -vE 'VS_UI/WinMain\.cpp$|VS_UI/src/hangul/(Ci|FL2)\.cpp$'
 	sed -n '/set(VS_UI_CLIENT_SOURCES/,/^	)/p' CMakeLists.txt \
 		| grep -oE 'Client/[A-Za-z0-9_/]+\.cpp'
 	sed -n '/set(PACKETWIRE_SOURCES/,/^)/p' CMakeLists.txt \
@@ -114,6 +135,26 @@ R4=$(lib_members | sort -u | while read -r f; do
 	[ -f "$f" ] && grep -lE '\bg_p[A-Z]' "$f"
 done | wc -l)
 check "R4 (library cpps referencing g_p globals)" "$R4" "$R4_BASELINE"
+
+#----------------------------------------------------------------------
+# R5 - direct packet execute() call sites outside Client/Packet.
+#
+# The receive loops and PacketDispatcher are the only sanctioned
+# callers; the adversarial review of task 2.2 found the client also
+# fabricates packets locally and executed them directly (skill echoes,
+# GM system messages, the login-path CGConnectSetKey), which the R2
+# migration would have silently broken. Those sites now go through
+# PacketDispatcher::dispatch. The baseline of 1 is the commented-out
+# PacketAttackMelee block in CGameUpdate.cpp (~line 5867), which lives
+# inside a /* */ block this line-based grep cannot see; it leaves with
+# that dead block's deletion.
+#----------------------------------------------------------------------
+R5_BASELINE=1
+
+R5=$(grep -rnE '(\.|->)execute\s*\(\s*(g_pSocket|NULL|this|0)\s*\)' \
+	Client VS_UI --include='*.cpp' 2>/dev/null \
+	| grep -v 'Client/Packet/' | grep -vE ':\s*//' | wc -l)
+check "R5 (direct packet execute callers outside Client/Packet)" "$R5" "$R5_BASELINE"
 
 #----------------------------------------------------------------------
 

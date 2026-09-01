@@ -5,15 +5,20 @@
 #include "Client_PCH.h"
 #include "PacketDispatcher.h"
 
-#include "PacketAssert.h"
-
 PacketDispatcher::HandlerFn PacketDispatcher::s_Handlers[Packet::PACKET_MAX] = {0};
 
 void PacketDispatcher::registerHandler(PacketID_t packetID, HandlerFn fn)
 {
-	Assert(packetID < Packet::PACKET_MAX);
-	Assert(fn != 0);
-	Assert(s_Handlers[packetID] == 0);
+	// Real checks, not Assert: Assert compiles away under NDEBUG, and an
+	// out-of-range table write or a silently overwritten handler must
+	// not survive into a Release build. Registration runs only at
+	// startup, so throwing here fails fast at the composition root.
+	if (packetID >= Packet::PACKET_MAX)
+		throw Error("PacketDispatcher::registerHandler: packet id out of range");
+	if (fn == 0)
+		throw Error("PacketDispatcher::registerHandler: null handler");
+	if (s_Handlers[packetID] != 0)
+		throw Error("PacketDispatcher::registerHandler: id already registered");
 	s_Handlers[packetID] = fn;
 }
 

@@ -48,13 +48,18 @@ private:
 
 // Registration helpers for the composition root: bind packet class Cls
 // to Cls##Handler::execute, preserving the exact call the packet's own
-// execute() used to make. The _NOPLAYER form is for handlers that take
-// only the packet.
+// execute() used to make - including the __BEGIN_TRY/__END_CATCH frame
+// every deleted execute() carried, so a Throwable rethrown out of a
+// handler still picks up one stack-annotation entry per packet in
+// builds where that macro pair is live. The _NOPLAYER form is for
+// handlers that take only the packet.
 #define DE_REGISTER_PACKET_HANDLER(Cls)                                       \
 	{                                                                         \
 		struct Thunk {                                                        \
 			static void call(Packet* pPacket, Player* pPlayer) {              \
+				__BEGIN_TRY                                                   \
 				Cls##Handler::execute(static_cast<Cls*>(pPacket), pPlayer);   \
+				__END_CATCH                                                   \
 			}                                                                 \
 		};                                                                    \
 		PacketDispatcher::registerHandler(Cls().getPacketID(), &Thunk::call); \
@@ -64,7 +69,9 @@ private:
 	{                                                                         \
 		struct Thunk {                                                        \
 			static void call(Packet* pPacket, Player*) {                      \
+				__BEGIN_TRY                                                   \
 				Cls##Handler::execute(static_cast<Cls*>(pPacket));            \
+				__END_CATCH                                                   \
 			}                                                                 \
 		};                                                                    \
 		PacketDispatcher::registerHandler(Cls().getPacketID(), &Thunk::call); \
