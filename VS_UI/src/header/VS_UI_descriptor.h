@@ -64,17 +64,30 @@ private:
 
 	FP_SHOW_PARAM				m_fp_show_param;
 
+	//
+	// m_p_void_ptr2
+	//
+	// Secondary payload pointer belonging to the descriptor that Set() is
+	// currently dispatching, and afterwards to the one Show() is drawing.
+	// It exists because FP_SHOW_PARAM::left/right are long, which is 32 bits
+	// on 64-bit Windows and therefore truncates a pointer. Read it back with
+	// GetSecondaryPtr() from a calculator or show function.
+	//
+	void *						m_p_void_ptr2;
+
 public:
 	DescriptorManager();
 	~DescriptorManager();
 
-	void	Set(id_t id, int x, int y, void * void_ptr, long left=0, long right=0);
+	void	Set(id_t id, int x, int y, void * void_ptr, long left=0, long right=0, void * void_ptr2=NULL);
 	//void	Unset();
 
 
 	void	Unset(void* pPtr=NULL);	// by sigi
 
 	void	Show();
+
+	void *	GetSecondaryPtr() const;
 
 	void	AddDescribedUnit(id_t id, void (*fp_rect_calculator)(void (*fp_show)(Rect, void *, long, long), int, int, void *, long, long), void (*fp_show)(Rect, void *, long, long), bool bl_immediate=true);
 	void	RectCalculationFinished(void (*fp_show)(Rect, void *, long, long), Rect rect, void * void_ptr, long left, long right);

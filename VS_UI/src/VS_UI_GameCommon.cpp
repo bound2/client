@@ -2884,7 +2884,9 @@ bool C_VS_UI_GEAR::MouseControl(UINT message, int _x, int _y)
 						else
 						{
 							const MItem* pAddedItem = gC_vs_ui.GetGearCoreZapItem(m_focus_slot);
-							g_descriptor_manager.Set(DID_ITEM, x+m_p_slot_rect[m_focus_slot].x, y+m_p_slot_rect[m_focus_slot].y, (void *)p_selected_item, 0, (int)(intptr_t)pAddedItem);
+							// pAddedItem travels in void_ptr2, not in right: right is long,
+							// which is 32 bits on 64-bit Windows and would truncate it.
+							g_descriptor_manager.Set(DID_ITEM, x+m_p_slot_rect[m_focus_slot].x, y+m_p_slot_rect[m_focus_slot].y, (void *)p_selected_item, 0, 0, (void *)pAddedItem);
 						}
 					}
 					//						m_focus_slot = NOT_SELECTED;
