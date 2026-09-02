@@ -398,3 +398,27 @@ TEST(GameStringTable, LanguageFileSelectsEnglishUnlessItSaysOtherwise)
 	CHECK(UseEnglishTextFrom(kTempFile));
 	RemoveScratch();
 }
+
+//----------------------------------------------------------------------
+// An option row the file never fills is read like any other: the none
+// row (option 0) is what an unoptioned item reports its colour from.
+// Every field must start defined; under /RTC1 an unset one reads 0xCC.
+//----------------------------------------------------------------------
+TEST(ItemOptionInfo, ConstructsWithEveryFieldZero)
+{
+	ITEMOPTION_INFO info;
+
+	CHECK_EQ(0, info.Part);
+	CHECK_EQ(0, info.PlusPoint);
+	CHECK_EQ(0, info.PriceMultiplier);
+	CHECK_EQ(0, info.RequireSTR);
+	CHECK_EQ(0, info.RequireDEX);
+	CHECK_EQ(0, info.RequireINT);
+	CHECK_EQ(0, info.RequireSUM);
+	CHECK_EQ(0, info.RequireLevel);
+	CHECK_EQ(0, info.ColorSet);
+	CHECK_EQ(0, info.UpgradeOptionType);
+	CHECK_EQ(0, info.PreviousOptionType);
+	CHECK(info.Name.GetString() == NULL);
+	CHECK(info.EName.GetString() == NULL);
+}

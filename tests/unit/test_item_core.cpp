@@ -49,7 +49,6 @@ struct ItemWorld
 		// Option 0 is the "no option" row; 1 and 2 carry requirements.
 		g_pItemOptionTable = new ITEMOPTION_TABLE;
 		g_pItemOptionTable->Init(3);
-		g_pItemOptionTable->Get(0).ColorSet = 0;
 		g_pItemOptionTable->Get(1).RequireSUM = 10;
 		g_pItemOptionTable->Get(1).ColorSet = 501;
 		g_pItemOptionTable->Get(2).RequireSUM = 25;

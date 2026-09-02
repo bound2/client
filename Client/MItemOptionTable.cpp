@@ -71,7 +71,20 @@ ITEMOPTION_TABLE*		g_pItemOptionTable = NULL;
 //
 //--------------------------------------------------------------------------
 ITEMOPTION_INFO::ITEMOPTION_INFO()
+: Part(0)
+, PlusPoint(0)
+, PriceMultiplier(0)
+, RequireSTR(0)
+, RequireDEX(0)
+, RequireINT(0)
+, RequireSUM(0)
+, RequireLevel(0)
+, ColorSet(0)
+, UpgradeOptionType(0)
+, PreviousOptionType(0)
 {
+	// A row the file never fills (the none row an unoptioned item reads
+	// its colour from) must not report stack or heap fill.
 }
 
 ITEMOPTION_INFO::~ITEMOPTION_INFO()
