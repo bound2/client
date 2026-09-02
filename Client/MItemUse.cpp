@@ -4,9 +4,12 @@
 // Split from MItem.cpp (docs/RESTRUCTURING.md task 4.4): the factory
 // table MItem::NewItem dispatches through and every item class with a
 // UseInventory/UseQuickItem/UseGear body, or a container base, because
-// those reach packets, the player, the zone and the dialogs. A class
-// moves here whole - a class split across a library and the executable
-// would leave its vtable referencing symbols a test binary cannot link.
+// those reach packets, the player, the zone and the dialogs. Such a
+// class moves here whole: if the library constructed it, its vtable
+// there would reference symbols a test binary cannot link. (MBomb and
+// MHolyWater keep GetMaxNumber in the core with NewItem here, and
+// MItem::NewItem is here - safe because the core constructs none of
+// them.)
 // MItem.cpp keeps the model half in gamemodel. Bodies are moved
 // verbatim; the __GAME_CLIENT__ guards inside them are the originals.
 //----------------------------------------------------------------------

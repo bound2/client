@@ -83,8 +83,10 @@ ITEMOPTION_INFO::ITEMOPTION_INFO()
 , UpgradeOptionType(0)
 , PreviousOptionType(0)
 {
-	// A row the file never fills (the none row an unoptioned item reads
-	// its colour from) must not report stack or heap fill.
+	// The loader fills every row it sizes; a table sized but never
+	// loaded (a test's), or a load that returned early, must still hand
+	// out defined rows - the none row an unoptioned item reads its
+	// colour from above all.
 }
 
 ITEMOPTION_INFO::~ITEMOPTION_INFO()

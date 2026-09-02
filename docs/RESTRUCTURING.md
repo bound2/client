@@ -116,7 +116,7 @@ an unrecorded drop, so tightening lands in the same commit as the progress.
 | R1 | Translation units compiled directly into the DarkEden target | **512** (515 before 4.4's second slice moved `MItem.cpp`, `MObject.cpp`, `UserInformation.cpp`, `ClientConfig.cpp` and `MTimeItemManager.cpp` into `gamemodel` and split their executable halves out as `MItemUse.cpp` and `MObjectScreen.cpp`, +2 −5; 516 before 5.2 deleted the dead `MitemTableInit.cpp`; 517 before 4.4's first slice moved `MItemTable.cpp`; 518 before 4.2 moved `MMoneyManager.cpp`, another double-compiled VS_UI entry; 528 before task 4.1's `gamemodel` took its ten members out — the four support sources, and the six tables that the relative `VS_UI_CLIENT_SOURCES` list had never actually removed from the exe glob, so they compiled into both VS_UI and the executable — as the 36 files still on that list do; 529 before task 2.5 deleted the dead `CRRequest2Handler.cpp`; 992 before task 2.4 moved the 465 packet/table/info sources into `packetwire`, +1 for the split-out `GCExchangeBuyHandler.cpp`; 1,044 before task 1.1; the task-2.2 composition root `PacketHandlerRegistry.cpp` was a recorded +1, offset when finishing the migration deleted `CGHandlersStub.cpp`) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` — `ratchets.sh` reads the generated vcxproj, preferring the ctest run's own build dir; on generators with no vcxproj it reports SKIP, not PASS |
 | R2 | Packet `.cpp` files still defining a packet-style `::execute(Player` | **0** (448 → 432 in slice 1 → 0 when 2.2/2.3 finished; regex refined at 0 to stop matching comments and the in-file handler body in `GCExchangeBuy.cpp`) | `grep -rlE '^void\s+\w+::execute\s*\(\s*Player' Client/Packet/{Gpackets,Cpackets,Lpackets,Rpackets,Upackets} --include='*.cpp' \| grep -v Handler \| wc -l` |
 | R3 | Live `sprintf`/`strcpy`/`strcat` lines under `Client/Packet` **and `Client/PacketHandler`** | 46 (unchanged by task 2.4, which widened the scope to follow the handlers out of `Client/Packet`; 61 at first measurement — the 2026-09-01 adversarial review showed a quarter of that was commented-out code, so the measurement now excludes `//` matches) | see `ratchets.sh` — the grep excludes comment-prefixed matches |
-| R4 | Library-compiled `.cpp` files referencing `g_p*` client globals **no library file defines** | **28** (35 before 4.4's second slice — a reclassification again: the subtraction became library-wide, so a library file reading a global another library file defines is no longer a seam — the item core reading `gamemodel`'s own tables, `Datagram.cpp` reading `packetwire`'s factory manager, and five `VS_UI` sources whose only reaches are `gamemodel`'s tables, `packetwire`'s `g_pFileDef` or `VS_UI`'s own globals; 59 before task 4.0 — a reclassification, not seam-cutting: the 36 `VS_UI_CLIENT_SOURCES` files stopped being library-compiled, so the 24 of them that reach globals are executable debt now, counted by R1 and outside this ratchet; 61 before task 4.1 cut the two `g_pFileDef` seams in `MGameStringTable` and `SystemAvailabilities` and added the `gamemodel` membership file, whose four new members reference no game global; 81 before task 2.4 grew the membership from 52 to 518 files; the number fell because the measurement stopped counting a file's references to globals it defines — the packet tables own `g_pPacketFactoryManager`/`g_pPacketValidator` — and the two dead server-only bodies that reached game globals were deleted; 83 at first measurement, before two never-compiled files were filtered) | `ratchets.sh` computes it over the library dirs (minus CMake-excluded files) plus the `packetwire` and `gamemodel` membership files |
+| R4 | Library-compiled `.cpp` files referencing `g_p*` client globals **no library file defines** | **28** (35 before 4.4's second slice — a reclassification again, 35 + 1 − 8: the subtraction became library-wide, so a library file reading a global another library file defines is no longer a seam; `MItem.cpp` joined reading `gamemodel`'s own tables, +1 under the old per-file rule, and the union rule excludes it with seven earlier members — `Datagram.cpp` reading `packetwire`'s factory manager, and six `VS_UI` sources whose only reaches are `gamemodel`'s tables, `packetwire`'s `g_pFileDef` or `VS_UI`'s own globals; 59 before task 4.0 — a reclassification, not seam-cutting: the 36 `VS_UI_CLIENT_SOURCES` files stopped being library-compiled, so the 24 of them that reach globals are executable debt now, counted by R1 and outside this ratchet; 61 before task 4.1 cut the two `g_pFileDef` seams in `MGameStringTable` and `SystemAvailabilities` and added the `gamemodel` membership file, whose four new members reference no game global; 81 before task 2.4 grew the membership from 52 to 518 files; the number fell because the measurement stopped counting a file's references to globals it defines — the packet tables own `g_pPacketFactoryManager`/`g_pPacketValidator` — and the two dead server-only bodies that reached game globals were deleted; 83 at first measurement, before two never-compiled files were filtered) | `ratchets.sh` computes it over the library dirs (minus CMake-excluded files) plus the `packetwire` and `gamemodel` membership files |
 | R5 | Direct packet `execute()` call sites outside `Client/Packet` (handlers under `Client/PacketHandler` are in scope) | 1 (a commented-out block in `CGameUpdate.cpp`; added 2026-09-01 after the review found live local-echo callers the receive-loop enumeration had missed; task 2.4 found two more inside handlers — `GCReconnectLoginHandler`/`LCReconnectHandler` fabricating a `CGConnectSetKey` — invisible while handlers lived under the excluded `Client/Packet`, caught by the compiler once `Packet::execute` was deleted, and routed through the dispatcher; a live caller is now a compile error before it is a ratchet failure) | see `ratchets.sh` |
 
 R1 is the headline number: it counts what still cannot be unit-tested. R2 is
@@ -972,8 +972,9 @@ starting each — the scan is one grep, and the ranking below is from a
   > the factory table, because a class split across a library and the
   > executable leaves its vtable referencing symbols a test binary cannot
   > link; `MItem` and the gear/armour/weapon families stay in `MItem.cpp`
-  > and join `gamemodel` (37 classes executable-side, 12 in the library;
-  > chunks moved byte for byte, the pile sizes to `MItemLimits.h`).
+  > and join `gamemodel` (twelve classes have out-of-line members in the
+  > library; chunks moved byte for byte, the pile sizes to
+  > `MItemLimits.h`, the commented-out twin of that block dropped).
   > `MItem`'s two reaches into the executable go through a host it is
   > handed at start-up (`MItemHost`: the animation clock behind the
   > colour cycles, the top view's item-drop frame pack, the player's pet
@@ -1004,6 +1005,29 @@ starting each — the scan is one grep, and the ranking below is from a
   > executable-side of the item family: the use handlers (by design -
   > they are the packet/dialog side of items), `MItemFinder`,
   > `MItemManager.cpp`, the two container managers' `.cpp` files.
+  > **Adversarial review round (2026-09-02, 2 reviewers; one NO-SHIP,
+  > one SHIP), fixed on the branch:** the hook was committed 100644 (a
+  > POSIX clone skips a non-executable hook) and its match took any
+  > word starting with the phrase — now 100755 and anchored; the R4
+  > note said 35 − 7 with five `VS_UI` files where the truth is 35 + 1 −
+  > 8 with six (`MItem.cpp` joined counting under the old rule and left
+  > under the new); the file headers claimed no class is split across
+  > the halves, but `MBomb` and `MHolyWater` have `GetMaxNumber` in the
+  > core and `NewItem` in the executable, and `MItem::NewItem` is
+  > executable-side — harmless because the core constructs none of
+  > them (no vtable emitted there), and the headers now say that;
+  > the option-row constructor's comment named a wrong exposure (the
+  > loader fills every row it sizes — the real ones are a table sized
+  > but never loaded, as a test does, and a load that returns early);
+  > and the quest-flag fix's message credits `InitGameObject` with
+  > creating the timed-item register when `InitInfomation` does, earlier
+  > — and recreates it after a `SAFE_DELETE`, a window in which the old
+  > code ignored the flag. Confirmed by the round: every moved chunk
+  > byte-identical (196 of 201 bodies; the five that differ are the
+  > two host rewrites and the three colour-set clock reads), no
+  > pre-init item construction, drop or colour read (every `NewItem`
+  > caller is in-game), the widened requirement getters safe at all 64
+  > call sites, each fix's test failing before its fix.
   - Owner (all of 4.x): `gamemodel`'s membership file
     (`tests/arch/gamemodel_files.txt`), the M0–M2 include rules in
     `check_includes.pl` (in force since 4.1), R4 shrinking.

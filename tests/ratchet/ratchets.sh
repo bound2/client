@@ -170,13 +170,16 @@ check "R3 (unsafe format/copy lines in Client/Packet + Client/PacketHandler)" "$
 # targets and the include checker read the same files). Extraction work
 # (Phase 4) shrinks this by cutting the global seams.
 #
-# 28: 35 - 7, again a reclassification, by the library-wide definition
-# rule below (task 4.4's second slice): MItem.cpp itself, Datagram.cpp
-# (g_pPacketFactoryManager, packetwire's own) and five VS_UI sources
-# whose only reaches are gamemodel's tables (g_pItemTable,
-# g_pItemOptionTable, g_pGameStringTable, g_pUserInformation) and
-# packetwire's g_pFileDef, or their own library's g_pKeyAccelerator and
-# g_pSystemAvailableManager.
+# 28: 35 + 1 - 8, again a reclassification, by the library-wide
+# definition rule below (task 4.4's second slice). MItem.cpp joined the
+# library reading gamemodel's own tables (+1 under the old per-file
+# rule); the union rule then excludes it and seven earlier members:
+# Datagram.cpp (g_pPacketFactoryManager, packetwire's own) and six
+# VS_UI sources (AcceleratorDef, VS_UI_ELEVATOR, VS_UI_Item,
+# VS_UI_Message, VS_UI_Shop, VS_UI_progress) whose only reaches are
+# gamemodel's tables (g_pItemTable, g_pItemOptionTable,
+# g_pGameStringTable, g_pUserInformation), packetwire's g_pFileDef, or
+# their own library's g_pKeyAccelerator and g_pSystemAvailableManager.
 # 35: 59 - 24, a RECLASSIFICATION, not progress on the seams: the 36
 # Client/*.cpp files VS_UI_CLIENT_SOURCES listed were compiled into
 # both VS_UI.lib and the executable, and the executable's objects were
