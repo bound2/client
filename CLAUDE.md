@@ -43,8 +43,9 @@ regenerate locally, never commit it. `/MP` is set once for all targets in
 ### Reading build output
 
 A clean build is **~27,000 warnings and 0 errors**. The noise is pre-existing: C4290
-across `Client/Packet/**`, and LNK4217/LNK4286 because some sources compile into both
-`DarkEden` and `VS_UI.lib`. Judge a build by `error C####`, `error LNK`, `error MSB`
+across `Client/Packet/**` (LNK4217/LNK4286 used to join it while 36 `Client/*.cpp`
+files compiled into both `DarkEden` and `VS_UI.lib`; `docs/RESTRUCTURING.md` task 4.0
+ended that). Judge a build by `error C####`, `error LNK`, `error MSB`
 or `fatal error` — never by grepping `"error"`, which matches ~2,700 identifiers such
 as `GCMoveErrorHandler`. Redirect builds to a log file; piping through `tail` buffers
 the output and hides all progress.

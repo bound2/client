@@ -517,73 +517,12 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/WinMain\\.cpp")
 	endif()
 
-	# Client files that VS_UI depends on (按需编译)
-	set(VS_UI_CLIENT_SOURCES
-		# Core
-		Client/Client.cpp
-		Client/ClientFunction.cpp
-
-		# Item System
-		Client/MItem.cpp
-		Client/MItemManager.cpp
-
-		# Skill System
-		Client/MSkillManager.cpp
-		Client/SkillDef.cpp
-
-		# Gear System
-		Client/MSlayerGear.cpp
-		Client/MVampireGear.cpp
-		Client/MOustersGear.cpp
-		Client/MQuickSlot.cpp
-
-		# Inventory System
-		Client/MInventory.cpp
-		Client/MStorage.cpp
-		Client/MShopShelf.cpp
-
-		# Zone System
-		Client/MZone.cpp
-		Client/MZoneTable.cpp
-
-		# Player System
-		Client/MPlayer.cpp
-		Client/MCreatureTable.cpp
-		Client/MFakeCreature.cpp
-		Client/MNPCTable.cpp
-
-		# Social System
-		Client/MParty.cpp
-		Client/MGuildMarkManager.cpp
-		Client/MGuildInfoMapper.cpp
-
-		# Trade System
-		Client/MTradeManager.cpp
-		Client/MPriceManager.cpp
-		Client/MShop.cpp
-
-		# Game Data (the pure tables moved to gamemodel - task 4.1)
-		Client/UserInformation.cpp
-		Client/DebugInfo.cpp
-		Client/ClientConfig.cpp
-		Client/UtilityFunction.cpp
-		# GameFunctions.cpp - Moved to CLIENT_MAIN_SOURCES to avoid duplicates with GameMain.cpp
-		# GamePacketFunctions.cpp - Removed, all functions now in PacketFunction.cpp
-		Client/RenderingFunctions.cpp
-		Client/UIUtilityFunctions.cpp
-
-		# Events & Time
-		Client/MEventManager.cpp
-		Client/MGameTime.cpp
-		Client/MTimeItemManager.cpp
-
-		# UI Support
-		Client/MHelpMessageManager.cpp
-		Client/MMonsterKillQuestInfo.cpp
-	)
-
-	# Combine all sources
-	set(VS_UI_ALL_SOURCES ${VS_UI_SRC_SOURCES} ${VS_UI_CLIENT_SOURCES})
+	# VS_UI builds from its own sources only. It used to add a list of
+	# Client/*.cpp files (VS_UI_CLIENT_SOURCES) that the executable's glob
+	# compiled as well, and the executable's objects were the ones that
+	# linked; the list is gone and those files compile once, into the
+	# executable (docs/RESTRUCTURING.md task 4.0).
+	set(VS_UI_ALL_SOURCES ${VS_UI_SRC_SOURCES})
 
 	# Create VS_UI static library
 	add_library(VS_UI STATIC ${VS_UI_ALL_SOURCES})
@@ -672,7 +611,8 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# This excludes test/debug code wrapped in #ifndef _LIB from library builds
 	target_compile_definitions(VS_UI PRIVATE _LIB)
 
-	message(STATUS "VS_UI library will be built from ${VS_UI_SRC_SOURCES} VS_UI files + ${VS_UI_CLIENT_SOURCES} Client files")
+	list(LENGTH VS_UI_SRC_SOURCES _vsui_count)
+	message(STATUS "VS_UI library: ${_vsui_count} sources from VS_UI/")
 endif()
 
 # ============================================================
@@ -908,9 +848,8 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		Client/Globals.cpp
 	)
 
-	# Remove files that are already compiled in VS_UI library
+	# Remove files the executable must not compile
 	list(REMOVE_ITEM CLIENT_MAIN_SOURCES
-		${VS_UI_CLIENT_SOURCES}
 		# Explicitly remove files that duplicate globals in Client.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/GlobalVariables.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/GCNotifyWinHandler.cpp
@@ -947,20 +886,12 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	endforeach()
 
 	# The same for gamemodel (tests/arch/gamemodel_files.txt): its members
-	# come from the Client/ glob above or used to sit in VS_UI_CLIENT_SOURCES.
+	# come from the Client/ glob above.
 	list(REMOVE_ITEM CLIENT_MAIN_SOURCES ${GAMEMODEL_SOURCES})
 	foreach(_src IN LISTS GAMEMODEL_SOURCES)
 		list(FIND CLIENT_MAIN_SOURCES ${_src} _still_in_exe)
 		if(NOT _still_in_exe EQUAL -1)
 			message(FATAL_ERROR "gamemodel member is still in the executable's source list (case mismatch in tests/arch/gamemodel_files.txt?): ${_src}")
-		endif()
-		# VS_UI_CLIENT_SOURCES holds repository-relative paths; compare in
-		# that form, or this FIND is the same absolute-vs-relative miss the
-		# REMOVE_ITEM above suffers from.
-		string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" _rel "${_src}")
-		list(FIND VS_UI_CLIENT_SOURCES ${_rel} _still_in_vsui)
-		if(NOT _still_in_vsui EQUAL -1)
-			message(FATAL_ERROR "gamemodel member is still in VS_UI_CLIENT_SOURCES: ${_rel}")
 		endif()
 	endforeach()
 

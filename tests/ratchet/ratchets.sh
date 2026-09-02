@@ -155,13 +155,18 @@ check "R3 (unsafe format/copy lines in Client/Packet + Client/PacketHandler)" "$
 # R4 - library-compiled .cpp files referencing g_p* client globals.
 #
 # Membership: every .cpp under the whole-directory library trees, plus
-# the VS_UI_CLIENT_SOURCES list in the top-level CMakeLists.txt, plus
 # the packetwire and gamemodel membership files (tests/arch/
 # packetwire_files.txt, tests/arch/gamemodel_files.txt - the CMake
 # targets and the include checker read the same files). Extraction work
 # (Phase 4) shrinks this by cutting the global seams.
 #
-# 59: 61 - 2. Task 4.1 cut the two g_pFileDef seams in MGameStringTable
+# 35: 59 - 24, a RECLASSIFICATION, not progress on the seams: the 36
+# Client/*.cpp files VS_UI_CLIENT_SOURCES listed were compiled into
+# both VS_UI.lib and the executable, and the executable's objects were
+# the ones that linked; the list is gone and they compile once, into
+# the executable, so the 24 of them that reach g_p globals are
+# executable debt now, outside this ratchet (R1 already counts them).
+# History: 59 = 61 - 2. Task 4.1 cut the two g_pFileDef seams in MGameStringTable
 # (UseEnglishText takes the Properties table) and SystemAvailabilities
 # (LoadFromStream; the executable reads the archive); the four support
 # sources gamemodel added (ExpInfo, MString, MStringArray, DebugLog)
@@ -175,7 +180,7 @@ check "R3 (unsafe format/copy lines in Client/Packet + Client/PacketHandler)" "$
 # GCStashList::setStashItem from a live Item*) were deleted rather than
 # grandfathered.
 #----------------------------------------------------------------------
-R4_BASELINE=59
+R4_BASELINE=35
 
 lib_members () {
 	# The directory trees minus the files CMake excludes from the
@@ -185,8 +190,6 @@ lib_members () {
 	find basic Client/SpriteLib Client/DXLib Client/framelib Client/TextSystem VS_UI \
 		-name '*.cpp' 2>/dev/null \
 		| grep -vE 'VS_UI/WinMain\.cpp$|VS_UI/src/hangul/(Ci|FL2)\.cpp$'
-	sed -n '/set(VS_UI_CLIENT_SOURCES/,/^	)/p' CMakeLists.txt \
-		| grep -oE 'Client/[A-Za-z0-9_/]+\.cpp'
 	sed -e 's/#.*//' tests/arch/packetwire_files.txt \
 		| grep -oE 'Client/Packet/[A-Za-z0-9_/]+\.cpp'
 	sed -e 's/#.*//' tests/arch/gamemodel_files.txt \
