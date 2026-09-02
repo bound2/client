@@ -33,6 +33,7 @@
 #include "SocketImpl.h"
 #include "ModifyInfo.h"
 #include "InventoryInfo.h"
+#include "Gpackets/GCUpdateInfo.h"
 #include "Exception.h"
 
 #include <string>
@@ -254,6 +255,50 @@ TEST(ModifyInfo, OversizedShortCountHitsTheUnderflowGuard)
 		bThrew = true;
 	}
 	CHECK(bThrew);
+}
+
+//----------------------------------------------------------------------
+// GCUpdateInfo lifetime - the packet a truncated login reply leaves
+// behind.
+//
+// GCUpdateInfo::read allocates its sub-objects as it parses, and the
+// client-side destructor deletes every one of them. The receive loop
+// deletes a packet whose read threw, so every pointer the destructor
+// frees must be null from construction, not only after a complete
+// read. m_pBloodBibleSign was the one that was not (found when task
+// 2.5's wire-layout test first constructed and destroyed every packet):
+// a body cut short before the blood-bible section freed whatever the
+// heap held.
+//----------------------------------------------------------------------
+
+TEST(GCUpdateInfo, FreshPacketHoldsNoSubObjects)
+{
+	GCUpdateInfo packet;
+	CHECK(packet.getPCInfo() == NULL);
+	CHECK(packet.getInventoryInfo() == NULL);
+	CHECK(packet.getGearInfo() == NULL);
+	CHECK(packet.getExtraInfo() == NULL);
+	CHECK(packet.getEffectInfo() == NULL);
+	CHECK(packet.getRideMotorcycleInfo() == NULL);
+	CHECK(packet.getNicknameInfo() == NULL);
+	CHECK(packet.getBloodBibleSignInfo() == NULL);
+}
+
+TEST(GCUpdateInfo, PacketWhoseReadThrewIsSafeToDestroy)
+{
+	StreamFixture f;
+
+	// An empty body: the very first byte (the PC type) underflows, so
+	// nothing past the constructor has run when the packet is deleted.
+	GCUpdateInfo* pPacket = new GCUpdateInfo();
+	bool bThrew = false;
+	try {
+		pPacket->read(f.m_Stream);
+	} catch (InsufficientDataException&) {
+		bThrew = true;
+	}
+	CHECK(bThrew);
+	delete pPacket;	// the receive loop's path; ASan aborts on a bad free
 }
 
 //----------------------------------------------------------------------

@@ -23,8 +23,13 @@
 //--------------------------------------------------------------------------------
 GCUpdateInfo::GCUpdateInfo ()
 	throw ()
-: m_pPCInfo(NULL), m_pInventoryInfo(NULL), m_pGearInfo(NULL), m_pExtraInfo(NULL), m_pEffectInfo(NULL), m_hasMotorcycle(false), m_pRideMotorcycleInfo(NULL), m_fPremium(0), m_pNicknameInfo(NULL), m_NonPK(0)
+: m_pPCInfo(NULL), m_pInventoryInfo(NULL), m_pGearInfo(NULL), m_pExtraInfo(NULL), m_pEffectInfo(NULL), m_hasMotorcycle(false), m_pRideMotorcycleInfo(NULL), m_fPremium(0), m_pNicknameInfo(NULL), m_NonPK(0), m_pBloodBibleSign(NULL)
 {
+	// m_pBloodBibleSign is only assigned by read(); the client-side
+	// destructor deletes it, so a packet destroyed before a complete
+	// read (a truncated body, a mid-parse exception) must not free
+	// whatever the heap held here. The server's copy never deletes it
+	// and never needed this.
 }
 
 //--------------------------------------------------------------------------------
