@@ -80,6 +80,7 @@
 #include "Gpackets/GCDropItemToZone.h"
 #include "Gpackets/GCGuildChat.h"
 #include "Gpackets/GCMoveError.h"
+#include "Gpackets/GCAddItemToItemVerify.h"
 #include "Gpackets/GCMoveOK.h"
 #include "Gpackets/GCSay.h"
 #include "Gpackets/GCSystemMessage.h"
@@ -779,6 +780,101 @@ TEST(CLLogin, NetmarbleLayoutMatchesGolden)
 	const std::vector<unsigned char> body = WriteBody(packet, 0);
 	CHECK_EQ(packet.getPacketSize(), body.size());
 	ExpectGolden("CLLogin.netmarble", 0, body);
+}
+
+//----------------------------------------------------------------------
+// GCAddItemToItemVerify: a code byte, then 0, 1 or 2 uint parameters
+// depending on the code. The server (the writing side, so the
+// authority) sends ONE parameter - the new grade - for UP_GRADE_OK and
+// two for THREE_ENCHANT_OK; this repo's read() and getPacketSize() took
+// two for both until task 2.5's triage, so a successful item upgrade
+// over-read into the next packet. The bytes below are what the server's
+// write() puts on the wire for each shape; write() here agreed all
+// along, only read()/getPacketSize() had drifted.
+//----------------------------------------------------------------------
+namespace {
+
+std::vector<unsigned char>	VerifyBody(BYTE code, const uint* params, size_t count)
+{
+	std::vector<unsigned char> body;
+	body.push_back(code);
+	for (size_t i = 0; i < count; i++)
+		Append(body, &params[i], sizeof(uint));
+	return body;
+}
+
+// Parse `body` and require read() to consume exactly it, then hand the
+// packet back for field checks.
+void	ReadExactly(GCAddItemToItemVerify& dst, const std::vector<unsigned char>& body)
+{
+	InFixture f;
+	SocketInputStreamTestAccess::Preload(f.m_Stream, &body[0], (unsigned int)body.size());
+	dst.read(f.m_Stream);
+	CHECK(f.m_Stream.isEmpty());
+	CHECK_EQ(body.size(), dst.getPacketSize());
+}
+
+} // namespace
+
+TEST(GCAddItemToItemVerify, UpgradeOKCarriesTheOneParameterTheServerSends)
+{
+	const uint grade = 7;
+	const std::vector<unsigned char> body = VerifyBody(ADD_ITEM_TO_ITEM_VERIFY_UP_GRADE_OK, &grade, 1);
+
+	GCAddItemToItemVerify dst;
+	ReadExactly(dst, body);
+	CHECK_EQ(ADD_ITEM_TO_ITEM_VERIFY_UP_GRADE_OK, dst.getCode());
+	CHECK_EQ(grade, dst.getParameter());
+	CHECK_EQ(0, dst.getParameter2());	// never on the wire for this code
+
+	GCAddItemToItemVerify src;
+	src.setCode(ADD_ITEM_TO_ITEM_VERIFY_UP_GRADE_OK);
+	src.setParameter(grade);
+	CHECK(EncrypterFree(src));
+	CHECK(WriteBody(src, 0) == body);
+	ExpectGolden("GCAddItemToItemVerify.upgrade", 0, body);
+}
+
+TEST(GCAddItemToItemVerify, ThreeEnchantOKCarriesTwoParameters)
+{
+	const uint params[2] = { 0x11223344, 0x55667788 };
+	const std::vector<unsigned char> body = VerifyBody(ADD_ITEM_TO_ITEM_VERIFY_THREE_ENCHANT_OK, params, 2);
+
+	GCAddItemToItemVerify dst;
+	ReadExactly(dst, body);
+	CHECK_EQ(ADD_ITEM_TO_ITEM_VERIFY_THREE_ENCHANT_OK, dst.getCode());
+	CHECK_EQ(params[0], dst.getParameter());
+	CHECK_EQ(params[1], dst.getParameter2());
+
+	GCAddItemToItemVerify src;
+	src.setCode(ADD_ITEM_TO_ITEM_VERIFY_THREE_ENCHANT_OK);
+	src.setParameter(params[0]);
+	src.setParameter2(params[1]);
+	CHECK(WriteBody(src, 0) == body);
+	ExpectGolden("GCAddItemToItemVerify.threeenchant", 0, body);
+}
+
+TEST(GCAddItemToItemVerify, EnchantFailCarriesNoParameter)
+{
+	const std::vector<unsigned char> body = VerifyBody(ADD_ITEM_TO_ITEM_VERIFY_ENCHANT_FAIL, NULL, 0);
+
+	GCAddItemToItemVerify dst;
+	ReadExactly(dst, body);
+	CHECK_EQ(ADD_ITEM_TO_ITEM_VERIFY_ENCHANT_FAIL, dst.getCode());
+
+	GCAddItemToItemVerify src;
+	src.setCode(ADD_ITEM_TO_ITEM_VERIFY_ENCHANT_FAIL);
+	CHECK(WriteBody(src, 0) == body);
+	ExpectGolden("GCAddItemToItemVerify.fail", 0, body);
+}
+
+// A fresh packet carries no parameter until read() supplies one: the
+// handler reads getParameter2() for codes the server sends without it.
+TEST(GCAddItemToItemVerify, FreshPacketHasZeroParameters)
+{
+	GCAddItemToItemVerify packet;
+	CHECK_EQ(0, packet.getParameter());
+	CHECK_EQ(0, packet.getParameter2());
 }
 
 //----------------------------------------------------------------------

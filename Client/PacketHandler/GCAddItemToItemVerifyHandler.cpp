@@ -244,19 +244,19 @@ void GCAddItemToItemVerifyHandler::execute ( GCAddItemToItemVerify * pPacket , P
 			}
 			break;
 
-		// add by svi 2009-06-24 增加升级成功确认
-		
+		// Item grade upgrade succeeded. The server sends the item's new
+		// grade as the one parameter (CGAddItemToItemHandler sets it from
+		// pItem->getGrade()) and nothing else for this code; the second
+		// parameter this case used to read as a new item type was never
+		// on the wire (task 2.5 triage, docs/RESTRUCTURING.md).
 		case ADD_ITEM_TO_ITEM_VERIFY_UP_GRADE_OK:
 			{
-				DWORD OptionType = pPacket->getParameter();
-				// add by svi 2009-06-28
-				DWORD OptionType2= pPacket->getParameter2();
-				pInventoryItem->SetItemType(OptionType2);
-				// end
-				
+				DWORD grade = pPacket->getParameter();
+				pInventoryItem->SetGrade( grade );
+
 				AddNewInventoryEffect( pInventoryItem->GetID(),
 				MAGIC_ENCHANT_OPTION_PLUS,
-				0, OptionType
+				0, 0
 				);
 				PlaySound(SOUND_XMAS_STAR);
 //				pInventoryItem->RemoveItemOption(g_pTempInformation->Value3);

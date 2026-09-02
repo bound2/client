@@ -24,13 +24,13 @@ void GCAddItemToItemVerify::read ( SocketInputStream & iStream )
 		case ADD_ITEM_TO_ITEM_VERIFY_MIXING_OK :
 		case ADD_ITEM_TO_ITEM_VERIFY_DETACHING_OK :
 		case ADD_ITEM_TO_ITEM_VERIFY_REVIVAL_OK:
+		// UP_GRADE_OK carries ONE parameter, the new grade: that is what
+		// the server's write() and getPacketSize() emit. Reading a second
+		// one here over-ran into the next packet (task 2.5 triage).
+		case ADD_ITEM_TO_ITEM_VERIFY_UP_GRADE_OK:
 		case ADD_ITEM_TO_ITEM_REMOVE_OPTION_OK:		//by svi 2009-07-15
 			iStream.read(m_Parameter);
 			break;
-// add by svi 2009-06-28			
-		case ADD_ITEM_TO_ITEM_VERIFY_UP_GRADE_OK:
-// end
-			// add by Coffee 2006.11.3
 		case ADD_ITEM_TO_ITEM_VERIFY_THREE_ENCHANT_OK:
 			iStream.read(m_Parameter);
 			iStream.read(m_Parameter2);
@@ -65,7 +65,12 @@ void GCAddItemToItemVerify::write ( SocketOutputStream & oStream ) const
 		case ADD_ITEM_TO_ITEM_VERIFY_DETACHING_OK:
 		case ADD_ITEM_TO_ITEM_VERIFY_REVIVAL_OK:
 		case ADD_ITEM_TO_ITEM_VERIFY_UP_GRADE_OK:
+		case ADD_ITEM_TO_ITEM_REMOVE_OPTION_OK:
 			oStream.write(m_Parameter);
+			break;
+		case ADD_ITEM_TO_ITEM_VERIFY_THREE_ENCHANT_OK:
+			oStream.write(m_Parameter);
+			oStream.write(m_Parameter2);
 			break;
 
 		// 파라미터를 쓰지 않아도 되는 코드
@@ -97,10 +102,10 @@ PacketSize_t GCAddItemToItemVerify::getPacketSize () const
 		case ADD_ITEM_TO_ITEM_VERIFY_DETACHING_OK :
 		case ADD_ITEM_TO_ITEM_VERIFY_MIXING_OK :
 		case ADD_ITEM_TO_ITEM_VERIFY_REVIVAL_OK:
+		case ADD_ITEM_TO_ITEM_VERIFY_UP_GRADE_OK:
+		case ADD_ITEM_TO_ITEM_REMOVE_OPTION_OK:
 			size += szuint;
 			break;
-		// add by Coffee 2006.11.3
-		case ADD_ITEM_TO_ITEM_VERIFY_UP_GRADE_OK:
 		case ADD_ITEM_TO_ITEM_VERIFY_THREE_ENCHANT_OK:
 			size += szuint + szuint;
 			break;
