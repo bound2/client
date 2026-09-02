@@ -955,9 +955,13 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		if(NOT _still_in_exe EQUAL -1)
 			message(FATAL_ERROR "gamemodel member is still in the executable's source list (case mismatch in tests/arch/gamemodel_files.txt?): ${_src}")
 		endif()
-		list(FIND VS_UI_CLIENT_SOURCES ${_src} _still_in_vsui)
+		# VS_UI_CLIENT_SOURCES holds repository-relative paths; compare in
+		# that form, or this FIND is the same absolute-vs-relative miss the
+		# REMOVE_ITEM above suffers from.
+		string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" _rel "${_src}")
+		list(FIND VS_UI_CLIENT_SOURCES ${_rel} _still_in_vsui)
 		if(NOT _still_in_vsui EQUAL -1)
-			message(FATAL_ERROR "gamemodel member is still in VS_UI_CLIENT_SOURCES: ${_src}")
+			message(FATAL_ERROR "gamemodel member is still in VS_UI_CLIENT_SOURCES: ${_rel}")
 		endif()
 	endforeach()
 

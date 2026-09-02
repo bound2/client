@@ -113,7 +113,7 @@ an unrecorded drop, so tightening lands in the same commit as the progress.
 
 | # | Metric | Baseline | Command |
 |---|--------|---------:|---------|
-| R1 | Translation units compiled directly into the DarkEden target | **518** (528 before task 4.1's `gamemodel` took its ten members out — the four support sources, and the six tables that the relative `VS_UI_CLIENT_SOURCES` list had never actually removed from the exe glob, so they compiled into both VS_UI and the executable; 529 before task 2.5 deleted the dead `CRRequest2Handler.cpp`; 992 before task 2.4 moved the 465 packet/table/info sources into `packetwire`, +1 for the split-out `GCExchangeBuyHandler.cpp`; 1,044 before task 1.1; the task-2.2 composition root `PacketHandlerRegistry.cpp` was a recorded +1, offset when finishing the migration deleted `CGHandlersStub.cpp`) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` — `ratchets.sh` reads the generated vcxproj, preferring the ctest run's own build dir; on generators with no vcxproj it reports SKIP, not PASS |
+| R1 | Translation units compiled directly into the DarkEden target | **518** (528 before task 4.1's `gamemodel` took its ten members out — the four support sources, and the six tables that the relative `VS_UI_CLIENT_SOURCES` list had never actually removed from the exe glob, so they compiled into both VS_UI and the executable — as the 37 files still on that list do; 529 before task 2.5 deleted the dead `CRRequest2Handler.cpp`; 992 before task 2.4 moved the 465 packet/table/info sources into `packetwire`, +1 for the split-out `GCExchangeBuyHandler.cpp`; 1,044 before task 1.1; the task-2.2 composition root `PacketHandlerRegistry.cpp` was a recorded +1, offset when finishing the migration deleted `CGHandlersStub.cpp`) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` — `ratchets.sh` reads the generated vcxproj, preferring the ctest run's own build dir; on generators with no vcxproj it reports SKIP, not PASS |
 | R2 | Packet `.cpp` files still defining a packet-style `::execute(Player` | **0** (448 → 432 in slice 1 → 0 when 2.2/2.3 finished; regex refined at 0 to stop matching comments and the in-file handler body in `GCExchangeBuy.cpp`) | `grep -rlE '^void\s+\w+::execute\s*\(\s*Player' Client/Packet/{Gpackets,Cpackets,Lpackets,Rpackets,Upackets} --include='*.cpp' \| grep -v Handler \| wc -l` |
 | R3 | Live `sprintf`/`strcpy`/`strcat` lines under `Client/Packet` **and `Client/PacketHandler`** | 46 (unchanged by task 2.4, which widened the scope to follow the handlers out of `Client/Packet`; 61 at first measurement — the 2026-09-01 adversarial review showed a quarter of that was commented-out code, so the measurement now excludes `//` matches) | see `ratchets.sh` — the grep excludes comment-prefixed matches |
 | R4 | Library-compiled `.cpp` files referencing `g_p*` client globals **they do not define themselves** | **59** (61 before task 4.1 cut the two `g_pFileDef` seams in `MGameStringTable` and `SystemAvailabilities` and added the `gamemodel` membership file, whose four new members reference no game global; 81 before task 2.4 grew the membership from 52 to 518 files; the number fell because the measurement stopped counting a file's references to globals it defines — the packet tables own `g_pPacketFactoryManager`/`g_pPacketValidator` — and the two dead server-only bodies that reached game globals were deleted; 83 at first measurement, before two never-compiled files were filtered) | `ratchets.sh` computes it over the library dirs (minus CMake-excluded files) plus the `VS_UI_CLIENT_SOURCES` list parsed from `CMakeLists.txt` and the `packetwire` membership file |
@@ -688,14 +688,18 @@ Not a code phase — the standing rule this plan exists to enable, stated once:
   test-first; (c) *exempt* — the code is on the exemption list, the commit
   says so and carries the regression-guard wording. A fix commit that is
   none of the three is wrong.
-  > **Status:** adopted (recorded 2026-09-02 with task 4.1; in practice
-  > since 1.2 landed). Every fix commit on the restructuring branches
-  > names its path — `StringStream` (1.3), `CGMove`, `GCUpdateInfo`,
-  > `GCAddItemToItemVerify` and the item-option table bound are
-  > *lib + test*; the `GCAddItemToItemVerify` handler change is
-  > *exempt* — and the adversarial reviewers check the claim. No
-  > commit-lint hook yet; add one the first time a fix lands without
-  > its path.
+  > **Status:** adopted (recorded 2026-09-02 with task 4.1). The rule
+  > has been followed in substance since 1.2 — every fix was written
+  > test-first in a library or called out as executable-side — but not
+  > in wording: of the nine `fix:` commits since 1.2, `GCUpdateInfo`,
+  > `GCAddItemToItemVerify` and the item-option bound say "Test path:
+  > lib + test" / "exempt" outright, the two `StringStream` fixes and
+  > the slot-info leak say "test-first against packetwire" instead, and
+  > the two review-round repair commits (`9b69cff`, `e5db5f9`) name no
+  > path at all while mixing library and handler edits. From here on the
+  > three words are mandatory in every fix commit, review-round repairs
+  > included, and the 4.1 review round is the miss that graduates this
+  > to a commit-lint hook: add it with the next fix.
   - Owner: review practice + this document; graduate to a commit-lint hook
     if drift is observed.
 
@@ -705,11 +709,19 @@ Not a code phase — the standing rule this plan exists to enable, stated once:
 
 Background work, one class family per branch, each independently mergeable.
 Target library: `gamemodel` (new; links `basic` + `packetwire`, **no**
-SDL/dxlib/VS_UI). The catch: ~45 `Client/*.cpp` model files currently
-compile into the **VS_UI** target (`VS_UI_CLIENT_SOURCES`), which is
-nominally a library but drags exe globals, so linking it into tests is not
-viable — extraction means moving files *out of that list* into `gamemodel`
-and cutting their `g_p*`/UI seams.
+SDL/dxlib/VS_UI). The catch: 37 `Client/*.cpp` model files (43 before
+4.1) sit in the **VS_UI** target's list (`VS_UI_CLIENT_SOURCES`), which
+is nominally a library but drags exe globals, so linking it into tests is
+not viable — extraction means moving files *out of that list* into
+`gamemodel` and cutting their `g_p*`/UI seams. **And they compile into the
+executable too** (found by 4.1): the list is relative, the exe's glob is
+absolute, so the `REMOVE_ITEM` between them has never matched — every
+file on that list is built twice and the exe's object wins the link (the
+LNK4217 noise CLAUDE.md describes). Making that `REMOVE_ITEM` work is a
+37-file link change that swaps the exe's objects for `VS_UI.lib`'s
+(compiled with `_LIB`), so it is its own runtime-verified branch, not a
+side effect of an extraction; until then each extraction removes its
+members from the exe by absolute path and asserts it.
 
 Order of attack (dependency-ranked; re-verify with an include scan when
 starting each — the scan is one grep, and the ranking below is from a
@@ -763,6 +775,22 @@ starting each — the scan is one grep, and the ranking below is from a
   > their zone), and the language file's English decision. R4 61 → 59.
   > Suite: 184 tests (3,284 checks) green plain and ASan; all four
   > trees 0 errors.
+  > **Adversarial review round (2026-09-02, 2 reviewers by angle — the
+  > cap in force from here: one SHIP, one NO-SHIP), fixed on the
+  > branch:** the new "member still in `VS_UI_CLIENT_SOURCES`" assertion
+  > compared an absolute path against the relative list — the very
+  > mismatch it was guarding against — and could never fire; it now
+  > compares repository-relative. The double-compilation finding was
+  > understated: the 37 files still on the list are all compiled into
+  > both targets today (recorded in the Phase 4 intro above; fixing the
+  > `REMOVE_ITEM` is its own branch). The 3.1 "every fix names its path"
+  > claim was false for four earlier commits and is corrected there.
+  > The tests' `strcmp` on `GetString()` now goes through a NULL-safe
+  > helper, so a regression fails a check instead of crashing the run.
+  > Observation kept, not fixed: a refused item-option table leaves the
+  > part-name `MString`s NULL and three `VS_UI` call sites `strcpy` them
+  > unguarded — pre-existing for any unset part, and the alternative was
+  > heap corruption at startup; a 4.3/4.4 seam.
 - [ ] **4.2 Money/price/trade logic:** `MMoneyManager.cpp`,
   `MPriceManager.cpp`, `MTradeManager.cpp` (seams to `g_pShop`/UI to cut).
   > **Status:** not started.
@@ -774,8 +802,9 @@ starting each — the scan is one grep, and the ranking below is from a
   `MSkillManager.cpp`, `SkillDef.cpp`, gear classes. Likely partial —
   whatever stays coupled goes on the exemption list explicitly.
   > **Status:** not started.
-  - Owner (all of 4.x): `gamemodel`'s explicit source list, an M1 include
-    rule (no SDL/UI/dxlib headers from `gamemodel`), R4 shrinking.
+  - Owner (all of 4.x): `gamemodel`'s membership file
+    (`tests/arch/gamemodel_files.txt`), the M0–M2 include rules in
+    `check_includes.pl` (in force since 4.1), R4 shrinking.
 
 ---
 

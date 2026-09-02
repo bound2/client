@@ -86,6 +86,13 @@ void	RemoveScratch()
 	std::remove(kTempFile);
 }
 
+// MString::GetString() is NULL for an entry that was never set, so a
+// bare strcmp would crash the run instead of failing the check.
+bool	StrEq(const char* actual, const char* expected)
+{
+	return actual != NULL && std::strcmp(actual, expected) == 0;
+}
+
 } // namespace
 
 //----------------------------------------------------------------------
@@ -155,9 +162,9 @@ TEST(ItemOptionTable, LoadReadsPartNamesThenTheEntries)
 	RemoveScratch();
 
 	CHECK_EQ(2, table.GetSize());
-	CHECK(std::strcmp(table.ITEMOPTION_PARTNAME[1].GetString(), "Dexterity") == 0);
-	CHECK(std::strcmp(table.ITEMOPTION_PARTENAME[0].GetString(), "E-Strength") == 0);
-	CHECK(std::strcmp(table[1].Name.GetString(), "Strong") == 0);
+	CHECK(StrEq(table.ITEMOPTION_PARTNAME[1].GetString(), "Dexterity"));
+	CHECK(StrEq(table.ITEMOPTION_PARTENAME[0].GetString(), "E-Strength"));
+	CHECK(StrEq(table[1].Name.GetString(), "Strong"));
 	CHECK_EQ(ITEMOPTION_TABLE::PART_DEX, table[1].Part);
 	CHECK_EQ(5, table[1].PlusPoint);
 	CHECK_EQ(150, table[1].PriceMultiplier);
@@ -225,8 +232,8 @@ TEST(SoundTable, SaveAndLoadRoundTripTheFileNames)
 	RemoveScratch();
 
 	CHECK_EQ(2, dst.GetSize());
-	CHECK(std::strcmp(dst[0].Filename.GetString(), "hit.wav") == 0);
-	CHECK(std::strcmp(dst[1].Filename.GetString(), "miss.wav") == 0);
+	CHECK(StrEq(dst[0].Filename.GetString(), "hit.wav"));
+	CHECK(StrEq(dst[1].Filename.GetString(), "miss.wav"));
 	CHECK(dst[2].Filename.GetString() == NULL);	// default entry past the end
 }
 
@@ -253,7 +260,7 @@ TEST(StringArray, NicknameLayoutRejectsAnIndexPastTheCount)
 
 	CHECK(!bOk);
 	CHECK_EQ(2, table.GetSize());
-	CHECK(std::strcmp(table[1].GetString(), "second") == 0);
+	CHECK(StrEq(table[1].GetString(), "second"));
 }
 
 //----------------------------------------------------------------------
