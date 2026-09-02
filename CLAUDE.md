@@ -66,7 +66,7 @@ how work gets verified here.
 `unit_tests` links `basic`, `SpriteLib`, `TextSystem` and `packetwire`. Covering
 something in `dxlib` or `VS_UI` means adding it to `target_link_libraries` in
 `tests/CMakeLists.txt` first. Packet tests construct real packets through the real
-factories and pin their bytes against `tests/golden/*.hex` — 39 of those files are
+factories and pin their bytes against `tests/golden/*.hex` — 54 of those files are
 byte-identical copies of the server repo's goldens, so `diff -r` of the two golden
 directories is the cross-repo wire check (`tests/unit/test_packet_goldens.cpp` has
 the recipe and the `UPDATE_GOLDENS=1` re-record rule).
@@ -127,7 +127,7 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **146 tests, 1,045 checks, 0 failed** in both trees.
+baseline: **164 tests, 1,718 checks, 0 failed** in both trees.
 
 ## Traps
 

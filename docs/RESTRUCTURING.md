@@ -515,9 +515,10 @@ the server's status notes. This is what makes the ~509 `Gpackets` parsers
   > the exe installs `SendBugReport` at the composition root.
   > **Goldens (the owner):** `test_packet_goldens.cpp` writes through the
   > real streams (a `SocketOutputStreamTestAccess` friend, the twin of
-  > 1.2's input seam) and pins 45 `.hex` files, **39 byte-identical copies
-  > of the server's** with its fixture values (GCMoveOK incl. framed,
-  > GCMoveError, the GCAddItemToZone family, CGMove, CGSay, CGWhisper) —
+  > 1.2's input seam) and pins 60 `.hex` files, **54 byte-identical copies
+  > of the server's** with its fixture values (all 19 encrypter packets
+  > at codes 0–5, GCMoveOK framed, CGSay, CGWhisper; the 15 beyond the
+  > first cut were added in the review round) —
   > `diff -r` of the two golden directories is the cross-repo check — plus
   > six client-authored (GCSay, GCGuildChat ×2, GCSystemMessage, CLLogin
   > ×2). 38 of 39 matched on the first run; **the 39th was a real wire
@@ -531,8 +532,50 @@ the server's status notes. This is what makes the ~509 `Gpackets` parsers
   > ids. Two asymmetries stated as fact-tests, server-style: this repo's
   > `CLLogin::read` is one byte short of the login server's (the client
   > never reads one), and `GCDropItemToZone` round-trips here while the
-  > server pins only its `write()`. Suite: 146 tests green in the plain
+  > server pins only its `write()`. Suite: 164 tests (1,718 checks) green in the plain
   > and ASan trees; all four ctests green.
+  > **Adversarial review round (2026-09-02, 8 Opus reviewers by angle;
+  > 1 NO-SHIP, on the tooling):** fixed on the branch —
+  > 1. `check_includes.pl` ignored `#include <...>`, and the library's
+  >    include path carries `Client/`, so `#include <MZone.h>` would have
+  >    compiled unseen: angle includes that resolve inside the tree are
+  >    now checked like quoted ones. Its search order was also the
+  >    inverse of the compiler's (a `Client/` shadow of a `Client/Packet`
+  >    header would have passed the checker and bound in the build);
+  >    it now mirrors `target_include_directories(packetwire)`. W0 keys
+  >    are case-folded (Windows), indented membership lines are refused
+  >    (CMake anchored at column 1 and would have dropped them), CMake
+  >    strips before matching, and both floors are 400.
+  > 2. Ratchets: R3 excluded any line whose `//` tail mentioned the
+  >    keyword, so a live `sprintf` with a trailing comment slipped —
+  >    the tail is stripped first now; R1 fails on a `.vcxproj` older
+  >    than the lists it was generated from instead of measuring a
+  >    stale tree; `check()` fails on an unmeasurable value instead of
+  >    passing it.
+  > 3. Tests: a recording run (`UPDATE_GOLDENS=1`) is no longer green;
+  >    `EncrypterFree` checks `read()` as well as `write()`;
+  >    `CheckItemBaseEqual` no longer pops an empty list (UB inside the
+  >    expected failure); the framework catches a throwing test body
+  >    instead of losing the rest of the suite; the remaining 15
+  >    encrypter packets are pinned with the server's goldens (54 of 60
+  >    files now byte-identical copies); the chat parsers' length bounds
+  >    have hostile-input tests; comment claims trimmed to what the code
+  >    proves (the factory link test covers the received directions
+  >    only; shared fixtures keep the server's sub-128 values).
+  > 4. Facts corrected: the reachable code-0 zone in the shipped data is
+  >    1301 (the fix commit's "zone 16" is arithmetic, not a real zone);
+  >    the four RC datagram handlers a reviewer reported unregistered
+  >    are registered through the `_NOPLAYER` macro form.
+  > 5. Review-surfaced follow-ups, not done here: the server's
+  >    `docs/RESTRUCTURING.md` 1.2 note still says the client has no
+  >    goldens and its `FIXES.md` has no entry for the CGMove finding
+  >    (server repo); a normalised read/write sweep across all 500
+  >    shared `.cpp` files flagged 8 GC/LC packets whose field sequence
+  >    may differ between repos (`GCAddItemToInventory`,
+  >    `GCAddItemToItemVerify`, `GCShopBought`, `GCShopBuyOK`,
+  >    `GCUpdateInfo`, `GCGQuestInventory`, `GCPartySay`,
+  >    `BloodBibleBonusInfo`) — a live parse desync if real, to triage
+  >    with goldens under 2.5.
   > **Deliberately not done here:** the 186 remaining
   > `__GAME_SERVER__`/`__GAME_CLIENT__` conditionals in 157 packet
   > sources (the server's K2 rule bans them; here they have one meaning
