@@ -57,6 +57,11 @@ throw ( ProtocolException , Error )
 			// 새로운 Shelf를 생성한다.
 			//------------------------------------------------------
 			MShopShelf* pShelf = MShopShelf::NewShelf( (MShopShelf::SHELF_TYPE)pPacket->getShopType() );
+			if (pShelf == NULL)
+			{
+				DEBUG_ADD_FORMAT("[Error] GCShopListMysterious: invalid shelf type %d", (int)pPacket->getShopType());
+				return;
+			}
 			
 			pShelf->SetVersion( pPacket->getShopVersion() );
 

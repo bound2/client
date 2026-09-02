@@ -331,6 +331,18 @@ TEST(ShopShelf, FactoryBuildsEachShelfType)
 	delete unknown;
 }
 
+// The shelf type in a shop list comes off the wire; one past the table
+// must not be called through.
+TEST(ShopShelf, FactoryRefusesAnUnknownType)
+{
+	ContainerWorld world;
+
+	CHECK(MShopShelf::NewShelf(MShopShelf::MAX_SHELF) == NULL);
+	CHECK(MShopShelf::NewShelf(MShopShelf::SHELF_BASE) == NULL);
+	CHECK(MShopShelf::NewShelf((MShopShelf::SHELF_TYPE)255) == NULL);
+	CHECK(MShopShelf::NewShelf((MShopShelf::SHELF_TYPE)-1) == NULL);
+}
+
 TEST(ShopShelf, FillsTheFirstEmptySlotAndReplacesByDeleting)
 {
 	ContainerWorld world;

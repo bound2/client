@@ -57,6 +57,15 @@ MShopShelf::NewShelf(MShopShelf::SHELF_TYPE ShelfClass)
 {
 	DEBUG_ADD_FORMAT("MShopShelf::NewShelf %d", ShelfClass);
 
+	// The type arrives in a shop-list packet, so it is validated before it
+	// indexes the factory table - one past the table is a code pointer to
+	// call through. Every caller handles a NULL return.
+	if (ShelfClass < 0 || ShelfClass >= MAX_SHELF)
+	{
+		DEBUG_ADD_FORMAT_ERR("[Error] MShopShelf::NewShelf: invalid shelf type %d", ShelfClass);
+		return NULL;
+	}
+
 	return (MShopShelf*)(*s_NewShelfClassTable[ShelfClass])();
 };
 

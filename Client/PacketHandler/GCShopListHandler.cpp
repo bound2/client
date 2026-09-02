@@ -67,9 +67,14 @@ throw ( ProtocolException , Error )
 			DEBUG_ADD_FORMAT("[GCShopListHandler::execute] OK [1.0]  %d\n", shopType);
 			if (shopType >= MShopShelf::MAX_SHELF) {
 				DEBUG_ADD("[GCShopListHandler::execute] SHELF_TYPE Wrong!");
+				return;
 			}
 
 			MShopShelf* pShelf = MShopShelf::NewShelf( (MShopShelf::SHELF_TYPE) shopType);
+			if (pShelf == NULL)
+			{
+				return;
+			}
 
 
 			DEBUG_ADD("[GCShopListHandler::execute] OK [1.1]\n");
