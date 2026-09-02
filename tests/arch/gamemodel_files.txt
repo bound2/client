@@ -55,20 +55,27 @@ Client/SkillDef.h
 Client/MMoneyManager.cpp
 Client/MMoneyManager.h
 
-# Item core (task 4.4, second slice): MItem and the gear/armour/weapon
-# families; the use handlers and the container-based classes are the
-# executable's MItemUse.cpp. MObject is the base; the two container
-# managers are included by MItem.h (their .cpp files stay executable
-# until 4.3 - a test constructs no container item); MItemLimits.h holds
-# the pile sizes both halves read.
+# Item core (task 4.4, second slice): MItem, the gear/armour/weapon
+# families and (since 4.3) the container-based gear; the use handlers
+# are the executable's MItemUse.cpp. MObject is the base; MItemLimits.h
+# holds the pile sizes both halves read.
 Client/MItem.cpp
 Client/MItem.h
 Client/MItemLimits.h
 Client/MObject.cpp
 Client/MObject.h
+# The item managers (task 4.3, first slice): the id map, the grid and the
+# slot containers, the finder predicates, and the quick-slot globals the
+# id map clears on release (MQuickSlot.cpp defines them).
+Client/MItemManager.cpp
 Client/MItemManager.h
 Client/MGridItemManager.h
 Client/MSlotItemManager.h
+Client/MGridItemManager.cpp
+Client/MSlotItemManager.cpp
+Client/MItemFinder.h
+Client/MQuickSlot.cpp
+Client/MQuickSlot.h
 
 # The seams MItem reads (task 4.4): the user's display settings (the
 # gore level picks the skull names), the client configuration (the

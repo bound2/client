@@ -3,8 +3,9 @@
 //----------------------------------------------------------------------
 // The classes whose behaviour is pure game model: MItem itself and the
 // gear/armour/weapon families, whose members read the item and option
-// tables and their own state. Item classes that act on use (potions,
-// portals, pets, keys, the containers) live in MItemUse.cpp, compiled
+// tables and their own state, and the container-based gear (belt, arms
+// band, motorcycle) over the item managers (task 4.3). Item classes
+// that act on use (potions, portals, pets, keys) live in MItemUse.cpp, compiled
 // into the executable, because their UseInventory/UseQuickItem/UseGear
 // bodies drive packets, the player, the zone and the dialogs; the
 // per-class factory table is there too. The two reaches MItem itself
@@ -1263,4 +1264,401 @@ TYPE_ITEM_NUMBER
 MLuckyBag::GetMaxNumber() const
 {
 	return MAX_LUCKY_BAG_NUMBER;	
+}
+
+
+//----------------------------------------------------------------------
+// MMotorcycle::Get MaxDurability
+//----------------------------------------------------------------------
+int
+MMotorcycle::GetMaxDurability() const	
+{ 
+	int maxDur = (*g_pItemTable)[ITEM_CLASS_MOTORCYCLE][m_ItemType].Value1; 
+
+	int plus_point = 100;
+
+	std::list<TYPE_ITEM_OPTION>::const_iterator itr = m_ItemOptionList.begin();
+
+	while(itr != m_ItemOptionList.end())
+	{
+		ITEMOPTION_INFO& optionInfo = (*g_pItemOptionTable)[*itr];
+		
+		if (optionInfo.Part == ITEMOPTION_TABLE::PART_DURABILITY)
+		{
+			plus_point += optionInfo.PlusPoint-100;
+		}
+
+		itr++;
+	}
+
+	if(plus_point != 0)
+		maxDur = maxDur * plus_point / 100;
+
+	return min( 65000, maxDur );
+}
+
+
+//----------------------------------------------------------------------
+//
+//						MBelt
+// 
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+// Set ItemType
+//----------------------------------------------------------------------
+// ItemType을 설정할때 SlotItemManager도 초기화해야한다.
+//----------------------------------------------------------------------
+void				
+MBelt::SetItemType(TYPE_ITEMTYPE type)		
+{ 
+	m_ItemType = type; 
+
+	MSlotItemManager::Init( GetPocketNumber() );
+}
+
+//----------------------------------------------------------------------
+// AddItem ( pItem )
+//----------------------------------------------------------------------
+// 적절한 slot에 pItem을 추가한다.
+//----------------------------------------------------------------------
+bool			
+MBelt::AddItem(MItem* pItem)
+{
+	//---------------------------------------------------------------
+	// 비어있는 slot을 찾아서 item을 추가한다.
+	//---------------------------------------------------------------
+	for (int n=0; n<m_Size; n++)
+	{
+		if (m_ItemSlot[n]==NULL)
+		{
+			return AddItem( pItem, n );
+		}
+	}
+
+	return false;
+}
+
+//----------------------------------------------------------------------
+// AddItem ( pItem, n )
+//----------------------------------------------------------------------
+// slot(n)에 pItem을 추가한다.
+//----------------------------------------------------------------------
+bool			
+MBelt::AddItem(MItem* pItem, BYTE n)
+{
+	if (n >= m_Size)
+	{
+		return false;
+	}
+
+	//---------------------------------------------------------------
+	// Quick item이어야지 belt에 추가할 수 있다.
+	//---------------------------------------------------------------
+	if (pItem->IsQuickItem())
+	{
+		return MSlotItemManager::AddItem( pItem, n );
+	}
+
+	return false;	
+}
+
+//----------------------------------------------------------------------
+// ReplaceItem
+//----------------------------------------------------------------------
+// pItem을 추가하고 딴게 있다면 Item교환
+//----------------------------------------------------------------------
+bool			
+MBelt::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
+{
+	if (n >= m_Size || pItem == NULL)
+	{
+		return false;
+	}
+
+	//---------------------------------------------------------------
+	// 비어 있는 slot이면 그냥 추가
+	//---------------------------------------------------------------
+	if (m_ItemSlot[n]==NULL)
+	{
+		return AddItem( pItem, n );
+	}
+	
+	//---------------------------------------------------------------
+	// 뭔가 있다면 replace해야 한다.
+	// 바꿀려는 Item이 quickItem인 경우만 교체..
+	//---------------------------------------------------------------	
+	if (pItem->IsQuickItem())
+	{
+		return MSlotItemManager::ReplaceItem( pItem, n, pOldItem );
+	}
+
+	return false;
+}
+
+
+//----------------------------------------------------------------------
+// Can ReplaceItem : (n) slot에 pItem을 추가하거나 
+//						원래 있던 Item과 교체가 가능한가?
+//----------------------------------------------------------------------
+bool			
+MBelt::CanReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
+{
+	//---------------------------------------------------------
+	// ItemSlot 범위를 넘어가는 경우..
+	//---------------------------------------------------------	
+	if (n>=m_Size)
+	{		
+		// NULL로 설정한다.
+		pOldItem = NULL;
+
+		return false;
+	}
+
+	//---------------------------------------------------------	
+	// QuickItem인가?
+	//---------------------------------------------------------	
+	if (pItem->IsQuickItem())
+	{		
+		pOldItem = m_ItemSlot[n];
+
+		return true;
+	}
+
+	pOldItem = NULL;
+
+	return false;
+}
+
+//----------------------------------------------------------------------
+// Find Slot To Add Item
+//----------------------------------------------------------------------
+// return값은 자리가 있느냐(true) / 없느냐(false)
+// true인 경우에.. pItem이 들어갈 수 있는 자리가 slot이다.
+//----------------------------------------------------------------------
+bool			
+MBelt::FindSlotToAddItem(MItem* pItem, int &slot) const
+{
+	if (!pItem->IsQuickItem())
+	{
+		return false;
+	}
+
+	//---------------------------------------------------------
+	// 어디에 들어갈 수 있을까?
+	//---------------------------------------------------------
+	for (int i=0; i<m_Size; i++)
+	{
+		const MItem* pQuickItem = m_ItemSlot[i];
+
+		//---------------------------------------------------------
+		// 아무것도 없는 곳이면 그냥 넣으면 된다.
+		//---------------------------------------------------------
+		if (pQuickItem==NULL)
+		{
+			slot = i;
+			return true;
+		}
+		//---------------------------------------------------------
+		// 뭔가 있으면.. 그곳에 쌓일 수 있는지 알아본다.
+		//---------------------------------------------------------
+		if (pQuickItem->GetItemClass()==pItem->GetItemClass()
+			&& pQuickItem->GetItemType()==pItem->GetItemType())
+		{
+			//----------------------------------------------------
+			// 더한 개수가 max를 넘지 않아야 한다.
+			//----------------------------------------------------
+			int addTotal = pQuickItem->GetNumber() + pItem->GetNumber();
+
+			if ( addTotal <= pQuickItem->GetMaxNumber() )
+			{
+				slot = i;
+				return true;
+			}
+		}		
+	}
+
+	// 들어갈 곳이 없다.
+	return false;
+}
+//----------------------------------------------------------------------
+//
+//						MOustersArmsBand
+// 
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+// Set ItemType
+//----------------------------------------------------------------------
+// ItemType을 설정할때 SlotItemManager도 초기화해야한다.
+//----------------------------------------------------------------------
+void				
+MOustersArmsBand::SetItemType(TYPE_ITEMTYPE type)		
+{ 
+	m_ItemType = type; 
+
+	MSlotItemManager::Init( GetPocketNumber() );
+}
+
+//----------------------------------------------------------------------
+// AddItem ( pItem )
+//----------------------------------------------------------------------
+// 적절한 slot에 pItem을 추가한다.
+//----------------------------------------------------------------------
+bool			
+MOustersArmsBand::AddItem(MItem* pItem)
+{
+	//---------------------------------------------------------------
+	// 비어있는 slot을 찾아서 item을 추가한다.
+	//---------------------------------------------------------------
+	for (int n=0; n<m_Size; n++)
+	{
+		if (m_ItemSlot[n]==NULL)
+		{
+			return AddItem( pItem, n );
+		}
+	}
+
+	return false;
+}
+
+//----------------------------------------------------------------------
+// AddItem ( pItem, n )
+//----------------------------------------------------------------------
+// slot(n)에 pItem을 추가한다.
+//----------------------------------------------------------------------
+bool			
+MOustersArmsBand::AddItem(MItem* pItem, BYTE n)
+{
+	if (n >= m_Size)
+	{
+		return false;
+	}
+
+	//---------------------------------------------------------------
+	// Quick item이어야지 belt에 추가할 수 있다.
+	//---------------------------------------------------------------
+	if (pItem->IsQuickItem())
+	{
+		return MSlotItemManager::AddItem( pItem, n );
+	}
+
+	return false;	
+}
+
+//----------------------------------------------------------------------
+// ReplaceItem
+//----------------------------------------------------------------------
+// pItem을 추가하고 딴게 있다면 Item교환
+//----------------------------------------------------------------------
+bool			
+MOustersArmsBand::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
+{
+	if (n >= m_Size || pItem == NULL)
+	{
+		return false;
+	}
+
+	//---------------------------------------------------------------
+	// 비어 있는 slot이면 그냥 추가
+	//---------------------------------------------------------------
+	if (m_ItemSlot[n]==NULL)
+	{
+		return AddItem( pItem, n );
+	}
+	
+	//---------------------------------------------------------------
+	// 뭔가 있다면 replace해야 한다.
+	// 바꿀려는 Item이 quickItem인 경우만 교체..
+	//---------------------------------------------------------------	
+	if (pItem->IsQuickItem())
+	{
+		return MSlotItemManager::ReplaceItem( pItem, n, pOldItem );
+	}
+
+	return false;
+}
+
+
+//----------------------------------------------------------------------
+// Can ReplaceItem : (n) slot에 pItem을 추가하거나 
+//						원래 있던 Item과 교체가 가능한가?
+//----------------------------------------------------------------------
+bool			
+MOustersArmsBand::CanReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
+{
+	//---------------------------------------------------------
+	// ItemSlot 범위를 넘어가는 경우..
+	//---------------------------------------------------------	
+	if (n>=m_Size)
+	{		
+		// NULL로 설정한다.
+		pOldItem = NULL;
+
+		return false;
+	}
+
+	//---------------------------------------------------------	
+	// QuickItem인가?
+	//---------------------------------------------------------	
+	if (pItem->IsQuickItem())
+	{		
+		pOldItem = m_ItemSlot[n];
+
+		return true;
+	}
+
+	pOldItem = NULL;
+
+	return false;
+}
+
+//----------------------------------------------------------------------
+// Find Slot To Add Item
+//----------------------------------------------------------------------
+// return값은 자리가 있느냐(true) / 없느냐(false)
+// true인 경우에.. pItem이 들어갈 수 있는 자리가 slot이다.
+//----------------------------------------------------------------------
+bool			
+MOustersArmsBand::FindSlotToAddItem(MItem* pItem, int &slot) const
+{
+	if (!pItem->IsQuickItem())
+	{
+		return false;
+	}
+
+	//---------------------------------------------------------
+	// 어디에 들어갈 수 있을까?
+	//---------------------------------------------------------
+	for (int i=0; i<m_Size; i++)
+	{
+		const MItem* pQuickItem = m_ItemSlot[i];
+
+		//---------------------------------------------------------
+		// 아무것도 없는 곳이면 그냥 넣으면 된다.
+		//---------------------------------------------------------
+		if (pQuickItem==NULL)
+		{
+			slot = i;
+			return true;
+		}
+		//---------------------------------------------------------
+		// 뭔가 있으면.. 그곳에 쌓일 수 있는지 알아본다.
+		//---------------------------------------------------------
+		if (pQuickItem->GetItemClass()==pItem->GetItemClass()
+			&& pQuickItem->GetItemType()==pItem->GetItemType())
+		{
+			//----------------------------------------------------
+			// 더한 개수가 max를 넘지 않아야 한다.
+			//----------------------------------------------------
+			int addTotal = pQuickItem->GetNumber() + pItem->GetNumber();
+
+			if ( addTotal <= pQuickItem->GetMaxNumber() )
+			{
+				slot = i;
+				return true;
+			}
+		}		
+	}
+
+	// 들어갈 곳이 없다.
+	return false;
 }

@@ -4,12 +4,6 @@
 #include "Client_PCH.h"
 #include "MItem.h"
 #include "MSlotItemManager.h"
-#include "DebugInfo.h"
-
-#ifdef __GAME_CLIENT__
-//	#define	new			DEBUG_NEW
-#endif
-//#define	delete		DEBUG_DELETE
 
 //----------------------------------------------------------------------
 // 
