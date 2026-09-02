@@ -116,7 +116,7 @@ an unrecorded drop, so tightening lands in the same commit as the progress.
 | R1 | Translation units compiled directly into the DarkEden target | **517** (518 before 4.2 moved `MMoneyManager.cpp`, another double-compiled VS_UI entry; 528 before task 4.1's `gamemodel` took its ten members out — the four support sources, and the six tables that the relative `VS_UI_CLIENT_SOURCES` list had never actually removed from the exe glob, so they compiled into both VS_UI and the executable — as the 36 files still on that list do; 529 before task 2.5 deleted the dead `CRRequest2Handler.cpp`; 992 before task 2.4 moved the 465 packet/table/info sources into `packetwire`, +1 for the split-out `GCExchangeBuyHandler.cpp`; 1,044 before task 1.1; the task-2.2 composition root `PacketHandlerRegistry.cpp` was a recorded +1, offset when finishing the migration deleted `CGHandlersStub.cpp`) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` — `ratchets.sh` reads the generated vcxproj, preferring the ctest run's own build dir; on generators with no vcxproj it reports SKIP, not PASS |
 | R2 | Packet `.cpp` files still defining a packet-style `::execute(Player` | **0** (448 → 432 in slice 1 → 0 when 2.2/2.3 finished; regex refined at 0 to stop matching comments and the in-file handler body in `GCExchangeBuy.cpp`) | `grep -rlE '^void\s+\w+::execute\s*\(\s*Player' Client/Packet/{Gpackets,Cpackets,Lpackets,Rpackets,Upackets} --include='*.cpp' \| grep -v Handler \| wc -l` |
 | R3 | Live `sprintf`/`strcpy`/`strcat` lines under `Client/Packet` **and `Client/PacketHandler`** | 46 (unchanged by task 2.4, which widened the scope to follow the handlers out of `Client/Packet`; 61 at first measurement — the 2026-09-01 adversarial review showed a quarter of that was commented-out code, so the measurement now excludes `//` matches) | see `ratchets.sh` — the grep excludes comment-prefixed matches |
-| R4 | Library-compiled `.cpp` files referencing `g_p*` client globals **they do not define themselves** | **35** (59 before task 4.0 — a reclassification, not seam-cutting: the 36 `VS_UI_CLIENT_SOURCES` files stopped being library-compiled, so the 24 of them that reach globals are executable debt now, counted by R1 and outside this ratchet; 61 before task 4.1 cut the two `g_pFileDef` seams in `MGameStringTable` and `SystemAvailabilities` and added the `gamemodel` membership file, whose four new members reference no game global; 81 before task 2.4 grew the membership from 52 to 518 files; the number fell because the measurement stopped counting a file's references to globals it defines — the packet tables own `g_pPacketFactoryManager`/`g_pPacketValidator` — and the two dead server-only bodies that reached game globals were deleted; 83 at first measurement, before two never-compiled files were filtered) | `ratchets.sh` computes it over the library dirs (minus CMake-excluded files) plus the `VS_UI_CLIENT_SOURCES` list parsed from `CMakeLists.txt` and the `packetwire` membership file |
+| R4 | Library-compiled `.cpp` files referencing `g_p*` client globals **they do not define themselves** | **35** (59 before task 4.0 — a reclassification, not seam-cutting: the 36 `VS_UI_CLIENT_SOURCES` files stopped being library-compiled, so the 24 of them that reach globals are executable debt now, counted by R1 and outside this ratchet; 61 before task 4.1 cut the two `g_pFileDef` seams in `MGameStringTable` and `SystemAvailabilities` and added the `gamemodel` membership file, whose four new members reference no game global; 81 before task 2.4 grew the membership from 52 to 518 files; the number fell because the measurement stopped counting a file's references to globals it defines — the packet tables own `g_pPacketFactoryManager`/`g_pPacketValidator` — and the two dead server-only bodies that reached game globals were deleted; 83 at first measurement, before two never-compiled files were filtered) | `ratchets.sh` computes it over the library dirs (minus CMake-excluded files) plus the `packetwire` and `gamemodel` membership files |
 | R5 | Direct packet `execute()` call sites outside `Client/Packet` (handlers under `Client/PacketHandler` are in scope) | 1 (a commented-out block in `CGameUpdate.cpp`; added 2026-09-01 after the review found live local-echo callers the receive-loop enumeration had missed; task 2.4 found two more inside handlers — `GCReconnectLoginHandler`/`LCReconnectHandler` fabricating a `CGConnectSetKey` — invisible while handlers lived under the excluded `Client/Packet`, caught by the compiler once `Packet::execute` was deleted, and routed through the dispatcher; a live caller is now a compile error before it is a ratchet failure) | see `ratchets.sh` |
 
 R1 is the headline number: it counts what still cannot be unit-tested. R2 is
@@ -741,14 +741,36 @@ starting each — the scan is one grep, and the ranking below is from a
   > copies instead) would have changed which objects run and, through
   > the `#ifndef _LIB` members in the VS_UI headers, class layouts.
   > **Proof:** a linker map of `DarkEden.exe` built before and after,
-  > reduced to symbol → defining object: 989,469 rows each, 0 differ;
-  > no `VS_UI:<client file>.obj` contributed before, and `VS_UI.vcxproj`
+  > the after-link forced non-incremental so the map is really rewritten
+  > (the first attempt compared a stale map with itself — the review
+  > caught it): 989,469 symbol → defining-object rows each, 0 differ;
+  > the objects appear in the same order; every symbol sits at the same
+  > address — the two images differ only in their timestamps. No
+  > `VS_UI:<client file>.obj` contributed before, and `VS_UI.vcxproj`
   > carries no `Client/` source after. The list, the exe's
   > never-matching `REMOVE_ITEM` entry and the gamemodel assertion
   > against the list are gone. R1 unchanged at 517 (the files were
   > already counted); R4 59 → 35 by reclassification — the 24 of those
   > files that reach `g_p*` globals are executable debt now, which R1
   > counts.
+  > **Adversarial review round (2026-09-02, 2 reviewers; one NO-SHIP,
+  > one SHIP-with-fixes), fixed on the branch:** both caught that the
+  > first "after" map was the before map again — the incremental relink
+  > had not rewritten it — so the proof above is the re-taken one; the
+  > non-Windows executable filters `Client/Client.cpp` out (its WinMain)
+  > and used to get it from `VS_UI.lib`, so that one file stays in
+  > `VS_UI` on `NOT WIN32` — unverified, Windows being the live path, but
+  > not knowingly broken; two CMake comments still said `Client.cpp` was
+  > "compiled into the VS_UI lib" and the R4 row's method column still
+  > named the deleted list; the code-health review's High finding on the
+  > silent `REMOVE_ITEM` is marked fixed. **Left open, recorded:** the
+  > review's neighbouring High finding — `_LIB` is defined for `VS_UI`
+  > and not for the executable, and the `#ifndef _LIB` members in the
+  > VS_UI headers give the 54 `VS_UI/src` objects a different
+  > `C_VS_UI_TITLE` layout than the executable's objects see. This task
+  > was that finding's stated precondition and did not change which
+  > objects link, so the hazard is exactly as before; it is next for
+  > this area.
   - Owner: the linker-map comparison recorded above; R4's membership no
     longer parses a CMake list.
 

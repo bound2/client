@@ -523,6 +523,13 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# linked; the list is gone and those files compile once, into the
 	# executable (docs/RESTRUCTURING.md task 4.0).
 	set(VS_UI_ALL_SOURCES ${VS_UI_SRC_SOURCES})
+	# The one exception, kept exactly as it was: the non-Windows executable
+	# filters Client/Client.cpp out (its WinMain entry point), and that
+	# platform got the file from VS_UI.lib. Unverified here - Windows is
+	# the live path - but not knowingly broken.
+	if(NOT WIN32)
+		list(APPEND VS_UI_ALL_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Client/Client.cpp)
+	endif()
 
 	# Create VS_UI static library
 	add_library(VS_UI STATIC ${VS_UI_ALL_SOURCES})
@@ -939,7 +946,9 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*MInternetConnection.*")
 		# Exclude Handler files in Client root only (not in Packet subdirectories)
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "^Client/[^/]+Handler\\.cpp")
-		# Exclude Client.cpp and ClientFunction.cpp - they're already in VS_UI library
+		# These two anchored patterns never match: the glob yields absolute
+		# paths. ClientFunction.cpp compiles into the executable on every
+		# platform; Client.cpp is excluded below by the unanchored pattern.
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "^Client/Client\\.cpp")
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "^Client/ClientFunction\\.cpp")
 		# MWorkThread and MMusic are needed on all platforms
@@ -954,13 +963,14 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*WavePackFileManager\\.cpp")
 		# Exclude Windows-specific WinMain files
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "WinLib/CWinMain\\.cpp")
-		# Exclude Client.cpp on non-Windows (uses WinMain)
+		# Exclude Client.cpp on non-Windows (uses WinMain); VS_UI carries it
+		# there, see the VS_UI_ALL_SOURCES block.
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "Client/Client\\.cpp")
 	endif()
 
 	# Add DarkEden executable
-	# WIN32 keyword required on Windows: Client/Client.cpp (compiled into the VS_UI
-	# lib below) defines a real WinAPI WinMain, so the exe must link as a GUI
+	# WIN32 keyword required on Windows: Client/Client.cpp (compiled into the
+	# executable) defines a real WinAPI WinMain, so the exe must link as a GUI
 	# subsystem app (not console/main).
 	if(WIN32)
 		add_executable(DarkEden WIN32 ${CLIENT_MAIN_SOURCES})
