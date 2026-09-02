@@ -793,7 +793,32 @@ starting each — the scan is one grep, and the ranking below is from a
   > heap corruption at startup; a 4.3/4.4 seam.
 - [ ] **4.2 Money/price/trade logic:** `MMoneyManager.cpp`,
   `MPriceManager.cpp`, `MTradeManager.cpp` (seams to `g_pShop`/UI to cut).
-  > **Status:** not started.
+  > **Status:** money done, price/trade re-ranked (2026-09-02,
+  > `restructuring/gamemodel-money`; live verification gates the merge).
+  > The include scan the plan asks for overturned the 2026-09-01
+  > ranking for two of the three: `MPriceManager` prices through
+  > `MItem`, `g_pItemTable`, `g_pPlayer` (race, stats, level), `g_pZone`,
+  > `g_pEventManager`, `g_pTimeItemManager`, `g_pSkillAvailable` and
+  > `g_pUserInformation`, and `MTradeManager` is an `MInventory`
+  > shuffle over `MItem`s — both stand on the item core and the
+  > containers, so they move **after 4.3/4.4**, not before. **`MMoneyManager`
+  > is in `gamemodel`**: its one reach, the storage-box help hint
+  > `SetMoney` raised past 100,000, is a per-wallet hook the executable
+  > installs on the player's wallet at start-up (the trade and storage
+  > box wallets carry none — under the old process-wide `static`
+  > one-shot, any of them crossing the threshold consumed the hint).
+  > **A defect fixed test-first:** `CanAddMoney` compared the amount
+  > alone against the limit and ignored the balance, so a wallet near
+  > the limit answered yes and the `AddMoney` that followed answered no
+  > — the trade manager asks the first before accepting and does the
+  > second after, and the other side's money had nowhere to go in
+  > between (its `else` branch is an empty comment). Now it answers for
+  > the balance the add would leave, without overflowing on a large
+  > amount. `test_money_manager.cpp`: 8 tests (limits, add/use,
+  > CanAdd/CanUse agreeing with Add/Use around the edge, the hint once
+  > per wallet through the hook, no hook no hint). R1 518 → 517 (the
+  > file was another of the double-compiled VS_UI entries). Suite: 192
+  > tests (3,334 checks).
 - [ ] **4.3 Containers:** `MInventory.cpp`, `MStorage.cpp`,
   `MShopShelf.cpp`, `MQuickSlot.cpp` — the shop/stash index-bounds fixes
   from the review live here and deserve permanent tests.
