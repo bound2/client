@@ -614,9 +614,16 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		target_compile_definitions(VS_UI PUBLIC PLATFORM_MACOS)
 	endif()
 
-	# Define _LIB to match original VC6 build configuration
-	# This excludes test/debug code wrapped in #ifndef _LIB from library builds
-	target_compile_definitions(VS_UI PRIVATE _LIB)
+	# Define _LIB to match the original VC6 library configuration: the
+	# #ifndef _LIB regions of VS_UI are its standalone UI test harness
+	# (its own dialogs, gpC_press_button, message-queue accessors) and stay
+	# out of the game build. PUBLIC, not PRIVATE: the headers change class
+	# layout under _LIB (C_VS_UI_TITLE's m_pC_dialog, for one), so every
+	# translation unit that includes them - the executable's above all -
+	# must see the same definition as the library's own objects, or the two
+	# sides of a call disagree about where the members are (the code-health
+	# review's _LIB ODR finding; docs/RESTRUCTURING.md task 4.0).
+	target_compile_definitions(VS_UI PUBLIC _LIB)
 
 	list(LENGTH VS_UI_SRC_SOURCES _vsui_count)
 	message(STATUS "VS_UI library: ${_vsui_count} sources from VS_UI/")

@@ -771,6 +771,23 @@ starting each — the scan is one grep, and the ranking below is from a
   > was that finding's stated precondition and did not change which
   > objects link, so the hazard is exactly as before; it is next for
   > this area.
+  > **Second slice (2026-09-02, `restructuring/vsui-lib-define-public`;
+  > live verification gates the merge):** that hazard closed. `_LIB` is
+  > not a detail of VS_UI's build: its ~100 `#ifndef _LIB` regions are
+  > the standalone UI test harness (own dialogs, `gpC_press_button`, the
+  > message-queue accessors, `VS_UI_ExtraDialog.h`), which the original
+  > VC6 library configuration compiled out — and some of those regions
+  > are class members, so a translation unit including the headers
+  > without `_LIB` sees a different layout than the library's objects.
+  > The definition is now `PUBLIC` on the `VS_UI` target, so the
+  > executable's 50 sources that include VS_UI headers compile with it
+  > too and both sides of every call agree on where the members are.
+  > Dropping `_LIB` instead would have compiled the harness into the
+  > game. Nothing in `Client/` used a harness-only member (the build
+  > would have said so); the three `_LIB` mentions in `Client/` are dead
+  > under `__GAME_CLIENT__` or `OUTPUT_DEBUG`, and `g_bEnable3DHAL` keeps
+  > its one definition in `GameInit.cpp` (`VS_UI_Title.cpp` declares it
+  > `extern` under `_LIB`).
   - Owner: the linker-map comparison recorded above; R4's membership no
     longer parses a CMake list.
 
