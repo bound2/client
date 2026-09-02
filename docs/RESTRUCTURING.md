@@ -780,7 +780,8 @@ starting each — the scan is one grep, and the ranking below is from a
   > are class members, so a translation unit including the headers
   > without `_LIB` sees a different layout than the library's objects.
   > The definition is now `PUBLIC` on the `VS_UI` target, so the
-  > executable's 50 sources that include VS_UI headers compile with it
+  > executable's 72 translation units that include VS_UI headers (50
+  > under `Client/`, 22 packet handlers) compile with it
   > too and both sides of every call agree on where the members are.
   > Dropping `_LIB` instead would have compiled the harness into the
   > game. Nothing in `Client/` used a harness-only member (the build
