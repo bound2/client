@@ -1010,6 +1010,29 @@ starting each — the scan is one grep, and the ranking below is from a
   > `MSkillInfoTable.cpp` carries ~2,300 lines of in-code skill
   > definitions under `#ifndef __GAME_CLIENT__` (lines 32–2348), the same
   > server-data pattern, executable-side so with no test path.
+> **Third slice (2026-09-02, `restructuring/drop-server-skill-data`):**
+> that skill data. The 2,300-line `#ifndef __GAME_CLIENT__` block in
+> `MSkillInfoTable`'s constructor and the `__INIT_INFO__`-guarded include
+> only it used are deleted; only `DarkEden` compiles the file and it
+> defines `__GAME_CLIENT__=1` (`Client_PCH.h` defines it unconditionally
+> besides), so the constructor did, and does, exactly
+> `Init(MIN_RESULT_ACTIONINFO)` then `Init()`. The client fills the table
+> from `SkillInfo.inf`; the level-150 additions after the load stay.
+> 2,621 lines → 304; R1 unchanged (the file is still compiled). Review:
+> two reviewers, both SHIP, prose only (the line count, the header
+> comment's account of what the file supplies, the commit message's list
+> of targets defining the macro) — fixed. Two observations recorded for
+> later slices: the deletion removed the last callers of
+> `SKILLINFO_NODE::SetPassive` and `AddNextSkill`, so `IsPassive()` (six
+> reads in `MPlayer.cpp`) and `GetNextSkillList()` (four in
+> `MSkillManager.cpp`) have always read defaults in the client; and
+> `LoadFromFileServerSkillInfo` indexes `m_pTypeInfo` with the
+> file-supplied skill type through the raw pointer, past
+> `CTypeTable::operator[]`'s check (a code-health item, not a 5.2 one).
+> Remaining `#ifndef __GAME_CLIENT__` residue outside `Client/Packet`:
+> `RankBonusTable.cpp` (a save path), `MSectorInfo.h` (portal fields),
+> `Updater/Update.cpp` and the two unbuilt `OtherClass/Request*PacketFactoryManager.cpp`
+> files — none a data slab; the exclusion graveyard is still untouched.
 - [ ] **5.3 TextSystem stub retirement.** Split `TextService.cpp`'s pure
   text utilities from its `g_pLast` drawing entry point so
   `tests/stubs/client_globals.cpp` can shrink (the stub file itself
