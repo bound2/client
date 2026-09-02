@@ -284,6 +284,32 @@ TEST(GridItemManager, ReplacementCoversAtMostOneOldItem)
 	CHECK_EQ(0, s_Alive);
 }
 
+// The grid, the same rule: a refused newcomer must not cost the occupant
+// its place, and the call must say so.
+TEST(GridItemManager, RefusedReplacementKeepsTheOccupant)
+{
+	ContainerWorld world;
+	MGridItemManager grid;
+	grid.Init(3, 1);
+
+	Sword* a = new Sword(1, 1);
+	Sword* b = new Sword(2, 1);
+	Sword* twinOfB = new Sword(2, 1);
+	CHECK(grid.AddItem(a, 0, 0));
+	CHECK(grid.AddItem(b, 1, 0));
+
+	MItem* old = NULL;
+	CHECK_EQ(false, grid.ReplaceItem(twinOfB, 0, 0, old));
+	CHECK(old == NULL);
+	CHECK(grid.GetItem(0, 0) == a);
+	CHECK(grid.GetItem((TYPE_OBJECTID)1) == a);
+	CHECK_EQ(2, grid.GetItemNum());
+
+	delete twinOfB;
+	grid.Release();
+	CHECK_EQ(0, s_Alive);
+}
+
 //----------------------------------------------------------------------
 // The slots
 //----------------------------------------------------------------------
