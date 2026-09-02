@@ -56,8 +56,9 @@ the output and hides all progress.
 
 Only code compiled into a **static library**: `basic`, `SpriteLib`, `dxlib`,
 `gamemodel` (the pure data tables, the item table, the money manager, the item
-core - `MItem` and the gear families, behind the `MItemHost` the executable
-installs - with the user, config and timed-item loaders it reads, and their
+core - `MItem`, the gear families and the three item managers, behind the
+`MItemHost` the executable installs - with the user, config and timed-item
+loaders it reads, and their
 string/log support, membership in `tests/arch/gamemodel_files.txt` —
 `docs/RESTRUCTURING.md` tasks 4.1, 4.2 and 4.4),
 `framelib`, `TextSystem`, `VS_UI`, and `packetwire` — the whole wire layer: socket
@@ -136,7 +137,7 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **216 tests, 3,513 checks, 0 failed** in both trees.
+baseline: **226 tests, 3,660 checks, 0 failed** in both trees.
 
 ## Traps
 

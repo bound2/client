@@ -909,6 +909,38 @@ starting each — the scan is one grep, and the ranking below is from a
   from the review live here and deserve permanent tests.
   > **Status:** not started. Unblocked by 4.4's second slice
   > (the item core links); next.
+  > **First slice (2026-09-02, `restructuring/gamemodel-containers`; live
+  > verification gates the merge):** the managers. `MItemManager` (the
+  > id map), `MGridItemManager` (the grid) and `MSlotItemManager` (the
+  > slots) join `gamemodel` with `MItemFinder.h` and `MQuickSlot.cpp/.h`,
+  > which define the belt and arms-band globals the id map clears on
+  > release, so that reach is library-internal. The grid manager was
+  > pure; the slot manager drops a `DebugInfo.h` include that served a
+  > commented-out `DEBUG_NEW`. The container-based gear (`MBelt`,
+  > `MOustersArmsBand`, `MMotorcycle`) moves back from `MItemUse.cpp`
+  > into the core, byte for byte; `MCorpse` stays executable-side (it
+  > owns an `MCreature`). R1 512 → 508; R4 unchanged. Tests
+  > (`test_item_containers.cpp`, 10): the id map's one-item-per-id rule
+  > and predicate search; the grid's placement, overlap/spill/range
+  > refusals, top-down column scan, removal clearing every covered cell,
+  > replacement over at most one old item; the slots by index and by
+  > id; a belt sizing its pockets from the table and taking only quick
+  > items; every test ending in `Release` proving ownership. **One defect
+  > fixed test-first:** the slot manager wrote the item into its slot
+  > before the id map could refuse it, so a refused item (its id already
+  > held) sat in a slot the map knew nothing about — the slot looked
+  > taken, a later remove gave it up, nobody owned the item — and
+  > `ReplaceItem` had dropped the occupant by then; the map decides
+  > first now, and a refused replacement puts the occupant back. Suite:
+  > 226 tests (3,660 checks). **Next, the containers proper:**
+  > `MInventory.cpp` (the player refreshes affects on add, sounds on
+  > pile/charge changes, and the effect list over `MEffect` /
+  > `g_EffectGeneratorTable` / `g_CurrentFrame` — an executable half to
+  > split out), `MStorage.cpp` (one `g_pPlayer->CheckAffectStatus` loop)
+  > and `MShopShelf.cpp` (the same refresh, `g_ShopFixedItemTable`, a
+  > `DEBUG_ADD_FORMAT`). The affect refresh is the `MItemHost`'s
+  > `RefreshPetAffect` under another name — one host entry serves all
+  > three.
 - [ ] **4.4 Item/skill cores:** `MItem.cpp`, `MItemManager.cpp`,
   `MSkillManager.cpp`, `SkillDef.cpp`, gear classes. Likely partial —
   whatever stays coupled goes on the exemption list explicitly.
