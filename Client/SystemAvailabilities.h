@@ -15,6 +15,7 @@
 #include <map>
 #include <list>
 #include <bitset>
+#include <iosfwd>
 
 #define MAX_OPEN_DEGREE		9
 
@@ -82,7 +83,14 @@ public :
 	bool	ScriptFiltering( int scriptID, int answerID );
 	bool	ZoneFiltering( int zoneID ) const;
 
-	bool	LoadFromFile(const char *szFileName);
+	// Parses the filter script (Data/Info's FILE_FILTER_INFO) from any
+	// stream, one record per line: '*<kind> <count>' opens a script
+	// filter, 'Z<degree>' a zone list (closed by 99999), 'S<n> <count>'
+	// the per-degree script list; ';' starts a comment. Reading the
+	// file out of the game data is the caller's job (GameInit.cpp goes
+	// through CRarFile), which keeps this class free of the
+	// executable's file-definition table and archive reader.
+	bool	LoadFromStream(std::istream& in);
 	
 private :
 	bool	CheckScript( const std::list<FilterScript>& List, int &scriptID, int& answerID ) const;

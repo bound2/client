@@ -339,6 +339,73 @@ endif()
 message(STATUS "packetwire library: ${_packetwire_count} sources from tests/arch/packetwire_files.txt")
 
 # ============================================================
+# gamemodel - game-model code with no SDL/UI/dxlib reach
+# (docs/RESTRUCTURING.md task 4.1): the pure data tables and the
+# string/logging support they are built on. Same membership-file
+# discipline as packetwire: tests/arch/gamemodel_files.txt is read by
+# this block (.cpp lines), the include checker (rules M0-M2) and the
+# ratchet script (R4). Header lines in the file are the checker's
+# allowed set and are skipped here.
+# ============================================================
+set(GAMEMODEL_MEMBERSHIP_FILE ${CMAKE_CURRENT_SOURCE_DIR}/tests/arch/gamemodel_files.txt)
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${GAMEMODEL_MEMBERSHIP_FILE})
+file(STRINGS ${GAMEMODEL_MEMBERSHIP_FILE} _gamemodel_lines)
+set(GAMEMODEL_SOURCES)
+foreach(_line IN LISTS _gamemodel_lines)
+	string(STRIP "${_line}" _line)
+	if(NOT _line MATCHES "^Client/.*\\.cpp$")
+		continue()
+	endif()
+	if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${_line})
+		message(FATAL_ERROR "gamemodel membership lists a file that does not exist: ${_line}")
+	endif()
+	list(APPEND GAMEMODEL_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${_line})
+endforeach()
+list(LENGTH GAMEMODEL_SOURCES _gamemodel_count)
+# 10 today; a truncated list must not configure as "the library".
+if(_gamemodel_count LESS 8)
+	message(FATAL_ERROR "gamemodel membership file yielded only ${_gamemodel_count} sources - is ${GAMEMODEL_MEMBERSHIP_FILE} intact?")
+endif()
+
+add_library(gamemodel STATIC ${GAMEMODEL_SOURCES})
+
+target_include_directories(gamemodel PUBLIC
+	${CMAKE_CURRENT_SOURCE_DIR}
+	${CMAKE_CURRENT_SOURCE_DIR}/basic
+	${CMAKE_CURRENT_SOURCE_DIR}/Client
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/framelib
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet
+)
+
+# Same definitions as packetwire, for the same reason: these files used
+# to compile inside VS_UI and the executable, and identical
+# preprocessing is the point of the move.
+target_compile_definitions(gamemodel PRIVATE
+	USE_SDL_BACKEND
+	SPRITELIB_BACKEND_SDL
+	__GAME_CLIENT__=1
+)
+if(WIN32)
+	target_compile_definitions(gamemodel PRIVATE __WIN32__ __WINDOWS__)
+else()
+	target_compile_definitions(gamemodel PRIVATE PLATFORM_MACOS)
+endif()
+
+# packetwire for Properties (the file-definition table the string
+# table's language test reads); iconv for MString's GBK -> UTF-8
+# conversion, carried PUBLIC so every consumer resolves it.
+target_link_libraries(gamemodel PUBLIC basic packetwire)
+if(NOT EMSCRIPTEN)
+	if(Iconv_FOUND)
+		target_link_libraries(gamemodel PUBLIC Iconv::Iconv)
+	else()
+		target_link_libraries(gamemodel PUBLIC iconv)
+	endif()
+endif()
+
+message(STATUS "gamemodel library: ${_gamemodel_count} sources from tests/arch/gamemodel_files.txt")
+
+# ============================================================
 # TextSystem - New SDL-based Text System (Abstracted)
 # ============================================================
 if(USE_SDL_BACKEND OR NOT WIN32)
@@ -422,7 +489,6 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		# U_edit is now cross-platform (SDL-based), so don't exclude it
 		# Exclude problematic files in VS_UI root directory
 		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/DebugInfo\\.cpp")
-		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/MitemTableInit\\.cpp")
 		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/SXml\\.cpp")
 		# Note: u_window.cpp is now cross-platform compatible
 	endif()
@@ -450,80 +516,19 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/WinMain\\.cpp")
 	endif()
 
-	# Client files that VS_UI depends on (按需编译)
-	set(VS_UI_CLIENT_SOURCES
-		# Core
-		Client/Client.cpp
-		Client/ClientFunction.cpp
-
-		# Item System
-		Client/MItem.cpp
-		Client/MItemManager.cpp
-		Client/MItemOptionTable.cpp
-		Client/MMoneyManager.cpp
-
-		# Skill System
-		Client/MSkillManager.cpp
-		Client/SkillDef.cpp
-
-		# Gear System
-		Client/MSlayerGear.cpp
-		Client/MVampireGear.cpp
-		Client/MOustersGear.cpp
-		Client/MQuickSlot.cpp
-
-		# Inventory System
-		Client/MInventory.cpp
-		Client/MStorage.cpp
-		Client/MShopShelf.cpp
-
-		# Zone System
-		Client/MZone.cpp
-		Client/MZoneTable.cpp
-
-		# Player System
-		Client/MPlayer.cpp
-		Client/MCreatureTable.cpp
-		Client/MFakeCreature.cpp
-		Client/MNPCTable.cpp
-
-		# Social System
-		Client/MParty.cpp
-		Client/MGuildMarkManager.cpp
-		Client/MGuildInfoMapper.cpp
-
-		# Trade System
-		Client/MTradeManager.cpp
-		Client/MPriceManager.cpp
-		Client/MShop.cpp
-
-		# Game Data
-		Client/MGameStringTable.cpp
-		Client/ExperienceTable.cpp
-		Client/UserInformation.cpp
-		Client/SystemAvailabilities.cpp
-		Client/FameInfo.cpp
-		Client/DebugInfo.cpp
-		Client/ClientConfig.cpp
-		Client/UtilityFunction.cpp
-		# GameFunctions.cpp - Moved to CLIENT_MAIN_SOURCES to avoid duplicates with GameMain.cpp
-		# GamePacketFunctions.cpp - Removed, all functions now in PacketFunction.cpp
-		Client/RenderingFunctions.cpp
-		Client/UIUtilityFunctions.cpp
-
-		# Events & Time
-		Client/MEventManager.cpp
-		Client/MGameTime.cpp
-		Client/MTimeItemManager.cpp
-
-		# UI Support
-		Client/MHelpMessageManager.cpp
-		Client/MSoundTable.cpp
-		Client/MMonsterKillQuestInfo.cpp
-	)
-
-	# Combine all sources
-	set(VS_UI_ALL_SOURCES ${VS_UI_SRC_SOURCES} ${VS_UI_CLIENT_SOURCES})
+	# VS_UI builds from its own sources only. It used to add a list of
+	# Client/*.cpp files (VS_UI_CLIENT_SOURCES) that the executable's glob
+	# compiled as well, and the executable's objects were the ones that
+	# linked; the list is gone and those files compile once, into the
+	# executable (docs/RESTRUCTURING.md task 4.0).
+	set(VS_UI_ALL_SOURCES ${VS_UI_SRC_SOURCES})
+	# The one exception, kept exactly as it was: the non-Windows executable
+	# filters Client/Client.cpp out (its WinMain entry point), and that
+	# platform got the file from VS_UI.lib. Unverified here - Windows is
+	# the live path - but not knowingly broken.
+	if(NOT WIN32)
+		list(APPEND VS_UI_ALL_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Client/Client.cpp)
+	endif()
 
 	# Create VS_UI static library
 	add_library(VS_UI STATIC ${VS_UI_ALL_SOURCES})
@@ -582,6 +587,7 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	target_link_libraries(VS_UI PUBLIC
 		basic
 		packetwire
+		gamemodel
 		dxlib
 		SpriteLib
 		framelib
@@ -607,11 +613,19 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		target_compile_definitions(VS_UI PUBLIC PLATFORM_MACOS)
 	endif()
 
-	# Define _LIB to match original VC6 build configuration
-	# This excludes test/debug code wrapped in #ifndef _LIB from library builds
-	target_compile_definitions(VS_UI PRIVATE _LIB)
+	# Define _LIB to match the original VC6 library configuration: the
+	# #ifndef _LIB regions of VS_UI are its standalone UI test harness
+	# (its own dialogs, gpC_press_button, message-queue accessors) and stay
+	# out of the game build. PUBLIC, not PRIVATE: the headers change class
+	# layout under _LIB (C_VS_UI_TITLE's m_pC_dialog, for one), so every
+	# translation unit that includes them - the executable's above all -
+	# must see the same definition as the library's own objects, or the two
+	# sides of a call disagree about where the members are (the code-health
+	# review's _LIB ODR finding; docs/RESTRUCTURING.md task 4.0).
+	target_compile_definitions(VS_UI PUBLIC _LIB)
 
-	message(STATUS "VS_UI library will be built from ${VS_UI_SRC_SOURCES} VS_UI files + ${VS_UI_CLIENT_SOURCES} Client files")
+	list(LENGTH VS_UI_SRC_SOURCES _vsui_count)
+	message(STATUS "VS_UI library: ${_vsui_count} sources from VS_UI/")
 endif()
 
 # ============================================================
@@ -847,15 +861,12 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		Client/Globals.cpp
 	)
 
-	# Remove files that are already compiled in VS_UI library
+	# Remove files the executable must not compile
 	list(REMOVE_ITEM CLIENT_MAIN_SOURCES
-		${VS_UI_CLIENT_SOURCES}
 		# Explicitly remove files that duplicate globals in Client.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/GlobalVariables.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/GCNotifyWinHandler.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/GCNotifyWin.cpp
-		# Exclude MitemTableinit2.cpp - duplicates InitItem2() from MitemTableInit.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/MitemTableinit2.cpp
 		# Exclude MissingGlobals.cpp - duplicates globals with GameMain.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/MissingGlobals.cpp
 		# Exclude GameHelpers.cpp - duplicates many functions with GamePacketFunctions.cpp
@@ -885,6 +896,16 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		endif()
 	endforeach()
 
+	# The same for gamemodel (tests/arch/gamemodel_files.txt): its members
+	# come from the Client/ glob above.
+	list(REMOVE_ITEM CLIENT_MAIN_SOURCES ${GAMEMODEL_SOURCES})
+	foreach(_src IN LISTS GAMEMODEL_SOURCES)
+		list(FIND CLIENT_MAIN_SOURCES ${_src} _still_in_exe)
+		if(NOT _still_in_exe EQUAL -1)
+			message(FATAL_ERROR "gamemodel member is still in the executable's source list (case mismatch in tests/arch/gamemodel_files.txt?): ${_src}")
+		endif()
+	endforeach()
+
 	# CAvi.cpp is NOT excluded (re-checked 2026-08-22): the "never
 	# instantiated" claim this exclusion used to be based on doesn't hold -
 	# COpeningUpdate::PlayMPG() does instantiate CAVI and call OpenMPG()/
@@ -910,7 +931,7 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# copy for every CSpritePal symbol at link time (LNK2005).
 	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "/Client/CSpritePal\\.cpp$")
 
-	# Backup files (e.g. MItemTable_bak-2007-5-7.cpp) are stale duplicates of
+	# Backup files (any *_bak-* copy of a source) are stale duplicates of
 	# their non-"_bak" counterpart and were never meant to compile on any
 	# platform - this used to be scoped inside the `if(NOT WIN32)` block
 	# below, so on Windows these still got globbed in and fought their
@@ -929,7 +950,9 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*MInternetConnection.*")
 		# Exclude Handler files in Client root only (not in Packet subdirectories)
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "^Client/[^/]+Handler\\.cpp")
-		# Exclude Client.cpp and ClientFunction.cpp - they're already in VS_UI library
+		# These two anchored patterns never match: the glob yields absolute
+		# paths. ClientFunction.cpp compiles into the executable on every
+		# platform; Client.cpp is excluded below by the unanchored pattern.
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "^Client/Client\\.cpp")
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "^Client/ClientFunction\\.cpp")
 		# MWorkThread and MMusic are needed on all platforms
@@ -944,13 +967,14 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*WavePackFileManager\\.cpp")
 		# Exclude Windows-specific WinMain files
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "WinLib/CWinMain\\.cpp")
-		# Exclude Client.cpp on non-Windows (uses WinMain)
+		# Exclude Client.cpp on non-Windows (uses WinMain); VS_UI carries it
+		# there, see the VS_UI_ALL_SOURCES block.
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "Client/Client\\.cpp")
 	endif()
 
 	# Add DarkEden executable
-	# WIN32 keyword required on Windows: Client/Client.cpp (compiled into the VS_UI
-	# lib below) defines a real WinAPI WinMain, so the exe must link as a GUI
+	# WIN32 keyword required on Windows: Client/Client.cpp (compiled into the
+	# executable) defines a real WinAPI WinMain, so the exe must link as a GUI
 	# subsystem app (not console/main).
 	if(WIN32)
 		add_executable(DarkEden WIN32 ${CLIENT_MAIN_SOURCES})
@@ -993,6 +1017,7 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		dxlib
 		basic
 		packetwire
+		gamemodel
 		framelib
 		VS_UI
 		TextSystem

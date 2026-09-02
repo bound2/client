@@ -63,6 +63,7 @@ chdir $root or die "cannot chdir to repo root: $!";
 
 my $members_file  = 'tests/arch/packetwire_files.txt';
 my $holdouts_file = 'tests/arch/packetwire_holdouts.txt';
+my $gamemodel_file = 'tests/arch/gamemodel_files.txt';
 
 my @violations;
 
@@ -116,6 +117,34 @@ die "$members_file lists only " . scalar(@members) . " files - truncated?" unles
 }
 
 #----------------------------------------------------------------------
+# gamemodel (docs/RESTRUCTURING.md task 4.1) - the same discipline for
+# the second library. Its membership file lists .cpp members (what
+# CMake compiles) AND the .h files the closure may include, because
+# Client/ is not a library-only directory the way Client/Packet is.
+#
+#   M0  Every listed file exists, lives under Client/, and is listed
+#       once; the list is not truncated.
+#   M1  A file in the gamemodel closure may include only files under
+#       basic/, Client/framelib/ or Client/Packet/, Client/Client_PCH.h,
+#       or a file listed in the membership file. Anything else - an
+#       SDL, UI, dxlib or unlisted game header - is a reach out of the
+#       model.
+#   M2  As W2: no MinTr.h / DebugInfo.h / DebugKit.h.
+#----------------------------------------------------------------------
+my @gm_listed = read_list($gamemodel_file);
+die "$gamemodel_file lists only " . scalar(@gm_listed) . " files - truncated?" unless @gm_listed >= 10;
+my %gm_listed;
+my @gm_members;
+{
+	for my $f (@gm_listed) {
+		push @violations, "M0|$f|listed twice" if $gm_listed{lc $f}++;
+		push @violations, "M0|$f|listed but missing" unless -f $f;
+		push @violations, "M0|$f|listed but not under Client/" unless $f =~ m{^Client/};
+		push @gm_members, $f if $f =~ /\.cpp$/i;
+	}
+}
+
+#----------------------------------------------------------------------
 # Include resolution: the file's own directory first (how the compiler
 # treats quote-includes), then the include path the library compiles
 # with, IN THE COMPILER'S ORDER - target_include_directories(packetwire)
@@ -126,7 +155,9 @@ die "$members_file lists only " . scalar(@members) . " files - truncated?" unles
 # is then a W1 violation, not a silent pass). Keep this list in step
 # with CMakeLists.txt.
 #----------------------------------------------------------------------
-my @searchdirs = ('.', 'basic', 'Client', 'Client/Packet');
+# Client/framelib is gamemodel's extra include dir; it comes last so
+# packetwire's resolution order is unchanged.
+my @searchdirs = ('.', 'basic', 'Client', 'Client/Packet', 'Client/framelib');
 
 sub normalize {
 	my ($p) = @_;
@@ -245,9 +276,6 @@ if (open my $fh, '<', 'tests/arch/baseline.txt') {
 #----------------------------------------------------------------------
 my %banned = map { $_ => 1 } qw(MinTr.h DebugInfo.h DebugKit.h);
 
-my %seen;
-my @queue = @members;
-
 sub violate {
 	my ($key) = @_;
 	if (exists $baseline{$key}) {
@@ -256,6 +284,15 @@ sub violate {
 	}
 	push @violations, $key;
 }
+
+# Walk one library's closure. $rule is the rule letter ('W' or 'M');
+# $allowed->($resolved) says whether a resolved include may be walked
+# into (anything else is a <rule>1 violation). Returns the number of
+# files walked.
+sub walk_closure {
+	my ($members, $rule, $allowed) = @_;
+	my %seen;
+	my @queue = @$members;
 
 while (@queue) {
 	my $file = shift @queue;
@@ -295,7 +332,7 @@ while (@queue) {
 
 		my ($base) = $inc =~ m{([^/\\]+)$};
 		if ($banned{$base}) {
-			violate("W2|$file|$inc");
+			violate("${rule}2|$file|$inc");
 			next;
 		}
 
@@ -304,20 +341,30 @@ while (@queue) {
 			# An angle include nothing in the tree satisfies is a system
 			# header; a quoted one is a broken edge either way.
 			next if $angle;
-			violate("W1|$file|$inc (unresolved)");
+			violate("${rule}1|$file|$inc (unresolved)");
 			next;
 		}
 
-		if ($resolved =~ m{^Client/Packet/} or
-		    $resolved =~ m{^basic/} or
-		    $resolved eq 'Client/Client_PCH.h') {
+		if ($allowed->($resolved)) {
 			push @queue, $resolved;
 		} else {
-			violate("W1|$file|$inc -> $resolved");
+			violate("${rule}1|$file|$inc -> $resolved");
 		}
 	}
 	close $fh;
 }
+	return scalar keys %seen;
+}
+
+my $count = walk_closure(\@members, 'W', sub {
+	my ($r) = @_;
+	return $r =~ m{^Client/Packet/} || $r =~ m{^basic/} || $r eq 'Client/Client_PCH.h';
+});
+my $gm_count = walk_closure(\@gm_members, 'M', sub {
+	my ($r) = @_;
+	return $r =~ m{^basic/} || $r =~ m{^Client/framelib/} || $r =~ m{^Client/Packet/}
+		|| $r eq 'Client/Client_PCH.h' || $gm_listed{lc $r};
+});
 
 #----------------------------------------------------------------------
 # Report
@@ -334,11 +381,11 @@ for my $b (sort keys %baseline) {
 	$fail = 1;
 }
 
-my $count = scalar keys %seen;
 my $nmembers = scalar @members;
+my $gm_nmembers = scalar @gm_members;
 if ($fail) {
-	print "arch_includes: FAILED ($nmembers members, $count files walked)\n";
+	print "arch_includes: FAILED (packetwire $nmembers members, $count files walked; gamemodel $gm_nmembers members, $gm_count files walked)\n";
 	exit 1;
 }
-print "arch_includes: OK ($nmembers members, $count files walked, W0/W1/W2 clean)\n";
+print "arch_includes: OK (packetwire $nmembers members, $count files walked, W0/W1/W2 clean; gamemodel $gm_nmembers members, $gm_count files walked, M0/M1/M2 clean)\n";
 exit 0;

@@ -3,9 +3,6 @@
 //-----------------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "MMoneyManager.h"
-
-#include "MHelpManager.h"
-#include "MHelpDef.h"
 //-----------------------------------------------------------------------------
 // Global
 //-----------------------------------------------------------------------------
@@ -18,14 +15,32 @@ MMoneyManager*		g_pMoneyManager = NULL;
 //-----------------------------------------------------------------------------
 MMoneyManager::MMoneyManager()
 {
-	m_MoneyLimit	= 2000000000;		// 20억
+	m_MoneyLimit	= 2000000000;		// two billion
 	m_Money			= 0;
+	m_bStorageHintGiven	= false;
+	m_StorageHintHook	= NULL;
 }
 
+// A copy keeps the balance, the limit and the hint state, not the hook:
+// a temporary made from the player's wallet must not give hints.
 MMoneyManager::MMoneyManager(const MMoneyManager& mm)
 {
 	m_MoneyLimit = mm.m_MoneyLimit;
 	m_Money = mm.m_Money;
+	m_bStorageHintGiven = mm.m_bStorageHintGiven;
+	m_StorageHintHook = NULL;
+}
+
+// Assignment: the balance, the limit and the hint state come across;
+// the wallet assigned to keeps its own hook (the compiler's default
+// would have copied the source's, unlike the copy constructor).
+MMoneyManager&
+MMoneyManager::operator=(const MMoneyManager& mm)
+{
+	m_MoneyLimit = mm.m_MoneyLimit;
+	m_Money = mm.m_Money;
+	m_bStorageHintGiven = mm.m_bStorageHintGiven;
+	return *this;
 }
 
 MMoneyManager::~MMoneyManager()
@@ -51,16 +66,13 @@ MMoneyManager::SetMoney(int money)
 
 	m_Money = money;
 
-	// 2004, 5, 6, sobeit add start - 돈이 10 만이 넘으면 보관함 도움말
-#ifdef __GAME_CLIENT__
-	static bool CanBuyStorage = false;
-	if( false == CanBuyStorage && m_Money>100000 )
+	// Past 100,000 for the first time: suggest a storage box (once).
+	if (!m_bStorageHintGiven && m_Money > 100000)
 	{
-		ExecuteHelpEvent(HELP_EVENT_STORAGE_BUY);
-		CanBuyStorage = true;
+		m_bStorageHintGiven = true;
+		if (m_StorageHintHook != NULL)
+			m_StorageHintHook();
 	}
-#endif
-	//2004, 5, 6 sobeit add end
 	return true;
 }
 
@@ -85,17 +97,19 @@ MMoneyManager::UseMoney(int money)
 //-----------------------------------------------------------------------------
 // Can Add Money
 //-----------------------------------------------------------------------------
-bool		
+bool
 MMoneyManager::CanAddMoney(int money)
 {
-	int left = m_Money + money;
-
-	if (money > m_MoneyLimit)
+	// The question is whether the BALANCE stays within the limit, not
+	// whether the amount alone does; this used to compare the amount,
+	// so a wallet near the limit said yes and the AddMoney that
+	// followed said no (docs/RESTRUCTURING.md task 4.2). Written as a
+	// subtraction so a large amount cannot overflow the sum.
+	if (money < 0)
 	{
-		return false; 
+		return false;
 	}
-
-	return true;
+	return money <= m_MoneyLimit - m_Money;
 }
 
 //-----------------------------------------------------------------------------

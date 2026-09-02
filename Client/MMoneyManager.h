@@ -11,7 +11,8 @@ class MMoneyManager {
 
 	public :
 		MMoneyManager();
-		MMoneyManager(const MMoneyManager& mm); 	
+		MMoneyManager(const MMoneyManager& mm);
+		MMoneyManager& operator=(const MMoneyManager& mm);
 		~MMoneyManager();
 
 		//-------------------------------------------------------
@@ -34,9 +35,26 @@ class MMoneyManager {
 		int			GetMoneyLimit() const		{ return m_MoneyLimit;}
 		int			GetMaxAddMoney() const		{ return m_MoneyLimit - m_Money; }
 
+		//-------------------------------------------------------
+		// Storage hint (docs/RESTRUCTURING.md task 4.2)
+		//
+		// The help system wants to know the first time a wallet
+		// passes 100,000, to suggest buying a storage box. The
+		// manager only reports it, through a hook the executable
+		// installs on the player's own wallet at start-up; nothing
+		// UI-side is reachable from here, and the temporary wallets
+		// a trade or the storage box builds carry no hook and give
+		// no hint.
+		//-------------------------------------------------------
+		typedef void (*StorageHintHook)();
+		void		SetStorageHintHook(StorageHintHook hook)	{ m_StorageHintHook = hook; }
+
 	protected :
-		int			m_MoneyLimit;	// 가질 수 있는 돈의 한계
-		int			m_Money;		// 돈 - -;
+		int			m_MoneyLimit;	// the most this wallet may hold
+		int			m_Money;		// the balance
+
+		bool			m_bStorageHintGiven;	// the hint fires once per wallet
+		StorageHintHook	m_StorageHintHook;
 };
 
 extern MMoneyManager*		g_pMoneyManager;

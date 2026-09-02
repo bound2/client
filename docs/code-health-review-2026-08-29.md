@@ -60,9 +60,11 @@ A subsystem-by-subsystem review surfaced **197 findings**. Every area graded **D
 
 ## Remediation Status
 
+**Updated 2026-09-02:** the silent `list(REMOVE_ITEM)` High finding below is fixed by `docs/RESTRUCTURING.md` task 4.0 (`restructuring/vsui-single-compile`), and the `_LIB` ODR High finding that followed it by the same task's second slice (`restructuring/vsui-lib-define-public`), taking the total to 81 fixed and High to 38 fixed / 19 open.
+
 **Updated 2026-09-01 (High-severity pass).** 79 of the 197 findings have been fixed: 11 on branch `harden/library-code-fixes` ([PR #1](https://github.com/bound2/client/pull/1)), 2 on `harden/packet-index-bounds` ([PR #4](https://github.com/bound2/client/pull/4)), 11 on `harden/network-input`, 4 by the earlier SDL_mixer wiring commit `c0670ae` (recorded retroactively during the audio pass), 17 on `harden/audio-media`, 8 on `harden/text-format`, 2 on `harden/pointer-truncation`, and 24 on `harden/high-severity-batch1`. Fixed findings carry a ✅ marker in the sections below, naming the commit and the tests covering them; three carry ⚠️ instead, meaning the finding was resolved without a code change — already fixed elsewhere, made unreachable by another fix, or only partly closed with the remainder stated.
 
-By severity: **Critical 27 fixed / 1 open** (C19, narrowed — see its entry), **High 36 fixed, 3 noted, 21 open**, **Medium 13 fixed / 68 open**, **Low 3 fixed / 25 open**.
+By severity: **Critical 27 fixed / 1 open** (C19, narrowed — see its entry), **High 38 fixed, 3 noted, 19 open** (36/21 until the two build findings closed on 2026-09-02), **Medium 13 fixed / 68 open**, **Low 3 fixed / 25 open**.
 
 **Every finding the review rated Critical is now closed or explicitly narrowed** (C19 is narrowed — see its entry). That does not mean the client is free of critical defects: the pointer-truncation pass found a whole family of the same class that the review never recorded, described under *Open, not in this review* below.
 
@@ -2710,6 +2712,8 @@ Line 602's comment reads "Remove files that are already compiled in VS_UI librar
 
 **Recommendation:** Prefix the entries of VS_UI_CLIENT_SOURCES with `${CMAKE_CURRENT_SOURCE_DIR}/` (or build a second absolute-path list for the removal), then rebuild clean and confirm each of those files appears in exactly one .vcxproj. A `foreach`/`list(APPEND)` loop that absolutises the list in one place is less error-prone than editing 35 lines.
 
+> ✅ **Fixed 2026-09-02** on `restructuring/vsui-single-compile` (`docs/RESTRUCTURING.md` task 4.0), the other way round from the recommendation: since the executable's own objects were the ones the linker used all along (its objects are always linked; library members only resolve what is still undefined), the `VS_UI_CLIENT_SOURCES` list was deleted and the 36 files compile once, into the executable. A linker map before and after — symbol, defining object, order and address — is identical apart from timestamps. The `_LIB` ODR finding below is unchanged by this and stays open.
+>
 > **Still open, but re-measured 2026-09-01 against the generated tree.** The count is **43**, not ~35: `DarkEden.vcxproj` lists 1044 translation units and `VS_UI.vcxproj` 97, and 43 **full paths** appear in both — the `MItem`/`MZone`/`MPlayer` group the finding named, plus `Client.cpp`, `MGameStringTable.cpp` and `MCreatureTable.cpp`.
 >
 > A first pass at this measurement said 46 by comparing **basenames**, which is wrong in a way worth recording because it is easy to repeat: three basenames collide between *different* files — `Client_PCH.cpp`, `MitemTableInit.cpp` and `SXml.cpp` each exist once under `Client/` and once under `VS_UI/`. Those are two distinct sources, not one compiled twice, and folding them in inflates exactly the number the finding is about. Compare full paths.
@@ -2719,6 +2723,8 @@ Line 602's comment reads "Remove files that are already compiled in VS_UI librar
 #### 🟠 High -- _LIB is defined PRIVATE on VS_UI but not on DarkEden, giving inline functions in VS_UI headers two different bodies in the same link (ODR violation).
 
 **Category:** correctness  |  **Location:** `CMakeLists.txt:371`
+
+> ✅ **Fixed 2026-09-02** on `restructuring/vsui-lib-define-public` (`docs/RESTRUCTURING.md` task 4.0, second slice): the definition is `PUBLIC` on the `VS_UI` target, so the executable compiles its 72 VS_UI-including translation units (50 under `Client/`, 22 packet handlers) with `_LIB` too and sees the library layout. The recommendation's first option; moving the `#ifndef _LIB` blocks out of the headers would remove the macro's power to fork layouts at all and stays open as the better long-term shape.
 
 Line 371 sets `target_compile_definitions(VS_UI PRIVATE _LIB)`; the DarkEden target never gets it. Confirmed in the generated projects: VS_UI.vcxproj defines `_LIB;SPRITELIB_BACKEND_SDL;SPRITESURFACE_STANDALONE` while DarkEden.vcxproj defines `USE_SDL_BACKEND;SPRITELIB_BACKEND_SDL;__GAME_CLIENT__=1;__WIN32__;__WINDOWS__;SPRITESURFACE_STANDALONE` — no `_LIB`. `_LIB` is not an internal detail; it gates code inside shared *headers*: VS_UI/src/header/VS_UI_widget.h:300-320 wraps the body of the inline member `ButtonGroup::MouseControl` so that the `g_GetCtrlPushState()` drag-handling branch and the function-local `static bool press; static int gapx, gapy;` exist only when `_LIB` is undefined. VS_UI/src/header/VS_UI_Base.h:324-326 similarly adds/removes the inline member `Base::GetMessageSize()`. Because the duplicate-compilation bug above puts Client/MPlayer.cpp, MZone.cpp, MSkillManager.cpp etc. in *both* targets, and DarkEden-only files such as Client/GameUI.cpp and Client/MTopView.cpp include these same headers, one link contains two different definitions of the same inline function. That is a hard ODR violation: the linker keeps one COMDAT arbitrarily and every caller silently gets it, so which UI drag behaviour you ship depends on link order rather than on any source-level decision.
 

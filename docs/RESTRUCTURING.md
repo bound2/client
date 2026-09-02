@@ -113,10 +113,10 @@ an unrecorded drop, so tightening lands in the same commit as the progress.
 
 | # | Metric | Baseline | Command |
 |---|--------|---------:|---------|
-| R1 | Translation units compiled directly into the DarkEden target | **528** (529 before task 2.5 deleted the dead `CRRequest2Handler.cpp`; 992 before task 2.4 moved the 465 packet/table/info sources into `packetwire`, +1 for the split-out `GCExchangeBuyHandler.cpp`; 1,044 before task 1.1; the task-2.2 composition root `PacketHandlerRegistry.cpp` was a recorded +1, offset when finishing the migration deleted `CGHandlersStub.cpp`) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` — `ratchets.sh` reads the generated vcxproj, preferring the ctest run's own build dir; on generators with no vcxproj it reports SKIP, not PASS |
+| R1 | Translation units compiled directly into the DarkEden target | **515** (516 before 5.2 deleted the dead `MitemTableInit.cpp`; 517 before 4.4's first slice moved `MItemTable.cpp`; 518 before 4.2 moved `MMoneyManager.cpp`, another double-compiled VS_UI entry; 528 before task 4.1's `gamemodel` took its ten members out — the four support sources, and the six tables that the relative `VS_UI_CLIENT_SOURCES` list had never actually removed from the exe glob, so they compiled into both VS_UI and the executable — as the 36 files still on that list do; 529 before task 2.5 deleted the dead `CRRequest2Handler.cpp`; 992 before task 2.4 moved the 465 packet/table/info sources into `packetwire`, +1 for the split-out `GCExchangeBuyHandler.cpp`; 1,044 before task 1.1; the task-2.2 composition root `PacketHandlerRegistry.cpp` was a recorded +1, offset when finishing the migration deleted `CGHandlersStub.cpp`) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` — `ratchets.sh` reads the generated vcxproj, preferring the ctest run's own build dir; on generators with no vcxproj it reports SKIP, not PASS |
 | R2 | Packet `.cpp` files still defining a packet-style `::execute(Player` | **0** (448 → 432 in slice 1 → 0 when 2.2/2.3 finished; regex refined at 0 to stop matching comments and the in-file handler body in `GCExchangeBuy.cpp`) | `grep -rlE '^void\s+\w+::execute\s*\(\s*Player' Client/Packet/{Gpackets,Cpackets,Lpackets,Rpackets,Upackets} --include='*.cpp' \| grep -v Handler \| wc -l` |
 | R3 | Live `sprintf`/`strcpy`/`strcat` lines under `Client/Packet` **and `Client/PacketHandler`** | 46 (unchanged by task 2.4, which widened the scope to follow the handlers out of `Client/Packet`; 61 at first measurement — the 2026-09-01 adversarial review showed a quarter of that was commented-out code, so the measurement now excludes `//` matches) | see `ratchets.sh` — the grep excludes comment-prefixed matches |
-| R4 | Library-compiled `.cpp` files referencing `g_p*` client globals **they do not define themselves** | **61** (81 before task 2.4 grew the membership from 52 to 518 files; the number fell because the measurement stopped counting a file's references to globals it defines — the packet tables own `g_pPacketFactoryManager`/`g_pPacketValidator` — and the two dead server-only bodies that reached game globals were deleted; 83 at first measurement, before two never-compiled files were filtered) | `ratchets.sh` computes it over the library dirs (minus CMake-excluded files) plus the `VS_UI_CLIENT_SOURCES` list parsed from `CMakeLists.txt` and the `packetwire` membership file |
+| R4 | Library-compiled `.cpp` files referencing `g_p*` client globals **they do not define themselves** | **35** (59 before task 4.0 — a reclassification, not seam-cutting: the 36 `VS_UI_CLIENT_SOURCES` files stopped being library-compiled, so the 24 of them that reach globals are executable debt now, counted by R1 and outside this ratchet; 61 before task 4.1 cut the two `g_pFileDef` seams in `MGameStringTable` and `SystemAvailabilities` and added the `gamemodel` membership file, whose four new members reference no game global; 81 before task 2.4 grew the membership from 52 to 518 files; the number fell because the measurement stopped counting a file's references to globals it defines — the packet tables own `g_pPacketFactoryManager`/`g_pPacketValidator` — and the two dead server-only bodies that reached game globals were deleted; 83 at first measurement, before two never-compiled files were filtered) | `ratchets.sh` computes it over the library dirs (minus CMake-excluded files) plus the `packetwire` and `gamemodel` membership files |
 | R5 | Direct packet `execute()` call sites outside `Client/Packet` (handlers under `Client/PacketHandler` are in scope) | 1 (a commented-out block in `CGameUpdate.cpp`; added 2026-09-01 after the review found live local-echo callers the receive-loop enumeration had missed; task 2.4 found two more inside handlers — `GCReconnectLoginHandler`/`LCReconnectHandler` fabricating a `CGConnectSetKey` — invisible while handlers lived under the excluded `Client/Packet`, caught by the compiler once `Packet::execute` was deleted, and routed through the dispatcher; a live caller is now a compile error before it is a ratchet failure) | see `ratchets.sh` |
 
 R1 is the headline number: it counts what still cannot be unit-tested. R2 is
@@ -688,7 +688,18 @@ Not a code phase — the standing rule this plan exists to enable, stated once:
   test-first; (c) *exempt* — the code is on the exemption list, the commit
   says so and carries the regression-guard wording. A fix commit that is
   none of the three is wrong.
-  > **Status:** not started (activates when 1.2 lands; record adoption here).
+  > **Status:** adopted (recorded 2026-09-02 with task 4.1). The rule
+  > has been followed in substance since 1.2 — every fix was written
+  > test-first in a library or called out as executable-side — but not
+  > in wording: of the nine `fix:` commits since 1.2, `GCUpdateInfo`,
+  > `GCAddItemToItemVerify` and the item-option bound say "Test path:
+  > lib + test" / "exempt" outright, the two `StringStream` fixes and
+  > the slot-info leak say "test-first against packetwire" instead, and
+  > the two review-round repair commits (`9b69cff`, `e5db5f9`) name no
+  > path at all while mixing library and handler edits. From here on the
+  > three words are mandatory in every fix commit, review-round repairs
+  > included, and the 4.1 review round is the miss that graduates this
+  > to a commit-lint hook: add it with the next fix.
   - Owner: review practice + this document; graduate to a commit-lint hook
     if drift is observed.
 
@@ -698,24 +709,196 @@ Not a code phase — the standing rule this plan exists to enable, stated once:
 
 Background work, one class family per branch, each independently mergeable.
 Target library: `gamemodel` (new; links `basic` + `packetwire`, **no**
-SDL/dxlib/VS_UI). The catch: ~45 `Client/*.cpp` model files currently
-compile into the **VS_UI** target (`VS_UI_CLIENT_SOURCES`), which is
+SDL/dxlib/VS_UI). The catch, as first written: ~45 `Client/*.cpp` model
+files sat in the **VS_UI** target's list (`VS_UI_CLIENT_SOURCES`), which is
 nominally a library but drags exe globals, so linking it into tests is not
-viable — extraction means moving files *out of that list* into `gamemodel`
-and cutting their `g_p*`/UI seams.
+viable. Task 4.1 found they compiled into the executable too (the list was
+relative, the exe's glob absolute, so the `REMOVE_ITEM` between them never
+matched — every file on it was built twice and the exe's object won the
+link, the LNK4217 noise CLAUDE.md used to describe), and 4.0 resolved it
+the safe way round: the executable's objects were the ones that linked all
+along, so the list is gone and the files compile once, into the
+executable. Extraction now means adding a file to
+`tests/arch/gamemodel_files.txt` (which removes it from the exe by absolute
+path and asserts it) and cutting its `g_p*`/UI seams.
 
 Order of attack (dependency-ranked; re-verify with an include scan when
 starting each — the scan is one grep, and the ranking below is from a
 2026-09-01 reading of the include graph, not a proof):
 
-- [ ] **4.1 Pure tables first:** `ExperienceTable.cpp`,
+- [x] **4.0 Compile the VS_UI client sources once.** Drop
+  `VS_UI_CLIENT_SOURCES` from the `VS_UI` target so its 36 `Client/*.cpp`
+  files are built only into the executable, where they already linked
+  from.
+  > **Status:** done (2026-09-02, `restructuring/vsui-single-compile`;
+  > live verification gates the merge as always, but this one is also
+  > proven offline). Objects handed to the linker are always linked;
+  > library members only when they resolve something still undefined,
+  > and every symbol the 36 `VS_UI.lib` copies defined was already
+  > defined by the executable's own objects — so the copies never
+  > linked, and the executable ran on its own objects. The opposite
+  > repair (make the `REMOVE_ITEM` work, link the `_LIB`-compiled
+  > copies instead) would have changed which objects run and, through
+  > the `#ifndef _LIB` members in the VS_UI headers, class layouts.
+  > **Proof:** a linker map of `DarkEden.exe` built before and after,
+  > the after-link forced non-incremental so the map is really rewritten
+  > (the first attempt compared a stale map with itself — the review
+  > caught it): 989,469 symbol → defining-object rows each, 0 differ;
+  > the objects appear in the same order; every symbol sits at the same
+  > address — the two images differ only in their timestamps. No
+  > `VS_UI:<client file>.obj` contributed before, and `VS_UI.vcxproj`
+  > carries no `Client/` source after. The list, the exe's
+  > never-matching `REMOVE_ITEM` entry and the gamemodel assertion
+  > against the list are gone. R1 unchanged at 517 (the files were
+  > already counted); R4 59 → 35 by reclassification — the 24 of those
+  > files that reach `g_p*` globals are executable debt now, which R1
+  > counts.
+  > **Adversarial review round (2026-09-02, 2 reviewers; one NO-SHIP,
+  > one SHIP-with-fixes), fixed on the branch:** both caught that the
+  > first "after" map was the before map again — the incremental relink
+  > had not rewritten it — so the proof above is the re-taken one; the
+  > non-Windows executable filters `Client/Client.cpp` out (its WinMain)
+  > and used to get it from `VS_UI.lib`, so that one file stays in
+  > `VS_UI` on `NOT WIN32` — unverified, Windows being the live path, but
+  > not knowingly broken; two CMake comments still said `Client.cpp` was
+  > "compiled into the VS_UI lib" and the R4 row's method column still
+  > named the deleted list; the code-health review's High finding on the
+  > silent `REMOVE_ITEM` is marked fixed. **Left open, recorded:** the
+  > review's neighbouring High finding — `_LIB` is defined for `VS_UI`
+  > and not for the executable, and the `#ifndef _LIB` members in the
+  > VS_UI headers give the 54 `VS_UI/src` objects a different
+  > `C_VS_UI_TITLE` layout than the executable's objects see. This task
+  > was that finding's stated precondition and did not change which
+  > objects link, so the hazard is exactly as before; it is next for
+  > this area.
+  > **Second slice (2026-09-02, `restructuring/vsui-lib-define-public`;
+  > live verification gates the merge):** that hazard closed. `_LIB` is
+  > not a detail of VS_UI's build: its ~100 `#ifndef _LIB` regions are
+  > the standalone UI test harness (own dialogs, `gpC_press_button`, the
+  > message-queue accessors, `VS_UI_ExtraDialog.h`), which the original
+  > VC6 library configuration compiled out — and some of those regions
+  > are class members, so a translation unit including the headers
+  > without `_LIB` sees a different layout than the library's objects.
+  > The definition is now `PUBLIC` on the `VS_UI` target, so the
+  > executable's 72 translation units that include VS_UI headers (50
+  > under `Client/`, 22 packet handlers) compile with it
+  > too and both sides of every call agree on where the members are.
+  > Dropping `_LIB` instead would have compiled the harness into the
+  > game. Nothing in `Client/` used a harness-only member (the build
+  > would have said so); the three `_LIB` mentions in `Client/` are dead
+  > under `__GAME_CLIENT__` or `OUTPUT_DEBUG`, and `g_bEnable3DHAL` keeps
+  > its one definition in `GameInit.cpp` (`VS_UI_Title.cpp` declares it
+  > `extern` under `_LIB`).
+  - Owner: the linker-map comparison recorded above; R4's membership no
+    longer parses a CMake list.
+
+- [x] **4.1 Pure tables first:** `ExperienceTable.cpp`,
   `MItemOptionTable.cpp`, `MGameStringTable.cpp`, `MSoundTable.cpp`,
   `SystemAvailabilities.cpp`, `FameInfo.cpp`. Data-in/data-out, load from
   files — the `TArray`-style loader tests already show the test pattern.
-  > **Status:** not started.
+  > **Status:** done (2026-09-02, `restructuring/gamemodel-tables`;
+  > live verification gates the merge). `gamemodel` exists: a static
+  > library over `basic` + `packetwire` (+ iconv for `MString`), no
+  > SDL/UI/dxlib, with the packetwire discipline — membership in
+  > `tests/arch/gamemodel_files.txt`, read by CMake (`.cpp` lines), the
+  > include checker (rules **M0–M2**: every listed file exists under
+  > `Client/`; the closure may include only `basic/`,
+  > `Client/framelib/`, `Client/Packet/`, `Client_PCH.h` and the `.h`
+  > lines of the file; no `MinTr.h`/`DebugInfo.h`/`DebugKit.h`) and
+  > the ratchet script (R4). Members: the six tables, `ExpInfo.cpp`,
+  > and the support they stand on — `MString.cpp`, `MStringArray.cpp`,
+  > `DebugLog.cpp` (the lib-safe logger 5.1 wants finished; its dead
+  > `#if 0` reach to `g_pDebugMessage` was deleted). The include scan
+  > confirmed the 2026-09-01 ranking: the six were clean apart from two
+  > `g_pFileDef` seams, cut so the files reference no executable
+  > global: `UseEnglishText` takes the `Properties` table (with a
+  > path-taking `UseEnglishTextFrom` underneath, the testable core), and
+  > `SystemAvailabilitiesManager::LoadFromFile` — which opened the
+  > archive through `CRarFile` and `g_pFileDef` — became
+  > `LoadFromStream(std::istream&)`, with `GameInit.cpp` reading the
+  > archive and handing over the lines (`MinTr.h` was a vestigial
+  > include). `FameInfo` needs only the `SKILLDOMAIN` enum from
+  > `SkillDef.h`, which is listed as a header, not compiled.
+  > **Found on the way:** the six tables had been compiled into BOTH
+  > `VS_UI` and the executable all along — `VS_UI_CLIENT_SOURCES` is
+  > relative and the exe's `REMOVE_ITEM` never matched the glob's
+  > absolute paths (the LNK4217 trap CLAUDE.md names). The membership
+  > removal is absolute and asserted, so **R1 528 → 518**: the ten
+  > members left the executable, ten fewer twice-compiled units. And a
+  > real defect: `ITEMOPTION_TABLE::LoadFromFile` wrote the part names
+  > into two fixed `MAX_PART` arrays for however many the file declared
+  > — the test's oversized count crashed the suite before the bound
+  > went in (test-first, lib + test).
+  > **Tests** (`test_gamemodel_tables.cpp`, 12): each loader fed its
+  > own byte layout from a scratch file — experience by level with
+  > out-of-range reads yielding the default, item options with part
+  > names and the two rejections (oversized and negative counts), the
+  > sound table round trip, the nickname layout's index bound, fame by
+  > domain and level, the availability script's three record kinds
+  > (script filters gated by the system flag, zone lists by open degree
+  > with the out-of-range degree dropped, per-degree scripts following
+  > their zone), and the language file's English decision. R4 61 → 59.
+  > Suite: 184 tests (3,284 checks) green plain and ASan; all four
+  > trees 0 errors.
+  > **Adversarial review round (2026-09-02, 2 reviewers by angle — the
+  > cap in force from here: one SHIP, one NO-SHIP), fixed on the
+  > branch:** the new "member still in `VS_UI_CLIENT_SOURCES`" assertion
+  > compared an absolute path against the relative list — the very
+  > mismatch it was guarding against — and could never fire; it now
+  > compares repository-relative. The double-compilation finding was
+  > understated: the 37 files still on the list are all compiled into
+  > both targets today (recorded in the Phase 4 intro above; fixing the
+  > `REMOVE_ITEM` is its own branch). The 3.1 "every fix names its path"
+  > claim was false for four earlier commits and is corrected there.
+  > The tests' `strcmp` on `GetString()` now goes through a NULL-safe
+  > helper, so a regression fails a check instead of crashing the run.
+  > Observation kept, not fixed: a refused item-option table leaves the
+  > part-name `MString`s NULL and three `VS_UI` call sites `strcpy` them
+  > unguarded — pre-existing for any unset part, and the alternative was
+  > heap corruption at startup; a 4.3/4.4 seam.
 - [ ] **4.2 Money/price/trade logic:** `MMoneyManager.cpp`,
   `MPriceManager.cpp`, `MTradeManager.cpp` (seams to `g_pShop`/UI to cut).
-  > **Status:** not started.
+  > **Status:** money done, price/trade re-ranked (2026-09-02,
+  > `restructuring/gamemodel-money`; live verification gates the merge).
+  > The include scan the plan asks for overturned the 2026-09-01
+  > ranking for two of the three: `MPriceManager` prices through
+  > `MItem`, `g_pItemTable`, `g_pPlayer` (race, stats, level),
+  > `g_pEventManager`, `g_pTimeItemManager`, `g_pSkillAvailable` and
+  > `g_pUserInformation` (its `g_pZone` reach is commented out; the
+  > player and time-item ones sit under `__GAME_CLIENT__`, live in every
+  > client build), and `MTradeManager` is an `MInventory`
+  > shuffle over `MItem`s — both stand on the item core and the
+  > containers, so they move **after 4.3/4.4**, not before. **`MMoneyManager`
+  > is in `gamemodel`**: its one reach, the storage-box help hint
+  > `SetMoney` raised past 100,000, is a per-wallet hook the executable
+  > installs on the player's wallet at start-up (the trade and storage
+  > box wallets carry none — under the old process-wide `static`
+  > one-shot, any of them crossing the threshold consumed the hint).
+  > **A defect fixed test-first:** `CanAddMoney` compared the amount
+  > alone against the limit and ignored the balance, so a wallet near
+  > the limit answered yes and the `AddMoney` that followed answered no
+  > — the trade manager asks the first before accepting and does the
+  > second after, and the other side's money had nowhere to go in
+  > between (its `else` branch is an empty comment). Now it answers for
+  > the balance the add would leave, without overflowing on a large
+  > amount. `test_money_manager.cpp`: 8 tests (limits, add/use,
+  > CanAdd/CanUse agreeing with Add/Use around the edge, the hint once
+  > per wallet through the hook, no hook no hint). R1 518 → 517 (the
+  > file was another of the double-compiled VS_UI entries). Suite: 192
+  > tests (3,334 checks).
+  > **Adversarial review round (2026-09-02, 2 reviewers, both SHIP with
+  > findings), fixed on the branch:** the copy-constructor test copied a
+  > wallet that had already hinted, so "state copied" and "hook dropped"
+  > were indistinguishable — split into two wallets where only one half
+  > can suppress the hint; the compiler's `operator=` would have copied
+  > the hook where the copy constructor drops it — an explicit one now
+  > copies balance, limit and state and keeps the target's hook, with a
+  > test; `g_pZone` was listed as a live price dependency but is only a
+  > commented-out condition; the R1 row's "37 files still on that list"
+  > was 36 after this move; and the fix commit's "four checks" was
+  > counted against a hybrid old body — under the original one the
+  > negative-amount check fails too, five. Suite: 194 tests (3,345
+  > checks).
 - [ ] **4.3 Containers:** `MInventory.cpp`, `MStorage.cpp`,
   `MShopShelf.cpp`, `MQuickSlot.cpp` — the shop/stash index-bounds fixes
   from the review live here and deserve permanent tests.
@@ -723,9 +906,61 @@ starting each — the scan is one grep, and the ranking below is from a
 - [ ] **4.4 Item/skill cores:** `MItem.cpp`, `MItemManager.cpp`,
   `MSkillManager.cpp`, `SkillDef.cpp`, gear classes. Likely partial —
   whatever stays coupled goes on the exemption list explicitly.
-  > **Status:** not started.
-  - Owner (all of 4.x): `gamemodel`'s explicit source list, an M1 include
-    rule (no SDL/UI/dxlib headers from `gamemodel`), R4 shrinking.
+  > **Status:** first slice done — the item table (2026-09-02,
+  > `restructuring/gamemodel-items`; live verification gates the
+  > merge). The scan of the item family: `MItem.h` is clean (`MObject`,
+  > `MItemTable`, the two item managers, `ItemClassDef`), three of the
+  > four item-manager sources reach no global (`MItemManager.cpp`
+  > assigns the arms-band and quick-slot globals; the 4.3 containers
+  > all reach the player or their own `g_p*`), and `MItem.cpp` is the
+  > god class the plan expected — roughly three fifths of its methods
+  > touch no global, the rest are the `UseQuickItem` family (packets,
+  > player, zone, dialogs), the name lookups (`g_pUserInformation` for
+  > the language) and the colour sets (`g_pClientConfig`). So 4.3 and
+  > the rest of 4.4
+  > wait on a split of `MItem.cpp` into a core the containers can be
+  > linked against and an executable half; the item table went first
+  > because nothing depends on that split. **`MItemTable` is in
+  > `gamemodel`** with `ItemClassDef.h`, `AddonDef.h` and `DrawTypeDef.h`
+  > as listed headers: its 23,000-line in-code item definitions are the
+  > server's (`__INIT_ITEM__`, never defined here — the client loads
+  > `Item.inf`), so the live code is `ITEMTABLE_INFO`'s loader,
+  > `ITEMTYPE_TABLE`'s average price and `ITEMCLASS_TABLE::InitClass`;
+  > `ITEMCLASS_TABLE::InitItem2` stays defined in the executable
+  > (`MitemTableInit.cpp`, dead — called only from the server-only
+  > constructor). Two reaches cut: a `DebugInfo.h` include nothing used,
+  > and `MItem.h` included for the class enum, replaced by
+  > `ItemClassDef.h`; the header now pulls its own platform types so a
+  > test can include it alone. Tests (`test_item_table.cpp`, 6): a
+  > full save/load round trip of every field, the file head pinned by
+  > hand (English name first, then Korean, then description), the
+  > average price over option-free items rounded to hundreds and zero
+  > when none qualifies, and `InitClass` sizing one class. R1 517 → 516.
+  > Suite: 200 tests (3,411 checks).
+  > **Adversarial review round (2026-09-02, 2 reviewers, both SHIP with
+  > findings), fixed on the branch:** a real defect the new tests had
+  > walked past — `ITEMTABLE_INFO`'s constructor never set `Price`,
+  > `Race` or `DropFrameID`, and `ITEMTYPE_TABLE` had no constructor for
+  > its average price, so an `InitClass`'d slot no file entry filled
+  > read garbage; the constructor test now pins every field and fails
+  > without the fix (0xCC patterns under `/RTC1`), and a fresh type
+  > table answers 0. The "four container sources reach no global"
+  > sentence was wrong (three; `MItemManager.cpp` assigns three), the
+  > method counts were one script's reading and are stated as a
+  > proportion, and the test header claimed the round trip pins the
+  > on-disk order when it pins agreement between save and load — only
+  > the string head is pinned against bytes, and no shipped `Item.inf`
+  > is in the repository. Noted, not fixed: `ITEMCLASS_TABLE::InitItem2`
+  > (`MitemTableInit.cpp`, 8,488 lines) ends by calling itself —
+  > unbounded recursion if it were ever reached — and `VS_UI/` carries a
+  > second copy of that file that the Windows `VS_UI` target still
+  > compiles (the `list(FILTER)` meant to drop it sits in the non-Windows
+  > branch), so `VS_UI.lib` holds a twin the executable's object
+  > outranks; both dead in this build — cleared by 5.2's first slice.
+  > Suite: 201 tests (3,423 checks).
+  - Owner (all of 4.x): `gamemodel`'s membership file
+    (`tests/arch/gamemodel_files.txt`), the M0–M2 include rules in
+    `check_includes.pl` (in force since 4.1), R4 shrinking.
 
 ---
 
@@ -740,7 +975,41 @@ starting each — the scan is one grep, and the ranking below is from a
   `_bak` files are already excluded by the build — delete them; sort the
   `GameHelpers`/`GameFunctions`/`GamePacketFunctions` exclusion graveyard
   into deleted-or-documented. The wrong-file-edited trap dies here.
-  > **Status:** not started.
+  > **Status:** first slice done — the item-table twins (2026-09-02,
+  > `restructuring/dead-item-table-twins`). Deleted: the one tracked
+  > `_bak` file (`MItemTable_bak-2007-5-7.cpp`, 15,000 lines of a 2007
+  > item table, excluded by the build's `_bak` filter); `MitemTableinit2.cpp`
+  > (a second `InitItem2`, excluded by name); and `VS_UI/MitemTableInit.cpp`
+  > (a third, which the Windows `VS_UI` target was still compiling
+  > because the filter meant to drop it sat in the non-Windows branch —
+  > `VS_UI.lib` carried a twin the executable's object outranked). The
+  > surviving `Client/MitemTableInit.cpp` no longer ends by calling
+  > itself. All of it dead in this build: `InitItem2` is reached only
+  > from `ITEMCLASS_TABLE`'s server-only constructor, which is the next
+  > 5.2 candidate — the 23,000-line `__INIT_ITEM__` block in
+  > `MItemTable.cpp` plus the 8,500-line `MitemTableInit.cpp` are the
+  > server's item data in client source. The exclusion graveyard proper
+  > (`GameHelpers`, `GameFunctions`, `GamePacketFunctions`,
+  > `ActionFunctions`, `MissingGlobals`, `GlobalVariables`) is untouched.
+  > Verified: both executable trees 0 errors; R1 unchanged (nothing
+  > deleted was compiled into the executable); ctest 4/4 in both test
+  > trees.
+  > **Second slice (2026-09-02, `restructuring/drop-server-item-data`):**
+  > the server's item data itself. The 23,000-line `__INIT_ITEM__` block
+  > in `ITEMCLASS_TABLE`'s constructor and the 8,500-line
+  > `MitemTableInit.cpp` (`InitItem2`, its only caller being that block)
+  > are deleted, with the `__INIT_ITEM__` define, the `InitItem2`
+  > declaration and the three includes the block alone used
+  > (`AddonDef.h` leaves the membership file). Both were compiled out
+  > or unreachable in every client configuration, so the linked program
+  > is unchanged; the client has loaded `Item.inf` all along. Git
+  > history keeps the data if a data-authoring path ever wants it.
+  > `MItemTable.cpp` goes from 23,907 lines to under 400. R1 516 → 515
+  > (`MitemTableInit.cpp` was compiled into the executable, dead). Review: one
+  > reviewer, SHIP, no findings; it named the next candidate —
+  > `MSkillInfoTable.cpp` carries ~2,300 lines of in-code skill
+  > definitions under `#ifndef __GAME_CLIENT__` (lines 32–2348), the same
+  > server-data pattern, executable-side so with no test path.
 - [ ] **5.3 TextSystem stub retirement.** Split `TextService.cpp`'s pure
   text utilities from its `g_pLast` drawing entry point so
   `tests/stubs/client_globals.cpp` can shrink (the stub file itself

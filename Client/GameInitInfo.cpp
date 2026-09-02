@@ -828,7 +828,7 @@ InitInfomation()
 
 	// NPCScript.inf ships in Korean, so in English the built-in translation is
 	// applied over it - the same arrangement String.inf has.
-	if (UseEnglishText())
+	if (UseEnglishText(g_pFileDef))
 	{
 		ApplyEnglishNPCScriptTable();
 	}

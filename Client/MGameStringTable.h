@@ -32,8 +32,16 @@ extern void				InitGameStringTable();
 // localised text the game data supplies. It gates the string table above
 // and the NPC script table, which have the same problem: the shipped data
 // is Korean and the translation lives in the client.
+//
+// The decision is read from the language file (Data/Info/Language.inf);
+// the Properties overload looks its path up under FILE_LANGUAGE_INFO,
+// which is how the executable calls it with g_pFileDef. A NULL table, a
+// missing property or an unreadable file all mean English (the build's
+// default), so the client never starts without UI text.
 //----------------------------------------------------------------------
-extern bool				UseEnglishText();
+class Properties;
+extern bool				UseEnglishText(const Properties* pFileDef);
+extern bool				UseEnglishTextFrom(const char* szLanguageInfoFile);
 
 //----------------------------------------------------------------------
 // Replaces every entry of the game string table that holds a printf

@@ -45,6 +45,7 @@ target_link_libraries(unit_tests PRIVATE
 	SpriteLib
 	TextSystem
 	packetwire
+	gamemodel
 )
 
 target_include_directories(unit_tests PRIVATE
@@ -96,6 +97,10 @@ set_source_files_properties(
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_factories.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_goldens.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_stringstream.cpp
+	# gamemodel compiles with the same definitions (its headers share
+	# Client/Packet's Properties and RaceType).
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_gamemodel_tables.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_item_table.cpp
 	PROPERTIES
 		COMPILE_DEFINITIONS "${PACKETWIRE_TEST_DEFINITIONS};WIRE_GOLDEN_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/golden\""
 )

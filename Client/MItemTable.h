@@ -34,6 +34,14 @@
 
 #pragma warning(disable:4786)
 
+// BYTE, WORD, COLORREF: the library's sources see them through
+// Client_PCH.h; a test including this header alone needs them too.
+#ifdef PLATFORM_WINDOWS
+#include <Windows.h>
+#else
+#include "../../basic/Platform.h"
+#endif
+
 #include "CTypeTable.h"
 #include "DrawTypeDef.h"
 #include "MTypeDef.h"
@@ -199,6 +207,8 @@ class ITEMTABLE_INFO {
 class ITEMTYPE_TABLE : public CTypeTable<ITEMTABLE_INFO>
 {
 public :
+	ITEMTYPE_TABLE() : m_AveragePrice(0) {}
+
 	void	LoadFromFile(std::ifstream& file);
 
 	int		GetAveragePrice() const	{ return m_AveragePrice; }
@@ -224,7 +234,6 @@ class ITEMCLASS_TABLE : public CTypeTable<ITEMTYPE_TABLE> {
 		// 각 classType에 맞는 개수를 초기화한다.
 		//-------------------------------------------------------
 		void		InitClass( int c, int size );
-		void		InitItem2();
 };
 
 extern	ITEMCLASS_TABLE	*	g_pItemTable;
