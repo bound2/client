@@ -1480,6 +1480,7 @@ MBelt::FindSlotToAddItem(MItem* pItem, int &slot) const
 	// 들어갈 곳이 없다.
 	return false;
 }
+
 //----------------------------------------------------------------------
 //
 //						MOustersArmsBand

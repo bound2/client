@@ -64,7 +64,8 @@ check () {
 # LNK4217 trap); the membership removal is absolute and asserted.
 # History: 508 = 512 - 4 (task 4.3's first slice: MItemManager.cpp,
 # MGridItemManager.cpp, MSlotItemManager.cpp and MQuickSlot.cpp moved
-# into gamemodel). # History: 512 = 515 + 2 - 5 (task 4.4's second slice: MItem.cpp,
+# into gamemodel).
+# History: 512 = 515 + 2 - 5 (task 4.4's second slice: MItem.cpp,
 # MObject.cpp, UserInformation.cpp, ClientConfig.cpp and
 # MTimeItemManager.cpp moved into gamemodel; the executable halves split
 # out of the first two, MItemUse.cpp and MObjectScreen.cpp, are new exe

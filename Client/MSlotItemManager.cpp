@@ -278,9 +278,6 @@ MSlotItemManager::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 	
 
 	//-------------------------------------------------
-	// n slot에 pItem을 추가한다.
-	//-------------------------------------------------
-	//-------------------------------------------------
 	// If the map refuses the newcomer (its id is held by a third item),
 	// the occupant goes back where it was rather than being dropped.
 	//-------------------------------------------------

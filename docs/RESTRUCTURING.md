@@ -941,6 +941,27 @@ starting each — the scan is one grep, and the ranking below is from a
   > `DEBUG_ADD_FORMAT`). The affect refresh is the `MItemHost`'s
   > `RefreshPetAffect` under another name — one host entry serves all
   > three.
+  > **Adversarial review round (2026-09-02, 2 reviewers, both SHIP with
+  > findings), fixed on the branch:** a real sibling defect — the grid's
+  > `ReplaceItem` removed the occupant and cleared its cells, then
+  > returned `true` even when the id map refused the newcomer, so
+  > `MInventory::ReplaceItem` reported a replacement that had put the
+  > newcomer nowhere and the drop handler picked up the "old" item on
+  > the strength of it; fixed test-first the same way as the slots (the
+  > occupant goes back, the call says no), and the slot fix's claim that
+  > "the grid already worked in this order" is corrected — its two
+  > `AddItem` overloads did. The round also sharpened the slot defect's
+  > consequence: the belt, stash and store handlers `delete` an item the
+  > container refuses, so the slot held a freed pointer, not merely an
+  > unowned one. Tidy-ups: a spliced history line in the ratchet script,
+  > a stale Korean banner left above the slot fix's new one, the
+  > CLAUDE.md citation missing 4.3, one blank line the move-back had
+  > dropped. Confirmed: every moved definition byte-identical and
+  > present once, `CheckAffectStatus` overrides read only the item's own
+  > fields so the reorder sees the same state, the client cannot collide
+  > with its own ids (the pickup path removes before it re-adds), the
+  > tests' arithmetic and ownership counts. Suite: 227 tests (3,668
+  > checks).
 - [ ] **4.4 Item/skill cores:** `MItem.cpp`, `MItemManager.cpp`,
   `MSkillManager.cpp`, `SkillDef.cpp`, gear classes. Likely partial —
   whatever stays coupled goes on the exemption list explicitly.
