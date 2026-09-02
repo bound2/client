@@ -1005,7 +1005,11 @@ starting each — the scan is one grep, and the ranking below is from a
   > is unchanged; the client has loaded `Item.inf` all along. Git
   > history keeps the data if a data-authoring path ever wants it.
   > `MItemTable.cpp` goes from 23,907 lines to under 400. R1 516 → 515
-  > (`MitemTableInit.cpp` was compiled into the executable, dead).
+  > (`MitemTableInit.cpp` was compiled into the executable, dead). Review: one
+  > reviewer, SHIP, no findings; it named the next candidate —
+  > `MSkillInfoTable.cpp` carries ~2,300 lines of in-code skill
+  > definitions under `#ifndef __GAME_CLIENT__` (lines 32–2348), the same
+  > server-data pattern, executable-side so with no test path.
 - [ ] **5.3 TextSystem stub retirement.** Split `TextService.cpp`'s pure
   text utilities from its `g_pLast` drawing entry point so
   `tests/stubs/client_globals.cpp` can shrink (the stub file itself
