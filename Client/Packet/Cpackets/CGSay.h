@@ -76,7 +76,6 @@ private :
 };
 
 
-#ifdef __DEBUG_OUTPUT__
 //////////////////////////////////////////////////////////////////////
 //
 // class CGSayFactory;
@@ -103,7 +102,6 @@ public:
 	PacketSize_t getPacketMaxSize() const throw() { return szuint + szBYTE + 128; }
 
 };
-#endif
 
 
 #ifndef __GAME_CLIENT__

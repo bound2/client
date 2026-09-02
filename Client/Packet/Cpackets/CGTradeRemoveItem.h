@@ -48,7 +48,6 @@ private:
 // class CGTradeRemoveItemFactory;
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGTradeRemoveItemFactory : public PacketFactory {
 public:
 	Packet * createPacket () throw () { return new CGTradeRemoveItem(); }
@@ -60,7 +59,6 @@ public:
 	PacketID_t getPacketID () const throw () { return Packet::PACKET_CG_TRADE_REMOVE_ITEM; }
 	PacketSize_t getPacketMaxSize () const throw () { return szObjectID*2; }
 };
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 //

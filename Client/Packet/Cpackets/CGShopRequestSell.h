@@ -71,7 +71,6 @@ private:
 // class CGShopRequestSellFactory;
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGShopRequestSellFactory : public PacketFactory 
 {
 public:
@@ -85,7 +84,6 @@ public:
 	PacketSize_t getPacketMaxSize () const throw () { return szObjectID+szObjectID+szBYTE; }
 
 };
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 //

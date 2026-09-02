@@ -68,7 +68,6 @@ private:
 // class CGTradeFinishFactory;
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGTradeFinishFactory : public PacketFactory 
 {
 public:
@@ -81,7 +80,6 @@ public:
 	PacketID_t getPacketID () const throw () { return Packet::PACKET_CG_TRADE_FINISH; }
 	PacketSize_t getPacketMaxSize () const throw () { return szObjectID + szBYTE; }
 };
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 //

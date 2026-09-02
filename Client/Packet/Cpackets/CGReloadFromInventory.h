@@ -88,7 +88,6 @@ private :
 // Factory for CGReloadFromInventory
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGReloadFromInventoryFactory : public PacketFactory {
 
 public :
@@ -111,7 +110,6 @@ public :
 
 };
 
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

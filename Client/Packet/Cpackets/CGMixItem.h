@@ -55,7 +55,6 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 // class CGMixItemFactory;
 //////////////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
 class CGMixItemFactory : public PacketFactory 
 {
 public:
@@ -64,7 +63,6 @@ public:
 	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_MIX_ITEM; }
 	PacketSize_t getPacketMaxSize() const throw() { return szObjectID + szCoordInven + szCoordInven + ( szObjectID * 2 ); }
 };
-#endif
 
 //////////////////////////////////////////////////////////////////////////////
 // class CGMixItemHandler;

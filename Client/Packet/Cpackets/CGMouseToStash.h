@@ -51,7 +51,6 @@ private:
 // class CGMouseToStashFactory;
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGMouseToStashFactory : public PacketFactory 
 {
 public :
@@ -65,7 +64,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return szObjectID+szBYTE*2; }
 
 };
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 //

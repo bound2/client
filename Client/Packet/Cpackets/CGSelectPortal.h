@@ -75,7 +75,6 @@ private :
 // Factory for CGSelectPortal
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGSelectPortalFactory : public PacketFactory {
 
 public :
@@ -102,7 +101,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return szZoneID; }
 };
 
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

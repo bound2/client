@@ -53,7 +53,6 @@ private:
 // class CGStashToMouseFactory;
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGStashToMouseFactory : public PacketFactory 
 {
 public :
@@ -67,7 +66,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return szObjectID + szBYTE*2; }
 
 };
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 //

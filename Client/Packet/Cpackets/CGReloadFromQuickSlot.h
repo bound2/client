@@ -83,7 +83,6 @@ private :
 // Factory for CGReloadFromQuickSlot
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGReloadFromQuickSlotFactory : public PacketFactory {
 
 public :
@@ -106,7 +105,6 @@ public :
 
 };
 
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

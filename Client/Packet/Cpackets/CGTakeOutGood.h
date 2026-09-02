@@ -42,7 +42,6 @@ private :
 //////////////////////////////////////////////////////////////////////////////
 // class CGTakeOutGoodFactory;
 //////////////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGTakeOutGoodFactory : public PacketFactory 
 {
 public:
@@ -51,7 +50,6 @@ public:
 	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_TAKE_OUT_GOOD; }
 	PacketSize_t getPacketMaxSize() const throw() { return szObjectID; }
 };
-#endif
 
 //////////////////////////////////////////////////////////////////////////////
 // class CGTakeOutGoodHandler;

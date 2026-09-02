@@ -71,7 +71,6 @@ private :
 // Factory for CLQueryPlayerID
 //
 //--------------------------------------------------------------------------------
-#ifdef __DEBUG_OUTPUT__
 class CLQueryPlayerIDFactory : public PacketFactory {
 
 public :
@@ -93,7 +92,6 @@ public :
 
 };
 
-#endif
 
 
 //--------------------------------------------------------------------------------

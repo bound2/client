@@ -73,7 +73,6 @@ private :
 };
 
 
-#ifdef __DEBUG_OUTPUT__
 //////////////////////////////////////////////////////////////////////
 //
 // class CGWhisperFactory;
@@ -100,7 +99,6 @@ public:
 	PacketSize_t getPacketMaxSize() const throw() { return szBYTE + 10 + szuint + szBYTE + 128; }
 
 };
-#endif
 
 
 #ifndef __GAME_CLIENT__

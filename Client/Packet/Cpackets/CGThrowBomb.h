@@ -61,7 +61,6 @@ private:
 // class CGThrowBombFactory;
 // Factory for CGThrowBomb
 //////////////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGThrowBombFactory : public PacketFactory 
 {
 public:
@@ -72,7 +71,6 @@ public:
 	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_THROW_BOMB; }
 	PacketSize_t getPacketMaxSize() const throw() { return szCoord * 4 + szBYTE; }
 };
-#endif
 
 //////////////////////////////////////////////////////////////////////////////
 // class CGThrowBombHandler;

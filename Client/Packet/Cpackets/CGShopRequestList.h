@@ -73,7 +73,6 @@ private :
 // Factory for CGShopRequestList
 //
 //--------------------------------------------------------------------------------
-#ifdef __DEBUG_OUTPUT__
 class CGShopRequestListFactory : public PacketFactory {
 
 public :
@@ -94,7 +93,6 @@ public :
 
 };
 
-#endif
 
 
 //--------------------------------------------------------------------------------

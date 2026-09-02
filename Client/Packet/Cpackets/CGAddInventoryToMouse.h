@@ -95,7 +95,6 @@ private :
 // Factory for CGAddInventoryToMouse
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGAddInventoryToMouseFactory : public PacketFactory {
 
 public :
@@ -120,7 +119,6 @@ public :
 	//end
 };
 
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

@@ -46,7 +46,6 @@ private :
 //////////////////////////////////////////////////////////////////////////////
 // class CGAddItemToItemFactory;
 //////////////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGAddItemToItemFactory : public PacketFactory 
 {
 public:
@@ -55,7 +54,6 @@ public:
 	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_ADD_ITEM_TO_ITEM; }
 	PacketSize_t getPacketMaxSize() const throw() { return szObjectID + szCoordInven + szCoordInven; }
 };
-#endif
 
 #ifndef __GAME_CLIENT__
 //////////////////////////////////////////////////////////////////////////////

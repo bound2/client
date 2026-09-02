@@ -74,7 +74,6 @@ private :
 // Factory for CGNPCAskAnswer
 //
 //--------------------------------------------------------------------------------
-#ifdef __DEBUG_OUTPUT__
 class CGNPCAskAnswerFactory : public PacketFactory {
 
 public :
@@ -97,7 +96,6 @@ public :
 
 };
 
-#endif
 
 
 //--------------------------------------------------------------------------------

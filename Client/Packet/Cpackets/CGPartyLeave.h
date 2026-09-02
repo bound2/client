@@ -39,7 +39,6 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 // class CGPartyLeaveFactory;
 //////////////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGPartyLeaveFactory : public PacketFactory 
 {
 public:
@@ -52,7 +51,6 @@ public:
 	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_PARTY_LEAVE; }
 	PacketSize_t getPacketMaxSize() const throw() { return szBYTE + 10; }
 };
-#endif
 
 //////////////////////////////////////////////////////////////////////////////
 // class CGPartyLeaveHandler

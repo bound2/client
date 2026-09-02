@@ -76,7 +76,6 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 // class CGTypeStringListFactory;
 //////////////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGTypeStringListFactory : public PacketFactory 
 {
 public:
@@ -85,7 +84,6 @@ public:
 	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_TYPE_STRING_LIST; }
 	PacketSize_t getPacketMaxSize() const throw() { return szBYTE+szBYTE + ( szBYTE + MAX_STRING_LENGTH ) * MAX_STRING_NUM + szDWORD; }
 };
-#endif
 
 #ifndef __GAME_CLIENT__
 //////////////////////////////////////////////////////////////////////////////

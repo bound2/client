@@ -65,7 +65,6 @@ private:
 // class CGTradeMoneyFactory;
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGTradeMoneyFactory : public PacketFactory {
 public:
 	Packet * createPacket () throw () { return new CGTradeMoney(); }
@@ -77,7 +76,6 @@ public:
 	PacketID_t getPacketID () const throw () { return Packet::PACKET_CG_TRADE_MONEY; }
 	PacketSize_t getPacketMaxSize () const throw () { return szObjectID + szGold + szBYTE; }
 };
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 //

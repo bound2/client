@@ -39,7 +39,6 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 // class CGRequestNewbieItemFactory;
 //////////////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGRequestNewbieItemFactory : public PacketFactory 
 {
 public:
@@ -52,7 +51,6 @@ public:
 	PacketID_t getPacketID () const throw () { return Packet::PACKET_CG_REQUEST_NEWBIE_ITEM; }
 	PacketSize_t getPacketMaxSize () const throw () { return szBYTE; }
 };
-#endif
 
 
 //////////////////////////////////////////////////////////////////////////////

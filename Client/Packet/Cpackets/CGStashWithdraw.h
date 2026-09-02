@@ -43,7 +43,6 @@ private :
 // class CGStashWithdrawFactory;
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGStashWithdrawFactory : public PacketFactory 
 {
 public :
@@ -57,7 +56,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return szGold; }
 
 };
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 //

@@ -79,7 +79,6 @@ private :
 // Factory for CGRequestInfo
 //
 //--------------------------------------------------------------------------------
-#ifdef __DEBUG_OUTPUT__
 
 class CGRequestInfoFactory : public PacketFactory {
 
@@ -100,7 +99,6 @@ public:
 	PacketSize_t getPacketMaxSize() const throw() { return szBYTE + szuint; }
 
 };
-#endif
 
 //--------------------------------------------------------------------------------
 //

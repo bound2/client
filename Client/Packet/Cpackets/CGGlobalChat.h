@@ -67,7 +67,6 @@ private :
 };
 
 
-#ifdef __DEBUG_OUTPUT__
 //////////////////////////////////////////////////////////////////////
 //
 // class CGGlobalChatFactory;
@@ -94,7 +93,6 @@ public:
 	PacketSize_t getPacketMaxSize() const throw() { return szuint + szBYTE + 128; }
 
 };
-#endif
 
 
 #ifndef __GAME_CLIENT__

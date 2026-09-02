@@ -31,7 +31,6 @@ public:
 //////////////////////////////////////////////////////////////////////////////
 // class CGResurrectFactory;
 //////////////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGResurrectFactory : public PacketFactory 
 {
 public:
@@ -44,7 +43,6 @@ public:
 	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_RESURRECT; }
 	PacketSize_t getPacketMaxSize() const throw() { return 0; }
 };
-#endif
 
 //////////////////////////////////////////////////////////////////////////////
 // class CGResurrectHandler;

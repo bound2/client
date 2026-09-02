@@ -95,7 +95,6 @@ private :
 // Factory for CGThrowItem
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGThrowItemFactory : public PacketFactory {
 
 public :
@@ -124,7 +123,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return szObjectID + szObjectID + szCoordInven + szCoordInven; }
 };
 
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

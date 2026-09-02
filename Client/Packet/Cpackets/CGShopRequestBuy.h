@@ -67,7 +67,6 @@ private:
 // class CGShopRequestBuyFactory;
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGShopRequestBuyFactory : public PacketFactory {
 public:
 	Packet * createPacket () throw () { return new CGShopRequestBuy(); }
@@ -78,7 +77,6 @@ public:
 	PacketID_t getPacketID () const throw () { return Packet::PACKET_CG_SHOP_REQUEST_BUY; }
 	PacketSize_t getPacketMaxSize () const throw () { return szObjectID+szShopRackType+szBYTE+szItemNum+szCoord*2; }
 };
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 //

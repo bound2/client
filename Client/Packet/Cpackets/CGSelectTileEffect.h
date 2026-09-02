@@ -41,7 +41,6 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 // class CGSelectTileEffectFactory
 //////////////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGSelectTileEffectFactory : public PacketFactory {
 	Packet* createPacket() throw() { return new CGSelectTileEffect(); }
 
@@ -52,7 +51,6 @@ class CGSelectTileEffectFactory : public PacketFactory {
 	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_SELECT_TILE_EFFECT; }
 	PacketSize_t getPacketMaxSize() const throw() { return szObjectID; }
 };
-#endif
 
 //////////////////////////////////////////////////////////////////////////////
 // class CGSelectTileEffectHandler

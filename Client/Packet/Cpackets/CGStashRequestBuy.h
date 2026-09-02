@@ -41,7 +41,6 @@ public:
 // Factory for CGStashRequestBuy
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGStashRequestBuyFactory : public PacketFactory 
 {
 public:
@@ -53,7 +52,6 @@ public:
 	PacketSize_t getPacketMaxSize () const throw () { return 0; }
 
 };
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 //

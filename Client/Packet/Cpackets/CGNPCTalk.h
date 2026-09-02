@@ -66,7 +66,6 @@ private :
 // Factory for CGNPCTalk
 //
 //--------------------------------------------------------------------------------
-#ifdef __DEBUG_OUTPUT__
 class CGNPCTalkFactory : public PacketFactory {
 
 public :
@@ -89,7 +88,6 @@ public :
 
 };
 
-#endif
 
 
 //--------------------------------------------------------------------------------

@@ -65,7 +65,6 @@ private :
 // Factory for CGRequestRepair
 //
 //-----------------------------------------------------------------------------
-#ifdef __DEBUG_OUTPUT__
 class CGRequestRepairFactory : public PacketFactory {
 
 public :
@@ -86,7 +85,6 @@ public :
 
 };
 
-#endif
 
 
 //--------------------------------------------------------------------------------

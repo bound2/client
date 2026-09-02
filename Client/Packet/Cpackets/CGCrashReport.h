@@ -79,7 +79,6 @@ private:
 // Factory for CGCrashReport
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGCrashReportFactory : public PacketFactory {
 
 public:
@@ -102,7 +101,6 @@ public:
 	}
 
 };
-#endif
 
 #ifndef __GAME_CLIENT__
 //////////////////////////////////////////////////////////////////////
