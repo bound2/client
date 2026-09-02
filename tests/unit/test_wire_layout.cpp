@@ -13,9 +13,11 @@
 // wire_inventory_diff.sh diffs them. A change in this file is a
 // wire-protocol change: it must ship in both repos together.
 //
-// The factories are not instantiated (their vtables would drag every
-// packet handler, and so the whole game, into the link). tests/tools/
-// gen_wire_inventory.pl lifts each factory's getPacketID() and
+// The factories are not instantiated here: this predates the packet
+// classes joining the packetwire library (docs/RESTRUCTURING.md task
+// 2.4 - test_packet_factories.cpp does construct them now), and
+// retiring the lifted copies for the real factories is task 2.5.
+// tests/tools/gen_wire_inventory.pl lifts each factory's getPacketID() and
 // getPacketMaxSize() bodies into tests/generated/WireInventory.inc,
 // which this file compiles against the real packet headers.
 //

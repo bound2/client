@@ -6,12 +6,14 @@
 # Regenerates tests/generated/WireInventory.inc from every packet factory
 # declared under Client/Packet/{Gpackets,Cpackets,Lpackets,Upackets}.
 #
-# Why a generator and not the factories themselves: a factory's vtable
-# references createPacket(), which references the packet's constructor
-# and vtable, which live in the packet's .cpp beside its handler - and
-# the handlers reach into the whole game executable, which no test
-# binary can link (see tests/CMakeLists.txt). So instead of instantiating
-# GCMoveOKFactory, this script lifts the BODIES of its getPacketID() and
+# Why a generator and not the factories themselves: when this was
+# written the packet .cpp files compiled only into the game executable,
+# beside their handlers, so no test binary could link a factory. Since
+# docs/RESTRUCTURING.md task 2.4 they compile into the packetwire library
+# and unit_tests instantiates the real factories
+# (tests/unit/test_packet_factories.cpp); swapping this generator for
+# them is task 2.5. Until then this script lifts the BODIES of each
+# factory's getPacketID() and
 # getPacketMaxSize() verbatim into a plain struct with two static
 # functions. The compiler evaluates them against the real sz* constants
 # and Packet::PACKET_* ids from the real headers; nothing is linked.

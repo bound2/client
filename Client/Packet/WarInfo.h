@@ -35,9 +35,6 @@ public :
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
     virtual void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
 
-//	// execute packet's handler
-//	virtual void execute(Player* pPlayer) throw(ProtocolException, Error);
-
 	virtual PacketSize_t getSize() const throw() 
 	{ 
 		return szDWORD*2;
