@@ -455,7 +455,13 @@ MItem::IsGenderForAll() const
 int	
 MItem::IsQuestItem() const
 {
-	if( g_pTimeItemManager != NULL && (g_pTimeItemManager->IsExist( GetID() ) || m_Quest ) )
+	// The flag is the item's own. The timed-item register (a quest reward
+	// with a lifetime) also makes one, when the register exists; the flag
+	// used to sit inside that condition and vanished without it.
+	if (m_Quest)
+		return 1;
+
+	if (g_pTimeItemManager != NULL && g_pTimeItemManager->IsExist( GetID() ))
 		return 1;
 
 	return 0;

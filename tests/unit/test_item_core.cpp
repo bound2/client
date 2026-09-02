@@ -242,6 +242,18 @@ TEST(ItemCore, QuestItemComesFromTheFlagOrTheTimedItemRegister)
 	CHECK_EQ(1, item.IsQuestItem());
 }
 
+// The flag is the item's own; it must not need the register to exist.
+TEST(ItemCore, QuestFlagCountsWithoutTheTimedItemRegister)
+{
+	ItemWorld world;
+	delete g_pTimeItemManager;
+	g_pTimeItemManager = NULL;
+
+	Sword item;
+	item.SetQuestFlag(true);
+	CHECK_EQ(1, item.IsQuestItem());
+}
+
 //----------------------------------------------------------------------
 // Colour cycles: the grade walks 0..14 and back over 28 frames of the
 // host's clock; without a host the clock reads 0.
