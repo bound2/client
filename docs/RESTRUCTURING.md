@@ -574,8 +574,8 @@ the server's status notes. This is what makes the ~509 `Gpackets` parsers
   >    may differ between repos (`GCAddItemToInventory`,
   >    `GCAddItemToItemVerify`, `GCShopBought`, `GCShopBuyOK`,
   >    `GCUpdateInfo`, `GCGQuestInventory`, `GCPartySay`,
-  >    `BloodBibleBonusInfo`) — a live parse desync if real, to triage
-  >    with goldens under 2.5.
+  >    `BloodBibleBonusInfo`) — triaged under 2.5: one real desync
+  >    (`GCAddItemToItemVerify`), seven false positives.
   > **Deliberately not done here:** the 186 remaining
   > `__GAME_SERVER__`/`__GAME_CLIENT__` conditionals in 157 packet
   > sources (the server's K2 rule bans them; here they have one meaning
@@ -624,8 +624,52 @@ the server's status notes. This is what makes the ~509 `Gpackets` parsers
   > the one-token fix; green plain and ASan with it. The server's copy has
   > the same constructor but never deletes the member, so it needs no
   > change. Suite: 168 tests (3,199 checks) green in both test trees.
+  > **Triage of the 8 packets task 2.4's sweep flagged** (field sequence
+  > possibly differing between the repos), `read()`/`write()` bodies
+  > diffed against the server's: six are false positives with identical
+  > layouts (`GCAddItemToInventory`, `GCShopBought`, `GCShopBuyOK`,
+  > `GCGQuestInventory`, `BloodBibleBonusInfo`, and `GCPartySay`, where
+  > the server merely reuses its name-length local for the message
+  > length and this repo adds the bounds checks); `GCUpdateInfo`'s
+  > `read()` is identical and only its never-used client `write()` lacks
+  > the trailing power-point field; **`GCAddItemToItemVerify` was a real
+  > desync**: the server writes ONE parameter (the new grade) for
+  > `UP_GRADE_OK` — `CGAddItemToItemHandler` calls only
+  > `setParameter(pItem->getGrade())`, and the server's `write()` and
+  > `getPacketSize()` agree — while this repo's `read()` and
+  > `getPacketSize()` took two, so every successful item-grade upgrade
+  > over-read four bytes into the next packet. This repo's `write()` also
+  > dropped both parameters of `THREE_ENCHANT_OK`. Fixed test-first with
+  > three client-authored goldens built from the server's `write()`
+  > semantics (`GCAddItemToItemVerify.{upgrade,threeenchant,fail}`),
+  > read-exactly and round-trip checks, and a fresh-packet check
+  > (`m_Parameter2` was uninitialised, and the handler reads it). The
+  > handler's `UP_GRADE_OK` case, which set the item TYPE from the
+  > phantom second parameter, now sets the item's grade from the one
+  > the server sends — executable code, runtime-verified (exempt path).
+  > The client-only `ADD_ITEM_TO_ITEM_REMOVE_OPTION_OK` code (one past
+  > the server's enum, where the server's `ADD_ITEM_TO_ITEM_VERIFY_MAX`
+  > sits) is left as it was; the server never sends it.
+  > **Adversarial review round (2026-09-02, 3 reviewers by angle, all
+  > SHIP with findings), fixed on the branch:** the un-guard had left a
+  > doubled blank line wherever one of 59 `#endif`s sat between blanks —
+  > swept, and the count of blank runs is back to the pre-strip figure;
+  > two of the four `__GAME_CLIENT__` guards (`CGFailQuest`,
+  > `CGAddItemToCodeSheet`) had also wrapped the server-side handler
+  > declaration, now exposed as 41 other CG headers already expose theirs
+  > (harmless; the first commit's "factory classes" wording
+  > under-described it); the orphaned `Client/Client.vcxproj.filters` and
+  > `.user` (no tracked `.vcxproj`, hundreds of dead entries, three of
+  > them `CRRequest2`) are deleted; the freshness gate's failure message
+  > still spoke of ids and max sizes the registry no longer carries —
+  > reworded; the generator's `getPacketName()` check now refuses a
+  > spelling it cannot check instead of skipping it. Suite: 172 tests
+  > (3,232 checks) green in both test trees; both executable trees 0
+  > errors; live verification of an item upgrade (and a play session)
+  > gates the merge.
   - Owner: `wire_inventory_fresh` staying green through the swap; the
-    all-factory construction in `test_wire_layout.cpp`.
+    all-factory construction in `test_wire_layout.cpp`; the
+    `GCAddItemToItemVerify` goldens.
 
 **Phase exit criteria:** R2 = 0; `Client/Packet` contains no handler code;
 parser fixes under `Gpackets` are written test-first against real packet

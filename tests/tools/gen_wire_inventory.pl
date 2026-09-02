@@ -71,9 +71,14 @@ for my $spec (@dirs) {
 			# The inventory names the packet after its factory class;
 			# the server names it from getPacketName(). The two must
 			# agree or the inventories would not diff line for line.
-			if ($body =~ /getPacketName\s*\(\s*\)\s*const\s*(?:throw\s*\(\s*\))?\s*\{\s*return\s*"([^"]*)"/
-			    && $1 ne $packet) {
-				die "$path: $name says getPacketName() is \"$1\", not $packet\n";
+			# Only the one spelling every factory uses is recognised;
+			# any other form is refused rather than skipped, so the
+			# check cannot go quiet on a new factory.
+			if ($body =~ /getPacketName\s*\(\s*\)\s*const\s*(?:throw\s*\(\s*\))?\s*\{\s*return\s*"([^"]*)"\s*;\s*\}/) {
+				die "$path: $name says getPacketName() is \"$1\", not $packet\n"
+					if $1 ne $packet;
+			} else {
+				die "$path: $name has no `return \"$packet\";` getPacketName() this script can check\n";
 			}
 			push @entries, [ $packet, $name, "$dir/$h", $inventoried ];
 		}

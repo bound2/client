@@ -4,10 +4,11 @@
 #
 # Fails when tests/generated/WireInventory.inc has drifted from what
 # tests/tools/gen_wire_inventory.pl produces from the packet headers, so
-# that adding or changing a factory cannot leave the inventory stale.
-# The inventory is what tests/unit/test_wire_layout.cpp checks the wire
-# layout against, and what the server repo diffs its own copy with; a
-# stale one silently stops covering the packets it no longer describes.
+# that a factory added, removed, renamed or moved between directories
+# cannot leave the registry stale. The registry is the list of factories
+# tests/unit/test_wire_layout.cpp constructs to build the inventory the
+# server repo diffs its own copy with; a stale one silently stops
+# constructing (and inventorying) the factories it no longer names.
 #
 # Driven by the wire_inventory_fresh test registered in
 # tests/CMakeLists.txt, which passes:
@@ -63,8 +64,8 @@ if(NOT compare_result EQUAL 0)
 		"  committed : ${committed}\n"
 		"  fresh     : ${fresh}\n"
 		"\n"
-		"A packet factory's id or max size has changed without the inventory "
-		"being regenerated. Re-record it from the repository root with\n"
+		"A packet factory was added, removed, renamed or moved without the "
+		"registry being regenerated. Re-record it from the repository root with\n"
 		"\n"
 		"    perl tests/tools/gen_wire_inventory.pl\n"
 		"\n"
