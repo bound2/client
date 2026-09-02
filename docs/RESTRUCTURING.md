@@ -688,7 +688,14 @@ Not a code phase — the standing rule this plan exists to enable, stated once:
   test-first; (c) *exempt* — the code is on the exemption list, the commit
   says so and carries the regression-guard wording. A fix commit that is
   none of the three is wrong.
-  > **Status:** not started (activates when 1.2 lands; record adoption here).
+  > **Status:** adopted (recorded 2026-09-02 with task 4.1; in practice
+  > since 1.2 landed). Every fix commit on the restructuring branches
+  > names its path — `StringStream` (1.3), `CGMove`, `GCUpdateInfo`,
+  > `GCAddItemToItemVerify` and the item-option table bound are
+  > *lib + test*; the `GCAddItemToItemVerify` handler change is
+  > *exempt* — and the adversarial reviewers check the claim. No
+  > commit-lint hook yet; add one the first time a fix lands without
+  > its path.
   - Owner: review practice + this document; graduate to a commit-lint hook
     if drift is observed.
 
@@ -708,11 +715,54 @@ Order of attack (dependency-ranked; re-verify with an include scan when
 starting each — the scan is one grep, and the ranking below is from a
 2026-09-01 reading of the include graph, not a proof):
 
-- [ ] **4.1 Pure tables first:** `ExperienceTable.cpp`,
+- [x] **4.1 Pure tables first:** `ExperienceTable.cpp`,
   `MItemOptionTable.cpp`, `MGameStringTable.cpp`, `MSoundTable.cpp`,
   `SystemAvailabilities.cpp`, `FameInfo.cpp`. Data-in/data-out, load from
   files — the `TArray`-style loader tests already show the test pattern.
-  > **Status:** not started.
+  > **Status:** done (2026-09-02, `restructuring/gamemodel-tables`;
+  > live verification gates the merge). `gamemodel` exists: a static
+  > library over `basic` + `packetwire` (+ iconv for `MString`), no
+  > SDL/UI/dxlib, with the packetwire discipline — membership in
+  > `tests/arch/gamemodel_files.txt`, read by CMake (`.cpp` lines), the
+  > include checker (rules **M0–M2**: every listed file exists under
+  > `Client/`; the closure may include only `basic/`,
+  > `Client/framelib/`, `Client/Packet/`, `Client_PCH.h` and the `.h`
+  > lines of the file; no `MinTr.h`/`DebugInfo.h`/`DebugKit.h`) and
+  > the ratchet script (R4). Members: the six tables, `ExpInfo.cpp`,
+  > and the support they stand on — `MString.cpp`, `MStringArray.cpp`,
+  > `DebugLog.cpp` (the lib-safe logger 5.1 wants finished; its dead
+  > `#if 0` reach to `g_pDebugMessage` was deleted). The include scan
+  > confirmed the 2026-09-01 ranking: the six were clean apart from two
+  > `g_pFileDef` seams, cut so the files reference no executable
+  > global: `UseEnglishText` takes the `Properties` table (with a
+  > path-taking `UseEnglishTextFrom` underneath, the testable core), and
+  > `SystemAvailabilitiesManager::LoadFromFile` — which opened the
+  > archive through `CRarFile` and `g_pFileDef` — became
+  > `LoadFromStream(std::istream&)`, with `GameInit.cpp` reading the
+  > archive and handing over the lines (`MinTr.h` was a vestigial
+  > include). `FameInfo` needs only the `SKILLDOMAIN` enum from
+  > `SkillDef.h`, which is listed as a header, not compiled.
+  > **Found on the way:** the six tables had been compiled into BOTH
+  > `VS_UI` and the executable all along — `VS_UI_CLIENT_SOURCES` is
+  > relative and the exe's `REMOVE_ITEM` never matched the glob's
+  > absolute paths (the LNK4217 trap CLAUDE.md names). The membership
+  > removal is absolute and asserted, so **R1 528 → 518**: the ten
+  > members left the executable, ten fewer twice-compiled units. And a
+  > real defect: `ITEMOPTION_TABLE::LoadFromFile` wrote the part names
+  > into two fixed `MAX_PART` arrays for however many the file declared
+  > — the test's oversized count crashed the suite before the bound
+  > went in (test-first, lib + test).
+  > **Tests** (`test_gamemodel_tables.cpp`, 12): each loader fed its
+  > own byte layout from a scratch file — experience by level with
+  > out-of-range reads yielding the default, item options with part
+  > names and the two rejections (oversized and negative counts), the
+  > sound table round trip, the nickname layout's index bound, fame by
+  > domain and level, the availability script's three record kinds
+  > (script filters gated by the system flag, zone lists by open degree
+  > with the out-of-range degree dropped, per-degree scripts following
+  > their zone), and the language file's English decision. R4 61 → 59.
+  > Suite: 184 tests (3,284 checks) green plain and ASan; all four
+  > trees 0 errors.
 - [ ] **4.2 Money/price/trade logic:** `MMoneyManager.cpp`,
   `MPriceManager.cpp`, `MTradeManager.cpp` (seams to `g_pShop`/UI to cut).
   > **Status:** not started.

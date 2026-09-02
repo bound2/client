@@ -54,6 +54,8 @@ the output and hides all progress.
 ### What can be tested
 
 Only code compiled into a **static library**: `basic`, `SpriteLib`, `dxlib`,
+`gamemodel` (the pure data tables and their string/log support, membership in
+`tests/arch/gamemodel_files.txt` — `docs/RESTRUCTURING.md` task 4.1),
 `framelib`, `TextSystem`, `VS_UI`, and `packetwire` — the whole wire layer: socket
 streams, the encrypter, the info classes, every packet class in every direction and
 the factory/validator tables (`docs/RESTRUCTURING.md` tasks 1.1 and 2.4; membership
@@ -63,7 +65,7 @@ including the packet *handlers* under `Client/PacketHandler/` — cannot be link
 a test binary. That is a structural limit, and it is the single biggest constraint on
 how work gets verified here.
 
-`unit_tests` links `basic`, `SpriteLib`, `TextSystem` and `packetwire`. Covering
+`unit_tests` links `basic`, `SpriteLib`, `TextSystem`, `packetwire` and `gamemodel`. Covering
 something in `dxlib` or `VS_UI` means adding it to `target_link_libraries` in
 `tests/CMakeLists.txt` first. Packet tests construct real packets through the real
 factories and pin their bytes against `tests/golden/*.hex` — 54 of those files are
@@ -130,7 +132,7 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **172 tests, 3,232 checks, 0 failed** in both trees.
+baseline: **184 tests, 3,284 checks, 0 failed** in both trees.
 
 ## Traps
 
