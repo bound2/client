@@ -37,12 +37,18 @@ struct HookGuard
 
 } // namespace
 
+// Prove the counter moves with a hook, then that removing the hook
+// stops it - otherwise "no report" would be true by construction.
 TEST(PacketDiagnostics, ReportWithoutAHookIsANoOp)
 {
 	HookGuard guard;
+	PacketDiagnostics::setBugReportHook(&Capture);
+	PacketDiagnostics::reportBug("armed %d", 1);
+	CHECK_EQ(1, s_Reports);
 	PacketDiagnostics::setBugReportHook(NULL);
 	PacketDiagnostics::reportBug("too large PacketSize ID)%d %d/%d", 1, 2, 3);
-	CHECK_EQ(0, s_Reports);
+	CHECK_EQ(1, s_Reports);
+	CHECK(s_LastReport == "armed 1");
 }
 
 TEST(PacketDiagnostics, HookReceivesTheFormattedText)

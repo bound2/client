@@ -49,7 +49,11 @@ public:
 			    unsigned int len, unsigned int head = 0)
 	{
 		// The ring keeps one slot empty to distinguish full from empty.
+		// An oversized preload would wrap onto its own head and read
+		// as an EMPTY ring, so it is refused here, not just recorded.
 		CHECK(len < stream.m_BufferLen);
+		if (len >= stream.m_BufferLen)
+			return;
 
 		for (unsigned int i = 0; i < len; i++)
 			stream.m_Buffer[(head + i) % stream.m_BufferLen] = (char)data[i];

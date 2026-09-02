@@ -6,6 +6,7 @@
 //               handler stays with the executable like every other one.
 //////////////////////////////////////////////////////////////////////////////
 
+#include "Client_PCH.h"
 #include "Gpackets/GCExchangeBuy.h"
 
 #include "Player.h"

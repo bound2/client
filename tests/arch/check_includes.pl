@@ -19,10 +19,15 @@
 #       exists. The directory is wire-only by construction: a new
 #       packet source is a library member unless a holdout line says
 #       why not, and a deleted one cannot linger in a list.
-#   W1  A file in the packetwire closure may quote-include only files
-#       under Client/Packet/ or basic/, or Client/Client_PCH.h (the
-#       shared precompiled header - its own includes are walked too).
-#       Anything else means game code is reachable from the wire layer.
+#   W1  A file in the packetwire closure may include only files under
+#       Client/Packet/ or basic/, or Client/Client_PCH.h (the shared
+#       precompiled header - its own includes are walked too). Anything
+#       else means game code is reachable from the wire layer. Angle
+#       includes are checked too: the library's include path carries
+#       Client/, so `#include <MZone.h>` would compile - an angle include
+#       that resolves inside the repository is treated exactly like a
+#       quoted one; only one that resolves nowhere in the tree is a
+#       system header and ignored.
 #   W2  The debug facilities whose definitions live in the executable
 #       or VS_UI (MinTr.h, DebugInfo.h, DebugKit.h) may not be included
 #       anywhere in the closure, so the library stays linkable into a
@@ -61,6 +66,10 @@ my $holdouts_file = 'tests/arch/packetwire_holdouts.txt';
 
 my @violations;
 
+# A path line must start in column 1: CMake's file(STRINGS ... REGEX
+# "^Client/Packet/") anchors there, so an indented line would be a member
+# for this checker and the ratchet script but not for the build - the
+# three-readers-one-file guarantee is only as good as this agreement.
 sub read_list {
 	my ($path) = @_;
 	my @out;
@@ -68,8 +77,11 @@ sub read_list {
 	while (<$fh>) {
 		s/\r?\n$//;	# belt and braces beside the .gitattributes eol=lf
 		s/#.*//;
-		s/^\s+|\s+$//g;
-		push @out, $_ if length;
+		next unless /\S/;
+		die "$path line $.: a path must start in column 1 (CMake would not read it)\n"
+			if /^\s/;
+		s/\s+$//;
+		push @out, $_;
 	}
 	close $fh;
 	return @out;
@@ -77,24 +89,28 @@ sub read_list {
 
 my @members  = read_list($members_file);
 my @holdouts = read_list($holdouts_file);
-die "$members_file lists too few files to be the library" unless @members >= 10;
+# 518 today; a truncated list must not pass as "the library".
+die "$members_file lists only " . scalar(@members) . " files - truncated?" unless @members >= 400;
 
 #----------------------------------------------------------------------
 # W0 - membership completeness
 #----------------------------------------------------------------------
+# Keys are lower-cased: the Windows filesystem is case-insensitive, so
+# "Dup.cpp" and "DUP.cpp" are one file to -f and to the compiler, and
+# must be one file to "listed exactly once" as well.
 {
 	my %listed;
 	for my $f (@members, @holdouts) {
-		push @violations, "W0|$f|listed twice" if $listed{$f}++;
+		push @violations, "W0|$f|listed twice" if $listed{lc $f}++;
 		push @violations, "W0|$f|listed but missing" unless -f $f;
 		push @violations, "W0|$f|listed but not under Client/Packet"
 			unless $f =~ m{^Client/Packet/};
 	}
 	my @unlisted;
 	find({ no_chdir => 1, wanted => sub {
-		return unless -f $_ && /\.cpp$/;
+		return unless -f $_ && /\.cpp$/i;
 		(my $p = $_) =~ s{\\}{/}g;
-		push @unlisted, $p unless $listed{$p};
+		push @unlisted, $p unless $listed{lc $p};
 	} }, 'Client/Packet');
 	push @violations, "W0|$_|not in $members_file or $holdouts_file" for sort @unlisted;
 }
@@ -102,9 +118,15 @@ die "$members_file lists too few files to be the library" unless @members >= 10;
 #----------------------------------------------------------------------
 # Include resolution: the file's own directory first (how the compiler
 # treats quote-includes), then the include path the library compiles
-# with.
+# with, IN THE COMPILER'S ORDER - target_include_directories(packetwire)
+# in CMakeLists.txt lists the repository root, basic, Client, then
+# Client/Packet. The order matters for a basename present in two of
+# them: mirroring the compiler makes the checker resolve to the same
+# file the build does (and a Client/ shadow of a Client/Packet header
+# is then a W1 violation, not a silent pass). Keep this list in step
+# with CMakeLists.txt.
 #----------------------------------------------------------------------
-my @searchdirs = ('Client/Packet', 'Client/Packet/Types', 'Client', 'basic', '.');
+my @searchdirs = ('.', 'basic', 'Client', 'Client/Packet');
 
 sub normalize {
 	my ($p) = @_;
@@ -119,8 +141,9 @@ sub normalize {
 }
 
 sub resolve_include {
-	my ($includer, $inc) = @_;
-	for my $dir (dirname($includer), @searchdirs) {
+	my ($includer, $inc, $angle) = @_;
+	# <...> skips the includer's own directory, as the compiler does.
+	for my $dir (($angle ? () : dirname($includer)), @searchdirs) {
 		my $cand = normalize("$dir/$inc");
 		return $cand if -f $cand;
 	}
@@ -264,8 +287,10 @@ while (@queue) {
 		}
 		if (/^\s*#\s*endif\b/) { pop @stack; next; }
 
-		next unless /^\s*#\s*include\s*"([^"]+)"/;
-		my $inc = $1;
+		my ($inc, $angle);
+		if (/^\s*#\s*include\s*"([^"]+)"/) { ($inc, $angle) = ($1, 0); }
+		elsif (/^\s*#\s*include\s*<([^>]+)>/) { ($inc, $angle) = ($1, 1); }
+		else { next; }
 		next if grep { defined $_->[0] && !$_->[0] } @stack;	# dead branch
 
 		my ($base) = $inc =~ m{([^/\\]+)$};
@@ -274,8 +299,11 @@ while (@queue) {
 			next;
 		}
 
-		my $resolved = resolve_include($file, $inc);
+		my $resolved = resolve_include($file, $inc, $angle);
 		if (!defined $resolved) {
+			# An angle include nothing in the tree satisfies is a system
+			# header; a quoted one is a broken edge either way.
+			next if $angle;
 			violate("W1|$file|$inc (unresolved)");
 			next;
 		}

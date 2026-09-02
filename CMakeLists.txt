@@ -282,17 +282,24 @@ add_subdirectory(Client/framelib)
 # see the LNK4217 note in CLAUDE.md).
 set(PACKETWIRE_MEMBERSHIP_FILE ${CMAKE_CURRENT_SOURCE_DIR}/tests/arch/packetwire_files.txt)
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${PACKETWIRE_MEMBERSHIP_FILE})
-file(STRINGS ${PACKETWIRE_MEMBERSHIP_FILE} _packetwire_lines REGEX "^Client/Packet/.*\\.cpp")
+# Every line is stripped before it is matched, so an indented path is
+# read the same way the checker and the ratchet script read it (the
+# checker rejects indentation outright, so the three cannot drift).
+file(STRINGS ${PACKETWIRE_MEMBERSHIP_FILE} _packetwire_lines)
 set(PACKETWIRE_SOURCES)
 foreach(_line IN LISTS _packetwire_lines)
 	string(STRIP "${_line}" _line)
+	if(NOT _line MATCHES "^Client/Packet/.*\\.cpp$")
+		continue()
+	endif()
 	if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${_line})
 		message(FATAL_ERROR "packetwire membership lists a file that does not exist: ${_line}")
 	endif()
 	list(APPEND PACKETWIRE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${_line})
 endforeach()
 list(LENGTH PACKETWIRE_SOURCES _packetwire_count)
-if(_packetwire_count LESS 100)
+# 518 today; a truncated list must not configure as "the library".
+if(_packetwire_count LESS 400)
 	message(FATAL_ERROR "packetwire membership file yielded only ${_packetwire_count} sources - is ${PACKETWIRE_MEMBERSHIP_FILE} intact?")
 endif()
 
@@ -867,6 +874,16 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# Client/Packet/*.cpp after this is exactly
 	# tests/arch/packetwire_holdouts.txt (the receive loops).
 	list(REMOVE_ITEM CLIENT_MAIN_SOURCES ${PACKETWIRE_SOURCES})
+	# EXISTS is case-insensitive on Windows but REMOVE_ITEM is not: a
+	# membership entry whose case differs from the on-disk name would pass
+	# the existence check above and still be globbed into the executable
+	# - compiled twice, silently. Assert the removal actually happened.
+	foreach(_src IN LISTS PACKETWIRE_SOURCES)
+		list(FIND CLIENT_MAIN_SOURCES ${_src} _still_in_exe)
+		if(NOT _still_in_exe EQUAL -1)
+			message(FATAL_ERROR "packetwire member is still in the executable's source list (case mismatch in tests/arch/packetwire_files.txt?): ${_src}")
+		endif()
+	endforeach()
 
 	# CAvi.cpp is NOT excluded (re-checked 2026-08-22): the "never
 	# instantiated" claim this exclusion used to be based on doesn't hold -

@@ -4,13 +4,18 @@
 //
 // The packet classes, the factory manager and the validator compile
 // into packetwire since docs/RESTRUCTURING.md task 2.4, and this test
-// is the link-level proof that the library stands on its own:
-// PacketFactoryManager::init() news every factory the client registers,
-// each factory's vtable references its packet's constructor and vtable,
-// so constructing one manager pulls every packet object in the archive
-// into this test binary. A packet source that still reached into the
-// executable (a game global, a handler body, a debug facility) would
-// fail this binary's link, not just a grep.
+// is the link-level proof for the directions the client RECEIVES:
+// PacketFactoryManager::init() news every factory the client registers
+// (GC, LC, RC, UC - not CG/CL, which the client only writes and whose
+// factories sit behind the server-only #if), each factory's vtable
+// references its packet's constructor and vtable, so constructing one
+// manager pulls every received-direction packet object in the archive
+// into this test binary. A received-direction packet source that still
+// reached into the executable (a game global, a handler body, a debug
+// facility) would fail this binary's link, not just a grep. The
+// written directions are covered by the include-graph checker
+// (tests/arch/check_includes.pl) and by whichever CG/CL packets the
+// golden tests construct.
 //
 // The behavioral checks are deliberately thin: the wire layout is
 // pinned elsewhere (test_wire_layout.cpp, test_packet_goldens.cpp).

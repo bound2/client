@@ -20,17 +20,27 @@
 // (EncryptUtility.h) - the shuffle IS part of the wire format, and the
 // _4/_5 tables have non-rotation cases that codes 1..3 never reach.
 // Packets that never touch the encrypter are pinned at code 0 only,
-// and a test asserts they are still encrypter-free, so a packet that
-// starts shuffling cannot hide behind a single golden.
+// and EncrypterFree() asserts both their write() and their read() are
+// code-insensitive, so a packet that starts shuffling on either side
+// cannot hide behind a single golden. (Known blind spot: the
+// encrypter's bool transform is the identity for every code below 129,
+// so a packet whose ONLY encrypted field were a bool would pass; none
+// exists.)
 //
-// Fixture values follow the server's canonical-value rules: distinct
-// per field and >= 128 in every byte the width allows, so a signedness
-// flip, a same-width type swap or two transposed fields all move bytes
-// in the golden (an all-<128 fixture cannot tell BYTE from char).
+// Fixture values follow the server's canonical-value rules where this
+// file owns them: distinct per field and >= 128 in every byte the width
+// allows, so a signedness flip, a same-width type swap or two
+// transposed fields all move bytes in the golden. The fixtures shared
+// with the server (GCMoveOK, CGMove, CGSay, the item-base ObjectIDs)
+// keep the server's values, some below 128, because the point of those
+// pins is byte identity with the server's files - changing them means
+// re-recording both repositories in lockstep.
 //
 // Set UPDATE_GOLDENS=1 to (re)record instead of compare. Any other
 // value compares - UPDATE_GOLDENS=0 must not silently rewrite every
-// pin and pass.
+// pin and pass. A recording run is deliberately NOT green: every
+// recorded pin is reported as a failure, so a stale UPDATE_GOLDENS=1 in
+// a shell or a CI job cannot turn the contract into a rubber stamp.
 //
 // Compiled with the packetwire defines (tests/CMakeLists.txt), so the
 // Packet and stream definitions are identical to the library's.
@@ -50,6 +60,21 @@
 #include "Cpackets/CGSay.h"
 #include "Cpackets/CGWhisper.h"
 #include "Cpackets/CLLogin.h"
+#include "Cpackets/CGAddMouseToZone.h"
+#include "Cpackets/CGAddZoneToInventory.h"
+#include "Cpackets/CGAddZoneToMouse.h"
+#include "Cpackets/CGAttack.h"
+#include "Cpackets/CGDissectionCorpse.h"
+#include "Cpackets/CGDropMoney.h"
+#include "Cpackets/CGNPCAskAnswer.h"
+#include "Cpackets/CGPickupMoney.h"
+#include "Cpackets/CGSkillToInventory.h"
+#include "Cpackets/CGSkillToObject.h"
+#include "Cpackets/CGSkillToSelf.h"
+#include "Cpackets/CGSkillToTile.h"
+#include "Cpackets/CGUseItemFromGear.h"
+#include "Cpackets/CGUseItemFromInventory.h"
+#include "Cpackets/CGUsePotionFromInventory.h"
 #include "Gpackets/GCAddInstalledMineToZone.h"
 #include "Gpackets/GCAddNewItemToZone.h"
 #include "Gpackets/GCDropItemToZone.h"
@@ -160,6 +185,10 @@ void	ExpectGolden(const std::string& name, uchar code, const std::vector<unsigne
 		CHECK(file.good());
 		file << actual << "\n";
 		std::printf("  recorded golden %s\n", path.c_str());
+		// See the file header: a recording run must not pass.
+		::testfw::RecordCheck();
+		::testfw::RecordFailure(__FILE__, __LINE__,
+			"golden recorded (UPDATE_GOLDENS=1) - review the diff and re-run without it");
 		return;
 	}
 
@@ -175,6 +204,7 @@ void	ExpectGolden(const std::string& name, uchar code, const std::vector<unsigne
 	}
 	std::string expected;
 	std::getline(file, expected);
+	CHECK(!expected.empty());	// an empty pin pins nothing
 	if (expected != actual)
 		std::fprintf(stderr,
 			"  wire bytes changed for %s (encrypt code %d)\n"
@@ -205,16 +235,80 @@ void	RoundTrip(const Packet& src, Packet& dst, uchar code)
 	CHECK(f.m_Stream.isEmpty());
 }
 
+// Parse `body` into a fresh packet through an input stream set to
+// `code`. Throws whatever read() throws.
+template <class PacketT>
+void	ReadBody(PacketT& dst, const std::vector<unsigned char>& body, uchar code)
+{
+	InFixture f;
+	f.m_Stream.setEncryptCode(code);
+	SocketInputStreamTestAccess::Preload(f.m_Stream, body.empty() ? NULL : &body[0],
+					     (unsigned int)body.size());
+	dst.read(f.m_Stream);
+}
+
 // A packet that never calls readEncrypt/writeEncrypt writes the same
-// bytes under every code. Pinned so a packet cannot start shuffling
-// while its single code-0 golden keeps passing.
-bool	EncrypterFree(const Packet& packet)
+// bytes under every code AND parses the same fields from the plain
+// bytes under every code. Both sides are checked: a shuffle added to
+// read() alone would leave write() and the code-0 golden untouched
+// while every live session (nonzero code) mis-parsed. Field equality
+// is proved by re-serialising the parsed packet at code 0 - write()
+// emits every field, so equal bytes mean equal fields.
+template <class PacketT>
+bool	EncrypterFree(const PacketT& packet)
 {
 	const std::vector<unsigned char> plain = WriteBody(packet, 0);
 	for (size_t i = 1; i < kEncryptCodeCount; i++)
+	{
 		if (WriteBody(packet, kEncryptCodes[i]) != plain)
 			return false;
+		PacketT parsed;
+		ReadBody(parsed, plain, kEncryptCodes[i]);
+		if (WriteBody(parsed, 0) != plain)
+			return false;
+	}
 	return true;
+}
+
+// True when read() refuses `body` with InvalidProtocolException - the
+// parsers' bounds checks, which are the whole point of the wire library
+// being testable.
+template <class PacketT>
+bool	Rejects(const std::vector<unsigned char>& body)
+{
+	try {
+		PacketT dst;
+		ReadBody(dst, body, 0);
+	} catch (InvalidProtocolException&) {
+		return true;
+	}
+	return false;
+}
+
+void	Append(std::vector<unsigned char>& out, const void* p, size_t n)
+{
+	const unsigned char* b = (const unsigned char*)p;
+	out.insert(out.end(), b, b + n);
+}
+
+// Round-trip + goldens for a fixed-width encrypter packet whose fixture
+// is shared with the server: field equality after the round-trip is
+// proved by re-serialising both sides at code 0 (write() emits every
+// field), so no per-packet getter list is needed.
+template <class PacketT>
+void	PinSharedEncrypterPacket(const char* name, void (*fill)(PacketT&))
+{
+	for (size_t i = 0; i < kEncryptCodeCount; i++)
+	{
+		PacketT src, dst;
+		fill(src);
+		RoundTrip(src, dst, kEncryptCodes[i]);
+		CHECK(WriteBody(dst, 0) == WriteBody(src, 0));
+	}
+	PacketT packet;
+	fill(packet);
+	for (size_t i = 0; i < kEncryptCodeCount; i++)
+		ExpectGolden(name, kEncryptCodes[i], WriteBody(packet, kEncryptCodes[i]));
 }
 
 //----------------------------------------------------------------------
@@ -277,7 +371,15 @@ void	CheckItemBaseEqual(GCAddItemToZone& a, GCAddItemToZone& b)
 	CHECK_EQ(a.getItemNum(), b.getItemNum());
 	CHECK_EQ(a.getListNum(), b.getListNum());
 	// No const accessor for the sub-item list: pop the single element
-	// from each side and compare. Popped elements are ours to free.
+	// from each side and compare. popFrontListElement() is front()/
+	// pop_front() with no emptiness check, so a parse that yielded no
+	// sub-item must be reported here, not turned into undefined
+	// behaviour inside the expected failure. Popped elements are ours
+	// to free.
+	CHECK_EQ(1, a.getListNum());
+	CHECK_EQ(1, b.getListNum());
+	if (a.getListNum() != 1 || b.getListNum() != 1)
+		return;
 	SubItemInfo* pa = a.popFrontListElement();
 	SubItemInfo* pb = b.popFrontListElement();
 	CHECK(pa != NULL && pb != NULL);
@@ -294,9 +396,46 @@ void	CheckItemBaseEqual(GCAddItemToZone& a, GCAddItemToZone& b)
 }
 
 //----------------------------------------------------------------------
+// The other fifteen encrypter packets, values copied from the server's
+// packet_encrypter_test.cpp so the goldens are the same files (the
+// server pins all nineteen encrypter users; so does this file now).
+//----------------------------------------------------------------------
+void	Fill(CGSkillToSelf& p)		{ p.setSkillType(0x8A1B); p.setCEffectID(0x9C2D); }
+void	Fill(CGUseItemFromGear& p)	{ p.setObjectID(0xA1B2C3D4); p.setPart(0x85); }
+void	Fill(CGAddZoneToMouse& p)	{ p.setObjectID(0xB3C4D5E6); p.setZoneX(0x97); p.setZoneY(0xA9); }
+void	Fill(CGNPCAskAnswer& p)		{ p.setObjectID(0xC5D6E7F8); p.setScriptID(0x89ABCDEF); p.setAnswerID(0xB1); }
+void	Fill(CGPickupMoney& p)		{ p.setObjectID(0xD7E8F90A); p.setZoneX(0x9B); p.setZoneY(0xAD); }
+void	Fill(CGSkillToObject& p)	{ p.setSkillType(0x8E3F); p.setCEffectID(0x9D4A); p.setTargetObjectID(0xE9FA0B1C); }
+void	Fill(CGUseItemFromInventory& p)	{ p.setObjectID(0xFB0C1D2E); p.setX(0x93); p.setY(0xA5); }
+void	Fill(CGUsePotionFromInventory& p) { p.setObjectID(0x8C9DAEBF); p.setX(0xB5); p.setY(0xC7); }
+void	Fill(CGAttack& p)		{ p.setObjectID(0x9EAFB0C1); p.setX(0x83); p.setY(0x95); p.setDir(0xA7); }
+void	Fill(CGDissectionCorpse& p)	{ p.setObjectID(0xACBDCEDF); p.setX(0x89); p.setY(0x9B); p.setPet(0xAD); }
+void	Fill(CGSkillToTile& p)		{ p.setSkillType(0x8F5B); p.setCEffectID(0x9E6C); p.setX(0xB9); p.setY(0xCB); }
+void	Fill(CGAddZoneToInventory& p)
+{
+	p.setObjectID(0xBACBDCED);
+	p.setZoneX(0x8B);
+	p.setZoneY(0x9D);
+	p.setInvenX(0xAF);
+	p.setInvenY(0xC1);
+}
+void	Fill(CGSkillToInventory& p)
+{
+	p.setSkillType(0x8D7E);
+	p.setObjectID(0xCEDFE0F1);
+	p.setX(0x91);
+	p.setY(0xA3);
+	p.setTargetX(0xB5);
+	p.setTargetY(0xC7);
+}
+void	Fill(CGAddMouseToZone& p)	{ p.setObjectID(0x14253647); }
+void	Fill(CGDropMoney& p)		{ p.setAmount(0x8899AABB); }
+
+//----------------------------------------------------------------------
 // Client-authored fixtures: the chat/guild/system-message family the
-// code-health review named as the highest-risk parsers, and the login
-// packet whose layout switches on the netmarble flag.
+// code-health review named among the highest-risk parsers (the layout
+// pins here; their length bounds are pinned separately below), and the
+// login packet whose layout switches on the netmarble flag.
 //----------------------------------------------------------------------
 void	Fill(GCSay& p)
 {
@@ -516,6 +655,31 @@ TEST(CGWhisper, RoundTripsAndMatchesTheSharedGolden)
 }
 
 //----------------------------------------------------------------------
+// The other fifteen encrypter packets, shared goldens (see Fill above)
+//----------------------------------------------------------------------
+#define SHARED_ENCRYPTER_PIN(Name)						\
+	TEST(Name, RoundTripsAndMatchesTheSharedGoldenForEveryEncryptCode)	\
+	{								\
+		PinSharedEncrypterPacket<Name>(#Name, &Fill);		\
+	}
+SHARED_ENCRYPTER_PIN(CGSkillToSelf)
+SHARED_ENCRYPTER_PIN(CGUseItemFromGear)
+SHARED_ENCRYPTER_PIN(CGAddZoneToMouse)
+SHARED_ENCRYPTER_PIN(CGNPCAskAnswer)
+SHARED_ENCRYPTER_PIN(CGPickupMoney)
+SHARED_ENCRYPTER_PIN(CGSkillToObject)
+SHARED_ENCRYPTER_PIN(CGUseItemFromInventory)
+SHARED_ENCRYPTER_PIN(CGUsePotionFromInventory)
+SHARED_ENCRYPTER_PIN(CGAttack)
+SHARED_ENCRYPTER_PIN(CGDissectionCorpse)
+SHARED_ENCRYPTER_PIN(CGSkillToTile)
+SHARED_ENCRYPTER_PIN(CGAddZoneToInventory)
+SHARED_ENCRYPTER_PIN(CGSkillToInventory)
+SHARED_ENCRYPTER_PIN(CGAddMouseToZone)
+SHARED_ENCRYPTER_PIN(CGDropMoney)
+#undef SHARED_ENCRYPTER_PIN
+
+//----------------------------------------------------------------------
 // Client-authored pins: chat, guild chat, system message, login
 //----------------------------------------------------------------------
 TEST(GCSay, RoundTripsAndMatchesGolden)
@@ -615,4 +779,71 @@ TEST(CLLogin, NetmarbleLayoutMatchesGolden)
 	const std::vector<unsigned char> body = WriteBody(packet, 0);
 	CHECK_EQ(packet.getPacketSize(), body.size());
 	ExpectGolden("CLLogin.netmarble", 0, body);
+}
+
+//----------------------------------------------------------------------
+// Bounds of the chat-family parsers: the checks that make a hostile
+// length byte a disconnect instead of an overrun. Each hostile body is
+// built from a good one so only the byte under test differs.
+//----------------------------------------------------------------------
+TEST(GCSay, RejectsAnEmptyAndAnOverlongMessage)
+{
+	GCSay good;
+	Fill(good);
+	std::vector<unsigned char> body = WriteBody(good, 0);
+	const size_t lenAt = 8;	// ObjectID(4) + color(4), then the length byte
+	CHECK_EQ(good.getMessage().size(), body[lenAt]);
+
+	std::vector<unsigned char> empty(body.begin(), body.begin() + lenAt);
+	empty.push_back(0);
+	CHECK(Rejects<GCSay>(empty));
+
+	std::vector<unsigned char> overlong(body.begin(), body.begin() + lenAt);
+	overlong.push_back(129);	// the parser's cap is 128
+	overlong.insert(overlong.end(), 129, 'x');
+	CHECK(Rejects<GCSay>(overlong));
+
+	// The boundary itself is accepted: 128 bytes parse.
+	std::vector<unsigned char> atCap(body.begin(), body.begin() + lenAt);
+	atCap.push_back(128);
+	atCap.insert(atCap.end(), 128, 'x');
+	CHECK(!Rejects<GCSay>(atCap));
+}
+
+TEST(GCGuildChat, RejectsAnOverlongSenderAndGuildName)
+{
+	// type 0, then szSender 11 - one past the parser's cap of 10.
+	std::vector<unsigned char> longSender;
+	longSender.push_back(0);
+	longSender.push_back(11);
+	longSender.insert(longSender.end(), 11, 's');
+	CHECK(Rejects<GCGuildChat>(longSender));
+
+	// type 1 carries a guild name first; 31 is one past its cap of 30.
+	std::vector<unsigned char> longGuild;
+	longGuild.push_back(1);
+	longGuild.push_back(31);
+	longGuild.insert(longGuild.end(), 31, 'g');
+	CHECK(Rejects<GCGuildChat>(longGuild));
+
+	// An empty sender is refused too (szSender == 0).
+	std::vector<unsigned char> emptySender;
+	emptySender.push_back(0);
+	emptySender.push_back(0);
+	CHECK(Rejects<GCGuildChat>(emptySender));
+}
+
+// Type != 0 with an empty guild name: write() emits the zero length
+// byte and no name, read() skips the name read on zero - the one
+// asymmetric branch in the parser, pinned so it stays a round-trip.
+TEST(GCGuildChat, EmptyGuildNameWithNonZeroTypeRoundTrips)
+{
+	GCGuildChat src, dst;
+	Fill(src);
+	src.setSendGuildName("");
+	RoundTrip(src, dst, 0);
+	CHECK_EQ(src.getType(), dst.getType());
+	CHECK(dst.getSendGuildName().empty());
+	CHECK(src.getSender() == dst.getSender());
+	CHECK(src.getMessage() == dst.getMessage());
 }

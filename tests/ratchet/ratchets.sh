@@ -24,6 +24,14 @@ FAIL=0
 
 check () {
 	local name="$1" measured="$2" baseline="$3"
+	# An unmeasurable metric is a failure, never a pass: with an empty
+	# $measured both comparisons below error out as "false" and would
+	# fall through to OK.
+	if ! [ "$measured" -ge 0 ] 2>/dev/null; then
+		echo "FAIL $name: could not measure (got '$measured')"
+		FAIL=1
+		return
+	fi
 	if [ "$measured" -gt "$baseline" ]; then
 		echo "FAIL $name: measured $measured > baseline $baseline - this change grows debt the ratchet exists to shrink"
 		FAIL=1
@@ -62,8 +70,21 @@ for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; 
 done
 
 if [ -n "$R1_VCXPROJ" ]; then
-	R1=$(grep -c "<ClCompile Include" "$R1_VCXPROJ")
-	check "R1 (TUs in DarkEden.vcxproj: $R1_VCXPROJ)" "$R1" "$R1_BASELINE"
+	# A tree configured before the source lists were last edited
+	# measures a different tree (parallel sessions share this checkout);
+	# that is a failure to measure, not a pass. The configure time is
+	# CMakeFiles/generate.stamp - the Visual Studio generator touches it
+	# on every generate, while it leaves an unchanged .vcxproj (and an
+	# unchanged CMakeCache.txt) alone, so those mtimes would report a
+	# fresh reconfigure as stale.
+	R1_CACHE="$(dirname "$R1_VCXPROJ")/CMakeFiles/generate.stamp"
+	if [ ! -f "$R1_CACHE" ] || [ CMakeLists.txt -nt "$R1_CACHE" ] || [ tests/arch/packetwire_files.txt -nt "$R1_CACHE" ]; then
+		echo "FAIL R1: $(dirname "$R1_VCXPROJ") was configured before CMakeLists.txt or the packetwire membership file last changed - reconfigure that tree first"
+		FAIL=1
+	else
+		R1=$(grep -c "<ClCompile Include" "$R1_VCXPROJ")
+		check "R1 (TUs in DarkEden.vcxproj: $R1_VCXPROJ)" "$R1" "$R1_BASELINE"
+	fi
 else
 	echo "SKIP R1: no generated DarkEden.vcxproj found (non-MSVC generator?)"
 fi
@@ -101,11 +122,11 @@ check "R2 (packet cpps defining execute)" "$R2" "$R2_BASELINE"
 # classes under Client/Packet AND the handlers under Client/PacketHandler
 # (task 2.4 moved the handlers out; they are where most of the strcpy
 # targets fed by server strings live, so the metric follows them).
-# (snprintf does not match: \b rejects the preceding 'n'. Lines whose
-# match sits behind a // comment are excluded - a quarter of the first
-# baseline was commented-out code, and deleting a comment must not
-# demand a baseline edit, nor may a comment deletion mask a new live
-# call.)
+# (snprintf does not match: \b rejects the preceding 'n'. The // comment
+# tail of every line is stripped BEFORE matching, so commented-out code
+# does not count - a quarter of the first baseline was - while a live
+# call with a trailing comment still does; the earlier whole-line
+# exclusion let `sprintf(...); // was strcpy` through.)
 #----------------------------------------------------------------------
 R3_BASELINE=46
 
@@ -116,8 +137,8 @@ for d in Client/Packet Client/PacketHandler; do
 	fi
 done
 
-R3=$(grep -rE '\b(sprintf|strcpy|strcat)\s*\(' Client/Packet Client/PacketHandler --include='*.cpp' \
-	| grep -vE ':\s*//|//.*\b(sprintf|strcpy|strcat)' | wc -l)
+R3=$(grep -rhE '\b(sprintf|strcpy|strcat)\s*\(' Client/Packet Client/PacketHandler --include='*.cpp' \
+	| sed -e 's://.*::' | grep -cE '\b(sprintf|strcpy|strcat)\s*\(')
 check "R3 (unsafe format/copy lines in Client/Packet + Client/PacketHandler)" "$R3" "$R3_BASELINE"
 
 #----------------------------------------------------------------------

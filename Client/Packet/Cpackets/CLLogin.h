@@ -70,7 +70,9 @@ public :
 	bool isNetmarble () const throw () { return m_bNetmarble; }
 	void setNetmarble ( bool bNetmarble ) throw () { m_bNetmarble = bNetmarble; }
 
-	CLLogin () throw () : m_LoginMode(0) , m_bNetmarble(false) {}
+	// A user-provided constructor forgoes value-initialisation's zero
+	// fill, so the MAC is cleared here explicitly.
+	CLLogin () throw () : m_LoginMode(0) , m_bNetmarble(false) { memset( m_MacAddress, 0, sizeof(m_MacAddress) ); }
 
 private :
 
