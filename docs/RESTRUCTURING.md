@@ -956,8 +956,8 @@ starting each — the scan is one grep, and the ranking below is from a
   > second copy of that file that the Windows `VS_UI` target still
   > compiles (the `list(FILTER)` meant to drop it sits in the non-Windows
   > branch), so `VS_UI.lib` holds a twin the executable's object
-  > outranks; both dead in this build (5.2). Suite: 201 tests (3,423
-  > checks).
+  > outranks; both dead in this build — cleared by 5.2's first slice.
+  > Suite: 201 tests (3,423 checks).
   - Owner (all of 4.x): `gamemodel`'s membership file
     (`tests/arch/gamemodel_files.txt`), the M0–M2 include rules in
     `check_includes.pl` (in force since 4.1), R4 shrinking.
@@ -975,7 +975,25 @@ starting each — the scan is one grep, and the ranking below is from a
   `_bak` files are already excluded by the build — delete them; sort the
   `GameHelpers`/`GameFunctions`/`GamePacketFunctions` exclusion graveyard
   into deleted-or-documented. The wrong-file-edited trap dies here.
-  > **Status:** not started.
+  > **Status:** first slice done — the item-table twins (2026-09-02,
+  > `restructuring/dead-item-table-twins`). Deleted: the one tracked
+  > `_bak` file (`MItemTable_bak-2007-5-7.cpp`, 15,000 lines of a 2007
+  > item table, excluded by the build's `_bak` filter); `MitemTableinit2.cpp`
+  > (a second `InitItem2`, excluded by name); and `VS_UI/MitemTableInit.cpp`
+  > (a third, which the Windows `VS_UI` target was still compiling
+  > because the filter meant to drop it sat in the non-Windows branch —
+  > `VS_UI.lib` carried a twin the executable's object outranked). The
+  > surviving `Client/MitemTableInit.cpp` no longer ends by calling
+  > itself. All of it dead in this build: `InitItem2` is reached only
+  > from `ITEMCLASS_TABLE`'s server-only constructor, which is the next
+  > 5.2 candidate — the 23,000-line `__INIT_ITEM__` block in
+  > `MItemTable.cpp` plus the 8,500-line `MitemTableInit.cpp` are the
+  > server's item data in client source. The exclusion graveyard proper
+  > (`GameHelpers`, `GameFunctions`, `GamePacketFunctions`,
+  > `ActionFunctions`, `MissingGlobals`, `GlobalVariables`) is untouched.
+  > Verified: both executable trees 0 errors; R1 unchanged (nothing
+  > deleted was compiled into the executable); ctest 4/4 in both test
+  > trees.
 - [ ] **5.3 TextSystem stub retirement.** Split `TextService.cpp`'s pure
   text utilities from its `g_pLast` drawing entry point so
   `tests/stubs/client_globals.cpp` can shrink (the stub file itself

@@ -489,7 +489,6 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		# U_edit is now cross-platform (SDL-based), so don't exclude it
 		# Exclude problematic files in VS_UI root directory
 		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/DebugInfo\\.cpp")
-		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/MitemTableInit\\.cpp")
 		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/SXml\\.cpp")
 		# Note: u_window.cpp is now cross-platform compatible
 	endif()
@@ -868,8 +867,6 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/GlobalVariables.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/GCNotifyWinHandler.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/GCNotifyWin.cpp
-		# Exclude MitemTableinit2.cpp - duplicates InitItem2() from MitemTableInit.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/MitemTableinit2.cpp
 		# Exclude MissingGlobals.cpp - duplicates globals with GameMain.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/MissingGlobals.cpp
 		# Exclude GameHelpers.cpp - duplicates many functions with GamePacketFunctions.cpp
