@@ -5,9 +5,11 @@
 // The item table (gamemodel, docs/RESTRUCTURING.md task 4.4, first
 // slice): ITEMTABLE_INFO, one item definition, and ITEMTYPE_TABLE, the
 // per-class table of them with the average price MPriceManager uses.
-// The client loads the table from Item.inf; SaveToFile writes the same
-// layout, so a round trip through both pins the on-disk order, and a
-// hand-built head pins the part a wrong string order would scramble.
+// The client loads the table from Item.inf and SaveToFile writes the
+// same layout, so a round trip through both pins that the two agree
+// field for field (a matching swap in both would still pass), and the
+// hand-built head pins the string order against bytes. No shipped
+// Item.inf is in the repository to pin the rest against.
 //
 //----------------------------------------------------------------------
 
@@ -73,17 +75,38 @@ void	Fill(ITEMTABLE_INFO& info)
 
 } // namespace
 
+// Every field the loader sets must also start defined: an InitClass'd
+// slot that no file entry fills is read like any other (the average
+// price, the shop's price display). Price, Race and DropFrameID were
+// the three the constructor missed until task 4.4's review.
 TEST(ItemTableInfo, ConstructsAsAnEmptyOneByOneItem)
 {
 	ITEMTABLE_INFO info;
 	CHECK_EQ(FRAMEID_NULL, info.TileFrameID);
 	CHECK_EQ(FRAMEID_NULL, info.InventoryFrameID);
+	CHECK_EQ(FRAMEID_NULL, info.GearFrameID);
+	CHECK_EQ(FRAMEID_NULL, info.DropFrameID);
+	CHECK_EQ(FRAMEID_NULL, info.AddonMaleFrameID);
+	CHECK_EQ(FRAMEID_NULL, info.AddonFemaleFrameID);
 	CHECK_EQ(SOUNDID_NULL, info.UseSoundID);
+	CHECK_EQ(SOUNDID_NULL, info.TileSoundID);
 	CHECK_EQ(1, info.GridWidth);
 	CHECK_EQ(1, info.GridHeight);
 	CHECK_EQ(0, info.Weight);
+	CHECK_EQ(0, info.Price);
+	CHECK_EQ(0, info.Race);
+	CHECK_EQ(0, info.SilverMax);
+	CHECK_EQ(1, info.MaxNumber);
+	CHECK_EQ(ITEMTABLE_INFO::ELEMENTAL_TYPE_ANY, info.ElementalType);
 	CHECK(info.IsGenderForAll());
 	CHECK(info.DefaultOptionList.empty());
+}
+
+TEST(ItemTypeTable, FreshTableHasNoEntriesAndZeroAveragePrice)
+{
+	ITEMTYPE_TABLE table;
+	CHECK_EQ(0, table.GetSize());
+	CHECK_EQ(0, table.GetAveragePrice());
 }
 
 TEST(ItemTableInfo, SaveAndLoadRoundTripEveryField)
@@ -211,7 +234,7 @@ TEST(ItemTypeTable, AveragePriceSkipsItemsWithDefaultOptionsAndRoundsToHundreds)
 	CHECK_EQ(1, table[2].DefaultOptionList.size());
 	// (1200 + 3400) / 2 = 2300 -> /1000 = 2 -> *100 = 200
 	CHECK_EQ(200, table.GetAveragePrice());
-	CHECK_EQ(0, table[5].Price);			// past the end: the default entry
+	CHECK_EQ(0, table[5].Price);			// past the end: a default-constructed entry
 }
 
 TEST(ItemTypeTable, AveragePriceIsZeroWhenEveryItemHasOptions)

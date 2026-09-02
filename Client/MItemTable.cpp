@@ -38,6 +38,7 @@ ITEMTABLE_INFO::ITEMTABLE_INFO()
 	GearFrameID			= FRAMEID_NULL;		// Gear에서의 Frame ID
 	AddonMaleFrameID	= FRAMEID_NULL;		// 장착했을 때의 동작 FrameID - 남자
 	AddonFemaleFrameID	= FRAMEID_NULL;		// 장착했을 때의 동작 FrameID - 여자
+	DropFrameID			= FRAMEID_NULL;
 
 	// Sound ID
 	UseSoundID			= SOUNDID_NULL;		// Item 사용 SoundID			
@@ -53,7 +54,8 @@ ITEMTABLE_INFO::ITEMTABLE_INFO()
 	GridHeight			= 1;
 
 	// item 자체에 대한 고정된 정보
-	Weight				= 0;				// 무게	
+	Weight				= 0;				// 무게
+	Price				= 0;
 
 	// 값들.. --> Protection, 공격력, 사정거리
 	Value1				= 0;
@@ -88,6 +90,7 @@ ITEMTABLE_INFO::ITEMTABLE_INFO()
 
 	ElementalType		= ELEMENTAL_TYPE_ANY;
 	Elemental			= 0;
+	Race				= 0;
 
 	DescriptionFrameID = 0;
 }

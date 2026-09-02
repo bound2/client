@@ -207,6 +207,8 @@ class ITEMTABLE_INFO {
 class ITEMTYPE_TABLE : public CTypeTable<ITEMTABLE_INFO>
 {
 public :
+	ITEMTYPE_TABLE() : m_AveragePrice(0) {}
+
 	void	LoadFromFile(std::ifstream& file);
 
 	int		GetAveragePrice() const	{ return m_AveragePrice; }
