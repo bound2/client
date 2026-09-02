@@ -35,10 +35,15 @@ namespace {
 // The tables the items read: swords of three footprints, a belt with
 // three pockets.
 //----------------------------------------------------------------------
+// Managers own their items, so tests hand them heap objects; the count
+// of live ones proves Release's ownership. Each fixture starts it at 0.
+int	s_Alive = 0;
+
 struct ContainerWorld
 {
 	ContainerWorld()
 	{
+		s_Alive = 0;
 		g_pItemTable = new ITEMCLASS_TABLE;
 		g_pItemTable->Init(MAX_ITEM_CLASS);
 		g_pItemTable->InitClass(ITEM_CLASS_SWORD, 3);
@@ -69,10 +74,6 @@ struct ContainerWorld
 		delete g_pItemTable;		g_pItemTable = NULL;
 	}
 };
-
-// Managers own their items, so tests hand them heap objects; the count
-// of live ones proves Release's ownership.
-int	s_Alive = 0;
 
 struct Sword : public MItem
 {
@@ -353,6 +354,57 @@ TEST(SlotItemManager, ReplacementHandsTheOccupantOut)
 	slots.Release();
 	CHECK_EQ(0, s_Alive);
 	CHECK_EQ(0, (int)slots.GetSize());
+}
+
+// The slot array mirrors the id map: an item the map refuses (its id is
+// already held) must not be left in a slot the map knows nothing about.
+TEST(SlotItemManager, RefusedIdLeavesTheSlotEmpty)
+{
+	ContainerWorld world;
+	MSlotItemManager slots;
+	slots.Init(2);
+
+	Quick* a = new Quick(1);
+	Quick* twin = new Quick(1);
+	CHECK(slots.AddItem(a, 0));
+	CHECK_EQ(false, slots.AddItem(twin, 1));
+	CHECK(slots.GetItem(1) == NULL);
+	CHECK_EQ(1, slots.GetItemNum());
+
+	// The slot is still free for an item the map will take.
+	Quick* b = new Quick(2);
+	CHECK(slots.AddItem(b, 1));
+	CHECK(slots.GetItem(1) == b);
+
+	delete twin;
+	slots.Release();
+	CHECK_EQ(0, s_Alive);
+}
+
+// The same rule for replacement: when the map refuses the newcomer, the
+// occupant stays where it was instead of being dropped on the floor.
+TEST(SlotItemManager, RefusedReplacementKeepsTheOccupant)
+{
+	ContainerWorld world;
+	MSlotItemManager slots;
+	slots.Init(2);
+
+	Quick* a = new Quick(1);
+	Quick* b = new Quick(2);
+	Quick* twinOfB = new Quick(2);
+	CHECK(slots.AddItem(a, 0));
+	CHECK(slots.AddItem(b, 1));
+
+	MItem* old = NULL;
+	CHECK_EQ(false, slots.ReplaceItem(twinOfB, 0, old));
+	CHECK(old == NULL);
+	CHECK(slots.GetItem(0) == a);
+	CHECK(slots.MItemManager::GetItem(1) == a);	// the slot overload hides the id lookup
+	CHECK_EQ(2, slots.GetItemNum());
+
+	delete twinOfB;
+	slots.Release();
+	CHECK_EQ(0, s_Alive);
 }
 
 //----------------------------------------------------------------------
