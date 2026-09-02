@@ -62,6 +62,13 @@ check () {
 # relative VS_UI_CLIENT_SOURCES list never matched the exe glob's
 # absolute paths in REMOVE_ITEM, so they compiled into both (the
 # LNK4217 trap); the membership removal is absolute and asserted.
+# History: 512 = 515 + 2 - 5 (task 4.4's second slice: MItem.cpp,
+# MObject.cpp, UserInformation.cpp, ClientConfig.cpp and
+# MTimeItemManager.cpp moved into gamemodel; the executable halves split
+# out of the first two, MItemUse.cpp and MObjectScreen.cpp, are new exe
+# TUs). 515 = 516 - 1 (task 5.2 deleted the dead MitemTableInit.cpp).
+# 516 = 517 - 1 (4.4's first slice moved MItemTable.cpp). 517 = 518 - 1
+# (4.2 moved MMoneyManager.cpp). 518 = 528 - 10 (4.1's gamemodel).
 # History: 528 = 529 - 1 (task 2.5 deleted CRRequest2, a dead duplicate
 # of CRRequest claiming the same packet id, with its handler
 # Client/PacketHandler/CRRequest2Handler.cpp). 529 = 992 - 463. Task 2.4 moved every packet class, the
@@ -72,7 +79,7 @@ check () {
 # before (0 net). 992 = 993 - 1 (task 2.2's PacketHandlerRegistry.cpp,
 # a recorded +1, offset by the finished migration deleting
 # CGHandlersStub.cpp).
-R1_BASELINE=515
+R1_BASELINE=512
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do
@@ -163,6 +170,13 @@ check "R3 (unsafe format/copy lines in Client/Packet + Client/PacketHandler)" "$
 # targets and the include checker read the same files). Extraction work
 # (Phase 4) shrinks this by cutting the global seams.
 #
+# 28: 35 - 7, again a reclassification, by the library-wide definition
+# rule below (task 4.4's second slice): MItem.cpp itself, Datagram.cpp
+# (g_pPacketFactoryManager, packetwire's own) and five VS_UI sources
+# whose only reaches are gamemodel's tables (g_pItemTable,
+# g_pItemOptionTable, g_pGameStringTable, g_pUserInformation) and
+# packetwire's g_pFileDef, or their own library's g_pKeyAccelerator and
+# g_pSystemAvailableManager.
 # 35: 59 - 24, a RECLASSIFICATION, not progress on the seams: the 36
 # Client/*.cpp files VS_UI_CLIENT_SOURCES listed were compiled into
 # both VS_UI.lib and the executable, and the executable's objects were
@@ -183,7 +197,7 @@ check "R3 (unsafe format/copy lines in Client/Packet + Client/PacketHandler)" "$
 # GCStashList::setStashItem from a live Item*) were deleted rather than
 # grandfathered.
 #----------------------------------------------------------------------
-R4_BASELINE=35
+R4_BASELINE=28
 
 lib_members () {
 	# The directory trees minus the files CMake excludes from the
@@ -199,16 +213,27 @@ lib_members () {
 		| grep -oE 'Client/[A-Za-z0-9_/]+\.cpp'
 }
 
-# A file that references only globals it DEFINES itself is not a seam
-# into the executable (the packet tables own g_pPacketFactoryManager /
-# g_pPacketValidator, and they moved into the library with task 2.4);
-# those are subtracted per file.
-R4=$(lib_members | sort -u | while read -r f; do
+# A global DEFINED by a library file is not a seam into the executable:
+# the reference resolves inside the libraries. The packet tables own
+# g_pPacketFactoryManager / g_pPacketValidator (task 2.4); since task
+# 4.4's item core, MItem.cpp reads g_pItemTable, g_pItemOptionTable,
+# g_pGameStringTable, g_pUserInformation, g_pClientConfig and
+# g_pTimeItemManager, every one defined by another gamemodel member -
+# so the subtraction is against the union of every library file's
+# definitions, not the file's own. (Until 4.4 it was per file, which
+# would have counted the item core as debt for reading a table that
+# sits beside it in the same library.)
+lib_defs () {
+	lib_members | sort -u | while read -r f; do
+		[ -f "$f" ] || continue
+		grep -oE '^[A-Za-z_][A-Za-z0-9_:<>]*[[:space:]]*\*?[[:space:]]*g_p[A-Z]\w*[[:space:]]*(=|;)' "$f" \
+			| grep -oE '\bg_p[A-Z]\w*'
+	done | sort -u
+}
+R4=$(defs=$(lib_defs); lib_members | sort -u | while read -r f; do
 	[ -f "$f" ] || continue
 	refs=$(grep -oE '\bg_p[A-Z]\w*' "$f" | sort -u)
 	[ -n "$refs" ] || continue
-	defs=$(grep -oE '^[A-Za-z_][A-Za-z0-9_:<>]*[[:space:]]*\*?[[:space:]]*g_p[A-Z]\w*[[:space:]]*(=|;)' "$f" \
-		| grep -oE '\bg_p[A-Z]\w*' | sort -u)
 	if [ -n "$(comm -23 <(echo "$refs") <(echo "$defs"))" ]; then
 		echo "$f"
 	fi

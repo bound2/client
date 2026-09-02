@@ -392,9 +392,11 @@ else()
 endif()
 
 # packetwire for Properties (the file-definition table the string
-# table's language test reads); iconv for MString's GBK -> UTF-8
-# conversion, carried PUBLIC so every consumer resolves it.
-target_link_libraries(gamemodel PUBLIC basic packetwire)
+# table's language test reads); framelib for CAnimationFrame, the item
+# model's animation base (task 4.4 - its .cpp holds the constructor);
+# iconv for MString's GBK -> UTF-8 conversion, carried PUBLIC so every
+# consumer resolves it.
+target_link_libraries(gamemodel PUBLIC basic packetwire framelib)
 if(NOT EMSCRIPTEN)
 	if(Iconv_FOUND)
 		target_link_libraries(gamemodel PUBLIC Iconv::Iconv)

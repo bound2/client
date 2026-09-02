@@ -82,6 +82,9 @@
 #include "RankBonusTable.h"
 #include "MMonsterKillQuestInfo.h"
 #include "MTimeItemManager.h"
+#include "MItem.h"
+#include "MTopView.h"
+#include "MPlayer.h"
 #include "FameInfo.h"
 #include "MWarManager.h"
 #include "CSprite555.h"
@@ -2878,6 +2881,32 @@ LoadSystemAvailabilities(SystemAvailabilitiesManager* pManager, const char* szFi
 	return pManager->LoadFromStream(in);
 }
 
+//----------------------------------------------------------------------
+// The item model lives in gamemodel and cannot reach the animation
+// clock, the top view or the player (docs/RESTRUCTURING.md task 4.4);
+// MItem asks through this host, installed in InitGameObject before any
+// item exists.
+//----------------------------------------------------------------------
+static int	ItemDropFrameCount(TYPE_FRAMEID dropID)
+{
+	if (g_pTopView==NULL)
+	{
+		return 0;
+	}
+
+	return g_pTopView->m_ItemDropFPK[dropID].GetSize();
+}
+
+static void	RefreshPetAffect(MItem* pItem)
+{
+	if (g_pPlayer!=NULL)
+	{
+		g_pPlayer->CheckAffectStatus(pItem);
+	}
+}
+
+static const MItemHost	s_ItemHost = { &g_CurrentFrame, ItemDropFrameCount, RefreshPetAffect };
+
 //-----------------------------------------------------------------------------
 // Init GameObject
 //-----------------------------------------------------------------------------
@@ -3002,6 +3031,8 @@ InitGameObject()
 		// system itself - task 4.2).
 		g_pMoneyManager->SetStorageHintHook([]() { ExecuteHelpEvent(HELP_EVENT_STORAGE_BUY); });
 	}
+
+	MItem::SetHost(&s_ItemHost);
 
 	if (g_pPCTalkBox==NULL)
 	{

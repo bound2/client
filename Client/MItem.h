@@ -69,6 +69,20 @@
 #include "CAnimationFrame.h"
 #include "RaceType.h"
 class MCreature;
+class MItem;
+
+//----------------------------------------------------------------------
+// MItemHost - what MItem needs from the executable (docs/RESTRUCTURING.md
+// task 4.4). The item model compiles into gamemodel, which cannot see
+// the animation clock, the top view's item-drop frame pack or the
+// player, so the executable installs these once at start-up
+// (GameInit.cpp); a test binary installs its own, or none.
+//----------------------------------------------------------------------
+struct MItemHost {
+	const DWORD*	pCurrentFrame;							// the animation clock the colour cycles follow
+	int				(*DropFrameCount)(TYPE_FRAMEID dropID);	// frames in the drop animation of a drop frame id
+	void			(*RefreshPetAffect)(MItem* pItem);		// re-evaluate a pet item's affect before its colour is read
+};
 
 
 #define	MAX_DROP_COUNT					6
@@ -411,6 +425,8 @@ class MItem : public MObject, public CAnimationFrame {
 		// Item떨어뜨리기..
 		//---------------------------------------------------
 		void		SetDropping();
+		static void				SetHost(const MItemHost* pHost)	{ s_pHost = pHost; }
+		static const MItemHost*	GetHost()						{ return s_pHost; }
 		BOOL		IsDropping() const		{ return m_bDropping; }
 		int			GetDropHeight() const	{ return s_DropHeight[m_DropCount]; }
 		void		NextDropFrame();		
@@ -528,6 +544,8 @@ class MItem : public MObject, public CAnimationFrame {
 		BOOL					m_bDropping;					// 떨어지고 있는 중
 		int						m_DropCount;					// 현재 count
 		static int				s_DropHeight[MAX_DROP_COUNT];	// Drop 높이
+		static const MItemHost*	s_pHost;						// the executable's services, NULL in a test binary
+		static DWORD			CurrentFrame()	{ return s_pHost!=NULL ? *s_pHost->pCurrentFrame : 0; }
 
 		//---------------------------------------------------
 		// identified
