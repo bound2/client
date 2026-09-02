@@ -221,6 +221,25 @@ TEST(ItemCore, RequiredStrengthAddsOptionsAndCapsAtTheOldCeiling)
 	CHECK_EQ(0, item.GetRequireSTR());
 }
 
+// Level-150 gear can ask more than a byte holds: the slayer ceiling is
+// 295, and Ousters gear is not capped at all.
+TEST(ItemCore, RequirementsAboveTwoHundredFiftyFiveSurvive)
+{
+	ItemWorld world;
+	Sword item;
+
+	SwordInfo().SetRequireSTR(250);
+	SwordInfo().SetRequireDEX(250);
+	SwordInfo().SetRequireINT(250);
+	item.AddItemOption(2);			// +25 -> doubled: 300, capped at 295
+	CHECK_EQ(MAX_SLAYER_ATTR, item.GetRequireSTR());
+	CHECK_EQ(MAX_SLAYER_ATTR, item.GetRequireDEX());
+	CHECK_EQ(MAX_SLAYER_ATTR, item.GetRequireINT());
+
+	SwordInfo().Race = FLAG_RACE_OUSTERS;
+	CHECK_EQ(300, item.GetRequireSTR());
+}
+
 //----------------------------------------------------------------------
 // Quest items: the flag, or the timed-item register knowing the id.
 //----------------------------------------------------------------------

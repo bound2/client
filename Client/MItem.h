@@ -351,11 +351,13 @@ class MItem : public MObject, public CAnimationFrame {
 		//---------------------------------------------------
 		// 필요능력
 		//---------------------------------------------------
-		BYTE					GetRequireSTR()	const;
-		BYTE					GetRequireDEX()	const;
-		BYTE					GetRequireINT()	const;
-		BYTE					GetRequireLevel() const;		
-		WORD					GetRequireSUM() const;		
+		// int, not BYTE: the slayer ceiling is 295 and Ousters gear is uncapped,
+		// so a byte return wrapped level-150 requirements (task 4.4 fix).
+		int					GetRequireSTR()	const;
+		int					GetRequireDEX()	const;
+		int					GetRequireINT()	const;
+		int					GetRequireLevel() const;
+		int					GetRequireSUM() const;
 
 		//---------------------------------------------------
 		// 장착했을 때 바뀌는.. BasicActionInfo

@@ -906,7 +906,7 @@ MItem::GetItemOptionRequireSUM() const
 //----------------------------------------------------------------------
 // Get Require STR
 //----------------------------------------------------------------------
-BYTE					
+int
 MItem::GetRequireSTR() const
 {
 	int original = (*g_pItemTable)[GetItemClass()][m_ItemType].GetRequireSTR();
@@ -937,7 +937,7 @@ MItem::GetRequireSTR() const
 //----------------------------------------------------------------------
 // Get Require DEX
 //----------------------------------------------------------------------
-BYTE					
+int
 MItem::GetRequireDEX() const
 {
 	int original = (*g_pItemTable)[GetItemClass()][m_ItemType].GetRequireDEX();
@@ -968,7 +968,7 @@ MItem::GetRequireDEX() const
 //----------------------------------------------------------------------
 // Get Require INT
 //----------------------------------------------------------------------
-BYTE					
+int
 MItem::GetRequireINT() const
 {
 	int original = (*g_pItemTable)[GetItemClass()][m_ItemType].GetRequireINT();
@@ -999,7 +999,7 @@ MItem::GetRequireINT() const
 //----------------------------------------------------------------------
 // Get Require SUM
 //----------------------------------------------------------------------
-WORD					
+int
 MItem::GetRequireSUM() const
 {
 	int original = (*g_pItemTable)[GetItemClass()][m_ItemType].GetRequireSUM();
@@ -1028,7 +1028,7 @@ MItem::GetRequireSUM() const
 //----------------------------------------------------------------------
 // Get Require Level
 //----------------------------------------------------------------------
-BYTE					
+int
 MItem::GetRequireLevel() const
 {
 	int original = (*g_pItemTable)[GetItemClass()][m_ItemType].GetRequireLevel();
