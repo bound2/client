@@ -3,12 +3,7 @@
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "MShopShelf.h"
-//#include "MShopFixedItemTable.h"
-
-#ifdef __GAME_CLIENT__
-	#include "MPlayer.h"
-#endif
-#include "DebugInfo.h"
+#include "DebugLog.h"
 
 //----------------------------------------------------------------------
 // Static member
@@ -161,9 +156,7 @@ MShopShelf::SetItem(unsigned int  slot, MItem* pItem)
 	//------------------------------------------------------
 	// 사용 가능 여부 체크
 	//------------------------------------------------------
-	#ifdef __GAME_CLIENT__
-		g_pPlayer->CheckAffectStatus( pItem );
-	#endif
+	MItem::RefreshAffect( pItem );
 
 	return true;
 }
@@ -215,63 +208,6 @@ MShopShelf::DeleteItem(unsigned int slot)
 //							MShop FixedShelf 
 //
 //----------------------------------------------------------------------
-//----------------------------------------------------------------------
-// Init From FixedItemTable
-//----------------------------------------------------------------------
-/*
-bool		
-MShopFixedShelf::InitFromFixedItemTable(unsigned int tableID)
-{
-	FIXED_ITEM_INFO* pInfo = g_ShopFixedItemTable.GetItemInfo( tableID );
-
-	// 그런 id의 정보는 없따~
-	if (pInfo==NULL)
-	{
-		return false;
-	}
-
-
-	//---------------------------------------------------------
-	// 그 tableID에 속한 모든 item들을 검색..
-	//---------------------------------------------------------
-	FIXED_ITEM_INFO::iterator iInfo = pInfo->begin();
-
-	while (iInfo != pInfo->end())
-	{
-		unsigned int	slotID		= (*iInfo).first;
-		ITEM_INFO*		pItemInfo	= (*iInfo).second;
-
-		//---------------------------------------------------------
-		// Item을 생성하고 정보를 설정한다.
-		//---------------------------------------------------------
-		MItem* pItem = MItem::NewItem( pItemInfo->Class );
-		
-		pItem->SetItemType( pItemInfo->Type );
-
-		pItem->SetItemOption( pItemInfo->Option );
-
-		pItem->SetCurrentDurability( pItemInfo->Durability );
-
-		pItem->SetNumber( pItemInfo->Number );
-
-		//---------------------------------------------------------
-		// 생성된 item을 shelf에 추가한다.
-		//---------------------------------------------------------
-		if (!SetItem( slotID, pItem ))
-		{
-			// item이 shelf에 추가되지 못한 경우.. -_-;;
-			delete pItem;
-		}
-	
-		//---------------------------------------------------------
-		// 다음
-		//---------------------------------------------------------
-		iInfo++;
-	}
-
-	return true;
-}
-*/
 
 //----------------------------------------------------------------------
 //

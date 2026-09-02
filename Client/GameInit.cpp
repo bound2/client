@@ -2897,7 +2897,7 @@ static int	ItemDropFrameCount(TYPE_FRAMEID dropID)
 	return g_pTopView->m_ItemDropFPK[dropID].GetSize();
 }
 
-static void	RefreshPetAffect(MItem* pItem)
+static void	RefreshAffect(MItem* pItem)
 {
 	if (g_pPlayer!=NULL)
 	{
@@ -2905,7 +2905,12 @@ static void	RefreshPetAffect(MItem* pItem)
 	}
 }
 
-static const MItemHost	s_ItemHost = { &g_CurrentFrame, ItemDropFrameCount, RefreshPetAffect };
+static void	PlayItemSound(TYPE_SOUNDID soundID)
+{
+	PlaySound(soundID);
+}
+
+static const MItemHost	s_ItemHost = { &g_CurrentFrame, ItemDropFrameCount, RefreshAffect, PlayItemSound };
 
 //-----------------------------------------------------------------------------
 // Init GameObject

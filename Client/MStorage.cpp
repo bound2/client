@@ -5,10 +5,6 @@
 #include "MStorage.h"
 #include "MGameDef.h"
 
-#ifdef __GAME_CLIENT__
-	#include "MPlayer.h"
-#endif
-
 //----------------------------------------------------------------------
 // Global
 //----------------------------------------------------------------------
@@ -199,17 +195,15 @@ MStorage::SetCurrent(unsigned int n)
 	//------------------------------------------------------
 	// 사용 가능 여부 체크
 	//------------------------------------------------------
-	#ifdef __GAME_CLIENT__
-		for (int i=0; i<STORAGE_SLOT; i++)
-		{
-			MItem* pItem = m_pStorage[m_CurrentStorage][i];
+	for (int i=0; i<STORAGE_SLOT; i++)
+	{
+		MItem* pItem = m_pStorage[m_CurrentStorage][i];
 
-			if (pItem!=NULL)
-			{	
-				g_pPlayer->CheckAffectStatus( pItem );
-			}
-		}		
-	#endif
+		if (pItem!=NULL)
+		{
+			MItem::RefreshAffect( pItem );
+		}
+	}
 
 	
 }

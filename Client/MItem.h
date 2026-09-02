@@ -81,7 +81,8 @@ class MItem;
 struct MItemHost {
 	const DWORD*	pCurrentFrame;							// the animation clock the colour cycles follow
 	int				(*DropFrameCount)(TYPE_FRAMEID dropID);	// frames in the drop animation of a drop frame id
-	void			(*RefreshPetAffect)(MItem* pItem);		// re-evaluate a pet item's affect before its colour is read
+	void			(*RefreshAffect)(MItem* pItem);			// the player re-evaluates whether it can use the item (containers on add, a pet before its colour is read)
+	void			(*PlayItemSound)(TYPE_SOUNDID soundID);	// the inventory sound an item makes when it lands in a container
 };
 
 
@@ -429,6 +430,9 @@ class MItem : public MObject, public CAnimationFrame {
 		void		SetDropping();
 		static void				SetHost(const MItemHost* pHost)	{ s_pHost = pHost; }
 		static const MItemHost*	GetHost()						{ return s_pHost; }
+		// The host's services, safe to call without one (a test binary).
+		static void				RefreshAffect(MItem* pItem)		{ if (s_pHost!=NULL) s_pHost->RefreshAffect(pItem); }
+		static void				PlayItemSound(TYPE_SOUNDID soundID)	{ if (s_pHost!=NULL) s_pHost->PlayItemSound(soundID); }
 		BOOL		IsDropping() const		{ return m_bDropping; }
 		int			GetDropHeight() const	{ return s_DropHeight[m_DropCount]; }
 		void		NextDropFrame();		

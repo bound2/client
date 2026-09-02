@@ -120,8 +120,9 @@ class MInventory : public MGridItemManager {
 		//------------------------------------------------------
 		// 현재 사용가능한건가?
 		//------------------------------------------------------
-		void			CheckAffectStatus();				// 모든 아이템
-		void			CheckAffectStatus(MItem* pItem);	// 특정 아이템
+		// One item (the whole inventory is MItemManager::CheckAffectStatusAll;
+		// a no-argument overload used to be declared here and defined nowhere).
+		void			CheckAffectStatus(MItem* pItem);
 
 		/*
 	#ifdef __GAME_CLIENT__

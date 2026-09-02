@@ -77,6 +77,17 @@ Client/MItemFinder.h
 Client/MQuickSlot.cpp
 Client/MQuickSlot.h
 
+# The containers (task 4.3, second slice): the inventory grid, the
+# storage boxes and the shop shelves. Their reaches - the player's affect
+# check and the landing sound - go through MItem's host.
+Client/MInventory.cpp
+Client/MInventory.h
+Client/MStorage.cpp
+Client/MStorage.h
+Client/MShopShelf.cpp
+Client/MShopShelf.h
+Client/MGameDef.h
+
 # The seams MItem reads (task 4.4): the user's display settings (the
 # gore level picks the skull names), the client configuration (the
 # colour-set bases) and the timed-item register (quest items). All
