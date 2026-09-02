@@ -3,30 +3,31 @@
 # gen_wire_inventory.pl
 #----------------------------------------------------------------------
 #
-# Regenerates tests/generated/WireInventory.inc from every packet factory
-# declared under Client/Packet/{Gpackets,Cpackets,Lpackets,Upackets}.
+# Regenerates tests/generated/WireInventory.inc: one include and one
+# registration per packet factory declared under
+# Client/Packet/{Gpackets,Cpackets,Lpackets,Upackets,Rpackets}, for
+# tests/unit/test_wire_layout.cpp to construct the REAL factories with.
 #
-# Why a generator and not the factories themselves: when this was
-# written the packet .cpp files compiled only into the game executable,
-# beside their handlers, so no test binary could link a factory. Since
-# docs/RESTRUCTURING.md task 2.4 they compile into the packetwire library
-# and unit_tests instantiates the real factories
-# (tests/unit/test_packet_factories.cpp); swapping this generator for
-# them is task 2.5. Until then this script lifts the BODIES of each
-# factory's getPacketID() and
-# getPacketMaxSize() verbatim into a plain struct with two static
-# functions. The compiler evaluates them against the real sz* constants
-# and Packet::PACKET_* ids from the real headers; nothing is linked.
+# Until docs/RESTRUCTURING.md task 2.5 this script lifted the bodies of
+# each factory's getPacketID()/getPacketMaxSize() into plain structs,
+# because the packet .cpp files compiled only into the game executable
+# and no test binary could link a factory. Since task 2.4 they compile
+# into the packetwire library, so the inventory is now measured on the
+# factory objects themselves - the same registry shape as the server's
+# tests/generated/AllPacketFactories.inc.
 #
-# The server repo keeps the same inventory (server/tests/wire-layout.txt,
-# produced from its compiled factories). The two files are meant to be
-# diffed: server/tests/tools/wire_inventory_diff.sh does that.
+# Rpackets (CR*/RC*, the ranger/remote-admin relics) are registered here
+# but flagged OUT of the inventory file: the server deleted its copies,
+# and tests/wire-layout.txt is diffed against the server's line for line
+# (server/tests/tools/wire_inventory_diff.sh). They are still
+# constructed, so their link and the factory manager's registration of
+# them are checked like everyone else's.
 #
 # Usage (from the repository root):
 #     perl tests/tools/gen_wire_inventory.pl [output-path]
 #
-# The output is committed. tests/unit/test_wire_layout.cpp compiles it;
-# the wire_inventory_fresh ctest fails when it drifts from this script.
+# The output is committed. The wire_inventory_fresh ctest fails when it
+# drifts from this script's output.
 #
 #----------------------------------------------------------------------
 use strict;
@@ -36,15 +37,20 @@ my $root = 'Client/Packet';
 my $out  = $ARGV[0] // 'tests/generated/WireInventory.inc';   # ctest passes a scratch path
 -d $root or die "run from the repository root\n";
 
-my @dirs = qw(Gpackets Cpackets Lpackets Upackets);
+# Directory => whether its factories belong in tests/wire-layout.txt.
+my @dirs = (
+	[ Gpackets => 1 ],
+	[ Cpackets => 1 ],
+	[ Lpackets => 1 ],
+	[ Upackets => 1 ],
+	[ Rpackets => 0 ],
+);
 
-#----------------------------------------------------------------------
-# Pass 1: collect every factory class with its base and method bodies.
-#----------------------------------------------------------------------
-my %factory;   # name => { base, file, id, size }
-my @order;
+my @entries;   # [ packet, factory, file, inventoried ]
+my %seen;
 
-for my $dir (@dirs) {
+for my $spec (@dirs) {
+	my ($dir, $inventoried) = @$spec;
 	opendir(my $dh, "$root/$dir") or die "$root/$dir: $!";
 	for my $h (sort grep { /\.h$/ } readdir $dh) {
 		my $path = "$root/$dir/$h";
@@ -53,55 +59,29 @@ for my $dir (@dirs) {
 		my $src = <$fh>;
 		close $fh;
 
-		# Strip comments so a commented-out factory or method is not picked up.
+		# Strip comments so a commented-out factory is not picked up.
 		$src =~ s{/\*.*?\*/}{}gs;
 		$src =~ s{//[^\n]*}{}g;
 
 		while ($src =~ /class\s+(\w+Factory)\s*:\s*public\s+(\w+)\s*(\{(?:[^{}]|(?3))*\})/g) {
-			my ($name, $base, $body) = ($1, $2, $3);
-			my ($id)   = $body =~ /getPacketID\s*\(\s*\)\s*const\s*(?:throw\s*\(\s*\))?\s*(\{(?:[^{}]|(?1))*\})/;
-			my ($size) = $body =~ /getPacketMaxSize\s*\(\s*\)\s*const\s*(?:throw\s*\(\s*\))?\s*(\{(?:[^{}]|(?1))*\})/;
-			die "$path: $name declared twice\n" if exists $factory{$name};
-			$factory{$name} = { base => $base, file => "$dir/$h", id => $id, size => $size };
-			push @order, $name;
+			my ($name, $body) = ($1, $3);
+			(my $packet = $name) =~ s/Factory$//;
+			die "$path: $name declared twice\n" if $seen{$name}++;
+
+			# The inventory names the packet after its factory class;
+			# the server names it from getPacketName(). The two must
+			# agree or the inventories would not diff line for line.
+			if ($body =~ /getPacketName\s*\(\s*\)\s*const\s*(?:throw\s*\(\s*\))?\s*\{\s*return\s*"([^"]*)"/
+			    && $1 ne $packet) {
+				die "$path: $name says getPacketName() is \"$1\", not $packet\n";
+			}
+			push @entries, [ $packet, $name, "$dir/$h", $inventoried ];
 		}
 	}
 	closedir $dh;
 }
 
-#----------------------------------------------------------------------
-# Pass 2: resolve inherited methods, rewrite calls to another factory's
-# getPacketMaxSize() (a derived factory adding to its base's size) so
-# they land on the generated twin, and emit.
-#----------------------------------------------------------------------
-sub resolve {
-	my ($name, $what) = @_;
-	my $cur = $name;
-	while (1) {
-		my $f = $factory{$cur} or die "$name: cannot resolve $what through unknown base $cur\n";
-		return $f->{$what} if defined $f->{$what};
-		$cur = $f->{base};
-		die "$name: no $what in its factory chain\n" if $cur eq 'PacketFactory';
-	}
-}
-
-sub rewrite {
-	my ($body) = @_;
-	$body =~ s/\b(\w+Factory)::getPacketMaxSize\s*\(\s*\)/Inv_$1::maxSize()/g;
-	$body =~ s/\r//g;
-	return $body;
-}
-
-my %files;
-my @entries;
-for my $name (@order) {
-	my $f = $factory{$name};
-	(my $packet = $name) =~ s/Factory$//;
-	$files{ $f->{file} } = 1;
-	my $id   = rewrite(resolve($name, 'id'));
-	my $size = rewrite(resolve($name, 'size'));
-	push @entries, [ $packet, $name, $id, $size ];
-}
+my %files = map { $_->[2] => 1 } @entries;
 
 open(my $o, '>', $out) or die "$out: $!";
 binmode $o;
@@ -111,21 +91,15 @@ print $o "// the wire_inventory_fresh ctest pins this file against a fresh gener
 print $o "#ifdef WIRE_INVENTORY_INCLUDES\n";
 print $o "#include \"$_\"\n" for sort keys %files;
 print $o "#endif // WIRE_INVENTORY_INCLUDES\n";
-print $o "#ifdef WIRE_INVENTORY_STRUCTS\n";
-for my $e (@entries) {
-	my ($packet, $name, $id, $size) = @$e;
-	print $o "struct Inv_$name {\n";
-	print $o "\tstatic PacketID_t id() $id\n";
-	print $o "\tstatic PacketSize_t maxSize() $size\n";
-	print $o "};\n";
-}
-print $o "#endif // WIRE_INVENTORY_STRUCTS\n";
 print $o "#ifdef WIRE_INVENTORY_ENTRIES\n";
 for my $e (@entries) {
-	my ($packet, $name) = @$e;
-	print $o "\t{ \"$packet\", &Inv_$name\::id, &Inv_$name\::maxSize },\n";
+	my ($packet, $name, undef, $inventoried) = @$e;
+	printf $o "\tfactories.push_back(FactoryEntry(\"%s\", new %s(), %s));\n",
+		$packet, $name, $inventoried ? 'true' : 'false';
 }
 print $o "#endif // WIRE_INVENTORY_ENTRIES\n";
 close $o;
 
-printf "wrote %s (%d factories from %d headers)\n", $out, scalar @entries, scalar keys %files;
+my $inventoried = grep { $_->[3] } @entries;
+printf "wrote %s (%d factories from %d headers, %d in the inventory)\n",
+	$out, scalar @entries, scalar keys %files, $inventoried;

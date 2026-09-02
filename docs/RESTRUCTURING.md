@@ -585,12 +585,47 @@ the server's status notes. This is what makes the ~509 `Gpackets` parsers
   - Owner: W0/W1 over the whole `Client/Packet` tree (membership file);
     the goldens; the factory link test.
 
-- [ ] **2.5 Retire the wire-inventory workaround.** With packet `.cpp`s
+- [x] **2.5 Retire the wire-inventory workaround.** With packet `.cpp`s
   linkable, `test_wire_layout.cpp` can call the real factories instead of
   the perl-lifted `WireInventory.inc`. Keep `tests/wire-layout.txt` and its
   format byte-compatible — the server's `wire_inventory_diff.sh` reads it.
-  > **Status:** not started.
-  - Owner: `wire_inventory_fresh` staying green through the swap.
+  > **Status:** done (2026-09-02,
+  > `restructuring/wire-inventory-real-factories`). `test_wire_layout.cpp`
+  > now constructs every factory under `Client/Packet` through
+  > `tests/generated/WireInventory.inc`, which took the server's registry
+  > shape (one include and one registration per factory class;
+  > `gen_wire_inventory.pl` emits it, `wire_inventory_fresh` still pins
+  > it) instead of perl-lifted method bodies. `tests/wire-layout.txt` is
+  > byte-identical before and after. Two client-only divergences had to
+  > go first: **112 factory classes were compiled out of every client
+  > build** — wrapped in `#ifdef __DEBUG_OUTPUT__` (108) or `#ifndef
+  > __GAME_CLIENT__` (4), where the server compiles all of its
+  > unconditionally — so the guards came out (224 deleted lines, nothing
+  > else touched, CRLF intact); and `CRRequest2`, the dead duplicate that
+  > claimed `PACKET_CR_REQUEST` beside `CRRequest`, was deleted with its
+  > handler and membership line (the registry comment had deferred it to
+  > 5.2; the uniqueness test it broke made it due now; R1 529 → 528).
+  > Rpackets are registered but flagged out of the rendered file (the
+  > server deleted its copies; the file stays diffable line for line).
+  > The test gained the server's "every factory creates a packet with its
+  > own id" — the link proof for the written CG/CL directions, which
+  > `test_packet_factories.cpp`'s manager never constructs — and a manager
+  > check: every id `PacketFactoryManager::init()` serves is a listed
+  > factory at the factory's own max size (the server pins the same
+  > relation from its ratchet script).
+  > **The first all-factory construct/destroy found a real defect:**
+  > `GCUpdateInfo`'s constructor never initialised `m_pBloodBibleSign`
+  > while the client-side destructor deletes it, so a packet destroyed
+  > before a complete `read()` — a truncated body or a mid-parse
+  > exception, exactly the receive loop's failure path — freed a garbage
+  > pointer. Fixed test-first in `test_packetwire_parsers.cpp` (a fresh
+  > packet holds no sub-objects; a packet whose read threw is safe to
+  > destroy): the contract check fails and the process then dies without
+  > the one-token fix; green plain and ASan with it. The server's copy has
+  > the same constructor but never deletes the member, so it needs no
+  > change. Suite: 168 tests (3,199 checks) green in both test trees.
+  - Owner: `wire_inventory_fresh` staying green through the swap; the
+    all-factory construction in `test_wire_layout.cpp`.
 
 **Phase exit criteria:** R2 = 0; `Client/Packet` contains no handler code;
 parser fixes under `Gpackets` are written test-first against real packet

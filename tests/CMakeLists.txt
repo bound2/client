@@ -72,18 +72,18 @@ endif()
 #----------------------------------------------------------------------
 # Wire-layout inventory (unit/test_wire_layout.cpp).
 #
-# That one source compiles every packet header under Client/Packet the
-# way the DarkEden target does; tests/generated/WireInventory.inc
-# carries the factories' getPacketID/getPacketMaxSize bodies as plain
-# functions (tests/tools/gen_wire_inventory.pl). The generator predates
-# the packet classes joining packetwire - the two out-of-line size
-# inputs it needed stubbed now link from the library itself; retiring
-# the generator for the real factories is task 2.5.
+# That one source constructs every packet factory under Client/Packet
+# through tests/generated/WireInventory.inc, the registry that
+# tests/tools/gen_wire_inventory.pl writes (one include and one
+# registration per factory class; the wire_inventory_fresh test below
+# pins it). Its include dirs are packetwire's PUBLIC ones plus the
+# generated directory, and it needs the packetwire defines so the class
+# definitions match the library's (docs/RESTRUCTURING.md task 2.5).
 #----------------------------------------------------------------------
 set_source_files_properties(
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_wire_layout.cpp
 	PROPERTIES
-		INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/Client/Packet;${CMAKE_CURRENT_SOURCE_DIR}/generated"
+		INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/generated"
 		COMPILE_DEFINITIONS "${PACKETWIRE_TEST_DEFINITIONS};WIRE_LAYOUT_FILE=\"${CMAKE_CURRENT_SOURCE_DIR}/wire-layout.txt\""
 )
 
@@ -139,7 +139,7 @@ endif()
 
 #----------------------------------------------------------------------
 # The committed WireInventory.inc must match a fresh generation, so a
-# new or changed factory cannot go uninventoried. Needs perl (Git for
+# new or changed factory cannot go unconstructed and uninventoried. Needs perl (Git for
 # Windows ships one, found above); without it the check is skipped,
 # not passed.
 #----------------------------------------------------------------------

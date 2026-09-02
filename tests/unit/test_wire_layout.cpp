@@ -3,8 +3,9 @@
 //----------------------------------------------------------------------
 //
 // Wire-layout inventory: packet id, name and max body size for every
-// packet factory under Client/Packet, regenerated on each run and
-// compared to the committed tests/wire-layout.txt.
+// packet factory under Client/Packet, regenerated on each run from the
+// real factory objects and compared to the committed
+// tests/wire-layout.txt.
 //
 // The server repo (../server) produces the identical file from its own
 // packet classes, and this client carries a hand-maintained copy of
@@ -13,13 +14,20 @@
 // wire_inventory_diff.sh diffs them. A change in this file is a
 // wire-protocol change: it must ship in both repos together.
 //
-// The factories are not instantiated here: this predates the packet
-// classes joining the packetwire library (docs/RESTRUCTURING.md task
-// 2.4 - test_packet_factories.cpp does construct them now), and
-// retiring the lifted copies for the real factories is task 2.5.
-// tests/tools/gen_wire_inventory.pl lifts each factory's getPacketID() and
-// getPacketMaxSize() bodies into tests/generated/WireInventory.inc,
-// which this file compiles against the real packet headers.
+// The factory registry is tests/generated/WireInventory.inc, produced
+// by tests/tools/gen_wire_inventory.pl and pinned by the
+// wire_inventory_fresh ctest: one include and one registration per
+// factory class, the same shape as the server's AllPacketFactories.inc.
+// Constructing every factory and its packet here is also the link-level
+// proof that every packet class in every direction - the written CG/CL
+// ones included - lives in the packetwire library with no reach into
+// the executable (docs/RESTRUCTURING.md task 2.5; task 2.4's
+// test_packet_factories.cpp proves the received directions through
+// PacketFactoryManager).
+//
+// Rpackets (CR*/RC*) are registered but flagged out of the rendered
+// file: the server deleted its copies, and the file must stay line for
+// line diffable against the server's.
 //
 // Set UPDATE_GOLDENS=1 in the environment to re-record the inventory
 // instead of comparing.
@@ -30,6 +38,8 @@
 
 #include "Packet.h"
 #include "PacketFactory.h"
+#include "PacketFactoryManager.h"
+#include "Exception.h"
 
 #define WIRE_INVENTORY_INCLUDES
 #include "WireInventory.inc"
@@ -46,24 +56,41 @@
 
 namespace {
 
-#define WIRE_INVENTORY_STRUCTS
-#include "WireInventory.inc"
-#undef WIRE_INVENTORY_STRUCTS
-
 struct FactoryEntry
 {
+	FactoryEntry(const char* n, PacketFactory* f, bool i)
+		: name(n), factory(f), inventoried(i) {}
+
 	const char*	name;
-	PacketID_t	(*id)();
-	PacketSize_t	(*maxSize)();
+	PacketFactory*	factory;
+	bool		inventoried;	// in tests/wire-layout.txt (see the header)
 };
 
-const FactoryEntry kFactories[] = {
+//----------------------------------------------------------------------
+// Owns the factories for one test body; the framework has no fixtures.
+//----------------------------------------------------------------------
+class AllFactories
+{
+public:
+	AllFactories()
+	{
 #define WIRE_INVENTORY_ENTRIES
 #include "WireInventory.inc"
 #undef WIRE_INVENTORY_ENTRIES
-};
+	}
 
-const size_t kFactoryCount = sizeof(kFactories) / sizeof(kFactories[0]);
+	~AllFactories()
+	{
+		for (size_t i = 0; i < factories.size(); i++)
+			delete factories[i].factory;
+	}
+
+	std::vector<FactoryEntry>	factories;
+
+private:
+	AllFactories(const AllFactories&);
+	AllFactories& operator=(const AllFactories&);
+};
 
 struct InventoryEntry
 {
@@ -73,30 +100,38 @@ struct InventoryEntry
 
 //----------------------------------------------------------------------
 // Same rendering as server/tests/wire_layout_test.cpp, so the two files
-// diff line for line.
+// diff line for line. Every factory takes part in the id-conflict scan;
+// only the inventoried ones land in the map that gets rendered.
 //----------------------------------------------------------------------
-std::map<PacketID_t, InventoryEntry>	BuildInventory(std::vector<std::string>& idConflicts)
+std::map<PacketID_t, InventoryEntry>	BuildInventory(const std::vector<FactoryEntry>& factories,
+						       std::vector<std::string>& idConflicts)
 {
 	std::map<PacketID_t, InventoryEntry> inventory;
-	for (size_t i = 0; i < kFactoryCount; i++)
+	std::map<PacketID_t, std::string> claimed;
+	for (size_t i = 0; i < factories.size(); i++)
 	{
-		const PacketID_t id = kFactories[i].id();
-		InventoryEntry entry;
-		entry.name = kFactories[i].name;
-		entry.maxSize = kFactories[i].maxSize();
+		const PacketID_t id = factories[i].factory->getPacketID();
+		const std::string name = factories[i].name;
 
-		std::map<PacketID_t, InventoryEntry>::iterator existing = inventory.find(id);
-		if (existing != inventory.end())
+		std::map<PacketID_t, std::string>::iterator existing = claimed.find(id);
+		if (existing != claimed.end())
 		{
-			if (existing->second.name != entry.name)
+			if (existing->second != name)
 			{
 				std::ostringstream conflict;
 				conflict << "packet ID " << id << " claimed by both "
-					 << existing->second.name << " and " << entry.name;
+					 << existing->second << " and " << name;
 				idConflicts.push_back(conflict.str());
 			}
 			continue;
 		}
+		claimed[id] = name;
+
+		if (!factories[i].inventoried)
+			continue;
+		InventoryEntry entry;
+		entry.name = name;
+		entry.maxSize = factories[i].factory->getPacketMaxSize();
 		inventory[id] = entry;
 	}
 	return inventory;
@@ -153,9 +188,10 @@ void	ReportFirstDifference(const std::string& expected, const std::string& actua
 
 TEST(WireLayout, PacketIdsAreUniqueAcrossAllFactories)
 {
-	CHECK(kFactoryCount > 0);
+	AllFactories all;
+	CHECK(all.factories.size() > 0);
 	std::vector<std::string> idConflicts;
-	BuildInventory(idConflicts);
+	BuildInventory(all.factories, idConflicts);
 	for (size_t i = 0; i < idConflicts.size(); i++)
 		std::fprintf(stderr, "  %s\n", idConflicts[i].c_str());
 	CHECK_EQ(0, idConflicts.size());
@@ -163,8 +199,10 @@ TEST(WireLayout, PacketIdsAreUniqueAcrossAllFactories)
 
 TEST(WireLayout, InventoryMatchesCommittedFile)
 {
+	AllFactories all;
 	std::vector<std::string> idConflicts;
-	const std::string actual = RenderInventory(BuildInventory(idConflicts));
+	const std::map<PacketID_t, InventoryEntry> inventory = BuildInventory(all.factories, idConflicts);
+	const std::string actual = RenderInventory(inventory);
 
 	const char* path = WIRE_LAYOUT_FILE;
 	if (IsRecording())
@@ -172,7 +210,9 @@ TEST(WireLayout, InventoryMatchesCommittedFile)
 		std::ofstream file(path, std::ios::trunc | std::ios::binary);
 		CHECK(file.good());
 		file << actual;
-		std::printf("recorded %s (%d packets)\n", path, (int)kFactoryCount);
+		std::printf("recorded %s (%d packets)\n", path, (int)inventory.size());
+		// A recording run must not read as a green comparison.
+		CHECK(!"recorded tests/wire-layout.txt - rerun without UPDATE_GOLDENS to compare");
 		return;
 	}
 
@@ -192,4 +232,72 @@ TEST(WireLayout, InventoryMatchesCommittedFile)
 		ReportFirstDifference(expected.str(), actual);
 	}
 	CHECK(same);
+}
+
+//----------------------------------------------------------------------
+// Every factory creates its packet, and the packet reports the id its
+// factory does: a createPacket/getPacketID mismatch would misroute at
+// dispatch time. This is also the link proof for the written
+// directions (CG/CL), which no PacketFactoryManager ever constructs.
+//----------------------------------------------------------------------
+TEST(WireLayout, EveryFactoryCreatesAPacketWithItsOwnId)
+{
+	AllFactories all;
+	CHECK(all.factories.size() > 0);
+	for (size_t i = 0; i < all.factories.size(); i++)
+	{
+		const FactoryEntry& entry = all.factories[i];
+		Packet* pPacket = entry.factory->createPacket();
+		const bool bCreated = pPacket != NULL;
+		const bool bSameId = bCreated && pPacket->getPacketID() == entry.factory->getPacketID();
+		if (!bCreated || !bSameId)
+			std::fprintf(stderr, "  %s: %s\n", entry.name,
+				     bCreated ? "packet id differs from its factory's" : "createPacket returned NULL");
+		CHECK(bCreated);
+		CHECK(bSameId);
+		delete pPacket;
+	}
+}
+
+//----------------------------------------------------------------------
+// The client's PacketFactoryManager is the receive-side registry: every
+// id it serves must be one of these factories, sized as that factory
+// sizes it. A registration whose factory is missing from the generated
+// list would be a packet the validator bounds but nothing inventories
+// (the server pins the same relation from its ratchet script).
+//----------------------------------------------------------------------
+TEST(WireLayout, EveryManagerRegistrationIsAnInventoriedFactory)
+{
+	AllFactories all;
+	std::map<PacketID_t, const FactoryEntry*> byId;
+	for (size_t i = 0; i < all.factories.size(); i++)
+		byId[all.factories[i].factory->getPacketID()] = &all.factories[i];
+
+	PacketFactoryManager manager;
+	manager.init();
+
+	size_t registered = 0;
+	for (PacketID_t id = 0; id < Packet::PACKET_MAX; id++)
+	{
+		PacketSize_t maxSize;
+		try {
+			maxSize = manager.getPacketMaxSize(id);
+		} catch (InvalidProtocolException&) {
+			continue;	// not registered on the client
+		}
+		registered++;
+
+		std::map<PacketID_t, const FactoryEntry*>::const_iterator it = byId.find(id);
+		const bool bListed = it != byId.end();
+		const bool bSameSize = bListed && it->second->factory->getPacketMaxSize() == maxSize;
+		if (!bListed)
+			std::fprintf(stderr, "  packet id %u is registered but no factory in WireInventory.inc has it\n",
+				     (unsigned)id);
+		else if (!bSameSize)
+			std::fprintf(stderr, "  %s: manager max size %u, factory %u\n", it->second->name,
+				     (unsigned)maxSize, (unsigned)it->second->factory->getPacketMaxSize());
+		CHECK(bListed);
+		CHECK(bSameSize);
+	}
+	CHECK(registered > 0);
 }
