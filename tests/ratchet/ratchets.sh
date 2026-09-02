@@ -62,6 +62,8 @@ check () {
 # relative VS_UI_CLIENT_SOURCES list never matched the exe glob's
 # absolute paths in REMOVE_ITEM, so they compiled into both (the
 # LNK4217 trap); the membership removal is absolute and asserted.
+# History: 505 = 508 - 3 (task 4.3's second slice: MInventory.cpp,
+# MStorage.cpp and MShopShelf.cpp moved into gamemodel).
 # History: 508 = 512 - 4 (task 4.3's first slice: MItemManager.cpp,
 # MGridItemManager.cpp, MSlotItemManager.cpp and MQuickSlot.cpp moved
 # into gamemodel).
@@ -82,7 +84,7 @@ check () {
 # before (0 net). 992 = 993 - 1 (task 2.2's PacketHandlerRegistry.cpp,
 # a recorded +1, offset by the finished migration deleting
 # CGHandlersStub.cpp).
-R1_BASELINE=508
+R1_BASELINE=505
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do
