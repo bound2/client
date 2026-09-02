@@ -113,7 +113,7 @@ an unrecorded drop, so tightening lands in the same commit as the progress.
 
 | # | Metric | Baseline | Command |
 |---|--------|---------:|---------|
-| R1 | Translation units compiled directly into the DarkEden target | **517** (518 before 4.2 moved `MMoneyManager.cpp`, another double-compiled VS_UI entry; 528 before task 4.1's `gamemodel` took its ten members out — the four support sources, and the six tables that the relative `VS_UI_CLIENT_SOURCES` list had never actually removed from the exe glob, so they compiled into both VS_UI and the executable — as the 36 files still on that list do; 529 before task 2.5 deleted the dead `CRRequest2Handler.cpp`; 992 before task 2.4 moved the 465 packet/table/info sources into `packetwire`, +1 for the split-out `GCExchangeBuyHandler.cpp`; 1,044 before task 1.1; the task-2.2 composition root `PacketHandlerRegistry.cpp` was a recorded +1, offset when finishing the migration deleted `CGHandlersStub.cpp`) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` — `ratchets.sh` reads the generated vcxproj, preferring the ctest run's own build dir; on generators with no vcxproj it reports SKIP, not PASS |
+| R1 | Translation units compiled directly into the DarkEden target | **516** (517 before 4.4's first slice moved `MItemTable.cpp`; 518 before 4.2 moved `MMoneyManager.cpp`, another double-compiled VS_UI entry; 528 before task 4.1's `gamemodel` took its ten members out — the four support sources, and the six tables that the relative `VS_UI_CLIENT_SOURCES` list had never actually removed from the exe glob, so they compiled into both VS_UI and the executable — as the 36 files still on that list do; 529 before task 2.5 deleted the dead `CRRequest2Handler.cpp`; 992 before task 2.4 moved the 465 packet/table/info sources into `packetwire`, +1 for the split-out `GCExchangeBuyHandler.cpp`; 1,044 before task 1.1; the task-2.2 composition root `PacketHandlerRegistry.cpp` was a recorded +1, offset when finishing the migration deleted `CGHandlersStub.cpp`) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` — `ratchets.sh` reads the generated vcxproj, preferring the ctest run's own build dir; on generators with no vcxproj it reports SKIP, not PASS |
 | R2 | Packet `.cpp` files still defining a packet-style `::execute(Player` | **0** (448 → 432 in slice 1 → 0 when 2.2/2.3 finished; regex refined at 0 to stop matching comments and the in-file handler body in `GCExchangeBuy.cpp`) | `grep -rlE '^void\s+\w+::execute\s*\(\s*Player' Client/Packet/{Gpackets,Cpackets,Lpackets,Rpackets,Upackets} --include='*.cpp' \| grep -v Handler \| wc -l` |
 | R3 | Live `sprintf`/`strcpy`/`strcat` lines under `Client/Packet` **and `Client/PacketHandler`** | 46 (unchanged by task 2.4, which widened the scope to follow the handlers out of `Client/Packet`; 61 at first measurement — the 2026-09-01 adversarial review showed a quarter of that was commented-out code, so the measurement now excludes `//` matches) | see `ratchets.sh` — the grep excludes comment-prefixed matches |
 | R4 | Library-compiled `.cpp` files referencing `g_p*` client globals **they do not define themselves** | **35** (59 before task 4.0 — a reclassification, not seam-cutting: the 36 `VS_UI_CLIENT_SOURCES` files stopped being library-compiled, so the 24 of them that reach globals are executable debt now, counted by R1 and outside this ratchet; 61 before task 4.1 cut the two `g_pFileDef` seams in `MGameStringTable` and `SystemAvailabilities` and added the `gamemodel` membership file, whose four new members reference no game global; 81 before task 2.4 grew the membership from 52 to 518 files; the number fell because the measurement stopped counting a file's references to globals it defines — the packet tables own `g_pPacketFactoryManager`/`g_pPacketValidator` — and the two dead server-only bodies that reached game globals were deleted; 83 at first measurement, before two never-compiled files were filtered) | `ratchets.sh` computes it over the library dirs (minus CMake-excluded files) plus the `packetwire` and `gamemodel` membership files |
@@ -906,7 +906,34 @@ starting each — the scan is one grep, and the ranking below is from a
 - [ ] **4.4 Item/skill cores:** `MItem.cpp`, `MItemManager.cpp`,
   `MSkillManager.cpp`, `SkillDef.cpp`, gear classes. Likely partial —
   whatever stays coupled goes on the exemption list explicitly.
-  > **Status:** not started.
+  > **Status:** first slice done — the item table (2026-09-02,
+  > `restructuring/gamemodel-items`; live verification gates the
+  > merge). The scan of the item family: `MItem.h` is clean (`MObject`,
+  > `MItemTable`, the two item managers, `ItemClassDef`), the four
+  > container sources reach no global at all, and `MItem.cpp` is the god
+  > class the plan expected — 108 of its 174 methods touch no global,
+  > the other 66 are the `UseQuickItem` family (packets, player, zone,
+  > dialogs), the name lookups (`g_pUserInformation` for the language)
+  > and the colour sets (`g_pClientConfig`). So 4.3 and the rest of 4.4
+  > wait on a split of `MItem.cpp` into a core the containers can be
+  > linked against and an executable half; the item table went first
+  > because nothing depends on that split. **`MItemTable` is in
+  > `gamemodel`** with `ItemClassDef.h`, `AddonDef.h` and `DrawTypeDef.h`
+  > as listed headers: its 23,000-line in-code item definitions are the
+  > server's (`__INIT_ITEM__`, never defined here — the client loads
+  > `Item.inf`), so the live code is `ITEMTABLE_INFO`'s loader,
+  > `ITEMTYPE_TABLE`'s average price and `ITEMCLASS_TABLE::InitClass`;
+  > `ITEMCLASS_TABLE::InitItem2` stays defined in the executable
+  > (`MitemTableInit.cpp`, dead — called only from the server-only
+  > constructor). Two reaches cut: a `DebugInfo.h` include nothing used,
+  > and `MItem.h` included for the class enum, replaced by
+  > `ItemClassDef.h`; the header now pulls its own platform types so a
+  > test can include it alone. Tests (`test_item_table.cpp`, 6): a
+  > full save/load round trip of every field, the file head pinned by
+  > hand (English name first, then Korean, then description), the
+  > average price over option-free items rounded to hundreds and zero
+  > when none qualifies, and `InitClass` sizing one class. R1 517 → 516.
+  > Suite: 200 tests (3,411 checks).
   - Owner (all of 4.x): `gamemodel`'s membership file
     (`tests/arch/gamemodel_files.txt`), the M0–M2 include rules in
     `check_includes.pl` (in force since 4.1), R4 shrinking.

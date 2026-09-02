@@ -100,6 +100,7 @@ set_source_files_properties(
 	# gamemodel compiles with the same definitions (its headers share
 	# Client/Packet's Properties and RaceType).
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_gamemodel_tables.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_item_table.cpp
 	PROPERTIES
 		COMPILE_DEFINITIONS "${PACKETWIRE_TEST_DEFINITIONS};WIRE_GOLDEN_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/golden\""
 )

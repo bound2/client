@@ -34,6 +34,14 @@
 
 #pragma warning(disable:4786)
 
+// BYTE, WORD, COLORREF: the library's sources see them through
+// Client_PCH.h; a test including this header alone needs them too.
+#ifdef PLATFORM_WINDOWS
+#include <Windows.h>
+#else
+#include "../../basic/Platform.h"
+#endif
+
 #include "CTypeTable.h"
 #include "DrawTypeDef.h"
 #include "MTypeDef.h"

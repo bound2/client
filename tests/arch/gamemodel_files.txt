@@ -26,6 +26,15 @@ Client/ExpInfo.h
 Client/MItemOptionTable.cpp
 Client/MItemOptionTable.h
 
+# Item table (task 4.4, first slice): the per-class item definitions.
+# The 23,000-line in-code table in its constructor is server-only
+# (__INIT_ITEM__); the client loads the table from Item.inf.
+Client/MItemTable.cpp
+Client/MItemTable.h
+Client/ItemClassDef.h
+Client/AddonDef.h
+Client/DrawTypeDef.h
+
 # Game string table (the built-in English text and the String.inf loader)
 Client/MGameStringTable.cpp
 Client/MGameStringTable.h

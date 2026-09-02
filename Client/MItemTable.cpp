@@ -6,16 +6,12 @@
 // 물론 .. MTopView에는 ItemDropFPK와 ItemDropFPK가 제대로 된게 있어야 겠지..
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
-#include "MItem.h"
 #include "MItemTable.h"
+#include "ItemClassDef.h"
 #include "AddonDef.h"
 #include "SkillDef.h"
 #include "SoundDef.h"
 #include "MGameStringTable.h"
-
-#ifdef __GAME_CLIENT__
-	#include "DebugInfo.h"
-#endif
 
 //#if !defined(__GAME_CLIENT__) || defined(OUTPUT_DEBUG) || defined(_DEBUG)
 #if defined(__INIT_INFO__) || !defined(__GAME_CLIENT__)
