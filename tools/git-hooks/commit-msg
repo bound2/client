@@ -1,0 +1,28 @@
+#!/bin/sh
+# commit-msg hook: every fix commit names its test path
+# (docs/RESTRUCTURING.md task 3.1). Install once per clone:
+#
+#     git config core.hooksPath tools/git-hooks
+#
+# A commit whose summary starts with "fix:" must carry a "Test path:"
+# line naming one of the three paths the plan allows:
+#   lib + test        - the code is in a static library and this commit
+#                       holds the test
+#   moved, then fixed - the previous commit moved the unit into a
+#                       library; this one fixes it test-first
+#   exempt            - the code is on the exemption list; the commit
+#                       says so and carries the regression-guard wording
+# Anything else is refused; there is no bypass flag on purpose (use
+# --no-verify only to fix the hook itself).
+msg="$1"
+summary=$(sed -n '1p' "$msg")
+case "$summary" in
+	fix:*|fix\(*) ;;
+	*) exit 0 ;;
+esac
+if grep -qiE '^Test path:[[:space:]]*(lib \+ test|moved, then fixed|exempt)' "$msg"; then
+	exit 0
+fi
+echo "commit-msg: a fix commit must name its test path (docs/RESTRUCTURING.md task 3.1):" >&2
+echo "    Test path: lib + test | moved, then fixed | exempt" >&2
+exit 1

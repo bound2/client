@@ -700,6 +700,11 @@ Not a code phase — the standing rule this plan exists to enable, stated once:
   > three words are mandatory in every fix commit, review-round repairs
   > included, and the 4.1 review round is the miss that graduates this
   > to a commit-lint hook: add it with the next fix.
+  > **Hook added (2026-09-02, `restructuring/gamemodel-item-core`, with
+  > the 4.4 second-slice fixes):** `tools/git-hooks/commit-msg` refuses a
+  > `fix:` commit without a `Test path:` line naming one of the three;
+  > installed per clone with `git config core.hooksPath tools/git-hooks`
+  > (CLAUDE.md carries the instruction). No bypass flag on purpose.
   - Owner: review practice + this document; graduate to a commit-lint hook
     if drift is observed.
 

@@ -181,7 +181,10 @@ baseline: **201 tests, 3,423 checks, 0 failed** in both trees.
   and sections — follow the file you are in.
 - Commit messages: `type: lowercase imperative summary`, then prose covering why the
   change is right, what was verified, and what is deliberately out of scope. `a41eec9`
-  is the model. Trailer: `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`.
+  is the model. A `fix:` commit also carries a `Test path:` line (`lib + test`,
+  `moved, then fixed` or `exempt` - `docs/RESTRUCTURING.md` task 3.1); the
+  `tools/git-hooks/commit-msg` hook refuses one without, after
+  `git config core.hooksPath tools/git-hooks` once per clone. Trailer: `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`.
 
 ## Layout
 
