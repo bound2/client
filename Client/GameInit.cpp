@@ -2997,6 +2997,10 @@ InitGameObject()
 	if (g_pMoneyManager==NULL)
 	{
 		g_pMoneyManager = new MMoneyManager;
+		// The player's own wallet is the one that suggests a storage box
+		// (MMoneyManager lives in gamemodel and cannot reach the help
+		// system itself - task 4.2).
+		g_pMoneyManager->SetStorageHintHook([]() { ExecuteHelpEvent(HELP_EVENT_STORAGE_BUY); });
 	}
 
 	if (g_pPCTalkBox==NULL)

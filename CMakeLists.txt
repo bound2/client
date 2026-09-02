@@ -526,7 +526,6 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		# Item System
 		Client/MItem.cpp
 		Client/MItemManager.cpp
-		Client/MMoneyManager.cpp
 
 		# Skill System
 		Client/MSkillManager.cpp

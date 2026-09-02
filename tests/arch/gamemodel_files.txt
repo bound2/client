@@ -44,6 +44,10 @@ Client/FameInfo.cpp
 Client/FameInfo.h
 Client/SkillDef.h
 
+# Money (task 4.2; the price and trade managers wait for the item core)
+Client/MMoneyManager.cpp
+Client/MMoneyManager.h
+
 # Support: the string class, the typed table template and the logger
 Client/MString.cpp
 Client/MString.h

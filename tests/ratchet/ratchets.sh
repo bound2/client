@@ -51,7 +51,9 @@ check () {
 # passed in, then the day-to-day tree. On generators that produce no
 # .vcxproj the ratchet is skipped with a message - skipped, not passed.
 #----------------------------------------------------------------------
-# 518: 528 - 10. Task 4.1's gamemodel library took its ten members out
+# 517: 518 - 1. Task 4.2 moved MMoneyManager.cpp into gamemodel (another
+# of the double-compiled VS_UI_CLIENT_SOURCES entries).
+# History: 518 = 528 - 10. Task 4.1's gamemodel library took its ten members out
 # of the executable: ExpInfo.cpp, MString.cpp, MStringArray.cpp and
 # DebugLog.cpp, and the six tables that were nominally VS_UI's - the
 # relative VS_UI_CLIENT_SOURCES list never matched the exe glob's
@@ -67,7 +69,7 @@ check () {
 # before (0 net). 992 = 993 - 1 (task 2.2's PacketHandlerRegistry.cpp,
 # a recorded +1, offset by the finished migration deleting
 # CGHandlersStub.cpp).
-R1_BASELINE=518
+R1_BASELINE=517
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do
