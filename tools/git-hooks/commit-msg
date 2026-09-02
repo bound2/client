@@ -20,7 +20,7 @@ case "$summary" in
 	fix:*|fix\(*) ;;
 	*) exit 0 ;;
 esac
-if grep -qiE '^Test path:[[:space:]]*(lib \+ test|moved, then fixed|exempt)' "$msg"; then
+if grep -qE '^Test path:[[:space:]]*(lib \+ test|moved, then fixed|exempt)([[:space:].,;:)-]|$)' "$msg"; then
 	exit 0
 fi
 echo "commit-msg: a fix commit must name its test path (docs/RESTRUCTURING.md task 3.1):" >&2
