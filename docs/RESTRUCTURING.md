@@ -909,12 +909,15 @@ starting each — the scan is one grep, and the ranking below is from a
   > **Status:** first slice done — the item table (2026-09-02,
   > `restructuring/gamemodel-items`; live verification gates the
   > merge). The scan of the item family: `MItem.h` is clean (`MObject`,
-  > `MItemTable`, the two item managers, `ItemClassDef`), the four
-  > container sources reach no global at all, and `MItem.cpp` is the god
-  > class the plan expected — 108 of its 174 methods touch no global,
-  > the other 66 are the `UseQuickItem` family (packets, player, zone,
-  > dialogs), the name lookups (`g_pUserInformation` for the language)
-  > and the colour sets (`g_pClientConfig`). So 4.3 and the rest of 4.4
+  > `MItemTable`, the two item managers, `ItemClassDef`), three of the
+  > four item-manager sources reach no global (`MItemManager.cpp`
+  > assigns the arms-band and quick-slot globals; the 4.3 containers
+  > all reach the player or their own `g_p*`), and `MItem.cpp` is the
+  > god class the plan expected — roughly three fifths of its methods
+  > touch no global, the rest are the `UseQuickItem` family (packets,
+  > player, zone, dialogs), the name lookups (`g_pUserInformation` for
+  > the language) and the colour sets (`g_pClientConfig`). So 4.3 and
+  > the rest of 4.4
   > wait on a split of `MItem.cpp` into a core the containers can be
   > linked against and an executable half; the item table went first
   > because nothing depends on that split. **`MItemTable` is in
@@ -934,6 +937,27 @@ starting each — the scan is one grep, and the ranking below is from a
   > average price over option-free items rounded to hundreds and zero
   > when none qualifies, and `InitClass` sizing one class. R1 517 → 516.
   > Suite: 200 tests (3,411 checks).
+  > **Adversarial review round (2026-09-02, 2 reviewers, both SHIP with
+  > findings), fixed on the branch:** a real defect the new tests had
+  > walked past — `ITEMTABLE_INFO`'s constructor never set `Price`,
+  > `Race` or `DropFrameID`, and `ITEMTYPE_TABLE` had no constructor for
+  > its average price, so an `InitClass`'d slot no file entry filled
+  > read garbage; the constructor test now pins every field and fails
+  > without the fix (0xCC patterns under `/RTC1`), and a fresh type
+  > table answers 0. The "four container sources reach no global"
+  > sentence was wrong (three; `MItemManager.cpp` assigns three), the
+  > method counts were one script's reading and are stated as a
+  > proportion, and the test header claimed the round trip pins the
+  > on-disk order when it pins agreement between save and load — only
+  > the string head is pinned against bytes, and no shipped `Item.inf`
+  > is in the repository. Noted, not fixed: `ITEMCLASS_TABLE::InitItem2`
+  > (`MitemTableInit.cpp`, 8,488 lines) ends by calling itself —
+  > unbounded recursion if it were ever reached — and `VS_UI/` carries a
+  > second copy of that file that the Windows `VS_UI` target still
+  > compiles (the `list(FILTER)` meant to drop it sits in the non-Windows
+  > branch), so `VS_UI.lib` holds a twin the executable's object
+  > outranks; both dead in this build (5.2). Suite: 201 tests (3,423
+  > checks).
   - Owner (all of 4.x): `gamemodel`'s membership file
     (`tests/arch/gamemodel_files.txt`), the M0–M2 include rules in
     `check_includes.pl` (in force since 4.1), R4 shrinking.
