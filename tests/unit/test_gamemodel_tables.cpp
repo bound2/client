@@ -164,6 +164,44 @@ TEST(ItemOptionTable, LoadReadsPartNamesThenTheEntries)
 	CHECK_EQ(10, table[1].RequireLevel);
 }
 
+TEST(ItemOptionTable, RejectsMorePartNamesThanTheArraysHold)
+{
+	Bytes b;
+	b.Int(ITEMOPTION_TABLE::MAX_PART + 1);
+	for (int i = 0; i < ITEMOPTION_TABLE::MAX_PART + 1; i++)
+		b.Str("e").Str("n");
+	b.Int(1);
+	AppendOptionInfo(b, "E-X", "X", ITEMOPTION_TABLE::PART_STR, 1);
+	WriteScratch(b);
+
+	ITEMOPTION_TABLE table;
+	{
+		std::ifstream in(kTempFile, std::ios::binary);
+		table.LoadFromFile(in);
+	}
+	RemoveScratch();
+
+	// The oversized part list is refused as a whole: nothing is loaded
+	// rather than the last names written past the arrays.
+	CHECK_EQ(0, table.GetSize());
+	CHECK(table.ITEMOPTION_PARTNAME[0].GetString() == NULL);
+}
+
+TEST(ItemOptionTable, RejectsANegativePartCount)
+{
+	Bytes b;
+	b.Int(-1);
+	WriteScratch(b);
+
+	ITEMOPTION_TABLE table;
+	{
+		std::ifstream in(kTempFile, std::ios::binary);
+		table.LoadFromFile(in);
+	}
+	RemoveScratch();
+	CHECK_EQ(0, table.GetSize());
+}
+
 //----------------------------------------------------------------------
 // SOUND_TABLE is a plain CTypeTable of file names: a save/load round
 // trip through the two MString-backed entries.

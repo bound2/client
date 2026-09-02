@@ -156,6 +156,13 @@ ITEMOPTION_TABLE::LoadFromFile(std::ifstream& file)
 	int size;
 
 	file.read((char *)&size, 4);
+	// The part names land in two arrays of MAX_PART entries, so a count
+	// the file declares beyond that would be written past them (a
+	// negative one is nonsense). The whole table is refused rather than
+	// just the names past the arrays: half a table is harder to notice
+	// than an empty one.
+	if (size < 0 || size > MAX_PART)
+		return;
 	for(int i = 0; i < size; i++)
 	{
 		ITEMOPTION_PARTENAME[i].LoadFromFile(file);
