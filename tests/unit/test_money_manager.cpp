@@ -64,6 +64,40 @@ TEST(MoneyManager, AddAndUseMoveTheBalanceWithinTheLimit)
 	CHECK_EQ(0, wallet.GetMoney());
 }
 
+//----------------------------------------------------------------------
+// CanAddMoney used to compare the AMOUNT against the limit and ignore
+// the balance, so a wallet near its limit said yes and the AddMoney
+// that followed said no - the trade manager asks CanAddMoney before it
+// accepts a trade and AddMoney after, and between those two answers
+// the other side's money had nowhere to go.
+//----------------------------------------------------------------------
+TEST(MoneyManager, CanAddMoneyAnswersForTheBalanceItWouldLeave)
+{
+	MMoneyManager wallet;
+	wallet.SetMoneyLimit(1000);
+	CHECK(wallet.SetMoney(900));
+
+	CHECK(wallet.CanAddMoney(100));
+	CHECK(!wallet.CanAddMoney(101));
+	CHECK(wallet.CanAddMoney(0));
+	CHECK(!wallet.CanAddMoney(-1));
+
+	// CanAddMoney and AddMoney agree on every amount around the edge.
+	for (int amount = 98; amount <= 102; amount++)
+	{
+		MMoneyManager probe(wallet);
+		CHECK_EQ(wallet.CanAddMoney(amount), probe.AddMoney(amount));
+	}
+}
+
+TEST(MoneyManager, CanAddMoneyDoesNotOverflowOnALargeAmount)
+{
+	MMoneyManager wallet;			// limit two billion
+	CHECK(wallet.SetMoney(1500000000));
+	CHECK(!wallet.CanAddMoney(2000000000));	// the sum would wrap past INT_MAX
+	CHECK(wallet.CanAddMoney(500000000));
+}
+
 TEST(MoneyManager, CanUseMoneyAnswersForTheBalanceItWouldLeave)
 {
 	MMoneyManager wallet;
