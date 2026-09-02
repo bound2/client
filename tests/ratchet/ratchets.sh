@@ -51,15 +51,18 @@ check () {
 # passed in, then the day-to-day tree. On generators that produce no
 # .vcxproj the ratchet is skipped with a message - skipped, not passed.
 #----------------------------------------------------------------------
-# 529: 992 - 463. Task 2.4 moved every packet class, the factory/
-# validator tables and the last held-back info classes (465 .cpp files,
-# tests/arch/packetwire_files.txt) into packetwire; the exe gained the
-# split-out GCExchangeBuyHandler.cpp (+1) and the five root info classes
-# that moved under Client/Packet were already counted before (0 net).
-# History: 992 = 993 - 1 (task 2.2's PacketHandlerRegistry.cpp, a
-# recorded +1, offset by the finished migration deleting
+# 528: 529 - 1. Task 2.5 deleted CRRequest2 (a dead duplicate of
+# CRRequest claiming the same packet id) with its handler,
+# Client/PacketHandler/CRRequest2Handler.cpp.
+# History: 529 = 992 - 463. Task 2.4 moved every packet class, the
+# factory/validator tables and the last held-back info classes (465
+# .cpp files, tests/arch/packetwire_files.txt) into packetwire; the exe
+# gained the split-out GCExchangeBuyHandler.cpp (+1) and the five root
+# info classes that moved under Client/Packet were already counted
+# before (0 net). 992 = 993 - 1 (task 2.2's PacketHandlerRegistry.cpp,
+# a recorded +1, offset by the finished migration deleting
 # CGHandlersStub.cpp).
-R1_BASELINE=529
+R1_BASELINE=528
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do

@@ -536,7 +536,6 @@ Client/Packet/Lpackets/LGIncomingConnection.cpp
 Client/Packet/Rpackets/CRConnect.cpp
 Client/Packet/Rpackets/CRDisconnect.cpp
 Client/Packet/Rpackets/CRRequest.cpp
-Client/Packet/Rpackets/CRRequest2.cpp
 Client/Packet/Rpackets/CRWhisper.cpp
 Client/Packet/Rpackets/RCCharacterInfo.cpp
 Client/Packet/Rpackets/RCConnectVerify.cpp
