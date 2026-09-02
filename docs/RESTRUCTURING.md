@@ -907,7 +907,8 @@ starting each — the scan is one grep, and the ranking below is from a
 - [ ] **4.3 Containers:** `MInventory.cpp`, `MStorage.cpp`,
   `MShopShelf.cpp`, `MQuickSlot.cpp` — the shop/stash index-bounds fixes
   from the review live here and deserve permanent tests.
-  > **Status:** not started.
+  > **Status:** not started. Unblocked by 4.4's second slice
+  > (the item core links); next.
 - [ ] **4.4 Item/skill cores:** `MItem.cpp`, `MItemManager.cpp`,
   `MSkillManager.cpp`, `SkillDef.cpp`, gear classes. Likely partial —
   whatever stays coupled goes on the exemption list explicitly.
@@ -963,6 +964,46 @@ starting each — the scan is one grep, and the ranking below is from a
   > branch), so `VS_UI.lib` holds a twin the executable's object
   > outranks; both dead in this build — cleared by 5.2's first slice.
   > Suite: 201 tests (3,423 checks).
+  > **Second slice (2026-09-02, `restructuring/gamemodel-item-core`; live
+  > verification gates the merge):** the item core. `MItem.cpp` is split
+  > per class: a class with any `UseInventory`/`UseQuickItem`/`UseGear`
+  > body, or a container base (`MBelt`, `MOustersArmsBand`, `MMotorcycle`,
+  > `MCorpse`), moves whole to the executable's new `MItemUse.cpp` with
+  > the factory table, because a class split across a library and the
+  > executable leaves its vtable referencing symbols a test binary cannot
+  > link; `MItem` and the gear/armour/weapon families stay in `MItem.cpp`
+  > and join `gamemodel` (37 classes executable-side, 12 in the library;
+  > chunks moved byte for byte, the pile sizes to `MItemLimits.h`).
+  > `MItem`'s two reaches into the executable go through a host it is
+  > handed at start-up (`MItemHost`: the animation clock behind the
+  > colour cycles, the top view's item-drop frame pack, the player's pet
+  > affect refresh; installed in `InitGameObject` beside the money hook).
+  > `MObject` moves too, its two screen-rectangle members split to
+  > `MObjectScreen.cpp` (they read the draw interpolation state);
+  > `UserInformation`, `ClientConfig` and `MTimeItemManager` are pure
+  > loaders and join rather than be hooked; `gamemodel` links `framelib`
+  > for `CAnimationFrame`'s constructor. R4's subtraction became
+  > library-wide (35 → 28, a reclassification, see the ratchet table);
+  > R1 515 → 512. Tests (`test_item_core.cpp`, 14): construction, the
+  > option list, the requirement math over both tables, quest detection
+  > by flag and by register, the colour cycles under a hand-driven host,
+  > the drop animation and its parking, the teen-build skull naming, the
+  > pet refresh through the host. **Three defects the tests surfaced,
+  > fixed test-first after the move:** `IsQuestItem` tested the item's
+  > own flag only inside the condition that the timed-item register
+  > exists; the requirement getters returned `BYTE` while the slayer
+  > ceiling is 295 and Ousters gear is uncapped (295 read back as 39,
+  > 300 as 44 - a level-150 item with strong options looked easy to
+  > equip); and `ITEMOPTION_INFO` had an empty constructor, so the none
+  > row an unoptioned item reads its colour from was allocation fill
+  > (the `ITEMTABLE_INFO` shape again). The 3.1 commit-msg hook landed
+  > with these fixes. Suite: 216 tests (3,513 checks). **4.3 is
+  > unblocked**: the containers can now link against the item core; the
+  > container-based item classes and `MItemManager.cpp` (it assigns
+  > the arms-band and quick-slot globals) move with them. Still
+  > executable-side of the item family: the use handlers (by design -
+  > they are the packet/dialog side of items), `MItemFinder`,
+  > `MItemManager.cpp`, the two container managers' `.cpp` files.
   - Owner (all of 4.x): `gamemodel`'s membership file
     (`tests/arch/gamemodel_files.txt`), the M0–M2 include rules in
     `check_includes.pl` (in force since 4.1), R4 shrinking.
