@@ -931,7 +931,7 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# copy for every CSpritePal symbol at link time (LNK2005).
 	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "/Client/CSpritePal\\.cpp$")
 
-	# Backup files (e.g. MItemTable_bak-2007-5-7.cpp) are stale duplicates of
+	# Backup files (any *_bak-* copy of a source) are stale duplicates of
 	# their non-"_bak" counterpart and were never meant to compile on any
 	# platform - this used to be scoped inside the `if(NOT WIN32)` block
 	# below, so on Windows these still got globbed in and fought their
