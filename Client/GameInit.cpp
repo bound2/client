@@ -90,6 +90,8 @@
 #include "UIFunction.h"
 #include "SoundSetting.h"
 #include "SystemAvailabilities.h"
+#include "RarFile.h"
+#include <sstream>
 #include "ShrineInfoManager.h"
 #include "ServerInfoFileParser.h"
 
@@ -1625,7 +1627,7 @@ InitGame()
 	// String.inf carries the localised UI strings that ship with the game data.
 	// In English the built-in table from MGameStringTable.cpp is applied on top
 	// of it, so the English UI does not depend on an English String.inf.
-	const bool bUseEnglishStrings = UseEnglishText();
+	const bool bUseEnglishStrings = UseEnglishText(g_pFileDef);
 
 	std::ifstream gameStringTableTable2;//(FILE_INFO_gameStringTable, ios::binary);
 	if (FileOpenBinary(g_pFileDef->getProperty("FILE_INFO_STRING").c_str(), gameStringTableTable2))
@@ -2848,6 +2850,35 @@ UnInitSound()
 }
 
 //-----------------------------------------------------------------------------
+// Read the system-availability filter script out of the game data and
+// hand its text to the manager. The archive reader and the
+// file-definition table are the executable's; the parser
+// (SystemAvailabilitiesManager::LoadFromStream, gamemodel) sees only the
+// lines, so it can be tested without either.
+//-----------------------------------------------------------------------------
+static bool
+LoadSystemAvailabilities(SystemAvailabilitiesManager* pManager, const char* szFileName)
+{
+	CRarFile rarfile;
+	rarfile.SetRAR(g_pFileDef->getProperty("FILE_INFO_DATA").c_str(), "darkeden");
+	rarfile.Open(szFileName);
+	if (!rarfile.IsSet())
+		return false;
+
+	std::string text;
+	char szLine[512];
+	while (rarfile.GetString(szLine, sizeof(szLine)))
+	{
+		text += szLine;
+		text += '\n';
+	}
+	rarfile.Release();
+
+	std::istringstream in(text);
+	return pManager->LoadFromStream(in);
+}
+
+//-----------------------------------------------------------------------------
 // Init GameObject
 //-----------------------------------------------------------------------------
 BOOL
@@ -2861,7 +2892,8 @@ InitGameObject()
 	if (g_pSystemAvailableManager == NULL )
 	{
 		g_pSystemAvailableManager = new SystemAvailabilitiesManager;
-		g_pSystemAvailableManager->LoadFromFile(g_pFileDef->getProperty("FILE_FILTER_INFO").c_str());
+		LoadSystemAvailabilities(g_pSystemAvailableManager,
+			g_pFileDef->getProperty("FILE_FILTER_INFO").c_str());
 	}
 	if (g_pServerInformation==NULL)
 	{

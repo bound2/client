@@ -51,10 +51,15 @@ check () {
 # passed in, then the day-to-day tree. On generators that produce no
 # .vcxproj the ratchet is skipped with a message - skipped, not passed.
 #----------------------------------------------------------------------
-# 528: 529 - 1. Task 2.5 deleted CRRequest2 (a dead duplicate of
-# CRRequest claiming the same packet id) with its handler,
-# Client/PacketHandler/CRRequest2Handler.cpp.
-# History: 529 = 992 - 463. Task 2.4 moved every packet class, the
+# 518: 528 - 10. Task 4.1's gamemodel library took its ten members out
+# of the executable: ExpInfo.cpp, MString.cpp, MStringArray.cpp and
+# DebugLog.cpp, and the six tables that were nominally VS_UI's - the
+# relative VS_UI_CLIENT_SOURCES list never matched the exe glob's
+# absolute paths in REMOVE_ITEM, so they compiled into both (the
+# LNK4217 trap); the membership removal is absolute and asserted.
+# History: 528 = 529 - 1 (task 2.5 deleted CRRequest2, a dead duplicate
+# of CRRequest claiming the same packet id, with its handler
+# Client/PacketHandler/CRRequest2Handler.cpp). 529 = 992 - 463. Task 2.4 moved every packet class, the
 # factory/validator tables and the last held-back info classes (465
 # .cpp files, tests/arch/packetwire_files.txt) into packetwire; the exe
 # gained the split-out GCExchangeBuyHandler.cpp (+1) and the five root
@@ -62,7 +67,7 @@ check () {
 # before (0 net). 992 = 993 - 1 (task 2.2's PacketHandlerRegistry.cpp,
 # a recorded +1, offset by the finished migration deleting
 # CGHandlersStub.cpp).
-R1_BASELINE=528
+R1_BASELINE=518
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do
@@ -149,11 +154,18 @@ check "R3 (unsafe format/copy lines in Client/Packet + Client/PacketHandler)" "$
 #
 # Membership: every .cpp under the whole-directory library trees, plus
 # the VS_UI_CLIENT_SOURCES list in the top-level CMakeLists.txt, plus
-# the packetwire membership file (tests/arch/packetwire_files.txt -
-# the CMake target and the include checker read the same file).
-# Extraction work (Phase 4) shrinks this by cutting the global seams.
+# the packetwire and gamemodel membership files (tests/arch/
+# packetwire_files.txt, tests/arch/gamemodel_files.txt - the CMake
+# targets and the include checker read the same files). Extraction work
+# (Phase 4) shrinks this by cutting the global seams.
 #
-# 61: 81 - 20. Task 2.4 grew the membership from 52 to 517 files, and
+# 59: 61 - 2. Task 4.1 cut the two g_pFileDef seams in MGameStringTable
+# (UseEnglishText takes the Properties table) and SystemAvailabilities
+# (LoadFromStream; the executable reads the archive); the four support
+# sources gamemodel added (ExpInfo, MString, MStringArray, DebugLog)
+# reference no game global - DebugLog.cpp's dead #if 0 block that named
+# g_pDebugMessage was deleted rather than counted.
+# History: 61 = 81 - 20. Task 2.4 grew the membership from 52 to 517 files, and
 # the count still went DOWN because the measurement was refined with it
 # (see the R4 loop): a file referencing only globals it defines itself
 # no longer counts. The two dead server-only blocks that referenced
@@ -161,7 +173,7 @@ check "R3 (unsafe format/copy lines in Client/Packet + Client/PacketHandler)" "$
 # GCStashList::setStashItem from a live Item*) were deleted rather than
 # grandfathered.
 #----------------------------------------------------------------------
-R4_BASELINE=61
+R4_BASELINE=59
 
 lib_members () {
 	# The directory trees minus the files CMake excludes from the
@@ -175,6 +187,8 @@ lib_members () {
 		| grep -oE 'Client/[A-Za-z0-9_/]+\.cpp'
 	sed -e 's/#.*//' tests/arch/packetwire_files.txt \
 		| grep -oE 'Client/Packet/[A-Za-z0-9_/]+\.cpp'
+	sed -e 's/#.*//' tests/arch/gamemodel_files.txt \
+		| grep -oE 'Client/[A-Za-z0-9_/]+\.cpp'
 }
 
 # A file that references only globals it DEFINES itself is not a seam

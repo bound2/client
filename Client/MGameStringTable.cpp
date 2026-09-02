@@ -26,11 +26,9 @@ MStringArray*		g_pNickNameStringTable = NULL;
 // other value leaves the strings that String.inf supplied untouched.
 //----------------------------------------------------------------------
 bool
-UseEnglishText()
+UseEnglishText(const Properties* pFileDef)
 {
-	enum { LANGUAGE_ENGLISH = 3 };
-
-	if (g_pFileDef == NULL)
+	if (pFileDef == NULL)
 	{
 		return true;
 	}
@@ -39,13 +37,27 @@ UseEnglishText()
 
 	try
 	{
-		fileName = g_pFileDef->getProperty("FILE_LANGUAGE_INFO");
+		fileName = pFileDef->getProperty("FILE_LANGUAGE_INFO");
 	}
 	catch (...)
 	{
 		// No Language.inf configured at all.
 		return true;
 	}
+
+	return UseEnglishTextFrom(fileName.c_str());
+}
+
+bool
+UseEnglishTextFrom(const char* szLanguageInfoFile)
+{
+	enum { LANGUAGE_ENGLISH = 3 };
+
+	if (szLanguageInfoFile == NULL)
+	{
+		return true;
+	}
+	std::string fileName = szLanguageInfoFile;
 
 	FILE* pFile = fopen(fileName.c_str(), "r");
 

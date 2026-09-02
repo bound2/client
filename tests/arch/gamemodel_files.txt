@@ -1,0 +1,55 @@
+# gamemodel membership (docs/RESTRUCTURING.md task 4.1) - game-model
+# code that has no SDL, UI or dxlib reach: today the pure data tables
+# (experience, item options, game strings, sounds, system availability,
+# fame) and the string/logging support they are built on.
+#
+# Read by three consumers that must never disagree about what "the
+# library" is: CMakeLists.txt (the gamemodel target's source list -
+# .cpp lines only), tests/arch/check_includes.pl (rules M0-M2; the .h
+# lines are the headers the closure may include) and
+# tests/ratchet/ratchets.sh (R4). One repository-relative path per
+# line, column 1; '#' starts a comment.
+#
+# Extend deliberately: a file joins when its include closure passes M1
+# (basic/, Client/framelib/, Client/Packet/, Client/Client_PCH.h and the
+# headers listed here) and it references no executable global it does
+# not define itself. The seams that had to be cut to get here are
+# recorded in the plan's 4.1 status.
+
+# Experience tables
+Client/ExperienceTable.cpp
+Client/ExperienceTable.h
+Client/ExpInfo.cpp
+Client/ExpInfo.h
+
+# Item option table
+Client/MItemOptionTable.cpp
+Client/MItemOptionTable.h
+
+# Game string table (the built-in English text and the String.inf loader)
+Client/MGameStringTable.cpp
+Client/MGameStringTable.h
+
+# Sound table
+Client/MSoundTable.cpp
+Client/MSoundTable.h
+Client/SoundDef.h
+
+# System availability filters
+Client/SystemAvailabilities.cpp
+Client/SystemAvailabilities.h
+
+# Fame table (SkillDef.h only for the SKILLDOMAIN enum)
+Client/FameInfo.cpp
+Client/FameInfo.h
+Client/SkillDef.h
+
+# Support: the string class, the typed table template and the logger
+Client/MString.cpp
+Client/MString.h
+Client/MStringArray.cpp
+Client/MStringArray.h
+Client/CTypeTable.h
+Client/MTypeDef.h
+Client/DebugLog.cpp
+Client/DebugLog.h

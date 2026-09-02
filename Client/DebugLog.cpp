@@ -257,14 +257,6 @@ void log_write(LogLevel level,
 		fflush(g_config.log_fp);
 	}
 
-	// Output to memory array (g_pDebugMessage)
-	// Note: Disabled to avoid circular dependency with CMessageArray
-	// If needed, enable by including CMessageArray.h before this file
-#if 0
-	if (g_config.output_to_array && g_pDebugMessage != NULL) {
-		g_pDebugMessage->Add(log_line);
-	}
-#endif
 
 	LeaveCriticalSection(&g_log_lock);
 }

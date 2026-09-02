@@ -339,6 +339,73 @@ endif()
 message(STATUS "packetwire library: ${_packetwire_count} sources from tests/arch/packetwire_files.txt")
 
 # ============================================================
+# gamemodel - game-model code with no SDL/UI/dxlib reach
+# (docs/RESTRUCTURING.md task 4.1): the pure data tables and the
+# string/logging support they are built on. Same membership-file
+# discipline as packetwire: tests/arch/gamemodel_files.txt is read by
+# this block (.cpp lines), the include checker (rules M0-M2) and the
+# ratchet script (R4). Header lines in the file are the checker's
+# allowed set and are skipped here.
+# ============================================================
+set(GAMEMODEL_MEMBERSHIP_FILE ${CMAKE_CURRENT_SOURCE_DIR}/tests/arch/gamemodel_files.txt)
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${GAMEMODEL_MEMBERSHIP_FILE})
+file(STRINGS ${GAMEMODEL_MEMBERSHIP_FILE} _gamemodel_lines)
+set(GAMEMODEL_SOURCES)
+foreach(_line IN LISTS _gamemodel_lines)
+	string(STRIP "${_line}" _line)
+	if(NOT _line MATCHES "^Client/.*\\.cpp$")
+		continue()
+	endif()
+	if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${_line})
+		message(FATAL_ERROR "gamemodel membership lists a file that does not exist: ${_line}")
+	endif()
+	list(APPEND GAMEMODEL_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${_line})
+endforeach()
+list(LENGTH GAMEMODEL_SOURCES _gamemodel_count)
+# 10 today; a truncated list must not configure as "the library".
+if(_gamemodel_count LESS 8)
+	message(FATAL_ERROR "gamemodel membership file yielded only ${_gamemodel_count} sources - is ${GAMEMODEL_MEMBERSHIP_FILE} intact?")
+endif()
+
+add_library(gamemodel STATIC ${GAMEMODEL_SOURCES})
+
+target_include_directories(gamemodel PUBLIC
+	${CMAKE_CURRENT_SOURCE_DIR}
+	${CMAKE_CURRENT_SOURCE_DIR}/basic
+	${CMAKE_CURRENT_SOURCE_DIR}/Client
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/framelib
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet
+)
+
+# Same definitions as packetwire, for the same reason: these files used
+# to compile inside VS_UI and the executable, and identical
+# preprocessing is the point of the move.
+target_compile_definitions(gamemodel PRIVATE
+	USE_SDL_BACKEND
+	SPRITELIB_BACKEND_SDL
+	__GAME_CLIENT__=1
+)
+if(WIN32)
+	target_compile_definitions(gamemodel PRIVATE __WIN32__ __WINDOWS__)
+else()
+	target_compile_definitions(gamemodel PRIVATE PLATFORM_MACOS)
+endif()
+
+# packetwire for Properties (the file-definition table the string
+# table's language test reads); iconv for MString's GBK -> UTF-8
+# conversion, carried PUBLIC so every consumer resolves it.
+target_link_libraries(gamemodel PUBLIC basic packetwire)
+if(NOT EMSCRIPTEN)
+	if(Iconv_FOUND)
+		target_link_libraries(gamemodel PUBLIC Iconv::Iconv)
+	else()
+		target_link_libraries(gamemodel PUBLIC iconv)
+	endif()
+endif()
+
+message(STATUS "gamemodel library: ${_gamemodel_count} sources from tests/arch/gamemodel_files.txt")
+
+# ============================================================
 # TextSystem - New SDL-based Text System (Abstracted)
 # ============================================================
 if(USE_SDL_BACKEND OR NOT WIN32)
@@ -459,7 +526,6 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		# Item System
 		Client/MItem.cpp
 		Client/MItemManager.cpp
-		Client/MItemOptionTable.cpp
 		Client/MMoneyManager.cpp
 
 		# Skill System
@@ -497,12 +563,8 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		Client/MPriceManager.cpp
 		Client/MShop.cpp
 
-		# Game Data
-		Client/MGameStringTable.cpp
-		Client/ExperienceTable.cpp
+		# Game Data (the pure tables moved to gamemodel - task 4.1)
 		Client/UserInformation.cpp
-		Client/SystemAvailabilities.cpp
-		Client/FameInfo.cpp
 		Client/DebugInfo.cpp
 		Client/ClientConfig.cpp
 		Client/UtilityFunction.cpp
@@ -518,7 +580,6 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 
 		# UI Support
 		Client/MHelpMessageManager.cpp
-		Client/MSoundTable.cpp
 		Client/MMonsterKillQuestInfo.cpp
 	)
 
@@ -582,6 +643,7 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	target_link_libraries(VS_UI PUBLIC
 		basic
 		packetwire
+		gamemodel
 		dxlib
 		SpriteLib
 		framelib
@@ -885,6 +947,20 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		endif()
 	endforeach()
 
+	# The same for gamemodel (tests/arch/gamemodel_files.txt): its members
+	# come from the Client/ glob above or used to sit in VS_UI_CLIENT_SOURCES.
+	list(REMOVE_ITEM CLIENT_MAIN_SOURCES ${GAMEMODEL_SOURCES})
+	foreach(_src IN LISTS GAMEMODEL_SOURCES)
+		list(FIND CLIENT_MAIN_SOURCES ${_src} _still_in_exe)
+		if(NOT _still_in_exe EQUAL -1)
+			message(FATAL_ERROR "gamemodel member is still in the executable's source list (case mismatch in tests/arch/gamemodel_files.txt?): ${_src}")
+		endif()
+		list(FIND VS_UI_CLIENT_SOURCES ${_src} _still_in_vsui)
+		if(NOT _still_in_vsui EQUAL -1)
+			message(FATAL_ERROR "gamemodel member is still in VS_UI_CLIENT_SOURCES: ${_src}")
+		endif()
+	endforeach()
+
 	# CAvi.cpp is NOT excluded (re-checked 2026-08-22): the "never
 	# instantiated" claim this exclusion used to be based on doesn't hold -
 	# COpeningUpdate::PlayMPG() does instantiate CAVI and call OpenMPG()/
@@ -993,6 +1069,7 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		dxlib
 		basic
 		packetwire
+		gamemodel
 		framelib
 		VS_UI
 		TextSystem

@@ -1,8 +1,9 @@
 #include "Client_PCH.h"
 #include "SystemAvailabilities.h"
-#include "MinTr.h"
-#include "RarFile.h"
-#include "Packet/Properties.h"
+#include <istream>
+#include <string>
+#include <string.h>
+#include <stdio.h>
 
 SystemAvailabilitiesManager *g_pSystemAvailableManager = NULL;
 
@@ -97,14 +98,12 @@ bool	SystemAvailabilitiesManager::CheckScript( const std::list<FilterScript>& Li
 	return true;			// 리스트에 없으면 사용 가능
 }
 
-bool	SystemAvailabilitiesManager::LoadFromFile(const char *szFileName)
+bool	SystemAvailabilitiesManager::LoadFromStream(std::istream& in)
 {
-	CRarFile rarfile;
-	rarfile.SetRAR(g_pFileDef->getProperty("FILE_INFO_DATA").c_str(),"darkeden");
-	rarfile.Open(szFileName);
-
-	if( !rarfile.IsSet() )
+	if( !in.good() )
 		return false;
+
+	std::string line;
 	char szLine[512];
 
 	int key=-1, count=-1;
@@ -124,8 +123,15 @@ bool	SystemAvailabilitiesManager::LoadFromFile(const char *szFileName)
 
 	KIND_PARSE Kind = PARSE_MAX;
 
-	while( rarfile.GetString( szLine, 512 ) )
+	while( std::getline( in, line ) )
 	{
+		// CRarFile::GetString used to hand out the line without its
+		// newline; a CR left by a Windows file is dropped the same way.
+		if( !line.empty() && line[line.size()-1] == '\r' )
+			line.erase( line.size()-1 );
+		strncpy( szLine, line.c_str(), sizeof(szLine)-1 );
+		szLine[sizeof(szLine)-1] = '\0';
+
 		// * 는 key, ; 는 주석
 		if( strlen( szLine ) <= 0 )
 			continue;
@@ -218,6 +224,5 @@ bool	SystemAvailabilitiesManager::LoadFromFile(const char *szFileName)
 			}			
 		}
 	}
-	rarfile.Release();
 	return true;
 }
