@@ -234,7 +234,6 @@ class ITEMCLASS_TABLE : public CTypeTable<ITEMTYPE_TABLE> {
 		// 각 classType에 맞는 개수를 초기화한다.
 		//-------------------------------------------------------
 		void		InitClass( int c, int size );
-		void		InitItem2();
 };
 
 extern	ITEMCLASS_TABLE	*	g_pItemTable;
