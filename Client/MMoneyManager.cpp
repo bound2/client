@@ -31,6 +31,18 @@ MMoneyManager::MMoneyManager(const MMoneyManager& mm)
 	m_StorageHintHook = NULL;
 }
 
+// Assignment: the balance, the limit and the hint state come across;
+// the wallet assigned to keeps its own hook (the compiler's default
+// would have copied the source's, unlike the copy constructor).
+MMoneyManager&
+MMoneyManager::operator=(const MMoneyManager& mm)
+{
+	m_MoneyLimit = mm.m_MoneyLimit;
+	m_Money = mm.m_Money;
+	m_bStorageHintGiven = mm.m_bStorageHintGiven;
+	return *this;
+}
+
 MMoneyManager::~MMoneyManager()
 {
 }

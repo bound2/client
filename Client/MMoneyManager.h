@@ -11,7 +11,8 @@ class MMoneyManager {
 
 	public :
 		MMoneyManager();
-		MMoneyManager(const MMoneyManager& mm); 	
+		MMoneyManager(const MMoneyManager& mm);
+		MMoneyManager& operator=(const MMoneyManager& mm);
 		~MMoneyManager();
 
 		//-------------------------------------------------------

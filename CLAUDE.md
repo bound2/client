@@ -54,8 +54,9 @@ the output and hides all progress.
 ### What can be tested
 
 Only code compiled into a **static library**: `basic`, `SpriteLib`, `dxlib`,
-`gamemodel` (the pure data tables and their string/log support, membership in
-`tests/arch/gamemodel_files.txt` — `docs/RESTRUCTURING.md` task 4.1),
+`gamemodel` (the pure data tables, the money manager and their string/log
+support, membership in `tests/arch/gamemodel_files.txt` —
+`docs/RESTRUCTURING.md` tasks 4.1 and 4.2),
 `framelib`, `TextSystem`, `VS_UI`, and `packetwire` — the whole wire layer: socket
 streams, the encrypter, the info classes, every packet class in every direction and
 the factory/validator tables (`docs/RESTRUCTURING.md` tasks 1.1 and 2.4; membership
@@ -132,7 +133,7 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **192 tests, 3,334 checks, 0 failed** in both trees.
+baseline: **194 tests, 3,345 checks, 0 failed** in both trees.
 
 ## Traps
 

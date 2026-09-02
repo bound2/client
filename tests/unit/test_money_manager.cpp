@@ -125,10 +125,53 @@ TEST(MoneyManager, StorageHintFiresOncePastTheThresholdThroughTheHook)
 	CHECK(wallet.SetMoney(0));
 	CHECK(wallet.SetMoney(500000));
 	CHECK_EQ(1, g_HintCount);		// once per wallet
+}
 
-	MMoneyManager copy(wallet);
-	CHECK(copy.SetMoney(900000));
-	CHECK_EQ(1, g_HintCount);		// the copy carries the state, not the hook
+// The two halves of the copy rule, each on a wallet where only that
+// half can suppress the hint.
+TEST(MoneyManager, ACopyDropsTheHookButKeepsTheHintState)
+{
+	g_HintCount = 0;
+
+	// An un-hinted, hooked wallet: its copy has the state to fire but
+	// no hook to fire through.
+	MMoneyManager fresh;
+	fresh.SetStorageHintHook(CountHint);
+	MMoneyManager copyOfFresh(fresh);
+	CHECK(copyOfFresh.SetMoney(900000));
+	CHECK_EQ(0, g_HintCount);
+
+	// A hinted wallet: its copy gets a hook of its own and still stays
+	// quiet, because the "already hinted" state came with it.
+	CHECK(fresh.SetMoney(200000));
+	CHECK_EQ(1, g_HintCount);
+	MMoneyManager copyOfHinted(fresh);
+	copyOfHinted.SetStorageHintHook(CountHint);
+	CHECK(copyOfHinted.SetMoney(0));
+	CHECK(copyOfHinted.SetMoney(900000));
+	CHECK_EQ(1, g_HintCount);
+}
+
+// Assignment follows the same rule as copying, except that the wallet
+// being assigned to keeps the hook it already had.
+TEST(MoneyManager, AssignmentCopiesTheBalanceAndStateButKeepsTheTargetsHook)
+{
+	g_HintCount = 0;
+	MMoneyManager source;
+	source.SetMoneyLimit(5000);
+	CHECK(source.SetMoney(4000));
+
+	MMoneyManager target;
+	target.SetStorageHintHook(CountHint);
+	target = source;
+	CHECK_EQ(4000, target.GetMoney());
+	CHECK_EQ(5000, target.GetMoneyLimit());
+	CHECK(!target.SetMoney(5001));
+
+	// The source never hinted, so the target's own hook fires once.
+	target.SetMoneyLimit(2000000000);
+	CHECK(target.SetMoney(300000));
+	CHECK_EQ(1, g_HintCount);
 }
 
 TEST(MoneyManager, NoHookMeansNoHintAndNoCrash)

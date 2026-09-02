@@ -113,7 +113,7 @@ an unrecorded drop, so tightening lands in the same commit as the progress.
 
 | # | Metric | Baseline | Command |
 |---|--------|---------:|---------|
-| R1 | Translation units compiled directly into the DarkEden target | **517** (518 before 4.2 moved `MMoneyManager.cpp`, another double-compiled VS_UI entry; 528 before task 4.1's `gamemodel` took its ten members out — the four support sources, and the six tables that the relative `VS_UI_CLIENT_SOURCES` list had never actually removed from the exe glob, so they compiled into both VS_UI and the executable — as the 37 files still on that list do; 529 before task 2.5 deleted the dead `CRRequest2Handler.cpp`; 992 before task 2.4 moved the 465 packet/table/info sources into `packetwire`, +1 for the split-out `GCExchangeBuyHandler.cpp`; 1,044 before task 1.1; the task-2.2 composition root `PacketHandlerRegistry.cpp` was a recorded +1, offset when finishing the migration deleted `CGHandlersStub.cpp`) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` — `ratchets.sh` reads the generated vcxproj, preferring the ctest run's own build dir; on generators with no vcxproj it reports SKIP, not PASS |
+| R1 | Translation units compiled directly into the DarkEden target | **517** (518 before 4.2 moved `MMoneyManager.cpp`, another double-compiled VS_UI entry; 528 before task 4.1's `gamemodel` took its ten members out — the four support sources, and the six tables that the relative `VS_UI_CLIENT_SOURCES` list had never actually removed from the exe glob, so they compiled into both VS_UI and the executable — as the 36 files still on that list do; 529 before task 2.5 deleted the dead `CRRequest2Handler.cpp`; 992 before task 2.4 moved the 465 packet/table/info sources into `packetwire`, +1 for the split-out `GCExchangeBuyHandler.cpp`; 1,044 before task 1.1; the task-2.2 composition root `PacketHandlerRegistry.cpp` was a recorded +1, offset when finishing the migration deleted `CGHandlersStub.cpp`) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` — `ratchets.sh` reads the generated vcxproj, preferring the ctest run's own build dir; on generators with no vcxproj it reports SKIP, not PASS |
 | R2 | Packet `.cpp` files still defining a packet-style `::execute(Player` | **0** (448 → 432 in slice 1 → 0 when 2.2/2.3 finished; regex refined at 0 to stop matching comments and the in-file handler body in `GCExchangeBuy.cpp`) | `grep -rlE '^void\s+\w+::execute\s*\(\s*Player' Client/Packet/{Gpackets,Cpackets,Lpackets,Rpackets,Upackets} --include='*.cpp' \| grep -v Handler \| wc -l` |
 | R3 | Live `sprintf`/`strcpy`/`strcat` lines under `Client/Packet` **and `Client/PacketHandler`** | 46 (unchanged by task 2.4, which widened the scope to follow the handlers out of `Client/Packet`; 61 at first measurement — the 2026-09-01 adversarial review showed a quarter of that was commented-out code, so the measurement now excludes `//` matches) | see `ratchets.sh` — the grep excludes comment-prefixed matches |
 | R4 | Library-compiled `.cpp` files referencing `g_p*` client globals **they do not define themselves** | **59** (61 before task 4.1 cut the two `g_pFileDef` seams in `MGameStringTable` and `SystemAvailabilities` and added the `gamemodel` membership file, whose four new members reference no game global; 81 before task 2.4 grew the membership from 52 to 518 files; the number fell because the measurement stopped counting a file's references to globals it defines — the packet tables own `g_pPacketFactoryManager`/`g_pPacketValidator` — and the two dead server-only bodies that reached game globals were deleted; 83 at first measurement, before two never-compiled files were filtered) | `ratchets.sh` computes it over the library dirs (minus CMake-excluded files) plus the `VS_UI_CLIENT_SOURCES` list parsed from `CMakeLists.txt` and the `packetwire` membership file |
@@ -797,9 +797,11 @@ starting each — the scan is one grep, and the ranking below is from a
   > `restructuring/gamemodel-money`; live verification gates the merge).
   > The include scan the plan asks for overturned the 2026-09-01
   > ranking for two of the three: `MPriceManager` prices through
-  > `MItem`, `g_pItemTable`, `g_pPlayer` (race, stats, level), `g_pZone`,
+  > `MItem`, `g_pItemTable`, `g_pPlayer` (race, stats, level),
   > `g_pEventManager`, `g_pTimeItemManager`, `g_pSkillAvailable` and
-  > `g_pUserInformation`, and `MTradeManager` is an `MInventory`
+  > `g_pUserInformation` (its `g_pZone` reach is commented out; the
+  > player and time-item ones sit under `__GAME_CLIENT__`, live in every
+  > client build), and `MTradeManager` is an `MInventory`
   > shuffle over `MItem`s — both stand on the item core and the
   > containers, so they move **after 4.3/4.4**, not before. **`MMoneyManager`
   > is in `gamemodel`**: its one reach, the storage-box help hint
@@ -819,6 +821,19 @@ starting each — the scan is one grep, and the ranking below is from a
   > per wallet through the hook, no hook no hint). R1 518 → 517 (the
   > file was another of the double-compiled VS_UI entries). Suite: 192
   > tests (3,334 checks).
+  > **Adversarial review round (2026-09-02, 2 reviewers, both SHIP with
+  > findings), fixed on the branch:** the copy-constructor test copied a
+  > wallet that had already hinted, so "state copied" and "hook dropped"
+  > were indistinguishable — split into two wallets where only one half
+  > can suppress the hint; the compiler's `operator=` would have copied
+  > the hook where the copy constructor drops it — an explicit one now
+  > copies balance, limit and state and keeps the target's hook, with a
+  > test; `g_pZone` was listed as a live price dependency but is only a
+  > commented-out condition; the R1 row's "37 files still on that list"
+  > was 36 after this move; and the fix commit's "four checks" was
+  > counted against a hybrid old body — under the original one the
+  > negative-amount check fails too, five. Suite: 194 tests (3,345
+  > checks).
 - [ ] **4.3 Containers:** `MInventory.cpp`, `MStorage.cpp`,
   `MShopShelf.cpp`, `MQuickSlot.cpp` — the shop/stash index-bounds fixes
   from the review live here and deserve permanent tests.
