@@ -74,7 +74,6 @@ private :
 // Factory for CGPhoneSay
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGPhoneSayFactory : public PacketFactory {
 
 public :
@@ -95,8 +94,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return szSlotID + szBYTE + 128; }
 
 };
-
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

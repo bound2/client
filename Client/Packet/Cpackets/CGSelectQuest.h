@@ -71,7 +71,6 @@ private :
 // Factory for CGSelectQuest
 //
 //////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
 class CGSelectQuestFactory : public PacketFactory {
 
 public:
@@ -97,7 +96,6 @@ public:
 	// get Packet Max Size
 	PacketSize_t getPacketMaxSize() const throw() { return szQuestID + szObjectID; }
 };
-#endif
 
 //////////////////////////////////////////////////////////////////////
 //

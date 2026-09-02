@@ -210,11 +210,10 @@ ClientCommunicationManager::Update()
 				DEBUG_ADD_FORMAT("[From] %s(%d)", pDatagramPacket->getHost().c_str(),
 													pDatagramPacket->getPort());
 
-				// Dispatch-first (RESTRUCTURING.md task 2.1), legacy
-				// virtual as fallback until ratchet R2 reaches 0. The
-				// datagram direction has no player behind it.
-				if ( !PacketDispatcher::tryDispatch( pDatagramPacket , NULL ) )
-					pDatagramPacket->execute(NULL);
+				// Dispatch table (RESTRUCTURING.md tasks 2.1-2.4); an
+				// unregistered id throws. The datagram direction has no
+				// player behind it.
+				PacketDispatcher::dispatch( pDatagramPacket , NULL );
 
 				#ifdef __METROTECH_TEST__
 					g_UDPTest.UDPPacketExecute ++;

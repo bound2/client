@@ -44,7 +44,6 @@ private:
 //////////////////////////////////////////////////////////////////////
 // class CGLearnSkillFactory;
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGLearnSkillFactory : public PacketFactory 
 {
 public:
@@ -54,7 +53,6 @@ public:
 	PacketID_t getPacketID () const throw () { return Packet::PACKET_CG_LEARN_SKILL; }
 	PacketSize_t getPacketMaxSize () const throw () { return szSkillType+szSkillDomainType; }
 };
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

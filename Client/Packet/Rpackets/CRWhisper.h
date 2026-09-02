@@ -12,7 +12,7 @@
 // include files
 #include "Packet.h"
 #include "PacketFactory.h"
-#include "WhisperManager.h"
+#include "WhisperMessage.h"
 
 //////////////////////////////////////////////////////////////////////
 //

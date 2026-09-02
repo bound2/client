@@ -95,7 +95,6 @@ private :
 // Factory for CGBloodDrain
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGBloodDrainFactory : public PacketFactory {
 
 public :
@@ -124,8 +123,6 @@ public :
 	PacketSize_t getPacketMaxSize() const throw() { return szObjectID; } // X/Y/Dir are commented out of read()/write()
 
 };
-
-#endif
 
 //////////////////////////////////////////////////////////////////////
 //

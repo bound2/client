@@ -87,7 +87,6 @@ private :
 // Factory for CGPickupMoney
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGPickupMoneyFactory : public PacketFactory {
 
 public :
@@ -109,8 +108,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return szObjectID + szCoord + szCoord; }
 
 };
-
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

@@ -58,7 +58,6 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 // class CGPartyInviteFactory;
 //////////////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGPartyInviteFactory : public PacketFactory 
 {
 public:
@@ -71,8 +70,6 @@ public:
 	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_PARTY_INVITE; }
 	PacketSize_t getPacketMaxSize() const throw() { return szObjectID + szBYTE; }
 };
-
-#endif
 
 //////////////////////////////////////////////////////////////////////////////
 // class CGPartyInviteHandler

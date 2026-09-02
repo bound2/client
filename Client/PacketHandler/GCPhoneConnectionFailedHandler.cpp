@@ -1,0 +1,27 @@
+//////////////////////////////////////////////////////////////////////
+//
+// Filename    : GCPhoneConnectionFailedHandler.cc
+// Written By  : elca@ewestsoft.com
+// Description :
+//
+//////////////////////////////////////////////////////////////////////
+
+// include files
+#include "Client_PCH.h"
+#include "Gpackets/GCPhoneConnectionFailed.h"
+#include "ClientDef.h"
+
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+void GCPhoneConnectionFailedHandler::execute ( GCPhoneConnectionFailed * pPacket , Player * pPlayer )
+	 
+throw ( ProtocolException , Error )
+{
+	__BEGIN_TRY
+
+
+	// disconnect 출력?
+//	UI_PCSConnectionFailed();
+
+	__END_CATCH
+}

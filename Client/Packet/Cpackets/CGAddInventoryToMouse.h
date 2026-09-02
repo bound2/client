@@ -95,7 +95,6 @@ private :
 // Factory for CGAddInventoryToMouse
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGAddInventoryToMouseFactory : public PacketFactory {
 
 public :
@@ -119,8 +118,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return szObjectID + szCoordInven + szCoordInven; }
 	//end
 };
-
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

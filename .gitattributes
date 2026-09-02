@@ -3,8 +3,13 @@
 tests/wire-layout.txt text eol=lf
 tests/generated/*.inc text eol=lf
 
-# Parsed line-by-line by check_includes.pl / executed by bash; keep LF so
-# a CRLF checkout cannot corrupt baseline keys or the shebang line.
-tests/arch/baseline.txt text eol=lf
+# Parsed line-by-line by check_includes.pl, CMake's file(STRINGS) and the
+# ratchet script / executed by bash; keep LF so a CRLF checkout cannot
+# corrupt baseline keys, membership paths or the shebang line.
+tests/arch/*.txt text eol=lf
 tests/arch/*.pl text eol=lf
 tests/ratchet/*.sh text eol=lf
+
+# Golden wire bytes (tests/unit/test_packet_goldens.cpp): one hex line per
+# file, compared byte for byte and shared with the server repo's copies.
+tests/golden/*.hex text eol=lf

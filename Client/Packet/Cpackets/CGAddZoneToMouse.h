@@ -86,7 +86,6 @@ private :
 // Factory for CGAddZoneToMouse
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGAddZoneToMouseFactory : public PacketFactory {
 
 public :
@@ -108,8 +107,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return szObjectID + szCoord + szCoord; }
 
 };
-
-#endif
 
 //////////////////////////////////////////////////////////////////////
 //

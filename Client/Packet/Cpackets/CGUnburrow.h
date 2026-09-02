@@ -85,7 +85,6 @@ private :
 // Factory for CGUnburrow
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGUnburrowFactory : public PacketFactory {
 
 public :
@@ -107,8 +106,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return szCoord + szCoord + szDir; }
 
 };
-
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

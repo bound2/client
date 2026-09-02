@@ -72,7 +72,6 @@ private :
 	
 };
 
-#ifdef __DEBUG_OUTPUT__
 //////////////////////////////////////////////////////////////////////
 //
 // class CGJoinGuildFactory;
@@ -106,7 +105,6 @@ public:
 	// get Packet Max Size
 	PacketSize_t getPacketMaxSize() const throw() { return szGuildID + szGuildMemberRank + szBYTE + 256; }
 };
-#endif
 
 #ifndef __GAME_CLIENT__
 //////////////////////////////////////////////////////////////////////

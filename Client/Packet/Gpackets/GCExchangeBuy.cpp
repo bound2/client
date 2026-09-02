@@ -8,8 +8,6 @@
 #include "SocketInputStream.h"
 #include "SocketOutputStream.h"
 
-#include "Player.h"
-
 // Out-of-line definition so the constant may also be odr-used (bound to a
 // reference) by the UI and tests, not only read as a compile-time constant.
 const PacketSize_t GCExchangeBuy::kMaxMessage;
@@ -93,15 +91,4 @@ string GCExchangeBuy::toString() const
 		<< ", OrderID:" << (ulonglong)m_OrderID
 		<< ")";
 	return msg.toString();
-}
-
-void GCExchangeBuyHandler::execute(GCExchangeBuy* pPacket, Player* pPlayer)
-	throw ( ProtocolException , Error )
-{
-	__BEGIN_TRY
-
-	// Client-side packet handling
-	// This will be implemented to update the exchange UI with the buy result
-
-	__END_CATCH
 }

@@ -43,7 +43,6 @@ private :
 // class CGStashDepositFactory;
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGStashDepositFactory : public PacketFactory {
 public :
 	Packet * createPacket () throw () { return new CGStashDeposit(); }
@@ -56,8 +55,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return szGold; }
 
 };
-
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 //

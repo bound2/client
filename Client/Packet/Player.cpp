@@ -197,11 +197,9 @@ void Player::processCommand ()
 			fclose(fp);
 	#endif
 */		
-			// Now run the packet's handler: dispatch-first
-			// (RESTRUCTURING.md task 2.1), legacy virtual as fallback
-			// until ratchet R2 reaches 0.
-			if ( !PacketDispatcher::tryDispatch( pPacket , this ) )
-				pPacket->execute( this );
+			// Now run the packet's handler through the dispatch table
+			// (RESTRUCTURING.md tasks 2.1-2.4); an unregistered id throws.
+			PacketDispatcher::dispatch( pPacket , this );
 			
 			// 패킷을 삭제한다
 			delete pPacket;

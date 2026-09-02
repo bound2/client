@@ -33,6 +33,7 @@
 #include "PacketHandlerRegistry.h"
 
 #include "PacketDispatcher.h"
+#include "PacketDiagnostics.h"
 
 #include "Cpackets/CGConnectSetKey.h"
 
@@ -310,7 +311,6 @@
 #include "Rpackets/CRConnect.h"
 #include "Rpackets/CRDisconnect.h"
 #include "Rpackets/CRRequest.h"
-#include "Rpackets/CRRequest2.h"
 #include "Rpackets/CRWhisper.h"
 #include "Rpackets/RCCharacterInfo.h"
 #include "Rpackets/RCConnectVerify.h"
@@ -321,6 +321,23 @@
 #include "Rpackets/RCStatusHP.h"
 #include "Upackets/CURequestLoginMode.h"
 #include "Upackets/UCRequestLoginMode.h"
+
+// Defined in Client/PacketFunction.cpp: formats the text and sends it to
+// the game server as a "*bug_report" chat line. Declared ad hoc here the
+// way its other callers do; there is no header for it.
+void SendBugReport(const char* bug, ...);
+
+namespace {
+
+// The wire library's diagnostic seam (PacketDiagnostics.h): the library
+// formats the report, the executable's SendBugReport delivers it - the
+// same text Datagram::read used to hand SendBugReport directly.
+void ForwardBugReport(const char* message)
+{
+	SendBugReport("%s", message);
+}
+
+} // namespace
 
 void registerClientPacketHandlers()
 {
@@ -334,6 +351,9 @@ void registerClientPacketHandlers()
 	static bool bRegistered = false;
 	if (bRegistered)
 		return;
+
+	// Idempotent, so it sits inside the guard only for tidiness.
+	PacketDiagnostics::setBugReportHook(&ForwardBugReport);
 
 	//------------------------------------------------------------------
 	// Standard delegations: the packet's deleted execute() was exactly
@@ -617,11 +637,10 @@ void registerClientPacketHandlers()
 	// Handlers that take only the packet (the datagram-flavored
 	// connection packets): deleted execute() called Handler::execute(this).
 	//
-	// CRRequest2 is deliberately NOT here: it is a dead duplicate class
-	// that claims the same PACKET_CR_REQUEST id as CRRequest (registered
-	// above) - no factory creates it and no code references it, so
-	// registering it would only trip the double-registration guard at
-	// startup. Deleting the pair of files is task 5.2 work.
+	// CRRequest2, a dead duplicate class that claimed the same
+	// PACKET_CR_REQUEST id as CRRequest (registered above), was deleted
+	// with task 2.5: the wire-layout test now constructs every factory
+	// and asserts the ids are unique, which it broke.
 	//------------------------------------------------------------------
 	DE_REGISTER_PACKET_HANDLER_NOPLAYER(GLIncomingConnectionOK);
 	DE_REGISTER_PACKET_HANDLER_NOPLAYER(LGIncomingConnection);

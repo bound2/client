@@ -68,7 +68,6 @@ private :
 // Factory for CLVersionCheck
 //
 //--------------------------------------------------------------------------------
-#ifdef __DEBUG_OUTPUT__
 class CLVersionCheckFactory : public PacketFactory {
 
 public :
@@ -88,8 +87,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return szDWORD; }
 
 };
-
-#endif
 
 
 //--------------------------------------------------------------------------------

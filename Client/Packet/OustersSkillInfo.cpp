@@ -14,7 +14,6 @@
 #include "SocketInputStream.h"
 #include "SocketOutputStream.h"
 #include "PacketAssert.h"
-#include "ClientDef.h"
 
 //////////////////////////////////////////////////////////////////////
 // constructor

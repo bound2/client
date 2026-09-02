@@ -89,7 +89,6 @@ private :
 // Factory for CGRideMotorCycle
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGRideMotorCycleFactory : public PacketFactory {
 
 public :
@@ -118,8 +117,6 @@ public :
 	PacketSize_t getPacketMaxSize() const throw() { return szObjectID + szCoord + szCoord; }
 
 };
-
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

@@ -82,7 +82,6 @@ private :
 // Factory for CGAddQuickSlotToMouse
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGAddQuickSlotToMouseFactory : public PacketFactory {
 
 public :
@@ -104,8 +103,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return szObjectID + szSlotID; }
 
 };
-
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

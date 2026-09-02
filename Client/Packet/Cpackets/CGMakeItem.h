@@ -75,7 +75,6 @@ private :
 // Factory for CGMakeItem
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGMakeItemFactory : public PacketFactory {
 
 public :
@@ -97,8 +96,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return szItemClass + szItemType; }
 
 };
-
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

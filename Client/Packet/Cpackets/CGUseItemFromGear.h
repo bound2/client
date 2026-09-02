@@ -39,7 +39,6 @@ private:
 	BYTE		 m_Part;	 // 아이템이 있는 slot 
 };
 
-#ifdef __DEBUG_OUTPUT__
 //////////////////////////////////////////////////////////////////////////////
 // class CGUseItemFromGearFactory;
 //////////////////////////////////////////////////////////////////////////////
@@ -52,7 +51,6 @@ public:
 	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_USE_ITEM_FROM_GEAR; }
 	PacketSize_t getPacketMaxSize() const throw() { return szObjectID + szBYTE; }
 };
-#endif
 
 #ifndef __GAME_CLIENT__
 //////////////////////////////////////////////////////////////////////////////

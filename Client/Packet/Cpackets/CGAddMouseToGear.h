@@ -80,7 +80,6 @@ private :
 // Factory for CGAddMouseToGear
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGAddMouseToGearFactory : public PacketFactory {
 
 public :
@@ -103,8 +102,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return szObjectID + szSlotID; }
 
 };
-
-#endif
 
 //////////////////////////////////////////////////////////////////////
 //

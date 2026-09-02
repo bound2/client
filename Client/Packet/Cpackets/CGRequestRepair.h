@@ -65,7 +65,6 @@ private :
 // Factory for CGRequestRepair
 //
 //-----------------------------------------------------------------------------
-#ifdef __DEBUG_OUTPUT__
 class CGRequestRepairFactory : public PacketFactory {
 
 public :
@@ -85,8 +84,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return szObjectID; }
 
 };
-
-#endif
 
 
 //--------------------------------------------------------------------------------

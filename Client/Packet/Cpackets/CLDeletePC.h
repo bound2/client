@@ -79,7 +79,6 @@ private :
 // Factory for CLDeletePC
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CLDeletePCFactory : public PacketFactory {
 
 public :
@@ -97,8 +96,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return szBYTE + 20 + szSlot + szBYTE + 20; }
 
 };
-
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

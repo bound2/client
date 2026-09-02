@@ -5,6 +5,7 @@
 #include "test_framework.h"
 
 #include <cstdio>
+#include <exception>
 #include <vector>
 
 namespace testfw {
@@ -95,7 +96,16 @@ int	RunAll()
 		std::printf("  [RUN ] %s.%s\n", testCase.suite, testCase.name);
 		std::fflush(stdout);
 
-		testCase.fn();
+		// A test body that throws (the packet parsers throw on bad
+		// input by design) must fail as a named test, not take the
+		// rest of the suite down with it.
+		try {
+			testCase.fn();
+		} catch (const std::exception& e) {
+			RecordFailure(__FILE__, __LINE__, e.what());
+		} catch (...) {
+			RecordFailure(__FILE__, __LINE__, "uncaught exception of unknown type");
+		}
 
 		if (g_TestFailures == 0)
 		{

@@ -66,7 +66,6 @@ private :
 // Factory for CGNPCTalk
 //
 //--------------------------------------------------------------------------------
-#ifdef __DEBUG_OUTPUT__
 class CGNPCTalkFactory : public PacketFactory {
 
 public :
@@ -88,8 +87,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return szObjectID; }
 
 };
-
-#endif
 
 
 //--------------------------------------------------------------------------------

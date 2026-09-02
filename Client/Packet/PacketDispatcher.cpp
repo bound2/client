@@ -34,17 +34,3 @@ void PacketDispatcher::dispatch(Packet* pPacket, Player* pPlayer)
 
 	fn(pPacket, pPlayer);
 }
-
-bool PacketDispatcher::tryDispatch(Packet* pPacket, Player* pPlayer)
-{
-	PacketID_t packetID = pPacket->getPacketID();
-	if (packetID >= Packet::PACKET_MAX)
-		return false;
-
-	HandlerFn fn = s_Handlers[packetID];
-	if (fn == 0)
-		return false;
-
-	fn(pPacket, pPlayer);
-	return true;
-}

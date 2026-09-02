@@ -103,7 +103,6 @@ private :
 // Factory for CGAbsorbSoul
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGAbsorbSoulFactory : public PacketFactory {
 
 public:
@@ -130,7 +129,6 @@ public:
 	PacketSize_t getPacketMaxSize() const throw() { return szObjectID + szZoneCoord*2+ szObjectID + szCoordInven*4; }
 
 };
-#endif
 
 //////////////////////////////////////////////////////////////////////
 //

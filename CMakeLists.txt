@@ -254,96 +254,54 @@ add_subdirectory(Client/SpriteLib)
 add_subdirectory(Client/framelib)
 
 # ============================================================
-# packetwire - wire-support static library
+# packetwire - the wire library
 # ============================================================
 #
-# The game-free subset of the Client/Packet root: socket streams, the
-# encrypter, StringStream/Exception, and the wire info classes the GC
-# packets delegate their parsing to. Created by docs/RESTRUCTURING.md
-# task 1.1 so this code can be linked into unit_tests; the packet
-# classes themselves join in Phase 2 once execute() is stripped.
+# Everything under Client/Packet except the receive loops: socket
+# streams, the encrypter, StringStream/Exception, the wire info classes,
+# every packet class in every direction, and the factory/validator
+# tables (docs/RESTRUCTURING.md tasks 1.1 and 2.4). The packet handlers
+# live in Client/PacketHandler and compile into the executable; the
+# packet headers only declare them.
 #
-# Membership is an explicit list on purpose: the ratchet script and the
-# include-graph checker (tasks 0.2/0.3) parse it, and file(GLOB) would
-# silently adopt new files. Absolute paths so the list(REMOVE_ITEM ...)
-# against the globbed CLIENT_MAIN_SOURCES below matches - file(GLOB)
-# returns absolute paths, and a relative entry is silently not removed
-# (that mismatch is exactly how sources end up compiled into both a
-# library and the executable, see the LNK4217 note in CLAUDE.md).
+# Membership is tests/arch/packetwire_files.txt, one repository-relative
+# path per line. Three readers, one file, so the target and the rules
+# cannot disagree: this target, the include-graph checker
+# (tests/arch/check_includes.pl - whose rule W0 also demands that every
+# .cpp under Client/Packet be listed there or in
+# tests/arch/packetwire_holdouts.txt) and the ratchet script
+# (tests/ratchet/ratchets.sh, R4). Deliberately not file(GLOB): a moved
+# or new file has to be listed on purpose. CMAKE_CONFIGURE_DEPENDS makes
+# an edit to the list re-run configure, which a bare file(STRINGS) would
+# not.
 #
-# Excluded root files and why (sort when touched, never silently):
-# ClientPlayer/ClientCommunicationManager/Player/Request*Player* are
-# receive loops with game includes (Phase 2); PacketFactoryManager/
-# PacketIDSet/PacketValidator drag every packet's execute() (task 2.4);
-# NPCInfo (MZone.h) and OustersSkillInfo (ClientDef.h) are one
-# vestigial include away each; DatagramSocket.cpp calls DEBUG_ADD for
-# real (task 5.1). PacketFileAPI.cpp is include-clean but nothing needs
-# it yet - it joins with the Rpackets file-transfer work.
-set(PACKETWIRE_SOURCES
-	# Streams / framing / crypto
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/Datagram.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/Encrypter.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/Exception.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PacketAssert.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PacketDispatcher.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SocketEncryptInputStream.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SocketEncryptOutputStream.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SocketInputStream.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SocketOutputStream.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/StringStream.cpp
-
-	# Sockets. SocketAPI.cpp's DebugInfo.h include is commented out, so it
-	# is include-clean; it is also required here, because SocketImpl's
-	# destructor calls SocketAPI::closesocket_ex - without it, any test
-	# binary that constructs a Socket would fail to link.
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/ServerSocket.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/Socket.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SocketAPI.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SocketImpl.cpp
-
-	# Wire info classes (parsers for server-supplied sub-structures)
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/EffectInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/ExtraInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/ExtraSlotInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/GameTime.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/GearInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/GearSlotInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/GuildWarInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/InventoryInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/InventorySlotInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/LevelWarInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/ModifyInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PCItemInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PCOustersInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PCOustersInfo2.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PCOustersInfo3.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PCSlayerInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PCSlayerInfo2.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PCSlayerInfo3.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PCVampireInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PCVampireInfo2.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PCVampireInfo3.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/PetInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/QuestStatusInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/RaceWarInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/RideMotorcycleInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/RideMotorcycleSlotInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/ScriptParameter.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/ServerGroupInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SlayerSkillInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SubItemInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SubOustersSkillInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SubServerInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SubSlayerSkillInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SubVampireSkillInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/TextInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/VampireSkillInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/WarInfo.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/WorldInfo.cpp
-
-	# Misc utility
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/Properties.cpp
-)
+# Absolute paths so the list(REMOVE_ITEM ...) against the globbed
+# CLIENT_MAIN_SOURCES below matches - file(GLOB) returns absolute paths,
+# and a relative entry is silently not removed (that mismatch is exactly
+# how sources end up compiled into both a library and the executable,
+# see the LNK4217 note in CLAUDE.md).
+set(PACKETWIRE_MEMBERSHIP_FILE ${CMAKE_CURRENT_SOURCE_DIR}/tests/arch/packetwire_files.txt)
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${PACKETWIRE_MEMBERSHIP_FILE})
+# Every line is stripped before it is matched, so an indented path is
+# read the same way the checker and the ratchet script read it (the
+# checker rejects indentation outright, so the three cannot drift).
+file(STRINGS ${PACKETWIRE_MEMBERSHIP_FILE} _packetwire_lines)
+set(PACKETWIRE_SOURCES)
+foreach(_line IN LISTS _packetwire_lines)
+	string(STRIP "${_line}" _line)
+	if(NOT _line MATCHES "^Client/Packet/.*\\.cpp$")
+		continue()
+	endif()
+	if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${_line})
+		message(FATAL_ERROR "packetwire membership lists a file that does not exist: ${_line}")
+	endif()
+	list(APPEND PACKETWIRE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${_line})
+endforeach()
+list(LENGTH PACKETWIRE_SOURCES _packetwire_count)
+# 518 today; a truncated list must not configure as "the library".
+if(_packetwire_count LESS 400)
+	message(FATAL_ERROR "packetwire membership file yielded only ${_packetwire_count} sources - is ${PACKETWIRE_MEMBERSHIP_FILE} intact?")
+endif()
 
 add_library(packetwire STATIC ${PACKETWIRE_SOURCES})
 
@@ -378,7 +336,7 @@ if(WIN32)
 	target_link_libraries(packetwire PUBLIC ws2_32)
 endif()
 
-message(STATUS "packetwire library: wire-support subset of Client/Packet (explicit list)")
+message(STATUS "packetwire library: ${_packetwire_count} sources from tests/arch/packetwire_files.txt")
 
 # ============================================================
 # TextSystem - New SDL-based Text System (Abstracted)
@@ -871,6 +829,10 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		Client/*.cpp
 		Client/Packet/*.cpp
 		Client/Packet/**/*.cpp
+		# The packet handlers (task 2.4): executable-side, bound by
+		# Client/PacketHandlerRegistry.cpp; the wire classes they handle
+		# are in packetwire.
+		Client/PacketHandler/*.cpp
 		Client/SXml/*.cpp
 		Client/WinLib/*.cpp
 	)
@@ -908,13 +870,20 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 
 	# packetwire members compile in the packetwire library now; leaving
 	# them here too would compile them into the executable a second time
-	# (the existing LNK4217 double-compilation trap).
+	# (the existing LNK4217 double-compilation trap). What stays of
+	# Client/Packet/*.cpp after this is exactly
+	# tests/arch/packetwire_holdouts.txt (the receive loops).
 	list(REMOVE_ITEM CLIENT_MAIN_SOURCES ${PACKETWIRE_SOURCES})
-
-	# Note: Cpackets contains CG (Client to Game) handlers
-	# These are server-side handlers that shouldn't be compiled in the client
-	# The client-side packet handling is done through different mechanisms
-	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*Cpackets/.*Handler\\.cpp")
+	# EXISTS is case-insensitive on Windows but REMOVE_ITEM is not: a
+	# membership entry whose case differs from the on-disk name would pass
+	# the existence check above and still be globbed into the executable
+	# - compiled twice, silently. Assert the removal actually happened.
+	foreach(_src IN LISTS PACKETWIRE_SOURCES)
+		list(FIND CLIENT_MAIN_SOURCES ${_src} _still_in_exe)
+		if(NOT _still_in_exe EQUAL -1)
+			message(FATAL_ERROR "packetwire member is still in the executable's source list (case mismatch in tests/arch/packetwire_files.txt?): ${_src}")
+		endif()
+	endforeach()
 
 	# CAvi.cpp is NOT excluded (re-checked 2026-08-22): the "never
 	# instantiated" claim this exclusion used to be based on doesn't hold -

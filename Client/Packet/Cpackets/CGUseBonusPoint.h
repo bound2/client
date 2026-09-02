@@ -81,7 +81,6 @@ private :
 // Factory for CGUseBonusPoint
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGUseBonusPointFactory : public PacketFactory {
 
 public :
@@ -110,8 +109,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return szBYTE; }
 
 };
-
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

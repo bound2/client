@@ -55,8 +55,6 @@ private :
 };
 
 
-#ifndef __GAME_CLIENT__
-
 //////////////////////////////////////////////////////////////////////
 //
 // class CGFailQuestFactory;
@@ -106,6 +104,5 @@ public:
 	static void execute(CGFailQuest* pCGFailQuest, Player* pPlayer) throw ( ProtocolException , Error );
 
 };
-#endif
 
 #endif

@@ -99,7 +99,6 @@ private :
 // Factory for CGAddZoneToInventory
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGAddZoneToInventoryFactory : public PacketFactory {
 
 public :
@@ -121,8 +120,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return szObjectID + szCoord + szCoord + szCoordInven + szCoordInven; }
 
 };
-
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

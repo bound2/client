@@ -63,7 +63,6 @@ private :
 // Factory for CLChangeServer
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CLChangeServerFactory : public PacketFactory {
 
 public :
@@ -81,8 +80,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return szServerGroupID; }
 
 };
-
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

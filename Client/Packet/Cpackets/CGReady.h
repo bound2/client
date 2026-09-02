@@ -56,7 +56,6 @@ public :
 // Factory for CGReady
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGReadyFactory : public PacketFactory {
 
 public :
@@ -76,8 +75,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return 0; }
 	
 };
-
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

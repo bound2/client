@@ -94,7 +94,6 @@ private :
 // Factory for CGAttack
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGAttackFactory : public PacketFactory {
 
 public :
@@ -123,8 +122,6 @@ public :
 	PacketSize_t getPacketMaxSize() const throw() { return szObjectID + szCoord + szCoord + szDir; }
 
 };
-
-#endif
 
 //////////////////////////////////////////////////////////////////////
 //

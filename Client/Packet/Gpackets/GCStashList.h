@@ -55,8 +55,6 @@ typedef struct _STASHITEM
 // class GCStashList;
 //////////////////////////////////////////////////////////////////////////////
 
-class Item;
-
 class GCStashList : public Packet 
 {
 public:
@@ -77,7 +75,6 @@ public:
 	bool isExist(BYTE rack, BYTE index) const throw();
 
 	STASHITEM getStashItem(BYTE rack, BYTE index) const throw();
-	void setStashItem(BYTE rack, BYTE index, Item* pItem) throw();
 
 	std::list<SubItemInfo*>& getSubItems(BYTE rack, BYTE index) throw();
 

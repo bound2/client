@@ -50,7 +50,6 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 // class CGSelectWayPointFactory;
 //////////////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGSelectWayPointFactory : public PacketFactory 
 {
 	Packet* createPacket() throw() { return new CGSelectWayPoint(); }
@@ -62,7 +61,6 @@ class CGSelectWayPointFactory : public PacketFactory
 	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_SELECT_WAYPOINT; }
 	PacketSize_t getPacketMaxSize() const throw() { return szZoneID + szCoord*2; }
 };
-#endif
 
 //////////////////////////////////////////////////////////////////////////////
 // class CGSelectWayPointHandler;

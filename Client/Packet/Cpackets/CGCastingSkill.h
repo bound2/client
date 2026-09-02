@@ -73,7 +73,6 @@ private :
 // Factory for CGCastingSkill
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGCastingSkillFactory : public PacketFactory {
 
 public :
@@ -100,8 +99,6 @@ public :
 	PacketSize_t getPacketMaxSize() const throw() { return szSkillType; }
 
 };
-
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

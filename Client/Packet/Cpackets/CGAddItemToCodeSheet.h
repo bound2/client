@@ -45,7 +45,6 @@ private :
 };
 
 
-#ifndef __GAME_CLIENT__
 //////////////////////////////////////////////////////////////////////////////
 // class CGAddItemToCodeSheetFactory;
 //////////////////////////////////////////////////////////////////////////////
@@ -69,7 +68,5 @@ public:
 	static void execute(CGAddItemToCodeSheet* pCGAddItemToCodeSheet, Player* pPlayer) throw ( ProtocolException , Error );
 
 };
-
-#endif
 
 #endif

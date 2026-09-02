@@ -48,7 +48,6 @@ private:
 // class CGTradeAddItemFactory;
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGTradeAddItemFactory : public PacketFactory 
 {
 public:
@@ -61,7 +60,6 @@ public:
 	PacketID_t getPacketID () const throw () { return Packet::PACKET_CG_TRADE_ADD_ITEM; }
 	PacketSize_t getPacketMaxSize () const throw () { return szObjectID*2; }
 };
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 //

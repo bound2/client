@@ -75,7 +75,6 @@ private :
 // Factory for CGDialUp
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGDialUpFactory : public PacketFactory {
 
 public :
@@ -97,8 +96,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return szPhoneNumber; }
 
 };
-
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

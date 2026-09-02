@@ -41,7 +41,6 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 // class CGSilverCoatingFactory;
 //////////////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGSilverCoatingFactory : public PacketFactory 
 {
 public:
@@ -54,7 +53,6 @@ public:
 	PacketID_t getPacketID () const throw () { return Packet::PACKET_CG_SILVER_COATING; }
 	PacketSize_t getPacketMaxSize () const throw () { return szObjectID; }
 };
-#endif
 
 //////////////////////////////////////////////////////////////////////////////
 // class CGSilverCoatingHandler;

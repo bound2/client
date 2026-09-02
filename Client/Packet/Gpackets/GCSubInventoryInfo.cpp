@@ -9,7 +9,6 @@
 #include "LevelWarInfo.h"
 #include "GuildWarInfo.h"
 #include "PacketAssert.h"
-#include "Client.h"
 #ifdef __GAME_SERVER__
 #include "PetItem.h"
 #endif
@@ -36,7 +35,8 @@ GCSubInventoryInfo::~GCSubInventoryInfo()
 {
 	__BEGIN_TRY 
 
-	SAFE_DELETE( m_pInventoryInfo );
+	delete m_pInventoryInfo;
+	m_pInventoryInfo = NULL;
 
 	__END_CATCH 
 }

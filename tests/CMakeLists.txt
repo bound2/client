@@ -6,8 +6,11 @@ cmake_minimum_required(VERSION 3.10)
 #
 # Only code compiled into a static library can be linked into a test
 # binary. Today that means basic/, framelib/ (header-only templates),
-# SpriteLib/, DXLib/, TextSystem/ and VS_UI. Game logic that is compiled
-# straight into the DarkEden executable is not reachable from here.
+# SpriteLib/, DXLib/, TextSystem/, VS_UI and packetwire (the whole wire
+# layer: streams, info classes, every packet class and the factory
+# tables - docs/RESTRUCTURING.md task 2.4). Game logic that is compiled
+# straight into the DarkEden executable, including the packet handlers
+# under Client/PacketHandler, is not reachable from here.
 #
 #----------------------------------------------------------------------
 
@@ -49,6 +52,8 @@ target_include_directories(unit_tests PRIVATE
 	${CMAKE_SOURCE_DIR}/basic
 	${CMAKE_SOURCE_DIR}/Client/framelib
 	${CMAKE_SOURCE_DIR}/Client/TextSystem
+	# Test-only seams into the packetwire streams (support/packet_stream_access.h)
+	${CMAKE_CURRENT_SOURCE_DIR}/support
 )
 
 #----------------------------------------------------------------------
@@ -67,18 +72,18 @@ endif()
 #----------------------------------------------------------------------
 # Wire-layout inventory (unit/test_wire_layout.cpp).
 #
-# That one source compiles every packet header under Client/Packet the
-# way the DarkEden target does but links none of the packet .cpp files:
-# tests/generated/WireInventory.inc carries the factories'
-# getPacketID/getPacketMaxSize bodies as plain functions.
-# See tests/tools/gen_wire_inventory.pl.
+# That one source constructs every packet factory under Client/Packet
+# through tests/generated/WireInventory.inc, the registry that
+# tests/tools/gen_wire_inventory.pl writes (one include and one
+# registration per factory class; the wire_inventory_fresh test below
+# pins it). Its include dirs are packetwire's PUBLIC ones plus the
+# generated directory, and it needs the packetwire defines so the class
+# definitions match the library's (docs/RESTRUCTURING.md task 2.5).
 #----------------------------------------------------------------------
-target_sources(unit_tests PRIVATE stubs/wire_layout_defs.cpp)
 set_source_files_properties(
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_wire_layout.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/stubs/wire_layout_defs.cpp
 	PROPERTIES
-		INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/Client/Packet;${CMAKE_CURRENT_SOURCE_DIR}/generated"
+		INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/generated"
 		COMPILE_DEFINITIONS "${PACKETWIRE_TEST_DEFINITIONS};WIRE_LAYOUT_FILE=\"${CMAKE_CURRENT_SOURCE_DIR}/wire-layout.txt\""
 )
 
@@ -88,9 +93,11 @@ set_source_files_properties(
 set_source_files_properties(
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packetwire_parsers.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_dispatcher.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_factories.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_goldens.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_stringstream.cpp
 	PROPERTIES
-		COMPILE_DEFINITIONS "${PACKETWIRE_TEST_DEFINITIONS}"
+		COMPILE_DEFINITIONS "${PACKETWIRE_TEST_DEFINITIONS};WIRE_GOLDEN_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/golden\""
 )
 
 add_test(NAME unit_tests COMMAND unit_tests)
@@ -132,7 +139,7 @@ endif()
 
 #----------------------------------------------------------------------
 # The committed WireInventory.inc must match a fresh generation, so a
-# new or changed factory cannot go uninventoried. Needs perl (Git for
+# new or changed factory cannot go unconstructed and uninventoried. Needs perl (Git for
 # Windows ships one, found above); without it the check is skipped,
 # not passed.
 #----------------------------------------------------------------------

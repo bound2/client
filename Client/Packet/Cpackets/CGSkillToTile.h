@@ -98,7 +98,6 @@ private :
 // Factory for CGSkillToTile
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGSkillToTileFactory : public PacketFactory {
 
 public :
@@ -127,8 +126,6 @@ public :
 	PacketSize_t getPacketMaxSize() const throw() { return szSkillType + szCEffectID + szCoord + szCoord; }
 
 };
-
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

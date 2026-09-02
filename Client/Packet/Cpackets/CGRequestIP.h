@@ -77,7 +77,6 @@ protected :
 // Factory for CGRequestIP
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGRequestIPFactory : public PacketFactory {
 
 public :
@@ -106,8 +105,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return szBYTE + 10;}
 
 };
-
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

@@ -48,7 +48,6 @@ private :
 	ObjectID_t m_ObjectID;  // ObjectID
 };
 
-#ifdef __DEBUG_OUTPUT__
 //////////////////////////////////////////////////////////////////////
 //
 // class CGTameMonsterFactory;
@@ -69,7 +68,6 @@ public:
 	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_TAME_MONSTER; }
 	PacketSize_t getPacketMaxSize() const throw() { return szObjectID; }
 };
-#endif
 
 #ifndef __GAME_CLIENT__
 //////////////////////////////////////////////////////////////////////

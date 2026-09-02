@@ -436,2683 +436,467 @@
 #include "Lpackets/LCVersionCheckOK.h"
 #include "Lpackets/LCWorldList.h"
 #include "Lpackets/LGIncomingConnection.h"
+#include "Rpackets/CRConnect.h"
+#include "Rpackets/CRDisconnect.h"
+#include "Rpackets/CRRequest.h"
+#include "Rpackets/CRWhisper.h"
+#include "Rpackets/RCCharacterInfo.h"
+#include "Rpackets/RCConnectVerify.h"
+#include "Rpackets/RCPositionInfo.h"
+#include "Rpackets/RCRequestVerify.h"
+#include "Rpackets/RCRequestedFile.h"
+#include "Rpackets/RCSay.h"
+#include "Rpackets/RCStatusHP.h"
 #include "Upackets/CURequestLoginMode.h"
 #include "Upackets/UCRequestLoginMode.h"
 #endif // WIRE_INVENTORY_INCLUDES
-#ifdef WIRE_INVENTORY_STRUCTS
-struct Inv_GCActiveGuildListFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ACTIVE_GUILD_LIST; }
-	static PacketSize_t maxSize() { return szWORD + (GuildInfo::getMaxSize() * 5000); }
-};
-struct Inv_GCAddBatFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADD_BAT; }
-	static PacketSize_t maxSize() {
-		return szObjectID 
-			+ szBYTE + 20 
-			+ szItemType
-			
-			
-			+ szCoord + szCoord + szDir
-			+ szHP*2
-			+ szGuildID
-			+ szColor
-			;
-	}
-};
-struct Inv_GCAddBurrowingCreatureFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADD_BURROWING_CREATURE; }
-	static PacketSize_t maxSize() {
-		return szObjectID 
-			+ szBYTE + 20
-			+ szCoord + szCoord; 
-	}
-};
-struct Inv_GCAddEffectFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADD_EFFECT; }
-	static PacketSize_t maxSize() { return szObjectID + szEffectID + szDuration; }
-};
-struct Inv_GCAddEffectToTileFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADD_EFFECT_TO_TILE; }
-	static PacketSize_t maxSize() { return szObjectID + szCoord*2 + szEffectID + szDuration; }
-};
-struct Inv_GCAddGearToInventoryFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADD_GEAR_TO_INVENTORY; }
-	static PacketSize_t maxSize() { return szSlotID + szCoordInven + szCoordInven; }
-};
-struct Inv_GCAddGearToZoneFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADD_GEAR_TO_ZONE; }
-	static PacketSize_t maxSize() { return szSlotID; }
-};
-struct Inv_GCAddHelicopterFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADD_HELICOPTER; }
-	static PacketSize_t maxSize() { return szObjectID + szBYTE; }
-};
-struct Inv_GCAddInjuriousCreatureFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADD_INJURIOUS_CREATURE; }
-	static PacketSize_t maxSize() { return szBYTE + 10; }
-};
-struct Inv_GCAddInstalledMineToZoneFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADD_INSTALLED_MINE_TO_ZONE; }
-	static PacketSize_t maxSize() { return szObjectID + szCoord + szCoord + szBYTE + szItemType + szBYTE + 255 + szDurability + szItemNum + szBYTE +(szObjectID + szBYTE + szItemType + szItemNum + szSlotID)* 12; }
-};
-struct Inv_GCAddItemToItemVerifyFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADD_ITEM_TO_ITEM_VERIFY; }
-	static PacketSize_t maxSize() { return szBYTE + szuint +szuint; }
-};
-struct Inv_GCAddMonsterFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADD_MONSTER; }
-	static PacketSize_t maxSize() { 
-		return szObjectID +            
-			szMonsterType +            
-			szBYTE +                   
-			32 +                       
-			szColor +                  
-			szColor +                  
-			szCoord +                  
-			szCoord +                  
-			szDir +                    
-			EffectInfo::getMaxSize() + 
-			szHP +                     
-			szHP +                      
-			szBYTE;						
-	}
-};
-struct Inv_GCAddMonsterCorpseFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADD_MONSTER_CORPSE; }
-	static PacketSize_t maxSize() { 
-		return szObjectID +
-			szMonsterType +
-			szBYTE +
-			128 +
-			szCoord +
-			szCoord +
-			szDir +
-			szBYTE +	
-			szBYTE +	
-			szObjectID;
-	}
-};
-struct Inv_GCAddMonsterFromBurrowingFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADD_MONSTER_FROM_BURROWING; }
-	static PacketSize_t maxSize() { 
-		return szObjectID               
-			+ szMonsterType             
-			+ szBYTE                    
-			+ 32                        
-			+ szColor + szColor         
-			+ szCoord + szCoord + szDir 
-			+ EffectInfo::getMaxSize()  
-			+ szHP * 2;                 
-	}
-};
-struct Inv_GCAddMonsterFromTransformationFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADD_MONSTER_FROM_TRANSFORMATION; }
-	static PacketSize_t maxSize() { 
-		return szObjectID               
-			+ szMonsterType             
-			+ szBYTE                    
-			+ 32                        
-			+ szColor + szColor         
-			+ szCoord + szCoord + szDir 
-			+ EffectInfo::getMaxSize()  
-			+ szHP * 2;                 
-	}
-};
-struct Inv_GCAddNPCFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADD_NPC; }
-	static PacketSize_t maxSize() {
-		return szObjectID 
-			+ szBYTE + 40 + szNPCID
-			+ szSpriteType 
-			+ szColor + szColor
-			+ szCoord + szCoord + szDir;
-	}
-};
-struct Inv_GCAddNewItemToZoneFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADD_NEW_ITEM_TO_ZONE; }
-	static PacketSize_t maxSize() { return szObjectID + szCoord + szCoord + szBYTE + szItemType + szBYTE + 255 + szDurability + szItemNum + szBYTE +(szObjectID + szBYTE + szItemType + szItemNum + szSlotID)* 12; }
-};
-struct Inv_GCAddNicknameFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADD_NICKNAME; }
-	static PacketSize_t maxSize() { return NicknameInfo::getMaxSize(); }
-};
-struct Inv_GCAddOustersFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADD_OUSTERS; }
-	static PacketSize_t maxSize() { 
-		return PCOustersInfo3::getMaxSize() + EffectInfo::getMaxSize() + PetInfo::getMaxSize() + NicknameInfo::getMaxSize() + StoreOutlook::getMaxSize();
-	}
-};
-struct Inv_GCAddOustersCorpseFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADD_OUSTERS_CORPSE; }
-	static PacketSize_t maxSize() { return PCOustersInfo3::getMaxSize() + szBYTE; }
-};
-struct Inv_GCAddSlayerFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADD_SLAYER; }
-	static PacketSize_t maxSize() { 
-		return PCSlayerInfo3::getMaxSize() + EffectInfo::getMaxSize() + PetInfo::getMaxSize() + NicknameInfo::getMaxSize() + StoreOutlook::getMaxSize();
-	}
-};
-struct Inv_GCAddSlayerCorpseFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADD_SLAYER_CORPSE; }
-	static PacketSize_t maxSize() { 
-		return PCSlayerInfo3::getMaxSize() + szBYTE;
-	}
-};
-struct Inv_GCAddStoreItemFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADD_STORE_ITEM; }
-	static PacketSize_t maxSize() {
-		return szObjectID + szBYTE + StoreItemInfo::getMaxSize();
-	}
-};
-struct Inv_GCAddVampireFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADD_VAMPIRE; }
-	static PacketSize_t maxSize() { return PCVampireInfo3::getMaxSize() + EffectInfo::getMaxSize() + PetInfo::getMaxSize() + NicknameInfo::getMaxSize() + StoreOutlook::getMaxSize() + szBYTE; }
-};
-struct Inv_GCAddVampireCorpseFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADD_VAMPIRE_CORPSE; }
-	static PacketSize_t maxSize() { return PCVampireInfo3::getMaxSize() + szBYTE; }
-};
-struct Inv_GCAddVampireFromBurrowingFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADD_VAMPIRE_FROM_BURROWING; }
-	static PacketSize_t maxSize() { 
-		return PCVampireInfo3::getMaxSize() + EffectInfo::getMaxSize();
-	}
-};
-struct Inv_GCAddVampireFromTransformationFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADD_VAMPIRE_FROM_TRANSFORMATION; }
-	static PacketSize_t maxSize() { 
-		return PCVampireInfo3::getMaxSize() + EffectInfo::getMaxSize();
-	}
-};
-struct Inv_GCAddVampirePortalFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADD_VAMPIRE_PORTAL; }
-	static PacketSize_t maxSize() { 
-		return szObjectID + szBYTE + 20 + szDuration 
-			+ szCoord*2 + szZoneID + szCoord*2 + szBYTE;
-	}
-};
-struct Inv_GCAddWolfFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADD_WOLF; }
-	static PacketSize_t maxSize() {
-		return szObjectID 
-			+ szBYTE + 20 
-
-
-			+ szItemType
-			+ szCoord + szCoord + szDir
-			+ szHP*2
-			+ szGuildID
-			+ szColor
-			;
-	}
-};
-struct Inv_GCAddressListVerifyFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ADDRESS_LIST_VERIFY; }
-	static PacketSize_t maxSize() { return szBYTE + szDWORD; }
-};
-struct Inv_GCAttackFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ATTACK; }
-	static PacketSize_t maxSize() { return szObjectID + szCoord + szCoord + szDir ; }
-};
-struct Inv_GCAttackArmsOK1Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_ATTACK_ARMS_OK_1; }
-	static PacketSize_t maxSize() { return szSkillType + szObjectID + szBullet + szbool + ModifyInfo::getPacketMaxSize(); }
-};
-struct Inv_GCAttackArmsOK2Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_ATTACK_ARMS_OK_2; }
-	static PacketSize_t maxSize() { return szSkillType + szObjectID + ModifyInfo::getPacketMaxSize(); }
-};
-struct Inv_GCAttackArmsOK3Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_ATTACK_ARMS_OK_3; }
-	static PacketSize_t maxSize() { return szSkillType + szObjectID + szCoord*2; }
-};
-struct Inv_GCAttackArmsOK4Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_ATTACK_ARMS_OK_4; }
-	static PacketSize_t maxSize() { return szSkillType+szObjectID; }
-};
-struct Inv_GCAttackArmsOK5Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_ATTACK_ARMS_OK_5; }
-	static PacketSize_t maxSize() { return szSkillType+szObjectID + szObjectID+ szbool; }
-};
-struct Inv_GCAttackMeleeOK1Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_ATTACK_MELEE_OK_1; }
-	static PacketSize_t maxSize() { return szObjectID + ModifyInfo::getPacketMaxSize(); }
-};
-struct Inv_GCAttackMeleeOK2Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_ATTACK_MELEE_OK_2; }
-	static PacketSize_t maxSize() { return szObjectID + ModifyInfo::getPacketMaxSize(); }
-};
-struct Inv_GCAttackMeleeOK3Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_ATTACK_MELEE_OK_3; }
-	static PacketSize_t maxSize() { return szObjectID + szObjectID; }
-};
-struct Inv_GCAuthKeyFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_AUTH_KEY; }
-	static PacketSize_t maxSize() { return szDWORD; }
-};
-struct Inv_GCBloodBibleListFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_BLOOD_BIBLE_LIST; }
-	static PacketSize_t maxSize() {
-		return szBYTE
-			 + szItemType * 12;
-	}
-};
-struct Inv_GCBloodBibleSignInfoFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_BLOOD_BIBLE_SIGN_INFO; }
-	static PacketSize_t maxSize() {
-		return BloodBibleSignInfo::getMaxSize();
-	}
-};
-struct Inv_GCBloodBibleStatusFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_BLOOD_BIBLE_STATUS; }
-	static PacketSize_t maxSize() { 
-		return szItemType 
-				+ szZoneID 
-				+ szStorage 
-				+ szBYTE + 255
-				+ szRace 
-				+ szRace 
-				+ szZoneCoord + szZoneCoord;
-	}
-};
-struct Inv_GCBloodDrainOK1Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_BLOOD_DRAIN_OK_1; }
-	static PacketSize_t maxSize() { return szObjectID + ModifyInfo::getPacketMaxSize(); }
-};
-struct Inv_GCBloodDrainOK2Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_BLOOD_DRAIN_OK_2; }
-	static PacketSize_t maxSize() { return szObjectID + ModifyInfo::getPacketMaxSize(); }
-};
-struct Inv_GCBloodDrainOK3Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_BLOOD_DRAIN_OK_3; }
-	static PacketSize_t maxSize() { return szObjectID + szObjectID; }
-};
-struct Inv_GCCannotAddFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_CANNOT_ADD; }
-	static PacketSize_t maxSize() { return szObjectID; }
-};
-struct Inv_GCCannotUseFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_CANNOT_USE; }
-	static PacketSize_t maxSize() { return szObjectID; }
-};
-struct Inv_GCCastingSkillFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_CASTING_SKILL; }
-	static PacketSize_t maxSize() { return  szSkillType; }
-};
-struct Inv_GCChangeDarkLightFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_CHANGE_DARK_LIGHT; }
-	static PacketSize_t maxSize() { return szDarkLevel + szLightLevel; }
-};
-struct Inv_GCChangeShapeFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_CHANGE_SHAPE; }
-	static PacketSize_t maxSize() { return szObjectID + szBYTE + szItemType + szOptionType + szSpeed + szBYTE; }
-};
-struct Inv_GCChangeWeatherFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_CHANGE_WEATHER; }
-	static PacketSize_t maxSize() { return szWeather + szWeatherLevel; }
-};
-struct Inv_GCCreateItemFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_CREATE_ITEM; }
-	static PacketSize_t maxSize() { 
-		return szObjectID +  
-			szBYTE +         
-			szItemType +     
-			szBYTE + 255 +   
-			szDurability +   
-			szSilver +       
-			szGrade +        
-			szEnchantLevel + 
-			szItemNum +      
-			szCoordInven +   
-			szCoordInven;    
-	}
-};
-struct Inv_GCCreatureDiedFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_CREATURE_DIED; }
-	static PacketSize_t maxSize() { return szObjectID; }
-};
-struct Inv_GCCrossCounterOK1Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_CROSS_COUNTER_OK_1; }
-	static PacketSize_t maxSize() { return szObjectID + ModifyInfo::getPacketMaxSize() + szSkillType; }
-};
-struct Inv_GCCrossCounterOK2Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_CROSS_COUNTER_OK_2; }
-	static PacketSize_t maxSize() { return szObjectID + ModifyInfo::getPacketMaxSize() + szSkillType; }
-};
-struct Inv_GCCrossCounterOK3Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_CROSS_COUNTER_OK_3; }
-	static PacketSize_t maxSize() { return szObjectID + szObjectID + szSkillType; }
-};
-struct Inv_GCDeleteEffectFromTileFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_DELETE_EFFECT_FROM_TILE; }
-	static PacketSize_t maxSize() { return szObjectID + szCoord*2 + szEffectID ; }
-};
-struct Inv_GCDeleteInventoryItemFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_DELETE_INVENTORY_ITEM; }
-	static PacketSize_t maxSize() { 
-		return szObjectID; 
-	}
-};
-struct Inv_GCDeleteObjectFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_DELETE_OBJECT; }
-	static PacketSize_t maxSize() { 
-		return szObjectID; 
-	}
-};
-struct Inv_GCDeleteandPickUpOKFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_DELETE_AND_PICKUP_OK; }
-	static PacketSize_t maxSize() { return szObjectID; }
-};
-struct Inv_GCDisconnectFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_DISCONNECT; }
-	static PacketSize_t maxSize() { return szBYTE + 128 ; }
-};
-struct Inv_GCDownSkillFailedFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_DOWN_SKILL_FAILED; }
-	static PacketSize_t maxSize() { return szSkillType+szBYTE; }
-};
-struct Inv_GCDownSkillOKFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_DOWN_SKILL_OK; }
-	static PacketSize_t maxSize() { return szSkillType; }
-};
-struct Inv_GCDropItemToZoneFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_DROP_ITEM_TO_ZONE; }
-	static PacketSize_t maxSize() { return szObjectID + szCoord + szCoord + szBYTE + szItemType + szBYTE + 255 + szDurability + szItemNum + szBYTE +(szObjectID + szBYTE + szItemType + szItemNum + szSlotID)* 12 + szObjectID; }
-};
-struct Inv_GCEnterVampirePortalFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_ENTER_VAMPIRE_PORTAL; }
-	static PacketSize_t maxSize() { return szObjectID + szCoord*2; }
-};
-struct Inv_GCExchangeBuyFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_EXCHANGE_BUY; }
-	static PacketSize_t maxSize() { return 1 + 1 + GCExchangeBuy::kMaxMessage + 8; }
-};
-struct Inv_GCExchangeListFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_EXCHANGE_LIST; }
-	static PacketSize_t maxSize() {
-		
-		const PacketSize_t kMaxString = 1 + GCExchangeList::kMaxListingString;
-		const PacketSize_t kMaxListing =
-			  8 + 2					
-			+ kMaxString * 2		
-			+ 1 + 1 + 2 + 8			
-			+ 4 + 4 + 1 + 1			
-			+ kMaxString * 2		
-			+ 1 + 4					
-			+ kMaxString * 2		
-			+ 4						
-			+ kMaxString			
-			+ 1 + 2 + 4 + 2			
-			+ 1 + 1 + 1				
-			+ 2 + 2 + 2				
-			+ 4;					
-									
-		return 4 + 4 + 4 + 2 + kMaxListing * GCExchangeList::kMaxListingsPerPage;
-	}
-};
-struct Inv_GCExecuteElementFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_EXECUTE_ELEMENT; }
-	static PacketSize_t maxSize() { return szDWORD + szBYTE + szWORD; }
-};
-struct Inv_GCFakeMoveFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_FAKE_MOVE; }
-	static PacketSize_t maxSize() { return szObjectID + 2*szCoord ; }
-};
-struct Inv_GCFastMoveFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_FAST_MOVE; }
-	static PacketSize_t maxSize() { return szObjectID + 4*szCoord + szSkillType; }
-};
-struct Inv_GCFlagWarStatusFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_FLAG_WAR_STATUS; }
-	static PacketSize_t maxSize() { return szWORD + szBYTE * RACE_MAX; }
-};
-struct Inv_GCFriendChattingFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_FRIEND_CHATTING; }
-	static PacketSize_t maxSize() { return szDWORD + szBYTE + 32 + szWORD + 512 + szBYTE + szBYTE; }
-};
-struct Inv_GCGQuestInventoryFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_GQUEST_INVENTORY; }
-	static PacketSize_t maxSize() { return szBYTE + szItemType * MAX_GQUEST_INVENTORY_ITEM_NUM; }
-};
-struct Inv_GCGQuestStatusInfoFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_GQUEST_STATUS_INFO; }
-	static PacketSize_t maxSize() { return szBYTE + QuestStatusInfo::getMaxSize() * MAX_QUEST_NUM; }
-};
-struct Inv_GCGQuestStatusModifyFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_GQUEST_STATUS_MODIFY; }
-	static PacketSize_t maxSize() { return szBYTE + QuestStatusInfo::getMaxSize(); }
-};
-struct Inv_GCGetDamageFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_GET_DAMAGE; }
-	static PacketSize_t maxSize() { return szObjectID + szWORD; }
-};
-struct Inv_GCGetOffMotorCycleFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_GET_OFF_MOTORCYCLE; }
-	static PacketSize_t maxSize() { return szObjectID; }
-};
-struct Inv_GCGetOffMotorCycleFailedFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_GET_OFF_MOTORCYCLE_FAILED; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_GCGetOffMotorCycleOKFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_GET_OFF_MOTORCYCLE_OK; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_GCGlobalChatFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_GLOBAL_CHAT; }
-	static PacketSize_t maxSize() { return szuint + szBYTE + 128 + szBYTE ; }
-};
-struct Inv_GCGoodsListFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_GOODS_LIST; }
-	static PacketSize_t maxSize() { 
-		PacketSize_t size = szBYTE;
-		size += GoodsInfo::getPacketMaxSize() * MAX_GOODS_LIST;
-
-		return size;
-	}
-};
-struct Inv_GCGuildChatFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_GUILD_CHAT; }
-	static PacketSize_t maxSize() {
-		return szBYTE +
-			   szBYTE +
-			   20 +
-			   szBYTE +				
-			   10 +					
-			   szuint +				
-			   szBYTE +				
-			   128;					
-	}
-};
-struct Inv_GCGuildMemberListFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_GUILD_MEMBER_LIST; }
-	static PacketSize_t maxSize() { return  szBYTE + GuildMemberInfo::getMaxSize(); }
-};
-struct Inv_GCGuildResponseFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_GUILD_RESPONSE; }
-	static PacketSize_t maxSize() { return szWORD + szuint; }
-};
-struct Inv_GCHPRecoveryEndToOthersFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_HP_RECOVERY_END_TO_OTHERS; }
-	static PacketSize_t maxSize() { 
-		return szObjectID + szHP; 
-	}
-};
-struct Inv_GCHPRecoveryEndToSelfFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_HP_RECOVERY_END_TO_SELF; }
-	static PacketSize_t maxSize() { 
-		return szHP; 
-	}
-};
-struct Inv_GCHPRecoveryStartToOthersFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_HP_RECOVERY_START_TO_OTHERS; }
-	static PacketSize_t maxSize() { return szObjectID + szBYTE + szHP + szHP; }
-};
-struct Inv_GCHPRecoveryStartToSelfFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_HP_RECOVERY_START_TO_SELF; }
-	static PacketSize_t maxSize() { return szBYTE + szHP + szHP; }
-};
-struct Inv_GCHolyLandBonusInfoFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_HOLY_LAND_BONUS_INFO; }
-	static PacketSize_t maxSize() { return szBYTE + BloodBibleBonusInfo::getMaxSize()*12; }
-};
-struct Inv_GCKickMessageFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_KICK_MESSAGE; }
-	static PacketSize_t maxSize() { return szBYTE + szuint; }
-};
-struct Inv_GCKnockBackFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_KNOCK_BACK; }
-	static PacketSize_t maxSize() { return szObjectID + szZoneCoord*4; }
-};
-struct Inv_GCKnocksTargetBackOK1Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_KNOCKS_TARGET_BACK_OK_1; }
-	static PacketSize_t maxSize() { return szSkillType + szDir + szCoord*2 + szObjectID + szBullet + szbool + ModifyInfo::getPacketMaxSize(); }
-};
-struct Inv_GCKnocksTargetBackOK2Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_KNOCKS_TARGET_BACK_OK_2; }
-	static PacketSize_t maxSize() { return szSkillType + szCoord*2 + szDir + szObjectID + ModifyInfo::getPacketMaxSize(); }
-};
-struct Inv_GCKnocksTargetBackOK4Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_KNOCKS_TARGET_BACK_OK_4; }
-	static PacketSize_t maxSize() { return szObjectID + szSkillType + szDir + szCoord*2; }
-};
-struct Inv_GCKnocksTargetBackOK5Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_KNOCKS_TARGET_BACK_OK_5; }
-	static PacketSize_t maxSize() { return szObjectID + szObjectID+ szbool + szSkillType + szCoord*2 + szDir; }
-};
-struct Inv_GCLearnSkillFailedFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_LEARN_SKILL_FAILED; }
-	static PacketSize_t maxSize() { return szSkillType+szBYTE; }
-};
-struct Inv_GCLearnSkillOKFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_LEARN_SKILL_OK; }
-	static PacketSize_t maxSize() { return szSkillType+szSkillDomainType; }
-};
-struct Inv_GCLearnSkillReadyFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_LEARN_SKILL_READY; }
-	static PacketSize_t maxSize() { return szSkillDomainType;}
-};
-struct Inv_GCLightningFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_LIGHTNING; }
-	static PacketSize_t maxSize() { return szBYTE; }
-};
-struct Inv_GCMPRecoveryEndFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_MP_RECOVERY_END; }
-	static PacketSize_t maxSize() { 
-		return szMP; 
-	}
-};
-struct Inv_GCMPRecoveryStartFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_MP_RECOVERY_START; }
-	static PacketSize_t maxSize() { return szBYTE + szMP + szMP; }
-};
-struct Inv_GCMakeItemFailFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_MAKE_ITEM_FAIL; }
-	static PacketSize_t maxSize() { return 255 + ModifyInfo::getPacketMaxSize(); }
-};
-struct Inv_GCMakeItemOKFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_MAKE_ITEM_OK; }
-	static PacketSize_t maxSize() { return  255 + 255 + ModifyInfo::getPacketMaxSize(); }
-};
-struct Inv_GCMineExplosionOK1Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_MINE_EXPLOSION_OK_1; }
-	static PacketSize_t maxSize() { return szCoord*2 + szDir + szItemType
-	   + szBYTE + szWORD + szObjectID + ModifyInfo::getPacketMaxSize(); }
-};
-struct Inv_GCMineExplosionOK2Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_MINE_EXPLOSION_OK_2; }
-	static PacketSize_t maxSize() { return szCoord*2 + szDir + szItemType 
-		+ szBYTE + szWORD + szObjectID + 255; }
-};
-struct Inv_GCMiniGameScoresFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_MINI_GAME_SCORES; }
-	static PacketSize_t maxSize() { return szBYTE + szBYTE + szBYTE + (szWORD+21) * 10; }
-};
-struct Inv_GCModifyGuildMemberInfoFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_MODIFY_GUILD_MEMBER_INFO; }
-	static PacketSize_t maxSize() { return szGuildID + szBYTE + 30 + szGuildMemberRank; }
-};
-struct Inv_GCModifyInformationFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_MODIFY_INFORMATION; }
-	static PacketSize_t maxSize() { return ModifyInfo::getPacketMaxSize(); }
-};
-struct Inv_GCModifyNicknameFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_MODIFY_NICKNAME; }
-	static PacketSize_t maxSize() { return szObjectID + NicknameInfo::getMaxSize(); }
-};
-struct Inv_GCMonsterKillQuestInfoFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_MONSTER_KILL_QUEST_INFO; }
-	static PacketSize_t maxSize() {
-		return szBYTE
-			 + GCMonsterKillQuestInfo::szQuestInfo * maxQuestNum;
-	}
-};
-struct Inv_GCMorph1Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_MORPH_1; }
-	static PacketSize_t maxSize() { 
-		return szBYTE + PCSlayerInfo2::getMaxSize() 
-			+ InventoryInfo::getMaxSize()
-			+ GearInfo::getMaxSize()
-			+ ExtraInfo::getMaxSize()
-			;
-	}
-};
-struct Inv_GCMorphSlayer2Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_MORPH_SLAYER_2; }
-	static PacketSize_t maxSize() { 
-		return PCSlayerInfo3::getMaxSize();
-	}
-};
-struct Inv_GCMorphVampire2Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_MORPH_VAMPIRE_2; }
-	static PacketSize_t maxSize() { 
-		return PCVampireInfo3::getMaxSize();
-	}
-};
-struct Inv_GCMoveFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_MOVE; }
-	static PacketSize_t maxSize() { return szObjectID + szCoord + szCoord + szDir ; }
-};
-struct Inv_GCMoveErrorFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_MOVE_ERROR; }
-	static PacketSize_t maxSize() { return szCoord + szCoord; }
-};
-struct Inv_GCMoveOKFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_MOVE_OK; }
-	static PacketSize_t maxSize() { return szCoord + szCoord + szDir; }
-};
-struct Inv_GCMyStoreInfoFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_MY_STORE_INFO; }
-	static PacketSize_t maxSize() {
-		return szBYTE + StoreInfo::getMaxSize();
-	}
-};
-struct Inv_GCNPCAskFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_NPC_ASK; }
-	static PacketSize_t maxSize() { return szObjectID + szScriptID + szNPCID; }
-};
-struct Inv_GCNPCAskDynamicFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_NPC_ASK_DYNAMIC; }
-	static PacketSize_t maxSize() { 
-		PacketSize_t size = 0;
-
-		size += szObjectID;          
-		size += szScriptID;          
-		size += szWORD + 1024;       
-		size += szWORD * 10 + 10240; 
-
-		return size;
-	}
-};
-struct Inv_GCNPCAskVariableFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_NPC_ASK_VARIABLE; }
-	static PacketSize_t maxSize() {
-		return szObjectID
-			 + szScriptID
-			 + szBYTE
-			 + ScriptParameter::getMaxSize() * 255;
-	}
-};
-struct Inv_GCNPCInfoFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_NPC_INFO; }
-	static PacketSize_t maxSize() { 
-		PacketSize_t size = 0;
-
-		size += szBYTE;
-		size += NPCInfo::getMaxSize()* 255;
-
-		return size;
-	}
-};
-struct Inv_GCNPCResponseFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_NPC_RESPONSE; }
-	static PacketSize_t maxSize() { return szWORD + szuint; }
-};
-struct Inv_GCNPCSayFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_NPC_SAY; }
-	static PacketSize_t maxSize() { return szObjectID + szScriptID + szBYTE; }
-};
-struct Inv_GCNPCSayDynamicFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_NPC_SAY_DYNAMIC; }
-	static PacketSize_t maxSize() { return szObjectID + szBYTE + 2048 ; }
-};
-struct Inv_GCNicknameListFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_NICKNAME_LIST; }
-	static PacketSize_t maxSize() { return szBYTE + NicknameInfo::getMaxSize() * MAX_NICKNAME_NUM; }
-};
-struct Inv_GCNicknameVerifyFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_NICKNAME_VERIFY; }
-	static PacketSize_t maxSize() { return szBYTE + szuint; }
-};
-struct Inv_GCNoticeEventFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_NOTICE_EVENT; }
-	static PacketSize_t maxSize() { return szWORD + szuint; }
-};
-struct Inv_GCNotifyWinFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_NOTIFY_WIN; }
-	static PacketSize_t maxSize() { return szDWORD + szBYTE + 2048 ; }
-};
-struct Inv_GCOtherGuildNameFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_OTHER_GUILD_NAME; }
-	static PacketSize_t maxSize() { return szObjectID + szGuildID + szBYTE + 30; }
-};
-struct Inv_GCOtherModifyInfoFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_OTHER_MODIFY_INFO; }
-	static PacketSize_t maxSize() { return szObjectID + ModifyInfo::getPacketMaxSize(); }
-};
-struct Inv_GCOtherStoreInfoFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_OTHER_STORE_INFO; }
-	static PacketSize_t maxSize() {
-		return szObjectID + StoreInfo::getMaxSize() + szBYTE;
-	}
-};
-struct Inv_GCPartyErrorFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_PARTY_ERROR; }
-	static PacketSize_t maxSize() { return szBYTE + szObjectID; }
-};
-struct Inv_GCPartyInviteFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_PARTY_INVITE; }
-	static PacketSize_t maxSize() { return szBYTE + szObjectID; }
-};
-struct Inv_GCPartyJoinedFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_PARTY_JOINED; }
-	static PacketSize_t maxSize() { return szBYTE + PARTY_MEMBER_INFO_MAX_SIZE * 6; }
-};
-struct Inv_GCPartyLeaveFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_PARTY_LEAVE; }
-	static PacketSize_t maxSize() { return szBYTE*2 + 20; }
-};
-struct Inv_GCPartyPositionFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_PARTY_POSITION; }
-	static PacketSize_t maxSize() { return szBYTE + 20 + szZoneID + szZoneCoord*2+ szHP*2; }
-};
-struct Inv_GCPartySayFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_PARTY_SAY; }
-	static PacketSize_t maxSize() { return szBYTE + 20 + szBYTE + 128 + szuint; }
-};
-struct Inv_GCPetInfoFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_PET_INFO; }
-	static PacketSize_t maxSize() { return szObjectID + PetInfo::getMaxSize(); }
-};
-struct Inv_GCPetStashListFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_PET_STASH_LIST; }
-	static PacketSize_t maxSize() { return szBYTE + PetStashItemInfo::getPacketMaxSize() * MAX_PET_STASH; }
-};
-struct Inv_GCPetStashVerifyFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_PET_STASH_VERIFY; }
-	static PacketSize_t maxSize() { return szBYTE; }
-};
-struct Inv_GCPetUseSkillFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_PET_USE_SKILL; }
-	static PacketSize_t maxSize() { return szObjectID + szObjectID; }
-};
-struct Inv_GCPhoneConnectedFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_PHONE_CONNECTED; }
-	static PacketSize_t maxSize() { return szPhoneNumber + szSlotID + szBYTE + 20; }
-};
-struct Inv_GCPhoneConnectionFailedFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_PHONE_CONNECTION_FAILED; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_GCPhoneDisconnectedFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_PHONE_DISCONNECTED; }
-	static PacketSize_t maxSize() { return szPhoneNumber + szSlotID; }
-};
-struct Inv_GCPhoneSayFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_PHONE_SAY; }
-	static PacketSize_t maxSize() { return szSlotID + szBYTE + 128 ; }
-};
-struct Inv_GCQuestStatusFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_QUEST_STATUS; }
-	static PacketSize_t maxSize() { return szWORD + szWORD + szDWORD; }
-};
-struct Inv_GCRankBonusInfoFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_RANK_BONUS_INFO; }
-	static PacketSize_t maxSize() { 
-		return szBYTE + ( szDWORD * 100 );
-	}
-};
-struct Inv_GCRealWearingInfoFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_REAL_WEARING_INFO; }
-	static PacketSize_t maxSize() { return szDWORD; }
-};
-struct Inv_GCReconnectFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_RECONNECT; }
-	static PacketSize_t maxSize() {
-		return szBYTE + 20 		 		
-			+ szPCType 					
-			+ szBYTE + 15			 	
-			+ szDWORD; 					
-	}
-};
-struct Inv_GCReconnectLoginFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_RECONNECT_LOGIN; }
-	static PacketSize_t maxSize() { 
-		return szBYTE + 15 	
-			+ szuint		
-			+ szDWORD; 		
-	}
-};
-struct Inv_GCRegenZoneStatusFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_REGEN_ZONE_STATUS; }
-	static PacketSize_t maxSize() { return szBYTE * 8; }
-};
-struct Inv_GCReloadOKFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_RELOAD_OK; }
-	static PacketSize_t maxSize() { return szBullet; }
-};
-struct Inv_GCRemoveCorpseHeadFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_REMOVE_CORPSE_HEAD; }
-	static PacketSize_t maxSize() { 
-		return szObjectID; 
-	}
-};
-struct Inv_GCRemoveEffectFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_REMOVE_EFFECT; }
-	static PacketSize_t maxSize() { return 255;}
-};
-struct Inv_GCRemoveFromGearFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_REMOVE_FROM_GEAR; }
-	static PacketSize_t maxSize() { return szSlotID; }
-};
-struct Inv_GCRemoveInjuriousCreatureFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_REMOVE_INJURIOUS_CREATURE; }
-	static PacketSize_t maxSize() { return szBYTE + 10; }
-};
-struct Inv_GCRemoveStoreItemFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_REMOVE_STORE_ITEM; }
-	static PacketSize_t maxSize() {
-		return szObjectID + szBYTE;
-	}
-};
-struct Inv_GCRequestFailedFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_REQUEST_FAILED; }
-	static PacketSize_t maxSize() { return szBYTE + szBYTE + 10; }
-};
-struct Inv_GCRequestPowerPointResultFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_REQUEST_POWER_POINT_RESULT; }
-	static PacketSize_t maxSize() { return szBYTE + szint + szint; }
-};
-struct Inv_GCRequestedIPFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_REQUESTED_IP; }
-	static PacketSize_t maxSize() { return szBYTE + szuint + 10 + 4;}
-};
-struct Inv_GCRideMotorCycleFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_RIDE_MOTORCYCLE; }
-	static PacketSize_t maxSize() { return szObjectID + szObjectID ; }
-};
-struct Inv_GCRideMotorCycleFailedFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_RIDE_MOTORCYCLE_FAILED; }
-	static PacketSize_t maxSize() { return szObjectID; }
-};
-struct Inv_GCRideMotorCycleOKFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_RIDE_MOTORCYCLE_OK; }
-	static PacketSize_t maxSize() { return szObjectID; }
-};
-struct Inv_GCRingFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_RING; }
-	static PacketSize_t maxSize() { return szPhoneNumber + szSlotID + szBYTE + 20; }
-};
-struct Inv_GCSMSAddressListFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SMS_ADDRESS_LIST; }
-	static PacketSize_t maxSize() { return szBYTE + AddressUnit::getMaxPacketSize() * MAX_ADDRESS_NUM; }
-};
-struct Inv_GCSayFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SAY; }
-	static PacketSize_t maxSize() { return szObjectID + szuint + szBYTE + 128 ; }
-};
-struct Inv_GCSearchMotorcycleFailFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SEARCH_MOTORCYCLE_FAIL; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_GCSearchMotorcycleOKFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SEARCH_MOTORCYCLE_OK; }
-	static PacketSize_t maxSize() { return szZoneID + szCoord*2; }
-};
-struct Inv_GCSelectQuestIDFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SELECT_QUEST_ID; }
-	static PacketSize_t maxSize() {
-		return szBYTE
-			 + szQuestID * maxQuestNum;
-	}
-};
-struct Inv_GCSelectRankBonusFailedFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SELECT_RANK_BONUS_FAILED; }
-	static PacketSize_t maxSize() { return szDWORD + szBYTE; }
-};
-struct Inv_GCSelectRankBonusOKFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SELECT_RANK_BONUS_OK; }
-	static PacketSize_t maxSize() { return szDWORD; }
-};
-struct Inv_GCSetPositionFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SET_POSITION; }
-	static PacketSize_t maxSize() { return szCoord + szCoord + szDir; }
-};
-struct Inv_GCShopBoughtFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SHOP_BOUGHT; }
-	static PacketSize_t maxSize() { 
-		return szObjectID +  
-			szShopVersion +  
-			szShopRackType + 
-			szBYTE +         
-   		 	szObjectID +     
-			szBYTE +         
-			szItemType +     
-			szBYTE + 255 +   
-			szDurability +   
-			szSilver +       
-			szGrade +       
-			szEnchantLevel;  
-	}
-};
-struct Inv_GCShopBuyFailFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SHOP_BUY_FAIL; }
-	static PacketSize_t maxSize() { return szObjectID; }
-};
-struct Inv_GCShopBuyOKFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SHOP_BUY_OK; }
-	static PacketSize_t maxSize() { 
-		return szObjectID +  
-			szShopVersion +  
-			szObjectID +     
-			szBYTE +         
-			szItemType +     
-			szBYTE + 255 +   
-			szDurability +   
-			szItemNum +      
-			szSilver +       
-			szGrade +        
-			szEnchantLevel + 
-			szPrice;         
-	}
-};
-struct Inv_GCShopListFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SHOP_LIST; }
-	static PacketSize_t maxSize() { 
-		PacketSize_t unit = 0;
-		unit += szBYTE;         
-		unit += szObjectID;     
-		unit += szBYTE;         
-		unit += szItemType;     
-		unit += szBYTE + 255;   
-		unit += szDurability;   
-		unit += szSilver;       
-		unit += szGrade;        
-		unit += szEnchantLevel; 
-
-		return szObjectID +               
-		       szShopVersion +            
-		       szShopRackType +           
-		       szBYTE +                   
-		       unit*SHOP_RACK_INDEX_MAX + 
-			   szMarketCond*2 +           
-			   szBYTE;                    
-	}
-};
-struct Inv_GCShopListMysteriousFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SHOP_LIST_MYSTERIOUS; }
-	static PacketSize_t maxSize() { 
-		PacketSize_t unit_size = szBYTE + szItemType;
-		PacketSize_t rValue    = 0; 
-
-		rValue += szObjectID;                    
-		rValue += szShopVersion;                 
-		rValue += szShopRackType;                
-		rValue += szBYTE;                        
-		rValue += unit_size*SHOP_RACK_INDEX_MAX; 
-		rValue += szMarketCond*2;                
-
-		return rValue;
-	}
-};
-struct Inv_GCShopMarketConditionFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SHOP_MARKET_CONDITION; }
-	static PacketSize_t maxSize() { return szObjectID + szMarketCond*2; }
-};
-struct Inv_GCShopSellFailFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SHOP_SELL_FAIL; }
-	static PacketSize_t maxSize() { return szObjectID; }
-};
-struct Inv_GCShopSellOKFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SHOP_SELL_OK; }
-	static PacketSize_t maxSize() { 
-		return szObjectID + szShopVersion + szObjectID + szPrice;
-	}
-};
-struct Inv_GCShopSoldFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SHOP_SOLD; }
-	static PacketSize_t maxSize() { return szObjectID + szShopVersion + szShopRackType + szBYTE; }
-};
-struct Inv_GCShopVersionFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SHOP_VERSION; }
-	static PacketSize_t maxSize() { return szObjectID + szShopVersion*3+ szMarketCond; }
-};
-struct Inv_GCShowGuildInfoFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SHOW_GUILD_INFO; }
-	static PacketSize_t maxSize() {
-		return szGuildID +		
-			   szBYTE +			
-			   30 +				
-			   szGuildState +	
-			   szBYTE +			
-			   20 +				
-			   szBYTE +			
-			   szBYTE +			
-			   256 +			
-			   szGold;			
-	}
-};
-struct Inv_GCShowGuildJoinFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SHOW_GUILD_JOIN; }
-	static PacketSize_t maxSize() {
-		return szGuildID +
-			   szBYTE +
-			   30 +
-			   szGuildMemberRank +
-			   szGold;
-	}
-};
-struct Inv_GCShowGuildMemberInfoFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SHOW_GUILD_MEMBER_INFO; }
-	static PacketSize_t maxSize() {
-		return szGuildID +					
-			   szBYTE +						
-			   20 +							
-			   szGuildMemberRank +			
-			   szBYTE +						
-			   256;							
-	}
-};
-struct Inv_GCShowMessageBoxFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SHOW_MESSAGE_BOX; }
-	static PacketSize_t maxSize() { return szBYTE + 256; }
-};
-struct Inv_GCShowUnionInfoFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SHOW_UNION_INFO; }
-	static PacketSize_t maxSize() { return SingleGuildInfo::getMaxSize() * 4; }
-};
-struct Inv_GCShowWaitGuildInfoFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SHOW_WAIT_GUILD_INFO; }
-	static PacketSize_t maxSize() {
-		return szGuildID +		
-			   szBYTE +			
-			   30 +				
-			   szGuildState +	
-			   szBYTE +			
-			   20 +				
-			   szBYTE +			
-			   szBYTE +			
-			   256 +			
-			   szGold +			
-			   szBYTE +			
-			   ( szBYTE + 20 ) * 5;		
-	}
-};
-struct Inv_GCSkillFailed1Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_SKILL_FAILED_1; }
-	static PacketSize_t maxSize() { return szSkillType + ModifyInfo::getPacketMaxSize() + szBYTE; }
-};
-struct Inv_GCSkillFailed2Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_SKILL_FAILED_2; }
-	static PacketSize_t maxSize() { return  szObjectID + szObjectID + szSkillType + szBYTE; }
-};
-struct Inv_GCSkillInfoFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SKILL_INFO; }
-	static PacketSize_t maxSize() { 
-		return SlayerSkillInfo::getMaxSize();
-	}
-};
-struct Inv_GCSkillToInventoryOK1Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_SKILL_TO_INVENTORY_OK_1; }
-	static PacketSize_t maxSize() { return szSkillType + szObjectID + szItemType + szCEffectID + szCoord * 2
-			+ szDuration + ModifyInfo::getPacketMaxSize(); }
-};
-struct Inv_GCSkillToInventoryOK2Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_SKILL_TO_INVENTORY_OK_2; }
-	static PacketSize_t maxSize() { return szSkillType + szObjectID + szDuration; }
-};
-struct Inv_GCSkillToObjectOK1Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_SKILL_TO_OBJECT_OK_1; }
-	static PacketSize_t maxSize() { return szSkillType + szCEffectID + szObjectID + szDuration + szBYTE + ModifyInfo::getPacketMaxSize(); }
-};
-struct Inv_GCSkillToObjectOK2Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_SKILL_TO_OBJECT_OK_2; }
-	static PacketSize_t maxSize() { return szObjectID+ szSkillType + szDuration + szBYTE + ModifyInfo::getPacketMaxSize(); }
-};
-struct Inv_GCSkillToObjectOK3Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_SKILL_TO_OBJECT_OK_3; }
-	static PacketSize_t maxSize() { return szObjectID + szSkillType + szCoord*2 + szBYTE; }
-};
-struct Inv_GCSkillToObjectOK4Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_SKILL_TO_OBJECT_OK_4; }
-	static PacketSize_t maxSize() { return szObjectID + szSkillType + szDuration + szBYTE; }
-};
-struct Inv_GCSkillToObjectOK5Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_SKILL_TO_OBJECT_OK_5; }
-	static PacketSize_t maxSize() { return szObjectID + szSkillType + szObjectID + szDuration + szBYTE; }
-};
-struct Inv_GCSkillToObjectOK6Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_SKILL_TO_OBJECT_OK_6; }
-	static PacketSize_t maxSize() { return szCoord*2+ szSkillType + szDuration + szBYTE + ModifyInfo::getPacketMaxSize(); }
-};
-struct Inv_GCSkillToSelfOK1Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_SKILL_TO_SELF_OK_1; }
-	static PacketSize_t maxSize() { return szSkillType + szCEffectID + szDuration + szBYTE + ModifyInfo::getPacketMaxSize(); }
-};
-struct Inv_GCSkillToSelfOK2Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_SKILL_TO_SELF_OK_2; }
-	static PacketSize_t maxSize() { return szObjectID + szSkillType + szDuration + szBYTE; }
-};
-struct Inv_GCSkillToSelfOK3Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_SKILL_TO_SELF_OK_3; }
-	static PacketSize_t maxSize() { return szCoord*2 + szSkillType + szDuration + szBYTE; }
-};
-struct Inv_GCSkillToTileOK1Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_SKILL_TO_TILE_OK_1; }
-	static PacketSize_t maxSize() { return szSkillType + szCEffectID + szCoord* 2
-			+ szDuration + szBYTE + szBYTE + +szRange + szWORD + szObjectID + szBYTE + ModifyInfo::getPacketMaxSize(); }
-};
-struct Inv_GCSkillToTileOK2Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_SKILL_TO_TILE_OK_2; }
-	static PacketSize_t maxSize() { return szObjectID + szSkillType + szCoord*2 + szRange + szDuration + 
-			szBYTE + szWORD + szObjectID + szBYTE + ModifyInfo::getPacketMaxSize(); }
-};
-struct Inv_GCSkillToTileOK3Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_SKILL_TO_TILE_OK_3; }
-	static PacketSize_t maxSize() { return szSkillType + szObjectID +(szCoord* 2) + szBYTE; }
-};
-struct Inv_GCSkillToTileOK4Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_SKILL_TO_TILE_OK_4; }
-	static PacketSize_t maxSize() { return szSkillType + szCoord*2 + szRange + szDuration + 
-			szBYTE + szWORD + szObjectID + 255 + szBYTE; }
-};
-struct Inv_GCSkillToTileOK5Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_SKILL_TO_TILE_OK_5; }
-	static PacketSize_t maxSize() { return szObjectID + szSkillType + szCoord*2 + szRange + szDuration + 
-			szBYTE + szWORD + szObjectID + 255 + szBYTE; }
-};
-struct Inv_GCSkillToTileOK6Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_SKILL_TO_TILE_OK_6; }
-	static PacketSize_t maxSize() { return szCoord*2 + szSkillType + szCoord*2 + szRange + szDuration + 
-			szBYTE + szWORD + szObjectID + szBYTE + ModifyInfo::getPacketMaxSize(); }
-};
-struct Inv_GCStashListFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_STASH_LIST; }
-	static PacketSize_t maxSize() { 
-		PacketSize_t size = 0;
-		PacketSize_t unit_size = 
-			szBYTE*2 +                  
-			
-			STASHITEM::getPacketMaxSize() +
-			szBYTE +                    
-			SubItemInfo::getSize()* 8; 
-		
-		size += szBYTE; 
-		size += szBYTE; 
-		size += unit_size* STASH_RACK_MAX* STASH_INDEX_MAX; 
-		size += szGold; 
-
-		return size;
-	}
-};
-struct Inv_GCStashSellFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_STASH_SELL; }
-	static PacketSize_t maxSize() { return szGold; }
-};
-struct Inv_GCStatusCurrentHPFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_STATUS_CURRENT_HP; }
-	static PacketSize_t maxSize() { 
-		return szObjectID + szHP; 
-	}
-};
-struct Inv_GCSubInventoryInfoFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SUB_INVENTORY_INFO; }
-	static PacketSize_t maxSize() { return szObjectID + InventoryInfo::getMaxSize(); }
-};
-struct Inv_GCSweeperBonusInfoFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SWEEPER_BONUS_INFO; }
-	static PacketSize_t maxSize() { return szBYTE + SweeperBonusInfo::getMaxSize() * 12 ; }
-};
-struct Inv_GCSystemAvailabilitiesFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SYSTEM_AVAILABILITIES; }
-	static PacketSize_t maxSize() { return szDWORD + szBYTE * 2; }
-};
-struct Inv_GCSystemMessageFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_SYSTEM_MESSAGE; }
-	static PacketSize_t maxSize() { return szBYTE + 256 + szuint + szBYTE; }
-};
-struct Inv_GCTakeOffFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_TAKE_OFF; }
-	static PacketSize_t maxSize() { return szBYTE + szObjectID; }
-};
-struct Inv_GCTakeOutFailFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_TAKE_OUT_FAIL; }
-	static PacketSize_t maxSize() { return szObjectID; }
-};
-struct Inv_GCTakeOutOKFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_TAKE_OUT_OK; }
-	static PacketSize_t maxSize() { return szObjectID; }
-};
-struct Inv_GCTeachSkillInfoFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_TEACH_SKILL_INFO; }
-	static PacketSize_t maxSize() { return szSkillDomainType+szSkillLevel; }
-};
-struct Inv_GCThrowBombOK1Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_THROW_BOMB_OK_1; }
-	static PacketSize_t maxSize() { return szCoord * 2
-			+ szBYTE + szBYTE + +szDir + szItemType + szWORD + szObjectID + ModifyInfo::getPacketMaxSize(); }
-};
-struct Inv_GCThrowBombOK2Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_THROW_BOMB_OK_2; }
-	static PacketSize_t maxSize() { return szObjectID + szCoord*2 + szDir + szItemType
-			+ szBYTE + szWORD + szObjectID + ModifyInfo::getPacketMaxSize(); }
-};
-struct Inv_GCThrowBombOK3Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_THROW_BOMB_OK_3; }
-	static PacketSize_t maxSize() { return szObjectID + szCoord*2 + szDir + szItemType 
-	   + szBYTE + szWORD + szObjectID + 255; }
-};
-struct Inv_GCThrowItemOK1Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_THROW_ITEM_OK_1; }
-	static PacketSize_t maxSize() { return szObjectID; }
-};
-struct Inv_GCThrowItemOK2Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_THROW_ITEM_OK_2; }
-	static PacketSize_t maxSize() { return szObjectID + ModifyInfo::getPacketMaxSize(); }
-};
-struct Inv_GCThrowItemOK3Factory {
-	static PacketID_t id() { return Packet::PACKET_GC_THROW_ITEM_OK_3; }
-	static PacketSize_t maxSize() { return szObjectID + szObjectID; }
-};
-struct Inv_GCTimeLimitItemInfoFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_TIME_LIMIT_ITEM_INFO; }
-	static PacketSize_t maxSize() { return szBYTE + MAX_TIME_LIMIT_ITEM_INFO * ( szObjectID + szDWORD ); }
-};
-struct Inv_GCTradeAddItemFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_TRADE_ADD_ITEM; }
-	static PacketSize_t maxSize() { 
-		PacketSize_t size = 0;
-		size += szObjectID;                   
-		size += szCoordInven;                 
-		size += szCoordInven;                 
-		size += szObjectID;                   
-		size += szBYTE;                       
-		size += szItemType;                   
-		size += szBYTE + 255;                 
-		size += szDurability;                 
-		size += szItemNum;                    
-		size += szSilver;                     
-		size += szGrade;                      
-		size += szEnchantLevel;               
-		size += szBYTE;                       
-		size +=(SubItemInfo::getSize()* 8); 
-		return size;
-	}
-};
-struct Inv_GCTradeErrorFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_TRADE_ERROR; }
-	static PacketSize_t maxSize() { return szObjectID + szBYTE; }
-};
-struct Inv_GCTradeFinishFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_TRADE_FINISH; }
-	static PacketSize_t maxSize() { return szObjectID + szBYTE; }
-};
-struct Inv_GCTradeMoneyFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_TRADE_MONEY; }
-	static PacketSize_t maxSize() { return szObjectID + szGold + szBYTE; }
-};
-struct Inv_GCTradePrepareFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_TRADE_PREPARE; }
-	static PacketSize_t maxSize() { return szObjectID + szBYTE; }
-};
-struct Inv_GCTradeRemoveItemFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_TRADE_REMOVE_ITEM; }
-	static PacketSize_t maxSize() { return szObjectID*2; }
-};
-struct Inv_GCTradeVerifyFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_TRADE_VERIFY; }
-	static PacketSize_t maxSize() { return szBYTE; }
-};
-struct Inv_GCUnburrowFailFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_UNBURROW_FAIL; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_GCUnburrowOKFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_UNBURROW_OK; }
-	static PacketSize_t maxSize() { return szCoord + szCoord + szDir; }
-};
-struct Inv_GCUnionOfferListFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_UNION_OFFER_LIST; }
-	static PacketSize_t maxSize() { return SingleGuildUnionOffer::getMaxSize() * 20; }
-};
-struct Inv_GCUntransformFailFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_UNTRANSFORM_FAIL; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_GCUntransformOKFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_UNTRANSFORM_OK; }
-	static PacketSize_t maxSize() { return szCoord + szCoord + szDir; }
-};
-struct Inv_GCUpdateInfoFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_UPDATE_INFO; }
-	static PacketSize_t maxSize() { 
-		PacketSize_t size = 0;
-
-		size += szBYTE;
-		size += PCSlayerInfo2::getMaxSize();
-		size += InventoryInfo::getMaxSize();
-		size += GearInfo::getMaxSize();
-		size += ExtraInfo::getMaxSize();
-		size += EffectInfo::getMaxSize();
-		size += szBYTE;
-		size += RideMotorcycleInfo::getMaxSize();
-		size += szZoneID;
-		size += szCoord;
-		size += szCoord;
-		size += GameTime::getMaxSize();
-		size += szWeather;
-		size += szWeatherLevel;
-		size += szDarkLevel;
-		size += szLightLevel;
-		size += szBYTE;
-		size += szNPCType* maxNPCPerZone;
-		size += szBYTE;
-		size += szMonsterType* maxMonsterPerZone; 
-
-		size += szBYTE;
-		size += NPCInfo::getMaxSize()* 255;
-		
-		size += szBYTE;
-		
-		size += szBYTE;
-
-		size += szDWORD;
-		size += NicknameInfo::getMaxSize();
-
-		size += szBYTE; 
-
-		
-		size += sizeof(uint);
-		size += szBYTE;
-
-		
-		size += BloodBibleSignInfo::getMaxSize();
-
-		
-		size += sizeof(uint);
-		return size;
-	}
-};
-struct Inv_GCUseBonusPointFailFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_USE_BONUS_POINT_FAIL; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_GCUseBonusPointOKFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_USE_BONUS_POINT_OK; }
-	static PacketSize_t maxSize() { return ModifyInfo::getPacketMaxSize(); }
-};
-struct Inv_GCUseOKFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_USE_OK; }
-	static PacketSize_t maxSize() { return ModifyInfo::getPacketMaxSize(); }
-};
-struct Inv_GCUseSkillCardOKFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_USE_SKILLCARD_OK; }
-	static PacketSize_t maxSize() { return szBYTE; }
-};
-struct Inv_GCUsePowerPointResultFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_USE_POWER_POINT_RESULT; }
-	static PacketSize_t maxSize() { return szBYTE + szBYTE + szDWORD; }
-};
-struct Inv_GCVisibleFailFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_VISIBLE_FAIL; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_GCVisibleOKFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_VISIBLE_OK; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_GCWaitGuildListFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_WAIT_GUILD_LIST; }
-	static PacketSize_t maxSize() { return szWORD + (GuildInfo::getMaxSize() * 5000); }
-};
-struct Inv_GCWarListFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_WAR_LIST; }
-	static PacketSize_t maxSize() { return (RaceWarInfo::getMaxSize() + GuildWarInfo::getMaxSize()) * 12; }
-};
-struct Inv_GCWarScheduleListFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_WAR_SCHEDULE_LIST; }
-	static PacketSize_t maxSize() {
-		return (
-			szBYTE + 
-			( szBYTE+szWORD+szBYTE+szBYTE+szBYTE+szGuildID*6+(szBYTE*16)*6 ) * MAX_WAR_NUM
-		);
-	}
-};
-struct Inv_GCWhisperFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_WHISPER; }
-	static PacketSize_t maxSize() { return szBYTE + 10 + szuint + szBYTE + 128 + szBYTE; }
-};
-struct Inv_GCWhisperFailedFactory {
-	static PacketID_t id() { return Packet::PACKET_GC_WHISPER_FAILED; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_GLIncomingConnectionErrorFactory {
-	static PacketID_t id() { return Packet::PACKET_GL_INCOMING_CONNECTION_ERROR; }
-	static PacketSize_t maxSize() { return szBYTE + 127 + szBYTE + 127; }
-};
-struct Inv_GLIncomingConnectionOKFactory {
-	static PacketID_t id() { return Packet::PACKET_GL_INCOMING_CONNECTION_OK; }
-	static PacketSize_t maxSize() { 
-		return szBYTE + 20
-				+ szuint
-				+ szDWORD; 
-	}
-};
-struct Inv_CGAbsorbSoulFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_ABSORB_SOUL; }
-	static PacketSize_t maxSize() { return szObjectID + szZoneCoord*2+ szObjectID + szCoordInven*4; }
-};
-struct Inv_CGAcceptUnionFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_ACCEPT_UNION; }
-	static PacketSize_t maxSize() { return szGuildID; }
-};
-struct Inv_CGAddGearToMouseFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_ADD_GEAR_TO_MOUSE; }
-	static PacketSize_t maxSize() { return szObjectID + szSlotID; }
-};
-struct Inv_CGAddInventoryToMouseFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_ADD_INVENTORY_TO_MOUSE; }
-	static PacketSize_t maxSize() { return szObjectID + szCoordInven + szCoordInven; }
-};
-struct Inv_CGAddItemToCodeSheetFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_ADD_ITEM_TO_CODE_SHEET; }
-	static PacketSize_t maxSize() { return szObjectID + szCoordInven + szCoordInven; }
-};
-struct Inv_CGAddItemToItemFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_ADD_ITEM_TO_ITEM; }
-	static PacketSize_t maxSize() { return szObjectID + szCoordInven + szCoordInven; }
-};
-struct Inv_CGAddMouseToGearFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_ADD_MOUSE_TO_GEAR; }
-	static PacketSize_t maxSize() { return szObjectID + szSlotID; }
-};
-struct Inv_CGAddMouseToInventoryFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_ADD_MOUSE_TO_INVENTORY; }
-	static PacketSize_t maxSize() { return szObjectID + szCoordInven + szCoordInven; }
-};
-struct Inv_CGAddMouseToQuickSlotFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_ADD_MOUSE_TO_QUICKSLOT; }
-	static PacketSize_t maxSize() { return szObjectID + szSlotID; }
-};
-struct Inv_CGAddMouseToZoneFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_ADD_MOUSE_TO_ZONE; }
-	static PacketSize_t maxSize() { return szObjectID; }
-};
-struct Inv_CGAddQuickSlotToMouseFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_ADD_QUICKSLOT_TO_MOUSE; }
-	static PacketSize_t maxSize() { return szObjectID + szSlotID; }
-};
-struct Inv_CGAddSMSAddressFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_ADD_SMS_ADDRESS; }
-	static PacketSize_t maxSize() { return szBYTE + 20 + szBYTE + 40 + szBYTE + 11; }
-};
-struct Inv_CGAddZoneToInventoryFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_ADD_ZONE_TO_INVENTORY; }
-	static PacketSize_t maxSize() { return szObjectID + szCoord + szCoord + szCoordInven + szCoordInven; }
-};
-struct Inv_CGAddZoneToMouseFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_ADD_ZONE_TO_MOUSE; }
-	static PacketSize_t maxSize() { return szObjectID + szCoord + szCoord; }
-};
-struct Inv_CGAppointSubmasterFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_APPOINT_SUBMASTER; }
-	static PacketSize_t maxSize() { return szGuildID + szBYTE + 20; }
-};
-struct Inv_CGAttackFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_ATTACK; }
-	static PacketSize_t maxSize() { return szObjectID + szCoord + szCoord + szDir; }
-};
-struct Inv_CGAuthKeyFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_AUTH_KEY; }
-	static PacketSize_t maxSize() { return szDWORD; }
-};
-struct Inv_CGBloodDrainFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_BLOOD_DRAIN; }
-	static PacketSize_t maxSize() { return szObjectID; }
-};
-struct Inv_CGBuyStoreItemFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_BUY_STORE_ITEM; }
-	static PacketSize_t maxSize() { return szObjectID+szObjectID+szBYTE; }
-};
-struct Inv_CGCastingSkillFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_CASTING_SKILL; }
-	static PacketSize_t maxSize() { return szSkillType; }
-};
-struct Inv_CGConnectFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_CONNECT; }
-	static PacketSize_t maxSize() { 
-		return szDWORD 			
-			+ szPCType 			
-			+ szBYTE + 20 		
-			+6;				
-	}
-};
-struct Inv_CGConnectSetKeyFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_ENCODE_KEY; }
-	static PacketSize_t maxSize() { return szWORD + szWORD;  }
-};
-struct Inv_CGCrashReportFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_CRASH_REPORT; }
-	static PacketSize_t maxSize() {
-		return
-			19 + szWORD + 10 + szWORD + 100 + szWORD + 1024 + szWORD + 1024;
-	}
-};
-struct Inv_CGDeleteSMSAddressFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_DELETE_SMS_ADDRESS; }
-	static PacketSize_t maxSize() { return szDWORD; }
-};
-struct Inv_CGDenyUnionFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_DENY_UNION; }
-	static PacketSize_t maxSize() { return szGuildID; }
-};
-struct Inv_CGDepositPetFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_DEPOSIT_PET; }
-	static PacketSize_t maxSize() { return szObjectID + szBYTE; }
-};
-struct Inv_CGDialUpFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_DIAL_UP; }
-	static PacketSize_t maxSize() { return szPhoneNumber; }
-};
-struct Inv_CGDisplayItemFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_DISPLAY_ITEM; }
-	static PacketSize_t maxSize() { return szCoordInven + szCoordInven + szObjectID + szGold + szBYTE; }
-};
-struct Inv_CGDissectionCorpseFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_DISSECTION_CORPSE; }
-	static PacketSize_t maxSize() { return szObjectID + szCoord + szCoord + szBYTE; }
-};
-struct Inv_CGDonationMoneyFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_DONATION_MONEY; }
-	static PacketSize_t maxSize() { return szGold + szBYTE; }
-};
-struct Inv_CGDownSkillFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_DOWN_SKILL; }
-	static PacketSize_t maxSize() { return szSkillType; }
-};
-struct Inv_CGDropMoneyFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_DROP_MONEY; }
-	static PacketSize_t maxSize() { return szGold; }
-};
-struct Inv_CGExchangeBuyFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_EXCHANGE_BUY; }
-	static PacketSize_t maxSize() { return 8 + 1 + CGExchangeBuy::kMaxIdempotencyKey; }
-};
-struct Inv_CGExchangeListFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_EXCHANGE_LIST; }
-	static PacketSize_t maxSize() { return 4 + 4 + 1 + 2 + 4 + 4 + 1 + CGExchangeList::kMaxSellerFilter; }
-};
-struct Inv_CGExpelGuildFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_EXPEL_GUILD; }
-	static PacketSize_t maxSize() { return szGuildID; }
-};
-struct Inv_CGFailQuestFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_FAIL_QUEST; }
-	static PacketSize_t maxSize() { return szBYTE; }
-};
-struct Inv_CGGQuestAcceptFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_GQUEST_ACCEPT; }
-	static PacketSize_t maxSize() { return szDWORD; }
-};
-struct Inv_CGGQuestCancelFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_GQUEST_CANCEL; }
-	static PacketSize_t maxSize() { return szDWORD; }
-};
-struct Inv_CGGetEventItemFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_GET_EVENT_ITEM; }
-	static PacketSize_t maxSize() { return szBYTE; }
-};
-struct Inv_CGGetOffMotorCycleFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_GET_OFF_MOTORCYCLE; }
-	static PacketSize_t maxSize() { return szObjectID; }
-};
-struct Inv_CGGlobalChatFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_GLOBAL_CHAT; }
-	static PacketSize_t maxSize() { return szuint + szBYTE + 128; }
-};
-struct Inv_CGGuildChatFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_GUILD_CHAT; }
-	static PacketSize_t maxSize() {
-		return szBYTE +	
-				szuint +			
-			   szBYTE +			
-			   128;				
-	}
-};
-struct Inv_CGJoinGuildFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_JOIN_GUILD; }
-	static PacketSize_t maxSize() { return szGuildID + szGuildMemberRank + szBYTE + 256; }
-};
-struct Inv_CGLearnSkillFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_LEARN_SKILL; }
-	static PacketSize_t maxSize() { return szSkillType+szSkillDomainType; }
-};
-struct Inv_CGLogoutFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_LOGOUT; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_CGLotterySelectFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_LOTTERY_SELECT; }
-	static PacketSize_t maxSize() { return szBYTE + szDWORD + szDWORD; }
-};
-struct Inv_CGMakeItemFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_MAKE_ITEM; }
-	static PacketSize_t maxSize() { return szItemClass + szItemType; }
-};
-struct Inv_CGMixItemFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_MIX_ITEM; }
-	static PacketSize_t maxSize() { return szObjectID + szCoordInven + szCoordInven + ( szObjectID * 2 ); }
-};
-struct Inv_CGModifyGuildIntroFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_MODIFY_GUILD_INTRO; }
-	static PacketSize_t maxSize() { return szGuildID + szBYTE + 255; }
-};
-struct Inv_CGModifyGuildMemberFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_MODIFY_GUILD_MEMBER; }
-	static PacketSize_t maxSize() { return szGuildID + szBYTE + 20 + szGuildMemberRank; }
-};
-struct Inv_CGModifyGuildMemberIntroFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_MODIFY_GUILDMEMBER_INTRO; }
-	static PacketSize_t maxSize() { return szGuildID + szBYTE + 255; }
-};
-struct Inv_CGModifyNicknameFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_MODIFY_NICKNAME; }
-	static PacketSize_t maxSize() { return szObjectID + szBYTE + MAX_NICKNAME_SIZE; }
-};
-struct Inv_CGModifyTaxRatioFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_MODIFY_TAX_RATIO; }
-	static PacketSize_t maxSize() { return szuint; }
-};
-struct Inv_CGMouseToStashFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_MOUSE_TO_STASH; }
-	static PacketSize_t maxSize() { return szObjectID+szBYTE*2; }
-};
-struct Inv_CGMoveFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_MOVE; }
-	static PacketSize_t maxSize() { return szCoord + szCoord + szDir; }
-};
-struct Inv_CGNPCAskAnswerFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_NPC_ASK_ANSWER; }
-	static PacketSize_t maxSize() { return szObjectID + szScriptID + szAnswerID; }
-};
-struct Inv_CGNPCTalkFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_NPC_TALK; }
-	static PacketSize_t maxSize() { return szObjectID; }
-};
-struct Inv_CGPartyInviteFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_PARTY_INVITE; }
-	static PacketSize_t maxSize() { return szObjectID + szBYTE; }
-};
-struct Inv_CGPartyLeaveFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_PARTY_LEAVE; }
-	static PacketSize_t maxSize() { return szBYTE + 10; }
-};
-struct Inv_CGPartyPositionFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_PARTY_POSITION; }
-	static PacketSize_t maxSize() { return szZoneID + szZoneCoord*2 + szHP*2; }
-};
-struct Inv_CGPartySayFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_PARTY_SAY; }
-	static PacketSize_t maxSize() { return szBYTE + 128 + szuint; }
-};
-struct Inv_CGPetGambleFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_PET_GAMBLE; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_CGPhoneDisconnectFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_PHONE_DISCONNECT; }
-	static PacketSize_t maxSize() { return szSlotID; }
-};
-struct Inv_CGPhoneSayFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_PHONE_SAY; }
-	static PacketSize_t maxSize() { return szSlotID + szBYTE + 128; }
-};
-struct Inv_CGPickupMoneyFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_PICKUP_MONEY; }
-	static PacketSize_t maxSize() { return szObjectID + szCoord + szCoord; }
-};
-struct Inv_CGPortCheckFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_PORT_CHECK; }
-	static PacketSize_t maxSize() { 
-		return szBYTE + 20;		
-	}
-};
-struct Inv_CGQuitUnionFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_QUIT_UNION; }
-	static PacketSize_t maxSize() { return szGuildID + szBYTE; }
-};
-struct Inv_CGQuitUnionAcceptFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_QUIT_UNION_ACCEPT; }
-	static PacketSize_t maxSize() { return szGuildID; }
-};
-struct Inv_CGQuitUnionDenyFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_QUIT_UNION_DENY; }
-	static PacketSize_t maxSize() { return szGuildID; }
-};
-struct Inv_CGRangerSayFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_RANGER_SAY; }
-	static PacketSize_t maxSize() { return szBYTE + 128; }
-};
-struct Inv_CGReadyFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_READY; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_CGRegistGuildFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_REGIST_GUILD; }
-	static PacketSize_t maxSize() { return szBYTE + 30 + szBYTE + 256; }
-};
-struct Inv_CGRelicToObjectFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_RELIC_TO_OBJECT; }
-	static PacketSize_t maxSize() { return szObjectID + szObjectID + szCoord + szCoord; }
-};
-struct Inv_CGReloadFromInventoryFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_RELOAD_FROM_INVENTORY; }
-	static PacketSize_t maxSize() { return szObjectID + szCoordInven + szCoordInven; }
-};
-struct Inv_CGReloadFromQuickSlotFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_RELOAD_FROM_QUICKSLOT; }
-	static PacketSize_t maxSize() { return szObjectID + szSlotID; }
-};
-struct Inv_CGRequestGuildListFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_REQUEST_GUILD_LIST; }
-	static PacketSize_t maxSize() { return sizeof(GuildType_t); }
-};
-struct Inv_CGRequestGuildMemberListFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_REQUEST_GUILD_MEMBER_LIST; }
-	static PacketSize_t maxSize() { return szGuildID; }
-};
-struct Inv_CGRequestIPFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_REQUEST_IP; }
-	static PacketSize_t maxSize() { return szBYTE + 10;}
-};
-struct Inv_CGRequestInfoFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_REQUEST_INFO; }
-	static PacketSize_t maxSize() { return szBYTE + szuint; }
-};
-struct Inv_CGRequestNewbieItemFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_REQUEST_NEWBIE_ITEM; }
-	static PacketSize_t maxSize() { return szBYTE; }
-};
-struct Inv_CGRequestPowerPointFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_REQUEST_POWER_POINT; }
-	static PacketSize_t maxSize() { return szBYTE + 12;}
-};
-struct Inv_CGRequestRepairFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_REQUEST_REPAIR; }
-	static PacketSize_t maxSize() { return szObjectID; }
-};
-struct Inv_CGRequestStoreInfoFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_REQUEST_STORE_INFO; }
-	static PacketSize_t maxSize() { return szObjectID; }
-};
-struct Inv_CGRequestUnionFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_REQUEST_UNION; }
-	static PacketSize_t maxSize() { return szGuildID; }
-};
-struct Inv_CGRequestUnionInfoFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_REQUEST_UNION_INFO; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_CGResurrectFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_RESURRECT; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_CGRideMotorCycleFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_RIDE_MOTORCYCLE; }
-	static PacketSize_t maxSize() { return szObjectID + szCoord + szCoord; }
-};
-struct Inv_CGSMSAddressListFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_SMS_ADDRESS_LIST; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_CGSMSSendFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_SMS_SEND; }
-	static PacketSize_t maxSize() { return szBYTE + (szBYTE + MAX_NUMBER_LENGTH)*MAX_RECEVIER_NUM + szBYTE + MAX_RECEVIER_NUM + szBYTE + MAX_MESSAGE_LENGTH; }
-};
-struct Inv_CGSayFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_SAY; }
-	static PacketSize_t maxSize() { return szuint + szBYTE + 128; }
-};
-struct Inv_CGSelectBloodBibleFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_SELECT_BLOOD_BIBLE; }
-	static PacketSize_t maxSize() { return szItemType; }
-};
-struct Inv_CGSelectGuildFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_SELECT_GUILD; }
-	static PacketSize_t maxSize() { return szGuildID; }
-};
-struct Inv_CGSelectGuildMemberFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_SELECT_GUILD_MEMBER; }
-	static PacketSize_t maxSize() { return szGuildID + szBYTE + 20; }
-};
-struct Inv_CGSelectNicknameFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_SELECT_NICKNAME; }
-	static PacketSize_t maxSize() { return szWORD; }
-};
-struct Inv_CGSelectPortalFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_SELECT_PORTAL; }
-	static PacketSize_t maxSize() { return szZoneID; }
-};
-struct Inv_CGSelectQuestFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_SELECT_QUEST; }
-	static PacketSize_t maxSize() { return szQuestID + szObjectID; }
-};
-struct Inv_CGSelectRankBonusFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_SELECT_RANK_BONUS; }
-	static PacketSize_t maxSize() { return szDWORD; }
-};
-struct Inv_CGSelectRegenZoneFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_SELECT_REGEN_ZONE; }
-	static PacketSize_t maxSize() { return szBYTE; }
-};
-struct Inv_CGSelectTileEffectFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_SELECT_TILE_EFFECT; }
-	static PacketSize_t maxSize() { return szObjectID; }
-};
-struct Inv_CGSelectWayPointFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_SELECT_WAYPOINT; }
-	static PacketSize_t maxSize() { return szZoneID + szCoord*2; }
-};
-struct Inv_CGSetSlayerHotKeyFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_SET_SLAYER_HOT_KEY; }
-	static PacketSize_t maxSize() { return szSkillType * 4; }
-};
-struct Inv_CGSetVampireHotKeyFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_SET_VAMPIRE_HOT_KEY; }
-	static PacketSize_t maxSize() { return szSkillType * 8; }
-};
-struct Inv_CGShopRequestBuyFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_SHOP_REQUEST_BUY; }
-	static PacketSize_t maxSize() { return szObjectID+szShopRackType+szBYTE+szItemNum+szCoord*2; }
-};
-struct Inv_CGShopRequestListFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_SHOP_REQUEST_LIST; }
-	static PacketSize_t maxSize() { return szObjectID+szShopRackType; }
-};
-struct Inv_CGShopRequestSellFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_SHOP_REQUEST_SELL; }
-	static PacketSize_t maxSize() { return szObjectID+szObjectID+szBYTE; }
-};
-struct Inv_CGSilverCoatingFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_SILVER_COATING; }
-	static PacketSize_t maxSize() { return szObjectID; }
-};
-struct Inv_CGSkillToInventoryFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_SKILL_TO_INVENTORY; }
-	static PacketSize_t maxSize() { return szSkillType + szObjectID + szCoordInven*4; }
-};
-struct Inv_CGSkillToNamedFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_SKILL_TO_NAMED; }
-	static PacketSize_t maxSize() { return szSkillType + szCEffectID + szBYTE + 20; }
-};
-struct Inv_CGSkillToObjectFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_SKILL_TO_OBJECT; }
-	static PacketSize_t maxSize() { return szSkillType + szCEffectID + szObjectID; }
-};
-struct Inv_CGSkillToSelfFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_SKILL_TO_SELF; }
-	static PacketSize_t maxSize() { return szSkillType + szCEffectID; }
-};
-struct Inv_CGSkillToTileFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_SKILL_TO_TILE; }
-	static PacketSize_t maxSize() { return szSkillType + szCEffectID + szCoord + szCoord; }
-};
-struct Inv_CGStashDepositFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_STASH_DEPOSIT; }
-	static PacketSize_t maxSize() { return szGold; }
-};
-struct Inv_CGStashListFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_STASH_LIST; }
-	static PacketSize_t maxSize() { return szObjectID; }
-};
-struct Inv_CGStashRequestBuyFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_STASH_REQUEST_BUY; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_CGStashToMouseFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_STASH_TO_MOUSE; }
-	static PacketSize_t maxSize() { return szObjectID + szBYTE*2; }
-};
-struct Inv_CGStashWithdrawFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_STASH_WITHDRAW; }
-	static PacketSize_t maxSize() { return szGold; }
-};
-struct Inv_CGStoreCloseFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_STORE_CLOSE; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_CGStoreOpenFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_STORE_OPEN; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_CGStoreSignFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_STORE_SIGN; }
-	static PacketSize_t maxSize() { return szBYTE + 80; }
-};
-struct Inv_CGSubmitScoreFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_SUBMIT_SCORE; }
-	static PacketSize_t maxSize() { return szBYTE + szBYTE + szWORD; }
-};
-struct Inv_CGTakeOutGoodFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_TAKE_OUT_GOOD; }
-	static PacketSize_t maxSize() { return szObjectID; }
-};
-struct Inv_CGTameMonsterFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_TAME_MONSTER; }
-	static PacketSize_t maxSize() { return szObjectID; }
-};
-struct Inv_CGThrowBombFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_THROW_BOMB; }
-	static PacketSize_t maxSize() { return szCoord * 4 + szBYTE; }
-};
-struct Inv_CGThrowItemFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_THROW_ITEM; }
-	static PacketSize_t maxSize() { return szObjectID + szObjectID + szCoordInven + szCoordInven; }
-};
-struct Inv_CGTradeAddItemFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_TRADE_ADD_ITEM; }
-	static PacketSize_t maxSize() { return szObjectID*2; }
-};
-struct Inv_CGTradeFinishFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_TRADE_FINISH; }
-	static PacketSize_t maxSize() { return szObjectID + szBYTE; }
-};
-struct Inv_CGTradeMoneyFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_TRADE_MONEY; }
-	static PacketSize_t maxSize() { return szObjectID + szGold + szBYTE; }
-};
-struct Inv_CGTradePrepareFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_TRADE_PREPARE; }
-	static PacketSize_t maxSize() { return szObjectID + szBYTE; }
-};
-struct Inv_CGTradeRemoveItemFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_TRADE_REMOVE_ITEM; }
-	static PacketSize_t maxSize() { return szObjectID*2; }
-};
-struct Inv_CGTryJoinGuildFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_TRY_JOIN_GUILD; }
-	static PacketSize_t maxSize() { return szGuildID + szGuildMemberRank; }
-};
-struct Inv_CGTypeStringListFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_TYPE_STRING_LIST; }
-	static PacketSize_t maxSize() { return szBYTE+szBYTE + ( szBYTE + MAX_STRING_LENGTH ) * MAX_STRING_NUM + szDWORD; }
-};
-struct Inv_CGUnburrowFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_UNBURROW; }
-	static PacketSize_t maxSize() { return szCoord + szCoord + szDir; }
-};
-struct Inv_CGUndisplayItemFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_UNDISPLAY_ITEM; }
-	static PacketSize_t maxSize() { return szCoordInven + szCoordInven + szObjectID + szBYTE; }
-};
-struct Inv_CGUntransformFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_UNTRANSFORM; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_CGUseBonusPointFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_USE_BONUS_POINT; }
-	static PacketSize_t maxSize() { return szBYTE; }
-};
-struct Inv_CGUseItemFromGQuestInventoryFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_USE_ITEM_FROM_GQUEST_INVENTORY; }
-	static PacketSize_t maxSize() { return szBYTE; }
-};
-struct Inv_CGUseItemFromGearFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_USE_ITEM_FROM_GEAR; }
-	static PacketSize_t maxSize() { return szObjectID + szBYTE; }
-};
-struct Inv_CGUseItemFromInventoryFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_USE_ITEM_FROM_INVENTORY; }
-	static PacketSize_t maxSize() { return szObjectID + szCoordInven + szCoordInven; }
-};
-struct Inv_CGUseMessageItemFromInventoryFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_USE_MESSAGE_ITEM_FROM_INVENTORY; }
-	static PacketSize_t maxSize() { 
-		return Inv_CGUseItemFromInventoryFactory::maxSize() 
-				+ szBYTE + 128; 
-	}
-};
-struct Inv_CGUsePotionFromInventoryFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_USE_POTION_FROM_INVENTORY; }
-	static PacketSize_t maxSize() { return szObjectID + szCoordInven + szCoordInven; }
-};
-struct Inv_CGUsePotionFromQuickSlotFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_USE_POTION_FROM_QUICKSLOT; }
-	static PacketSize_t maxSize() { return szObjectID + szSlotID; }
-};
-struct Inv_CGUsePowerPointFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_USE_POWER_POINT; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_CGVerifyTimeFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_VERIFY_TIME; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_CGVisibleFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_VISIBLE; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_CGWhisperFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_WHISPER; }
-	static PacketSize_t maxSize() { return szBYTE + 10 + szuint + szBYTE + 128; }
-};
-struct Inv_CGWithdrawPetFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_WITHDRAW_PET; }
-	static PacketSize_t maxSize() { return szObjectID + szBYTE; }
-};
-struct Inv_CGWithdrawTaxFactory {
-	static PacketID_t id() { return Packet::PACKET_CG_WITHDRAW_TAX; }
-	static PacketSize_t maxSize() { return szGold; }
-};
-struct Inv_CLChangeServerFactory {
-	static PacketID_t id() { return Packet::PACKET_CL_CHANGE_SERVER; }
-	static PacketSize_t maxSize() { return szServerGroupID; }
-};
-struct Inv_CLCreatePCFactory {
-	static PacketID_t id() { return Packet::PACKET_CL_CREATE_PC; }
-	static PacketSize_t maxSize() { 
-		return szBYTE + 20 								
-			+ szSlot									
-			+ szBYTE									
-			+ szAttr* 3
-			+ szColor* CLCreatePC::SLAYER_COLOR_MAX 	
-			+ szRace;									
-	}
-};
-struct Inv_CLDeletePCFactory {
-	static PacketID_t id() { return Packet::PACKET_CL_DELETE_PC; }
-	static PacketSize_t maxSize() { return szBYTE + 20 + szSlot + szBYTE + 20; }
-};
-struct Inv_CLGetPCListFactory {
-	static PacketID_t id() { return Packet::PACKET_CL_GET_PC_LIST; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_CLGetServerListFactory {
-	static PacketID_t id() { return Packet::PACKET_CL_GET_SERVER_LIST; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_CLGetWorldListFactory {
-	static PacketID_t id() { return Packet::PACKET_CL_GET_WORLD_LIST; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_CLLoginFactory {
-	static PacketID_t id() { return Packet::PACKET_CL_LOGIN; }
-	static PacketSize_t maxSize() { return szBYTE + 30 + szBYTE + 30 + 6 + szBYTE; }
-};
-struct Inv_CLLogoutFactory {
-	static PacketID_t id() { return Packet::PACKET_CL_LOGOUT; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_CLQueryCharacterNameFactory {
-	static PacketID_t id() { return Packet::PACKET_CL_QUERY_CHARACTER_NAME; }
-	static PacketSize_t maxSize() { 
-		return szBYTE + 20; 
-	}
-};
-struct Inv_CLQueryPlayerIDFactory {
-	static PacketID_t id() { return Packet::PACKET_CL_QUERY_PLAYER_ID; }
-	static PacketSize_t maxSize() { 
-		return szBYTE + 20; 
-	}
-};
-struct Inv_CLReconnectLoginFactory {
-	static PacketID_t id() { return Packet::PACKET_CL_RECONNECT_LOGIN; }
-	static PacketSize_t maxSize() { 
-		return szDWORD+szBYTE; 			
-	}
-};
-struct Inv_CLRegisterPlayerFactory {
-	static PacketID_t id() { return Packet::PACKET_CL_REGISTER_PLAYER; }
-	static PacketSize_t maxSize() {
-		
-		return    szBYTE + PlayerInfo::maxIDLength 			
-				+ szBYTE + PlayerInfo::maxPasswordLength 	
-				+ szBYTE + PlayerInfo::maxNameLength 		
-				+ szBYTE									
-				+ szBYTE + PlayerInfo::maxSSNLength 		
-				+ szBYTE + PlayerInfo::maxTelephoneLength 	
-				+ szBYTE + PlayerInfo::maxCellularLength 	
-				+ szBYTE + PlayerInfo::maxZipCodeLength 	
-				+ szBYTE + PlayerInfo::maxAddressLength 	
-				+ szBYTE 									
-				+ szBYTE + PlayerInfo::maxEmailLength 		
-				+ szBYTE + PlayerInfo::maxHomepageLength 	
-				+ szBYTE + PlayerInfo::maxProfileLength 	
-				+ szBYTE;									
-	}
-};
-struct Inv_CLSelectPCFactory {
-	static PacketID_t id() { return Packet::PACKET_CL_SELECT_PC; }
-	static PacketSize_t maxSize() {
-		return szBYTE + 20		 	
-			+ szPCType; 			
-	}
-};
-struct Inv_CLSelectServerFactory {
-	static PacketID_t id() { return Packet::PACKET_CL_SELECT_SERVER; }
-	static PacketSize_t maxSize() { return szServerGroupID; }
-};
-struct Inv_CLSelectWorldFactory {
-	static PacketID_t id() { return Packet::PACKET_CL_SELECT_WORLD; }
-	static PacketSize_t maxSize() { return szWorldID; }
-};
-struct Inv_CLVersionCheckFactory {
-	static PacketID_t id() { return Packet::PACKET_CL_VERSION_CHECK; }
-	static PacketSize_t maxSize() { return szDWORD; }
-};
-struct Inv_LCCreatePCErrorFactory {
-	static PacketID_t id() { return Packet::PACKET_LC_CREATE_PC_ERROR; }
-	static PacketSize_t maxSize() { return szBYTE; }
-};
-struct Inv_LCCreatePCOKFactory {
-	static PacketID_t id() { return Packet::PACKET_LC_CREATE_PC_OK; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_LCDeletePCErrorFactory {
-	static PacketID_t id() { return Packet::PACKET_LC_DELETE_PC_ERROR; }
-	static PacketSize_t maxSize() { return szBYTE; }
-};
-struct Inv_LCDeletePCOKFactory {
-	static PacketID_t id() { return Packet::PACKET_LC_DELETE_PC_OK; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_LCLoginErrorFactory {
-	static PacketID_t id() { return Packet::PACKET_LC_LOGIN_ERROR; }
-	static PacketSize_t maxSize() { return szBYTE; }
-};
-struct Inv_LCLoginOKFactory {
-	static PacketID_t id() { return Packet::PACKET_LC_LOGIN_OK; }
-	static PacketSize_t maxSize() { return szBYTE + szBYTE + szBYTE + szWORD; }
-};
-struct Inv_LCPCListFactory {
-	static PacketID_t id() { return Packet::PACKET_LC_PC_LIST; }
-	static PacketSize_t maxSize() { 
-		
-		
-		return SLOT_MAX * sizeof(char) + PCSlayerInfo::getMaxSize() * SLOT_MAX; 
-	}
-};
-struct Inv_LCQueryResultCharacterNameFactory {
-	static PacketID_t id() { return Packet::PACKET_LC_QUERY_RESULT_CHARACTER_NAME; }
-	static PacketSize_t maxSize() { 
-		return szbool
-			+ szBYTE + 20; 
-	}
-};
-struct Inv_LCQueryResultPlayerIDFactory {
-	static PacketID_t id() { return Packet::PACKET_LC_QUERY_RESULT_PLAYER_ID; }
-	static PacketSize_t maxSize() { 
-		return szbool
-			+ szBYTE + 20; 
-	}
-};
-struct Inv_LCReconnectFactory {
-	static PacketID_t id() { return Packet::PACKET_LC_RECONNECT; }
-	static PacketSize_t maxSize() { 
-		return szBYTE + 15 	
-			+ szuint		
-			+ szDWORD; 		
-	}
-};
-struct Inv_LCRegisterPlayerErrorFactory {
-	static PacketID_t id() { return Packet::PACKET_LC_REGISTER_PLAYER_ERROR; }
-	static PacketSize_t maxSize() { return szBYTE; }
-};
-struct Inv_LCRegisterPlayerOKFactory {
-	static PacketID_t id() { return Packet::PACKET_LC_REGISTER_PLAYER_OK; }
-	static PacketSize_t maxSize() { return szBYTE + 20 + szBYTE; }
-};
-struct Inv_LCSelectPCErrorFactory {
-	static PacketID_t id() { return Packet::PACKET_LC_SELECT_PC_ERROR; }
-	static PacketSize_t maxSize() { return szBYTE; }
-};
-struct Inv_LCServerListFactory {
-	static PacketID_t id() { return Packet::PACKET_LC_SERVER_LIST; }
-	static PacketSize_t maxSize() { 
-		
-		
-		return szServerGroupID  + szBYTE + ServerGroupInfo::getMaxSize();
-	}
-};
-struct Inv_LCVersionCheckErrorFactory {
-	static PacketID_t id() { return Packet::PACKET_LC_VERSION_CHECK_ERROR; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_LCVersionCheckOKFactory {
-	static PacketID_t id() { return Packet::PACKET_LC_VERSION_CHECK_OK; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_LCWorldListFactory {
-	static PacketID_t id() { return Packet::PACKET_LC_WORLD_LIST; }
-	static PacketSize_t maxSize() { 
-		
-		
-		return szWorldID  + szBYTE + WorldInfo::getMaxSize();
-	}
-};
-struct Inv_LGIncomingConnectionFactory {
-	static PacketID_t id() { return Packet::PACKET_LG_INCOMING_CONNECTION; }
-	static PacketSize_t maxSize() { 
-		return + szBYTE + 20 	
-			+ szBYTE + 20 		
-			+ szBYTE + 15; 		
-	}
-};
-struct Inv_CURequestLoginModeFactory {
-	static PacketID_t id() { return Packet::PACKET_CU_REQUEST_LOGIN_MODE; }
-	static PacketSize_t maxSize() { return 0; }
-};
-struct Inv_UCRequestLoginModeFactory {
-	static PacketID_t id() { return Packet::PACKET_UC_REQUEST_LOGIN_MODE; }
-	static PacketSize_t maxSize() { return szBYTE; }
-};
-#endif // WIRE_INVENTORY_STRUCTS
 #ifdef WIRE_INVENTORY_ENTRIES
-	{ "GCActiveGuildList", &Inv_GCActiveGuildListFactory::id, &Inv_GCActiveGuildListFactory::maxSize },
-	{ "GCAddBat", &Inv_GCAddBatFactory::id, &Inv_GCAddBatFactory::maxSize },
-	{ "GCAddBurrowingCreature", &Inv_GCAddBurrowingCreatureFactory::id, &Inv_GCAddBurrowingCreatureFactory::maxSize },
-	{ "GCAddEffect", &Inv_GCAddEffectFactory::id, &Inv_GCAddEffectFactory::maxSize },
-	{ "GCAddEffectToTile", &Inv_GCAddEffectToTileFactory::id, &Inv_GCAddEffectToTileFactory::maxSize },
-	{ "GCAddGearToInventory", &Inv_GCAddGearToInventoryFactory::id, &Inv_GCAddGearToInventoryFactory::maxSize },
-	{ "GCAddGearToZone", &Inv_GCAddGearToZoneFactory::id, &Inv_GCAddGearToZoneFactory::maxSize },
-	{ "GCAddHelicopter", &Inv_GCAddHelicopterFactory::id, &Inv_GCAddHelicopterFactory::maxSize },
-	{ "GCAddInjuriousCreature", &Inv_GCAddInjuriousCreatureFactory::id, &Inv_GCAddInjuriousCreatureFactory::maxSize },
-	{ "GCAddInstalledMineToZone", &Inv_GCAddInstalledMineToZoneFactory::id, &Inv_GCAddInstalledMineToZoneFactory::maxSize },
-	{ "GCAddItemToItemVerify", &Inv_GCAddItemToItemVerifyFactory::id, &Inv_GCAddItemToItemVerifyFactory::maxSize },
-	{ "GCAddMonster", &Inv_GCAddMonsterFactory::id, &Inv_GCAddMonsterFactory::maxSize },
-	{ "GCAddMonsterCorpse", &Inv_GCAddMonsterCorpseFactory::id, &Inv_GCAddMonsterCorpseFactory::maxSize },
-	{ "GCAddMonsterFromBurrowing", &Inv_GCAddMonsterFromBurrowingFactory::id, &Inv_GCAddMonsterFromBurrowingFactory::maxSize },
-	{ "GCAddMonsterFromTransformation", &Inv_GCAddMonsterFromTransformationFactory::id, &Inv_GCAddMonsterFromTransformationFactory::maxSize },
-	{ "GCAddNPC", &Inv_GCAddNPCFactory::id, &Inv_GCAddNPCFactory::maxSize },
-	{ "GCAddNewItemToZone", &Inv_GCAddNewItemToZoneFactory::id, &Inv_GCAddNewItemToZoneFactory::maxSize },
-	{ "GCAddNickname", &Inv_GCAddNicknameFactory::id, &Inv_GCAddNicknameFactory::maxSize },
-	{ "GCAddOusters", &Inv_GCAddOustersFactory::id, &Inv_GCAddOustersFactory::maxSize },
-	{ "GCAddOustersCorpse", &Inv_GCAddOustersCorpseFactory::id, &Inv_GCAddOustersCorpseFactory::maxSize },
-	{ "GCAddSlayer", &Inv_GCAddSlayerFactory::id, &Inv_GCAddSlayerFactory::maxSize },
-	{ "GCAddSlayerCorpse", &Inv_GCAddSlayerCorpseFactory::id, &Inv_GCAddSlayerCorpseFactory::maxSize },
-	{ "GCAddStoreItem", &Inv_GCAddStoreItemFactory::id, &Inv_GCAddStoreItemFactory::maxSize },
-	{ "GCAddVampire", &Inv_GCAddVampireFactory::id, &Inv_GCAddVampireFactory::maxSize },
-	{ "GCAddVampireCorpse", &Inv_GCAddVampireCorpseFactory::id, &Inv_GCAddVampireCorpseFactory::maxSize },
-	{ "GCAddVampireFromBurrowing", &Inv_GCAddVampireFromBurrowingFactory::id, &Inv_GCAddVampireFromBurrowingFactory::maxSize },
-	{ "GCAddVampireFromTransformation", &Inv_GCAddVampireFromTransformationFactory::id, &Inv_GCAddVampireFromTransformationFactory::maxSize },
-	{ "GCAddVampirePortal", &Inv_GCAddVampirePortalFactory::id, &Inv_GCAddVampirePortalFactory::maxSize },
-	{ "GCAddWolf", &Inv_GCAddWolfFactory::id, &Inv_GCAddWolfFactory::maxSize },
-	{ "GCAddressListVerify", &Inv_GCAddressListVerifyFactory::id, &Inv_GCAddressListVerifyFactory::maxSize },
-	{ "GCAttack", &Inv_GCAttackFactory::id, &Inv_GCAttackFactory::maxSize },
-	{ "GCAttackArmsOK1", &Inv_GCAttackArmsOK1Factory::id, &Inv_GCAttackArmsOK1Factory::maxSize },
-	{ "GCAttackArmsOK2", &Inv_GCAttackArmsOK2Factory::id, &Inv_GCAttackArmsOK2Factory::maxSize },
-	{ "GCAttackArmsOK3", &Inv_GCAttackArmsOK3Factory::id, &Inv_GCAttackArmsOK3Factory::maxSize },
-	{ "GCAttackArmsOK4", &Inv_GCAttackArmsOK4Factory::id, &Inv_GCAttackArmsOK4Factory::maxSize },
-	{ "GCAttackArmsOK5", &Inv_GCAttackArmsOK5Factory::id, &Inv_GCAttackArmsOK5Factory::maxSize },
-	{ "GCAttackMeleeOK1", &Inv_GCAttackMeleeOK1Factory::id, &Inv_GCAttackMeleeOK1Factory::maxSize },
-	{ "GCAttackMeleeOK2", &Inv_GCAttackMeleeOK2Factory::id, &Inv_GCAttackMeleeOK2Factory::maxSize },
-	{ "GCAttackMeleeOK3", &Inv_GCAttackMeleeOK3Factory::id, &Inv_GCAttackMeleeOK3Factory::maxSize },
-	{ "GCAuthKey", &Inv_GCAuthKeyFactory::id, &Inv_GCAuthKeyFactory::maxSize },
-	{ "GCBloodBibleList", &Inv_GCBloodBibleListFactory::id, &Inv_GCBloodBibleListFactory::maxSize },
-	{ "GCBloodBibleSignInfo", &Inv_GCBloodBibleSignInfoFactory::id, &Inv_GCBloodBibleSignInfoFactory::maxSize },
-	{ "GCBloodBibleStatus", &Inv_GCBloodBibleStatusFactory::id, &Inv_GCBloodBibleStatusFactory::maxSize },
-	{ "GCBloodDrainOK1", &Inv_GCBloodDrainOK1Factory::id, &Inv_GCBloodDrainOK1Factory::maxSize },
-	{ "GCBloodDrainOK2", &Inv_GCBloodDrainOK2Factory::id, &Inv_GCBloodDrainOK2Factory::maxSize },
-	{ "GCBloodDrainOK3", &Inv_GCBloodDrainOK3Factory::id, &Inv_GCBloodDrainOK3Factory::maxSize },
-	{ "GCCannotAdd", &Inv_GCCannotAddFactory::id, &Inv_GCCannotAddFactory::maxSize },
-	{ "GCCannotUse", &Inv_GCCannotUseFactory::id, &Inv_GCCannotUseFactory::maxSize },
-	{ "GCCastingSkill", &Inv_GCCastingSkillFactory::id, &Inv_GCCastingSkillFactory::maxSize },
-	{ "GCChangeDarkLight", &Inv_GCChangeDarkLightFactory::id, &Inv_GCChangeDarkLightFactory::maxSize },
-	{ "GCChangeShape", &Inv_GCChangeShapeFactory::id, &Inv_GCChangeShapeFactory::maxSize },
-	{ "GCChangeWeather", &Inv_GCChangeWeatherFactory::id, &Inv_GCChangeWeatherFactory::maxSize },
-	{ "GCCreateItem", &Inv_GCCreateItemFactory::id, &Inv_GCCreateItemFactory::maxSize },
-	{ "GCCreatureDied", &Inv_GCCreatureDiedFactory::id, &Inv_GCCreatureDiedFactory::maxSize },
-	{ "GCCrossCounterOK1", &Inv_GCCrossCounterOK1Factory::id, &Inv_GCCrossCounterOK1Factory::maxSize },
-	{ "GCCrossCounterOK2", &Inv_GCCrossCounterOK2Factory::id, &Inv_GCCrossCounterOK2Factory::maxSize },
-	{ "GCCrossCounterOK3", &Inv_GCCrossCounterOK3Factory::id, &Inv_GCCrossCounterOK3Factory::maxSize },
-	{ "GCDeleteEffectFromTile", &Inv_GCDeleteEffectFromTileFactory::id, &Inv_GCDeleteEffectFromTileFactory::maxSize },
-	{ "GCDeleteInventoryItem", &Inv_GCDeleteInventoryItemFactory::id, &Inv_GCDeleteInventoryItemFactory::maxSize },
-	{ "GCDeleteObject", &Inv_GCDeleteObjectFactory::id, &Inv_GCDeleteObjectFactory::maxSize },
-	{ "GCDeleteandPickUpOK", &Inv_GCDeleteandPickUpOKFactory::id, &Inv_GCDeleteandPickUpOKFactory::maxSize },
-	{ "GCDisconnect", &Inv_GCDisconnectFactory::id, &Inv_GCDisconnectFactory::maxSize },
-	{ "GCDownSkillFailed", &Inv_GCDownSkillFailedFactory::id, &Inv_GCDownSkillFailedFactory::maxSize },
-	{ "GCDownSkillOK", &Inv_GCDownSkillOKFactory::id, &Inv_GCDownSkillOKFactory::maxSize },
-	{ "GCDropItemToZone", &Inv_GCDropItemToZoneFactory::id, &Inv_GCDropItemToZoneFactory::maxSize },
-	{ "GCEnterVampirePortal", &Inv_GCEnterVampirePortalFactory::id, &Inv_GCEnterVampirePortalFactory::maxSize },
-	{ "GCExchangeBuy", &Inv_GCExchangeBuyFactory::id, &Inv_GCExchangeBuyFactory::maxSize },
-	{ "GCExchangeList", &Inv_GCExchangeListFactory::id, &Inv_GCExchangeListFactory::maxSize },
-	{ "GCExecuteElement", &Inv_GCExecuteElementFactory::id, &Inv_GCExecuteElementFactory::maxSize },
-	{ "GCFakeMove", &Inv_GCFakeMoveFactory::id, &Inv_GCFakeMoveFactory::maxSize },
-	{ "GCFastMove", &Inv_GCFastMoveFactory::id, &Inv_GCFastMoveFactory::maxSize },
-	{ "GCFlagWarStatus", &Inv_GCFlagWarStatusFactory::id, &Inv_GCFlagWarStatusFactory::maxSize },
-	{ "GCFriendChatting", &Inv_GCFriendChattingFactory::id, &Inv_GCFriendChattingFactory::maxSize },
-	{ "GCGQuestInventory", &Inv_GCGQuestInventoryFactory::id, &Inv_GCGQuestInventoryFactory::maxSize },
-	{ "GCGQuestStatusInfo", &Inv_GCGQuestStatusInfoFactory::id, &Inv_GCGQuestStatusInfoFactory::maxSize },
-	{ "GCGQuestStatusModify", &Inv_GCGQuestStatusModifyFactory::id, &Inv_GCGQuestStatusModifyFactory::maxSize },
-	{ "GCGetDamage", &Inv_GCGetDamageFactory::id, &Inv_GCGetDamageFactory::maxSize },
-	{ "GCGetOffMotorCycle", &Inv_GCGetOffMotorCycleFactory::id, &Inv_GCGetOffMotorCycleFactory::maxSize },
-	{ "GCGetOffMotorCycleFailed", &Inv_GCGetOffMotorCycleFailedFactory::id, &Inv_GCGetOffMotorCycleFailedFactory::maxSize },
-	{ "GCGetOffMotorCycleOK", &Inv_GCGetOffMotorCycleOKFactory::id, &Inv_GCGetOffMotorCycleOKFactory::maxSize },
-	{ "GCGlobalChat", &Inv_GCGlobalChatFactory::id, &Inv_GCGlobalChatFactory::maxSize },
-	{ "GCGoodsList", &Inv_GCGoodsListFactory::id, &Inv_GCGoodsListFactory::maxSize },
-	{ "GCGuildChat", &Inv_GCGuildChatFactory::id, &Inv_GCGuildChatFactory::maxSize },
-	{ "GCGuildMemberList", &Inv_GCGuildMemberListFactory::id, &Inv_GCGuildMemberListFactory::maxSize },
-	{ "GCGuildResponse", &Inv_GCGuildResponseFactory::id, &Inv_GCGuildResponseFactory::maxSize },
-	{ "GCHPRecoveryEndToOthers", &Inv_GCHPRecoveryEndToOthersFactory::id, &Inv_GCHPRecoveryEndToOthersFactory::maxSize },
-	{ "GCHPRecoveryEndToSelf", &Inv_GCHPRecoveryEndToSelfFactory::id, &Inv_GCHPRecoveryEndToSelfFactory::maxSize },
-	{ "GCHPRecoveryStartToOthers", &Inv_GCHPRecoveryStartToOthersFactory::id, &Inv_GCHPRecoveryStartToOthersFactory::maxSize },
-	{ "GCHPRecoveryStartToSelf", &Inv_GCHPRecoveryStartToSelfFactory::id, &Inv_GCHPRecoveryStartToSelfFactory::maxSize },
-	{ "GCHolyLandBonusInfo", &Inv_GCHolyLandBonusInfoFactory::id, &Inv_GCHolyLandBonusInfoFactory::maxSize },
-	{ "GCKickMessage", &Inv_GCKickMessageFactory::id, &Inv_GCKickMessageFactory::maxSize },
-	{ "GCKnockBack", &Inv_GCKnockBackFactory::id, &Inv_GCKnockBackFactory::maxSize },
-	{ "GCKnocksTargetBackOK1", &Inv_GCKnocksTargetBackOK1Factory::id, &Inv_GCKnocksTargetBackOK1Factory::maxSize },
-	{ "GCKnocksTargetBackOK2", &Inv_GCKnocksTargetBackOK2Factory::id, &Inv_GCKnocksTargetBackOK2Factory::maxSize },
-	{ "GCKnocksTargetBackOK4", &Inv_GCKnocksTargetBackOK4Factory::id, &Inv_GCKnocksTargetBackOK4Factory::maxSize },
-	{ "GCKnocksTargetBackOK5", &Inv_GCKnocksTargetBackOK5Factory::id, &Inv_GCKnocksTargetBackOK5Factory::maxSize },
-	{ "GCLearnSkillFailed", &Inv_GCLearnSkillFailedFactory::id, &Inv_GCLearnSkillFailedFactory::maxSize },
-	{ "GCLearnSkillOK", &Inv_GCLearnSkillOKFactory::id, &Inv_GCLearnSkillOKFactory::maxSize },
-	{ "GCLearnSkillReady", &Inv_GCLearnSkillReadyFactory::id, &Inv_GCLearnSkillReadyFactory::maxSize },
-	{ "GCLightning", &Inv_GCLightningFactory::id, &Inv_GCLightningFactory::maxSize },
-	{ "GCMPRecoveryEnd", &Inv_GCMPRecoveryEndFactory::id, &Inv_GCMPRecoveryEndFactory::maxSize },
-	{ "GCMPRecoveryStart", &Inv_GCMPRecoveryStartFactory::id, &Inv_GCMPRecoveryStartFactory::maxSize },
-	{ "GCMakeItemFail", &Inv_GCMakeItemFailFactory::id, &Inv_GCMakeItemFailFactory::maxSize },
-	{ "GCMakeItemOK", &Inv_GCMakeItemOKFactory::id, &Inv_GCMakeItemOKFactory::maxSize },
-	{ "GCMineExplosionOK1", &Inv_GCMineExplosionOK1Factory::id, &Inv_GCMineExplosionOK1Factory::maxSize },
-	{ "GCMineExplosionOK2", &Inv_GCMineExplosionOK2Factory::id, &Inv_GCMineExplosionOK2Factory::maxSize },
-	{ "GCMiniGameScores", &Inv_GCMiniGameScoresFactory::id, &Inv_GCMiniGameScoresFactory::maxSize },
-	{ "GCModifyGuildMemberInfo", &Inv_GCModifyGuildMemberInfoFactory::id, &Inv_GCModifyGuildMemberInfoFactory::maxSize },
-	{ "GCModifyInformation", &Inv_GCModifyInformationFactory::id, &Inv_GCModifyInformationFactory::maxSize },
-	{ "GCModifyNickname", &Inv_GCModifyNicknameFactory::id, &Inv_GCModifyNicknameFactory::maxSize },
-	{ "GCMonsterKillQuestInfo", &Inv_GCMonsterKillQuestInfoFactory::id, &Inv_GCMonsterKillQuestInfoFactory::maxSize },
-	{ "GCMorph1", &Inv_GCMorph1Factory::id, &Inv_GCMorph1Factory::maxSize },
-	{ "GCMorphSlayer2", &Inv_GCMorphSlayer2Factory::id, &Inv_GCMorphSlayer2Factory::maxSize },
-	{ "GCMorphVampire2", &Inv_GCMorphVampire2Factory::id, &Inv_GCMorphVampire2Factory::maxSize },
-	{ "GCMove", &Inv_GCMoveFactory::id, &Inv_GCMoveFactory::maxSize },
-	{ "GCMoveError", &Inv_GCMoveErrorFactory::id, &Inv_GCMoveErrorFactory::maxSize },
-	{ "GCMoveOK", &Inv_GCMoveOKFactory::id, &Inv_GCMoveOKFactory::maxSize },
-	{ "GCMyStoreInfo", &Inv_GCMyStoreInfoFactory::id, &Inv_GCMyStoreInfoFactory::maxSize },
-	{ "GCNPCAsk", &Inv_GCNPCAskFactory::id, &Inv_GCNPCAskFactory::maxSize },
-	{ "GCNPCAskDynamic", &Inv_GCNPCAskDynamicFactory::id, &Inv_GCNPCAskDynamicFactory::maxSize },
-	{ "GCNPCAskVariable", &Inv_GCNPCAskVariableFactory::id, &Inv_GCNPCAskVariableFactory::maxSize },
-	{ "GCNPCInfo", &Inv_GCNPCInfoFactory::id, &Inv_GCNPCInfoFactory::maxSize },
-	{ "GCNPCResponse", &Inv_GCNPCResponseFactory::id, &Inv_GCNPCResponseFactory::maxSize },
-	{ "GCNPCSay", &Inv_GCNPCSayFactory::id, &Inv_GCNPCSayFactory::maxSize },
-	{ "GCNPCSayDynamic", &Inv_GCNPCSayDynamicFactory::id, &Inv_GCNPCSayDynamicFactory::maxSize },
-	{ "GCNicknameList", &Inv_GCNicknameListFactory::id, &Inv_GCNicknameListFactory::maxSize },
-	{ "GCNicknameVerify", &Inv_GCNicknameVerifyFactory::id, &Inv_GCNicknameVerifyFactory::maxSize },
-	{ "GCNoticeEvent", &Inv_GCNoticeEventFactory::id, &Inv_GCNoticeEventFactory::maxSize },
-	{ "GCNotifyWin", &Inv_GCNotifyWinFactory::id, &Inv_GCNotifyWinFactory::maxSize },
-	{ "GCOtherGuildName", &Inv_GCOtherGuildNameFactory::id, &Inv_GCOtherGuildNameFactory::maxSize },
-	{ "GCOtherModifyInfo", &Inv_GCOtherModifyInfoFactory::id, &Inv_GCOtherModifyInfoFactory::maxSize },
-	{ "GCOtherStoreInfo", &Inv_GCOtherStoreInfoFactory::id, &Inv_GCOtherStoreInfoFactory::maxSize },
-	{ "GCPartyError", &Inv_GCPartyErrorFactory::id, &Inv_GCPartyErrorFactory::maxSize },
-	{ "GCPartyInvite", &Inv_GCPartyInviteFactory::id, &Inv_GCPartyInviteFactory::maxSize },
-	{ "GCPartyJoined", &Inv_GCPartyJoinedFactory::id, &Inv_GCPartyJoinedFactory::maxSize },
-	{ "GCPartyLeave", &Inv_GCPartyLeaveFactory::id, &Inv_GCPartyLeaveFactory::maxSize },
-	{ "GCPartyPosition", &Inv_GCPartyPositionFactory::id, &Inv_GCPartyPositionFactory::maxSize },
-	{ "GCPartySay", &Inv_GCPartySayFactory::id, &Inv_GCPartySayFactory::maxSize },
-	{ "GCPetInfo", &Inv_GCPetInfoFactory::id, &Inv_GCPetInfoFactory::maxSize },
-	{ "GCPetStashList", &Inv_GCPetStashListFactory::id, &Inv_GCPetStashListFactory::maxSize },
-	{ "GCPetStashVerify", &Inv_GCPetStashVerifyFactory::id, &Inv_GCPetStashVerifyFactory::maxSize },
-	{ "GCPetUseSkill", &Inv_GCPetUseSkillFactory::id, &Inv_GCPetUseSkillFactory::maxSize },
-	{ "GCPhoneConnected", &Inv_GCPhoneConnectedFactory::id, &Inv_GCPhoneConnectedFactory::maxSize },
-	{ "GCPhoneConnectionFailed", &Inv_GCPhoneConnectionFailedFactory::id, &Inv_GCPhoneConnectionFailedFactory::maxSize },
-	{ "GCPhoneDisconnected", &Inv_GCPhoneDisconnectedFactory::id, &Inv_GCPhoneDisconnectedFactory::maxSize },
-	{ "GCPhoneSay", &Inv_GCPhoneSayFactory::id, &Inv_GCPhoneSayFactory::maxSize },
-	{ "GCQuestStatus", &Inv_GCQuestStatusFactory::id, &Inv_GCQuestStatusFactory::maxSize },
-	{ "GCRankBonusInfo", &Inv_GCRankBonusInfoFactory::id, &Inv_GCRankBonusInfoFactory::maxSize },
-	{ "GCRealWearingInfo", &Inv_GCRealWearingInfoFactory::id, &Inv_GCRealWearingInfoFactory::maxSize },
-	{ "GCReconnect", &Inv_GCReconnectFactory::id, &Inv_GCReconnectFactory::maxSize },
-	{ "GCReconnectLogin", &Inv_GCReconnectLoginFactory::id, &Inv_GCReconnectLoginFactory::maxSize },
-	{ "GCRegenZoneStatus", &Inv_GCRegenZoneStatusFactory::id, &Inv_GCRegenZoneStatusFactory::maxSize },
-	{ "GCReloadOK", &Inv_GCReloadOKFactory::id, &Inv_GCReloadOKFactory::maxSize },
-	{ "GCRemoveCorpseHead", &Inv_GCRemoveCorpseHeadFactory::id, &Inv_GCRemoveCorpseHeadFactory::maxSize },
-	{ "GCRemoveEffect", &Inv_GCRemoveEffectFactory::id, &Inv_GCRemoveEffectFactory::maxSize },
-	{ "GCRemoveFromGear", &Inv_GCRemoveFromGearFactory::id, &Inv_GCRemoveFromGearFactory::maxSize },
-	{ "GCRemoveInjuriousCreature", &Inv_GCRemoveInjuriousCreatureFactory::id, &Inv_GCRemoveInjuriousCreatureFactory::maxSize },
-	{ "GCRemoveStoreItem", &Inv_GCRemoveStoreItemFactory::id, &Inv_GCRemoveStoreItemFactory::maxSize },
-	{ "GCRequestFailed", &Inv_GCRequestFailedFactory::id, &Inv_GCRequestFailedFactory::maxSize },
-	{ "GCRequestPowerPointResult", &Inv_GCRequestPowerPointResultFactory::id, &Inv_GCRequestPowerPointResultFactory::maxSize },
-	{ "GCRequestedIP", &Inv_GCRequestedIPFactory::id, &Inv_GCRequestedIPFactory::maxSize },
-	{ "GCRideMotorCycle", &Inv_GCRideMotorCycleFactory::id, &Inv_GCRideMotorCycleFactory::maxSize },
-	{ "GCRideMotorCycleFailed", &Inv_GCRideMotorCycleFailedFactory::id, &Inv_GCRideMotorCycleFailedFactory::maxSize },
-	{ "GCRideMotorCycleOK", &Inv_GCRideMotorCycleOKFactory::id, &Inv_GCRideMotorCycleOKFactory::maxSize },
-	{ "GCRing", &Inv_GCRingFactory::id, &Inv_GCRingFactory::maxSize },
-	{ "GCSMSAddressList", &Inv_GCSMSAddressListFactory::id, &Inv_GCSMSAddressListFactory::maxSize },
-	{ "GCSay", &Inv_GCSayFactory::id, &Inv_GCSayFactory::maxSize },
-	{ "GCSearchMotorcycleFail", &Inv_GCSearchMotorcycleFailFactory::id, &Inv_GCSearchMotorcycleFailFactory::maxSize },
-	{ "GCSearchMotorcycleOK", &Inv_GCSearchMotorcycleOKFactory::id, &Inv_GCSearchMotorcycleOKFactory::maxSize },
-	{ "GCSelectQuestID", &Inv_GCSelectQuestIDFactory::id, &Inv_GCSelectQuestIDFactory::maxSize },
-	{ "GCSelectRankBonusFailed", &Inv_GCSelectRankBonusFailedFactory::id, &Inv_GCSelectRankBonusFailedFactory::maxSize },
-	{ "GCSelectRankBonusOK", &Inv_GCSelectRankBonusOKFactory::id, &Inv_GCSelectRankBonusOKFactory::maxSize },
-	{ "GCSetPosition", &Inv_GCSetPositionFactory::id, &Inv_GCSetPositionFactory::maxSize },
-	{ "GCShopBought", &Inv_GCShopBoughtFactory::id, &Inv_GCShopBoughtFactory::maxSize },
-	{ "GCShopBuyFail", &Inv_GCShopBuyFailFactory::id, &Inv_GCShopBuyFailFactory::maxSize },
-	{ "GCShopBuyOK", &Inv_GCShopBuyOKFactory::id, &Inv_GCShopBuyOKFactory::maxSize },
-	{ "GCShopList", &Inv_GCShopListFactory::id, &Inv_GCShopListFactory::maxSize },
-	{ "GCShopListMysterious", &Inv_GCShopListMysteriousFactory::id, &Inv_GCShopListMysteriousFactory::maxSize },
-	{ "GCShopMarketCondition", &Inv_GCShopMarketConditionFactory::id, &Inv_GCShopMarketConditionFactory::maxSize },
-	{ "GCShopSellFail", &Inv_GCShopSellFailFactory::id, &Inv_GCShopSellFailFactory::maxSize },
-	{ "GCShopSellOK", &Inv_GCShopSellOKFactory::id, &Inv_GCShopSellOKFactory::maxSize },
-	{ "GCShopSold", &Inv_GCShopSoldFactory::id, &Inv_GCShopSoldFactory::maxSize },
-	{ "GCShopVersion", &Inv_GCShopVersionFactory::id, &Inv_GCShopVersionFactory::maxSize },
-	{ "GCShowGuildInfo", &Inv_GCShowGuildInfoFactory::id, &Inv_GCShowGuildInfoFactory::maxSize },
-	{ "GCShowGuildJoin", &Inv_GCShowGuildJoinFactory::id, &Inv_GCShowGuildJoinFactory::maxSize },
-	{ "GCShowGuildMemberInfo", &Inv_GCShowGuildMemberInfoFactory::id, &Inv_GCShowGuildMemberInfoFactory::maxSize },
-	{ "GCShowMessageBox", &Inv_GCShowMessageBoxFactory::id, &Inv_GCShowMessageBoxFactory::maxSize },
-	{ "GCShowUnionInfo", &Inv_GCShowUnionInfoFactory::id, &Inv_GCShowUnionInfoFactory::maxSize },
-	{ "GCShowWaitGuildInfo", &Inv_GCShowWaitGuildInfoFactory::id, &Inv_GCShowWaitGuildInfoFactory::maxSize },
-	{ "GCSkillFailed1", &Inv_GCSkillFailed1Factory::id, &Inv_GCSkillFailed1Factory::maxSize },
-	{ "GCSkillFailed2", &Inv_GCSkillFailed2Factory::id, &Inv_GCSkillFailed2Factory::maxSize },
-	{ "GCSkillInfo", &Inv_GCSkillInfoFactory::id, &Inv_GCSkillInfoFactory::maxSize },
-	{ "GCSkillToInventoryOK1", &Inv_GCSkillToInventoryOK1Factory::id, &Inv_GCSkillToInventoryOK1Factory::maxSize },
-	{ "GCSkillToInventoryOK2", &Inv_GCSkillToInventoryOK2Factory::id, &Inv_GCSkillToInventoryOK2Factory::maxSize },
-	{ "GCSkillToObjectOK1", &Inv_GCSkillToObjectOK1Factory::id, &Inv_GCSkillToObjectOK1Factory::maxSize },
-	{ "GCSkillToObjectOK2", &Inv_GCSkillToObjectOK2Factory::id, &Inv_GCSkillToObjectOK2Factory::maxSize },
-	{ "GCSkillToObjectOK3", &Inv_GCSkillToObjectOK3Factory::id, &Inv_GCSkillToObjectOK3Factory::maxSize },
-	{ "GCSkillToObjectOK4", &Inv_GCSkillToObjectOK4Factory::id, &Inv_GCSkillToObjectOK4Factory::maxSize },
-	{ "GCSkillToObjectOK5", &Inv_GCSkillToObjectOK5Factory::id, &Inv_GCSkillToObjectOK5Factory::maxSize },
-	{ "GCSkillToObjectOK6", &Inv_GCSkillToObjectOK6Factory::id, &Inv_GCSkillToObjectOK6Factory::maxSize },
-	{ "GCSkillToSelfOK1", &Inv_GCSkillToSelfOK1Factory::id, &Inv_GCSkillToSelfOK1Factory::maxSize },
-	{ "GCSkillToSelfOK2", &Inv_GCSkillToSelfOK2Factory::id, &Inv_GCSkillToSelfOK2Factory::maxSize },
-	{ "GCSkillToSelfOK3", &Inv_GCSkillToSelfOK3Factory::id, &Inv_GCSkillToSelfOK3Factory::maxSize },
-	{ "GCSkillToTileOK1", &Inv_GCSkillToTileOK1Factory::id, &Inv_GCSkillToTileOK1Factory::maxSize },
-	{ "GCSkillToTileOK2", &Inv_GCSkillToTileOK2Factory::id, &Inv_GCSkillToTileOK2Factory::maxSize },
-	{ "GCSkillToTileOK3", &Inv_GCSkillToTileOK3Factory::id, &Inv_GCSkillToTileOK3Factory::maxSize },
-	{ "GCSkillToTileOK4", &Inv_GCSkillToTileOK4Factory::id, &Inv_GCSkillToTileOK4Factory::maxSize },
-	{ "GCSkillToTileOK5", &Inv_GCSkillToTileOK5Factory::id, &Inv_GCSkillToTileOK5Factory::maxSize },
-	{ "GCSkillToTileOK6", &Inv_GCSkillToTileOK6Factory::id, &Inv_GCSkillToTileOK6Factory::maxSize },
-	{ "GCStashList", &Inv_GCStashListFactory::id, &Inv_GCStashListFactory::maxSize },
-	{ "GCStashSell", &Inv_GCStashSellFactory::id, &Inv_GCStashSellFactory::maxSize },
-	{ "GCStatusCurrentHP", &Inv_GCStatusCurrentHPFactory::id, &Inv_GCStatusCurrentHPFactory::maxSize },
-	{ "GCSubInventoryInfo", &Inv_GCSubInventoryInfoFactory::id, &Inv_GCSubInventoryInfoFactory::maxSize },
-	{ "GCSweeperBonusInfo", &Inv_GCSweeperBonusInfoFactory::id, &Inv_GCSweeperBonusInfoFactory::maxSize },
-	{ "GCSystemAvailabilities", &Inv_GCSystemAvailabilitiesFactory::id, &Inv_GCSystemAvailabilitiesFactory::maxSize },
-	{ "GCSystemMessage", &Inv_GCSystemMessageFactory::id, &Inv_GCSystemMessageFactory::maxSize },
-	{ "GCTakeOff", &Inv_GCTakeOffFactory::id, &Inv_GCTakeOffFactory::maxSize },
-	{ "GCTakeOutFail", &Inv_GCTakeOutFailFactory::id, &Inv_GCTakeOutFailFactory::maxSize },
-	{ "GCTakeOutOK", &Inv_GCTakeOutOKFactory::id, &Inv_GCTakeOutOKFactory::maxSize },
-	{ "GCTeachSkillInfo", &Inv_GCTeachSkillInfoFactory::id, &Inv_GCTeachSkillInfoFactory::maxSize },
-	{ "GCThrowBombOK1", &Inv_GCThrowBombOK1Factory::id, &Inv_GCThrowBombOK1Factory::maxSize },
-	{ "GCThrowBombOK2", &Inv_GCThrowBombOK2Factory::id, &Inv_GCThrowBombOK2Factory::maxSize },
-	{ "GCThrowBombOK3", &Inv_GCThrowBombOK3Factory::id, &Inv_GCThrowBombOK3Factory::maxSize },
-	{ "GCThrowItemOK1", &Inv_GCThrowItemOK1Factory::id, &Inv_GCThrowItemOK1Factory::maxSize },
-	{ "GCThrowItemOK2", &Inv_GCThrowItemOK2Factory::id, &Inv_GCThrowItemOK2Factory::maxSize },
-	{ "GCThrowItemOK3", &Inv_GCThrowItemOK3Factory::id, &Inv_GCThrowItemOK3Factory::maxSize },
-	{ "GCTimeLimitItemInfo", &Inv_GCTimeLimitItemInfoFactory::id, &Inv_GCTimeLimitItemInfoFactory::maxSize },
-	{ "GCTradeAddItem", &Inv_GCTradeAddItemFactory::id, &Inv_GCTradeAddItemFactory::maxSize },
-	{ "GCTradeError", &Inv_GCTradeErrorFactory::id, &Inv_GCTradeErrorFactory::maxSize },
-	{ "GCTradeFinish", &Inv_GCTradeFinishFactory::id, &Inv_GCTradeFinishFactory::maxSize },
-	{ "GCTradeMoney", &Inv_GCTradeMoneyFactory::id, &Inv_GCTradeMoneyFactory::maxSize },
-	{ "GCTradePrepare", &Inv_GCTradePrepareFactory::id, &Inv_GCTradePrepareFactory::maxSize },
-	{ "GCTradeRemoveItem", &Inv_GCTradeRemoveItemFactory::id, &Inv_GCTradeRemoveItemFactory::maxSize },
-	{ "GCTradeVerify", &Inv_GCTradeVerifyFactory::id, &Inv_GCTradeVerifyFactory::maxSize },
-	{ "GCUnburrowFail", &Inv_GCUnburrowFailFactory::id, &Inv_GCUnburrowFailFactory::maxSize },
-	{ "GCUnburrowOK", &Inv_GCUnburrowOKFactory::id, &Inv_GCUnburrowOKFactory::maxSize },
-	{ "GCUnionOfferList", &Inv_GCUnionOfferListFactory::id, &Inv_GCUnionOfferListFactory::maxSize },
-	{ "GCUntransformFail", &Inv_GCUntransformFailFactory::id, &Inv_GCUntransformFailFactory::maxSize },
-	{ "GCUntransformOK", &Inv_GCUntransformOKFactory::id, &Inv_GCUntransformOKFactory::maxSize },
-	{ "GCUpdateInfo", &Inv_GCUpdateInfoFactory::id, &Inv_GCUpdateInfoFactory::maxSize },
-	{ "GCUseBonusPointFail", &Inv_GCUseBonusPointFailFactory::id, &Inv_GCUseBonusPointFailFactory::maxSize },
-	{ "GCUseBonusPointOK", &Inv_GCUseBonusPointOKFactory::id, &Inv_GCUseBonusPointOKFactory::maxSize },
-	{ "GCUseOK", &Inv_GCUseOKFactory::id, &Inv_GCUseOKFactory::maxSize },
-	{ "GCUseSkillCardOK", &Inv_GCUseSkillCardOKFactory::id, &Inv_GCUseSkillCardOKFactory::maxSize },
-	{ "GCUsePowerPointResult", &Inv_GCUsePowerPointResultFactory::id, &Inv_GCUsePowerPointResultFactory::maxSize },
-	{ "GCVisibleFail", &Inv_GCVisibleFailFactory::id, &Inv_GCVisibleFailFactory::maxSize },
-	{ "GCVisibleOK", &Inv_GCVisibleOKFactory::id, &Inv_GCVisibleOKFactory::maxSize },
-	{ "GCWaitGuildList", &Inv_GCWaitGuildListFactory::id, &Inv_GCWaitGuildListFactory::maxSize },
-	{ "GCWarList", &Inv_GCWarListFactory::id, &Inv_GCWarListFactory::maxSize },
-	{ "GCWarScheduleList", &Inv_GCWarScheduleListFactory::id, &Inv_GCWarScheduleListFactory::maxSize },
-	{ "GCWhisper", &Inv_GCWhisperFactory::id, &Inv_GCWhisperFactory::maxSize },
-	{ "GCWhisperFailed", &Inv_GCWhisperFailedFactory::id, &Inv_GCWhisperFailedFactory::maxSize },
-	{ "GLIncomingConnectionError", &Inv_GLIncomingConnectionErrorFactory::id, &Inv_GLIncomingConnectionErrorFactory::maxSize },
-	{ "GLIncomingConnectionOK", &Inv_GLIncomingConnectionOKFactory::id, &Inv_GLIncomingConnectionOKFactory::maxSize },
-	{ "CGAbsorbSoul", &Inv_CGAbsorbSoulFactory::id, &Inv_CGAbsorbSoulFactory::maxSize },
-	{ "CGAcceptUnion", &Inv_CGAcceptUnionFactory::id, &Inv_CGAcceptUnionFactory::maxSize },
-	{ "CGAddGearToMouse", &Inv_CGAddGearToMouseFactory::id, &Inv_CGAddGearToMouseFactory::maxSize },
-	{ "CGAddInventoryToMouse", &Inv_CGAddInventoryToMouseFactory::id, &Inv_CGAddInventoryToMouseFactory::maxSize },
-	{ "CGAddItemToCodeSheet", &Inv_CGAddItemToCodeSheetFactory::id, &Inv_CGAddItemToCodeSheetFactory::maxSize },
-	{ "CGAddItemToItem", &Inv_CGAddItemToItemFactory::id, &Inv_CGAddItemToItemFactory::maxSize },
-	{ "CGAddMouseToGear", &Inv_CGAddMouseToGearFactory::id, &Inv_CGAddMouseToGearFactory::maxSize },
-	{ "CGAddMouseToInventory", &Inv_CGAddMouseToInventoryFactory::id, &Inv_CGAddMouseToInventoryFactory::maxSize },
-	{ "CGAddMouseToQuickSlot", &Inv_CGAddMouseToQuickSlotFactory::id, &Inv_CGAddMouseToQuickSlotFactory::maxSize },
-	{ "CGAddMouseToZone", &Inv_CGAddMouseToZoneFactory::id, &Inv_CGAddMouseToZoneFactory::maxSize },
-	{ "CGAddQuickSlotToMouse", &Inv_CGAddQuickSlotToMouseFactory::id, &Inv_CGAddQuickSlotToMouseFactory::maxSize },
-	{ "CGAddSMSAddress", &Inv_CGAddSMSAddressFactory::id, &Inv_CGAddSMSAddressFactory::maxSize },
-	{ "CGAddZoneToInventory", &Inv_CGAddZoneToInventoryFactory::id, &Inv_CGAddZoneToInventoryFactory::maxSize },
-	{ "CGAddZoneToMouse", &Inv_CGAddZoneToMouseFactory::id, &Inv_CGAddZoneToMouseFactory::maxSize },
-	{ "CGAppointSubmaster", &Inv_CGAppointSubmasterFactory::id, &Inv_CGAppointSubmasterFactory::maxSize },
-	{ "CGAttack", &Inv_CGAttackFactory::id, &Inv_CGAttackFactory::maxSize },
-	{ "CGAuthKey", &Inv_CGAuthKeyFactory::id, &Inv_CGAuthKeyFactory::maxSize },
-	{ "CGBloodDrain", &Inv_CGBloodDrainFactory::id, &Inv_CGBloodDrainFactory::maxSize },
-	{ "CGBuyStoreItem", &Inv_CGBuyStoreItemFactory::id, &Inv_CGBuyStoreItemFactory::maxSize },
-	{ "CGCastingSkill", &Inv_CGCastingSkillFactory::id, &Inv_CGCastingSkillFactory::maxSize },
-	{ "CGConnect", &Inv_CGConnectFactory::id, &Inv_CGConnectFactory::maxSize },
-	{ "CGConnectSetKey", &Inv_CGConnectSetKeyFactory::id, &Inv_CGConnectSetKeyFactory::maxSize },
-	{ "CGCrashReport", &Inv_CGCrashReportFactory::id, &Inv_CGCrashReportFactory::maxSize },
-	{ "CGDeleteSMSAddress", &Inv_CGDeleteSMSAddressFactory::id, &Inv_CGDeleteSMSAddressFactory::maxSize },
-	{ "CGDenyUnion", &Inv_CGDenyUnionFactory::id, &Inv_CGDenyUnionFactory::maxSize },
-	{ "CGDepositPet", &Inv_CGDepositPetFactory::id, &Inv_CGDepositPetFactory::maxSize },
-	{ "CGDialUp", &Inv_CGDialUpFactory::id, &Inv_CGDialUpFactory::maxSize },
-	{ "CGDisplayItem", &Inv_CGDisplayItemFactory::id, &Inv_CGDisplayItemFactory::maxSize },
-	{ "CGDissectionCorpse", &Inv_CGDissectionCorpseFactory::id, &Inv_CGDissectionCorpseFactory::maxSize },
-	{ "CGDonationMoney", &Inv_CGDonationMoneyFactory::id, &Inv_CGDonationMoneyFactory::maxSize },
-	{ "CGDownSkill", &Inv_CGDownSkillFactory::id, &Inv_CGDownSkillFactory::maxSize },
-	{ "CGDropMoney", &Inv_CGDropMoneyFactory::id, &Inv_CGDropMoneyFactory::maxSize },
-	{ "CGExchangeBuy", &Inv_CGExchangeBuyFactory::id, &Inv_CGExchangeBuyFactory::maxSize },
-	{ "CGExchangeList", &Inv_CGExchangeListFactory::id, &Inv_CGExchangeListFactory::maxSize },
-	{ "CGExpelGuild", &Inv_CGExpelGuildFactory::id, &Inv_CGExpelGuildFactory::maxSize },
-	{ "CGFailQuest", &Inv_CGFailQuestFactory::id, &Inv_CGFailQuestFactory::maxSize },
-	{ "CGGQuestAccept", &Inv_CGGQuestAcceptFactory::id, &Inv_CGGQuestAcceptFactory::maxSize },
-	{ "CGGQuestCancel", &Inv_CGGQuestCancelFactory::id, &Inv_CGGQuestCancelFactory::maxSize },
-	{ "CGGetEventItem", &Inv_CGGetEventItemFactory::id, &Inv_CGGetEventItemFactory::maxSize },
-	{ "CGGetOffMotorCycle", &Inv_CGGetOffMotorCycleFactory::id, &Inv_CGGetOffMotorCycleFactory::maxSize },
-	{ "CGGlobalChat", &Inv_CGGlobalChatFactory::id, &Inv_CGGlobalChatFactory::maxSize },
-	{ "CGGuildChat", &Inv_CGGuildChatFactory::id, &Inv_CGGuildChatFactory::maxSize },
-	{ "CGJoinGuild", &Inv_CGJoinGuildFactory::id, &Inv_CGJoinGuildFactory::maxSize },
-	{ "CGLearnSkill", &Inv_CGLearnSkillFactory::id, &Inv_CGLearnSkillFactory::maxSize },
-	{ "CGLogout", &Inv_CGLogoutFactory::id, &Inv_CGLogoutFactory::maxSize },
-	{ "CGLotterySelect", &Inv_CGLotterySelectFactory::id, &Inv_CGLotterySelectFactory::maxSize },
-	{ "CGMakeItem", &Inv_CGMakeItemFactory::id, &Inv_CGMakeItemFactory::maxSize },
-	{ "CGMixItem", &Inv_CGMixItemFactory::id, &Inv_CGMixItemFactory::maxSize },
-	{ "CGModifyGuildIntro", &Inv_CGModifyGuildIntroFactory::id, &Inv_CGModifyGuildIntroFactory::maxSize },
-	{ "CGModifyGuildMember", &Inv_CGModifyGuildMemberFactory::id, &Inv_CGModifyGuildMemberFactory::maxSize },
-	{ "CGModifyGuildMemberIntro", &Inv_CGModifyGuildMemberIntroFactory::id, &Inv_CGModifyGuildMemberIntroFactory::maxSize },
-	{ "CGModifyNickname", &Inv_CGModifyNicknameFactory::id, &Inv_CGModifyNicknameFactory::maxSize },
-	{ "CGModifyTaxRatio", &Inv_CGModifyTaxRatioFactory::id, &Inv_CGModifyTaxRatioFactory::maxSize },
-	{ "CGMouseToStash", &Inv_CGMouseToStashFactory::id, &Inv_CGMouseToStashFactory::maxSize },
-	{ "CGMove", &Inv_CGMoveFactory::id, &Inv_CGMoveFactory::maxSize },
-	{ "CGNPCAskAnswer", &Inv_CGNPCAskAnswerFactory::id, &Inv_CGNPCAskAnswerFactory::maxSize },
-	{ "CGNPCTalk", &Inv_CGNPCTalkFactory::id, &Inv_CGNPCTalkFactory::maxSize },
-	{ "CGPartyInvite", &Inv_CGPartyInviteFactory::id, &Inv_CGPartyInviteFactory::maxSize },
-	{ "CGPartyLeave", &Inv_CGPartyLeaveFactory::id, &Inv_CGPartyLeaveFactory::maxSize },
-	{ "CGPartyPosition", &Inv_CGPartyPositionFactory::id, &Inv_CGPartyPositionFactory::maxSize },
-	{ "CGPartySay", &Inv_CGPartySayFactory::id, &Inv_CGPartySayFactory::maxSize },
-	{ "CGPetGamble", &Inv_CGPetGambleFactory::id, &Inv_CGPetGambleFactory::maxSize },
-	{ "CGPhoneDisconnect", &Inv_CGPhoneDisconnectFactory::id, &Inv_CGPhoneDisconnectFactory::maxSize },
-	{ "CGPhoneSay", &Inv_CGPhoneSayFactory::id, &Inv_CGPhoneSayFactory::maxSize },
-	{ "CGPickupMoney", &Inv_CGPickupMoneyFactory::id, &Inv_CGPickupMoneyFactory::maxSize },
-	{ "CGPortCheck", &Inv_CGPortCheckFactory::id, &Inv_CGPortCheckFactory::maxSize },
-	{ "CGQuitUnion", &Inv_CGQuitUnionFactory::id, &Inv_CGQuitUnionFactory::maxSize },
-	{ "CGQuitUnionAccept", &Inv_CGQuitUnionAcceptFactory::id, &Inv_CGQuitUnionAcceptFactory::maxSize },
-	{ "CGQuitUnionDeny", &Inv_CGQuitUnionDenyFactory::id, &Inv_CGQuitUnionDenyFactory::maxSize },
-	{ "CGRangerSay", &Inv_CGRangerSayFactory::id, &Inv_CGRangerSayFactory::maxSize },
-	{ "CGReady", &Inv_CGReadyFactory::id, &Inv_CGReadyFactory::maxSize },
-	{ "CGRegistGuild", &Inv_CGRegistGuildFactory::id, &Inv_CGRegistGuildFactory::maxSize },
-	{ "CGRelicToObject", &Inv_CGRelicToObjectFactory::id, &Inv_CGRelicToObjectFactory::maxSize },
-	{ "CGReloadFromInventory", &Inv_CGReloadFromInventoryFactory::id, &Inv_CGReloadFromInventoryFactory::maxSize },
-	{ "CGReloadFromQuickSlot", &Inv_CGReloadFromQuickSlotFactory::id, &Inv_CGReloadFromQuickSlotFactory::maxSize },
-	{ "CGRequestGuildList", &Inv_CGRequestGuildListFactory::id, &Inv_CGRequestGuildListFactory::maxSize },
-	{ "CGRequestGuildMemberList", &Inv_CGRequestGuildMemberListFactory::id, &Inv_CGRequestGuildMemberListFactory::maxSize },
-	{ "CGRequestIP", &Inv_CGRequestIPFactory::id, &Inv_CGRequestIPFactory::maxSize },
-	{ "CGRequestInfo", &Inv_CGRequestInfoFactory::id, &Inv_CGRequestInfoFactory::maxSize },
-	{ "CGRequestNewbieItem", &Inv_CGRequestNewbieItemFactory::id, &Inv_CGRequestNewbieItemFactory::maxSize },
-	{ "CGRequestPowerPoint", &Inv_CGRequestPowerPointFactory::id, &Inv_CGRequestPowerPointFactory::maxSize },
-	{ "CGRequestRepair", &Inv_CGRequestRepairFactory::id, &Inv_CGRequestRepairFactory::maxSize },
-	{ "CGRequestStoreInfo", &Inv_CGRequestStoreInfoFactory::id, &Inv_CGRequestStoreInfoFactory::maxSize },
-	{ "CGRequestUnion", &Inv_CGRequestUnionFactory::id, &Inv_CGRequestUnionFactory::maxSize },
-	{ "CGRequestUnionInfo", &Inv_CGRequestUnionInfoFactory::id, &Inv_CGRequestUnionInfoFactory::maxSize },
-	{ "CGResurrect", &Inv_CGResurrectFactory::id, &Inv_CGResurrectFactory::maxSize },
-	{ "CGRideMotorCycle", &Inv_CGRideMotorCycleFactory::id, &Inv_CGRideMotorCycleFactory::maxSize },
-	{ "CGSMSAddressList", &Inv_CGSMSAddressListFactory::id, &Inv_CGSMSAddressListFactory::maxSize },
-	{ "CGSMSSend", &Inv_CGSMSSendFactory::id, &Inv_CGSMSSendFactory::maxSize },
-	{ "CGSay", &Inv_CGSayFactory::id, &Inv_CGSayFactory::maxSize },
-	{ "CGSelectBloodBible", &Inv_CGSelectBloodBibleFactory::id, &Inv_CGSelectBloodBibleFactory::maxSize },
-	{ "CGSelectGuild", &Inv_CGSelectGuildFactory::id, &Inv_CGSelectGuildFactory::maxSize },
-	{ "CGSelectGuildMember", &Inv_CGSelectGuildMemberFactory::id, &Inv_CGSelectGuildMemberFactory::maxSize },
-	{ "CGSelectNickname", &Inv_CGSelectNicknameFactory::id, &Inv_CGSelectNicknameFactory::maxSize },
-	{ "CGSelectPortal", &Inv_CGSelectPortalFactory::id, &Inv_CGSelectPortalFactory::maxSize },
-	{ "CGSelectQuest", &Inv_CGSelectQuestFactory::id, &Inv_CGSelectQuestFactory::maxSize },
-	{ "CGSelectRankBonus", &Inv_CGSelectRankBonusFactory::id, &Inv_CGSelectRankBonusFactory::maxSize },
-	{ "CGSelectRegenZone", &Inv_CGSelectRegenZoneFactory::id, &Inv_CGSelectRegenZoneFactory::maxSize },
-	{ "CGSelectTileEffect", &Inv_CGSelectTileEffectFactory::id, &Inv_CGSelectTileEffectFactory::maxSize },
-	{ "CGSelectWayPoint", &Inv_CGSelectWayPointFactory::id, &Inv_CGSelectWayPointFactory::maxSize },
-	{ "CGSetSlayerHotKey", &Inv_CGSetSlayerHotKeyFactory::id, &Inv_CGSetSlayerHotKeyFactory::maxSize },
-	{ "CGSetVampireHotKey", &Inv_CGSetVampireHotKeyFactory::id, &Inv_CGSetVampireHotKeyFactory::maxSize },
-	{ "CGShopRequestBuy", &Inv_CGShopRequestBuyFactory::id, &Inv_CGShopRequestBuyFactory::maxSize },
-	{ "CGShopRequestList", &Inv_CGShopRequestListFactory::id, &Inv_CGShopRequestListFactory::maxSize },
-	{ "CGShopRequestSell", &Inv_CGShopRequestSellFactory::id, &Inv_CGShopRequestSellFactory::maxSize },
-	{ "CGSilverCoating", &Inv_CGSilverCoatingFactory::id, &Inv_CGSilverCoatingFactory::maxSize },
-	{ "CGSkillToInventory", &Inv_CGSkillToInventoryFactory::id, &Inv_CGSkillToInventoryFactory::maxSize },
-	{ "CGSkillToNamed", &Inv_CGSkillToNamedFactory::id, &Inv_CGSkillToNamedFactory::maxSize },
-	{ "CGSkillToObject", &Inv_CGSkillToObjectFactory::id, &Inv_CGSkillToObjectFactory::maxSize },
-	{ "CGSkillToSelf", &Inv_CGSkillToSelfFactory::id, &Inv_CGSkillToSelfFactory::maxSize },
-	{ "CGSkillToTile", &Inv_CGSkillToTileFactory::id, &Inv_CGSkillToTileFactory::maxSize },
-	{ "CGStashDeposit", &Inv_CGStashDepositFactory::id, &Inv_CGStashDepositFactory::maxSize },
-	{ "CGStashList", &Inv_CGStashListFactory::id, &Inv_CGStashListFactory::maxSize },
-	{ "CGStashRequestBuy", &Inv_CGStashRequestBuyFactory::id, &Inv_CGStashRequestBuyFactory::maxSize },
-	{ "CGStashToMouse", &Inv_CGStashToMouseFactory::id, &Inv_CGStashToMouseFactory::maxSize },
-	{ "CGStashWithdraw", &Inv_CGStashWithdrawFactory::id, &Inv_CGStashWithdrawFactory::maxSize },
-	{ "CGStoreClose", &Inv_CGStoreCloseFactory::id, &Inv_CGStoreCloseFactory::maxSize },
-	{ "CGStoreOpen", &Inv_CGStoreOpenFactory::id, &Inv_CGStoreOpenFactory::maxSize },
-	{ "CGStoreSign", &Inv_CGStoreSignFactory::id, &Inv_CGStoreSignFactory::maxSize },
-	{ "CGSubmitScore", &Inv_CGSubmitScoreFactory::id, &Inv_CGSubmitScoreFactory::maxSize },
-	{ "CGTakeOutGood", &Inv_CGTakeOutGoodFactory::id, &Inv_CGTakeOutGoodFactory::maxSize },
-	{ "CGTameMonster", &Inv_CGTameMonsterFactory::id, &Inv_CGTameMonsterFactory::maxSize },
-	{ "CGThrowBomb", &Inv_CGThrowBombFactory::id, &Inv_CGThrowBombFactory::maxSize },
-	{ "CGThrowItem", &Inv_CGThrowItemFactory::id, &Inv_CGThrowItemFactory::maxSize },
-	{ "CGTradeAddItem", &Inv_CGTradeAddItemFactory::id, &Inv_CGTradeAddItemFactory::maxSize },
-	{ "CGTradeFinish", &Inv_CGTradeFinishFactory::id, &Inv_CGTradeFinishFactory::maxSize },
-	{ "CGTradeMoney", &Inv_CGTradeMoneyFactory::id, &Inv_CGTradeMoneyFactory::maxSize },
-	{ "CGTradePrepare", &Inv_CGTradePrepareFactory::id, &Inv_CGTradePrepareFactory::maxSize },
-	{ "CGTradeRemoveItem", &Inv_CGTradeRemoveItemFactory::id, &Inv_CGTradeRemoveItemFactory::maxSize },
-	{ "CGTryJoinGuild", &Inv_CGTryJoinGuildFactory::id, &Inv_CGTryJoinGuildFactory::maxSize },
-	{ "CGTypeStringList", &Inv_CGTypeStringListFactory::id, &Inv_CGTypeStringListFactory::maxSize },
-	{ "CGUnburrow", &Inv_CGUnburrowFactory::id, &Inv_CGUnburrowFactory::maxSize },
-	{ "CGUndisplayItem", &Inv_CGUndisplayItemFactory::id, &Inv_CGUndisplayItemFactory::maxSize },
-	{ "CGUntransform", &Inv_CGUntransformFactory::id, &Inv_CGUntransformFactory::maxSize },
-	{ "CGUseBonusPoint", &Inv_CGUseBonusPointFactory::id, &Inv_CGUseBonusPointFactory::maxSize },
-	{ "CGUseItemFromGQuestInventory", &Inv_CGUseItemFromGQuestInventoryFactory::id, &Inv_CGUseItemFromGQuestInventoryFactory::maxSize },
-	{ "CGUseItemFromGear", &Inv_CGUseItemFromGearFactory::id, &Inv_CGUseItemFromGearFactory::maxSize },
-	{ "CGUseItemFromInventory", &Inv_CGUseItemFromInventoryFactory::id, &Inv_CGUseItemFromInventoryFactory::maxSize },
-	{ "CGUseMessageItemFromInventory", &Inv_CGUseMessageItemFromInventoryFactory::id, &Inv_CGUseMessageItemFromInventoryFactory::maxSize },
-	{ "CGUsePotionFromInventory", &Inv_CGUsePotionFromInventoryFactory::id, &Inv_CGUsePotionFromInventoryFactory::maxSize },
-	{ "CGUsePotionFromQuickSlot", &Inv_CGUsePotionFromQuickSlotFactory::id, &Inv_CGUsePotionFromQuickSlotFactory::maxSize },
-	{ "CGUsePowerPoint", &Inv_CGUsePowerPointFactory::id, &Inv_CGUsePowerPointFactory::maxSize },
-	{ "CGVerifyTime", &Inv_CGVerifyTimeFactory::id, &Inv_CGVerifyTimeFactory::maxSize },
-	{ "CGVisible", &Inv_CGVisibleFactory::id, &Inv_CGVisibleFactory::maxSize },
-	{ "CGWhisper", &Inv_CGWhisperFactory::id, &Inv_CGWhisperFactory::maxSize },
-	{ "CGWithdrawPet", &Inv_CGWithdrawPetFactory::id, &Inv_CGWithdrawPetFactory::maxSize },
-	{ "CGWithdrawTax", &Inv_CGWithdrawTaxFactory::id, &Inv_CGWithdrawTaxFactory::maxSize },
-	{ "CLChangeServer", &Inv_CLChangeServerFactory::id, &Inv_CLChangeServerFactory::maxSize },
-	{ "CLCreatePC", &Inv_CLCreatePCFactory::id, &Inv_CLCreatePCFactory::maxSize },
-	{ "CLDeletePC", &Inv_CLDeletePCFactory::id, &Inv_CLDeletePCFactory::maxSize },
-	{ "CLGetPCList", &Inv_CLGetPCListFactory::id, &Inv_CLGetPCListFactory::maxSize },
-	{ "CLGetServerList", &Inv_CLGetServerListFactory::id, &Inv_CLGetServerListFactory::maxSize },
-	{ "CLGetWorldList", &Inv_CLGetWorldListFactory::id, &Inv_CLGetWorldListFactory::maxSize },
-	{ "CLLogin", &Inv_CLLoginFactory::id, &Inv_CLLoginFactory::maxSize },
-	{ "CLLogout", &Inv_CLLogoutFactory::id, &Inv_CLLogoutFactory::maxSize },
-	{ "CLQueryCharacterName", &Inv_CLQueryCharacterNameFactory::id, &Inv_CLQueryCharacterNameFactory::maxSize },
-	{ "CLQueryPlayerID", &Inv_CLQueryPlayerIDFactory::id, &Inv_CLQueryPlayerIDFactory::maxSize },
-	{ "CLReconnectLogin", &Inv_CLReconnectLoginFactory::id, &Inv_CLReconnectLoginFactory::maxSize },
-	{ "CLRegisterPlayer", &Inv_CLRegisterPlayerFactory::id, &Inv_CLRegisterPlayerFactory::maxSize },
-	{ "CLSelectPC", &Inv_CLSelectPCFactory::id, &Inv_CLSelectPCFactory::maxSize },
-	{ "CLSelectServer", &Inv_CLSelectServerFactory::id, &Inv_CLSelectServerFactory::maxSize },
-	{ "CLSelectWorld", &Inv_CLSelectWorldFactory::id, &Inv_CLSelectWorldFactory::maxSize },
-	{ "CLVersionCheck", &Inv_CLVersionCheckFactory::id, &Inv_CLVersionCheckFactory::maxSize },
-	{ "LCCreatePCError", &Inv_LCCreatePCErrorFactory::id, &Inv_LCCreatePCErrorFactory::maxSize },
-	{ "LCCreatePCOK", &Inv_LCCreatePCOKFactory::id, &Inv_LCCreatePCOKFactory::maxSize },
-	{ "LCDeletePCError", &Inv_LCDeletePCErrorFactory::id, &Inv_LCDeletePCErrorFactory::maxSize },
-	{ "LCDeletePCOK", &Inv_LCDeletePCOKFactory::id, &Inv_LCDeletePCOKFactory::maxSize },
-	{ "LCLoginError", &Inv_LCLoginErrorFactory::id, &Inv_LCLoginErrorFactory::maxSize },
-	{ "LCLoginOK", &Inv_LCLoginOKFactory::id, &Inv_LCLoginOKFactory::maxSize },
-	{ "LCPCList", &Inv_LCPCListFactory::id, &Inv_LCPCListFactory::maxSize },
-	{ "LCQueryResultCharacterName", &Inv_LCQueryResultCharacterNameFactory::id, &Inv_LCQueryResultCharacterNameFactory::maxSize },
-	{ "LCQueryResultPlayerID", &Inv_LCQueryResultPlayerIDFactory::id, &Inv_LCQueryResultPlayerIDFactory::maxSize },
-	{ "LCReconnect", &Inv_LCReconnectFactory::id, &Inv_LCReconnectFactory::maxSize },
-	{ "LCRegisterPlayerError", &Inv_LCRegisterPlayerErrorFactory::id, &Inv_LCRegisterPlayerErrorFactory::maxSize },
-	{ "LCRegisterPlayerOK", &Inv_LCRegisterPlayerOKFactory::id, &Inv_LCRegisterPlayerOKFactory::maxSize },
-	{ "LCSelectPCError", &Inv_LCSelectPCErrorFactory::id, &Inv_LCSelectPCErrorFactory::maxSize },
-	{ "LCServerList", &Inv_LCServerListFactory::id, &Inv_LCServerListFactory::maxSize },
-	{ "LCVersionCheckError", &Inv_LCVersionCheckErrorFactory::id, &Inv_LCVersionCheckErrorFactory::maxSize },
-	{ "LCVersionCheckOK", &Inv_LCVersionCheckOKFactory::id, &Inv_LCVersionCheckOKFactory::maxSize },
-	{ "LCWorldList", &Inv_LCWorldListFactory::id, &Inv_LCWorldListFactory::maxSize },
-	{ "LGIncomingConnection", &Inv_LGIncomingConnectionFactory::id, &Inv_LGIncomingConnectionFactory::maxSize },
-	{ "CURequestLoginMode", &Inv_CURequestLoginModeFactory::id, &Inv_CURequestLoginModeFactory::maxSize },
-	{ "UCRequestLoginMode", &Inv_UCRequestLoginModeFactory::id, &Inv_UCRequestLoginModeFactory::maxSize },
+	factories.push_back(FactoryEntry("GCActiveGuildList", new GCActiveGuildListFactory(), true));
+	factories.push_back(FactoryEntry("GCAddBat", new GCAddBatFactory(), true));
+	factories.push_back(FactoryEntry("GCAddBurrowingCreature", new GCAddBurrowingCreatureFactory(), true));
+	factories.push_back(FactoryEntry("GCAddEffect", new GCAddEffectFactory(), true));
+	factories.push_back(FactoryEntry("GCAddEffectToTile", new GCAddEffectToTileFactory(), true));
+	factories.push_back(FactoryEntry("GCAddGearToInventory", new GCAddGearToInventoryFactory(), true));
+	factories.push_back(FactoryEntry("GCAddGearToZone", new GCAddGearToZoneFactory(), true));
+	factories.push_back(FactoryEntry("GCAddHelicopter", new GCAddHelicopterFactory(), true));
+	factories.push_back(FactoryEntry("GCAddInjuriousCreature", new GCAddInjuriousCreatureFactory(), true));
+	factories.push_back(FactoryEntry("GCAddInstalledMineToZone", new GCAddInstalledMineToZoneFactory(), true));
+	factories.push_back(FactoryEntry("GCAddItemToItemVerify", new GCAddItemToItemVerifyFactory(), true));
+	factories.push_back(FactoryEntry("GCAddMonster", new GCAddMonsterFactory(), true));
+	factories.push_back(FactoryEntry("GCAddMonsterCorpse", new GCAddMonsterCorpseFactory(), true));
+	factories.push_back(FactoryEntry("GCAddMonsterFromBurrowing", new GCAddMonsterFromBurrowingFactory(), true));
+	factories.push_back(FactoryEntry("GCAddMonsterFromTransformation", new GCAddMonsterFromTransformationFactory(), true));
+	factories.push_back(FactoryEntry("GCAddNPC", new GCAddNPCFactory(), true));
+	factories.push_back(FactoryEntry("GCAddNewItemToZone", new GCAddNewItemToZoneFactory(), true));
+	factories.push_back(FactoryEntry("GCAddNickname", new GCAddNicknameFactory(), true));
+	factories.push_back(FactoryEntry("GCAddOusters", new GCAddOustersFactory(), true));
+	factories.push_back(FactoryEntry("GCAddOustersCorpse", new GCAddOustersCorpseFactory(), true));
+	factories.push_back(FactoryEntry("GCAddSlayer", new GCAddSlayerFactory(), true));
+	factories.push_back(FactoryEntry("GCAddSlayerCorpse", new GCAddSlayerCorpseFactory(), true));
+	factories.push_back(FactoryEntry("GCAddStoreItem", new GCAddStoreItemFactory(), true));
+	factories.push_back(FactoryEntry("GCAddVampire", new GCAddVampireFactory(), true));
+	factories.push_back(FactoryEntry("GCAddVampireCorpse", new GCAddVampireCorpseFactory(), true));
+	factories.push_back(FactoryEntry("GCAddVampireFromBurrowing", new GCAddVampireFromBurrowingFactory(), true));
+	factories.push_back(FactoryEntry("GCAddVampireFromTransformation", new GCAddVampireFromTransformationFactory(), true));
+	factories.push_back(FactoryEntry("GCAddVampirePortal", new GCAddVampirePortalFactory(), true));
+	factories.push_back(FactoryEntry("GCAddWolf", new GCAddWolfFactory(), true));
+	factories.push_back(FactoryEntry("GCAddressListVerify", new GCAddressListVerifyFactory(), true));
+	factories.push_back(FactoryEntry("GCAttack", new GCAttackFactory(), true));
+	factories.push_back(FactoryEntry("GCAttackArmsOK1", new GCAttackArmsOK1Factory(), true));
+	factories.push_back(FactoryEntry("GCAttackArmsOK2", new GCAttackArmsOK2Factory(), true));
+	factories.push_back(FactoryEntry("GCAttackArmsOK3", new GCAttackArmsOK3Factory(), true));
+	factories.push_back(FactoryEntry("GCAttackArmsOK4", new GCAttackArmsOK4Factory(), true));
+	factories.push_back(FactoryEntry("GCAttackArmsOK5", new GCAttackArmsOK5Factory(), true));
+	factories.push_back(FactoryEntry("GCAttackMeleeOK1", new GCAttackMeleeOK1Factory(), true));
+	factories.push_back(FactoryEntry("GCAttackMeleeOK2", new GCAttackMeleeOK2Factory(), true));
+	factories.push_back(FactoryEntry("GCAttackMeleeOK3", new GCAttackMeleeOK3Factory(), true));
+	factories.push_back(FactoryEntry("GCAuthKey", new GCAuthKeyFactory(), true));
+	factories.push_back(FactoryEntry("GCBloodBibleList", new GCBloodBibleListFactory(), true));
+	factories.push_back(FactoryEntry("GCBloodBibleSignInfo", new GCBloodBibleSignInfoFactory(), true));
+	factories.push_back(FactoryEntry("GCBloodBibleStatus", new GCBloodBibleStatusFactory(), true));
+	factories.push_back(FactoryEntry("GCBloodDrainOK1", new GCBloodDrainOK1Factory(), true));
+	factories.push_back(FactoryEntry("GCBloodDrainOK2", new GCBloodDrainOK2Factory(), true));
+	factories.push_back(FactoryEntry("GCBloodDrainOK3", new GCBloodDrainOK3Factory(), true));
+	factories.push_back(FactoryEntry("GCCannotAdd", new GCCannotAddFactory(), true));
+	factories.push_back(FactoryEntry("GCCannotUse", new GCCannotUseFactory(), true));
+	factories.push_back(FactoryEntry("GCCastingSkill", new GCCastingSkillFactory(), true));
+	factories.push_back(FactoryEntry("GCChangeDarkLight", new GCChangeDarkLightFactory(), true));
+	factories.push_back(FactoryEntry("GCChangeShape", new GCChangeShapeFactory(), true));
+	factories.push_back(FactoryEntry("GCChangeWeather", new GCChangeWeatherFactory(), true));
+	factories.push_back(FactoryEntry("GCCreateItem", new GCCreateItemFactory(), true));
+	factories.push_back(FactoryEntry("GCCreatureDied", new GCCreatureDiedFactory(), true));
+	factories.push_back(FactoryEntry("GCCrossCounterOK1", new GCCrossCounterOK1Factory(), true));
+	factories.push_back(FactoryEntry("GCCrossCounterOK2", new GCCrossCounterOK2Factory(), true));
+	factories.push_back(FactoryEntry("GCCrossCounterOK3", new GCCrossCounterOK3Factory(), true));
+	factories.push_back(FactoryEntry("GCDeleteEffectFromTile", new GCDeleteEffectFromTileFactory(), true));
+	factories.push_back(FactoryEntry("GCDeleteInventoryItem", new GCDeleteInventoryItemFactory(), true));
+	factories.push_back(FactoryEntry("GCDeleteObject", new GCDeleteObjectFactory(), true));
+	factories.push_back(FactoryEntry("GCDeleteandPickUpOK", new GCDeleteandPickUpOKFactory(), true));
+	factories.push_back(FactoryEntry("GCDisconnect", new GCDisconnectFactory(), true));
+	factories.push_back(FactoryEntry("GCDownSkillFailed", new GCDownSkillFailedFactory(), true));
+	factories.push_back(FactoryEntry("GCDownSkillOK", new GCDownSkillOKFactory(), true));
+	factories.push_back(FactoryEntry("GCDropItemToZone", new GCDropItemToZoneFactory(), true));
+	factories.push_back(FactoryEntry("GCEnterVampirePortal", new GCEnterVampirePortalFactory(), true));
+	factories.push_back(FactoryEntry("GCExchangeBuy", new GCExchangeBuyFactory(), true));
+	factories.push_back(FactoryEntry("GCExchangeList", new GCExchangeListFactory(), true));
+	factories.push_back(FactoryEntry("GCExecuteElement", new GCExecuteElementFactory(), true));
+	factories.push_back(FactoryEntry("GCFakeMove", new GCFakeMoveFactory(), true));
+	factories.push_back(FactoryEntry("GCFastMove", new GCFastMoveFactory(), true));
+	factories.push_back(FactoryEntry("GCFlagWarStatus", new GCFlagWarStatusFactory(), true));
+	factories.push_back(FactoryEntry("GCFriendChatting", new GCFriendChattingFactory(), true));
+	factories.push_back(FactoryEntry("GCGQuestInventory", new GCGQuestInventoryFactory(), true));
+	factories.push_back(FactoryEntry("GCGQuestStatusInfo", new GCGQuestStatusInfoFactory(), true));
+	factories.push_back(FactoryEntry("GCGQuestStatusModify", new GCGQuestStatusModifyFactory(), true));
+	factories.push_back(FactoryEntry("GCGetDamage", new GCGetDamageFactory(), true));
+	factories.push_back(FactoryEntry("GCGetOffMotorCycle", new GCGetOffMotorCycleFactory(), true));
+	factories.push_back(FactoryEntry("GCGetOffMotorCycleFailed", new GCGetOffMotorCycleFailedFactory(), true));
+	factories.push_back(FactoryEntry("GCGetOffMotorCycleOK", new GCGetOffMotorCycleOKFactory(), true));
+	factories.push_back(FactoryEntry("GCGlobalChat", new GCGlobalChatFactory(), true));
+	factories.push_back(FactoryEntry("GCGoodsList", new GCGoodsListFactory(), true));
+	factories.push_back(FactoryEntry("GCGuildChat", new GCGuildChatFactory(), true));
+	factories.push_back(FactoryEntry("GCGuildMemberList", new GCGuildMemberListFactory(), true));
+	factories.push_back(FactoryEntry("GCGuildResponse", new GCGuildResponseFactory(), true));
+	factories.push_back(FactoryEntry("GCHPRecoveryEndToOthers", new GCHPRecoveryEndToOthersFactory(), true));
+	factories.push_back(FactoryEntry("GCHPRecoveryEndToSelf", new GCHPRecoveryEndToSelfFactory(), true));
+	factories.push_back(FactoryEntry("GCHPRecoveryStartToOthers", new GCHPRecoveryStartToOthersFactory(), true));
+	factories.push_back(FactoryEntry("GCHPRecoveryStartToSelf", new GCHPRecoveryStartToSelfFactory(), true));
+	factories.push_back(FactoryEntry("GCHolyLandBonusInfo", new GCHolyLandBonusInfoFactory(), true));
+	factories.push_back(FactoryEntry("GCKickMessage", new GCKickMessageFactory(), true));
+	factories.push_back(FactoryEntry("GCKnockBack", new GCKnockBackFactory(), true));
+	factories.push_back(FactoryEntry("GCKnocksTargetBackOK1", new GCKnocksTargetBackOK1Factory(), true));
+	factories.push_back(FactoryEntry("GCKnocksTargetBackOK2", new GCKnocksTargetBackOK2Factory(), true));
+	factories.push_back(FactoryEntry("GCKnocksTargetBackOK4", new GCKnocksTargetBackOK4Factory(), true));
+	factories.push_back(FactoryEntry("GCKnocksTargetBackOK5", new GCKnocksTargetBackOK5Factory(), true));
+	factories.push_back(FactoryEntry("GCLearnSkillFailed", new GCLearnSkillFailedFactory(), true));
+	factories.push_back(FactoryEntry("GCLearnSkillOK", new GCLearnSkillOKFactory(), true));
+	factories.push_back(FactoryEntry("GCLearnSkillReady", new GCLearnSkillReadyFactory(), true));
+	factories.push_back(FactoryEntry("GCLightning", new GCLightningFactory(), true));
+	factories.push_back(FactoryEntry("GCMPRecoveryEnd", new GCMPRecoveryEndFactory(), true));
+	factories.push_back(FactoryEntry("GCMPRecoveryStart", new GCMPRecoveryStartFactory(), true));
+	factories.push_back(FactoryEntry("GCMakeItemFail", new GCMakeItemFailFactory(), true));
+	factories.push_back(FactoryEntry("GCMakeItemOK", new GCMakeItemOKFactory(), true));
+	factories.push_back(FactoryEntry("GCMineExplosionOK1", new GCMineExplosionOK1Factory(), true));
+	factories.push_back(FactoryEntry("GCMineExplosionOK2", new GCMineExplosionOK2Factory(), true));
+	factories.push_back(FactoryEntry("GCMiniGameScores", new GCMiniGameScoresFactory(), true));
+	factories.push_back(FactoryEntry("GCModifyGuildMemberInfo", new GCModifyGuildMemberInfoFactory(), true));
+	factories.push_back(FactoryEntry("GCModifyInformation", new GCModifyInformationFactory(), true));
+	factories.push_back(FactoryEntry("GCModifyNickname", new GCModifyNicknameFactory(), true));
+	factories.push_back(FactoryEntry("GCMonsterKillQuestInfo", new GCMonsterKillQuestInfoFactory(), true));
+	factories.push_back(FactoryEntry("GCMorph1", new GCMorph1Factory(), true));
+	factories.push_back(FactoryEntry("GCMorphSlayer2", new GCMorphSlayer2Factory(), true));
+	factories.push_back(FactoryEntry("GCMorphVampire2", new GCMorphVampire2Factory(), true));
+	factories.push_back(FactoryEntry("GCMove", new GCMoveFactory(), true));
+	factories.push_back(FactoryEntry("GCMoveError", new GCMoveErrorFactory(), true));
+	factories.push_back(FactoryEntry("GCMoveOK", new GCMoveOKFactory(), true));
+	factories.push_back(FactoryEntry("GCMyStoreInfo", new GCMyStoreInfoFactory(), true));
+	factories.push_back(FactoryEntry("GCNPCAsk", new GCNPCAskFactory(), true));
+	factories.push_back(FactoryEntry("GCNPCAskDynamic", new GCNPCAskDynamicFactory(), true));
+	factories.push_back(FactoryEntry("GCNPCAskVariable", new GCNPCAskVariableFactory(), true));
+	factories.push_back(FactoryEntry("GCNPCInfo", new GCNPCInfoFactory(), true));
+	factories.push_back(FactoryEntry("GCNPCResponse", new GCNPCResponseFactory(), true));
+	factories.push_back(FactoryEntry("GCNPCSay", new GCNPCSayFactory(), true));
+	factories.push_back(FactoryEntry("GCNPCSayDynamic", new GCNPCSayDynamicFactory(), true));
+	factories.push_back(FactoryEntry("GCNicknameList", new GCNicknameListFactory(), true));
+	factories.push_back(FactoryEntry("GCNicknameVerify", new GCNicknameVerifyFactory(), true));
+	factories.push_back(FactoryEntry("GCNoticeEvent", new GCNoticeEventFactory(), true));
+	factories.push_back(FactoryEntry("GCNotifyWin", new GCNotifyWinFactory(), true));
+	factories.push_back(FactoryEntry("GCOtherGuildName", new GCOtherGuildNameFactory(), true));
+	factories.push_back(FactoryEntry("GCOtherModifyInfo", new GCOtherModifyInfoFactory(), true));
+	factories.push_back(FactoryEntry("GCOtherStoreInfo", new GCOtherStoreInfoFactory(), true));
+	factories.push_back(FactoryEntry("GCPartyError", new GCPartyErrorFactory(), true));
+	factories.push_back(FactoryEntry("GCPartyInvite", new GCPartyInviteFactory(), true));
+	factories.push_back(FactoryEntry("GCPartyJoined", new GCPartyJoinedFactory(), true));
+	factories.push_back(FactoryEntry("GCPartyLeave", new GCPartyLeaveFactory(), true));
+	factories.push_back(FactoryEntry("GCPartyPosition", new GCPartyPositionFactory(), true));
+	factories.push_back(FactoryEntry("GCPartySay", new GCPartySayFactory(), true));
+	factories.push_back(FactoryEntry("GCPetInfo", new GCPetInfoFactory(), true));
+	factories.push_back(FactoryEntry("GCPetStashList", new GCPetStashListFactory(), true));
+	factories.push_back(FactoryEntry("GCPetStashVerify", new GCPetStashVerifyFactory(), true));
+	factories.push_back(FactoryEntry("GCPetUseSkill", new GCPetUseSkillFactory(), true));
+	factories.push_back(FactoryEntry("GCPhoneConnected", new GCPhoneConnectedFactory(), true));
+	factories.push_back(FactoryEntry("GCPhoneConnectionFailed", new GCPhoneConnectionFailedFactory(), true));
+	factories.push_back(FactoryEntry("GCPhoneDisconnected", new GCPhoneDisconnectedFactory(), true));
+	factories.push_back(FactoryEntry("GCPhoneSay", new GCPhoneSayFactory(), true));
+	factories.push_back(FactoryEntry("GCQuestStatus", new GCQuestStatusFactory(), true));
+	factories.push_back(FactoryEntry("GCRankBonusInfo", new GCRankBonusInfoFactory(), true));
+	factories.push_back(FactoryEntry("GCRealWearingInfo", new GCRealWearingInfoFactory(), true));
+	factories.push_back(FactoryEntry("GCReconnect", new GCReconnectFactory(), true));
+	factories.push_back(FactoryEntry("GCReconnectLogin", new GCReconnectLoginFactory(), true));
+	factories.push_back(FactoryEntry("GCRegenZoneStatus", new GCRegenZoneStatusFactory(), true));
+	factories.push_back(FactoryEntry("GCReloadOK", new GCReloadOKFactory(), true));
+	factories.push_back(FactoryEntry("GCRemoveCorpseHead", new GCRemoveCorpseHeadFactory(), true));
+	factories.push_back(FactoryEntry("GCRemoveEffect", new GCRemoveEffectFactory(), true));
+	factories.push_back(FactoryEntry("GCRemoveFromGear", new GCRemoveFromGearFactory(), true));
+	factories.push_back(FactoryEntry("GCRemoveInjuriousCreature", new GCRemoveInjuriousCreatureFactory(), true));
+	factories.push_back(FactoryEntry("GCRemoveStoreItem", new GCRemoveStoreItemFactory(), true));
+	factories.push_back(FactoryEntry("GCRequestFailed", new GCRequestFailedFactory(), true));
+	factories.push_back(FactoryEntry("GCRequestPowerPointResult", new GCRequestPowerPointResultFactory(), true));
+	factories.push_back(FactoryEntry("GCRequestedIP", new GCRequestedIPFactory(), true));
+	factories.push_back(FactoryEntry("GCRideMotorCycle", new GCRideMotorCycleFactory(), true));
+	factories.push_back(FactoryEntry("GCRideMotorCycleFailed", new GCRideMotorCycleFailedFactory(), true));
+	factories.push_back(FactoryEntry("GCRideMotorCycleOK", new GCRideMotorCycleOKFactory(), true));
+	factories.push_back(FactoryEntry("GCRing", new GCRingFactory(), true));
+	factories.push_back(FactoryEntry("GCSMSAddressList", new GCSMSAddressListFactory(), true));
+	factories.push_back(FactoryEntry("GCSay", new GCSayFactory(), true));
+	factories.push_back(FactoryEntry("GCSearchMotorcycleFail", new GCSearchMotorcycleFailFactory(), true));
+	factories.push_back(FactoryEntry("GCSearchMotorcycleOK", new GCSearchMotorcycleOKFactory(), true));
+	factories.push_back(FactoryEntry("GCSelectQuestID", new GCSelectQuestIDFactory(), true));
+	factories.push_back(FactoryEntry("GCSelectRankBonusFailed", new GCSelectRankBonusFailedFactory(), true));
+	factories.push_back(FactoryEntry("GCSelectRankBonusOK", new GCSelectRankBonusOKFactory(), true));
+	factories.push_back(FactoryEntry("GCSetPosition", new GCSetPositionFactory(), true));
+	factories.push_back(FactoryEntry("GCShopBought", new GCShopBoughtFactory(), true));
+	factories.push_back(FactoryEntry("GCShopBuyFail", new GCShopBuyFailFactory(), true));
+	factories.push_back(FactoryEntry("GCShopBuyOK", new GCShopBuyOKFactory(), true));
+	factories.push_back(FactoryEntry("GCShopList", new GCShopListFactory(), true));
+	factories.push_back(FactoryEntry("GCShopListMysterious", new GCShopListMysteriousFactory(), true));
+	factories.push_back(FactoryEntry("GCShopMarketCondition", new GCShopMarketConditionFactory(), true));
+	factories.push_back(FactoryEntry("GCShopSellFail", new GCShopSellFailFactory(), true));
+	factories.push_back(FactoryEntry("GCShopSellOK", new GCShopSellOKFactory(), true));
+	factories.push_back(FactoryEntry("GCShopSold", new GCShopSoldFactory(), true));
+	factories.push_back(FactoryEntry("GCShopVersion", new GCShopVersionFactory(), true));
+	factories.push_back(FactoryEntry("GCShowGuildInfo", new GCShowGuildInfoFactory(), true));
+	factories.push_back(FactoryEntry("GCShowGuildJoin", new GCShowGuildJoinFactory(), true));
+	factories.push_back(FactoryEntry("GCShowGuildMemberInfo", new GCShowGuildMemberInfoFactory(), true));
+	factories.push_back(FactoryEntry("GCShowMessageBox", new GCShowMessageBoxFactory(), true));
+	factories.push_back(FactoryEntry("GCShowUnionInfo", new GCShowUnionInfoFactory(), true));
+	factories.push_back(FactoryEntry("GCShowWaitGuildInfo", new GCShowWaitGuildInfoFactory(), true));
+	factories.push_back(FactoryEntry("GCSkillFailed1", new GCSkillFailed1Factory(), true));
+	factories.push_back(FactoryEntry("GCSkillFailed2", new GCSkillFailed2Factory(), true));
+	factories.push_back(FactoryEntry("GCSkillInfo", new GCSkillInfoFactory(), true));
+	factories.push_back(FactoryEntry("GCSkillToInventoryOK1", new GCSkillToInventoryOK1Factory(), true));
+	factories.push_back(FactoryEntry("GCSkillToInventoryOK2", new GCSkillToInventoryOK2Factory(), true));
+	factories.push_back(FactoryEntry("GCSkillToObjectOK1", new GCSkillToObjectOK1Factory(), true));
+	factories.push_back(FactoryEntry("GCSkillToObjectOK2", new GCSkillToObjectOK2Factory(), true));
+	factories.push_back(FactoryEntry("GCSkillToObjectOK3", new GCSkillToObjectOK3Factory(), true));
+	factories.push_back(FactoryEntry("GCSkillToObjectOK4", new GCSkillToObjectOK4Factory(), true));
+	factories.push_back(FactoryEntry("GCSkillToObjectOK5", new GCSkillToObjectOK5Factory(), true));
+	factories.push_back(FactoryEntry("GCSkillToObjectOK6", new GCSkillToObjectOK6Factory(), true));
+	factories.push_back(FactoryEntry("GCSkillToSelfOK1", new GCSkillToSelfOK1Factory(), true));
+	factories.push_back(FactoryEntry("GCSkillToSelfOK2", new GCSkillToSelfOK2Factory(), true));
+	factories.push_back(FactoryEntry("GCSkillToSelfOK3", new GCSkillToSelfOK3Factory(), true));
+	factories.push_back(FactoryEntry("GCSkillToTileOK1", new GCSkillToTileOK1Factory(), true));
+	factories.push_back(FactoryEntry("GCSkillToTileOK2", new GCSkillToTileOK2Factory(), true));
+	factories.push_back(FactoryEntry("GCSkillToTileOK3", new GCSkillToTileOK3Factory(), true));
+	factories.push_back(FactoryEntry("GCSkillToTileOK4", new GCSkillToTileOK4Factory(), true));
+	factories.push_back(FactoryEntry("GCSkillToTileOK5", new GCSkillToTileOK5Factory(), true));
+	factories.push_back(FactoryEntry("GCSkillToTileOK6", new GCSkillToTileOK6Factory(), true));
+	factories.push_back(FactoryEntry("GCStashList", new GCStashListFactory(), true));
+	factories.push_back(FactoryEntry("GCStashSell", new GCStashSellFactory(), true));
+	factories.push_back(FactoryEntry("GCStatusCurrentHP", new GCStatusCurrentHPFactory(), true));
+	factories.push_back(FactoryEntry("GCSubInventoryInfo", new GCSubInventoryInfoFactory(), true));
+	factories.push_back(FactoryEntry("GCSweeperBonusInfo", new GCSweeperBonusInfoFactory(), true));
+	factories.push_back(FactoryEntry("GCSystemAvailabilities", new GCSystemAvailabilitiesFactory(), true));
+	factories.push_back(FactoryEntry("GCSystemMessage", new GCSystemMessageFactory(), true));
+	factories.push_back(FactoryEntry("GCTakeOff", new GCTakeOffFactory(), true));
+	factories.push_back(FactoryEntry("GCTakeOutFail", new GCTakeOutFailFactory(), true));
+	factories.push_back(FactoryEntry("GCTakeOutOK", new GCTakeOutOKFactory(), true));
+	factories.push_back(FactoryEntry("GCTeachSkillInfo", new GCTeachSkillInfoFactory(), true));
+	factories.push_back(FactoryEntry("GCThrowBombOK1", new GCThrowBombOK1Factory(), true));
+	factories.push_back(FactoryEntry("GCThrowBombOK2", new GCThrowBombOK2Factory(), true));
+	factories.push_back(FactoryEntry("GCThrowBombOK3", new GCThrowBombOK3Factory(), true));
+	factories.push_back(FactoryEntry("GCThrowItemOK1", new GCThrowItemOK1Factory(), true));
+	factories.push_back(FactoryEntry("GCThrowItemOK2", new GCThrowItemOK2Factory(), true));
+	factories.push_back(FactoryEntry("GCThrowItemOK3", new GCThrowItemOK3Factory(), true));
+	factories.push_back(FactoryEntry("GCTimeLimitItemInfo", new GCTimeLimitItemInfoFactory(), true));
+	factories.push_back(FactoryEntry("GCTradeAddItem", new GCTradeAddItemFactory(), true));
+	factories.push_back(FactoryEntry("GCTradeError", new GCTradeErrorFactory(), true));
+	factories.push_back(FactoryEntry("GCTradeFinish", new GCTradeFinishFactory(), true));
+	factories.push_back(FactoryEntry("GCTradeMoney", new GCTradeMoneyFactory(), true));
+	factories.push_back(FactoryEntry("GCTradePrepare", new GCTradePrepareFactory(), true));
+	factories.push_back(FactoryEntry("GCTradeRemoveItem", new GCTradeRemoveItemFactory(), true));
+	factories.push_back(FactoryEntry("GCTradeVerify", new GCTradeVerifyFactory(), true));
+	factories.push_back(FactoryEntry("GCUnburrowFail", new GCUnburrowFailFactory(), true));
+	factories.push_back(FactoryEntry("GCUnburrowOK", new GCUnburrowOKFactory(), true));
+	factories.push_back(FactoryEntry("GCUnionOfferList", new GCUnionOfferListFactory(), true));
+	factories.push_back(FactoryEntry("GCUntransformFail", new GCUntransformFailFactory(), true));
+	factories.push_back(FactoryEntry("GCUntransformOK", new GCUntransformOKFactory(), true));
+	factories.push_back(FactoryEntry("GCUpdateInfo", new GCUpdateInfoFactory(), true));
+	factories.push_back(FactoryEntry("GCUseBonusPointFail", new GCUseBonusPointFailFactory(), true));
+	factories.push_back(FactoryEntry("GCUseBonusPointOK", new GCUseBonusPointOKFactory(), true));
+	factories.push_back(FactoryEntry("GCUseOK", new GCUseOKFactory(), true));
+	factories.push_back(FactoryEntry("GCUseSkillCardOK", new GCUseSkillCardOKFactory(), true));
+	factories.push_back(FactoryEntry("GCUsePowerPointResult", new GCUsePowerPointResultFactory(), true));
+	factories.push_back(FactoryEntry("GCVisibleFail", new GCVisibleFailFactory(), true));
+	factories.push_back(FactoryEntry("GCVisibleOK", new GCVisibleOKFactory(), true));
+	factories.push_back(FactoryEntry("GCWaitGuildList", new GCWaitGuildListFactory(), true));
+	factories.push_back(FactoryEntry("GCWarList", new GCWarListFactory(), true));
+	factories.push_back(FactoryEntry("GCWarScheduleList", new GCWarScheduleListFactory(), true));
+	factories.push_back(FactoryEntry("GCWhisper", new GCWhisperFactory(), true));
+	factories.push_back(FactoryEntry("GCWhisperFailed", new GCWhisperFailedFactory(), true));
+	factories.push_back(FactoryEntry("GLIncomingConnectionError", new GLIncomingConnectionErrorFactory(), true));
+	factories.push_back(FactoryEntry("GLIncomingConnectionOK", new GLIncomingConnectionOKFactory(), true));
+	factories.push_back(FactoryEntry("CGAbsorbSoul", new CGAbsorbSoulFactory(), true));
+	factories.push_back(FactoryEntry("CGAcceptUnion", new CGAcceptUnionFactory(), true));
+	factories.push_back(FactoryEntry("CGAddGearToMouse", new CGAddGearToMouseFactory(), true));
+	factories.push_back(FactoryEntry("CGAddInventoryToMouse", new CGAddInventoryToMouseFactory(), true));
+	factories.push_back(FactoryEntry("CGAddItemToCodeSheet", new CGAddItemToCodeSheetFactory(), true));
+	factories.push_back(FactoryEntry("CGAddItemToItem", new CGAddItemToItemFactory(), true));
+	factories.push_back(FactoryEntry("CGAddMouseToGear", new CGAddMouseToGearFactory(), true));
+	factories.push_back(FactoryEntry("CGAddMouseToInventory", new CGAddMouseToInventoryFactory(), true));
+	factories.push_back(FactoryEntry("CGAddMouseToQuickSlot", new CGAddMouseToQuickSlotFactory(), true));
+	factories.push_back(FactoryEntry("CGAddMouseToZone", new CGAddMouseToZoneFactory(), true));
+	factories.push_back(FactoryEntry("CGAddQuickSlotToMouse", new CGAddQuickSlotToMouseFactory(), true));
+	factories.push_back(FactoryEntry("CGAddSMSAddress", new CGAddSMSAddressFactory(), true));
+	factories.push_back(FactoryEntry("CGAddZoneToInventory", new CGAddZoneToInventoryFactory(), true));
+	factories.push_back(FactoryEntry("CGAddZoneToMouse", new CGAddZoneToMouseFactory(), true));
+	factories.push_back(FactoryEntry("CGAppointSubmaster", new CGAppointSubmasterFactory(), true));
+	factories.push_back(FactoryEntry("CGAttack", new CGAttackFactory(), true));
+	factories.push_back(FactoryEntry("CGAuthKey", new CGAuthKeyFactory(), true));
+	factories.push_back(FactoryEntry("CGBloodDrain", new CGBloodDrainFactory(), true));
+	factories.push_back(FactoryEntry("CGBuyStoreItem", new CGBuyStoreItemFactory(), true));
+	factories.push_back(FactoryEntry("CGCastingSkill", new CGCastingSkillFactory(), true));
+	factories.push_back(FactoryEntry("CGConnect", new CGConnectFactory(), true));
+	factories.push_back(FactoryEntry("CGConnectSetKey", new CGConnectSetKeyFactory(), true));
+	factories.push_back(FactoryEntry("CGCrashReport", new CGCrashReportFactory(), true));
+	factories.push_back(FactoryEntry("CGDeleteSMSAddress", new CGDeleteSMSAddressFactory(), true));
+	factories.push_back(FactoryEntry("CGDenyUnion", new CGDenyUnionFactory(), true));
+	factories.push_back(FactoryEntry("CGDepositPet", new CGDepositPetFactory(), true));
+	factories.push_back(FactoryEntry("CGDialUp", new CGDialUpFactory(), true));
+	factories.push_back(FactoryEntry("CGDisplayItem", new CGDisplayItemFactory(), true));
+	factories.push_back(FactoryEntry("CGDissectionCorpse", new CGDissectionCorpseFactory(), true));
+	factories.push_back(FactoryEntry("CGDonationMoney", new CGDonationMoneyFactory(), true));
+	factories.push_back(FactoryEntry("CGDownSkill", new CGDownSkillFactory(), true));
+	factories.push_back(FactoryEntry("CGDropMoney", new CGDropMoneyFactory(), true));
+	factories.push_back(FactoryEntry("CGExchangeBuy", new CGExchangeBuyFactory(), true));
+	factories.push_back(FactoryEntry("CGExchangeList", new CGExchangeListFactory(), true));
+	factories.push_back(FactoryEntry("CGExpelGuild", new CGExpelGuildFactory(), true));
+	factories.push_back(FactoryEntry("CGFailQuest", new CGFailQuestFactory(), true));
+	factories.push_back(FactoryEntry("CGGQuestAccept", new CGGQuestAcceptFactory(), true));
+	factories.push_back(FactoryEntry("CGGQuestCancel", new CGGQuestCancelFactory(), true));
+	factories.push_back(FactoryEntry("CGGetEventItem", new CGGetEventItemFactory(), true));
+	factories.push_back(FactoryEntry("CGGetOffMotorCycle", new CGGetOffMotorCycleFactory(), true));
+	factories.push_back(FactoryEntry("CGGlobalChat", new CGGlobalChatFactory(), true));
+	factories.push_back(FactoryEntry("CGGuildChat", new CGGuildChatFactory(), true));
+	factories.push_back(FactoryEntry("CGJoinGuild", new CGJoinGuildFactory(), true));
+	factories.push_back(FactoryEntry("CGLearnSkill", new CGLearnSkillFactory(), true));
+	factories.push_back(FactoryEntry("CGLogout", new CGLogoutFactory(), true));
+	factories.push_back(FactoryEntry("CGLotterySelect", new CGLotterySelectFactory(), true));
+	factories.push_back(FactoryEntry("CGMakeItem", new CGMakeItemFactory(), true));
+	factories.push_back(FactoryEntry("CGMixItem", new CGMixItemFactory(), true));
+	factories.push_back(FactoryEntry("CGModifyGuildIntro", new CGModifyGuildIntroFactory(), true));
+	factories.push_back(FactoryEntry("CGModifyGuildMember", new CGModifyGuildMemberFactory(), true));
+	factories.push_back(FactoryEntry("CGModifyGuildMemberIntro", new CGModifyGuildMemberIntroFactory(), true));
+	factories.push_back(FactoryEntry("CGModifyNickname", new CGModifyNicknameFactory(), true));
+	factories.push_back(FactoryEntry("CGModifyTaxRatio", new CGModifyTaxRatioFactory(), true));
+	factories.push_back(FactoryEntry("CGMouseToStash", new CGMouseToStashFactory(), true));
+	factories.push_back(FactoryEntry("CGMove", new CGMoveFactory(), true));
+	factories.push_back(FactoryEntry("CGNPCAskAnswer", new CGNPCAskAnswerFactory(), true));
+	factories.push_back(FactoryEntry("CGNPCTalk", new CGNPCTalkFactory(), true));
+	factories.push_back(FactoryEntry("CGPartyInvite", new CGPartyInviteFactory(), true));
+	factories.push_back(FactoryEntry("CGPartyLeave", new CGPartyLeaveFactory(), true));
+	factories.push_back(FactoryEntry("CGPartyPosition", new CGPartyPositionFactory(), true));
+	factories.push_back(FactoryEntry("CGPartySay", new CGPartySayFactory(), true));
+	factories.push_back(FactoryEntry("CGPetGamble", new CGPetGambleFactory(), true));
+	factories.push_back(FactoryEntry("CGPhoneDisconnect", new CGPhoneDisconnectFactory(), true));
+	factories.push_back(FactoryEntry("CGPhoneSay", new CGPhoneSayFactory(), true));
+	factories.push_back(FactoryEntry("CGPickupMoney", new CGPickupMoneyFactory(), true));
+	factories.push_back(FactoryEntry("CGPortCheck", new CGPortCheckFactory(), true));
+	factories.push_back(FactoryEntry("CGQuitUnion", new CGQuitUnionFactory(), true));
+	factories.push_back(FactoryEntry("CGQuitUnionAccept", new CGQuitUnionAcceptFactory(), true));
+	factories.push_back(FactoryEntry("CGQuitUnionDeny", new CGQuitUnionDenyFactory(), true));
+	factories.push_back(FactoryEntry("CGRangerSay", new CGRangerSayFactory(), true));
+	factories.push_back(FactoryEntry("CGReady", new CGReadyFactory(), true));
+	factories.push_back(FactoryEntry("CGRegistGuild", new CGRegistGuildFactory(), true));
+	factories.push_back(FactoryEntry("CGRelicToObject", new CGRelicToObjectFactory(), true));
+	factories.push_back(FactoryEntry("CGReloadFromInventory", new CGReloadFromInventoryFactory(), true));
+	factories.push_back(FactoryEntry("CGReloadFromQuickSlot", new CGReloadFromQuickSlotFactory(), true));
+	factories.push_back(FactoryEntry("CGRequestGuildList", new CGRequestGuildListFactory(), true));
+	factories.push_back(FactoryEntry("CGRequestGuildMemberList", new CGRequestGuildMemberListFactory(), true));
+	factories.push_back(FactoryEntry("CGRequestIP", new CGRequestIPFactory(), true));
+	factories.push_back(FactoryEntry("CGRequestInfo", new CGRequestInfoFactory(), true));
+	factories.push_back(FactoryEntry("CGRequestNewbieItem", new CGRequestNewbieItemFactory(), true));
+	factories.push_back(FactoryEntry("CGRequestPowerPoint", new CGRequestPowerPointFactory(), true));
+	factories.push_back(FactoryEntry("CGRequestRepair", new CGRequestRepairFactory(), true));
+	factories.push_back(FactoryEntry("CGRequestStoreInfo", new CGRequestStoreInfoFactory(), true));
+	factories.push_back(FactoryEntry("CGRequestUnion", new CGRequestUnionFactory(), true));
+	factories.push_back(FactoryEntry("CGRequestUnionInfo", new CGRequestUnionInfoFactory(), true));
+	factories.push_back(FactoryEntry("CGResurrect", new CGResurrectFactory(), true));
+	factories.push_back(FactoryEntry("CGRideMotorCycle", new CGRideMotorCycleFactory(), true));
+	factories.push_back(FactoryEntry("CGSMSAddressList", new CGSMSAddressListFactory(), true));
+	factories.push_back(FactoryEntry("CGSMSSend", new CGSMSSendFactory(), true));
+	factories.push_back(FactoryEntry("CGSay", new CGSayFactory(), true));
+	factories.push_back(FactoryEntry("CGSelectBloodBible", new CGSelectBloodBibleFactory(), true));
+	factories.push_back(FactoryEntry("CGSelectGuild", new CGSelectGuildFactory(), true));
+	factories.push_back(FactoryEntry("CGSelectGuildMember", new CGSelectGuildMemberFactory(), true));
+	factories.push_back(FactoryEntry("CGSelectNickname", new CGSelectNicknameFactory(), true));
+	factories.push_back(FactoryEntry("CGSelectPortal", new CGSelectPortalFactory(), true));
+	factories.push_back(FactoryEntry("CGSelectQuest", new CGSelectQuestFactory(), true));
+	factories.push_back(FactoryEntry("CGSelectRankBonus", new CGSelectRankBonusFactory(), true));
+	factories.push_back(FactoryEntry("CGSelectRegenZone", new CGSelectRegenZoneFactory(), true));
+	factories.push_back(FactoryEntry("CGSelectTileEffect", new CGSelectTileEffectFactory(), true));
+	factories.push_back(FactoryEntry("CGSelectWayPoint", new CGSelectWayPointFactory(), true));
+	factories.push_back(FactoryEntry("CGSetSlayerHotKey", new CGSetSlayerHotKeyFactory(), true));
+	factories.push_back(FactoryEntry("CGSetVampireHotKey", new CGSetVampireHotKeyFactory(), true));
+	factories.push_back(FactoryEntry("CGShopRequestBuy", new CGShopRequestBuyFactory(), true));
+	factories.push_back(FactoryEntry("CGShopRequestList", new CGShopRequestListFactory(), true));
+	factories.push_back(FactoryEntry("CGShopRequestSell", new CGShopRequestSellFactory(), true));
+	factories.push_back(FactoryEntry("CGSilverCoating", new CGSilverCoatingFactory(), true));
+	factories.push_back(FactoryEntry("CGSkillToInventory", new CGSkillToInventoryFactory(), true));
+	factories.push_back(FactoryEntry("CGSkillToNamed", new CGSkillToNamedFactory(), true));
+	factories.push_back(FactoryEntry("CGSkillToObject", new CGSkillToObjectFactory(), true));
+	factories.push_back(FactoryEntry("CGSkillToSelf", new CGSkillToSelfFactory(), true));
+	factories.push_back(FactoryEntry("CGSkillToTile", new CGSkillToTileFactory(), true));
+	factories.push_back(FactoryEntry("CGStashDeposit", new CGStashDepositFactory(), true));
+	factories.push_back(FactoryEntry("CGStashList", new CGStashListFactory(), true));
+	factories.push_back(FactoryEntry("CGStashRequestBuy", new CGStashRequestBuyFactory(), true));
+	factories.push_back(FactoryEntry("CGStashToMouse", new CGStashToMouseFactory(), true));
+	factories.push_back(FactoryEntry("CGStashWithdraw", new CGStashWithdrawFactory(), true));
+	factories.push_back(FactoryEntry("CGStoreClose", new CGStoreCloseFactory(), true));
+	factories.push_back(FactoryEntry("CGStoreOpen", new CGStoreOpenFactory(), true));
+	factories.push_back(FactoryEntry("CGStoreSign", new CGStoreSignFactory(), true));
+	factories.push_back(FactoryEntry("CGSubmitScore", new CGSubmitScoreFactory(), true));
+	factories.push_back(FactoryEntry("CGTakeOutGood", new CGTakeOutGoodFactory(), true));
+	factories.push_back(FactoryEntry("CGTameMonster", new CGTameMonsterFactory(), true));
+	factories.push_back(FactoryEntry("CGThrowBomb", new CGThrowBombFactory(), true));
+	factories.push_back(FactoryEntry("CGThrowItem", new CGThrowItemFactory(), true));
+	factories.push_back(FactoryEntry("CGTradeAddItem", new CGTradeAddItemFactory(), true));
+	factories.push_back(FactoryEntry("CGTradeFinish", new CGTradeFinishFactory(), true));
+	factories.push_back(FactoryEntry("CGTradeMoney", new CGTradeMoneyFactory(), true));
+	factories.push_back(FactoryEntry("CGTradePrepare", new CGTradePrepareFactory(), true));
+	factories.push_back(FactoryEntry("CGTradeRemoveItem", new CGTradeRemoveItemFactory(), true));
+	factories.push_back(FactoryEntry("CGTryJoinGuild", new CGTryJoinGuildFactory(), true));
+	factories.push_back(FactoryEntry("CGTypeStringList", new CGTypeStringListFactory(), true));
+	factories.push_back(FactoryEntry("CGUnburrow", new CGUnburrowFactory(), true));
+	factories.push_back(FactoryEntry("CGUndisplayItem", new CGUndisplayItemFactory(), true));
+	factories.push_back(FactoryEntry("CGUntransform", new CGUntransformFactory(), true));
+	factories.push_back(FactoryEntry("CGUseBonusPoint", new CGUseBonusPointFactory(), true));
+	factories.push_back(FactoryEntry("CGUseItemFromGQuestInventory", new CGUseItemFromGQuestInventoryFactory(), true));
+	factories.push_back(FactoryEntry("CGUseItemFromGear", new CGUseItemFromGearFactory(), true));
+	factories.push_back(FactoryEntry("CGUseItemFromInventory", new CGUseItemFromInventoryFactory(), true));
+	factories.push_back(FactoryEntry("CGUseMessageItemFromInventory", new CGUseMessageItemFromInventoryFactory(), true));
+	factories.push_back(FactoryEntry("CGUsePotionFromInventory", new CGUsePotionFromInventoryFactory(), true));
+	factories.push_back(FactoryEntry("CGUsePotionFromQuickSlot", new CGUsePotionFromQuickSlotFactory(), true));
+	factories.push_back(FactoryEntry("CGUsePowerPoint", new CGUsePowerPointFactory(), true));
+	factories.push_back(FactoryEntry("CGVerifyTime", new CGVerifyTimeFactory(), true));
+	factories.push_back(FactoryEntry("CGVisible", new CGVisibleFactory(), true));
+	factories.push_back(FactoryEntry("CGWhisper", new CGWhisperFactory(), true));
+	factories.push_back(FactoryEntry("CGWithdrawPet", new CGWithdrawPetFactory(), true));
+	factories.push_back(FactoryEntry("CGWithdrawTax", new CGWithdrawTaxFactory(), true));
+	factories.push_back(FactoryEntry("CLChangeServer", new CLChangeServerFactory(), true));
+	factories.push_back(FactoryEntry("CLCreatePC", new CLCreatePCFactory(), true));
+	factories.push_back(FactoryEntry("CLDeletePC", new CLDeletePCFactory(), true));
+	factories.push_back(FactoryEntry("CLGetPCList", new CLGetPCListFactory(), true));
+	factories.push_back(FactoryEntry("CLGetServerList", new CLGetServerListFactory(), true));
+	factories.push_back(FactoryEntry("CLGetWorldList", new CLGetWorldListFactory(), true));
+	factories.push_back(FactoryEntry("CLLogin", new CLLoginFactory(), true));
+	factories.push_back(FactoryEntry("CLLogout", new CLLogoutFactory(), true));
+	factories.push_back(FactoryEntry("CLQueryCharacterName", new CLQueryCharacterNameFactory(), true));
+	factories.push_back(FactoryEntry("CLQueryPlayerID", new CLQueryPlayerIDFactory(), true));
+	factories.push_back(FactoryEntry("CLReconnectLogin", new CLReconnectLoginFactory(), true));
+	factories.push_back(FactoryEntry("CLRegisterPlayer", new CLRegisterPlayerFactory(), true));
+	factories.push_back(FactoryEntry("CLSelectPC", new CLSelectPCFactory(), true));
+	factories.push_back(FactoryEntry("CLSelectServer", new CLSelectServerFactory(), true));
+	factories.push_back(FactoryEntry("CLSelectWorld", new CLSelectWorldFactory(), true));
+	factories.push_back(FactoryEntry("CLVersionCheck", new CLVersionCheckFactory(), true));
+	factories.push_back(FactoryEntry("LCCreatePCError", new LCCreatePCErrorFactory(), true));
+	factories.push_back(FactoryEntry("LCCreatePCOK", new LCCreatePCOKFactory(), true));
+	factories.push_back(FactoryEntry("LCDeletePCError", new LCDeletePCErrorFactory(), true));
+	factories.push_back(FactoryEntry("LCDeletePCOK", new LCDeletePCOKFactory(), true));
+	factories.push_back(FactoryEntry("LCLoginError", new LCLoginErrorFactory(), true));
+	factories.push_back(FactoryEntry("LCLoginOK", new LCLoginOKFactory(), true));
+	factories.push_back(FactoryEntry("LCPCList", new LCPCListFactory(), true));
+	factories.push_back(FactoryEntry("LCQueryResultCharacterName", new LCQueryResultCharacterNameFactory(), true));
+	factories.push_back(FactoryEntry("LCQueryResultPlayerID", new LCQueryResultPlayerIDFactory(), true));
+	factories.push_back(FactoryEntry("LCReconnect", new LCReconnectFactory(), true));
+	factories.push_back(FactoryEntry("LCRegisterPlayerError", new LCRegisterPlayerErrorFactory(), true));
+	factories.push_back(FactoryEntry("LCRegisterPlayerOK", new LCRegisterPlayerOKFactory(), true));
+	factories.push_back(FactoryEntry("LCSelectPCError", new LCSelectPCErrorFactory(), true));
+	factories.push_back(FactoryEntry("LCServerList", new LCServerListFactory(), true));
+	factories.push_back(FactoryEntry("LCVersionCheckError", new LCVersionCheckErrorFactory(), true));
+	factories.push_back(FactoryEntry("LCVersionCheckOK", new LCVersionCheckOKFactory(), true));
+	factories.push_back(FactoryEntry("LCWorldList", new LCWorldListFactory(), true));
+	factories.push_back(FactoryEntry("LGIncomingConnection", new LGIncomingConnectionFactory(), true));
+	factories.push_back(FactoryEntry("CURequestLoginMode", new CURequestLoginModeFactory(), true));
+	factories.push_back(FactoryEntry("UCRequestLoginMode", new UCRequestLoginModeFactory(), true));
+	factories.push_back(FactoryEntry("CRConnect", new CRConnectFactory(), false));
+	factories.push_back(FactoryEntry("CRDisconnect", new CRDisconnectFactory(), false));
+	factories.push_back(FactoryEntry("CRRequest", new CRRequestFactory(), false));
+	factories.push_back(FactoryEntry("CRWhisper", new CRWhisperFactory(), false));
+	factories.push_back(FactoryEntry("RCCharacterInfo", new RCCharacterInfoFactory(), false));
+	factories.push_back(FactoryEntry("RCConnectVerify", new RCConnectVerifyFactory(), false));
+	factories.push_back(FactoryEntry("RCPositionInfo", new RCPositionInfoFactory(), false));
+	factories.push_back(FactoryEntry("RCRequestVerify", new RCRequestVerifyFactory(), false));
+	factories.push_back(FactoryEntry("RCRequestedFile", new RCRequestedFileFactory(), false));
+	factories.push_back(FactoryEntry("RCSay", new RCSayFactory(), false));
+	factories.push_back(FactoryEntry("RCStatusHP", new RCStatusHPFactory(), false));
 #endif // WIRE_INVENTORY_ENTRIES

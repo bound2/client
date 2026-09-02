@@ -67,7 +67,6 @@ private :
 // Factory for CGSetSlayerHotKey
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGSetSlayerHotKeyFactory : public PacketFactory {
 
 public :
@@ -89,8 +88,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return szSkillType * 4; }
 
 };
-
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

@@ -56,7 +56,6 @@ private :
 // Factory for CLGetServerList
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CLGetServerListFactory : public PacketFactory {
 
 public :
@@ -74,8 +73,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return 0; }
 
 };
-
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

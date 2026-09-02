@@ -76,7 +76,6 @@ private :
 //
 //////////////////////////////////////////////////////////////////////
 
-#ifdef __DEBUG_OUTPUT__
 class CGModifyGuildMemberIntroFactory : public PacketFactory {
 
 public:
@@ -102,7 +101,6 @@ public:
 	// get Packet Max Size
 	PacketSize_t getPacketMaxSize() const throw() { return szGuildID + szBYTE + 255; }
 };
-#endif
 
 //////////////////////////////////////////////////////////////////////
 //

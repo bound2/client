@@ -57,7 +57,6 @@ public :
 // Factory for CGVisible
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGVisibleFactory : public PacketFactory {
 
 public :
@@ -77,8 +76,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return 0; }
 
 };
-
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

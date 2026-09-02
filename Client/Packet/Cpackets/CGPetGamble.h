@@ -39,7 +39,6 @@ private :
 //////////////////////////////////////////////////////////////////////////////
 // class CGPetGambleFactory;
 //////////////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGPetGambleFactory : public PacketFactory 
 {
 public:
@@ -48,7 +47,6 @@ public:
 	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_PET_GAMBLE; }
 	PacketSize_t getPacketMaxSize() const throw() { return 0; }
 };
-#endif
 
 //////////////////////////////////////////////////////////////////////////////
 // class CGPetGambleHandler;

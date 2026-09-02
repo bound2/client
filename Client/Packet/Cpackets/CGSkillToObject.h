@@ -89,7 +89,6 @@ private :
 // Factory for CGSkillToObject
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGSkillToObjectFactory : public PacketFactory {
 
 public :
@@ -117,8 +116,6 @@ public :
 	// get Packet Max Size
 	PacketSize_t getPacketMaxSize () const throw () { return szSkillType + szCEffectID + szObjectID; }
 };
-
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

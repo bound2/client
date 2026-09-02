@@ -26,65 +26,20 @@
 //----------------------------------------------------------------------
 
 #include "test_framework.h"
+#include "packet_stream_access.h"
 
 #include "SocketInputStream.h"
 #include "Socket.h"
 #include "SocketImpl.h"
 #include "ModifyInfo.h"
 #include "InventoryInfo.h"
+#include "Gpackets/GCUpdateInfo.h"
 #include "Exception.h"
 
 #include <string>
 #include <string.h>
 
-#ifdef _WIN32
-#include <winsock.h>
-#endif
-
-//----------------------------------------------------------------------
-// Befriended by SocketInputStream: writes test bytes into the private
-// ring buffer, optionally starting at a nonzero head so a read has to
-// reassemble across the wrap point.
-//----------------------------------------------------------------------
-class SocketInputStreamTestAccess
-{
-public:
-	static void Preload(SocketInputStream& stream, const unsigned char* data,
-			    unsigned int len, unsigned int head = 0)
-	{
-		// The ring keeps one slot empty to distinguish full from empty.
-		CHECK(len < stream.m_BufferLen);
-
-		for (unsigned int i = 0; i < len; i++)
-			stream.m_Buffer[(head + i) % stream.m_BufferLen] = (char)data[i];
-
-		stream.m_Head = head;
-		stream.m_Tail = (head + len) % stream.m_BufferLen;
-	}
-};
-
 namespace {
-
-//----------------------------------------------------------------------
-// One-time Winsock init (see the file header). MAKEWORD(2,2) matches
-// what any modern Windows provides; on other platforms this is a no-op.
-//----------------------------------------------------------------------
-void EnsureSocketsInitialised()
-{
-#ifdef _WIN32
-	static bool bDone = false;
-	if (!bDone)
-	{
-		WSADATA data;
-		// Fail visibly here rather than as an Error thrown out of
-		// ~SocketImpl during fixture teardown (which would terminate the
-		// process with no pointer at the cause). CHECK only records into
-		// the framework's counters, so it is safe during fixture setup.
-		CHECK(WSAStartup(MAKEWORD(2, 2), &data) == 0);
-		bDone = true;
-	}
-#endif
-}
 
 //----------------------------------------------------------------------
 // Stream fixture: a small ring over a never-used socket.
@@ -107,14 +62,13 @@ struct StreamFixture
 };
 
 //----------------------------------------------------------------------
-// ModifyInfo is abstract (it inherits Packet's pure execute() and
-// getPacketID()); the concrete subclasses are the GC packets. This
-// minimal subclass exists only so read() can run against a real object.
+// ModifyInfo is abstract (it inherits Packet's pure getPacketID()); the
+// concrete subclasses are the GC packets. This minimal subclass exists
+// only so read() can run against a real object.
 //----------------------------------------------------------------------
 class TestModifyInfo : public ModifyInfo
 {
 public:
-	void execute(Player*) { }
 	PacketID_t getPacketID() const  { return 0; }
 };
 
@@ -301,6 +255,50 @@ TEST(ModifyInfo, OversizedShortCountHitsTheUnderflowGuard)
 		bThrew = true;
 	}
 	CHECK(bThrew);
+}
+
+//----------------------------------------------------------------------
+// GCUpdateInfo lifetime - the packet a truncated login reply leaves
+// behind.
+//
+// GCUpdateInfo::read allocates its sub-objects as it parses, and the
+// client-side destructor deletes every one of them. The receive loop
+// deletes a packet whose read threw, so every pointer the destructor
+// frees must be null from construction, not only after a complete
+// read. m_pBloodBibleSign was the one that was not (found when task
+// 2.5's wire-layout test first constructed and destroyed every packet):
+// a body cut short before the blood-bible section freed whatever the
+// heap held.
+//----------------------------------------------------------------------
+
+TEST(GCUpdateInfo, FreshPacketHoldsNoSubObjects)
+{
+	GCUpdateInfo packet;
+	CHECK(packet.getPCInfo() == NULL);
+	CHECK(packet.getInventoryInfo() == NULL);
+	CHECK(packet.getGearInfo() == NULL);
+	CHECK(packet.getExtraInfo() == NULL);
+	CHECK(packet.getEffectInfo() == NULL);
+	CHECK(packet.getRideMotorcycleInfo() == NULL);
+	CHECK(packet.getNicknameInfo() == NULL);
+	CHECK(packet.getBloodBibleSignInfo() == NULL);
+}
+
+TEST(GCUpdateInfo, PacketWhoseReadThrewIsSafeToDestroy)
+{
+	StreamFixture f;
+
+	// An empty body: the very first byte (the PC type) underflows, so
+	// nothing past the constructor has run when the packet is deleted.
+	GCUpdateInfo* pPacket = new GCUpdateInfo();
+	bool bThrew = false;
+	try {
+		pPacket->read(f.m_Stream);
+	} catch (InsufficientDataException&) {
+		bThrew = true;
+	}
+	CHECK(bThrew);
+	delete pPacket;	// the receive loop's path; ASan aborts on a bad free
 }
 
 //----------------------------------------------------------------------

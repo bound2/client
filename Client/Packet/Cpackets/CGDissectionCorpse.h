@@ -92,7 +92,6 @@ private :
 // Factory for CGDissectionCorpse
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGDissectionCorpseFactory : public PacketFactory {
 
 public :
@@ -120,8 +119,6 @@ public :
 	// get Packet Max Size
 	PacketSize_t getPacketMaxSize () const throw () { return szObjectID + szCoord + szCoord + szBYTE; }
 };
-
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

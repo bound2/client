@@ -81,7 +81,6 @@ private :
 	
 };
 
-#ifdef __DEBUG_OUTPUT__
 //////////////////////////////////////////////////////////////////////
 //
 // class CGRelicToObjectFactory;
@@ -115,7 +114,6 @@ public:
 	// get Packet Max Size
 	PacketSize_t getPacketMaxSize() const throw() { return szObjectID + szObjectID + szCoord + szCoord; }
 };
-#endif
 
 #ifndef __GAME_CLIENT__
 //////////////////////////////////////////////////////////////////////

@@ -29,9 +29,13 @@ void CGMove::read (SocketInputStream & iStream)
 	else
 #endif
 	{
+		// dir, x, y on the unencrypted branch - the order the game
+		// server's CGMove::read() consumes (tests/golden/CGMove.code0.hex,
+		// shared with the server repo). The encrypted branch above is
+		// shuffled by SHUFFLE_STATEMENT_3 and was already in step.
+		iStream.read(m_Dir);
 		iStream.read(m_X);
 		iStream.read(m_Y);
-		iStream.read(m_Dir);
 	}
 
 	__END_CATCH
@@ -56,9 +60,10 @@ void CGMove::write (SocketOutputStream & oStream) const
 	else
 #endif
 	{
+		// dir, x, y - see read().
+		oStream.write(m_Dir);
 		oStream.write(m_X);
 		oStream.write(m_Y);
-		oStream.write(m_Dir);
 	}
 
 	__END_CATCH

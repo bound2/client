@@ -75,7 +75,6 @@ private :
 // Factory for CGVerifyTime
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGVerifyTimeFactory : public PacketFactory {
 
 public :
@@ -96,8 +95,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return 0; }
 
 };
-
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

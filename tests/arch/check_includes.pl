@@ -1,29 +1,51 @@
 #!/usr/bin/env perl
 #----------------------------------------------------------------------
 # check_includes.pl - include-graph architecture rules
-# (docs/RESTRUCTURING.md, task 0.3)
+# (docs/RESTRUCTURING.md, tasks 0.3 and 2.4)
 #----------------------------------------------------------------------
 #
 # Walks the quote-include closure of every packetwire member and fails
 # on forbidden edges. Perl, not python: the dev machines have Git for
 # Windows' perl, and the wire-inventory generator is already perl.
 #
+# Membership is tests/arch/packetwire_files.txt - the same file the
+# CMake target and the ratchet script read, so the three cannot
+# disagree about what "the library" is.
+#
 # Rules:
-#   W1  A file in the packetwire closure may quote-include only files
-#       under Client/Packet/ or basic/, or Client/Client_PCH.h (the
-#       shared precompiled header - its own includes are walked too).
-#       Anything else means game code is reachable from the wire layer.
+#   W0  Every .cpp under Client/Packet is listed in exactly one of
+#       tests/arch/packetwire_files.txt and
+#       tests/arch/packetwire_holdouts.txt, and every listed file
+#       exists. The directory is wire-only by construction: a new
+#       packet source is a library member unless a holdout line says
+#       why not, and a deleted one cannot linger in a list.
+#   W1  A file in the packetwire closure may include only files under
+#       Client/Packet/ or basic/, or Client/Client_PCH.h (the shared
+#       precompiled header - its own includes are walked too). Anything
+#       else means game code is reachable from the wire layer. Angle
+#       includes are checked too: the library's include path carries
+#       Client/, so `#include <MZone.h>` would compile - an angle include
+#       that resolves inside the repository is treated exactly like a
+#       quoted one; only one that resolves nowhere in the tree is a
+#       system header and ignored.
 #   W2  The debug facilities whose definitions live in the executable
 #       or VS_UI (MinTr.h, DebugInfo.h, DebugKit.h) may not be included
 #       anywhere in the closure, so the library stays linkable into a
 #       test binary without game stubs.
 #
+# W1/W2 look at the lines the library's compile actually sees. The
+# packet sources are the once-shared client/server copies and still
+# carry the server halves behind #ifdef __GAME_SERVER__ /
+# #ifndef __GAME_CLIENT__, and those halves include server headers
+# that do not exist in this repo. Those macros have exactly one meaning
+# in every target of this build (__GAME_CLIENT__ defined, the server
+# macros never), so the walk evaluates conditionals on them and skips
+# the dead branches; every other macro is unknown and BOTH branches are
+# checked. Nothing else is evaluated - an include that is dead only
+# under some other macro is still a violation.
+#
 # An include that cannot be resolved against the search path at all is
 # reported as a violation too - a silent skip is how a rule rots.
-#
-# Membership is parsed from the PACKETWIRE_SOURCES list in the
-# top-level CMakeLists.txt, so the CMake target and this checker cannot
-# disagree about what "the library" is.
 #
 # Grandfathered violations, if ever needed, live one per line in
 # tests/arch/baseline.txt as "RULE|includer|include" - the list is
@@ -34,34 +56,77 @@
 use strict;
 use warnings;
 use File::Basename qw(dirname);
+use File::Find qw(find);
 
 my $root = dirname(__FILE__) . "/../..";
 chdir $root or die "cannot chdir to repo root: $!";
 
-#----------------------------------------------------------------------
-# Membership from CMakeLists.txt
-#----------------------------------------------------------------------
-my @members;
-{
-	open my $fh, '<', 'CMakeLists.txt' or die "CMakeLists.txt: $!";
-	my $in = 0;
+my $members_file  = 'tests/arch/packetwire_files.txt';
+my $holdouts_file = 'tests/arch/packetwire_holdouts.txt';
+
+my @violations;
+
+# A path line must start in column 1: CMake's file(STRINGS ... REGEX
+# "^Client/Packet/") anchors there, so an indented line would be a member
+# for this checker and the ratchet script but not for the build - the
+# three-readers-one-file guarantee is only as good as this agreement.
+sub read_list {
+	my ($path) = @_;
+	my @out;
+	open my $fh, '<', $path or die "$path: $!";
 	while (<$fh>) {
-		$in = 1 if /^set\(PACKETWIRE_SOURCES/;
-		if ($in) {
-			push @members, $1 if m{(Client/Packet/[A-Za-z0-9_/]+\.cpp)};
-			last if /^\)/;
-		}
+		s/\r?\n$//;	# belt and braces beside the .gitattributes eol=lf
+		s/#.*//;
+		next unless /\S/;
+		die "$path line $.: a path must start in column 1 (CMake would not read it)\n"
+			if /^\s/;
+		s/\s+$//;
+		push @out, $_;
 	}
 	close $fh;
+	return @out;
 }
-die "no PACKETWIRE_SOURCES found in CMakeLists.txt" unless @members >= 10;
+
+my @members  = read_list($members_file);
+my @holdouts = read_list($holdouts_file);
+# 518 today; a truncated list must not pass as "the library".
+die "$members_file lists only " . scalar(@members) . " files - truncated?" unless @members >= 400;
+
+#----------------------------------------------------------------------
+# W0 - membership completeness
+#----------------------------------------------------------------------
+# Keys are lower-cased: the Windows filesystem is case-insensitive, so
+# "Dup.cpp" and "DUP.cpp" are one file to -f and to the compiler, and
+# must be one file to "listed exactly once" as well.
+{
+	my %listed;
+	for my $f (@members, @holdouts) {
+		push @violations, "W0|$f|listed twice" if $listed{lc $f}++;
+		push @violations, "W0|$f|listed but missing" unless -f $f;
+		push @violations, "W0|$f|listed but not under Client/Packet"
+			unless $f =~ m{^Client/Packet/};
+	}
+	my @unlisted;
+	find({ no_chdir => 1, wanted => sub {
+		return unless -f $_ && /\.cpp$/i;
+		(my $p = $_) =~ s{\\}{/}g;
+		push @unlisted, $p unless $listed{lc $p};
+	} }, 'Client/Packet');
+	push @violations, "W0|$_|not in $members_file or $holdouts_file" for sort @unlisted;
+}
 
 #----------------------------------------------------------------------
 # Include resolution: the file's own directory first (how the compiler
 # treats quote-includes), then the include path the library compiles
-# with.
+# with, IN THE COMPILER'S ORDER - target_include_directories(packetwire)
+# in CMakeLists.txt lists the repository root, basic, Client, then
+# Client/Packet. The order matters for a basename present in two of
+# them: mirroring the compiler makes the checker resolve to the same
+# file the build does (and a Client/ shadow of a Client/Packet header
+# is then a W1 violation, not a silent pass). Keep this list in step
+# with CMakeLists.txt.
 #----------------------------------------------------------------------
-my @searchdirs = ('Client/Packet', 'Client/Packet/Types', 'Client', 'basic', '.');
+my @searchdirs = ('.', 'basic', 'Client', 'Client/Packet');
 
 sub normalize {
 	my ($p) = @_;
@@ -76,12 +141,90 @@ sub normalize {
 }
 
 sub resolve_include {
-	my ($includer, $inc) = @_;
-	for my $dir (dirname($includer), @searchdirs) {
+	my ($includer, $inc, $angle) = @_;
+	# <...> skips the includer's own directory, as the compiler does.
+	for my $dir (($angle ? () : dirname($includer)), @searchdirs) {
 		my $cand = normalize("$dir/$inc");
 		return $cand if -f $cand;
 	}
 	return undef;
+}
+
+#----------------------------------------------------------------------
+# Preprocessor conditionals on the macros with one build-wide meaning.
+# Three-valued: 1 = live, 0 = dead, undef = unknown (both branches
+# checked). Expressions are the forms this tree uses - defined(X),
+# !defined(X), bare X, !, &&, || and parentheses; anything else is
+# unknown.
+#----------------------------------------------------------------------
+my %defined = (
+	'__GAME_CLIENT__'   => 1,
+	'__GAME_SERVER__'   => 0,
+	'__LOGIN_SERVER__'  => 0,
+	'__SHARED_SERVER__' => 0,
+	'__UPDATE_SERVER__' => 0,
+);
+
+sub tv_not { my ($v) = @_; return defined $v ? ($v ? 0 : 1) : undef; }
+sub tv_and {
+	my ($a, $b) = @_;
+	return 0 if (defined $a && !$a) || (defined $b && !$b);
+	return 1 if defined $a && defined $b;
+	return undef;
+}
+sub tv_or {
+	my ($a, $b) = @_;
+	return 1 if (defined $a && $a) || (defined $b && $b);
+	return 0 if defined $a && defined $b;
+	return undef;
+}
+
+sub eval_expr {
+	my ($expr) = @_;
+	$expr =~ s{/\*.*?\*/}{}g;
+	$expr =~ s{//.*}{};
+	my @tok = $expr =~ /(\|\||&&|!|\(|\)|defined|[A-Za-z_]\w*|\d+|\S)/g;
+	my $i = 0;
+	my ($or, $and, $unary, $primary);
+	$primary = sub {
+		my $t = $tok[$i++];
+		return undef unless defined $t;
+		if ($t eq '(') { my $v = $or->(); $i++ if defined $tok[$i] && $tok[$i] eq ')'; return $v; }
+		if ($t eq 'defined') {
+			my $paren = defined $tok[$i] && $tok[$i] eq '(';
+			$i++ if $paren;
+			my $name = $tok[$i++];
+			$i++ if $paren && defined $tok[$i] && $tok[$i] eq ')';
+			return defined $name && exists $defined{$name} ? $defined{$name} : undef;
+		}
+		if ($t =~ /^\d+$/) { return $t ? 1 : 0; }
+		if ($t =~ /^[A-Za-z_]\w*$/) { return exists $defined{$t} ? $defined{$t} : undef; }
+		return undef;
+	};
+	$unary = sub {
+		if (defined $tok[$i] && $tok[$i] eq '!') { $i++; return tv_not($unary->()); }
+		return $primary->();
+	};
+	$and = sub {
+		my $v = $unary->();
+		while (defined $tok[$i] && $tok[$i] eq '&&') { $i++; $v = tv_and($v, $unary->()); }
+		return $v;
+	};
+	$or = sub {
+		my $v = $and->();
+		while (defined $tok[$i] && $tok[$i] eq '||') { $i++; $v = tv_or($v, $and->()); }
+		return $v;
+	};
+	my $v = $or->();
+	return undef if $i < @tok;	# trailing junk: do not pretend to understand it
+	return $v;
+}
+
+sub directive_value {
+	my ($kw, $rest) = @_;
+	return eval_expr("defined($rest)")  if $kw eq 'ifdef';
+	return eval_expr("!defined($rest)") if $kw eq 'ifndef';
+	return eval_expr($rest);
 }
 
 #----------------------------------------------------------------------
@@ -90,7 +233,7 @@ sub resolve_include {
 my %baseline;
 if (open my $fh, '<', 'tests/arch/baseline.txt') {
 	while (<$fh>) {
-		s/\r?\n$//;	# belt and braces beside the .gitattributes eol=lf
+		s/\r?\n$//;
 		next if /^\s*(#|$)/;
 		$baseline{$_} = 0;	# 0 = not yet seen this run
 	}
@@ -102,7 +245,6 @@ if (open my $fh, '<', 'tests/arch/baseline.txt') {
 #----------------------------------------------------------------------
 my %banned = map { $_ => 1 } qw(MinTr.h DebugInfo.h DebugKit.h);
 
-my @violations;
 my %seen;
 my @queue = @members;
 
@@ -120,9 +262,36 @@ while (@queue) {
 	next if $seen{$file}++;
 
 	open my $fh, '<', $file or next;
+	# Each frame: [value of this branch, has an earlier branch in the
+	# group been definitely live]. A line is live when no enclosing
+	# frame is definitely dead.
+	my @stack;
 	while (<$fh>) {
-		next unless /^\s*#\s*include\s*"([^"]+)"/;
-		my $inc = $1;
+		s/\r?\n$//;
+		if (/^\s*#\s*(ifdef|ifndef|if)\b\s*(.*)$/) {
+			my $v = directive_value($1, $2);
+			push @stack, [ $v, (defined $v && $v) ? 1 : 0 ];
+			next;
+		}
+		if (/^\s*#\s*elif\b\s*(.*)$/) {
+			next unless @stack;
+			my $v = $stack[-1][1] ? 0 : eval_expr($1);
+			$stack[-1][0] = $v;
+			$stack[-1][1] ||= (defined $v && $v) ? 1 : 0;
+			next;
+		}
+		if (/^\s*#\s*else\b/) {
+			next unless @stack;
+			$stack[-1][0] = $stack[-1][1] ? 0 : tv_not($stack[-1][0]);
+			next;
+		}
+		if (/^\s*#\s*endif\b/) { pop @stack; next; }
+
+		my ($inc, $angle);
+		if (/^\s*#\s*include\s*"([^"]+)"/) { ($inc, $angle) = ($1, 0); }
+		elsif (/^\s*#\s*include\s*<([^>]+)>/) { ($inc, $angle) = ($1, 1); }
+		else { next; }
+		next if grep { defined $_->[0] && !$_->[0] } @stack;	# dead branch
 
 		my ($base) = $inc =~ m{([^/\\]+)$};
 		if ($banned{$base}) {
@@ -130,8 +299,11 @@ while (@queue) {
 			next;
 		}
 
-		my $resolved = resolve_include($file, $inc);
+		my $resolved = resolve_include($file, $inc, $angle);
 		if (!defined $resolved) {
+			# An angle include nothing in the tree satisfies is a system
+			# header; a quoted one is a broken edge either way.
+			next if $angle;
 			violate("W1|$file|$inc (unresolved)");
 			next;
 		}
@@ -163,9 +335,10 @@ for my $b (sort keys %baseline) {
 }
 
 my $count = scalar keys %seen;
+my $nmembers = scalar @members;
 if ($fail) {
-	print "arch_includes: FAILED ($count files walked)\n";
+	print "arch_includes: FAILED ($nmembers members, $count files walked)\n";
 	exit 1;
 }
-print "arch_includes: OK ($count files walked, W1/W2 clean)\n";
+print "arch_includes: OK ($nmembers members, $count files walked, W0/W1/W2 clean)\n";
 exit 0;

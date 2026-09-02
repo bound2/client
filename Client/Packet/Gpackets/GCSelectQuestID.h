@@ -13,7 +13,6 @@
 #include "Packet.h"
 #include "PacketFactory.h"
 
-class PlayerCreature;
 const BYTE maxQuestNum = 255;
 
 //////////////////////////////////////////////////////////////////////////////
@@ -23,12 +22,6 @@ const BYTE maxQuestNum = 255;
 class GCSelectQuestID : public Packet
 {
 public:
-#ifdef __GAME_SERVER__
-	GCSelectQuestID(PlayerCreature* pPC) throw();
-	GCSelectQuestID() throw() { }
-	virtual ~GCSelectQuestID() throw();
-#endif
-
 public:
 	void read(SocketInputStream & iStream) throw(ProtocolException, Error);
 	void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);

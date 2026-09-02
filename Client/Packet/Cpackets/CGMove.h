@@ -77,7 +77,6 @@ private :
 // Factory for CGMove
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGMoveFactory : public PacketFactory {
 
 public :
@@ -99,8 +98,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return szCoord + szCoord + szDir; }
 
 };
-
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

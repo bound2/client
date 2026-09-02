@@ -58,7 +58,6 @@ public :
 // Factory for CLLogout
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CLLogoutFactory : public PacketFactory {
 
 public :
@@ -76,8 +75,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return 0; }
 
 };
-
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

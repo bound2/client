@@ -54,7 +54,6 @@ public :
 // Factory for CLGetPCList
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CLGetPCListFactory : public PacketFactory {
 
 public :
@@ -72,8 +71,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return 0; }
 
 };
-
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

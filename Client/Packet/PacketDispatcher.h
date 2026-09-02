@@ -6,12 +6,12 @@
 //               packetwire library keeps the wire classes, the executable
 //               owns which handler runs. Ported from the server
 //               repository's identical, battle-tested design (its task
-//               2.3), with one addition: tryDispatch, the transitional
-//               entry the receive loops use while packets are migrated
-//               direction-by-direction - it reports an unregistered id
-//               instead of throwing, so the caller can fall back to the
-//               legacy virtual. When ratchet R2 reaches 0, the loops
-//               switch to dispatch() and tryDispatch is deleted.
+//               2.3). The transitional tryDispatch entry the receive
+//               loops used during the direction-by-direction migration
+//               (a reported miss instead of a throw, so they could fall
+//               back to the legacy virtual) was deleted with the
+//               virtual itself once ratchet R2 reached 0 and the
+//               migration was runtime-verified (task 2.4).
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __PACKET_DISPATCHER_H__
@@ -35,12 +35,6 @@ public:
 	// InvalidProtocolException. The table is written only during startup,
 	// so dispatch needs no locking.
 	static void dispatch(Packet* pPacket, Player* pPlayer);
-
-	// Transitional (see the file header): runs the handler and returns
-	// true if one is registered; returns false - never throws - for an
-	// unmigrated id, so the receive loops can fall back to
-	// pPacket->execute().
-	static bool tryDispatch(Packet* pPacket, Player* pPlayer);
 
 private:
 	static HandlerFn s_Handlers[];

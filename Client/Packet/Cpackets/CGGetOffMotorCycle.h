@@ -82,7 +82,6 @@ private :
 // Factory for CGGetOffMotorCycle
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGGetOffMotorCycleFactory : public PacketFactory {
 
 public :
@@ -111,8 +110,6 @@ public :
 	PacketSize_t getPacketMaxSize() const throw() { return szObjectID; }
 
 };
-
-#endif
 
 
 //////////////////////////////////////////////////////////////////////

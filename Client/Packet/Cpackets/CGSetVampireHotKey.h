@@ -67,7 +67,6 @@ private :
 // Factory for CGSetVampireHotKey
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
 class CGSetVampireHotKeyFactory : public PacketFactory {
 
 public :
@@ -89,8 +88,6 @@ public :
 	PacketSize_t getPacketMaxSize () const throw () { return szSkillType * 8; }
 
 };
-
-#endif
 
 
 //////////////////////////////////////////////////////////////////////
