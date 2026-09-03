@@ -551,9 +551,10 @@ TEST(SkillDomain, ASavedDomainComesBackReadyToLearnAndUnlearn)
 
 	//------------------------------------------------------------------
 	// A file that says a skill deep in the tree is learned and its
-	// parent is not: the level below it holds no skill, and the
-	// unlearn that walks down to that level must not read the tree
-	// for one.
+	// parent is not: the level below it holds no skill, so the
+	// unlearn that walks down to that level asks the tree what the
+	// empty slot leads to - which AddNextSkill now refuses outright
+	// instead of leaning on the info table's out-of-range entry.
 	//------------------------------------------------------------------
 	{
 		std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
@@ -598,8 +599,12 @@ TEST(SkillDomain, ASaveFileThatEndsEarlyLoadsWhatIsThereAndStops)
 
 		CHECK_EQ(0, domain.GetSize());
 
-		// And a domain with no tree refuses a learn rather than
-		// writing through the array it has none of.
+		// A domain with no tree learns and unlearns nothing. Both
+		// refusals stop at the gates that were already there - the
+		// skill is not in the list, and no level is learned - so they
+		// do not reach the bounds guards on the learned-skill array,
+		// which after this fix nothing can: the array is absent only
+		// while the list is empty too.
 		domain.SetNewSkill();
 		CHECK_EQ(false, domain.LearnSkill(kRoot));
 		CHECK_EQ(false, domain.UnLearnSkill(kRoot));
@@ -901,4 +906,140 @@ TEST(SkillDomain, TheSkillTheRacesShareTakesTheStepOfTheDomainItJoins)
 	MSkillDomain domain;
 	domain.SetRootSkill(kRoot);
 	CHECK(domain.GetSkillStepList(SKILL_STEP_MASTER) != NULL);
+}
+
+TEST(SkillDomain, ALoadOverALiveDomainLeavesNoneOfTheOldTreeBehind)
+{
+	SkillWorld world;
+
+	// Two skills in one step, one in another.
+	(*g_pSkillInfoTable)[kRoot].SetSkillStep(SKILL_STEP_APPRENTICE);
+	(*g_pSkillInfoTable)[kChild].SetSkillStep(SKILL_STEP_APPRENTICE);
+	(*g_pSkillInfoTable)[kLeaf].SetSkillStep(SKILL_STEP_ADEPT);
+
+	MSkillDomain domain;
+	domain.SetRootSkill(kRoot);
+
+	const MSkillDomain::SKILL_STEP_LIST* pList = domain.GetSkillStepList(SKILL_STEP_APPRENTICE);
+	CHECK(pList != NULL);
+	if (pList != NULL)
+		CHECK_EQ(2, (int)pList->size());
+	CHECK(domain.GetSkillStepList(SKILL_STEP_ADEPT) != NULL);
+
+	//------------------------------------------------------------------
+	// A file naming one skill of the tree and nothing else. The step
+	// lists follow the skill list, so the step the loaded skill is not
+	// in must be gone and the one it is in must hold only it - the
+	// lists used to be freed by the destructor alone, so every rebuild
+	// added to lists still naming the tree before it.
+	//------------------------------------------------------------------
+	{
+		std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
+		const int rows = 1;
+		const WORD id = (WORD)kChild;
+		const BYTE status = (BYTE)MSkillDomain::SKILLSTATUS_NEXT;
+		out.write((const char*)&rows, 4);
+		out.write((const char*)&id, 2);
+		out.write((const char*)&status, 1);
+	}
+	{
+		std::ifstream in(kTempFile, std::ios::binary);
+		domain.LoadFromFile(in);
+	}
+
+	CHECK_EQ(1, domain.GetSize());
+	CHECK(domain.GetSkillStepList(SKILL_STEP_ADEPT) == NULL);
+	CHECK(domain.IsExistSkillStep(SKILL_STEP_ADEPT) == FALSE);
+
+	pList = domain.GetSkillStepList(SKILL_STEP_APPRENTICE);
+	CHECK(pList != NULL);
+	if (pList != NULL)
+	{
+		CHECK_EQ(1, (int)pList->size());
+		CHECK_EQ((int)kChild, (int)(*pList)[0]);
+	}
+
+	// The skill-info packet asks for the same rebuild every login, so
+	// it must not grow the lists either.
+	g_pSkillManager->Init();
+	g_pSkillManager->InitSkillList();
+	g_pSkillManager->InitSkillList();
+
+	pList = (*g_pSkillManager)[SKILLDOMAIN_BLADE].GetSkillStepList(SKILL_STEP_APPRENTICE);
+	CHECK(pList != NULL);
+	if (pList != NULL)
+		CHECK_EQ(2, (int)pList->size());
+
+	std::remove(kTempFile);
+}
+
+TEST(SkillDomain, AnExperienceRowThatCannotBeStoredCostsOnlyItself)
+{
+	SkillWorld world;
+	MSkillDomain domain;
+
+	const int	kBadGoal	= 0x0BADBAD0;
+	const int	kGoodGoal	= 0x00ABCDEF;
+
+	//------------------------------------------------------------------
+	// Two rows, the first for a level the table cannot hold. Refusing
+	// it must still take its eight payload bytes off the stream, or
+	// the next read starts in the middle of a row - and the manager's
+	// loop reads the next domain from wherever this leaves it.
+	//------------------------------------------------------------------
+	{
+		std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
+		const int	bad		= 900;
+		const int	good	= 7;
+		const unsigned int	accum = 0;
+		out.write((const char*)&bad, 4);
+		out.write((const char*)&kBadGoal, 4);
+		out.write((const char*)&accum, 4);
+		out.write((const char*)&good, 4);
+		out.write((const char*)&kGoodGoal, 4);
+		out.write((const char*)&accum, 4);
+	}
+	{
+		std::ifstream in(kTempFile, std::ios::binary);
+		domain.LoadFromFileServerDomainInfo(in);
+		domain.LoadFromFileServerDomainInfo(in);
+	}
+
+	CHECK_EQ(kGoodGoal, domain.GetExpInfo(7).GoalExp);
+	CHECK(domain.GetExpInfo(900).GoalExp != kBadGoal);
+
+	std::remove(kTempFile);
+}
+
+TEST(SkillDomain, TheGlobalsTheExecutableOwnsMayBeGone)
+{
+	SkillWorld world;
+
+	// The usable-skill set is created at start-up and deleted at
+	// shutdown, and the manager is a global of its own; library code
+	// runs either side of both.
+	MSkillSet*		pSet = g_pSkillAvailable;
+	MSkillManager*	pManager = g_pSkillManager;
+
+	(*g_pSkillInfoTable)[SKILL_SOUL_CHAIN].SetSkillStep(SKILL_STEP_ETC);
+
+	g_pSkillAvailable = NULL;
+	g_pSkillManager = NULL;
+
+	MSkillDomain domain;
+
+	// Without the manager there is no domain to compare against, so
+	// the shared skill keeps the step the file gave it.
+	domain.SetRootSkill(SKILL_SOUL_CHAIN);
+	CHECK(domain.GetSkillStepList(SKILL_STEP_ETC) != NULL);
+
+	domain.SetRootSkill(kRoot, false);
+	domain.SetNewSkill();
+	CHECK(domain.LearnSkill(kRoot));
+	CHECK(domain.UnLearnSkill(kRoot));
+	domain.ClearSkillList();
+	CHECK_EQ(0, domain.GetSize());
+
+	g_pSkillAvailable = pSet;
+	g_pSkillManager = pManager;
 }

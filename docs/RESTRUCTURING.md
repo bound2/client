@@ -1489,6 +1489,13 @@ starting each — the scan is one grep, and the ranking below is from a
   > learned-level array follow from the skill list and the info table,
   > so `SetStateFromSkillList` derives both, and the learned skills go
   > back into the usable set that `ClearSkillList` took them out of.
+  > Deriving the step lists took a second fix, which the review round
+  > below caught: nothing but the destructor ever cleared
+  > `m_mapSkillStep`, so a rebuild *added* to lists still naming the
+  > tree before it. `ClearSkillList` frees them now, through a new
+  > `ClearSkillStep` — which is what the skill-info packet's
+  > `InitSkillList` needed too; its lists came out right only because
+  > the eight trees are the same on every login.
   > The loader also checks its reads — a count with no rows behind it
   > used to insert the two uninitialised locals as a skill, and a
   > count past the end of the file to insert the last row over and
@@ -1499,7 +1506,7 @@ starting each — the scan is one grep, and the ranking below is from a
   > walk counted. The two agree in the client today only because the
   > file is read once before the trees are built; they are one table
   > apart, and the new test — a skill whose level moves after the walk
-  > — drives a write six entries past a three-entry array. Refused
+  > — drives a write nine entries into an array of three. Refused
   > now, and refused *before* the skill is added to the usable set, so
   > a refusal leaves nothing behind; `UnLearnSkill` got the matching
   > guard. Worth recording: ASan did not flag that write in the
@@ -1519,16 +1526,29 @@ starting each — the scan is one grep, and the ranking below is from a
   > experience table, and that row is not the one a read gets back, so
   > the new checks pass against the old loader too — what they pin is
   > the contract. And the three `g_pSkillAvailable` dereferences in
-  > the domain are NULL-guarded, the global being the executable's to
-  > create.
-  > Two refactors carried along: `AddSkillStep` searched a *copy* of
-  > the step list it was about to append to, once per skill added, and
-  > now searches the list; and the "which step does the skill all three
-  > races share belong to" decision moved out of `AddSkill` into
-  > `GetSkillStepFor`, which the rebuild path needs as well — the new
-  > test pins all three of its answers. Korean comments in every
-  > function touched are translated (`CLAUDE.md`'s English-only rule).
-  > Tests (`test_skill_core.cpp`, +7, 14 → 21 in the file): the step
+  > the domain are NULL-guarded (`GameInit.cpp` deletes that global at
+  > shutdown, so the window is real), as is `GetSkillStepFor`'s reach
+  > for `g_pSkillManager`. The `m_pLearnedSkillID==NULL` limb of the
+  > two new bounds guards is a guard of the same kind: after the fix
+  > nothing can reach it, because the array is absent only while the
+  > skill list is empty too, and every entry point gates on the list
+  > first.
+  > Two refactors carried along, both verified identical by the review:
+  > `AddSkillStep` searched a *copy* of the step list it was about to
+  > append to, once per skill added, and now searches the list; and the
+  > "which step does the skill all three races share belong to"
+  > decision moved out of `AddSkill` into `GetSkillStepFor`, which the
+  > rebuild path needs as well — the new test pins all three of its
+  > answers. `AddNextSkill` gained the `MAX_ACTIONINFO` test its two
+  > siblings already had; it had been leaning on the info table
+  > answering an index it does not hold with an empty entry. The 37
+  > Korean comment lines inside the four functions this slice edits
+  > (`AddSkill`, `RemoveNextSkill`, `LearnSkill`, `UnLearnSkill`) are
+  > translated — the first round of this slice translated only the
+  > lines next to the edits and claimed all of them, which the review
+  > caught; `SetRootSkill` and the rest of the file are untouched and
+  > still Korean.
+  > Tests (`test_skill_core.cpp`, +10, 9 → 19 in the file): the step
   > lists ordered by learn level and holding each skill once; the
   > save/load round trip, over a fresh domain and over a live one, and
   > a file that marks a deep skill learned and its parent not; a save
@@ -1536,8 +1556,14 @@ starting each — the scan is one grep, and the ranking below is from a
   > count, or an impossible status; an experience level past the table
   > and a negative one; `InitSkillList` rebuilding the eight trees
   > while keeping the domain levels the server sent once; the
-  > deeper-than-the-array learn refusal; and the shared skill's step
-  > per domain. **Noted, not done:** `MSkillDomain::SaveToFile` and
+  > deeper-than-the-array learn refusal; the shared skill's step per
+  > domain; a load over a live domain leaving none of the old tree in
+  > the step lists; an experience row that cannot be stored costing
+  > only itself; and the domain running with both executable-owned
+  > globals set to NULL. Three of those — the step-list ordering, the
+  > `InitSkillList` rebuild and the shared skill's step — pass in full
+  > against the unfixed code: they are coverage for the two refactors,
+  > not reproductions. **Noted, not done:** `MSkillDomain::SaveToFile` and
   > `LoadFromFile` have no caller anywhere in the tree — they are
   > reachable only through `CTypeTable`'s own file I/O, one call away,
   > which is why they were made correct rather than deleted; deleting
@@ -1546,8 +1572,28 @@ starting each — the scan is one grep, and the ranking below is from a
   > are the same eight names in the same order, and `MSkillManager.cpp`
   > indexes itself with both spellings. `LearnSkill`'s "is this the
   > level being learned next" gate is commented out, so any level in
-  > the domain can be learned in any order. Suite: 280 tests (4,384
-  > checks).
+  > the domain can be learned in any order. A skill whose level the
+  > file gives as negative is now refused rather than written below
+  > the array *and marked learned*, which is strictly safer but would
+  > make such a skill vanish from the window — no shipped data to
+  > check that against here. Suite: 283 tests (4,401 checks).
+  > **Adversarial review round (2026-09-03, 2 reviewers, both SHIP
+  > with findings), fixed on the branch:** both reviewers independently
+  > found the same real defect — the experience-level refusal returned
+  > without consuming the row, and the manager's loop reads the next
+  > domain from wherever the stream is left, so one bad level cost the
+  > rest of the file where the old code lost only that row. The row is
+  > read into a local now and stored only if the level fits, so the
+  > stream stays where it always was. They also both caught the step
+  > lists never being cleared, and the behavioural reviewer verified
+  > line by line that the other seven changes are behaviour-preserving
+  > on every reachable path — including that `LearnSkill`'s bound
+  > cannot refuse a learn that used to succeed, because `AddSkill`
+  > raises `m_MaxLevel` before its duplicate test and the level never
+  > decreases. The test reviewer's findings account for the guard
+  > labels, the coverage admissions and the corrected counts above,
+  > and for two test comments that described contracts the code does
+  > not have.
   - Owner (all of 4.x): `gamemodel`'s membership file
     (`tests/arch/gamemodel_files.txt`), the M0–M2 include rules in
     `check_includes.pl` (in force since 4.1), R4 shrinking.

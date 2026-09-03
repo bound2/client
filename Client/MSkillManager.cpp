@@ -605,24 +605,7 @@ MSkillDomain::~MSkillDomain()
 	}
 
 
-	//---------------------------------------------------------
-	// Skill Step map 지우기
-	//---------------------------------------------------------
-	SKILL_STEP_MAP::iterator iList = m_mapSkillStep.begin();
-
-	while (iList != m_mapSkillStep.end())
-	{
-		SKILL_STEP_LIST* pList = iList->second;
-
-		if (pList != NULL)
-		{
-			delete pList;
-		}
-		
-		iList ++;
-	}
-
-	m_mapSkillStep.clear();
+	ClearSkillStep();
 }
 
 //----------------------------------------------------------------------
@@ -698,6 +681,37 @@ MSkillDomain::ClearSkillList()
 		delete [] m_pLearnedSkillID;
 		m_pLearnedSkillID = NULL;
 	}
+
+	//-----------------------------------------------
+	// The step lists hold the same skills, so they go with the list.
+	// They used to be freed by the destructor alone, which left every
+	// rebuild - the skill-info packet's, and a load - adding to lists
+	// that still named the skills of the tree before it.
+	//-----------------------------------------------
+	ClearSkillStep();
+}
+
+//----------------------------------------------------------------------
+// Clear SkillStep
+//----------------------------------------------------------------------
+void
+MSkillDomain::ClearSkillStep()
+{
+	SKILL_STEP_MAP::iterator iList = m_mapSkillStep.begin();
+
+	while (iList != m_mapSkillStep.end())
+	{
+		SKILL_STEP_LIST* pList = iList->second;
+
+		if (pList != NULL)
+		{
+			delete pList;
+		}
+
+		iList ++;
+	}
+
+	m_mapSkillStep.clear();
 }
 
 //----------------------------------------------------------------------
@@ -750,7 +764,7 @@ MSkillDomain::SetRootSkill(ACTIONINFO id, bool reset)
 //----------------------------------------------------------------------
 // AddSkill
 //----------------------------------------------------------------------
-// id와 그의 하위에 있는 것들을 모두 추가한다.
+// Add <id> and everything below it.
 //----------------------------------------------------------------------
 bool
 MSkillDomain::AddSkill(ACTIONINFO id)
@@ -773,7 +787,7 @@ MSkillDomain::AddSkill(ACTIONINFO id)
 	int skillLevel = (*g_pSkillInfoTable)[id].GetLevel();
 
 	//--------------------------------------------------
-	// domain 최고 skill level을 찾는다.
+	// Find the domain's top skill level.
 	//--------------------------------------------------
 	if (m_MaxLevel < skillLevel)
 	{
@@ -781,12 +795,12 @@ MSkillDomain::AddSkill(ACTIONINFO id)
 	}
 
 	//-----------------------------------------------
-	// 아직 없는 Skill이면 추가	
+	// Add the skill if it is not in yet	
 	//-----------------------------------------------
 	if (iSkill == m_mapSkillID.end() )
 	{		
 		//-----------------------------------------------
-		// root level이면 다음에 배울 수 있는 걸로 체크한다.
+		// A root-level skill is marked as learnable next.
 		//-----------------------------------------------
 		if(id == SKILL_ABERRATION)
 			int a =0 ;
@@ -805,7 +819,7 @@ MSkillDomain::AddSkill(ACTIONINFO id)
 		AddSkillStep( GetSkillStepFor( id ), id );
 
 		//--------------------------------------------------
-		// 다음에 배울 수 있는 것들을 찾아서 추가한다.
+		// Find what can be learned next and add it.
 		//--------------------------------------------------
 		const SKILLINFO_NODE::SKILLID_LIST& listNextSkill = (*g_pSkillInfoTable)[id].GetNextSkillList();
 
@@ -814,12 +828,12 @@ MSkillDomain::AddSkill(ACTIONINFO id)
 		while (iNextSkill != listNextSkill.end())
 		{
 			//--------------------------------------------------
-			// ID가 *iNextSkil인 Skill를 찾는다.
+			// Find the skill whose id is *iNextSkill.
 			//--------------------------------------------------
 			iSkill = m_mapSkillID.find( *iNextSkill );
 
 			//--------------------------------------------------
-			// 아직 없는 경우에 추가한다.
+			// Add it when it is not in yet.
 			//--------------------------------------------------
 			if (iSkill == m_mapSkillID.end())
 			{
@@ -833,7 +847,7 @@ MSkillDomain::AddSkill(ACTIONINFO id)
 	}
 
 	//-----------------------------------------------
-	// 이미 있는 Skill이면 false
+	// A skill the domain already holds gives false
 	//-----------------------------------------------
 	return false;
 }
@@ -959,6 +973,15 @@ MSkillDomain::RemoveSkill(ACTIONINFO id)
 void
 MSkillDomain::AddNextSkill(ACTIONINFO id)
 {
+	// The empty slot of the learned-skill array, which UnLearnSkill
+	// hands over when it walks down to a level holding no skill. Its
+	// two siblings test for it; this one leaned on the info table
+	// answering an index it does not hold with an empty entry.
+	if (id==MAX_ACTIONINFO)
+	{
+		return;
+	}
+
 	const SKILLINFO_NODE::SKILLID_LIST& listNextSkill = (*g_pSkillInfoTable)[id].GetNextSkillList();
 
 	SKILLINFO_NODE::SKILLID_LIST::const_iterator iNextSkill = listNextSkill.begin();
@@ -1040,7 +1063,7 @@ MSkillDomain::AddNextSkillForce(ACTIONINFO id)
 //----------------------------------------------------------------------
 // Remove NextSkill
 //----------------------------------------------------------------------
-// 다음에 배울 수 있게 표시된 기술들을 제거한다.
+// Take the mark off the skills that could be learned next.
 //----------------------------------------------------------------------
 void
 MSkillDomain::RemoveNextSkill(ACTIONINFO id)
@@ -1068,15 +1091,15 @@ MSkillDomain::RemoveNextSkill(ACTIONINFO id)
 	while (iNextSkill != listNextSkill.end())
 	{
 		//--------------------------------------------------
-		// ID가 *iNextSkil인 Skill를 찾는다.
+		// Find the skill whose id is *iNextSkill.
 		//--------------------------------------------------
 		SKILLID_MAP::iterator	iSkill = m_mapSkillID.find( *iNextSkill );
 
 		//--------------------------------------------------
-		// 있으면 그 Skill의 값을 바꾼다.
+		// If it is there, change its status.
 		//--------------------------------------------------
-		// 물론, 현재 domain에 속해있는 경우에만 가능하고
-		// NEXT이면 OTHER로 바꾼다.
+		// Only for a skill in this domain, of course, and
+		// NEXT becomes OTHER.
 		//--------------------------------------------------
 		if (iSkill != m_mapSkillID.end())
 		{
@@ -1093,17 +1116,17 @@ MSkillDomain::RemoveNextSkill(ACTIONINFO id)
 //----------------------------------------------------------------------
 // Learn Skill
 //----------------------------------------------------------------------
-// id의 skill을 Learn상태로 바꾼다.
-// 다음에 배울 수 있는 skill들을 Next상태로 바꾼다.
+// Put the skill <id> into the learned state.
+// What it leads to becomes learnable next.
 //
-// 같은 level의 기술은 하나밖에 배울 수 없다.
-// 그렇게 되면, 현재 배울 수 있는 기술은 최고의 level인 기술이다. (m_MaxLevel)
+// Only one skill can be learned at each level.
+// So what can be learned now is the skill at the top level (m_MaxLevel).
 //----------------------------------------------------------------------
 bool
 MSkillDomain::LearnSkill(ACTIONINFO id)
 {
 	//--------------------------------------------------
-	// 새로운 기술을 배울 수 없으면..
+	// Nothing to spend on a new skill..
 	//--------------------------------------------------
 	if (!m_bNewSkill)
 	{
@@ -1112,7 +1135,7 @@ MSkillDomain::LearnSkill(ACTIONINFO id)
 
 
 	//--------------------------------------------------
-	// 이번에 배울 수 있는 level의 기술이 아니면 return
+	// Return unless it sits at the level being learned this time
 	//--------------------------------------------------
 	if ((*g_pSkillInfoTable)[id].GetLevel()!=m_MaxLearnedLevel+1)
 	{
@@ -1122,12 +1145,12 @@ MSkillDomain::LearnSkill(ACTIONINFO id)
 	SKILLID_MAP::iterator	iSkill;
 
 	//--------------------------------------------------
-	// ID가 id인 Skill를 찾는다.
+	// Find the skill whose id is <id>.
 	//--------------------------------------------------
 	iSkill = m_mapSkillID.find(id);
 
 	//--------------------------------------------------
-	// 없을 경우 NULL을 return한다.
+	// Return NULL when it is not there.
 	//--------------------------------------------------
 	if (iSkill == m_mapSkillID.end()) 
 	{
@@ -1135,7 +1158,7 @@ MSkillDomain::LearnSkill(ACTIONINFO id)
 	}
 
 	//--------------------------------------------------
-	// 이미 배운 것이면 return false
+	// Already learned, so return false
 	//--------------------------------------------------
 	if ((*iSkill).second==SKILLSTATUS_LEARNED)
 	{
@@ -1177,10 +1200,10 @@ MSkillDomain::LearnSkill(ACTIONINFO id)
 
 		//--------------------------------------------------
 		//
-		// 현재에 배울 수 있게 표시된 것들을 모두 없애준다.
+		// Clear every skill currently marked as learnable.
 		//
 		//--------------------------------------------------
-		// 바로 전 level의 하위 level
+		// The level below the one just learned
 		//--------------------------------------------------
 		//if (m_MaxLearnedLevel > 0)
 		//{	
@@ -1188,7 +1211,7 @@ MSkillDomain::LearnSkill(ACTIONINFO id)
 		//}
 
 		//--------------------------------------------------
-		// 배울 수 있다고 표시된거 모두 제거
+		// Remove every "can be learned" mark
 		//--------------------------------------------------
 		SKILLID_MAP::iterator iSkill2 = m_mapSkillID.begin();
 
@@ -1203,13 +1226,13 @@ MSkillDomain::LearnSkill(ACTIONINFO id)
 		}
 
 		//--------------------------------------------------
-		// 배웠다고 체크한다.
+		// Mark it learned.
 		//--------------------------------------------------
 		(*iSkill).second = SKILLSTATUS_LEARNED;	
 
 		//--------------------------------------------------
 		//
-		// 다음에 배울 수 있는 것들을 찾아서 설정한다.
+		// Find what can be learned next and mark it.
 		//
 		//--------------------------------------------------
 		AddNextSkill( id );
@@ -1217,7 +1240,7 @@ MSkillDomain::LearnSkill(ACTIONINFO id)
 	else
 	{
 		//--------------------------------------------------
-		// 배웠다고 체크한다.
+		// Mark it learned.
 		//--------------------------------------------------
 		(*iSkill).second = SKILLSTATUS_LEARNED;	
 	}
@@ -1230,17 +1253,17 @@ MSkillDomain::LearnSkill(ACTIONINFO id)
 //----------------------------------------------------------------------
 // UnLearn Skill
 //----------------------------------------------------------------------
-// id의 skill을 안 배운 상태로 바꾼다.
+// Put the skill <id> back into the unlearned state.
 //
-// 제거된 것들 중에서 최고 level의 기술의
-// 다음에 배울 수 있는 skill들을 Next상태로 바꾼다.
+// What the highest-level skill among those removed
+// What it leads to becomes learnable next.
 //
 //----------------------------------------------------------------------
 bool
 MSkillDomain::UnLearnSkill(ACTIONINFO id)
 {
 	//--------------------------------------------------
-	// 현재 최고 level의 기술만 제거할 수 있다.
+	// Only the skill at the current top level can be removed.
 	//--------------------------------------------------
 	if ((*g_pSkillInfoTable)[id].GetLevel()!=m_MaxLearnedLevel)
 	{
@@ -1250,12 +1273,12 @@ MSkillDomain::UnLearnSkill(ACTIONINFO id)
 	SKILLID_MAP::iterator	iSkill;
 
 	//--------------------------------------------------
-	// ID가 id인 Skill를 찾는다.
+	// Find the skill whose id is <id>.
 	//--------------------------------------------------
 	iSkill = m_mapSkillID.find(id);
 
 	//--------------------------------------------------
-	// 없을 경우 NULL을 return한다.
+	// Return NULL when it is not there.
 	//--------------------------------------------------
 	if (iSkill == m_mapSkillID.end()) 
 	{
@@ -1264,10 +1287,10 @@ MSkillDomain::UnLearnSkill(ACTIONINFO id)
 
 	//--------------------------------------------------
 	//
-	// Skill의 값을 UnLearned로 바꾼다.
+	// Change the skill's status to unlearned.
 	//
 	//--------------------------------------------------
-	// 배운 것이면 아니면 return false
+	// Return false unless it was learned
 	if ((*iSkill).second!=SKILLSTATUS_LEARNED)
 	{
 		return false;
@@ -1307,7 +1330,7 @@ MSkillDomain::UnLearnSkill(ACTIONINFO id)
 	
 	//--------------------------------------------------
 	//
-	// 다음에 배울 수 있는 것들을 찾아서 설정한다.
+	// Find what can be learned next and mark it.
 	//
 	//--------------------------------------------------
 	if (m_MaxLearnedLevel>=0)
@@ -1609,10 +1632,22 @@ MSkillDomain::LoadFromFileServerDomainInfo(std::ifstream& file)
 	}
 
 	//--------------------------------------------------
+	// The row is read whether or not it can be stored, so that a
+	// level this table cannot hold costs one row and not the rest of
+	// the file: the manager's loop above reads the next domain from
+	// wherever this leaves the stream.
+	//--------------------------------------------------
+	ExpInfo	info;
+
+	info.GoalExp = 0;
+	info.AccumExp = 0;
+	info.LoadFromFile( file );
+
+	//--------------------------------------------------
 	// The level names the row to fill. A table answers every index it
-	// does not hold with one row shared across the program, so a
-	// level outside this table would not be stored under that level -
-	// it would become what every level past the end of every table
+	// does not hold with one row shared across every table of that
+	// type, so a level outside this one would not be stored under
+	// that level - it would become what every level past the end
 	// reads. The level is the file's, so it is checked here.
 	//--------------------------------------------------
 	if (level<0 || level>=m_DomainExpTable.GetSize())
@@ -1620,8 +1655,7 @@ MSkillDomain::LoadFromFileServerDomainInfo(std::ifstream& file)
 		return;
 	}
 
-	// Load into the row for that level.
-	m_DomainExpTable[level].LoadFromFile( file );
+	m_DomainExpTable[level] = info;
 }
 
 bool		

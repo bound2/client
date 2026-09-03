@@ -469,6 +469,7 @@ class MSkillDomain {
 		//------------------------------------------------------
 		void			Clear();
 		void			ClearSkillList();
+		void			ClearSkillStep();
 
 		//------------------------------------------------------
 		// Set Root Skill - domain의 최상위 skill부터 
