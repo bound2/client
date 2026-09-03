@@ -111,6 +111,7 @@ extern enum CLIENT_MODE		g_ModeNext;
 // init / mode
 //-----------------------------------------------------------------------------
 extern BOOL		InitPlayer(int x, int y, int dir);
+extern void		InitSkillTree();
 extern void		SetMode(enum CLIENT_MODE mode);
 
 //-----------------------------------------------------------------------------

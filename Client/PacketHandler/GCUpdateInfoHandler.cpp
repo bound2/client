@@ -217,7 +217,7 @@ throw ( ProtocolException , Error )
 	//
 	//--------------------------------------------------
 	DEBUG_ADD( "SkillManager Init" );
-	g_pSkillManager->Init();	
+	InitSkillTree();	
 
 	g_PreviousCreatureType = -1;
 	g_MorphCreatureType = 0;
