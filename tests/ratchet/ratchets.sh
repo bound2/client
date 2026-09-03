@@ -178,14 +178,20 @@ check "R2 (packet cpps defining execute)" "$R2" "$R2_BASELINE"
 # call with a trailing comment still does; the earlier whole-line
 # exclusion let `sprintf(...); // was strcpy` through.)
 #
-# 19: 46 - 27. Task 5.4's first slice converted all 31 sprintf-family
-# calls in Client/PacketHandler whose format came from the game string
-# table to SafeFormat::Format. Only 27 of them move this number: the
-# other four are wsprintf, which \b rejects because of the preceding
-# 'w'. R7 below counts all 31, which is why both exist - each is blind
-# to something the other sees.
+# 18: 19 - 1. The review round of task 5.4's first slice found a
+# pre-existing overflow one line below a site that slice had converted:
+# GCBloodBibleListHandler sprintf'd "%3d %s" into char[192] from a
+# char[192], four bytes short. Bounding it converts a 28th sprintf line,
+# even though its format is a literal and it was never a C19 site - which
+# is the difference between R3 and R7 in one example.
+# History: 19 = 46 - 27. Task 5.4's first slice converted all 31
+# sprintf-family calls in Client/PacketHandler whose format came from the
+# game string table to SafeFormat::Format. Only 27 of them moved this
+# number: the other four are wsprintf, which \b rejects because of the
+# preceding 'w'. R7 below counts all 31, which is why both exist - each
+# is blind to something the other sees.
 #----------------------------------------------------------------------
-R3_BASELINE=19
+R3_BASELINE=18
 
 for d in Client/Packet Client/PacketHandler; do
 	if [ ! -d "$d" ]; then

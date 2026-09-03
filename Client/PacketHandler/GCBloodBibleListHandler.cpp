@@ -53,14 +53,20 @@ throw ( ProtocolException , Error )
 	for(int i = 0; i< BloodBibleList.size(); i++)
 	{
 		// The two arguments are table lookups indexed by a packet field.
-		// CTypeTable::operator[] only bounds-checks under _DEBUG, so
-		// outside Debug a list entry the server made large enough read
-		// past the end of the table; GetGameString() range-checks the id
-		// in every build and answers "" for one it cannot resolve.
+		// CTypeTable::operator[] range-checks that (it has done so in
+		// every build since e65ab7a), but what it returns out of range is
+		// a default-constructed MString, whose GetString() is NULL - and
+		// a NULL passed to a %s is undefined, not merely empty.
+		// GetGameString() answers "" instead.
 		SafeFormat::Format(str2, GetGameString(UI_STRING_MESSAGE_RENT_BLOOD_BIBLE2),
 			GetGameString(UI_STRING_MESSAGE_BLOOD_BIBLE_ARMEGA+BloodBibleList[i]),
 			GetGameString(STRING_MESSAGE_BLOOD_BIBLE_BONUS_ARMEGA+BloodBibleList[i]));
-		sprintf(str, "%3d %s", BloodBibleList[i], str2);
+
+		// str2 can now be a full 191 bytes, and "%3d " adds at least four
+		// more, so the old sprintf into str[192] could run four bytes
+		// past it. The format here is a literal, so this is about the
+		// bound rather than about C19.
+		SafeFormat::Format(str, "%3d %s", BloodBibleList[i], str2);
 		g_pPCTalkBox->AddString( str );
 	}
 	

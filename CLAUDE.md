@@ -150,7 +150,7 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **328 tests, 4,505 checks, 0 failed** in both trees.
+baseline: **332 tests, 4,510 checks, 0 failed** in both trees.
 
 ## Traps
 
@@ -237,7 +237,9 @@ baseline: **328 tests, 4,505 checks, 0 failed** in both trees.
    **256 call sites**, measured by ratchet R7 rather than estimated, and it now
    has a fix to apply rather than a policy to argue about: `SafeFormat::Format`
    in `basic/SafeFormat.h` checks a table entry's conversions against the
-   arguments the call site really passed. `Client/PacketHandler` is converted;
-   `Client` has 64 left and `VS_UI` 192.
+   arguments the call site really passed. Every `sprintf`-family site in
+   `Client/PacketHandler` is converted; what is left is the `AddFormat` family
+   (3 there, 28 in all — `CMessageArray` bounds its own buffer already, so only
+   the arity half remains) plus `Client`'s other 61 and `VS_UI`'s 192.
 3. Dead and duplicate source sitting alongside live code, which is a correctness trap
    when the wrong file gets edited.

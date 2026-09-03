@@ -25,6 +25,7 @@
 
 #include "SafeFormat.h"
 
+#include <cstdio>
 #include <cstring>
 #include <string>
 
@@ -86,6 +87,20 @@ TEST(SafeFormat, TreatsADoubledPercentAsOneLiteralPercent)
 	SafeFormat::Format(buf, "100%% done");
 
 	CHECK(Is("100% done", buf));
+}
+
+TEST(SafeFormat, AcceptsAMutableCharPointerArgument)
+{
+	char buf[64];
+	char name[] = "Lorraine";
+	char* pName = name;
+
+	// This is the shape the converted call sites actually pass:
+	// MString::GetString() returns char*, not const char*, and the
+	// non-template overload has to win over the pointer template for it.
+	SafeFormat::Format(buf, "[System]%s", pName);
+
+	CHECK(Is("[System]Lorraine", buf));
 }
 
 TEST(SafeFormat, AcceptsAStdStringArgument)
@@ -166,6 +181,18 @@ TEST(SafeFormat, RefusesAWidthTakenFromAnArgument)
 	CHECK(Is("[%*d]", buf));
 }
 
+TEST(SafeFormat, RefusesAPrecisionTakenFromAnArgument)
+{
+	char buf[64];
+
+	// The header promises this of the precision as well as the width, and
+	// for the same reason: %.*s consumes two arguments where the call site
+	// counted on one.
+	SafeFormat::Format(buf, "[%.*s]", 3, "abcdef");
+
+	CHECK(Is("[%.*s]", buf));
+}
+
 TEST(SafeFormat, RefusesAWideConversionThatWouldRetypeACharPointer)
 {
 	char buf[64];
@@ -217,6 +244,22 @@ TEST(SafeFormat, RefusesAPointerConversionAgainstANonPointer)
 	SafeFormat::Format(buf, "%p", 7);
 
 	CHECK(Is("%p", buf));
+}
+
+TEST(SafeFormat, PerformsAPointerConversionWhenTheArgumentIsAPointer)
+{
+	char buf[64];
+	char expected[64];
+	int  anything = 0;
+	void* pValue = &anything;
+
+	SafeFormat::Format(buf, "%p", pValue);
+
+	// The rendering of a pointer is the runtime's business, so the
+	// assertion is that this agrees with it rather than a literal.
+	std::snprintf(expected, sizeof(expected), "%p", pValue);
+
+	CHECK(Is(expected, buf));
 }
 
 TEST(SafeFormat, PrintsTheHostileNoticeEntryAsMostlyText)
@@ -304,6 +347,18 @@ TEST(SafeFormat, TruncatesAStringConversionToItsPrecision)
 	SafeFormat::Format(buf, "%.4s!", "abcdefgh");
 
 	CHECK(Is("abcd!", buf));
+}
+
+TEST(SafeFormat, ClampsAPrecisionTheDataAsksFor)
+{
+	char buf[128];
+
+	// The precision cap is the same 32 as the width cap, and had no test
+	// of its own until the review round asked for one.
+	SafeFormat::Format(buf, "%.9000s|", "0123456789012345678901234567890123456789");
+
+	CHECK_EQ(33, (int)std::strlen(buf));
+	CHECK_EQ('|', buf[32]);
 }
 
 
