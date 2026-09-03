@@ -423,3 +423,623 @@ TEST(SkillManager, ADomainTheFileNamesPastTheTableIsRefused)
 	CHECK_EQ(MAX_SKILLDOMAIN, g_pSkillManager->GetSize());
 	CHECK_EQ(3, (*g_pSkillManager)[SKILLDOMAIN_BLADE].GetSize());
 }
+
+//----------------------------------------------------------------------
+// The step lists a domain groups its tree into
+//----------------------------------------------------------------------
+TEST(SkillDomain, AStepListIsOrderedByLearnLevelAndHoldsEachSkillOnce)
+{
+	SkillWorld world;
+
+	// All three sit in one step, and the level the skill file says
+	// each is learned at runs against the order the tree walk meets
+	// them.
+	(*g_pSkillInfoTable)[kRoot].SetSkillStep(SKILL_STEP_APPRENTICE);
+	(*g_pSkillInfoTable)[kChild].SetSkillStep(SKILL_STEP_APPRENTICE);
+	(*g_pSkillInfoTable)[kLeaf].SetSkillStep(SKILL_STEP_APPRENTICE);
+	(*g_pSkillInfoTable)[kRoot].SetLearnLevel(30);
+	(*g_pSkillInfoTable)[kChild].SetLearnLevel(20);
+	(*g_pSkillInfoTable)[kLeaf].SetLearnLevel(10);
+
+	MSkillDomain domain;
+
+	CHECK(domain.IsExistSkillStep(SKILL_STEP_APPRENTICE) == FALSE);
+	CHECK(domain.GetSkillStepList(SKILL_STEP_APPRENTICE) == NULL);
+
+	domain.SetRootSkill(kRoot);
+
+	CHECK(domain.IsExistSkillStep(SKILL_STEP_APPRENTICE) != FALSE);
+	CHECK(domain.IsExistSkillStep(SKILL_STEP_MASTER) == FALSE);
+	CHECK(domain.GetSkillStepList(SKILL_STEP_MASTER) == NULL);
+
+	const MSkillDomain::SKILL_STEP_LIST* pList = domain.GetSkillStepList(SKILL_STEP_APPRENTICE);
+
+	CHECK(pList != NULL);
+
+	if (pList != NULL)
+	{
+		// Lowest learn level first, whichever order they arrived in.
+		CHECK_EQ(3, (int)pList->size());
+		CHECK_EQ((int)kLeaf, (int)(*pList)[0]);
+		CHECK_EQ((int)kChild, (int)(*pList)[1]);
+		CHECK_EQ((int)kRoot, (int)(*pList)[2]);
+	}
+
+	// A second walk over a tree that is already there does not list
+	// anything twice.
+	domain.SetRootSkill(kRoot);
+	pList = domain.GetSkillStepList(SKILL_STEP_APPRENTICE);
+	CHECK(pList != NULL);
+
+	if (pList != NULL)
+	{
+		CHECK_EQ(3, (int)pList->size());
+	}
+}
+
+//----------------------------------------------------------------------
+// A domain's own save file
+//----------------------------------------------------------------------
+TEST(SkillDomain, ASavedDomainComesBackReadyToLearnAndUnlearn)
+{
+	SkillWorld world;
+	MSkillDomain domain;
+
+	(*g_pSkillInfoTable)[kRoot].SetSkillStep(SKILL_STEP_APPRENTICE);
+	(*g_pSkillInfoTable)[kChild].SetSkillStep(SKILL_STEP_APPRENTICE);
+	(*g_pSkillInfoTable)[kLeaf].SetSkillStep(SKILL_STEP_APPRENTICE);
+
+	domain.SetRootSkill(kRoot);
+	domain.SetNewSkill();
+	CHECK(domain.LearnSkill(kRoot));
+	domain.SetNewSkill();
+	CHECK(domain.LearnSkill(kChild));
+
+	{
+		std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
+		domain.SaveToFile(out);
+	}
+
+	//------------------------------------------------------------------
+	// A domain of its own gets the statuses back, and with them the
+	// levels the learn and unlearn paths index - which the file does
+	// not carry and the info table does.
+	//------------------------------------------------------------------
+	{
+		MSkillDomain loaded;
+		std::ifstream in(kTempFile, std::ios::binary);
+		loaded.LoadFromFile(in);
+
+		CHECK_EQ(3, loaded.GetSize());
+		CHECK_EQ((int)MSkillDomain::SKILLSTATUS_LEARNED, (int)loaded.GetSkillStatus(kRoot));
+		CHECK_EQ((int)MSkillDomain::SKILLSTATUS_LEARNED, (int)loaded.GetSkillStatus(kChild));
+		CHECK_EQ((int)MSkillDomain::SKILLSTATUS_NEXT, (int)loaded.GetSkillStatus(kLeaf));
+
+		// The step lists are the tree walk's, so they come back too.
+		const MSkillDomain::SKILL_STEP_LIST* pList = loaded.GetSkillStepList(SKILL_STEP_APPRENTICE);
+		CHECK(pList != NULL);
+
+		if (pList != NULL)
+		{
+			CHECK_EQ(3, (int)pList->size());
+		}
+
+		// The deepest learned skill is the one that can be given back.
+		CHECK_EQ(false, loaded.UnLearnSkill(kRoot));
+		CHECK(loaded.UnLearnSkill(kChild));
+		CHECK_EQ((int)MSkillDomain::SKILLSTATUS_NEXT, (int)loaded.GetSkillStatus(kChild));
+		CHECK_EQ((int)MSkillDomain::SKILLSTATUS_OTHER, (int)loaded.GetSkillStatus(kLeaf));
+		CHECK(loaded.UnLearnSkill(kRoot));
+	}
+
+	//------------------------------------------------------------------
+	// And so does the domain the load runs over, whose array the
+	// clear at the head of the load takes away.
+	//------------------------------------------------------------------
+	{
+		std::ifstream in(kTempFile, std::ios::binary);
+		domain.LoadFromFile(in);
+
+		CHECK_EQ(3, domain.GetSize());
+		CHECK(domain.UnLearnSkill(kChild));
+
+		// What is still learned is usable again, and what was just
+		// given back is not.
+		CHECK(g_pSkillAvailable->IsEnableSkill(kRoot));
+		CHECK_EQ(false, g_pSkillAvailable->IsEnableSkill(kChild));
+	}
+
+	//------------------------------------------------------------------
+	// A file that says a skill deep in the tree is learned and its
+	// parent is not: the level below it holds no skill, so the
+	// unlearn that walks down to that level asks the tree what the
+	// empty slot leads to - which AddNextSkill now refuses outright
+	// instead of leaning on the info table's out-of-range entry.
+	//------------------------------------------------------------------
+	{
+		std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
+		const int rows = 1;
+		const WORD id = (WORD)kChild;
+		const BYTE status = (BYTE)MSkillDomain::SKILLSTATUS_LEARNED;
+		out.write((const char*)&rows, 4);
+		out.write((const char*)&id, 2);
+		out.write((const char*)&status, 1);
+	}
+	{
+		MSkillDomain loaded;
+		std::ifstream in(kTempFile, std::ios::binary);
+		loaded.LoadFromFile(in);
+
+		CHECK_EQ(1, loaded.GetSize());
+		CHECK(loaded.UnLearnSkill(kChild));
+		CHECK_EQ((int)MSkillDomain::SKILLSTATUS_OTHER, (int)loaded.GetSkillStatus(kChild));
+		CHECK_EQ(false, loaded.UnLearnSkill(kChild));
+	}
+
+	std::remove(kTempFile);
+}
+
+TEST(SkillDomain, ASaveFileThatEndsEarlyLoadsWhatIsThereAndStops)
+{
+	SkillWorld world;
+
+	//------------------------------------------------------------------
+	// A count with no rows behind it invents no skills: the id and the
+	// status of a row that is not there are never read.
+	//------------------------------------------------------------------
+	{
+		std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
+		const int rows = 4;
+		out.write((const char*)&rows, 4);
+	}
+	{
+		MSkillDomain domain;
+		std::ifstream in(kTempFile, std::ios::binary);
+		domain.LoadFromFile(in);
+
+		CHECK_EQ(0, domain.GetSize());
+
+		// A domain with no tree learns and unlearns nothing. Both
+		// refusals stop at the gates that were already there - the
+		// skill is not in the list, and no level is learned - so they
+		// do not reach the bounds guards on the learned-skill array,
+		// which after this fix nothing can: the array is absent only
+		// while the list is empty too.
+		domain.SetNewSkill();
+		CHECK_EQ(false, domain.LearnSkill(kRoot));
+		CHECK_EQ(false, domain.UnLearnSkill(kRoot));
+	}
+
+	//------------------------------------------------------------------
+	// Two rows behind a count of a thousand are two skills.
+	//------------------------------------------------------------------
+	{
+		std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
+		const int rows = 1000;
+		WORD id;
+		BYTE status;
+		out.write((const char*)&rows, 4);
+		id = (WORD)kRoot;	status = (BYTE)MSkillDomain::SKILLSTATUS_LEARNED;
+		out.write((const char*)&id, 2);
+		out.write((const char*)&status, 1);
+		id = (WORD)kChild;	status = (BYTE)MSkillDomain::SKILLSTATUS_NEXT;
+		out.write((const char*)&id, 2);
+		out.write((const char*)&status, 1);
+	}
+	{
+		MSkillDomain domain;
+		std::ifstream in(kTempFile, std::ios::binary);
+		domain.LoadFromFile(in);
+
+		CHECK_EQ(2, domain.GetSize());
+		CHECK_EQ((int)MSkillDomain::SKILLSTATUS_LEARNED, (int)domain.GetSkillStatus(kRoot));
+		CHECK_EQ((int)MSkillDomain::SKILLSTATUS_NEXT, (int)domain.GetSkillStatus(kChild));
+		CHECK_EQ((int)MSkillDomain::SKILLSTATUS_NULL, (int)domain.GetSkillStatus(kLeaf));
+	}
+
+	//------------------------------------------------------------------
+	// A status the enum does not have is not a status, and neither is
+	// the one that means the skill is not in the domain at all.
+	//------------------------------------------------------------------
+	{
+		std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
+		const int rows = 3;
+		WORD id;
+		BYTE status;
+		out.write((const char*)&rows, 4);
+		id = (WORD)kRoot;	status = 200;
+		out.write((const char*)&id, 2);
+		out.write((const char*)&status, 1);
+		id = (WORD)kLeaf;	status = (BYTE)MSkillDomain::SKILLSTATUS_NULL;
+		out.write((const char*)&id, 2);
+		out.write((const char*)&status, 1);
+		id = (WORD)kChild;	status = (BYTE)MSkillDomain::SKILLSTATUS_LEARNED;
+		out.write((const char*)&id, 2);
+		out.write((const char*)&status, 1);
+	}
+	{
+		MSkillDomain domain;
+		std::ifstream in(kTempFile, std::ios::binary);
+		domain.LoadFromFile(in);
+
+		CHECK_EQ(1, domain.GetSize());
+		CHECK_EQ((int)MSkillDomain::SKILLSTATUS_NULL, (int)domain.GetSkillStatus(kRoot));
+		CHECK_EQ((int)MSkillDomain::SKILLSTATUS_NULL, (int)domain.GetSkillStatus(kLeaf));
+		CHECK_EQ((int)MSkillDomain::SKILLSTATUS_LEARNED, (int)domain.GetSkillStatus(kChild));
+	}
+
+	//------------------------------------------------------------------
+	// A negative count is not a count.
+	//------------------------------------------------------------------
+	{
+		std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
+		const int rows = -5;
+		const WORD id = (WORD)kRoot;
+		const BYTE status = (BYTE)MSkillDomain::SKILLSTATUS_LEARNED;
+		out.write((const char*)&rows, 4);
+		out.write((const char*)&id, 2);
+		out.write((const char*)&status, 1);
+	}
+	{
+		MSkillDomain domain;
+		std::ifstream in(kTempFile, std::ios::binary);
+		domain.LoadFromFile(in);
+
+		CHECK_EQ(0, domain.GetSize());
+	}
+
+	// An empty file is a domain with nothing in it.
+	{
+		std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
+	}
+	{
+		MSkillDomain domain;
+		std::ifstream in(kTempFile, std::ios::binary);
+		domain.LoadFromFile(in);
+
+		CHECK_EQ(0, domain.GetSize());
+	}
+
+	std::remove(kTempFile);
+}
+
+//----------------------------------------------------------------------
+// A domain's experience rows
+//----------------------------------------------------------------------
+TEST(SkillDomain, AnExperienceLevelPastTheTableIsRefused)
+{
+	SkillWorld world;
+	MSkillDomain domain;
+
+	const int			kGoal	= 0x01234567;
+	const unsigned int	kAccum	= 0x07654321;
+
+	// A row for a level the table holds reads back through GetExpInfo.
+	{
+		std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
+		const int level = 3;
+		out.write((const char*)&level, 4);
+		out.write((const char*)&kGoal, 4);
+		out.write((const char*)&kAccum, 4);
+	}
+	{
+		std::ifstream in(kTempFile, std::ios::binary);
+		domain.LoadFromFileServerDomainInfo(in);
+	}
+	CHECK_EQ(kGoal, domain.GetExpInfo(3).GoalExp);
+	CHECK_EQ((int)kAccum, (int)domain.GetExpInfo(3).AccumExp);
+
+	//------------------------------------------------------------------
+	// A level outside it is not loaded at all. A regression guard
+	// rather than a reproduction: the table's own range test - in
+	// force in every build since an earlier slice - already sent the
+	// store to the one out-of-range row it shares across every
+	// experience table, and that row is not the one a read gets back,
+	// so the checks below pass against the unfixed loader too. What
+	// they pin is the contract: the file's numbers never become what
+	// a level past the end of the table reads.
+	//------------------------------------------------------------------
+	{
+		std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
+		const int level = 4000;
+		out.write((const char*)&level, 4);
+		out.write((const char*)&kGoal, 4);
+		out.write((const char*)&kAccum, 4);
+	}
+	{
+		std::ifstream in(kTempFile, std::ios::binary);
+		domain.LoadFromFileServerDomainInfo(in);
+	}
+	CHECK(domain.GetExpInfo(4000).GoalExp != kGoal);
+
+	// The same for a negative one.
+	{
+		std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
+		const int level = -2;
+		out.write((const char*)&level, 4);
+		out.write((const char*)&kGoal, 4);
+		out.write((const char*)&kAccum, 4);
+	}
+	{
+		std::ifstream in(kTempFile, std::ios::binary);
+		domain.LoadFromFileServerDomainInfo(in);
+	}
+	CHECK(domain.GetExpInfo(-2).GoalExp != kGoal);
+
+	// A file that ends before the level does names no level.
+	{
+		std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
+	}
+	{
+		std::ifstream in(kTempFile, std::ios::binary);
+		domain.LoadFromFileServerDomainInfo(in);
+	}
+
+	// The row that did load is untouched by any of it.
+	CHECK_EQ(kGoal, domain.GetExpInfo(3).GoalExp);
+
+	std::remove(kTempFile);
+}
+
+TEST(SkillManager, InitSkillListRebuildsTheTreesAndKeepsTheDomainLevels)
+{
+	SkillWorld world;
+
+	g_pSkillManager->Init();
+
+	MSkillDomain& blade = (*g_pSkillManager)[SKILLDOMAIN_BLADE];
+
+	blade.SetDomainLevel(9);
+	blade.SetDomainExpRemain(1200);
+	blade.SetNewSkill();
+	CHECK(blade.LearnSkill(kRoot));
+	CHECK(g_pSkillAvailable->IsEnableSkill(kRoot));
+
+	//------------------------------------------------------------------
+	// The server sends the domain levels once and the list of learned
+	// skills on every login, so the rebuild the skill-info packet asks
+	// for keeps the levels and drops what was learned.
+	//------------------------------------------------------------------
+	g_pSkillManager->InitSkillList();
+
+	CHECK_EQ(9, blade.GetDomainLevel());
+	CHECK_EQ(1200, (int)blade.GetDomainExpRemain());
+	CHECK_EQ(3, blade.GetSize());
+	CHECK_EQ((int)MSkillDomain::SKILLSTATUS_NEXT, (int)blade.GetSkillStatus(kRoot));
+	CHECK_EQ((int)MSkillDomain::SKILLSTATUS_OTHER, (int)blade.GetSkillStatus(kChild));
+	CHECK_EQ(false, g_pSkillAvailable->IsEnableSkill(kRoot));
+
+	// The tree is ready to be learned into again straight away.
+	blade.SetNewSkill();
+	CHECK(blade.LearnSkill(kRoot));
+
+	// A second rebuild is the same rebuild.
+	g_pSkillManager->InitSkillList();
+
+	CHECK_EQ(MAX_SKILLDOMAIN, g_pSkillManager->GetSize());
+	CHECK_EQ(9, blade.GetDomainLevel());
+	CHECK_EQ(3, blade.GetSize());
+	CHECK_EQ(2, (*g_pSkillManager)[SKILLDOMAIN_SWORD].GetSize());
+	CHECK_EQ(1, (*g_pSkillManager)[SKILLDOMAIN_GUN].GetSize());
+	CHECK_EQ((int)MSkillDomain::SKILLSTATUS_NEXT, (int)blade.GetSkillStatus(kRoot));
+}
+
+TEST(SkillDomain, ASkillDeeperThanTheDomainWasBuiltForIsRefused)
+{
+	SkillWorld world;
+	MSkillDomain domain;
+
+	domain.SetRootSkill(kRoot);
+
+	// The array that says what is learned at each level is as long as
+	// the deepest skill the tree walk counted - three levels here.
+	domain.SetNewSkill();
+	CHECK(domain.LearnSkill(kRoot));
+
+	//------------------------------------------------------------------
+	// The levels themselves come out of the skill file, which is read
+	// once before the trees are built, so the two agree in the client
+	// today. They are one table apart all the same: a level the walk
+	// never counted used to be written straight into that array,
+	// which is the shape of a heap write past the end - here nine
+	// entries into an array of three.
+	//------------------------------------------------------------------
+	(*g_pSkillInfoTable)[kChild].Set(9, "Double Impact", 1, 0, 0, "Double Impact");
+
+	domain.SetNewSkill();
+	CHECK_EQ(false, domain.LearnSkill(kChild));
+
+	// Refused before it was made usable, so nothing is left behind.
+	CHECK_EQ((int)MSkillDomain::SKILLSTATUS_NEXT, (int)domain.GetSkillStatus(kChild));
+	CHECK_EQ(false, g_pSkillAvailable->IsEnableSkill(kChild));
+
+	// A negative level is no level either.
+	(*g_pSkillInfoTable)[kChild].Set(-1, "Double Impact", 1, 0, 0, "Double Impact");
+	domain.SetNewSkill();
+	CHECK_EQ(false, domain.LearnSkill(kChild));
+	CHECK_EQ(false, g_pSkillAvailable->IsEnableSkill(kChild));
+
+	// And the skill at a level the domain does hold still learns.
+	(*g_pSkillInfoTable)[kChild].Set(1, "Double Impact", 1, 0, 0, "Double Impact");
+	domain.SetNewSkill();
+	CHECK(domain.LearnSkill(kChild));
+	CHECK(g_pSkillAvailable->IsEnableSkill(kChild));
+}
+
+TEST(SkillDomain, TheSkillTheRacesShareTakesTheStepOfTheDomainItJoins)
+{
+	SkillWorld world;
+
+	// The one skill every race has sits in a step of its own for each
+	// of them, and the domain it is added to is what says which.
+	(*g_pSkillInfoTable)[SKILL_SOUL_CHAIN].SetSkillStep(SKILL_STEP_ETC);
+
+	g_pSkillManager->Init();
+
+	(*g_pSkillManager)[SKILLDOMAIN_VAMPIRE].SetRootSkill(SKILL_SOUL_CHAIN, false);
+	(*g_pSkillManager)[SKILLDOMAIN_OUSTERS].SetRootSkill(SKILL_SOUL_CHAIN, false);
+
+	const MSkillDomain::SKILL_STEP_LIST* pList;
+
+	// The vampire's own innate step, the ousters' own etc step, and
+	// for anyone else the apprentices - never the step the file gave.
+	pList = (*g_pSkillManager)[SKILLDOMAIN_VAMPIRE].GetSkillStepList(SKILL_STEP_VAMPIRE_INNATE);
+	CHECK(pList != NULL);
+	CHECK((*g_pSkillManager)[SKILLDOMAIN_VAMPIRE].GetSkillStepList(SKILL_STEP_ETC) == NULL);
+
+	pList = (*g_pSkillManager)[SKILLDOMAIN_OUSTERS].GetSkillStepList(SKILL_STEP_OUSTERS_ETC);
+	CHECK(pList != NULL);
+	CHECK((*g_pSkillManager)[SKILLDOMAIN_OUSTERS].GetSkillStepList(SKILL_STEP_ETC) == NULL);
+
+	pList = (*g_pSkillManager)[SKILLDOMAIN_ETC].GetSkillStepList(SKILL_STEP_APPRENTICE);
+	CHECK(pList != NULL);
+	CHECK((*g_pSkillManager)[SKILLDOMAIN_ETC].GetSkillStepList(SKILL_STEP_ETC) == NULL);
+
+	if (pList != NULL)
+	{
+		CHECK_EQ(1, (int)pList->size());
+		CHECK_EQ((int)SKILL_SOUL_CHAIN, (int)(*pList)[0]);
+	}
+
+	// A skill whose step the file did name keeps it.
+	(*g_pSkillInfoTable)[kRoot].SetSkillStep(SKILL_STEP_MASTER);
+	MSkillDomain domain;
+	domain.SetRootSkill(kRoot);
+	CHECK(domain.GetSkillStepList(SKILL_STEP_MASTER) != NULL);
+}
+
+TEST(SkillDomain, ALoadOverALiveDomainLeavesNoneOfTheOldTreeBehind)
+{
+	SkillWorld world;
+
+	// Two skills in one step, one in another.
+	(*g_pSkillInfoTable)[kRoot].SetSkillStep(SKILL_STEP_APPRENTICE);
+	(*g_pSkillInfoTable)[kChild].SetSkillStep(SKILL_STEP_APPRENTICE);
+	(*g_pSkillInfoTable)[kLeaf].SetSkillStep(SKILL_STEP_ADEPT);
+
+	MSkillDomain domain;
+	domain.SetRootSkill(kRoot);
+
+	const MSkillDomain::SKILL_STEP_LIST* pList = domain.GetSkillStepList(SKILL_STEP_APPRENTICE);
+	CHECK(pList != NULL);
+	if (pList != NULL)
+		CHECK_EQ(2, (int)pList->size());
+	CHECK(domain.GetSkillStepList(SKILL_STEP_ADEPT) != NULL);
+
+	//------------------------------------------------------------------
+	// A file naming one skill of the tree and nothing else. The step
+	// lists follow the skill list, so the step the loaded skill is not
+	// in must be gone and the one it is in must hold only it - the
+	// lists used to be freed by the destructor alone, so every rebuild
+	// added to lists still naming the tree before it.
+	//------------------------------------------------------------------
+	{
+		std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
+		const int rows = 1;
+		const WORD id = (WORD)kChild;
+		const BYTE status = (BYTE)MSkillDomain::SKILLSTATUS_NEXT;
+		out.write((const char*)&rows, 4);
+		out.write((const char*)&id, 2);
+		out.write((const char*)&status, 1);
+	}
+	{
+		std::ifstream in(kTempFile, std::ios::binary);
+		domain.LoadFromFile(in);
+	}
+
+	CHECK_EQ(1, domain.GetSize());
+	CHECK(domain.GetSkillStepList(SKILL_STEP_ADEPT) == NULL);
+	CHECK(domain.IsExistSkillStep(SKILL_STEP_ADEPT) == FALSE);
+
+	pList = domain.GetSkillStepList(SKILL_STEP_APPRENTICE);
+	CHECK(pList != NULL);
+	if (pList != NULL)
+	{
+		CHECK_EQ(1, (int)pList->size());
+		CHECK_EQ((int)kChild, (int)(*pList)[0]);
+	}
+
+	// The skill-info packet asks for the same rebuild every login, so
+	// it must not grow the lists either.
+	g_pSkillManager->Init();
+	g_pSkillManager->InitSkillList();
+	g_pSkillManager->InitSkillList();
+
+	pList = (*g_pSkillManager)[SKILLDOMAIN_BLADE].GetSkillStepList(SKILL_STEP_APPRENTICE);
+	CHECK(pList != NULL);
+	if (pList != NULL)
+		CHECK_EQ(2, (int)pList->size());
+
+	std::remove(kTempFile);
+}
+
+TEST(SkillDomain, AnExperienceRowThatCannotBeStoredCostsOnlyItself)
+{
+	SkillWorld world;
+	MSkillDomain domain;
+
+	const int	kBadGoal	= 0x0BADBAD0;
+	const int	kGoodGoal	= 0x00ABCDEF;
+
+	//------------------------------------------------------------------
+	// Two rows, the first for a level the table cannot hold. Refusing
+	// it must still take its eight payload bytes off the stream, or
+	// the next read starts in the middle of a row - and the manager's
+	// loop reads the next domain from wherever this leaves it.
+	//------------------------------------------------------------------
+	{
+		std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
+		const int	bad		= 900;
+		const int	good	= 7;
+		const unsigned int	accum = 0;
+		out.write((const char*)&bad, 4);
+		out.write((const char*)&kBadGoal, 4);
+		out.write((const char*)&accum, 4);
+		out.write((const char*)&good, 4);
+		out.write((const char*)&kGoodGoal, 4);
+		out.write((const char*)&accum, 4);
+	}
+	{
+		std::ifstream in(kTempFile, std::ios::binary);
+		domain.LoadFromFileServerDomainInfo(in);
+		domain.LoadFromFileServerDomainInfo(in);
+	}
+
+	CHECK_EQ(kGoodGoal, domain.GetExpInfo(7).GoalExp);
+	CHECK(domain.GetExpInfo(900).GoalExp != kBadGoal);
+
+	std::remove(kTempFile);
+}
+
+TEST(SkillDomain, TheGlobalsTheExecutableOwnsMayBeGone)
+{
+	SkillWorld world;
+
+	// The usable-skill set is created at start-up and deleted at
+	// shutdown, and the manager is a global of its own; library code
+	// runs either side of both.
+	MSkillSet*		pSet = g_pSkillAvailable;
+	MSkillManager*	pManager = g_pSkillManager;
+
+	(*g_pSkillInfoTable)[SKILL_SOUL_CHAIN].SetSkillStep(SKILL_STEP_ETC);
+
+	g_pSkillAvailable = NULL;
+	g_pSkillManager = NULL;
+
+	MSkillDomain domain;
+
+	// Without the manager there is no domain to compare against, so
+	// the shared skill keeps the step the file gave it.
+	domain.SetRootSkill(SKILL_SOUL_CHAIN);
+	CHECK(domain.GetSkillStepList(SKILL_STEP_ETC) != NULL);
+
+	domain.SetRootSkill(kRoot, false);
+	domain.SetNewSkill();
+	CHECK(domain.LearnSkill(kRoot));
+	CHECK(domain.UnLearnSkill(kRoot));
+	domain.ClearSkillList();
+	CHECK_EQ(0, domain.GetSize());
+
+	g_pSkillAvailable = pSet;
+	g_pSkillManager = pManager;
+}
