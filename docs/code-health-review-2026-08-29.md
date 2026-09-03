@@ -60,6 +60,8 @@ A subsystem-by-subsystem review surfaced **197 findings**. Every area graded **D
 
 ## Remediation Status
 
+**Updated 2026-09-03:** the Medium dead-code finding below — roughly 400KB of stub and duplicate source excluded from the build — is fixed by `docs/RESTRUCTURING.md` task 5.2's first and fourth slices, taking the total to 82 fixed and Medium to 14 fixed / 67 open.
+
 **Updated 2026-09-02:** the silent `list(REMOVE_ITEM)` High finding below is fixed by `docs/RESTRUCTURING.md` task 4.0 (`restructuring/vsui-single-compile`), and the `_LIB` ODR High finding that followed it by the same task's second slice (`restructuring/vsui-lib-define-public`), taking the total to 81 fixed and High to 38 fixed / 19 open.
 
 **Updated 2026-09-01 (High-severity pass).** 79 of the 197 findings have been fixed: 11 on branch `harden/library-code-fixes` ([PR #1](https://github.com/bound2/client/pull/1)), 2 on `harden/packet-index-bounds` ([PR #4](https://github.com/bound2/client/pull/4)), 11 on `harden/network-input`, 4 by the earlier SDL_mixer wiring commit `c0670ae` (recorded retroactively during the audio pass), 17 on `harden/audio-media`, 8 on `harden/text-format`, 2 on `harden/pointer-truncation`, and 24 on `harden/high-severity-batch1`. Fixed findings carry a ✅ marker in the sections below, naming the commit and the tests covering them; three carry ⚠️ instead, meaning the finding was resolved without a code change — already fixed elsewhere, made unreachable by another fix, or only partly closed with the remainder stated.
@@ -1637,6 +1639,8 @@ CMakeLists.txt:609-618 removes Client/MissingGlobals.cpp, Client/GameHelpers.cpp
 **Failure scenario:** A contributor greps for SetWeather, finds GameFunctions.cpp:36, edits the empty stub, and observes no behaviour change — or adds the file back to the build and gets either a duplicate-symbol link failure or silently no-op weather, zone loading and skill execution.
 
 **Recommendation:** Delete these files (git history preserves them) or move them under a clearly-named unbuilt directory. At minimum add a header banner to each stating it is excluded from the build and naming the live implementation.
+
+> ✅ **Fixed** in `b4665e0` (branch `restructuring/dead-exclusion-graveyard`, `docs/RESTRUCTURING.md` task 5.2 fourth slice), completing what `MitemTableinit2.cpp`'s deletion started in the task's first slice. All six files this finding names are deleted, with `GlobalVariables.cpp` and a stale copy of the `GCNotifyWin` packet class and its handler alongside them, and the `list(REMOVE_ITEM)` block that excluded them one by one is gone. Verified before deleting: none of the eight appears as a `ClCompile` entry in any of the 70 generated project files across the four build trees, so no target compiled them; and every one of the 171 function definitions they carried is also defined by a file the build does compile (mostly `Client/PacketFunction.cpp`, `Client/GameMain.cpp` and `Client/RenderingFunctions.cpp`) — none was unique, so the deletion cannot change the linked program. Executable-side code with no test path; the four build trees are the check.
 
 #### 🟡 Medium -- Exception text derived from malformed server packets is passed as the format string to LOG_ERROR/DEBUG_ADD.
 

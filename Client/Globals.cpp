@@ -2,7 +2,8 @@
 // Globals.cpp
 //-----------------------------------------------------------------------------
 // Global variables and utility functions needed by the game
-// These are extracted from GamePacketFunctions.cpp to avoid symbol duplication
+// These came out of a duplicate of PacketFunction.cpp that the build
+// excluded and task 5.2 deleted; this file is the one that compiles.
 //-----------------------------------------------------------------------------
 
 #include "Client_PCH.h"

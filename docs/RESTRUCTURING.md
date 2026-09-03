@@ -1611,7 +1611,9 @@ starting each — the scan is one grep, and the ranking below is from a
   `_bak` files are already excluded by the build — delete them; sort the
   `GameHelpers`/`GameFunctions`/`GamePacketFunctions` exclusion graveyard
   into deleted-or-documented. The wrong-file-edited trap dies here.
-  > **Status:** first slice done — the item-table twins (2026-09-02,
+  > **Status:** four slices done; the graveyard the task names is
+  > deleted (fourth slice below), so the wrong-file-edited trap is
+  > closed for it. First slice — the item-table twins (2026-09-02,
   > `restructuring/dead-item-table-twins`). Deleted: the one tracked
   > `_bak` file (`MItemTable_bak-2007-5-7.cpp`, 15,000 lines of a 2007
   > item table, excluded by the build's `_bak` filter); `MitemTableinit2.cpp`
@@ -1669,6 +1671,54 @@ starting each — the scan is one grep, and the ranking below is from a
 > `RankBonusTable.cpp` (a save path), `MSectorInfo.h` (portal fields),
 > `Updater/Update.cpp` and the two unbuilt `OtherClass/Request*PacketFactoryManager.cpp`
 > files — none a data slab; the exclusion graveyard is still untouched.
+> **Fourth slice (2026-09-03, `restructuring/dead-exclusion-graveyard`):**
+> the graveyard itself, sorted the "deleted" way — all of it. Eight
+> `.cpp` files and two headers go: `GlobalVariables.cpp` and
+> `MissingGlobals.cpp` (globals `Client.cpp` and `GameMain.cpp` already
+> define, plus a `timeGetTime` that would fight the `SDL_GetTicks`
+> mapping in `basic/Platform.h`), `GameHelpers.cpp`/`.h` and
+> `GameFunctions.cpp` (two graveyards of empty stubs with the same
+> names, the second of them a `void*`-signature macOS port scaffold),
+> `GamePacketFunctions.cpp` (1,200 lines superseded by
+> `PacketFunction.cpp` and `Globals.cpp`), `ActionFunctions.cpp` (one
+> stub of a function with four other definitions in the tree), and
+> `GCNotifyWin.cpp`/`.h` plus `GCNotifyWinHandler.cpp` — pre-port
+> copies of the live packet class in `Client/Packet/Gpackets/` and its
+> handler in `Client/PacketHandler/`, still carrying the `execute()`
+> that task 2.4 stripped, and CLAUDE.md's wrong-file-edited trap in its
+> purest form: the stale handler has `UI_RunImageNotice` commented out
+> as "not implemented in SDL backend" while the function is implemented
+> at `GameUI.cpp:4238` and the live handler calls it.
+> **Verified before deleting anything.** None of the eight appears as a
+> `ClCompile` entry in any of the 70 generated project files across the
+> four build trees — the same scan finds `Client/Globals.cpp`, which is
+> compiled, in four of them — so no target compiled them and their
+> objects were never handed to a linker. And a scan of all 1,103
+> compiled translation units found that every one of the 171 function
+> definitions the six function-carrying files held is *also* defined by
+> a file the build compiles (`PacketFunction.cpp`, `GameMain.cpp`,
+> `RenderingFunctions.cpp`, `MTopView.cpp`, `SDLMain.cpp`,
+> `MItemUse.cpp`, `VS_UI_GameCommon.cpp`): **none was unique**, so
+> nothing in the graveyard was the only implementation of anything. The
+> stale `GCNotifyWin` trio was diffed against its live counterparts
+> line by line instead, being class members the scan does not match.
+> The `list(REMOVE_ITEM)` block that named the eight one by one is gone
+> with them, and four comments elsewhere that pointed at the deleted
+> files are corrected — two of which were already false: `rectangle()`
+> has one definition, not two (`GameInit.cpp`), and `g_BasicException`
+> and `g_SetNewHandler` are defined only in `basic/BasicException.cpp`,
+> never in `GameHelpers.cpp` (`RenderingFunctions.cpp`).
+> **R1 unchanged at 495** — the direct proof that no translation unit
+> left the executable. All four trees reconfigure and build at 0
+> errors; ctest 4/4 in both test trees; 280 tests, 4,384 checks, 0
+> failed. Closes the review's Medium dead-code finding ("roughly 400KB
+> of stub and duplicate source"), which the first slice had half
+> closed. **Noted, not done:** `Client/Client.cpp` and
+> `Client/ClientFunction.cpp` have two `list(FILTER ...)` patterns
+> anchored with `^Client/` that the glob's absolute paths can never
+> match, already documented in place as dead patterns; and
+> `VS_UI/WinMain.cpp` is in no target at all, which the 4.4 record also
+> noticed — a candidate for the next 5.2 slice.
 - [ ] **5.3 TextSystem stub retirement.** Split `TextService.cpp`'s pure
   text utilities from its `g_pLast` drawing entry point so
   `tests/stubs/client_globals.cpp` can shrink (the stub file itself

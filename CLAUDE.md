@@ -213,7 +213,7 @@ baseline: **283 tests, 4,401 checks, 0 failed** in both trees.
 
 ## Current focus
 
-`docs/code-health-review-2026-08-29.md` holds 197 findings, 81 fixed. In priority order:
+`docs/code-health-review-2026-08-29.md` holds 197 findings, 82 fixed. In priority order:
 
 1. **Unvalidated network input is the top open risk.** `Client/Packet/Gpackets/` passes
    server-supplied lengths, indices and item classes straight into array subscripts,

@@ -436,4 +436,4 @@ std::string g_GetStringByMoney(DWORD money)
     return sstr;
 }
 
-// g_BasicException and g_SetNewHandler are defined in BasicException.cpp and GameHelpers.cpp
+// g_BasicException and g_SetNewHandler are defined in basic/BasicException.cpp
