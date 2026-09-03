@@ -97,6 +97,14 @@ Client/MTradeManager.h
 Client/MSortedItemManager.cpp
 Client/MSortedItemManager.h
 
+# Prices (task 4.2, third slice): what a shop charges or pays for an
+# item, over the item and option tables, the timed-item register and the
+# user's head-price rate; the player's race, level and stats, the
+# half-price event and skills, and the shop tax come through MPriceHost,
+# installed by the executable.
+Client/MPriceManager.cpp
+Client/MPriceManager.h
+
 # The seams MItem reads (task 4.4): the user's display settings (the
 # gore level picks the skull names), the client configuration (the
 # colour-set bases) and the timed-item register (quest items). All

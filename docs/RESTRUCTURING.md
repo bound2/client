@@ -116,7 +116,7 @@ an unrecorded drop, so tightening lands in the same commit as the progress.
 
 | # | Metric | Baseline | Command |
 |---|--------|---------:|---------|
-| R1 | Translation units compiled directly into the DarkEden target | **503** (505 before 4.2's second slice moved `MTradeManager.cpp` and `MSortedItemManager.cpp` into `gamemodel`; 508 before 4.3's second slice moved `MInventory.cpp`, `MStorage.cpp` and `MShopShelf.cpp` into `gamemodel`; 512 before 4.3's first slice moved the three item managers and `MQuickSlot.cpp` into `gamemodel`; 515 before 4.4's second slice moved `MItem.cpp`, `MObject.cpp`, `UserInformation.cpp`, `ClientConfig.cpp` and `MTimeItemManager.cpp` into `gamemodel` and split their executable halves out as `MItemUse.cpp` and `MObjectScreen.cpp`, +2 −5; 516 before 5.2 deleted the dead `MitemTableInit.cpp`; 517 before 4.4's first slice moved `MItemTable.cpp`; 518 before 4.2 moved `MMoneyManager.cpp`, another double-compiled VS_UI entry; 528 before task 4.1's `gamemodel` took its ten members out — the four support sources, and the six tables that the relative `VS_UI_CLIENT_SOURCES` list had never actually removed from the exe glob, so they compiled into both VS_UI and the executable — as the 36 files still on that list do; 529 before task 2.5 deleted the dead `CRRequest2Handler.cpp`; 992 before task 2.4 moved the 465 packet/table/info sources into `packetwire`, +1 for the split-out `GCExchangeBuyHandler.cpp`; 1,044 before task 1.1; the task-2.2 composition root `PacketHandlerRegistry.cpp` was a recorded +1, offset when finishing the migration deleted `CGHandlersStub.cpp`) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` — `ratchets.sh` reads the generated vcxproj, preferring the ctest run's own build dir; on generators with no vcxproj it reports SKIP, not PASS |
+| R1 | Translation units compiled directly into the DarkEden target | **502** (503 before 4.2's third slice moved `MPriceManager.cpp` into `gamemodel`; 505 before 4.2's second slice moved `MTradeManager.cpp` and `MSortedItemManager.cpp` into `gamemodel`; 508 before 4.3's second slice moved `MInventory.cpp`, `MStorage.cpp` and `MShopShelf.cpp` into `gamemodel`; 512 before 4.3's first slice moved the three item managers and `MQuickSlot.cpp` into `gamemodel`; 515 before 4.4's second slice moved `MItem.cpp`, `MObject.cpp`, `UserInformation.cpp`, `ClientConfig.cpp` and `MTimeItemManager.cpp` into `gamemodel` and split their executable halves out as `MItemUse.cpp` and `MObjectScreen.cpp`, +2 −5; 516 before 5.2 deleted the dead `MitemTableInit.cpp`; 517 before 4.4's first slice moved `MItemTable.cpp`; 518 before 4.2 moved `MMoneyManager.cpp`, another double-compiled VS_UI entry; 528 before task 4.1's `gamemodel` took its ten members out — the four support sources, and the six tables that the relative `VS_UI_CLIENT_SOURCES` list had never actually removed from the exe glob, so they compiled into both VS_UI and the executable — as the 36 files still on that list do; 529 before task 2.5 deleted the dead `CRRequest2Handler.cpp`; 992 before task 2.4 moved the 465 packet/table/info sources into `packetwire`, +1 for the split-out `GCExchangeBuyHandler.cpp`; 1,044 before task 1.1; the task-2.2 composition root `PacketHandlerRegistry.cpp` was a recorded +1, offset when finishing the migration deleted `CGHandlersStub.cpp`) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` — `ratchets.sh` reads the generated vcxproj, preferring the ctest run's own build dir; on generators with no vcxproj it reports SKIP, not PASS |
 | R2 | Packet `.cpp` files still defining a packet-style `::execute(Player` | **0** (448 → 432 in slice 1 → 0 when 2.2/2.3 finished; regex refined at 0 to stop matching comments and the in-file handler body in `GCExchangeBuy.cpp`) | `grep -rlE '^void\s+\w+::execute\s*\(\s*Player' Client/Packet/{Gpackets,Cpackets,Lpackets,Rpackets,Upackets} --include='*.cpp' \| grep -v Handler \| wc -l` |
 | R3 | Live `sprintf`/`strcpy`/`strcat` lines under `Client/Packet` **and `Client/PacketHandler`** | 46 (unchanged by task 2.4, which widened the scope to follow the handlers out of `Client/Packet`; 61 at first measurement — the 2026-09-01 adversarial review showed a quarter of that was commented-out code, so the measurement now excludes `//` matches) | see `ratchets.sh` — the grep excludes comment-prefixed matches |
 | R4 | Library-compiled `.cpp` files referencing `g_p*` client globals **no library file defines** | **28** (35 before 4.4's second slice — a reclassification again, 35 + 1 − 8: the subtraction became library-wide, so a library file reading a global another library file defines is no longer a seam; `MItem.cpp` joined reading `gamemodel`'s own tables, +1 under the old per-file rule, and the union rule excludes it with seven earlier members — `Datagram.cpp` reading `packetwire`'s factory manager, and six `VS_UI` sources whose only reaches are `gamemodel`'s tables, `packetwire`'s `g_pFileDef` or `VS_UI`'s own globals; 59 before task 4.0 — a reclassification, not seam-cutting: the 36 `VS_UI_CLIENT_SOURCES` files stopped being library-compiled, so the 24 of them that reach globals are executable debt now, counted by R1 and outside this ratchet; 61 before task 4.1 cut the two `g_pFileDef` seams in `MGameStringTable` and `SystemAvailabilities` and added the `gamemodel` membership file, whose four new members reference no game global; 81 before task 2.4 grew the membership from 52 to 518 files; the number fell because the measurement stopped counting a file's references to globals it defines — the packet tables own `g_pPacketFactoryManager`/`g_pPacketValidator` — and the two dead server-only bodies that reached game globals were deleted; 83 at first measurement, before two never-compiled files were filtered) | `ratchets.sh` computes it over the library dirs (minus CMake-excluded files) plus the `packetwire` and `gamemodel` membership files |
@@ -866,8 +866,11 @@ starting each — the scan is one grep, and the ranking below is from a
   > heap corruption at startup; a 4.3/4.4 seam.
 - [ ] **4.2 Money/price/trade logic:** `MMoneyManager.cpp`,
   `MPriceManager.cpp`, `MTradeManager.cpp` (seams to `g_pShop`/UI to cut).
-  > **Status:** in progress (the price manager); money and trade done.
-  > Price/trade re-ranked (2026-09-02,
+  > **Status:** done (3e00211 the money manager, 8090919 the trade
+  > manager, b4e37d5 the price manager; owner: the `gamemodel`
+  > membership file, the CMake assertion that no member is in the
+  > executable's list, and the include checker). Price/trade re-ranked
+  > (2026-09-02,
   > `restructuring/gamemodel-money`; live verification gates the merge).
   > The include scan the plan asks for overturned the 2026-09-01
   > ranking for two of the three: `MPriceManager` prices through
@@ -979,9 +982,77 @@ starting each — the scan is one grep, and the ranking below is from a
   > named the wrong headers for the definitions (`Exception.h` and
   > `CreatureTypes.h` are the ones that switch on them); the restore
   > check pins both offers' positions and the other grid's cells. Noted,
-  > not done: the four `gamemodel` test fixtures share a byte-identical
+  > not done: the four `gamemodel` test fixtures (five after the price
+  > slice) share a byte-identical
   > teardown — a `tests/support` base fixture is the next tidy-up. Suite:
   > 241 tests (3,903 checks).
+  > **Third slice (2026-09-03, `restructuring/gamemodel-price`; live
+  > verification gates the merge):** the price manager. `MPriceManager`
+  > — what a shop charges or pays: the market conditions, the option
+  > multipliers, wear, repair at a tenth of the damage, charges,
+  > silvering, the gamble price — joins `gamemodel`. Its reaches into
+  > the executable were the player (`IsSlayer`/`IsVampire`/`IsOusters`,
+  > the worn and the basic stat sums, the level), the event manager
+  > (the premium half-price event, the tax-change event's percentage)
+  > and the skill set (the NEMA and JAVE blood bibles). They go through
+  > `MPriceHost`, seven entries the executable installs beside the item
+  > host: `Race`, `Level`, `StatSum`, `BasicStatSum`,
+  > `IsPotionHalfPrice` (the event or NEMA — the code applied them as
+  > two half-price branches of which at most one fired),
+  > `IsGambleHalfPrice`, `ShopTaxPercent` (100 without the event, a
+  > multiply by one — in 64 bits on both paths — where the code skipped
+  > the multiply). Without a host a price carries no player, event or
+  > skill adjustment. Dropped on the way: the five `__GAME_CLIENT__`
+  > guards, two of them with an `#else` half — a `VS_UI`-only build's
+  > `VS_UI.h` include and its reading of the race and stats from
+  > `g_char_slot_ingame`, which no target compiles (`Client_PCH.h`
+  > defines the macro unconditionally) — with the `MEventManager.h`,
+  > `MSkillManager.h`, `MPlayer.h` and `MZone.h` includes, a
+  > commented-out `g_mapPremiumZone` extern, and two commented-out
+  > blocks (a skull rule, the `bMysterious` five-times rule).
+  > `g_pItemTable`, `g_pItemOptionTable`, `g_pTimeItemManager` and
+  > `g_pUserInformation` are library-defined. R1 503 → 502; R4
+  > unchanged. Tests (`test_price_manager.cpp`, 9): the short circuits
+  > (nothing, the event moon card, an unidentified item priced as a
+  > gamble in every trade); the market conditions, and the skull's
+  > buying rate both ways; option multipliers adding up and wear scaling
+  > down, never below one; repair at a tenth of the damage, and never
+  > for a vampire portal, a blood bible sign or a timed item; charged
+  > items pricing every charge (the Ousters summon item at a fifth) and
+  > repair refilling them; silvering at the full coat until the coat is
+  > full; the host's weak-slayer potion rate, the consumables' half
+  > price, the tax on what the shop charges only, the skull's vampire
+  > and Ousters rates and then the head-price rate; star prices by the
+  > first option's part and the item type; the gamble scaling the loaded
+  > class average by basic stats or by level, halved and taxed.
+  > **4.2 is complete.** Suite: 250 tests (3,987 checks).
+  > **Adversarial review round (2026-09-03, 3 reviewers, all SHIP with
+  > findings), fixed on the branch:** two deltas the move had
+  > introduced — the gamble price's tax multiply ran in a 32-bit `int`
+  > on every call where the old code multiplied only under the event
+  > (an overflow above 21,474,836, data-dependent; both paths compute
+  > in 64 bits now), and the host narrowed the server-sent `DWORD`
+  > percentage to `int`, flipping the sign of a hostile value (the seam
+  > carries it unsigned, as the old multiply did); the host's player
+  > readers answer "none" for the window between `MODE_WAIT_UPDATEINFO`
+  > and the next `GCUpdateInfo` in which there is no player (the old
+  > code would have crashed there; nothing prices an item then); the
+  > seven host readers are private statics on the class, the `MItem`
+  > pattern, not free functions; "the `#else` half of every block"
+  > overstated — three of the five guards had none; the two no-host
+  > checks could not fail (the fixture's defaults were the no-host
+  > answers) and now set answers that would move the price; the sixth
+  > potion type, a negative maximum durability and a charged consumable
+  > (its charges alone, no half price, no tax) are covered; the mace
+  > silvering comment named the wrong branch; the Korean left inside
+  > the touched function is English, with two dead commented-out blocks
+  > gone. Noted, not done: `bMysterious` is a dead parameter (its only
+  > uses were the dropped comment) that `UIMessageManager` still
+  > computes an argument for; a star price for item type 0 is −20
+  > stars; the **five** `gamemodel` test fixtures now share a
+  > byte-identical teardown — the `tests/support` base fixture is the
+  > next commit before the next slice, not a note to walk past again.
+  > Suite: 250 tests (3,995 checks).
 - [ ] **4.3 Containers:** `MInventory.cpp`, `MStorage.cpp`,
   `MShopShelf.cpp`, `MQuickSlot.cpp` — the shop/stash index-bounds fixes
   from the review live here and deserve permanent tests.
@@ -1075,9 +1146,9 @@ starting each — the scan is one grep, and the ranking below is from a
   > handlers return on it. Suite: 235 tests (3,810 checks). **4.3 is
   > complete** but for `MItemManager`'s executable-side siblings that
   > were never on its list; the next 4.x work is 4.4's remainder
-  > (`MItemManager` is in, the skill core and the gear classes are not)
-  > and 4.2's price manager (the trade manager followed as 4.2's second
-  > slice), which stands on what is now in the library.
+  > (`MItemManager` is in, the skill core and the gear classes are not);
+  > 4.2's trade and price managers followed as its second and third
+  > slices, on what is now in the library.
   > **Adversarial review round (2026-09-03, with 4.2's second slice, 4
   > reviewers, all SHIP with findings, no runtime defect), fixed on the
   > branch:** the move's "the same call" was not quite — the containers'

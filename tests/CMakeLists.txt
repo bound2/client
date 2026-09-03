@@ -108,6 +108,7 @@ set_source_files_properties(
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_item_containers.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_inventory_storage_shop.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_trade_manager.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_price_manager.cpp
 	PROPERTIES
 		COMPILE_DEFINITIONS "${PACKETWIRE_TEST_DEFINITIONS};WIRE_GOLDEN_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/golden\""
 )
