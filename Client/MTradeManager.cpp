@@ -52,7 +52,6 @@ class ItemPositionMap : public std::map<TYPE_OBJECTID, ItemPosition*> {
 // Global
 //-----------------------------------------------------------------------------
 MTradeManager*		g_pTradeManager = NULL;
-const DWORD*		MTradeManager::s_pClock = NULL;
 
 //-----------------------------------------------------------------------------
 //
@@ -116,11 +115,8 @@ MTradeManager::Init()
 void				
 MTradeManager::Release()
 {
-	//if (m_pMyInventory != NULL)
-	//{
-	//	delete m_pMyInventory;
-	//	m_pMyInventory = NULL;
-	//}
+	// The player's own inventory: not ours to delete.
+	m_pMyInventory = NULL;
 
 	if (m_pOtherInventory != NULL)
 	{
@@ -149,14 +145,15 @@ MTradeManager::Release()
 //-----------------------------------------------------------------------------
 // Is AcceptTime
 //-----------------------------------------------------------------------------
-bool				
+// The accept delay runs on the item host's millisecond clock; without
+// one (a test binary) there is no delay.
+//-----------------------------------------------------------------------------
+bool
 MTradeManager::IsAcceptTime() const
 {
-	#ifdef __GAME_CLIENT__
-		return Now() >= m_NextAcceptTime;
-	#else
-		return true;
-	#endif
+	const DWORD* pClock = MItem::Clock();
+
+	return pClock==NULL || *pClock >= m_NextAcceptTime;
 }
 
 //-----------------------------------------------------------------------------
@@ -165,9 +162,9 @@ MTradeManager::IsAcceptTime() const
 void
 MTradeManager::SetNextAcceptTime()
 {
-	#ifdef __GAME_CLIENT__
-		m_NextAcceptTime = Now() + g_pClientConfig->TRADE_ACCEPT_DELAY_TIME;
-	#endif
+	const DWORD* pClock = MItem::Clock();
+
+	m_NextAcceptTime = (pClock!=NULL ? *pClock : 0) + g_pClientConfig->TRADE_ACCEPT_DELAY_TIME;
 }
 
 //-----------------------------------------------------------------------------
@@ -178,11 +175,9 @@ MTradeManager::RefuseMyTrade()
 { 
 	if (m_bAcceptMyTrade)
 	{
-		#ifdef __GAME_CLIENT__
-			SetNextAcceptTime();
-		#endif
+		SetNextAcceptTime();
 
-		m_bAcceptMyTrade = false; 
+		m_bAcceptMyTrade = false;
 	}
 }
 
@@ -194,11 +189,9 @@ MTradeManager::RefuseOtherTrade()
 { 
 	if (m_bAcceptOtherTrade)
 	{
-		#ifdef __GAME_CLIENT__
-			SetNextAcceptTime();
-		#endif
+		SetNextAcceptTime();
 
-		m_bAcceptOtherTrade = false; 
+		m_bAcceptOtherTrade = false;
 	}
 }
 
@@ -601,134 +594,20 @@ MTradeManager::Trade()
 }
 
 //-----------------------------------------------------------------------------
-// Cancel Trade 
+// Cancel Trade
 //-----------------------------------------------------------------------------
-// 교환이 취소되는 경우
-//
-// 
+// The trade is called off: the money the player put up goes back to
+// the wallet. The offered items stay where they are, flagged, until the
+// next trade start clears them (GameUI).
 //-----------------------------------------------------------------------------
 bool
 MTradeManager::CancelTrade()
 {
-	//---------------------------------------------------------
-	// 원래 내 돈을 다시 가져온다.
-	//---------------------------------------------------------
 	if (g_pMoneyManager->AddMoney( m_pMyMoney->GetMoney() ))
 	{
 		m_pOtherMoney->SetMoney( 0 );
 		m_pMyMoney->SetMoney( 0 );
 	}
-	/*
-	int x, y;
 
-	MSortedItemManager	SIM;
-	
-	MInventory*			pInventory;
-	
-	//--------------------------------------------------
-	// 2 x 2 아이템의 개수를 알아낸다. 인벤토리
-	//--------------------------------------------------
-	int numTwoByTwo = 0;
-	
-	for (int i=0; i<2; i++)
-	{
-		if (i==0)
-		{
-			pInventory = g_pInventory;
-		}
-		else
-		{
-			pInventory = g_pTradeManager->GetMyInventory();
-		}
-		
-		pInventory->SetBegin();
-
-		while (pInventory->IsNotEnd())
-		{
-			const MItem* pItem = pInventory->Get();
-
-			if (pItem!=NULL)
-			{
-				if (pItem->GetGridWidth()==2 
-					&& pItem->GetGridHeight()==2)
-				{
-					numTwoByTwo++;
-				}
-			}	
-			
-			pInventory->Next();
-		}
-	}
-
-	SIM.SetTwoByTwoNumber( numTwoByTwo );	// 2 x 2의 아이템 개수 설정
-	
-	//--------------------------------------------------
-	// 현재 Inventory에서 Item제거해서 SIM에 추가한다.
-	//--------------------------------------------------
-	pInventory	= g_pInventory;
-	
-	for (x=0; x<10; x++)
-	{
-		for (y=0; y<6; y++)
-		{
-			const MItem* pItem = pInventory->GetItem( x, y );
-
-			if (pItem != NULL)
-			{
-				MItem* pRemovedItem = pInventory->RemoveItem( pItem->GetID() );
-			
-				if (pRemovedItem!=NULL)
-				{
-					SIM.AddItem( pRemovedItem );
-				}							
-			}
-		}
-	}
-
-	//--------------------------------------------------
-	// 현재 내Trade에서 Item제거해서 SIM에 추가한다.
-	//--------------------------------------------------
-	pInventory	= g_pTradeManager->GetMyInventory();
-	
-	for (x=0; x<10; x++)
-	{
-		for (y=0; y<6; y++)
-		{
-			const MItem* pItem = pInventory->GetItem( x, y );
-
-			if (pItem != NULL)
-			{
-				MItem* pRemovedItem = pInventory->RemoveItem( pItem->GetID() );
-			
-				if (pRemovedItem!=NULL)
-				{
-					SIM.AddItem( pRemovedItem );
-				}							
-			}
-		}
-	}
-
-	//--------------------------------------------------
-	// Inventory를 다시 초기화한다.
-	//--------------------------------------------------
-	g_pTradeManager->GetMyInventory()->Init( 10, 6 );
-	g_pInventory->Init( 10, 6 );
-
-	MSortedItemManager::iterator iItem = SIM.begin();
-
-	while (iItem != SIM.end())
-	{
-		MItem* pItem = iItem->second;
-
-		g_pInventory->AddItem( pItem );
-
-		iItem ++;
-	}
-
-	//--------------------------------------------------
-	// InventorySIM의 것을 Clear시켜줘야 한다.
-	//--------------------------------------------------
-	SIM.Clear();
-	*/
 	return true;
 }

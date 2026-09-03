@@ -113,9 +113,9 @@ int		s_RefreshCalls = 0;
 
 int		DropFrameCount(TYPE_FRAMEID)	{ return s_DropFrames; }
 void	RefreshAffect(MItem*)			{ s_RefreshCalls++; }
-void	PlayItemSound(TYPE_SOUNDID)	{}
+void	PlayItemSound(TYPE_SOUNDID)		{}
 
-const MItemHost	s_Host = { &s_Frame, DropFrameCount, RefreshAffect, PlayItemSound };
+const MItemHost	s_Host = { &s_Frame, DropFrameCount, RefreshAffect, PlayItemSound, NULL };
 
 void	InstallHost()
 {

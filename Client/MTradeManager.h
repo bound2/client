@@ -1,19 +1,11 @@
 //-----------------------------------------------------------------------------
 // MTradeManager.h
 //-----------------------------------------------------------------------------
-// 교환 담당~
-//
-// Init하면 한 쌍의 (inventory와 moneymanager)를 생성한다.
-// 
-// 하나는 내꺼.. 하나는 남꺼..
-//
-// * Get .... () 해서 외부에서 처리하고..
-//
-// item이 add/remove되거나.. money가 바뀌면 .. AcceptTrade를 제거해야한다.
-//
-// MyAcceptTrade && OtherAcceptTrade인 경우만 trade 가능하다.
-//
-// CanTrade()로 체크해보고 trade가능하면 Trade()한다.
+// The exchange. Init pairs an inventory and a wallet for each side -
+// mine (the player's own inventory) and the other's - and the UI works
+// on them through the getters. Adding or removing an item, or changing
+// the money, must clear both acceptances; a trade goes through only
+// when both sides have accepted: check CanTrade(), then Trade().
 //-----------------------------------------------------------------------------
 
 #ifndef __MTRADEMANAGER_H__
@@ -48,14 +40,10 @@ class MTradeManager {
 		//-------------------------------------------------------
 		// Trade OK ?
 		//-------------------------------------------------------
-		// The accept delay is measured on the executable's millisecond
-		// clock (g_CurrentTime), installed once at start-up; without one
-		// (a test binary) the clock reads 0 (docs/RESTRUCTURING.md task 4.2).
-		static void			SetClock(const DWORD* pClock)	{ s_pClock = pClock; }
-		static DWORD		Now()							{ return s_pClock!=NULL ? *s_pClock : 0; }
-
+		// The accept delay runs on the item host's millisecond clock
+		// (docs/RESTRUCTURING.md task 4.2); without one there is no delay.
 		bool				IsAcceptTime() const;
-		void				SetNextAcceptTime();		// 다음 교환 가능한 시간 설정
+		void				SetNextAcceptTime();		// when accepting is allowed again
 
 		bool				IsAcceptMyTrade() const				{ return m_bAcceptMyTrade; }
 		bool				IsAcceptOtherTrade() const			{ return m_bAcceptOtherTrade; }
@@ -94,9 +82,7 @@ class MTradeManager {
 		bool				m_bAcceptMyTrade;			// 나의 교환확인
 		bool				m_bAcceptOtherTrade;		// 남의 교한확인
 
-		DWORD				m_NextAcceptTime;		// OK 누를 수 있는 시간
-
-		static const DWORD*	s_pClock;
+		DWORD				m_NextAcceptTime;		// when OK may be pressed again
 };
 
 extern MTradeManager*		g_pTradeManager;

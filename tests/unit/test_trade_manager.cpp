@@ -5,8 +5,9 @@
 // The trade manager (docs/RESTRUCTURING.md task 4.2, second slice):
 // the exchange between the player's inventory and wallet and the
 // other side's offer. What it needs from the executable is one
-// millisecond clock, installed here by hand; the player's inventory
-// and wallet are the globals the executable also creates.
+// millisecond clock, carried by the item host installed here by hand;
+// the player's inventory and wallet are the globals the executable
+// also creates.
 //
 //----------------------------------------------------------------------
 
@@ -30,7 +31,15 @@
 namespace {
 
 int		s_Alive = 0;
+DWORD	s_Frame = 0;
 DWORD	s_Now = 0;
+
+int		DropFrameCount(TYPE_FRAMEID)	{ return 0; }
+void	RefreshAffect(MItem*)			{}
+void	PlayItemSound(TYPE_SOUNDID)		{}
+
+// A host that carries the clock and nothing else of note.
+const MItemHost	s_Host = { &s_Frame, DropFrameCount, RefreshAffect, PlayItemSound, &s_Now };
 
 struct TradeWorld
 {
@@ -61,13 +70,12 @@ struct TradeWorld
 		g_pMoneyManager->SetMoneyLimit(1000);
 		g_pMoneyManager->SetMoney(100);
 
-		MItem::SetHost(NULL);
-		MTradeManager::SetClock(&s_Now);
+		MItem::SetHost(&s_Host);
 	}
 
 	~TradeWorld()
 	{
-		MTradeManager::SetClock(NULL);
+		MItem::SetHost(NULL);
 		delete g_pMoneyManager;		g_pMoneyManager = NULL;
 		delete g_pInventory;		g_pInventory = NULL;
 		delete g_pTimeItemManager;	g_pTimeItemManager = NULL;
@@ -112,13 +120,15 @@ TEST(TradeManager, InitBuildsTheOtherSideOverThePlayersInventory)
 	CHECK(trade.GetOtherID() == OBJECTID_NULL);
 
 	// Release deletes the other side's items and both trade wallets; the
-	// player's inventory is not the manager's to delete.
+	// player's inventory is not the manager's to delete, only to forget.
 	Sword* offered = new Sword(1, 0);
 	CHECK(trade.GetOtherInventory()->AddItem(offered));
 	trade.Release();
 	CHECK_EQ(0, s_Alive);
 	CHECK(trade.GetOtherInventory() == NULL);
 	CHECK(trade.GetMyMoneyManager() == NULL);
+	CHECK(trade.GetOtherMoneyManager() == NULL);
+	CHECK(trade.GetMyInventory() == NULL);
 	CHECK(g_pInventory != NULL);
 }
 
@@ -155,11 +165,22 @@ TEST(TradeManager, RefusingStartsTheAcceptDelayOnTheClock)
 	s_Now = 20000;
 	CHECK(trade.IsAcceptTime());
 
-	// Without a clock the delay never elapses.
-	MTradeManager::SetClock(NULL);
+	// Without a clock there is no delay - neither with no host at all
+	// nor with a host that carries none.
+	MItem::SetHost(NULL);
 	trade.AcceptMyTrade();
 	trade.RefuseMyTrade();
-	CHECK_EQ(false, trade.IsAcceptTime());
+	CHECK(trade.IsAcceptTime());
+	const MItemHost clockless = { &s_Frame, DropFrameCount, RefreshAffect, PlayItemSound, NULL };
+	MItem::SetHost(&clockless);
+	CHECK(trade.IsAcceptTime());
+	// With the clock back, a refusal counts again.
+	MItem::SetHost(&s_Host);
+	trade.AcceptMyTrade();
+	trade.RefuseMyTrade();
+	CHECK_EQ(false, trade.IsAcceptTime());		// 20000 + 5000 on the clock at 20000
+	s_Now = 25000;
+	CHECK(trade.IsAcceptTime());
 }
 
 //----------------------------------------------------------------------
@@ -190,8 +211,14 @@ TEST(TradeManager, CanTradeNeedsRoomForTheOffersAndForTheMoney)
 	CHECK(g_pInventory->GetItem(2, 0) == given);
 	CHECK_EQ(2, g_pInventory->GetItemNum());
 	CHECK_EQ(2, trade.GetOtherInventory()->GetItemNum());
+	// The offers sat at (0,0) and (0,1) on the other side, went to (2,0)
+	// and (2,1) in the scratch grid, and are back where they were.
 	CHECK_EQ(0, (int)offerA->GetGridX());
 	CHECK_EQ(0, (int)offerA->GetGridY());
+	CHECK_EQ(0, (int)offerB->GetGridX());
+	CHECK_EQ(1, (int)offerB->GetGridY());
+	CHECK(trade.GetOtherInventory()->GetItem(0, 0) == offerA);
+	CHECK(trade.GetOtherInventory()->GetItem(0, 1) == offerB);
 
 	// A third 1x1 would not fit beside the kept sword.
 	Sword* offerC = new Sword(5, 0);

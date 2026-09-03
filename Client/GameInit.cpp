@@ -85,7 +85,6 @@
 #include "MItem.h"
 #include "MTopView.h"
 #include "MPlayer.h"
-#include "MTradeManager.h"
 #include "FameInfo.h"
 #include "MWarManager.h"
 #include "CSprite555.h"
@@ -2911,7 +2910,7 @@ static void	PlayItemSound(TYPE_SOUNDID soundID)
 	PlaySound(soundID);
 }
 
-static const MItemHost	s_ItemHost = { &g_CurrentFrame, ItemDropFrameCount, RefreshAffect, PlayItemSound };
+static const MItemHost	s_ItemHost = { &g_CurrentFrame, ItemDropFrameCount, RefreshAffect, PlayItemSound, &g_CurrentTime };
 
 //-----------------------------------------------------------------------------
 // Init GameObject
@@ -3039,7 +3038,6 @@ InitGameObject()
 	}
 
 	MItem::SetHost(&s_ItemHost);
-	MTradeManager::SetClock(&g_CurrentTime);
 
 	if (g_pPCTalkBox==NULL)
 	{
