@@ -240,7 +240,7 @@ baseline: **332 tests, 4,510 checks, 0 failed** in both trees.
    arguments the call site really passed. `Client/PacketHandler` and all of
    `VS_UI` are converted; what is left is the executable's own 64 — the
    `AddFormat` family (3 there, 27 in all: `CMessageArray` bounds its own buffer
-   already, so only the arity half remains) and 61 more, concentrated in
+   already, so only the arity half remains) and 37 more, concentrated in
    `ModifyStatusManager.cpp`, `UIMessageManager.cpp` and `MTopView.cpp`.
    `tests/tools/check_format_arity.pl` (ctest `format_arity`) audits every
    converted site against the built-in English table and fails the suite when an
