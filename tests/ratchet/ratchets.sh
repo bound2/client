@@ -232,6 +232,18 @@ check "R3 (unsafe format/copy lines in Client/Packet + Client/PacketHandler)" "$
 # the ones that linked; the list is gone and they compile once, into
 # the executable, so the 24 of them that reach g_p globals are
 # executable debt now, outside this ratchet (R1 already counts them).
+# History: 21 = 25 - 4 (task 5.3). Partly seam-cutting and partly a
+# refined measurement, and it is worth being clear which. The real cut
+# is TextSystem: TextService.cpp lost its live g_pLast reach when
+# RenderText moved to the executable. The other three never had one -
+# they only NAMED a global in a comment, and R4 counted that, unlike R3
+# and R5 which have always stripped comment lines. Dropped:
+# Client/TextSystem/TextService.cpp (which after the move would have
+# counted for the comment 5.3 wrote ABOUT the seam it had just cut -
+# that is how the flaw surfaced), Client/Packet/SocketOutputStream.cpp
+# (a commented-out g_pLogManager call), Client/SpriteLib/
+# SpriteLibBackendSDL.cpp and VS_UI/src/VS_UI_WebBrowser.cpp. The 21
+# that remain are real reaches, and every one is a VS_UI file.
 # History: 59 = 61 - 2. Task 4.1 cut the two g_pFileDef seams in MGameStringTable
 # (UseEnglishText takes the Properties table) and SystemAvailabilities
 # (LoadFromStream; the executable reads the archive); the four support
@@ -246,7 +258,7 @@ check "R3 (unsafe format/copy lines in Client/Packet + Client/PacketHandler)" "$
 # GCStashList::setStashItem from a live Item*) were deleted rather than
 # grandfathered.
 #----------------------------------------------------------------------
-R4_BASELINE=25
+R4_BASELINE=21
 
 lib_members () {
 	# The directory trees minus the files CMake excludes from the
@@ -281,7 +293,16 @@ lib_defs () {
 }
 R4=$(defs=$(lib_defs); lib_members | sort -u | while read -r f; do
 	[ -f "$f" ] || continue
-	refs=$(grep -oE '\bg_p[A-Z]\w*' "$f" | sort -u)
+	# Comment lines are not references. R3 and R5 have always filtered
+	# them; R4 did not, so a file that only NAMED a global counted as
+	# reaching it - which is worse than noise, because it can hide a
+	# real tightening behind a sentence somebody wrote about the seam
+	# they had just cut. Task 5.1's second slice worked around it by
+	# rewording a comment; task 5.3 hit it again and fixed the
+	# measurement instead. Line-based, so the same blindness R5
+	# documents applies: a reference inside a /* */ block still counts.
+	refs=$(grep -vE '^[[:space:]]*(//|\*|/\*)' "$f" \
+		| grep -oE '\bg_p[A-Z]\w*' | sort -u)
 	[ -n "$refs" ] || continue
 	if [ -n "$(comm -23 <(echo "$refs") <(echo "$defs"))" ]; then
 		echo "$f"
