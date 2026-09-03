@@ -408,8 +408,8 @@ printf "check_format_arity: %d note(s)\n", $notes;
 # converted; a fall has to be explained by editing these lines in the
 # same commit.
 #----------------------------------------------------------------------
-my $MINIMUM_SITES   = 293;
-my $MINIMUM_CHECKED = 285;
+my $MINIMUM_SITES   = 294;
+my $MINIMUM_CHECKED = 286;
 
 if ($sites < $MINIMUM_SITES)
 {

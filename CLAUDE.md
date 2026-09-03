@@ -237,11 +237,16 @@ baseline: **332 tests, 4,510 checks, 0 failed** in both trees.
    **0 call sites** - ratchet R7 holds it at zero, so a new one fails the suite. It
    has a fix to apply rather than a policy to argue about: `SafeFormat::Format`
    in `basic/SafeFormat.h` checks a table entry's conversions against the
-   arguments the call site really passed. All 293 sites are converted, across
+   arguments the call site really passed. 294 sites are converted, across
    `Client`, `VS_UI` and the `AddFormat` family (through
-   `CMessageArray::AddSafeFormat`), so **finding C19 is closed** — a corrupt
-   table can still print wrong text, but it can no longer make the program read
-   or write something it was not given.
+   `CMessageArray::AddSafeFormat`). **R7 being 0 does not mean C19 is closed**,
+   and this file said it did for about an hour on 2026-09-04: R7 sees a format
+   *spelled at the call site* as a table lookup, and **24 live sites
+   read the entry out of a static array or a local first** — 21 of them in
+   `VS_UI_ExtraDialog.cpp`, 12 passing no varargs at all, into buffers sized
+   from the format string. That is C19's exploitable half, still open. Measure
+   it with `scratchpad`-style sweeps or extend R7; do not trust R7 alone for
+   this finding.
    `tests/tools/check_format_arity.pl` (ctest `format_arity`) audits every
    converted site against the built-in English table and fails the suite when an
    entry asks for more arguments than its call site passes; it also ratchets how

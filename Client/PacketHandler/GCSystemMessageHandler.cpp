@@ -11,6 +11,7 @@
 #include "ClientDef.h"
 #include "UIFunction.h"
 #include "MGameStringTable.h"
+#include "SafeFormat.h"
 #include "Client.h"
 //////////////////////////////////////////////////////////////////////
 //
@@ -127,10 +128,18 @@ throw ( ProtocolException , Error )
 			// characters around the message. Size the buffer from the format
 			// string itself instead, which is a safe upper bound for a single
 			// %s substitution.
-			const char* pFormat = (*g_pGameStringTable)[UI_STRING_MESSAGE_SYSTEM].GetString();
+			//
+			// The format is a String.inf entry, so it goes through SafeFormat
+			// rather than snprintf: bounding the write was never the whole
+			// problem here, because a second %s in that entry would read a
+			// stack word as a char* and print it inside the bound. This site
+			// hoisted the entry into a local first, which is why ratchet R7 -
+			// which looks for the lookup at the format argument itself - read
+			// zero while it was still live. Both adversarial reviewers of
+			// task 5.4's fourth slice found it independently.
 			size_t msgSize = (*g_pGameStringTable)[UI_STRING_MESSAGE_SYSTEM].GetLength()+messageStr.size()+1;
 			pMsg = new char[msgSize];
-			snprintf(pMsg,msgSize,pFormat,message);
+			SafeFormat::Format(pMsg, msgSize, GetGameString(UI_STRING_MESSAGE_SYSTEM), message);
 			pPacket->setMessage(pMsg);
 			SAFE_DELETE_ARRAY( pMsg );
 		}
