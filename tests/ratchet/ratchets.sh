@@ -191,8 +191,13 @@ check "R3 (unsafe format/copy lines in Client/Packet + Client/PacketHandler)" "$
 #
 # 25: 27 - 2, a reclassification (task 4.4's fourth slice moved the skill
 # core into gamemodel): VS_UI_SKILL_VIEW.cpp and VS_UI_skill_tree.cpp
-# reached past the libraries only for g_pSkillInfoTable, g_pSkillManager
-# and g_pSkillAvailable, which MSkillManager.cpp defines.
+# reached past the libraries only for g_pSkillInfoTable and
+# g_pSkillManager, which MSkillManager.cpp defines. Note what this
+# ratchet cannot see: it matches g_p* only, so a library file calling an
+# executable-side function - VS_UI_GameCommon.cpp calls
+# g_pSkillAvailable->SetAvailableSkills(), which lives in the
+# executable's MSkillAvailable.cpp - is a seam the number does not
+# count, before or after.
 # 27: 28 - 1, a reclassification (task 4.4's third slice moved the gear
 # into gamemodel): VS_UI_Game.cpp's only reaches past the libraries were
 # g_pSlayerGear, g_pVampireGear and g_pOustersGear, which the gear

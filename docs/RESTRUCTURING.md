@@ -1175,8 +1175,8 @@ starting each — the scan is one grep, and the ranking below is from a
   `MSkillManager.cpp`, `SkillDef.cpp`, gear classes. Likely partial —
   whatever stays coupled goes on the exemption list explicitly.
   > **Status:** done (9da85ff the item table, 144c92a the item core,
-  > 4cede66 the item managers, 12efc24 the gear, and the skill core in
-  > this branch; owner: the `gamemodel` membership file, the CMake
+  > 4cede66 the item managers, 12efc24 the gear, 486e3f6 the skill
+  > core; owner: the `gamemodel` membership file, the CMake
   > assertion that no member is in the executable's list, and the
   > include checker). Everything the task lists is in the library but
   > the halves that are the packet and UI side of items and skills —
@@ -1406,18 +1406,23 @@ starting each — the scan is one grep, and the ranking below is from a
   > `MSkillSet` has no virtuals, so splitting it across the two targets
   > costs no vtable. Two seams cut: the use delays read the item host's
   > clock (`MItem::Clock()`, the seam the trade manager already uses)
-  > instead of `g_CurrentTime`, and without a clock there is no delay;
+  > instead of `g_CurrentTime`, and without a clock there is no delay —
+  > which is what the `#else` branch did for the two readers; the two
+  > setters were no-ops without the macro and now write against a zero
+  > clock, inert while there is none;
   > and `MSkillManager::Init` no longer opens the domain-experience
   > file, because `FileOpenBinary` and `g_pFileDef` are the
   > executable's — `InitSkillTree` in `GameInit.cpp` builds the tree
   > and then feeds `LoadFromFileServerDomainInfo` a stream, the shape
-  > task 4.1 gave `SystemAvailabilities`, and the three call sites
-  > (`GameInit`, `GameMain`, `GCUpdateInfoHandler`) call it. The 17
-  > always-on `__GAME_CLIENT__` guards go with the includes they
-  > wrapped. R1 497 → 495; R4 27 → 25 — a reclassification again:
+  > task 4.1 gave `SystemAvailabilities`, and the three live call sites
+  > (`GameInit`, `GameMain`, `GCUpdateInfoHandler`) call it — a fourth
+  > in `VS_UI/WinMain.cpp` is in no target and opens the file itself.
+  > The 17 always-on `__GAME_CLIENT__` guard lines (8 blocks) go with
+  > the includes they wrapped; three more blocks moved with the
+  > methods. R1 497 → 495; R4 27 → 25 — a reclassification again:
   > `VS_UI_SKILL_VIEW.cpp` and `VS_UI_skill_tree.cpp` reached past the
-  > libraries only for the three skill globals `MSkillManager.cpp`
-  > defines. Tests (`test_skill_core.cpp`, 7): a skill's use delay over
+  > libraries only for `g_pSkillInfoTable` and `g_pSkillManager`, which
+  > `MSkillManager.cpp` defines. Tests (`test_skill_core.cpp`, 7): a skill's use delay over
   > the host clock, including no clock meaning no delay; the next-skill
   > list sorting by id and refusing a duplicate; the server-info round
   > trip, both with and without the Ousters elemental block the format
@@ -1427,6 +1432,44 @@ starting each — the scan is one grep, and the ranking below is from a
   > walking down that chain into the usable set and unlearning walking
   > back up; and `Init` giving all eight domains their root skill.
   > Suite: 271 tests (4,278 checks).
+  > **Adversarial review round (2026-09-03, 2 reviewers, both SHIP with
+  > findings), fixed on the branch:** the structural half held — the
+  > 1,203-line move is byte-identical (md5), the residual diff is
+  > accounted for line by line, both seams are behaviour-preserving for
+  > every build that exists — and what the round found was two library
+  > defects the move made reachable, plus test and prose repairs. **Two
+  > defects fixed test-first:** `SKILLINFO_NODE`'s constructor set every
+  > field but three — `m_SkillStep`, `m_X` and `m_Y` — and
+  > `MSkillDomain::AddSkill` *branches* on the step, so a table entry no
+  > file had filled decided a skill's step from whatever the memory held
+  > (the client loads `SkillInfo.inf` first, which is why it never
+  > showed; neither `/RTC1`, which fills locals only, nor ASan, which
+  > has no uninitialised-member check, could flag it, and the new test
+  > reads `0xCCCCCCCC` and `0xCDCDCDCD` against the old code); and
+  > `MSkillManager::LoadFromFileServerDomainInfo` indexed its eight-row
+  > table with an `int` read straight from the file, through the raw
+  > pointer, past even the typed table's own bound — the C13 shape, now
+  > library code, and the new test segfaults the runner against the old
+  > code. **Four checks passed for the wrong reason** and are repaired:
+  > three refusals in the learn test stopped at `LearnSkill`'s first
+  > gate, because the successful learn had consumed the skill point, so
+  > they would have survived gutting the function; and a `DomainType`
+  > round trip compared against `SKILLDOMAIN_BLADE`, which is 0, the
+  > constructor's own value. Prose corrections: "17 guards" is 17 guard
+  > *lines* over 8 blocks; `g_pSkillAvailable` was named as an R4 reach
+  > neither VS_UI file makes; the `#else` equivalence holds for the two
+  > delay readers but not the two setters; the 4.4 status line cites the
+  > slice's commit; the `MItemHost` clock comment names the skill delays
+  > too; and the R4 comment now says what that ratchet cannot see — a
+  > library file calling an executable-side *function*
+  > (`VS_UI_GameCommon.cpp` calls `SetAvailableSkills`) is a seam the
+  > `g_p*` pattern never counted. **Noted, not done:**
+  > `MSkillDomain::Clear` can never take its `m_pLearnedSkillID!=NULL`
+  > branch, because `ClearSkillList` nulls the pointer first, so the
+  > level counters go stale; `RemoveNextSkill` dereferences a `find`
+  > without checking for the end; and `InitSkillList`, `AddSkillStep`,
+  > the domain save/load and `GetExpInfo` are library-testable now and
+  > untested. Suite: 273 tests (4,301 checks).
   - Owner (all of 4.x): `gamemodel`'s membership file
     (`tests/arch/gamemodel_files.txt`), the M0–M2 include rules in
     `check_includes.pl` (in force since 4.1), R4 shrinking.
