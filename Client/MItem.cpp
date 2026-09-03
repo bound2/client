@@ -751,12 +751,8 @@ MItem::GetItemOptionColorSet(int OptionNum)
 {	
 	if(GetItemClass() == ITEM_CLASS_PET_ITEM)
 	{
-		// The player re-evaluates the pet's affect before its colour is read;
-		// the executable does that through the host.
-		if (s_pHost!=NULL)
-		{
-			s_pHost->RefreshPetAffect(this);
-		}
+		// The player re-evaluates the pet's affect before its colour is read.
+		RefreshAffect(this);
 		if(GetItemColorSet() == 0xFFFF)
 		{
 			if(GetSilver() > 0)	// an attribute shows as a colour

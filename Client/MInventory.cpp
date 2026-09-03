@@ -5,18 +5,8 @@
 #include "MItem.h"
 #include "MInventory.h"
 
-#include "MHelpManager.h"
-#ifdef __GAME_CLIENT__
-	#include "ClientFunction.h"
-	#include "MPlayer.h"
-#endif
-
-/*
-#ifdef __GAME_CLIENT__
-	#include "MEffect.h"
-	#include "MEffectGeneratorTable.h"
-#endif
-	*/
+// The player's affect check and the landing sound reach the executable
+// through MItem's host (docs/RESTRUCTURING.md task 4.3).
 
 //----------------------------------------------------------------------
 // Global
@@ -50,11 +40,7 @@ MInventory::~MInventory()
 void			
 MInventory::CheckAffectStatus(MItem* pItem)	// 특정 아이템
 {
-#ifdef __GAME_CLIENT__
-
-	g_pPlayer->CheckAffectStatus( pItem );
-		
-#endif
+	MItem::RefreshAffect( pItem );
 }
 
 //----------------------------------------------------------------------
@@ -71,9 +57,7 @@ MInventory::AddItem(MItem* pItem)
 		if (MGridItemManager::AddItem( pItem ))
 		{
 			// 제대로 추가된 경우 --> sound출력
-			#ifdef __GAME_CLIENT__
-				PlaySound( pItem->GetInventorySoundID() );
-			#endif
+			MItem::PlayItemSound( pItem->GetInventorySoundID() );
 		
 						
 			return true;
@@ -99,9 +83,7 @@ MInventory::AddItem(MItem* pItem, BYTE x, BYTE y)
 		if (MGridItemManager::AddItem( pItem, x, y ))
 		{
 			// 제대로 추가된 경우 --> sound출력
-			#ifdef __GAME_CLIENT__
-				PlaySound( pItem->GetInventorySoundID() );
-			#endif
+			MItem::PlayItemSound( pItem->GetInventorySoundID() );
 
 			return true;
 		}
@@ -127,9 +109,7 @@ MInventory::ReplaceItem(MItem* pItem, BYTE x, BYTE y, MItem*& pOldItem)
 		if (MGridItemManager::ReplaceItem(pItem, x,y, pOldItem))
 		{
 			// 제대로 추가된 경우 --> sound출력
-			#ifdef __GAME_CLIENT__
-				PlaySound( pItem->GetInventorySoundID() );
-			#endif
+			MItem::PlayItemSound( pItem->GetInventorySoundID() );
 
 			return true;
 		}
@@ -240,100 +220,4 @@ MInventory::FindItem( ITEM_CLASS itemClass, TYPE_ITEMTYPE itemType )
 
 	return NULL;
 }
-
-/*
-#ifdef __GAME_CLIENT__
-	//----------------------------------------------------------------------
-	// Add Effect
-	//----------------------------------------------------------------------
-	bool			
-	MInventory::AddEffect(MEffect* pEffect)
-	{
-		if (pEffect==NULL)
-		{
-			return false;
-		}
-
-		m_listEffect.push_back( pEffect );
-
-		return true;
-	}
-
-	//----------------------------------------------------------------------
-	// Update Effects
-	//----------------------------------------------------------------------
-	void			
-	MInventory::UpdateEffects()
-	{
-		EFFECT_LIST::iterator iEffect = m_listEffect.begin();
-
-		EFFECT_LIST::iterator iTemp;
-		
-		MEffect* pEffect;
-		int count = m_listEffect.size();
-
-		for (int i=0; i<count; i++)	
-		{
-			pEffect = *iEffect;
-
-			//---------------------------------------
-			//
-			// update --> 정상적으로 된 경우
-			//
-			//---------------------------------------
-			if (pEffect->Update())
-			{
-				//-----------------------------------------------
-				//
-				// 이 Effect가 끝나기 전에 LinkCount에 의해서
-				// 다음 연결되는 Effect가 있으면 생성해야 한다.
-				//
-				// 현재Frame이 EndLinkFrame을 넘어간 경우
-				//
-				//-----------------------------------------------
-				if (g_CurrentFrame >= pEffect->GetEndLinkFrame()
-					&& pEffect->GetLinkSize() != 0)
-				{
-					// GenerateNext에서 
-					// pEffect의 EffectTarget을 NULL로 만들어주기 때문에
-					// 여기서 지울 필요 없다.
-					g_EffectGeneratorTable.GenerateNext( pEffect );
-
-					// pEffect는 여전히 존재해야 하므로 지우면 안된다.
-				}
-				
-				
-				iEffect++;
-			}
-			//---------------------------------------
-			//
-			// 다 돼서 끝난 경우
-			//
-			//---------------------------------------
-			else
-			{
-				//-----------------------------------------------
-				// 다음 연결되는 Effect가 있으면 생성해야 한다.
-				//-----------------------------------------------
-				if (pEffect->GetLinkSize() != 0)
-				{
-					g_EffectGeneratorTable.GenerateNext( pEffect );
-				}
-
-				//-----------------------------------------------
-				// 제거
-				//-----------------------------------------------
-				delete pEffect;
-
-				iTemp = iEffect;
-				iEffect++;
-
-				// list에서 제거한다.
-				m_listEffect.erase(iTemp);
-			}
-		
-		}
-	}
-#endif
-	*/
 
