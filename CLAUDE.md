@@ -234,12 +234,16 @@ baseline: **332 tests, 4,510 checks, 0 failed** in both trees.
 2. Fixed-size buffers fed by variable-length server strings (the 21-byte chat rows
    are fixed; 128-byte stack buffers remain in other handlers), and format strings
    loaded from data files passed to sprintf (C19/C20/C22). That last one is
-   **257 call sites**, measured by ratchet R7 rather than estimated, and it now
+   **64 call sites**, measured by ratchet R7 rather than estimated, and it now
    has a fix to apply rather than a policy to argue about: `SafeFormat::Format`
    in `basic/SafeFormat.h` checks a table entry's conversions against the
-   arguments the call site really passed. Every `sprintf`-family site in
-   `Client/PacketHandler` is converted; what is left is the `AddFormat` family
-   (3 there, 28 in all — `CMessageArray` bounds its own buffer already, so only
-   the arity half remains) plus `Client`'s other 61 and `VS_UI`'s 193.
+   arguments the call site really passed. `Client/PacketHandler` and all of
+   `VS_UI` are converted; what is left is the executable's own 64 — the
+   `AddFormat` family (3 there, 27 in all: `CMessageArray` bounds its own buffer
+   already, so only the arity half remains) and 61 more, concentrated in
+   `ModifyStatusManager.cpp`, `UIMessageManager.cpp` and `MTopView.cpp`.
+   `tests/tools/check_format_arity.pl` (ctest `format_arity`) audits every
+   converted site against the built-in English table and fails the suite when an
+   entry asks for more arguments than its call site passes.
 3. Dead and duplicate source sitting alongside live code, which is a correctness trap
    when the wrong file gets edited.

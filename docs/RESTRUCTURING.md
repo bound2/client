@@ -123,7 +123,7 @@ an unrecorded drop, so tightening lands in the same commit as the progress.
 | R5 | Direct packet `execute()` call sites outside `Client/Packet` (handlers under `Client/PacketHandler` are in scope) | 1 (a commented-out block in `CGameUpdate.cpp`; added 2026-09-01 after the review found live local-echo callers the receive-loop enumeration had missed; task 2.4 found two more inside handlers — `GCReconnectLoginHandler`/`LCReconnectHandler` fabricating a `CGConnectSetKey` — invisible while handlers lived under the excluded `Client/Packet`, caught by the compiler once `Packet::execute` was deleted, and routed through the dispatcher; a live caller is now a compile error before it is a ratchet failure) | see `ratchets.sh` |
 | R6 | *retired* — `packetwire` members calling `SendBugReport`, which the executable used to define | — (lived for one slice, 2026-09-03. Task 5.1's first slice added it to replace the failed-link detector that stubbing the symbol had disabled — a library file calling an executable-side *function* is invisible to W1/W2, which read includes, and to R4, which greps `g_p*`. It fired on the very next thing done to the tree: promoting `ClientCommunicationManager.cpp` took the count to 2, which is what said to move the function rather than grow the seam. `SendBugReport` is in `Client/Packet/WireHost.cpp` now, so the ratchet measures a symbol nothing is on the wrong side of, and the stub that disabled the link detector is gone with it. Note what came back is narrower than what left: a failed link catches an executable-side call only in a library `unit_tests` links, and only in an object some test forces the linker to pull in — which is what the address-taking link proofs in `test_wire_host.cpp` and `test_player_base.cpp` exist to guarantee. R6 grepped every membership file unconditionally. `ratchets.sh` keeps the history where the check was) | — |
 
-| R7 | Call sites handing a game string table entry to `printf` as its **format** argument (`sprintf` family and `AddFormat`, across `Client` and `VS_UI`) | **257** (288 before task 5.4's first slice converted `Client/PacketHandler`'s 31; the split is `Client` 64 — of which `ModifyStatusManager.cpp` 19, `UIMessageManager.cpp` 14, `MTopView.cpp` 10, `PacketFunction.cpp` 9, `GameUI.cpp` 7 — and `VS_UI` 193, where `VS_UI_GameCommon.cpp` alone holds 89. First recorded as 287 → 256: the review round found the pattern could not match a counted call in **any** form, because it wanted the format at argument two, where `snprintf` and `swprintf` take a size — so it missed a live site and, worse, could not have caught a new one. Added 2026-09-03; finding C19 as a number) | see `ratchets.sh` — three alternatives, because the format sits at a different argument in each of the three families, and the tree is joined before matching, because four sites put the destination and the format on different lines |
+| R7 | Call sites handing a game string table entry to `printf` as its **format** argument (`sprintf` family and `AddFormat`, across `Client` and `VS_UI`) | **64** (257 before task 5.4's second slice converted every `VS_UI` site, leaving only the executable's own - of which three are the `AddFormat` family in `Client/PacketHandler`; 288 before its first slice converted `Client/PacketHandler`'s 31; the split is `Client` 64 — of which `ModifyStatusManager.cpp` 19, `UIMessageManager.cpp` 14, `MTopView.cpp` 10, `PacketFunction.cpp` 9, `GameUI.cpp` 7 — and `VS_UI` 193, where `VS_UI_GameCommon.cpp` alone holds 89. First recorded as 287 → 256: the review round found the pattern could not match a counted call in **any** form, because it wanted the format at argument two, where `snprintf` and `swprintf` take a size — so it missed a live site and, worse, could not have caught a new one. Added 2026-09-03; finding C19 as a number) | see `ratchets.sh` — three alternatives, because the format sits at a different argument in each of the three families, and the tree is joined before matching, because four sites put the destination and the format on different lines |
 
 R1 is the headline number: it counts what still cannot be unit-tested. R2 is
 the client twin of the server's R4 (which it drove to 0). R3 and R7 track
@@ -2038,18 +2038,75 @@ starting each — the scan is one grep, and the ranking below is from a
   > would have measured as a no-op — the exact failure mode task 5.3
   > found in R4 and fixed there.
   >
-  > **Also learned, and now in the script.** Measuring `VS_UI` without
-  > `grep -a` reports **113** where the truth is **192**: its sources are
-  > CP949 encoded, so grep decides they are binary and stops at the
-  > first byte it dislikes. Any future metric over `VS_UI` needs `-a`.
+  > **Also learned, and corrected once.** A per-file `grep -r` over
+  > `VS_UI` reports **113** where the truth is **193**: its sources are
+  > CP949 encoded, so grep decides such a file is binary and stops at the
+  > first byte it dislikes, silently. That bit the exploratory survey of
+  > this population, and the first draft of the ratchet recorded `-a` as
+  > the reason its number was right — which the review round measured and
+  > disproved, because the committed pipeline joins every file onto one
+  > stdin stream that grep does not classify per file. The flag stays as
+  > a defence for any future per-file variant; the lesson is that nothing
+  > tells you when binary detection has truncated a scan.
   >
   > **Left for the next slices, deliberately:** the 3 `AddFormat` sites
   > in `Client/PacketHandler` and the 24 elsewhere. `CMessageArray`
   > already bounds its own buffer (C20, fixed in `0e9d247`), so what is
   > left there is the arity half alone, and converting it needs a new
   > entry point on `CMessageArray` that touches all 27 at once — its own
-  > slice. Then `Client`'s remaining 64 and `VS_UI`'s 193, where
-  > `VS_UI_GameCommon.cpp` alone holds 89.
+  > slice.
+  >
+  > **Second slice (2026-09-03): every `VS_UI` site, 193 of them across
+  > nine sources, and `R7 257 → 64`.** What is left is the executable's
+  > own 64. The substitution is mechanical, so the work is in what was
+  > checked afterwards — and that check is now a ctest rather than a
+  > one-off script.
+  >
+  > **`tests/tools/check_format_arity.pl`** compares every converted
+  > site's arguments against the conversions in the built-in English
+  > table in `MGameStringTable.cpp`. That table is not a sample:
+  > `InitGameStringTable()` installs it over the file data on the English
+  > path, so it is exactly what the default build formats with. It fails
+  > the suite when an entry asks for **more** arguments than its call
+  > site passes — the direction that made `sprintf` read a stack word as
+  > a `char*`, and the direction that now shows a bare `%s` to the player
+  > — and when a conversion's argument is provably of the other kind.
+  > Result over all 224 converted sites: **219 checked, 0 failures**, and
+  > two notes in the harmless direction (`GCNPCResponseHandler` passes a
+  > character name to two entries whose English text takes no conversion;
+  > the localised entry they were written against does carry a `%s`, and
+  > dropping the argument would break that build to tidy this one).
+  >
+  > **Two things the tool taught about itself**, both fixed before it was
+  > committed. Its first draft used a Perl list assignment whose first
+  > target was an array, which left every scalar in the argument splitter
+  > undef — so it parsed nothing, resolved none of 224 sites, and printed
+  > `OK`. It now fails when it finds sites and resolves none, because a
+  > tool written to catch a silent failure is worth nothing if it can
+  > fail silently itself. And its first type check failed a `%s` whose
+  > argument it could not classify, which produced **29 findings, every
+  > one a false positive** — `weapon_speed_string[i]`, `szString`,
+  > `grade_string[i]` are all `char` arrays that no pattern over an
+  > expression can recognise without a type. A check that guesses cannot
+  > be a gate: it now fails only on what is provable and reports the
+  > 191 unclassifiable positions as a number, so the limit is visible
+  > rather than hidden.
+  >
+  > **Five more computed lookups got a range check** as a side effect,
+  > in `VS_UI_Description.cpp` and `VS_UI_ExtraDialog.cpp`, which index
+  > the string table by item type or a computed level grade. Thirty such
+  > lookups remain in argument position elsewhere; that is a separate
+  > job.
+  >
+  > **The audit's limit, stated plainly:** no `String.inf` ships in this
+  > repository, so for `LANGUAGE != 3` none of these entries can be
+  > checked here at all. That is the build the load-time gate protects
+  > and the one the formatter's run-time refusal matters most in.
+  >
+  > **Not test-verified.** `unit_tests` does not link `VS_UI`, so this
+  > slice is build-verified plus the arity audit. What running it shows
+  > is whether the item and skill descriptions, the gear tooltips, the
+  > extra dialogs and the title screen still read correctly.
 
 ---
 

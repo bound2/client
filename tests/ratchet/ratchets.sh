@@ -392,7 +392,13 @@ check "R5 (direct packet execute callers outside Client/Packet)" "$R5" "$R5_BASE
 # It stays a count of sites rather than of files, because a file here is
 # converted a call at a time and half a file is real progress.
 #----------------------------------------------------------------------
-R7_BASELINE=257
+# 64: 257 - 193. Task 5.4's second slice converted every VS_UI site, so
+# what is left is the executable's own 64 - of which 3 are the AddFormat
+# family in Client/PacketHandler. History: 257 = 288 - 31 (the first
+# slice, Client/PacketHandler); those two numbers were first recorded as
+# 256 and 287, before the review round found the pattern could not match
+# a counted call in any form.
+R7_BASELINE=64
 
 for d in Client VS_UI; do
 	if [ ! -d "$d" ]; then

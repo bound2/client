@@ -162,6 +162,28 @@ else()
 endif()
 
 #----------------------------------------------------------------------
+# Format-arity audit (tests/tools/check_format_arity.pl) - the check the
+# checked formatter cannot make for itself.
+#
+# SafeFormat::Format makes a data-file format string safe, but it cannot
+# tell that the entry MEANS what its call site passes: an entry with one
+# %s more than the call site hands over is no longer a memory-safety
+# defect, but it now prints a literal "%s" in the user interface. This
+# compares every converted site against the built-in English table -
+# which is not a sample, since InitGameStringTable installs it over the
+# file data on the English path. Needs perl (found above); without it
+# the check is skipped, not passed.
+#----------------------------------------------------------------------
+if(PERL_EXECUTABLE)
+	add_test(
+		NAME format_arity
+		COMMAND ${PERL_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_format_arity.pl
+	)
+else()
+	message(STATUS "perl not found: the format_arity test is not registered")
+endif()
+
+#----------------------------------------------------------------------
 # The committed WireInventory.inc must match a fresh generation, so a
 # new or changed factory cannot go unconstructed and uninventoried. Needs perl (Git for
 # Windows ships one, found above); without it the check is skipped,

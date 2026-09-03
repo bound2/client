@@ -17,6 +17,7 @@
 #include "MCreatureTable.h"
 #include "UtilityFunction.h"
 #include "MGameStringTable.h"
+#include "SafeFormat.h"
 #include "ClientConfig.h"
 #include "MNPCTable.h"
 #include "TextSystem/TextService.h"
@@ -1547,7 +1548,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 				&& p_item->GetItemClass() != ITEM_CLASS_COUPLE_RING && p_item->GetItemClass() != ITEM_CLASS_VAMPIRE_COUPLE_RING
 				&& !p_item->IsQuestItem())
 			{
-				wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_DURABILITY].GetString(), p_item->GetMaxDurability());
+				SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_DURABILITY), p_item->GetMaxDurability());
 				temp_string = sz_temp;
 				m_rep_string.push_back(temp_string);
 			}
@@ -1555,7 +1556,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 			// Silver
 			if (p_item->GetSilverMax() != -1)
 			{
-				wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_SILVERING].GetString(), p_item->GetSilverMax());
+				SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_SILVERING), p_item->GetSilverMax());
 				temp_string = sz_temp;
 				m_rep_string.push_back(temp_string);
 			}
@@ -1563,7 +1564,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 			// Damage
 			if (p_item->GetMaxDamage() != -1) // damage가 있는가?
 			{
-				wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_DAMAGE].GetString(), p_item->GetMinDamage(), p_item->GetMaxDamage());
+				SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_DAMAGE), p_item->GetMinDamage(), p_item->GetMaxDamage());
 				temp_string = sz_temp;
 				m_rep_string.push_back(temp_string);
 			}
@@ -1571,7 +1572,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 			// critical hit
 			if (p_item->GetCriticalHit() != -1) // 크리티컬히트가 있는가?
 			{
-				wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_CRITICALHIT].GetString(), p_item->GetCriticalHit());
+				SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_CRITICALHIT), p_item->GetCriticalHit());
 				temp_string = sz_temp;
 				m_rep_string.push_back(temp_string);
 			}
@@ -1579,7 +1580,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 			// Defense
 			if (p_item->GetDefenseValue() != -1)
 			{
-				wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_DEFENSE].GetString(), p_item->GetDefenseValue());
+				SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_DEFENSE), p_item->GetDefenseValue());
 				temp_string = sz_temp;
 				m_rep_string.push_back(temp_string);
 			}
@@ -1587,7 +1588,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 			// Protection
 			if (p_item->GetProtectionValue() != -1)
 			{
-				wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_PROTECTION].GetString(), p_item->GetProtectionValue());
+				SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_PROTECTION), p_item->GetProtectionValue());
 				temp_string = sz_temp;
 				m_rep_string.push_back(temp_string);
 			}
@@ -1595,7 +1596,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 			// TOHIT
 			if (p_item->GetToHit() != -1)
 			{
-				wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_ACCURACY].GetString(), p_item->GetToHit());
+				SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_ACCURACY), p_item->GetToHit());
 				temp_string = sz_temp;
 				m_rep_string.push_back(temp_string);
 			}
@@ -1603,7 +1604,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 			// Heal point
 			if (p_item->GetHealPoint() != -1)
 			{
-				wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_HP].GetString(), p_item->GetHealPoint());
+				SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_HP), p_item->GetHealPoint());
 				temp_string = sz_temp;
 				m_rep_string.push_back(temp_string);
 			}
@@ -1611,7 +1612,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 			// Mana point
 			if (p_item->GetManaPoint() != -1)
 			{
-				wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_MP].GetString(), p_item->GetManaPoint());
+				SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_MP), p_item->GetManaPoint());
 				temp_string = sz_temp;
 				m_rep_string.push_back(temp_string);
 			}
@@ -1619,7 +1620,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 			// Attack range
 			if (p_item->GetReach() != -1 && p_item->GetReach() != 1)
 			{
-				wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_RANGE].GetString(), p_item->GetReach());
+				SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_RANGE), p_item->GetReach());
 				temp_string = sz_temp;
 				m_rep_string.push_back(temp_string);
 			}
@@ -1627,7 +1628,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 			// Bullet
 			if (p_item->GetMagazineSize() != -1)
 			{
-				wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_MAGAZINE_NUM].GetString(), p_item->GetMagazineSize());
+				SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_MAGAZINE_NUM), p_item->GetMagazineSize());
 				temp_string = sz_temp;
 				m_rep_string.push_back(temp_string);
 			}
@@ -1635,7 +1636,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 			// Pocket size
 			if (p_item->GetPocketNumber() != -1)
 			{
-				wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_POCKET_NUM].GetString(), p_item->GetPocketNumber());
+				SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_POCKET_NUM), p_item->GetPocketNumber());
 				temp_string = sz_temp;
 				m_rep_string.push_back(temp_string);
 			}
@@ -1699,7 +1700,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 						{
 							if(optionInfo.Part == g_pItemOptionTable->PART_DURABILITY)
 							{
-								sprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_OPTION].GetString(), pPartName, PlusPoint-100);
+								SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_OPTION), pPartName, PlusPoint-100);
 								strcat(sz_temp, "%");
 							}
 							else
@@ -1707,17 +1708,17 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 								optionInfo.Part >= ITEMOPTION_TABLE::PART_STR_TO_DEX &&
 								optionInfo.Part <= ITEMOPTION_TABLE::PART_INT_TO_DEX)
 							{
-								sprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_OPTION].GetString(), pPartName, PlusPoint);
+								SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_OPTION), pPartName, PlusPoint);
 								strcat(sz_temp, "%");
 							}
 							else
-								sprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_OPTION].GetString(), pPartName, PlusPoint);
+								SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_OPTION), pPartName, PlusPoint);
 							fOptionCheck=TRUE;							
 						} else
 						{
 							if(optionInfo.Part == g_pItemOptionTable->PART_DURABILITY)
 							{
-								sprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_OPTION_EMPTY].GetString(), pPartName, PlusPoint-100);
+								SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_OPTION_EMPTY), pPartName, PlusPoint-100);
 								strcat(sz_temp, "%");
 							}
 							else
@@ -1725,11 +1726,11 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 								optionInfo.Part >= ITEMOPTION_TABLE::PART_STR_TO_DEX &&
 								optionInfo.Part <= ITEMOPTION_TABLE::PART_INT_TO_DEX)
 							{
-								sprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_OPTION_EMPTY].GetString(), pPartName, PlusPoint);
+								SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_OPTION_EMPTY), pPartName, PlusPoint);
 								strcat(sz_temp, "%");
 							}
 							else
-								sprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_OPTION_EMPTY].GetString(), pPartName, PlusPoint);							
+								SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_OPTION_EMPTY), pPartName, PlusPoint);							
 						}					
 						temp_string=sz_temp;
 						m_rep_string.push_back(temp_string);							
@@ -1757,7 +1758,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 						{
 							if(optionInfo.Part == g_pItemOptionTable->PART_DURABILITY)
 							{
-								sprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_OPTION].GetString(), pPartName, PlusPoint-100);
+								SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_OPTION), pPartName, PlusPoint-100);
 								strcat(sz_temp, "%");
 							}
 							else
@@ -1765,17 +1766,17 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 								optionInfo.Part >= ITEMOPTION_TABLE::PART_STR_TO_DEX &&
 								optionInfo.Part <= ITEMOPTION_TABLE::PART_INT_TO_DEX)
 							{
-								sprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_OPTION].GetString(), pPartName, PlusPoint);
+								SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_OPTION), pPartName, PlusPoint);
 								strcat(sz_temp, "%");
 							}
 							else
-								sprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_OPTION].GetString(), pPartName, PlusPoint);
+								SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_OPTION), pPartName, PlusPoint);
 							fOptionCheck=TRUE;							
 						} else
 						{
 							if(optionInfo.Part == g_pItemOptionTable->PART_DURABILITY)
 							{
-								sprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_OPTION_EMPTY].GetString(), pPartName, PlusPoint-100);
+								SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_OPTION_EMPTY), pPartName, PlusPoint-100);
 								strcat(sz_temp, "%");
 							}
 							else
@@ -1783,11 +1784,11 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 								optionInfo.Part >= ITEMOPTION_TABLE::PART_STR_TO_DEX &&
 								optionInfo.Part <= ITEMOPTION_TABLE::PART_INT_TO_DEX)
 							{
-								sprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_OPTION_EMPTY].GetString(), pPartName, PlusPoint);
+								SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_OPTION_EMPTY), pPartName, PlusPoint);
 								strcat(sz_temp, "%");
 							}
 							else
-								sprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_OPTION_EMPTY].GetString(), pPartName, PlusPoint);							
+								SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_OPTION_EMPTY), pPartName, PlusPoint);							
 						}					
 						temp_string=sz_temp;
 						m_rep_string.push_back(temp_string);							
@@ -1820,8 +1821,8 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 					const std::list<TYPE_ITEM_OPTION> &DefaultOptionList = p_item->GetItemDefaultOptionList();
 					if(optionList.size() ==0 && DefaultOptionList.size() == 0)
 					{
-						sprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_CORE_ZAP_BLACK+p_AddItem->GetItemType()].GetString(), p_AddItem->GetGrade());
-						sprintf(sz_buf1, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_OPTION2].GetString(), sz_temp);
+						SafeFormat::Format(sz_temp, GetGameString(UI_STRING_CORE_ZAP_BLACK+p_AddItem->GetItemType()), p_AddItem->GetGrade());
+						SafeFormat::Format(sz_buf1, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_OPTION2), sz_temp);
 						temp_string=sz_buf1;
 						m_rep_string.push_back(temp_string);
 						
@@ -1830,20 +1831,20 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 					}
 					else
 					{
-						sprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_CORE_ZAP_BLACK+p_AddItem->GetItemType()].GetString(), p_AddItem->GetGrade());
-						sprintf(sz_buf1, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_OPTION_EMPTY2].GetString(), sz_temp);
+						SafeFormat::Format(sz_temp, GetGameString(UI_STRING_CORE_ZAP_BLACK+p_AddItem->GetItemType()), p_AddItem->GetGrade());
+						SafeFormat::Format(sz_buf1, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_OPTION_EMPTY2), sz_temp);
 						temp_string=sz_buf1;
 						m_rep_string.push_back(temp_string);
 					}					
 					DWORD TempColor = RGB_DARKGRAY;
 					if(gC_vs_ui.IsHasAllCoreZap())
 						TempColor = RGB_GREEN;
-					sprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_CORE_ZAP_REWARD_ALL_STAT].GetString(), 3);
-					sprintf(sz_buf1, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_OPTION_EMPTY2].GetString(), sz_temp);
+					SafeFormat::Format(sz_temp, GetGameString(UI_STRING_CORE_ZAP_REWARD_ALL_STAT), 3);
+					SafeFormat::Format(sz_buf1, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_OPTION_EMPTY2), sz_temp);
 					temp_string=sz_buf1;
 					m_rep_string.push_back(temp_string);
-					sprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_CORE_ZAP_REWARD_ALL_REG].GetString(), 9);
-					sprintf(sz_buf1, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_OPTION_EMPTY2].GetString(), sz_temp);
+					SafeFormat::Format(sz_temp, GetGameString(UI_STRING_CORE_ZAP_REWARD_ALL_REG), 9);
+					SafeFormat::Format(sz_buf1, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_OPTION_EMPTY2), sz_temp);
 					temp_string=sz_buf1;
 					m_rep_string.push_back(temp_string);
 					
@@ -1994,7 +1995,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 					
 				MString kkkstr = (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_PRICE];
 				const char *pkkkstr = kkkstr.GetString();
-				wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_PRICE].GetString(), sstr.c_str());
+				SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_PRICE), sstr.c_str());
 				temp_string = sz_temp;
 				m_rep_string.push_back(temp_string);
 			}

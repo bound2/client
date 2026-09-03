@@ -19,6 +19,7 @@
 
 #include "MItemOptionTable.h"
 #include "MGameStringTable.h"
+#include "SafeFormat.h"
 #include "SkinManager.h"
 
 //add by zdj
@@ -2516,9 +2517,9 @@ void C_VS_UI_NEWCHAR::Show()
 	else if ( g_LeftPremiumDays > 0 )
 	{
 		if(g_bFamily)
-			sprintf( szBuffer, (*g_pGameStringTable)[UI_STRING_MESSAGE_LEFT_FAMILY_DAYS].GetString(), g_LeftPremiumDays );
+			SafeFormat::Format(szBuffer, GetGameString(UI_STRING_MESSAGE_LEFT_FAMILY_DAYS), g_LeftPremiumDays );
 		else
-			sprintf( szBuffer, (*g_pGameStringTable)[UI_STRING_MESSAGE_LEFT_PREMIUM_DAYS].GetString(), g_LeftPremiumDays );
+			SafeFormat::Format(szBuffer, GetGameString(UI_STRING_MESSAGE_LEFT_PREMIUM_DAYS), g_LeftPremiumDays );
 	}
 	else
 	{
@@ -3512,9 +3513,9 @@ void C_VS_UI_CHAR_MANAGER::Show()
 	else if ( g_LeftPremiumDays > 0 )
 	{
 		if(g_bFamily)
-			sprintf( szBuffer, (*g_pGameStringTable)[UI_STRING_MESSAGE_LEFT_FAMILY_DAYS].GetString(), g_LeftPremiumDays );
+			SafeFormat::Format(szBuffer, GetGameString(UI_STRING_MESSAGE_LEFT_FAMILY_DAYS), g_LeftPremiumDays );
 		else
-			sprintf( szBuffer, (*g_pGameStringTable)[UI_STRING_MESSAGE_LEFT_PREMIUM_DAYS].GetString(), g_LeftPremiumDays );
+			SafeFormat::Format(szBuffer, GetGameString(UI_STRING_MESSAGE_LEFT_PREMIUM_DAYS), g_LeftPremiumDays );
 	}
 	else
 	{
@@ -4028,9 +4029,9 @@ void C_VS_UI_SERVER_SELECT::Show()
 	else if ( g_LeftPremiumDays > 0 )
 	{
 		if(g_bFamily)
-			sprintf( szBuffer, (*g_pGameStringTable)[UI_STRING_MESSAGE_LEFT_FAMILY_DAYS].GetString(), g_LeftPremiumDays );
+			SafeFormat::Format(szBuffer, GetGameString(UI_STRING_MESSAGE_LEFT_FAMILY_DAYS), g_LeftPremiumDays );
 		else
-			sprintf( szBuffer, (*g_pGameStringTable)[UI_STRING_MESSAGE_LEFT_PREMIUM_DAYS].GetString(), g_LeftPremiumDays );
+			SafeFormat::Format(szBuffer, GetGameString(UI_STRING_MESSAGE_LEFT_PREMIUM_DAYS), g_LeftPremiumDays );
 	}
 	else
 	{

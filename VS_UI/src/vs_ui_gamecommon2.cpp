@@ -20,6 +20,7 @@
 #include "UserInformation.h"
 #include "MItemOptionTable.h"
 #include "MGameStringTable.h"
+#include "SafeFormat.h"
 #include "KeyAccelerator.h"
 #include "ClientConfig.h"
 #include "MTimeItemManager.h"
@@ -241,13 +242,13 @@ void g_StartOustersDownSkill( int _x, int _y , int PriceRaito)
 
 	if(PriceRaito != 1)
 	{
-		wsprintf(szBuffer, (*g_pGameStringTable)[UI_STRING_MESSAGE_CONFIRM_DOWN_SKILL2].GetString(),
+		SafeFormat::Format(szBuffer, GetGameString(UI_STRING_MESSAGE_CONFIRM_DOWN_SKILL2),
 			(*g_pSkillInfoTable)[g_CurrentSkillID].GetHName(),
 			sstr.c_str() );		
 	}
 	else
 	{
-		wsprintf(szBuffer, (*g_pGameStringTable)[UI_STRING_MESSAGE_CONFIRM_DOWN_SKILL].GetString(),
+		SafeFormat::Format(szBuffer, GetGameString(UI_STRING_MESSAGE_CONFIRM_DOWN_SKILL),
 			(*g_pSkillInfoTable)[g_CurrentSkillID].GetHName(),
 			(*g_pSkillInfoTable)[g_CurrentSkillID].GetExpLevel(),
 			(*g_pSkillInfoTable)[g_CurrentSkillID].GetExpLevel()-1,
@@ -706,7 +707,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 				g_PrintColorStr(vx, strY, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
 				strY += line_gap;
 				
-				sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_ZONEINFO_XY].GetString(), tempItem->GetZoneX(), tempItem->GetZoneY());
+				SafeFormat::Format(sz_buf, GetGameString(UI_STRING_MESSAGE_ZONEINFO_XY), tempItem->GetZoneX(), tempItem->GetZoneY());
 				g_PrintColorStr(vx, strY, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
 				strY += line_gap;
 			}
@@ -847,28 +848,28 @@ void	C_VS_UI_ITEM_LIST::Show()
 			{
 				char tempDay[30] = {0,};
 				strcat(temp, " ");
-				wsprintf(tempDay, (*g_pGameStringTable)[UI_STRING_MESSAGE_DAY].GetString() , days );
+				SafeFormat::Format(tempDay, GetGameString(UI_STRING_MESSAGE_DAY), days );
 				strcat ( temp, tempDay );				
 			}
 			if(hours > 0|| bContinue)
 			{
 				char tempDay[30] = {0,};
 				strcat(temp, " ");
-				wsprintf(tempDay, (*g_pGameStringTable)[UI_STRING_MESSAGE_HOUR].GetString() , hours );
+				SafeFormat::Format(tempDay, GetGameString(UI_STRING_MESSAGE_HOUR), hours );
 				strcat ( temp, tempDay );				
 			}
 			if(minutes || bContinue)
 			{
 				char tempDay[30] = {0,};
 				strcat(temp, " ");
-				wsprintf(tempDay, (*g_pGameStringTable)[UI_STRING_MESSAGE_MINUTE].GetString() , minutes );
+				SafeFormat::Format(tempDay, GetGameString(UI_STRING_MESSAGE_MINUTE), minutes );
 				strcat ( temp, tempDay );				
 			}
 			if(seconds)
 			{
 				char tempDay[30] = {0,};
 				strcat(temp, " ");
-				wsprintf(tempDay, (*g_pGameStringTable)[UI_STRING_MESSAGE_SECOND].GetString() , seconds );
+				SafeFormat::Format(tempDay, GetGameString(UI_STRING_MESSAGE_SECOND), seconds );
 				strcat ( temp, tempDay );				
 			}
 			g_PrintColorStr(vx,strY, temp,gpC_base->m_item_desc_pi,RGB(255,255,255));
@@ -3357,7 +3358,7 @@ void	C_VS_UI_REMOVE_OPTION::Show()
 		case STATUS_QUESTION:
 			{
 				char sz_temp[100];
-				wsprintf( sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_SELECT_OPTION].GetString(), m_str_option[m_select_option].c_str() ); 
+				SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_SELECT_OPTION), m_str_option[m_select_option].c_str() ); 
 				g_PrintColorStrOut( x+w/2-g_GetStringWidth(sz_temp, gpC_base->m_dialog_msg_pi.hfont)/2, 
 									y+45, sz_temp, gpC_base->m_dialog_msg_pi, RGB_WHITE, RGB_BLACK);
 				g_PrintColorStrOut( x+w/2-g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_QUESTION_REMOVE_OPTION].GetString(), gpC_base->m_dialog_msg_pi.hfont)/2, 
@@ -4032,16 +4033,16 @@ void	C_VS_UI_OUSTERS_SKILL_INFO::Show()
 					{
 						g_PrintColorStr(x+40, y+142, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DOWN_SKILL].GetString(), gpC_base->m_chatting_pi, color);
 												
-						sprintf(szTemp,(*g_pGameStringTable)[UI_STRING_MESSAGE_WITHDRAW_POINT].GetString(), sInfo.LevelUpPoint );
+						SafeFormat::Format(szTemp, GetGameString(UI_STRING_MESSAGE_WITHDRAW_POINT), sInfo.LevelUpPoint );
 						g_PrintColorStr(x+40, y+158, szTemp, gpC_base->m_chatting_pi, RGB_WHITE);
 					} else
 					{
 						g_PrintColorStr(x+40, y+142, (*g_pGameStringTable)[UI_STRING_MESSAGE_SKILL_LEVEL_UP].GetString(), gpC_base->m_chatting_pi, color);
 						
-						sprintf(szTemp,(*g_pGameStringTable)[UI_STRING_MESSAGE_REQUIRE_SKILL_POINT].GetString(), sInfo.LevelUpPoint );
+						SafeFormat::Format(szTemp, GetGameString(UI_STRING_MESSAGE_REQUIRE_SKILL_POINT), sInfo.LevelUpPoint );
 						g_PrintColorStr(x+40, y+158, szTemp, gpC_base->m_chatting_pi, RGB_WHITE);
 					}
-					sprintf(szTemp, (*g_pGameStringTable)[UI_STRING_MESSAGE_SKILL_LEVEL].GetString(), exp_level);
+					SafeFormat::Format(szTemp, GetGameString(UI_STRING_MESSAGE_SKILL_LEVEL), exp_level);
 				}
 			break;
 
@@ -4051,12 +4052,12 @@ void	C_VS_UI_OUSTERS_SKILL_INFO::Show()
 				else
 					color = RGB_GRAY;
 
-				sprintf(szTemp, (*g_pGameStringTable)[UI_STRING_MESSAGE_SKILL_LEVEL].GetString(), exp_level);
+				SafeFormat::Format(szTemp, GetGameString(UI_STRING_MESSAGE_SKILL_LEVEL), exp_level);
 				g_PrintColorStr(x+40, y+140, (*g_pGameStringTable)[UI_STRING_MESSAGE_LEARN_SKILL].GetString(), gpC_base->m_chatting_pi, color);
-				sprintf(szTemp,(*g_pGameStringTable)[UI_STRING_MESSAGE_REQUIRE_SKILL_POINT].GetString(), sInfo.SkillPoint );
+				SafeFormat::Format(szTemp, GetGameString(UI_STRING_MESSAGE_REQUIRE_SKILL_POINT), sInfo.SkillPoint );
 				g_PrintColorStr(x+40, y+158, szTemp, gpC_base->m_chatting_pi, color);
 
-				sprintf(szTemp, (*g_pGameStringTable)[UI_STRING_MESSAGE_SKILL_LEVEL].GetString(), exp_level);
+				SafeFormat::Format(szTemp, GetGameString(UI_STRING_MESSAGE_SKILL_LEVEL), exp_level);
 				break;
 		}
 
@@ -4066,7 +4067,7 @@ void	C_VS_UI_OUSTERS_SKILL_INFO::Show()
 		int line_gap = 0;
 		if(sInfo.GetLearnLevel()>1)
 		{
-			sprintf(szTemp, (*g_pGameStringTable)[UI_STRING_LEARN_SKILL_LEVEL].GetString(), sInfo.GetLearnLevel());
+			SafeFormat::Format(szTemp, GetGameString(UI_STRING_LEARN_SKILL_LEVEL), sInfo.GetLearnLevel());
 			g_PrintColorStr(x+100, y+82, szTemp, gpC_base->m_chatting_pi, color);
 			line_gap += 16;
 		}
@@ -4080,7 +4081,7 @@ void	C_VS_UI_OUSTERS_SKILL_INFO::Show()
 			)
 		{
 			int elemental_point[5] = { sInfo.Fire, sInfo.Water, sInfo.Earth, sInfo.Wind, sInfo.Sum };			
-			sprintf(szTemp, (*g_pGameStringTable)[UI_STRING_MESSAGE_REQUIRE_ELEMENTAL_LEVEL].GetString(), (*g_pGameStringTable)[g_ELEMENTAL_STRING_ID[sInfo.ElementalDomain]].GetString(), elemental_point[sInfo.ElementalDomain]);
+			SafeFormat::Format(szTemp, GetGameString(UI_STRING_MESSAGE_REQUIRE_ELEMENTAL_LEVEL), (*g_pGameStringTable)[g_ELEMENTAL_STRING_ID[sInfo.ElementalDomain]].GetString(), elemental_point[sInfo.ElementalDomain]);
 			g_PrintColorStr(x+100, y+82+line_gap, szTemp, gpC_base->m_chatting_pi, g_ELEMENTAL_COLOR[sInfo.ElementalDomain]);
 			line_gap += 16;
 		}
@@ -4732,7 +4733,7 @@ bool	C_VS_UI_HORN::MouseControl(UINT message, int _x, int _y)
 					
 					flag_string.sz_main_str = g_pZoneTable->Get(itr->zone_id)->Name.GetString();
 					flag_string.sz_sub_str = flag_temp;
-					wsprintf(flag_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_ZONEINFO_XY].GetString(), itr->portal_x, itr->portal_y);
+					SafeFormat::Format(flag_temp, GetGameString(UI_STRING_MESSAGE_ZONEINFO_XY), itr->portal_x, itr->portal_y);
 					
 					g_descriptor_manager.Set(DID_HELP, itr->x+x+m_MapX, itr->y+y-gpC_global_resource->m_pC_info_spk->GetHeight(C_GLOBAL_RESOURCE::OUSTERS_HORN)+5+m_MapY, (void *)&flag_string);
 					
@@ -8227,7 +8228,7 @@ void	C_VS_UI_CRAZY_MINE::Show()
 			g_PrintColorStrOut(x+180, y+170, szTemp,gpC_base->m_item_name_pi, RGB_WHITE,RGB_RED);				
 		}
 
-		wsprintf(szTemp,(*g_pGameStringTable)[STRING_MESSAGE_SEARCHING_MINE].GetString(),m_MineCount,m_FlagCount);
+		SafeFormat::Format(szTemp, GetGameString(STRING_MESSAGE_SEARCHING_MINE),m_MineCount,m_FlagCount);
 		g_PrintColorStrOut(x+20, y+205, szTemp, gpC_base->m_item_desc_pi, RGB_WHITE, RGB_BLACK);
 		g_FL2_ReleaseDC();
 	}
@@ -9278,7 +9279,7 @@ bool	C_VS_UI_STATUS_CTF::MouseControl(UINT message, int _x, int _y)
 						memset( szBuffer, 0, 256 );
 						strcat( szBuffer, (*g_pGameStringTable)[RaceString[i]].GetString() );
 						strcat( szBuffer, " ");
-						wsprintf( szTemp, (*g_pGameStringTable)[UI_STRING_MESSAGE_GET_EVENT_FLAG_STATUS].GetString(), m_num_flag[i] );
+						SafeFormat::Format(szTemp, GetGameString(UI_STRING_MESSAGE_GET_EVENT_FLAG_STATUS), m_num_flag[i] );
 						strcat( szBuffer, szTemp );
 						g_descriptor_manager.Set(DID_INFO, x+_x, y+_y, (void *)szBuffer,0,0);
 						break;
@@ -9949,7 +9950,7 @@ bool	C_VS_UI_PET_INFO::MouseControl(UINT message, int _x, int _y)
 				strcat( str[0], sztemp );
 
 				int goal_exp = g_pExperienceTable->GetPetExp(m_PetInfo.LEVEL).GoalExp;
-				wsprintf(str[1], (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW].GetString(), g_GetNumberString(m_PetInfo.EXP_REMAIN).c_str(), g_GetNumberString((goal_exp - m_PetInfo.EXP_REMAIN)*100/max(1, (goal_exp))).c_str());
+				SafeFormat::Format(str[1], GetGameString(UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW), g_GetNumberString(m_PetInfo.EXP_REMAIN).c_str(), g_GetNumberString((goal_exp - m_PetInfo.EXP_REMAIN)*100/max(1, (goal_exp))).c_str());
 				
 				g_descriptor_manager.Set(DID_STRINGS,x+_x,y+_y,(void*)pstr,2);
 			}
@@ -10195,14 +10196,14 @@ void	C_VS_UI_PET_INFO::Show()
 		g_PrintColorStr(hp_x, hpday_y-15, (*g_pGameStringTable)[UI_STRING_MESSAGE_PET_DESC_DURABILITY_2].GetString(), gpC_base->m_chatting_pi, ITEM_DESC_RGB);
 		
 		// hp
-		sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_DAY].GetString(), hpday);
+		SafeFormat::Format(sz_buf, GetGameString(UI_STRING_MESSAGE_DAY), hpday);
 		g_PrintColorStrOut(hp_x+m_pC_spk.GetWidth(HP_DAY_BACK)/2-g_GetStringWidth(sz_buf, gpC_base->m_chatting_pi.hfont)/2, hpday_y+2, sz_buf, gpC_base->m_chatting_pi, RGB_WHITE, RGB_BLACK);
 
 		std::string timeString;
-		sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_HOUR].GetString(), hptime/60);
+		SafeFormat::Format(sz_buf, GetGameString(UI_STRING_MESSAGE_HOUR), hptime/60);
 		timeString += sz_buf;
 		timeString += " ";
-		sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_MINUTE].GetString(), hptime%60);
+		SafeFormat::Format(sz_buf, GetGameString(UI_STRING_MESSAGE_MINUTE), hptime%60);
 		timeString += sz_buf;
 		g_PrintColorStrOut(hp_x+m_pC_spk.GetWidth(HP_TIME_BACK)/2-g_GetStringWidth(timeString.c_str(), gpC_base->m_chatting_pi.hfont)/2, hptime_y+2, timeString.c_str(), gpC_base->m_chatting_pi, RGB_WHITE, RGB_BLACK);
 
@@ -16046,12 +16047,13 @@ void	C_VS_UI_QUEST_MISSION::Show()
 				}
 				// The mission title carries the placeholders, so it is expanded on its
 				// own; the format below is the game string table entry, which comes from
-				// Data/Info/String.inf and is gated only by the load-time sanitiser.
-				// GetGameString() is used because GetString() returns NULL for an entry
-				// the file left empty, and a NULL format reaches the UCRT invalid
-				// parameter handler.
+				// Data/Info/String.inf. It was bounded but still a data-file format
+				// with arguments, so the entry's specifier count and the two arguments
+				// here were only ever assumed to agree - which is what SafeFormat
+				// checks. It is also the site ratchet R7 could not see until its
+				// review round, because the pattern wanted the format at argument two.
 				g_ExpandGQuestMissionTitle(szString, sizeof(szString), TempInfo->szMissionTitle.c_str(), TempInfo->m_StrArg.c_str(), TempValue);
-				snprintf(szString2, sizeof(szString2), GetGameString(UI_STRING_GQUEST_MISSION), i+1, szString);
+				SafeFormat::Format(szString2, GetGameString(UI_STRING_GQUEST_MISSION), i+1, szString);
 				if(strlen(szString2)>36)
 				{
 					if(i == m_SelectPos)

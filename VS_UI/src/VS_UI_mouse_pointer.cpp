@@ -10,6 +10,7 @@
 #include "MZoneTable.h"
 
 #include "MGameStringTable.h"
+#include "SafeFormat.h"
 
 /*-----------------------------------------------------------------------------
   Gloabls
@@ -335,7 +336,7 @@ void C_VS_UI_MOUSE_POINTER::Show()
 					if(m_portal_x != -1)
 					{
 						char sz_temp[50];
-						wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_ZONEINFO_XY].GetString(), m_portal_x, m_portal_y);
+						SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_ZONEINFO_XY), m_portal_x, m_portal_y);
 						g_PrintColorStr(rect.left +5, rect.top +6+(g_GetStringHeight(sz_temp, gpC_base->m_info_pi.hfont))*(m_owner_string.size()?2:1), sz_temp, gpC_base->m_info_pi, RGB(255,200,255));
 					}
 

@@ -11,6 +11,7 @@
 #include "VS_UI.h"
 #include "ExperienceTable.h"
 #include "MGameStringTable.h"
+#include "SafeFormat.h"
 #include "UserInformation.h"
 #include "MZoneTable.h"
 #include "SystemAvailabilities.h"
@@ -2504,7 +2505,7 @@ bool	C_VS_UI_SLAYER_PORTAL::MouseControl(UINT message, int _x, int _y)
 
 				flag_string.sz_main_str = g_pZoneTable->Get(m_flag[m_map][flag].zone_id)->Name.GetString();
 				flag_string.sz_sub_str = flag_temp;
-				wsprintf(flag_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_ZONEINFO_XY].GetString(), m_flag[m_map][flag].portal_x, m_flag[m_map][flag].portal_y);
+				SafeFormat::Format(flag_temp, GetGameString(UI_STRING_MESSAGE_ZONEINFO_XY), m_flag[m_map][flag].portal_x, m_flag[m_map][flag].portal_y);
 
 				g_descriptor_manager.Set(DID_HELP, m_flag[m_map][flag].x+x, m_flag[m_map][flag].y+y-m_etc_spk.GetHeight(FLAG)-3, (void *)&flag_string);
 			}
