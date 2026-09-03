@@ -2910,7 +2910,7 @@ static void	PlayItemSound(TYPE_SOUNDID soundID)
 	PlaySound(soundID);
 }
 
-static const MItemHost	s_ItemHost = { &g_CurrentFrame, ItemDropFrameCount, RefreshAffect, PlayItemSound };
+static const MItemHost	s_ItemHost = { &g_CurrentFrame, ItemDropFrameCount, RefreshAffect, PlayItemSound, &g_CurrentTime };
 
 //-----------------------------------------------------------------------------
 // Init GameObject

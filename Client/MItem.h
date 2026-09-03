@@ -74,15 +74,16 @@ class MItem;
 //----------------------------------------------------------------------
 // MItemHost - what MItem needs from the executable (docs/RESTRUCTURING.md
 // task 4.4). The item model compiles into gamemodel, which cannot see
-// the animation clock, the top view's item-drop frame pack or the
-// player, so the executable installs these once at start-up
-// (GameInit.cpp); a test binary installs its own, or none.
+// the two clocks, the top view's item-drop frame pack or the player,
+// so the executable installs these once at start-up (GameInit.cpp); a
+// test binary installs its own, or none.
 //----------------------------------------------------------------------
 struct MItemHost {
 	const DWORD*	pCurrentFrame;							// the animation clock the colour cycles follow
 	int				(*DropFrameCount)(TYPE_FRAMEID dropID);	// frames in the drop animation of a drop frame id
 	void			(*RefreshAffect)(MItem* pItem);			// the player re-evaluates whether it can use the item (containers on add, a pet before its colour is read)
 	void			(*PlayItemSound)(TYPE_SOUNDID soundID);	// the inventory sound an item makes when it lands in a container
+	const DWORD*	pCurrentTime;							// the millisecond clock the trade manager's accept delay runs on; NULL means no delay
 };
 
 
@@ -433,6 +434,8 @@ class MItem : public MObject, public CAnimationFrame {
 		// The host's services, safe to call without one (a test binary).
 		static void				RefreshAffect(MItem* pItem)		{ if (s_pHost!=NULL) s_pHost->RefreshAffect(pItem); }
 		static void				PlayItemSound(TYPE_SOUNDID soundID)	{ if (s_pHost!=NULL) s_pHost->PlayItemSound(soundID); }
+		// The executable's millisecond clock; NULL without a host, or with one that carries none.
+		static const DWORD*		Clock()							{ return s_pHost!=NULL ? s_pHost->pCurrentTime : NULL; }
 		BOOL		IsDropping() const		{ return m_bDropping; }
 		int			GetDropHeight() const	{ return s_DropHeight[m_DropCount]; }
 		void		NextDropFrame();		

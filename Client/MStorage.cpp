@@ -193,7 +193,7 @@ MStorage::SetCurrent(unsigned int n)
 	m_CurrentStorage = n;
 
 	//------------------------------------------------------
-	// 사용 가능 여부 체크
+	// Can the player use them?
 	//------------------------------------------------------
 	for (int i=0; i<STORAGE_SLOT; i++)
 	{

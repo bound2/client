@@ -88,6 +88,15 @@ Client/MShopShelf.cpp
 Client/MShopShelf.h
 Client/MGameDef.h
 
+# Trade (task 4.2, second slice): the two-inventory exchange over the
+# containers and the money manager, and the size-ordered item map it
+# packs with; its one reach, the accept-delay clock, is installed by the
+# executable.
+Client/MTradeManager.cpp
+Client/MTradeManager.h
+Client/MSortedItemManager.cpp
+Client/MSortedItemManager.h
+
 # The seams MItem reads (task 4.4): the user's display settings (the
 # gore level picks the skull names), the client configuration (the
 # colour-set bases) and the timed-item register (quest items). All

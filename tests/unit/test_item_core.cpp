@@ -113,9 +113,9 @@ int		s_RefreshCalls = 0;
 
 int		DropFrameCount(TYPE_FRAMEID)	{ return s_DropFrames; }
 void	RefreshAffect(MItem*)			{ s_RefreshCalls++; }
-void	PlayItemSound(TYPE_SOUNDID)	{}
+void	PlayItemSound(TYPE_SOUNDID)		{}
 
-const MItemHost	s_Host = { &s_Frame, DropFrameCount, RefreshAffect, PlayItemSound };
+const MItemHost	s_Host = { &s_Frame, DropFrameCount, RefreshAffect, PlayItemSound, NULL };
 
 void	InstallHost()
 {
@@ -149,6 +149,12 @@ TEST(ItemCore, FreshItemStartsUnoptionedUndroppedAndUncoloured)
 	CHECK_EQ(0, (int)item.GetEnchantLevel());
 	CHECK_EQ(0xFFFF, (int)item.GetItemColorSet());
 	CHECK_EQ(0, item.IsQuestItem());
+	// Never placed, never worn, never offered: the trade manager
+	// deletes every inventory item whose flag reads true.
+	CHECK_EQ(0, (int)item.GetGridX());
+	CHECK_EQ(0, (int)item.GetGridY());
+	CHECK_EQ(0, (int)item.GetCurrentDurability());
+	CHECK_EQ(0, (int)item.IsTrade());
 	CHECK(MItem::GetHost() == NULL);
 }
 

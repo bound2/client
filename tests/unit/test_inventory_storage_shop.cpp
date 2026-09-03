@@ -46,7 +46,7 @@ int		DropFrameCount(TYPE_FRAMEID)		{ return 0; }
 void	RefreshAffect(MItem* pItem)			{ s_Refreshed.push_back(pItem); }
 void	PlayItemSound(TYPE_SOUNDID sound)	{ s_Sounds.push_back(sound); }
 
-const MItemHost	s_Host = { &s_Frame, DropFrameCount, RefreshAffect, PlayItemSound };
+const MItemHost	s_Host = { &s_Frame, DropFrameCount, RefreshAffect, PlayItemSound, NULL };
 
 struct ContainerWorld
 {
@@ -60,12 +60,14 @@ struct ContainerWorld
 		g_pItemTable->Init(MAX_ITEM_CLASS);
 		g_pItemTable->InitClass(ITEM_CLASS_SWORD, 2);
 		(*g_pItemTable)[ITEM_CLASS_SWORD][0].SetGrid(2, 1);
-		(*g_pItemTable)[ITEM_CLASS_SWORD][0].SetSoundID(71, 71, 71, 71);	// inventory sound
+		// (tile, inventory, gear, use): the slots differ, so a container
+		// playing any slot but the inventory one fails the sound checks.
+		(*g_pItemTable)[ITEM_CLASS_SWORD][0].SetSoundID(170, 71, 270, 370);
 		(*g_pItemTable)[ITEM_CLASS_SWORD][1].SetGrid(1, 1);
-		(*g_pItemTable)[ITEM_CLASS_SWORD][1].SetSoundID(72, 72, 72, 72);
+		(*g_pItemTable)[ITEM_CLASS_SWORD][1].SetSoundID(171, 72, 271, 371);
 		g_pItemTable->InitClass(ITEM_CLASS_POTION, 1);
 		(*g_pItemTable)[ITEM_CLASS_POTION][0].SetGrid(1, 1);
-		(*g_pItemTable)[ITEM_CLASS_POTION][0].SetSoundID(73, 73, 73, 73);
+		(*g_pItemTable)[ITEM_CLASS_POTION][0].SetSoundID(172, 73, 272, 372);
 
 		g_pItemOptionTable = new ITEMOPTION_TABLE;
 		g_pItemOptionTable->Init(1);
@@ -386,7 +388,6 @@ TEST(ShopShelf, FillsTheFirstEmptySlotAndReplacesByDeleting)
 	shelf.DeleteItem(SHOP_SHELF_SLOT);
 
 	// A full shelf takes nothing more.
-	std::vector<Sword*> fill;
 	for (unsigned int i = 0; i < SHOP_SHELF_SLOT; i++)
 	{
 		Sword* s = new Sword(10 + i, 1);

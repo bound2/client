@@ -56,10 +56,11 @@ the output and hides all progress.
 
 Only code compiled into a **static library**: `basic`, `SpriteLib`, `dxlib`,
 `gamemodel` (the pure data tables, the item table, the money manager, the item
-core - `MItem`, the gear families, the item managers and the containers
-(inventory, storage, shop shelves), behind the `MItemHost` the executable
-installs - with the user, config and timed-item loaders it reads, and their
-string/log support, membership in `tests/arch/gamemodel_files.txt` —
+core - `MItem`, the gear families, the item managers, the containers
+(inventory, storage, shop shelves) and the trade manager over them, behind the
+`MItemHost` the executable installs - with the user, config and timed-item
+loaders it reads, and their string/log support, membership in
+`tests/arch/gamemodel_files.txt` —
 `docs/RESTRUCTURING.md` tasks 4.1, 4.2, 4.3 and 4.4),
 `framelib`, `TextSystem`, `VS_UI`, and `packetwire` — the whole wire layer: socket
 streams, the encrypter, the info classes, every packet class in every direction and
@@ -137,7 +138,7 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **235 tests, 3,810 checks, 0 failed** in both trees.
+baseline: **241 tests, 3,903 checks, 0 failed** in both trees.
 
 ## Traps
 
@@ -187,7 +188,7 @@ baseline: **235 tests, 3,810 checks, 0 failed** in both trees.
   is the model. A `fix:` commit also carries a `Test path:` line (`lib + test`,
   `moved, then fixed` or `exempt` - `docs/RESTRUCTURING.md` task 3.1); the
   `tools/git-hooks/commit-msg` hook refuses one without, after
-  `git config core.hooksPath tools/git-hooks` once per clone. Trailer: `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`.
+  `git config core.hooksPath tools/git-hooks` once per clone. Trailer: `Co-Authored-By: <the authoring model> <noreply@anthropic.com>`, e.g. `Claude Fable 5.1`.
 
 ## Layout
 
