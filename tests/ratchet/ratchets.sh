@@ -62,6 +62,9 @@ check () {
 # relative VS_UI_CLIENT_SOURCES list never matched the exe glob's
 # absolute paths in REMOVE_ITEM, so they compiled into both (the
 # LNK4217 trap); the membership removal is absolute and asserted.
+# History: 493 = 495 - 2 (task 5.1: Player.cpp and DatagramSocket.cpp
+# moved into packetwire once the debug facilities stopped gating the
+# wire layer's include rules - the logging header is in basic/ now).
 # History: 495 = 497 - 3 + 1 (task 4.4's fourth slice: MSkillManager.cpp,
 # MSkillInfoTable.cpp and SkillDef.cpp moved into gamemodel; the
 # player-facing half split out of the first, MSkillAvailable.cpp, is a
@@ -95,7 +98,7 @@ check () {
 # before (0 net). 992 = 993 - 1 (task 2.2's PacketHandlerRegistry.cpp,
 # a recorded +1, offset by the finished migration deleting
 # CGHandlersStub.cpp).
-R1_BASELINE=495
+R1_BASELINE=493
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do

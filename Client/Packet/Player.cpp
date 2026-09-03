@@ -16,7 +16,7 @@
 #include "Packet.h"
 #include "PacketDispatcher.h"
 #include "PacketFactoryManager.h"
-#include "DebugInfo.h"
+#include "DebugLog.h"
 
 void	SendBugReport(const char *bug, ...);
 

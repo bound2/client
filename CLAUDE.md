@@ -62,14 +62,19 @@ three races wear and the shop, behind the `MItemHost` the executable installs,
 the price manager behind its `MPriceHost`, and the skill core (the info
 table, the skill set, the domains and their tree; what the player can use
 right now stays executable-side) - with the user, config and
-timed-item loaders it reads, and their string/log support, membership in
+timed-item loaders it reads, and their string support, membership in
 `tests/arch/gamemodel_files.txt` —
 `docs/RESTRUCTURING.md` tasks 4.1, 4.2, 4.3 and 4.4),
 `framelib`, `TextSystem`, `VS_UI`, and `packetwire` — the whole wire layer: socket
-streams, the encrypter, the info classes, every packet class in every direction and
-the factory/validator tables (`docs/RESTRUCTURING.md` tasks 1.1 and 2.4; membership
-is `tests/arch/packetwire_files.txt`, read by CMake, the include checker and the
-ratchet script). Game logic compiled straight into the `DarkEden` executable —
+streams (datagram ones too) and the `Player` base under both player classes, the
+encrypter, the info classes, every packet class in every direction and
+the factory/validator tables (`docs/RESTRUCTURING.md` tasks 1.1, 2.4 and 5.1;
+membership is `tests/arch/packetwire_files.txt`, read by CMake, the include checker
+and the ratchet script, and `tests/arch/packetwire_holdouts.txt` says what keeps
+each of the remaining six out). The logging facility (`DebugLog.h`) is in
+`basic`, so every library may log; `Client/DebugInfo.h` is the executable's
+front end to it and pulls in `MinTr.h`, which is why the libraries may not
+include it. Game logic compiled straight into the `DarkEden` executable —
 including the packet *handlers* under `Client/PacketHandler/` — cannot be linked into
 a test binary. That is a structural limit, and it is the single biggest constraint on
 how work gets verified here.
@@ -141,7 +146,7 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **283 tests, 4,401 checks, 0 failed** in both trees.
+baseline: **286 tests, 4,415 checks, 0 failed** in both trees.
 
 ## Traps
 

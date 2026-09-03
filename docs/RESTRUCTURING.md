@@ -116,7 +116,7 @@ an unrecorded drop, so tightening lands in the same commit as the progress.
 
 | # | Metric | Baseline | Command |
 |---|--------|---------:|---------|
-| R1 | Translation units compiled directly into the DarkEden target | **495** (497 before 4.4's fourth slice moved `MSkillManager.cpp`, `MSkillInfoTable.cpp` and `SkillDef.cpp` into `gamemodel` and split the player-facing half out as `MSkillAvailable.cpp`, −3 +1; 502 before 4.4's third slice moved `MPlayerGear.cpp`, the three race gears and `MShop.cpp` into `gamemodel`; 503 before 4.2's third slice moved `MPriceManager.cpp` into `gamemodel`; 505 before 4.2's second slice moved `MTradeManager.cpp` and `MSortedItemManager.cpp` into `gamemodel`; 508 before 4.3's second slice moved `MInventory.cpp`, `MStorage.cpp` and `MShopShelf.cpp` into `gamemodel`; 512 before 4.3's first slice moved the three item managers and `MQuickSlot.cpp` into `gamemodel`; 515 before 4.4's second slice moved `MItem.cpp`, `MObject.cpp`, `UserInformation.cpp`, `ClientConfig.cpp` and `MTimeItemManager.cpp` into `gamemodel` and split their executable halves out as `MItemUse.cpp` and `MObjectScreen.cpp`, +2 −5; 516 before 5.2 deleted the dead `MitemTableInit.cpp`; 517 before 4.4's first slice moved `MItemTable.cpp`; 518 before 4.2 moved `MMoneyManager.cpp`, another double-compiled VS_UI entry; 528 before task 4.1's `gamemodel` took its ten members out — the four support sources, and the six tables that the relative `VS_UI_CLIENT_SOURCES` list had never actually removed from the exe glob, so they compiled into both VS_UI and the executable — as the 36 files still on that list do; 529 before task 2.5 deleted the dead `CRRequest2Handler.cpp`; 992 before task 2.4 moved the 465 packet/table/info sources into `packetwire`, +1 for the split-out `GCExchangeBuyHandler.cpp`; 1,044 before task 1.1; the task-2.2 composition root `PacketHandlerRegistry.cpp` was a recorded +1, offset when finishing the migration deleted `CGHandlersStub.cpp`) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` — `ratchets.sh` reads the generated vcxproj, preferring the ctest run's own build dir; on generators with no vcxproj it reports SKIP, not PASS |
+| R1 | Translation units compiled directly into the DarkEden target | **493** (495 before task 5.1 moved `Player.cpp` and `DatagramSocket.cpp` into `packetwire`, the two holdouts the debug facilities were the only thing keeping out; 497 before 4.4's fourth slice moved `MSkillManager.cpp`, `MSkillInfoTable.cpp` and `SkillDef.cpp` into `gamemodel` and split the player-facing half out as `MSkillAvailable.cpp`, −3 +1; 502 before 4.4's third slice moved `MPlayerGear.cpp`, the three race gears and `MShop.cpp` into `gamemodel`; 503 before 4.2's third slice moved `MPriceManager.cpp` into `gamemodel`; 505 before 4.2's second slice moved `MTradeManager.cpp` and `MSortedItemManager.cpp` into `gamemodel`; 508 before 4.3's second slice moved `MInventory.cpp`, `MStorage.cpp` and `MShopShelf.cpp` into `gamemodel`; 512 before 4.3's first slice moved the three item managers and `MQuickSlot.cpp` into `gamemodel`; 515 before 4.4's second slice moved `MItem.cpp`, `MObject.cpp`, `UserInformation.cpp`, `ClientConfig.cpp` and `MTimeItemManager.cpp` into `gamemodel` and split their executable halves out as `MItemUse.cpp` and `MObjectScreen.cpp`, +2 −5; 516 before 5.2 deleted the dead `MitemTableInit.cpp`; 517 before 4.4's first slice moved `MItemTable.cpp`; 518 before 4.2 moved `MMoneyManager.cpp`, another double-compiled VS_UI entry; 528 before task 4.1's `gamemodel` took its ten members out — the four support sources, and the six tables that the relative `VS_UI_CLIENT_SOURCES` list had never actually removed from the exe glob, so they compiled into both VS_UI and the executable — as the 36 files still on that list do; 529 before task 2.5 deleted the dead `CRRequest2Handler.cpp`; 992 before task 2.4 moved the 465 packet/table/info sources into `packetwire`, +1 for the split-out `GCExchangeBuyHandler.cpp`; 1,044 before task 1.1; the task-2.2 composition root `PacketHandlerRegistry.cpp` was a recorded +1, offset when finishing the migration deleted `CGHandlersStub.cpp`) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` — `ratchets.sh` reads the generated vcxproj, preferring the ctest run's own build dir; on generators with no vcxproj it reports SKIP, not PASS |
 | R2 | Packet `.cpp` files still defining a packet-style `::execute(Player` | **0** (448 → 432 in slice 1 → 0 when 2.2/2.3 finished; regex refined at 0 to stop matching comments and the in-file handler body in `GCExchangeBuy.cpp`) | `grep -rlE '^void\s+\w+::execute\s*\(\s*Player' Client/Packet/{Gpackets,Cpackets,Lpackets,Rpackets,Upackets} --include='*.cpp' \| grep -v Handler \| wc -l` |
 | R3 | Live `sprintf`/`strcpy`/`strcat` lines under `Client/Packet` **and `Client/PacketHandler`** | 46 (unchanged by task 2.4, which widened the scope to follow the handlers out of `Client/Packet`; 61 at first measurement — the 2026-09-01 adversarial review showed a quarter of that was commented-out code, so the measurement now excludes `//` matches) | see `ratchets.sh` — the grep excludes comment-prefixed matches |
 | R4 | Library-compiled `.cpp` files referencing `g_p*` client globals **no library file defines** | **25** (27 before 4.4's fourth slice moved the skill core into `gamemodel` — a reclassification again: `VS_UI_SKILL_VIEW.cpp` and `VS_UI_skill_tree.cpp` reached past the libraries only for `g_pSkillInfoTable`, `g_pSkillManager` and `g_pSkillAvailable`, which `MSkillManager.cpp` defines; 28 before 4.4's third slice moved the gear into `gamemodel` — a reclassification: `VS_UI_Game.cpp`'s only reaches past the libraries were `g_pSlayerGear`, `g_pVampireGear` and `g_pOustersGear`, which the gear sources define; 35 before 4.4's second slice — a reclassification again, 35 + 1 − 8: the subtraction became library-wide, so a library file reading a global another library file defines is no longer a seam; `MItem.cpp` joined reading `gamemodel`'s own tables, +1 under the old per-file rule, and the union rule excludes it with seven earlier members — `Datagram.cpp` reading `packetwire`'s factory manager, and six `VS_UI` sources whose only reaches are `gamemodel`'s tables, `packetwire`'s `g_pFileDef` or `VS_UI`'s own globals; 59 before task 4.0 — a reclassification, not seam-cutting: the 36 `VS_UI_CLIENT_SOURCES` files stopped being library-compiled, so the 24 of them that reach globals are executable debt now, counted by R1 and outside this ratchet; 61 before task 4.1 cut the two `g_pFileDef` seams in `MGameStringTable` and `SystemAvailabilities` and added the `gamemodel` membership file, whose four new members reference no game global; 81 before task 2.4 grew the membership from 52 to 518 files; the number fell because the measurement stopped counting a file's references to globals it defines — the packet tables own `g_pPacketFactoryManager`/`g_pPacketValidator` — and the two dead server-only bodies that reached game globals were deleted; 83 at first measurement, before two never-compiled files were filtered) | `ratchets.sh` computes it over the library dirs (minus CMake-excluded files) plus the `packetwire` and `gamemodel` membership files |
@@ -1604,9 +1604,75 @@ starting each — the scan is one grep, and the ranking below is from a
 
 - [ ] **5.1 Split the debug facilities.** A lib-safe logging header (the
   `DebugLog.h` system already exists — finish the migration for lib code)
-  so `DebugInfo.h`/`MinTr.h` stop gating membership (unblocks
-  `SocketAPI.cpp`, `DatagramSocket.cpp`, `NPCInfo.cpp`).
-  > **Status:** not started.
+  so `DebugInfo.h`/`MinTr.h` stop gating membership. The task named
+  `SocketAPI.cpp`, `DatagramSocket.cpp` and `NPCInfo.cpp`; by the time it
+  came up the first and third were already packetwire members, and the
+  real list was `tests/arch/packetwire_holdouts.txt`.
+  > **Status:** first slice done (2026-09-03,
+  > `restructuring/lib-safe-debug`; live verification gates the merge).
+  > **What actually gated the wire layer** was one line: `DebugInfo.h`
+  > opens with an unconditional `#include "MinTr.h"` on Windows, above
+  > its own include guard, and every one of the eight holdouts included
+  > `DebugInfo.h`. Past that line the header is nothing — the block that
+  > would define `OUTPUT_DEBUG` is commented out, so the `#else` branch
+  > is what every build takes, and it is `#include "DebugLog.h"` plus two
+  > no-op macros. Not one holdout uses `DEBUG_MESSAGE`, `DEBUG_CMD` or
+  > `DEBUG_NEW`; all eight use only the `DEBUG_ADD` family, which
+  > `DebugLog.h` supplies. So the eight now include `DebugLog.h`
+  > directly.
+  > **The logging facility moved to `basic/`.** It was
+  > `Client/DebugLog.cpp/.h` and a *gamemodel* member, which put it
+  > above packetwire in the link order and outside W1's allowed
+  > prefixes. It needs nothing but the C library and `Platform.h`, so
+  > the bottom library is where it belongs: every target links `basic`
+  > and that directory is a PUBLIC include directory, so not one of the
+  > fourteen `#include "DebugLog.h"` lines had to change. That also
+  > ended a *second* copy of it: `Client/SpriteLib/CMakeLists.txt`
+  > compiled `../DebugLog.cpp` into `SpriteLib` as well, so the same
+  > translation unit was in two libraries; `SpriteLib` links `basic`
+  > now and there is one object again. Two more executable-side headers
+  > left the closure with it: `DebugKit.h` from `ClientPlayer.cpp`,
+  > whose only user is a block inside a `/* */` comment (with four
+  > externs that went with it), and `MTestDef.h` from two files, whose
+  > one struct sits behind a `__METROTECH_TEST__` nothing defines.
+  > **Two holdouts became members:** `Player.cpp` (the send/receive
+  > plumbing under both player classes) and `DatagramSocket.cpp`. R1
+  > 495 → 493; gamemodel membership 35 → 34 files, packetwire 517 → 519.
+  > The other six reach for game headers, and the holdouts file now
+  > lists which ones each still needs — `ClientConfig.h` is common to
+  > all six and is the next thing to cut.
+  > **The link proof earned its keep.** `arch_includes` passed on the
+  > new membership, and then the test binary failed to link:
+  > `Player::processCommand` calls `SendBugReport`, which lives in the
+  > executable's `PacketFunction.cpp`. A library file calling an
+  > executable-side *function* is the seam neither W1/W2 (which read
+  > includes) nor R4 (which greps `g_p*`) can see — the 4.4 record made
+  > that observation and this is the first time it cost anything. It is
+  > stubbed in `tests/stubs/client_globals.cpp` for now, with the real
+  > fix recorded: `SendBugReport` builds a `CGSay` and sends it through
+  > `g_pSocket`, so its only reach outside the wire layer is that one
+  > global, and it can move into packetwire behind a `Player*`.
+  > Tests (`test_player_base.cpp`, 3): `Player`'s socket-free half —
+  > the default constructor holding no socket and no key, the
+  > encryption table following the hash key and being given back
+  > (including a second `delKey` being harmless), and `setSocket`
+  > making no streams on a player that had none. Coverage and a link
+  > proof, not reproductions. Suite: 286 tests (4,415 checks).
+  > **Noted, not done:** `Player`'s socket constructor — the one
+  > `RequestClientPlayer` forwards to, on a live path — never sets
+  > `pHashTable`, so a `delKey()` there frees a garbage pointer; the
+  > destructor never frees it either, and a second `setKey` leaks the
+  > first table. Nothing calls `setKey`/`delKey` in the client today
+  > (`SocketInputStream::setKey` is an empty stub whose comment says it
+  > survives only for `Player::setKey`), so all three are latent, and
+  > the socket constructor cannot be driven from a test binary: its
+  > destructor closes the socket, and `closesocket` on a descriptor
+  > Winsock never handed out throws an `Error` that
+  > `SocketImpl::close`'s catch does not catch. `SocketImpl`'s default
+  > constructor is the only one of its four that leaves `m_key` unset.
+  > And `Player::processInput`, `processOutput`, `sendPacket`,
+  > `disconnect` and `toString` all dereference the socket or a stream
+  > without testing either, which the default constructor leaves NULL.
 - [ ] **5.2 Dead/duplicate source removal** (code-health priority 3): the
   `_bak` files are already excluded by the build — delete them; sort the
   `GameHelpers`/`GameFunctions`/`GamePacketFunctions` exclusion graveyard

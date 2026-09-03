@@ -27,10 +27,15 @@ Client/Packet/SocketOutputStream.cpp
 Client/Packet/StringStream.cpp
 
 # Sockets
+Client/Packet/DatagramSocket.cpp
 Client/Packet/ServerSocket.cpp
 Client/Packet/Socket.cpp
 Client/Packet/SocketAPI.cpp
 Client/Packet/SocketImpl.cpp
+
+# The base of the two player classes: the send/receive plumbing over a
+# socket, with no game state of its own (task 5.1)
+Client/Packet/Player.cpp
 
 # Packet id tables: the factory manager, the id sets and the validator
 Client/Packet/PacketFactoryManager.cpp

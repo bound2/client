@@ -76,8 +76,10 @@ set(SPRITELIB_SOURCES
 	CFilterPack.cpp
 	CStorageSurface.cpp
 
-	# Debug logging
-	../DebugLog.cpp
+	# The logging facility used to be compiled here as ../DebugLog.cpp,
+	# a second copy of the same translation unit that the gamemodel
+	# library also carried. Task 5.1 moved it into basic/, which this
+	# target now links, so there is one object again.
 
 	# Other sprite classes (minimal set)
 	CSpriteDef.cpp
@@ -150,6 +152,9 @@ set(SPRITELIB_HEADERS
 
 # Create SpriteLib library
 add_library(SpriteLib STATIC ${SPRITELIB_SOURCES})
+
+# Two of its sources log through DebugLog.h, which basic provides.
+target_link_libraries(SpriteLib PUBLIC basic)
 
 # Include directories
 target_include_directories(SpriteLib

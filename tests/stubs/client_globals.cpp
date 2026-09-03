@@ -23,8 +23,27 @@
 //
 //----------------------------------------------------------------------
 
+// The same shape a second time, for a function rather than a global.
+// Player::processCommand reports an oversized packet upstream through
+// SendBugReport, which builds a CGSay - a packetwire class - and sends
+// it through g_pSocket, the executable's ClientPlayer. A test binary
+// has no server to report to, so the report goes nowhere; nothing
+// under test takes that path, which needs a socket carrying a packet
+// whose declared size exceeds its own factory's maximum.
+//
+// The real fix is the one the plan records for task 5.1's next slice:
+// SendBugReport itself reaches for exactly one thing outside the wire
+// layer, so it can move into packetwire behind a Player* rather than
+// stay a symbol the library expects the executable to supply. Doing it
+// here would mean moving a file this slice does not touch.
+//
+//----------------------------------------------------------------------
+
 #include <cstddef>
 
 class CSpriteSurface;
 
 CSpriteSurface*		g_pLast = NULL;
+
+void	SendBugReport(const char* bug, ...);
+void	SendBugReport(const char* /*bug*/, ...) {}
