@@ -761,8 +761,8 @@ InitSurface()
 	// IFC22.lib and CAVI's MCI driver) - can't link on x64. The rest of
 	// GL_import's interface (rectangle()/GL_RGB()/Convert24RGBto16()/
 	// Get_ColorkeyColor()) already has no live callers in the current
-	// build (rectangle() has local SDL-era replacements in
-	// GameHelpers.cpp/RenderingFunctions.cpp; Convert24RGBto16()'s only
+	// build (rectangle() has a local SDL-era replacement in
+	// RenderingFunctions.cpp; Convert24RGBto16()'s only
 	// caller, VS_UI/WinMain.cpp, is excluded on Windows), so this call is
 	// safe to drop rather than needing a stub function to keep around.
 

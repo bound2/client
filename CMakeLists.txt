@@ -857,29 +857,17 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	list(APPEND CLIENT_MAIN_SOURCES
 		# Time functions extracted from PacketFunction.cpp (which has Windows-specific networking code)
 		Client/ClientTimeFunctions.cpp
-		# ActionFunctions.cpp excluded - functions now in PacketFunction.cpp
-		# Client/ActionFunctions.cpp
-		# Globals.cpp - Global variables and utility functions (from GamePacketFunctions.cpp)
+		# Globals.cpp - the globals and print helpers the game needs
 		Client/Globals.cpp
 	)
 
-	# Remove files the executable must not compile
-	list(REMOVE_ITEM CLIENT_MAIN_SOURCES
-		# Explicitly remove files that duplicate globals in Client.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/GlobalVariables.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/GCNotifyWinHandler.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/GCNotifyWin.cpp
-		# Exclude MissingGlobals.cpp - duplicates globals with GameMain.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/MissingGlobals.cpp
-		# Exclude GameHelpers.cpp - duplicates many functions with GamePacketFunctions.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/GameHelpers.cpp
-		# Exclude GameFunctions.cpp - duplicates functions with GameMain.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/GameFunctions.cpp
-		# Exclude GamePacketFunctions.cpp - all functions now in PacketFunction.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/GamePacketFunctions.cpp
-		# Exclude ActionFunctions.cpp - functions now in PacketFunction.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/ActionFunctions.cpp
-	)
+	# The eight files this list used to remove one by one - the port-era
+	# exclusion graveyard (GlobalVariables, MissingGlobals, GameHelpers,
+	# GameFunctions, GamePacketFunctions, ActionFunctions and a stale
+	# copy of the GCNotifyWin packet class and its handler) - are deleted
+	# (docs/RESTRUCTURING.md task 5.2, fourth slice). Every function they
+	# defined was defined by a file the build does compile, so there was
+	# nothing in them to keep.
 
 	# packetwire members compile in the packetwire library now; leaving
 	# them here too would compile them into the executable a second time
