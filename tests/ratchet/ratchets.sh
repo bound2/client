@@ -317,8 +317,11 @@ check "R5 (direct packet execute callers outside Client/Packet)" "$R5" "$R5_BASE
 # promoting ClientCommunicationManager.cpp took the count to 2. The
 # answer was to move SendBugReport itself into the wire layer
 # (Client/Packet/WireHost.cpp), so packetwire defines it, the stub is
-# gone, and the failed-link detector is armed again. A ratchet over a
-# symbol nothing is on the wrong side of measures nothing.
+# gone. The failed-link detector is back, narrower than this check
+# was, since it catches a call only in a library unit_tests links and
+# only in an object some test pulls in, which is what the link-proof
+# tests are for. A ratchet over a symbol nothing is on the wrong side
+# of measures nothing.
 #----------------------------------------------------------------------
 
 #----------------------------------------------------------------------

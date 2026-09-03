@@ -28,6 +28,17 @@
 class Player;
 
 //----------------------------------------------------------------------
+// The answers with no host, which are ClientConfig's own constructor
+// values. Named so that the executable's accessors can fall back to
+// the same numbers rather than writing them a second time.
+//----------------------------------------------------------------------
+enum {
+	WIRE_DEFAULT_MAX_PROCESS_PACKET		= 11,
+	WIRE_DEFAULT_MAX_REQUEST_SERVICE	= 10,
+	WIRE_DEFAULT_UDP_PORT			= 9858
+};
+
+//----------------------------------------------------------------------
 // The host
 //----------------------------------------------------------------------
 struct WireHost {

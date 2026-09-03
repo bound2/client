@@ -5,6 +5,7 @@
 #include "WireHost.h"
 #include "Player.h"
 #include "Cpackets/CGSay.h"
+#include "DebugLog.h"		// DEBUG_ADD_FORMAT, for the __DEBUG_OUTPUT__ block below
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -21,7 +22,7 @@ Wire::MaxProcessPacket () throw ()
 {
 	if (s_pHost==NULL || s_pHost->MaxProcessPacket==NULL)
 	{
-		return 11;
+		return WIRE_DEFAULT_MAX_PROCESS_PACKET;
 	}
 
 	return s_pHost->MaxProcessPacket();
@@ -32,7 +33,7 @@ Wire::MaxRequestService () throw ()
 {
 	if (s_pHost==NULL || s_pHost->MaxRequestService==NULL)
 	{
-		return 10;
+		return WIRE_DEFAULT_MAX_REQUEST_SERVICE;
 	}
 
 	return s_pHost->MaxRequestService();
@@ -43,7 +44,7 @@ Wire::ClientCommunicationUDPPort () throw ()
 {
 	if (s_pHost==NULL || s_pHost->ClientCommunicationUDPPort==NULL)
 	{
-		return 9858;
+		return WIRE_DEFAULT_UDP_PORT;
 	}
 
 	return s_pHost->ClientCommunicationUDPPort();

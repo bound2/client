@@ -167,8 +167,9 @@ TEST(DatagramSocketLink, ItsObjectIsInTheLibrary)
 	// a build says nothing about whether it could have been. Taking
 	// the address of each entry point is what forces it: the whole
 	// object has to come in, and with it every symbol it references -
-	// which is how the wire layer's one remaining seam to the
-	// executable, Player::processCommand's SendBugReport, showed up.
+	// which is how the wire layer's last seam to the executable,
+	// Player::processCommand's SendBugReport, showed up - the slice
+	// after this one moved that function into the library too.
 	//
 	// Nothing here opens a socket. Both constructors do, and the
 	// server one binds a port, which is not a thing a unit test should

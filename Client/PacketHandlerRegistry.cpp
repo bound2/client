@@ -322,22 +322,13 @@
 #include "Upackets/CURequestLoginMode.h"
 #include "Upackets/UCRequestLoginMode.h"
 
-// Defined in Client/PacketFunction.cpp: formats the text and sends it to
-// the game server as a "*bug_report" chat line. Declared ad hoc here the
-// way its other callers do; there is no header for it.
-void SendBugReport(const char* bug, ...);
-
-namespace {
-
-// The wire library's diagnostic seam (PacketDiagnostics.h): the library
-// formats the report, the executable's SendBugReport delivers it - the
-// same text Datagram::read used to hand SendBugReport directly.
-void ForwardBugReport(const char* message)
-{
-	SendBugReport("%s", message);
-}
-
-} // namespace
+// The forwarder that used to live here is gone. It existed because
+// SendBugReport was defined in this executable and the wire library
+// could not call it, so the library formatted a report and handed it
+// back through PacketDiagnostics' hook. SendBugReport moved into the
+// library (Client/Packet/WireHost.cpp, docs/RESTRUCTURING.md task 5.1),
+// which turned that into the library calling out to the executable
+// only to call straight back in; reportBug goes to it directly now.
 
 void registerClientPacketHandlers()
 {
@@ -351,9 +342,6 @@ void registerClientPacketHandlers()
 	static bool bRegistered = false;
 	if (bRegistered)
 		return;
-
-	// Idempotent, so it sits inside the guard only for tidiness.
-	PacketDiagnostics::setBugReportHook(&ForwardBugReport);
 
 	//------------------------------------------------------------------
 	// Standard delegations: the packet's deleted execute() was exactly

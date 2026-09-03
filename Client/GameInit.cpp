@@ -3012,9 +3012,9 @@ static const MPriceHost	s_PriceHost = { PriceRace, PriceLevel, PriceStatSum, Pri
 // own defaults - ClientConfig's constructor values - answer while there
 // is none.
 //-----------------------------------------------------------------------------
-static int	WireMaxProcessPacket()	{ return g_pClientConfig!=NULL ? g_pClientConfig->MAX_PROCESS_PACKET : 11; }
-static int	WireMaxRequestService()	{ return g_pClientConfig!=NULL ? g_pClientConfig->MAX_REQUEST_SERVICE : 10; }
-static uint	WireUDPPort()			{ return g_pClientConfig!=NULL ? (uint)g_pClientConfig->CLIENT_COMMUNICATION_UDP_PORT : 9858; }
+static int	WireMaxProcessPacket()	{ return g_pClientConfig!=NULL ? g_pClientConfig->MAX_PROCESS_PACKET : WIRE_DEFAULT_MAX_PROCESS_PACKET; }
+static int	WireMaxRequestService()	{ return g_pClientConfig!=NULL ? g_pClientConfig->MAX_REQUEST_SERVICE : WIRE_DEFAULT_MAX_REQUEST_SERVICE; }
+static uint	WireUDPPort()			{ return g_pClientConfig!=NULL ? (uint)g_pClientConfig->CLIENT_COMMUNICATION_UDP_PORT : WIRE_DEFAULT_UDP_PORT; }
 static Player*	WireBugReportTarget()	{ return g_pSocket; }
 
 static const WireHost	s_WireHost = { WireMaxProcessPacket, WireMaxRequestService, WireUDPPort, WireBugReportTarget };

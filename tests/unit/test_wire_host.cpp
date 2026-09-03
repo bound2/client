@@ -19,6 +19,7 @@
 
 #include "ClientCommunicationManager.h"
 #include "Player.h"
+#include "PacketDiagnostics.h"
 #include "WireHost.h"
 
 namespace {
@@ -37,6 +38,15 @@ const WireHost	s_Host = { HostMaxProcessPacket, HostMaxRequestService, HostUDPPo
 
 // A host that answers nothing, which is not the same as no host.
 const WireHost	s_EmptyHost = { NULL, NULL, NULL, NULL };
+
+// SendBugReport asks for a target only once it has decided the report
+// is worth sending, so the count is the observable half of a function
+// whose other half needs a connection.
+int	s_Asked = 0;
+
+Player*	CountingBugReportTarget()	{ s_Asked++; return s_pTarget; }
+
+const WireHost	s_CountingHost = { HostMaxProcessPacket, HostMaxRequestService, HostUDPPort, CountingBugReportTarget };
 
 // Puts the library back the way every other test expects it.
 struct NoHost
@@ -103,34 +113,82 @@ TEST(WireHostSeam, AHostAnswersForTheProgramAroundIt)
 //----------------------------------------------------------------------
 // The report itself
 //----------------------------------------------------------------------
-TEST(WireHostSeam, ABugReportWithNowhereToGoIsDropped)
+TEST(WireHostSeam, AReportIsBuiltOnlyWhenThereIsSomethingToSay)
 {
 	NoHost	restore;
 
+	//------------------------------------------------------------------
 	// This is the function whose definition lived in the executable
 	// while the wire layer called it - the seam only a failed link
-	// could see. Every one of these used to be unreachable from a test
-	// binary at all.
-	Wire::SetHost(NULL);
+	// could see, and unreachable from a test binary until it moved.
+	//
+	// It asks the host for a target only after it has decided the
+	// report is worth sending, so counting the asks says which reports
+	// get that far without needing a Player to send one to.
+	//------------------------------------------------------------------
+	s_pTarget = NULL;
+	s_Asked = 0;
+	Wire::SetHost(&s_CountingHost);
 
-	SendBugReport("a report with no connection to send it on");
+	// Nothing to format.
 	SendBugReport(NULL);
-	SendBugReport("%d %s", 7, "formatted");
+	CHECK_EQ(0, s_Asked);
 
-	// A report of one character is dropped before any packet is built,
-	// and so is one that says nothing.
-	SendBugReport("x");
+	// A report that says nothing, and one that says one character:
+	// both dropped before a packet is built (the length test is
+	// `<= 1`, so a single character does not survive it either).
 	SendBugReport("");
+	SendBugReport("x");
+	CHECK_EQ(0, s_Asked);
 
-	// Longer than the 256-byte buffer it formats into: truncated, not
-	// overrun. Nothing to assert but that we are still here.
+	// Two characters is a report.
+	SendBugReport("xy");
+	CHECK_EQ(1, s_Asked);
+
+	// So is a formatted one, and a plain one.
+	SendBugReport("%d %s", 7, "formatted");
+	SendBugReport("a report with no connection to send it on");
+	CHECK_EQ(3, s_Asked);
+
+	// Longer than the 256-byte buffer it formats into: truncated
+	// rather than overrun, and still a report.
 	char	shout[600];
 	for (int i = 0; i < 599; i++)
 		shout[i] = 'A';
 	shout[599] = '\0';
 	SendBugReport("%s", shout);
+	CHECK_EQ(4, s_Asked);
 
+	// Every one of those was asked for a target and told there is
+	// none, which is where they stopped.
 	CHECK(Wire::BugReportTarget() == NULL);
+	CHECK_EQ(5, s_Asked);		// the line above asked too
+}
+
+//----------------------------------------------------------------------
+// The library's own diagnostic seam, which used to run through the
+// executable and back
+//----------------------------------------------------------------------
+TEST(WireHostSeam, AWireDiagnosticReachesTheReporterWithNoHookInstalled)
+{
+	NoHost	restore;
+
+	PacketDiagnostics::BugReportFn	pPrevious = PacketDiagnostics::getBugReportHook();
+
+	s_pTarget = NULL;
+	s_Asked = 0;
+	Wire::SetHost(&s_CountingHost);
+	PacketDiagnostics::setBugReportHook(NULL);
+
+	// With no hook, a report from inside the library used to go
+	// nowhere at all: the hook was how it left, and the executable
+	// installed one that called straight back into this library. It
+	// goes to SendBugReport directly now.
+	PacketDiagnostics::reportBug("too large PacketSize ID)%d %d/%d", 1, 2, 3);
+	CHECK_EQ(1, s_Asked);
+
+	// A hook still intercepts, and nothing reaches the reporter then.
+	PacketDiagnostics::setBugReportHook(pPrevious);
 }
 
 //----------------------------------------------------------------------

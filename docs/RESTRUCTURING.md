@@ -121,7 +121,7 @@ an unrecorded drop, so tightening lands in the same commit as the progress.
 | R3 | Live `sprintf`/`strcpy`/`strcat` lines under `Client/Packet` **and `Client/PacketHandler`** | 46 (unchanged by task 2.4, which widened the scope to follow the handlers out of `Client/Packet`; 61 at first measurement — the 2026-09-01 adversarial review showed a quarter of that was commented-out code, so the measurement now excludes `//` matches) | see `ratchets.sh` — the grep excludes comment-prefixed matches |
 | R4 | Library-compiled `.cpp` files referencing `g_p*` client globals **no library file defines** | **25** (27 before 4.4's fourth slice moved the skill core into `gamemodel` — a reclassification again: `VS_UI_SKILL_VIEW.cpp` and `VS_UI_skill_tree.cpp` reached past the libraries only for `g_pSkillInfoTable`, `g_pSkillManager` and `g_pSkillAvailable`, which `MSkillManager.cpp` defines; 28 before 4.4's third slice moved the gear into `gamemodel` — a reclassification: `VS_UI_Game.cpp`'s only reaches past the libraries were `g_pSlayerGear`, `g_pVampireGear` and `g_pOustersGear`, which the gear sources define; 35 before 4.4's second slice — a reclassification again, 35 + 1 − 8: the subtraction became library-wide, so a library file reading a global another library file defines is no longer a seam; `MItem.cpp` joined reading `gamemodel`'s own tables, +1 under the old per-file rule, and the union rule excludes it with seven earlier members — `Datagram.cpp` reading `packetwire`'s factory manager, and six `VS_UI` sources whose only reaches are `gamemodel`'s tables, `packetwire`'s `g_pFileDef` or `VS_UI`'s own globals; 59 before task 4.0 — a reclassification, not seam-cutting: the 36 `VS_UI_CLIENT_SOURCES` files stopped being library-compiled, so the 24 of them that reach globals are executable debt now, counted by R1 and outside this ratchet; 61 before task 4.1 cut the two `g_pFileDef` seams in `MGameStringTable` and `SystemAvailabilities` and added the `gamemodel` membership file, whose four new members reference no game global; 81 before task 2.4 grew the membership from 52 to 518 files; the number fell because the measurement stopped counting a file's references to globals it defines — the packet tables own `g_pPacketFactoryManager`/`g_pPacketValidator` — and the two dead server-only bodies that reached game globals were deleted; 83 at first measurement, before two never-compiled files were filtered) | `ratchets.sh` computes it over the library dirs (minus CMake-excluded files) plus the `packetwire` and `gamemodel` membership files |
 | R5 | Direct packet `execute()` call sites outside `Client/Packet` (handlers under `Client/PacketHandler` are in scope) | 1 (a commented-out block in `CGameUpdate.cpp`; added 2026-09-01 after the review found live local-echo callers the receive-loop enumeration had missed; task 2.4 found two more inside handlers — `GCReconnectLoginHandler`/`LCReconnectHandler` fabricating a `CGConnectSetKey` — invisible while handlers lived under the excluded `Client/Packet`, caught by the compiler once `Packet::execute` was deleted, and routed through the dispatcher; a live caller is now a compile error before it is a ratchet failure) | see `ratchets.sh` |
-| R6 | *retired* — `packetwire` members calling `SendBugReport`, which the executable used to define | — (lived for one slice, 2026-09-03. Task 5.1's first slice added it to replace the failed-link detector that stubbing the symbol had disabled — a library file calling an executable-side *function* is invisible to W1/W2, which read includes, and to R4, which greps `g_p*`. It fired on the very next thing done to the tree: promoting `ClientCommunicationManager.cpp` took the count to 2, which is what said to move the function rather than grow the seam. `SendBugReport` is in `Client/Packet/WireHost.cpp` now, the stub is gone, and the failed-link detector is armed again — so the ratchet measures a symbol nothing is on the wrong side of. `ratchets.sh` keeps the history where the check was) | — |
+| R6 | *retired* — `packetwire` members calling `SendBugReport`, which the executable used to define | — (lived for one slice, 2026-09-03. Task 5.1's first slice added it to replace the failed-link detector that stubbing the symbol had disabled — a library file calling an executable-side *function* is invisible to W1/W2, which read includes, and to R4, which greps `g_p*`. It fired on the very next thing done to the tree: promoting `ClientCommunicationManager.cpp` took the count to 2, which is what said to move the function rather than grow the seam. `SendBugReport` is in `Client/Packet/WireHost.cpp` now, so the ratchet measures a symbol nothing is on the wrong side of, and the stub that disabled the link detector is gone with it. Note what came back is narrower than what left: a failed link catches an executable-side call only in a library `unit_tests` links, and only in an object some test forces the linker to pull in — which is what the address-taking link proofs in `test_wire_host.cpp` and `test_player_base.cpp` exist to guarantee. R6 grepped every membership file unconditionally. `ratchets.sh` keeps the history where the check was) | — |
 
 R1 is the headline number: it counts what still cannot be unit-tested. R2 is
 the client twin of the server's R4 (which it drove to 0). R3 tracks
@@ -1710,8 +1710,24 @@ starting each — the scan is one grep, and the ranking below is from a
   > its target from the host; the definition leaves
   > `Client/PacketFunction.cpp` and every caller, in the library and in
   > the executable, resolves to the one in `packetwire`. The stub in
-  > `tests/stubs/client_globals.cpp` is gone with it, which re-arms the
-  > failed-link detector the first slice had to disable.
+  > `tests/stubs/client_globals.cpp` is gone with it, which brings back
+  > the failed-link detector the first slice had to disable — narrower
+  > than the ratchet that stood in for it, since a link only catches a
+  > call in a library `unit_tests` links and only in an object some
+  > test pulls in.
+  > **The round trip this made, undone.** `PacketDiagnostics` — the
+  > hook task 2.4 added so `Datagram::read` could report without
+  > linking against the executable — was left pointing at a forwarder
+  > in `PacketHandlerRegistry.cpp` that did nothing but call the
+  > library's `SendBugReport`. The library was calling out to the
+  > executable to call straight back in. `reportBug` goes to it
+  > directly now when no hook is installed, the forwarder and its
+  > installation are deleted, and the hook stays as what it is worth
+  > being: an interception point, which is how a test captures the
+  > text. Both delivery paths for the same "too large PacketSize"
+  > report — `Datagram.cpp`'s and `Player.cpp`'s — are armed by the
+  > same `Wire::SetHost` now instead of by two mechanisms at two
+  > different times.
   > **R6 retired by doing its job.** It was added last slice to replace
   > that disabled detector, and it fired on the first thing this slice
   > did: promoting `ClientCommunicationManager.cpp` took the count of
@@ -1723,9 +1739,14 @@ starting each — the scan is one grep, and the ranking below is from a
   > library source for `g_p*` and does not skip comments, so
   > `WireHost.cpp`'s note about which global the report used to go
   > through counted as a reach and took the measurement to 26. The
-  > comment says it without the name now; the blind spot is worth
-  > knowing about, since it means R4 can also *miss* nothing but can
-  > read a false one.
+  > comment says it without the name now. What that shows is that R4
+  > can read a *false* reach — its number is partly a function of
+  > comment wording. It misses real ones too, which its own comment in
+  > `ratchets.sh` has said since 4.4: the pattern is `g_p*` only, so a
+  > library file calling an executable-side function is invisible to it
+  > (`SendBugReport`, the subject of this very slice, was exactly that),
+  > and so is a global under any other name — `g_Mode`, which four of
+  > the remaining holdouts branch on, is one.
   > `ClientCommunicationManager.cpp` is a member. R1 493 → 492;
   > packetwire 519 → 521 files. Five holdouts remain, and what they
   > need is game state rather than tuning — `g_pGameMessage`,
@@ -1735,14 +1756,29 @@ starting each — the scan is one grep, and the ranking below is from a
   > of them branch on. The holdouts file lists it per file; a host the
   > size of `WireHost` would not cover it, so the request-service
   > family is its own slice.
-  > Tests (`test_wire_host.cpp`, 4): the defaults without a host, and
+  > Tests (`test_wire_host.cpp`, 5): the defaults without a host, and
   > again with a host whose entries are all NULL — the accessors test
   > the pointer, not just the host; a host answering, read each time
-  > rather than copied once, and put back by `SetHost(NULL)`;
-  > `SendBugReport` with nowhere to send it, including a NULL format, a
-  > one-character report and one longer than the 256-byte buffer it
-  > formats into; and a link proof for
-  > `ClientCommunicationManager.cpp`. Suite: 292 tests (4,442 checks).
+  > rather than copied once, and put back by `SetHost(NULL)`; which
+  > reports `SendBugReport` builds and which it drops; a report from
+  > inside the library reaching the reporter with no hook installed;
+  > and a link proof for `ClientCommunicationManager.cpp`.
+  > The bug-report test is the one the review round fixed: it ran six
+  > inputs through the function and asserted only that there was no
+  > target, which is true by construction — the function was
+  > gutted-proof. `SendBugReport` asks the host for a target *after*
+  > deciding a report is worth sending, so a host that counts the asks
+  > says which of NULL, `""`, `"x"`, a two-character report, a
+  > formatted one and one longer than its 256-byte buffer get that far
+  > — an observable contract, with no `Player` needed.
+  > **Untested, and it cannot be otherwise:** the host installation in
+  > `GameInit.cpp` is executable-side, so nothing here proves the
+  > client installs it, nor that the UDP port a live client binds comes
+  > from the config rather than the default. Running the client is the
+  > check. Its three fallbacks name the same defaults the library uses,
+  > through `WIRE_DEFAULT_*` in `WireHost.h` rather than a second copy
+  > of the numbers, so at least the two cannot drift.
+  > Suite: 293 tests (4,449 checks).
 - [ ] **5.2 Dead/duplicate source removal** (code-health priority 3): the
   `_bak` files are already excluded by the build — delete them; sort the
   `GameHelpers`/`GameFunctions`/`GamePacketFunctions` exclusion graveyard
