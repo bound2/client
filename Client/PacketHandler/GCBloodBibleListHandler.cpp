@@ -16,6 +16,7 @@
 #include "UIDialog.h"
 #include "SystemAvailabilities.h"
 #include "MGameStringTable.h"
+#include "SafeFormat.h"
 #include "TempInformation.h"
 
 //////////////////////////////////////////////////////////////////////
@@ -51,8 +52,14 @@ throw ( ProtocolException , Error )
 	char str2[192];
 	for(int i = 0; i< BloodBibleList.size(); i++)
 	{
-		sprintf(str2, (*g_pGameStringTable)[UI_STRING_MESSAGE_RENT_BLOOD_BIBLE2].GetString(), (*g_pGameStringTable)[UI_STRING_MESSAGE_BLOOD_BIBLE_ARMEGA+BloodBibleList[i]].GetString(), 
-			(*g_pGameStringTable)[STRING_MESSAGE_BLOOD_BIBLE_BONUS_ARMEGA+BloodBibleList[i]].GetString());
+		// The two arguments are table lookups indexed by a packet field.
+		// CTypeTable::operator[] only bounds-checks under _DEBUG, so
+		// outside Debug a list entry the server made large enough read
+		// past the end of the table; GetGameString() range-checks the id
+		// in every build and answers "" for one it cannot resolve.
+		SafeFormat::Format(str2, GetGameString(UI_STRING_MESSAGE_RENT_BLOOD_BIBLE2),
+			GetGameString(UI_STRING_MESSAGE_BLOOD_BIBLE_ARMEGA+BloodBibleList[i]),
+			GetGameString(STRING_MESSAGE_BLOOD_BIBLE_BONUS_ARMEGA+BloodBibleList[i]));
 		sprintf(str, "%3d %s", BloodBibleList[i], str2);
 		g_pPCTalkBox->AddString( str );
 	}

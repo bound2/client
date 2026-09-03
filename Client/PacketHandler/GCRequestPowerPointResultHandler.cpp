@@ -14,6 +14,7 @@
 #include "VS_UI_GameCommon.h"
 #include "UIFunction.h"
 #include "MGameStringTable.h"
+#include "SafeFormat.h"
 #include "UIDialog.h"
 #endif
 
@@ -33,7 +34,7 @@ throw ( ProtocolException , Error )
 		{
 			g_char_slot_ingame.m_Powerjjang_Point = pPacket->getSumPowerPoint(); 
 			char TempBuffer[128];
-			sprintf(TempBuffer, (*g_pGameStringTable)[UI_STRING_POWER_JJANG_REQUEST_OK].GetString(), pPacket->getRequestPowerPoint());
+			SafeFormat::Format(TempBuffer, GetGameString(UI_STRING_POWER_JJANG_REQUEST_OK), pPacket->getRequestPowerPoint());
 			g_pUIDialog->PopupFreeMessageDlg(TempBuffer);
 		}
 		break;

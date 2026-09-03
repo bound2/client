@@ -11,6 +11,7 @@
 #include "Gpackets/GCNoticeEvent.h"
 #include "MEventManager.h"
 #include "MGameStringTable.h"
+#include "SafeFormat.h"
 #include "CMessageArray.h"
 #include "MWarManager.h"
 #include "UserInformation.h"
@@ -292,7 +293,7 @@ throw ( ProtocolException , Error )
 	case NOTICE_EVENT_GOLD_MEDALS:
 		{
 			char szBuf[128];
-			sprintf(szBuf, (*g_pGameStringTable)[UI_STRING_NOTICE_EVENT_GOLD_MEDALS].GetString(), pPacket->getParameter());
+			SafeFormat::Format(szBuf, GetGameString(UI_STRING_NOTICE_EVENT_GOLD_MEDALS), pPacket->getParameter());
 			g_pSystemMessage->Add( szBuf );
 		}
 		break;
@@ -302,7 +303,7 @@ throw ( ProtocolException , Error )
 			int Value = pPacket->getParameter();
 			g_pPriceManager->SetEventItemPrice( Value );
 			char szBuf[128];
-			sprintf(szBuf, (*g_pGameStringTable)[UI_STRING_CHANGE_EVENTITEM_PRICE].GetString(), Value);
+			SafeFormat::Format(szBuf, GetGameString(UI_STRING_CHANGE_EVENTITEM_PRICE), Value);
 			g_pSystemMessage->Add( szBuf );
 		}
 		break;
@@ -314,7 +315,7 @@ throw ( ProtocolException , Error )
     case NOTICE_EVENT_GIVE_PRESENT_2:                // 레벨 2 선물상자 줬습니다.
 		{
 			char szBuf[1024];
-			sprintf(szBuf, (*g_pGameStringTable)[STRING_MESSAGE_DAUM_EVENT_2].GetString(), 5,(*g_pGameStringTable)[STRING_MESSAGE_DAUM_EVENT_BOX2].GetString());
+			SafeFormat::Format(szBuf, GetGameString(STRING_MESSAGE_DAUM_EVENT_2), 5,(*g_pGameStringTable)[STRING_MESSAGE_DAUM_EVENT_BOX2].GetString());
 			//g_pUIDialog->PopupFreeMessageDlg(szBuf);
 			gC_vs_ui.RunPopupMessage(szBuf,C_VS_UI_POPUP_MESSAGE::POPUP_LARGE);
 		}
@@ -322,49 +323,49 @@ throw ( ProtocolException , Error )
     case NOTICE_EVENT_GIVE_PRESENT_3:                // 레벨 3 선물상자 줬습니다.
 		{
 			char szBuf[1024];
-			sprintf(szBuf, (*g_pGameStringTable)[STRING_MESSAGE_DAUM_EVENT_2].GetString(), 10,(*g_pGameStringTable)[STRING_MESSAGE_DAUM_EVENT_BOX3].GetString());
+			SafeFormat::Format(szBuf, GetGameString(STRING_MESSAGE_DAUM_EVENT_2), 10,(*g_pGameStringTable)[STRING_MESSAGE_DAUM_EVENT_BOX3].GetString());
 			gC_vs_ui.RunPopupMessage(szBuf,C_VS_UI_POPUP_MESSAGE::POPUP_LARGE);
 		}
 		break;
     case NOTICE_EVENT_GIVE_PRESENT_4:                // 레벨 4 선물상자 줬습니다.
 		{
 			char szBuf[1024];
-			sprintf(szBuf, (*g_pGameStringTable)[STRING_MESSAGE_DAUM_EVENT_2].GetString(), 15,(*g_pGameStringTable)[STRING_MESSAGE_DAUM_EVENT_BOX4].GetString());
+			SafeFormat::Format(szBuf, GetGameString(STRING_MESSAGE_DAUM_EVENT_2), 15,(*g_pGameStringTable)[STRING_MESSAGE_DAUM_EVENT_BOX4].GetString());
 			gC_vs_ui.RunPopupMessage(szBuf,C_VS_UI_POPUP_MESSAGE::POPUP_LARGE);
 		}
 		break;
     case NOTICE_EVENT_GIVE_PRESENT_5:                // 레벨 5 선물상자 줬습니다.
 		{
 			char szBuf[1024];
-			sprintf(szBuf, (*g_pGameStringTable)[STRING_MESSAGE_DAUM_EVENT_2].GetString(), 20,(*g_pGameStringTable)[STRING_MESSAGE_DAUM_EVENT_BOX5].GetString());
+			SafeFormat::Format(szBuf, GetGameString(STRING_MESSAGE_DAUM_EVENT_2), 20,(*g_pGameStringTable)[STRING_MESSAGE_DAUM_EVENT_BOX5].GetString());
 			gC_vs_ui.RunPopupMessage(szBuf,C_VS_UI_POPUP_MESSAGE::POPUP_LARGE);
 		}
 		break;
     case NOTICE_EVENT_GIVE_PRESENT_6:                // 레벨 6 선물상자 줬습니다
 		{
 			char szBuf[1024];
-			sprintf(szBuf, (*g_pGameStringTable)[STRING_MESSAGE_DAUM_EVENT_2].GetString(), 25,(*g_pGameStringTable)[STRING_MESSAGE_DAUM_EVENT_BOX6].GetString());
+			SafeFormat::Format(szBuf, GetGameString(STRING_MESSAGE_DAUM_EVENT_2), 25,(*g_pGameStringTable)[STRING_MESSAGE_DAUM_EVENT_BOX6].GetString());
 			gC_vs_ui.RunPopupMessage(szBuf,C_VS_UI_POPUP_MESSAGE::POPUP_LARGE);
 		}
 		break;
     case NOTICE_EVENT_GIVE_PRESENT_7:                // 레벨 7 선물상자 줬습니다.
 		{
 			char szBuf[1024];
-			sprintf(szBuf, (*g_pGameStringTable)[STRING_MESSAGE_DAUM_EVENT_2].GetString(), 30,(*g_pGameStringTable)[STRING_MESSAGE_DAUM_EVENT_BOX7].GetString());
+			SafeFormat::Format(szBuf, GetGameString(STRING_MESSAGE_DAUM_EVENT_2), 30,(*g_pGameStringTable)[STRING_MESSAGE_DAUM_EVENT_BOX7].GetString());
 			gC_vs_ui.RunPopupMessage(szBuf,C_VS_UI_POPUP_MESSAGE::POPUP_LARGE);
 		}
 		break;
     case NOTICE_EVENT_GIVE_PRESENT_8:                // 레벨 8 선물상자 줬습니다.
 		{
 			char szBuf[1024];
-			sprintf(szBuf, (*g_pGameStringTable)[STRING_MESSAGE_DAUM_EVENT_2].GetString(), 35,(*g_pGameStringTable)[STRING_MESSAGE_DAUM_EVENT_BOX8].GetString());
+			SafeFormat::Format(szBuf, GetGameString(STRING_MESSAGE_DAUM_EVENT_2), 35,(*g_pGameStringTable)[STRING_MESSAGE_DAUM_EVENT_BOX8].GetString());
 			gC_vs_ui.RunPopupMessage(szBuf,C_VS_UI_POPUP_MESSAGE::POPUP_LARGE);
 		}
 		break;
     case NOTICE_EVENT_CAN_OPEN_PRESENT_8:            // 레벨 8 선물상자 열 수 있습니다.
 		{
 			char szBuf[1024];
-			sprintf(szBuf, (*g_pGameStringTable)[STRING_MESSAGE_DAUM_EVENT_3].GetString(), 40);
+			SafeFormat::Format(szBuf, GetGameString(STRING_MESSAGE_DAUM_EVENT_3), 40);
 			gC_vs_ui.RunPopupMessage(szBuf,C_VS_UI_POPUP_MESSAGE::POPUP_NORMAL);
 		}
 		break;

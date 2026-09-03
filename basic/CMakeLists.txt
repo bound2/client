@@ -47,6 +47,12 @@ set(BASIC_SOURCES
 	# this directory is a PUBLIC include directory, so #include
 	# "DebugLog.h" resolves everywhere it did before.
 	DebugLog.cpp
+	# The checked formatter (docs/RESTRUCTURING.md task 5.4). It is here
+	# for the same reason DebugLog is: the call sites that need it are in
+	# the executable, in VS_UI and in the packet handlers, and basic is
+	# the one library all of them already link. It needs nothing but the
+	# C library.
+	SafeFormat.cpp
 )
 
 # Platform-specific sources
@@ -114,5 +120,6 @@ install(FILES
 	ColorDraw.h
 	InputCodes.h
 	AudioTypes.h
+	SafeFormat.h
 	DESTINATION include/basic
 )

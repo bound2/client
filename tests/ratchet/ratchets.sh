@@ -177,8 +177,15 @@ check "R2 (packet cpps defining execute)" "$R2" "$R2_BASELINE"
 # does not count - a quarter of the first baseline was - while a live
 # call with a trailing comment still does; the earlier whole-line
 # exclusion let `sprintf(...); // was strcpy` through.)
+#
+# 19: 46 - 27. Task 5.4's first slice converted all 31 sprintf-family
+# calls in Client/PacketHandler whose format came from the game string
+# table to SafeFormat::Format. Only 27 of them move this number: the
+# other four are wsprintf, which \b rejects because of the preceding
+# 'w'. R7 below counts all 31, which is why both exist - each is blind
+# to something the other sees.
 #----------------------------------------------------------------------
-R3_BASELINE=46
+R3_BASELINE=19
 
 for d in Client/Packet Client/PacketHandler; do
 	if [ ! -d "$d" ]; then
@@ -334,6 +341,58 @@ R5=$(grep -rnE '(\.|->)execute\s*\(\s*(g_pSocket|NULL|this|0)\s*\)' \
 	Client VS_UI --include='*.cpp' 2>/dev/null \
 	| grep -v 'Client/Packet/' | grep -vE ':\s*//' | wc -l)
 check "R5 (direct packet execute callers outside Client/Packet)" "$R5" "$R5_BASELINE"
+
+#----------------------------------------------------------------------
+# R7 - call sites that hand a game string table entry to printf as its
+# format argument.
+#
+# Finding C19 (docs/code-health-review-2026-08-29.md) as a number. Every
+# UI string in this client is read from Data/Info/String.inf, and at
+# each of these sites it is the *format* rather than an argument: an
+# entry carrying one %s more than the call site passes makes the CRT
+# read a stack word as a char* and copy it, unbounded, into a
+# destination of fifty or a hundred bytes. What converts a site is
+# SafeFormat::Format (basic/SafeFormat.h), which checks the entry's
+# conversions against the arguments it was really handed, so this counts
+# what is left to do (task 5.4).
+#
+# The AddFormat family is in scope even though CMessageArray bounds its
+# own buffer (finding C20, fixed in 0e9d247): what is left there is the
+# arity half of the same defect.
+#
+# Three measurement decisions, each of them earned while this was
+# written:
+#
+#   -a   VS_UI's sources are CP949 encoded, so grep calls them binary
+#        and stops at the first byte it dislikes. Without this the
+#        metric reported 113 of VS_UI's real 192.
+#   tr   The files are joined into one stream before matching, because
+#        four of Client/PacketHandler's sites put the destination and
+#        the format on different lines. A line-based count cannot see
+#        those, so converting them would have measured as a no-op -
+#        which is the failure mode task 5.3 found in R4 and fixed there.
+#        The gap this pattern allows between the destination and the
+#        format admits no quote, paren or semicolon, which is what stops
+#        a joined stream from matching across two unrelated statements;
+#        counted per file and joined, the two agree exactly.
+#
+# It stays a count of sites rather than of files, because a file here is
+# converted a call at a time and half a file is real progress.
+#----------------------------------------------------------------------
+R7_BASELINE=256
+
+for d in Client VS_UI; do
+	if [ ! -d "$d" ]; then
+		echo "FAIL R7: directory $d is missing - fix the path list in this script"
+		FAIL=1
+	fi
+done
+
+R7=$(find Client VS_UI -name '*.cpp' -print0 2>/dev/null | xargs -0 cat 2>/dev/null \
+	| sed -e 's://.*::' | tr '\n' ' ' \
+	| grep -aoE '\b(sprintf|wsprintf|swprintf|_snprintf|vsprintf)[[:space:]]*\([[:space:]]*[^,;()"]+,[[:space:]]*(\(\*g_pGameStringTable\)\[|GetGameString[[:space:]]*\()|\bAddFormat(VL)?[[:space:]]*\([[:space:]]*(\(\*g_pGameStringTable\)\[|GetGameString[[:space:]]*\()' \
+	| wc -l)
+check "R7 (data-file format strings passed to printf)" "$R7" "$R7_BASELINE"
 
 #----------------------------------------------------------------------
 # R6 was here for exactly one slice, and retired by doing its job.
