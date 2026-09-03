@@ -1643,13 +1643,18 @@ ExecuteActionInfoFromMainNode(
 		
 		//--------------------------------------------------------
 		//
-		//					시작 위치를 결정한다.
+		//					Decide the start position.
+		//
+		// Default to the target position. An entry whose start flag is
+		// only "sky" (MAGIC_METEOR, RESULT_MAGIC_METEOR and SKILL_ERUPTION
+		// in the shipped Action.inf) matches neither branch below, and
+		// used to hand uninitialised x/y to the effect generator.
 		//
 		//--------------------------------------------------------
-		int x,y,z, dir;
+		int x = point.x + sX, y = point.y + sY, z = startZ, dir;
 
 		//--------------------------------------------------------
-		// User 위치에서 시작하는 경우
+		// Start at the user's position
 		//--------------------------------------------------------
 		if ((*g_pActionInfoTable)[nActionInfo].IsStartUser())
 		{
@@ -1660,7 +1665,7 @@ ExecuteActionInfoFromMainNode(
 			z			= startZ;//+60;			
 		}
 		//--------------------------------------------------------
-		// Target 위치에서 시작하는 경우
+		// Start at the target's position
 		//--------------------------------------------------------
 		else if ((*g_pActionInfoTable)[nActionInfo].IsStartTarget())
 		{
@@ -1670,7 +1675,7 @@ ExecuteActionInfoFromMainNode(
 		}
 
 		//--------------------------------------------------------
-		// 공중에서 시작하는 경우
+		// Start in the sky
 		//--------------------------------------------------------
 		if ((*g_pActionInfoTable)[nActionInfo].IsStartSky())
 		{
@@ -1679,7 +1684,7 @@ ExecuteActionInfoFromMainNode(
 			dir	= DIRECTION_DOWN;
 		}
 		//--------------------------------------------------------
-		// 지상에서 시작하는 경우
+		// Start on the ground
 		//--------------------------------------------------------
 		else
 		{

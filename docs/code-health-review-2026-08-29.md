@@ -70,7 +70,7 @@ By severity: **Critical 27 fixed / 1 open** (C19, narrowed — see its entry), *
 
 **Every finding the review rated Critical is now closed or explicitly narrowed** (C19 is narrowed — see its entry). That does not mean the client is free of critical defects: the pointer-truncation pass found a whole family of the same class that the review never recorded, described under *Open, not in this review* below.
 
-The test-driven work is confined to code compiled into a static library, since that is the only code a test binary can link against. A second phase has since fixed seven defects in the `DarkEden` executable itself, listed under Runtime defects below; those were found by running the client rather than by this review, and none of them are among the 197 findings.
+The test-driven work is confined to code compiled into a static library, since that is the only code a test binary can link against. A second phase has since fixed nine defects in the `DarkEden` executable itself, listed under Runtime defects below; those were found by running the client rather than by this review, and none of them are among the 197 findings.
 
 A third phase (2026-08-31, branch `harden/network-input`) took on the network attack surface this review rated most serious: the shop/stash index bounds (C7, C8, done earlier in `ed4f872`), the chat/guild/system-message string bounds (C9, C10/C16, C11/C17), the peer file-transfer filename (C12), the NewItem function-pointer table (C13), the 21-byte chat rows (C14, C15/C18) and the tooltip use-after-free (C25). None of these are reachable from a test binary, so they are build-verified regression guards. The branch was put through the same eight-angle adversarial review as phase one, which found ten real defects in the fixes themselves (including a filename guard that would have broken every legitimate profile transfer, and a missed overflow sixty lines from a fixed one) — all repaired in `3bc340e`. After merging master's wire max-size reconcile, a second review (two Opus xhigh reviewers, `1200625`) found more: write-side guards that tested the BYTE-narrowed length, a guild-name cap of 20 that would disconnect on legitimate 30-byte names, a filename validator that confined escape but not scope (a peer could still drop a DLL beside the executable), and config clamp floors of 1 that hung or corrupted the chat rows. The remaining Gpackets parsers beyond these findings are still unaudited, and the data-file format-string sites (C19/C20/C22) are untouched.
 
@@ -238,7 +238,7 @@ The reviewer independently verified the bound arithmetic in `CSprite555`, `CAlph
 
 ### Runtime defects
 
-Eight defects in the `DarkEden` executable, found by running the client against a live server rather than by this review. None are among the 197 findings, and none were reachable from a test binary. Each one blocked login, ended the session, or produced visibly wrong behaviour in play.
+Nine defects in the `DarkEden` executable, found by running the client against a live server rather than by this review. None are among the 197 findings, and none were reachable from a test binary. Each one blocked login, ended the session, or produced visibly wrong behaviour in play.
 
 | Defect | Symptom | Commit |
 |---|---|---|
@@ -250,6 +250,7 @@ Eight defects in the `DarkEden` executable, found by running the client against 
 | `bool` read on a switch path that never assigns it | `/RTC1` failure on hovering the info panel's grade tabs | `aac4b76` |
 | A percentage believed from a stale `ClientConfig.inf` record | every creature bleeding permanently at full health | `7660574` |
 | Quest XML parsed without checking that the file opened | null pointer walked as a character buffer | `d31bf57` |
+| Effect start position set only on the "start at user" and "start at target" branches | `/RTC1` failure on casting Meteor: `MAGIC_METEOR`, `RESULT_MAGIC_METEOR` and `SKILL_ERUPTION` are flagged sky-only in `Action.inf`, so `x`/`y` reached the effect generator uninitialised | `6b57bfa` |
 
 ### Caveats
 
