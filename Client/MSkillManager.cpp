@@ -43,10 +43,17 @@ SKILLINFO_NODE::SKILLINFO_NODE()
 	m_LearnLevel = 100;
 	m_eSkillRace = RACE_SLAYER;
 
-	m_DelayTime = 0;		// 기술 사용후 다시 사용가능한 delay
-	m_AvailableTime = 0;	// 다시 사용 가능한 시간
-		
-	m_bEnable = false;	
+	m_DelayTime = 0;		// the delay before it can be used again
+	m_AvailableTime = 0;	// when it can be used again
+
+	m_bEnable = false;
+
+	// Where it sits in its tree, and where it is drawn: the skill file
+	// fills all three, and a domain branches on the step, so they are
+	// defined here rather than left to whatever the memory held.
+	m_SkillStep = SKILL_STEP_NULL;
+	m_X = 0;
+	m_Y = 0;
 
 	DomainType = 0;		// 그 기술이 어느 도메인에 속하는가.
 	minDamage = 0;		// 최소 데미지 또는 효과치.
@@ -1593,12 +1600,23 @@ MSkillManager::LoadFromFileServerDomainInfo(std::ifstream& file)
 
 	file.read((char*)&num, 4);
 
-	// 개수만큼..
+	// The count and each domain are the file's. m_pTypeInfo is indexed
+	// raw here, past even the typed table's own bound, so a domain the
+	// file names outside the table would write through a wild pointer;
+	// and once a row is refused the stream is no longer where the next
+	// row begins, so reading stops.
 	for (int i=0; i<num; i++)
-	{		
-		file.read((char*)&domain, 4);
+	{
+		if (!file.read((char*)&domain, 4))
+		{
+			return;
+		}
 
-		// domain에 맞춰서 loading한다.
+		if (domain < 0 || domain >= GetSize())
+		{
+			return;
+		}
+
 		m_pTypeInfo[domain].LoadFromFileServerDomainInfo( file );
 	}
 }

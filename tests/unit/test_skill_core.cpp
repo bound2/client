@@ -145,7 +145,7 @@ TEST(SkillInfoNode, SaveAndLoadRoundTripTheServerFields)
 	// A skill of any other domain carries the common fields only.
 	SKILLINFO_NODE src;
 	src.Set(3, "Blade Dance", 4, 5, 77, "Blade Dance");
-	src.DomainType = SKILLDOMAIN_BLADE;
+	src.DomainType = SKILLDOMAIN_SWORD;		// not 0, so the field is really carried
 	src.SetMP(42);
 	src.SetLearnLevel(9);
 	src.SkillPoint = 6;
@@ -164,7 +164,7 @@ TEST(SkillInfoNode, SaveAndLoadRoundTripTheServerFields)
 
 	CHECK_EQ(42, dst.GetMP());
 	CHECK_EQ(9, dst.GetLearnLevel());
-	CHECK_EQ((int)SKILLDOMAIN_BLADE, dst.DomainType);
+	CHECK_EQ((int)SKILLDOMAIN_SWORD, dst.DomainType);
 	CHECK_EQ(0, dst.SkillPoint);		// an Ousters field, not in this row
 
 	// An Ousters skill carries the elemental block too.
@@ -200,6 +200,26 @@ TEST(SkillInfoNode, SaveAndLoadRoundTripTheServerFields)
 	CHECK_EQ(4, back.Wind);
 	CHECK_EQ(1, (int)back.CanDelete);
 	CHECK_EQ(1, (int)back.SkillTypeList.size());
+}
+
+TEST(SkillInfoNode, AFreshEntrySitsNowhereInItsTree)
+{
+	SkillWorld world;
+	SKILLINFO_NODE node;
+
+	// A domain branches on the step, so it cannot be left to whatever
+	// the memory held.
+	CHECK_EQ((int)SKILL_STEP_NULL, (int)node.GetSkillStep());
+	CHECK_EQ(0, node.GetX());
+	CHECK_EQ(0, node.GetY());
+	CHECK_EQ(0, node.GetMP());
+	CHECK_EQ(0, (int)node.GetDelayTime());
+	CHECK(node.IsAvailableTime());
+
+	// The table's own entries are just as defined, and it sets the one
+	// cast delay it knows by hand.
+	CHECK_EQ((int)SKILL_STEP_NULL, (int)(*g_pSkillInfoTable)[kLeaf].GetSkillStep());
+	CHECK_EQ(3000, (int)(*g_pSkillInfoTable)[SUMMON_HELICOPTER].GetDelayTime());
 }
 
 //----------------------------------------------------------------------
@@ -257,8 +277,12 @@ TEST(SkillDomain, TheRootSkillPullsInTheChainBelowIt)
 	// A skill outside the tree is not in the domain at all.
 	CHECK_EQ((int)MSkillDomain::SKILLSTATUS_NULL, (int)domain.GetSkillStatus(SKILL_FLOURISH));
 
-	// The domain remembers the deepest level it holds.
+	// The domain level is the server's, and a root reset zeroes it.
 	CHECK_EQ(0, domain.GetDomainLevel());
+	domain.SetDomainLevel(4);
+	domain.SetRootSkill(kRoot);
+	CHECK_EQ(0, domain.GetDomainLevel());
+
 	CHECK_EQ(false, (bool)domain.HasNewSkill());
 	domain.SetNewSkill();
 	CHECK(domain.HasNewSkill());
@@ -280,18 +304,32 @@ TEST(SkillDomain, LearningWalksDownTheChainAndUnlearningBackUp)
 
 	// With one, the root is learned and becomes usable; what follows it
 	// becomes learnable.
+	CHECK_EQ(false, g_pSkillAvailable->IsEnableSkill(kRoot));
 	domain.SetNewSkill();
 	CHECK(domain.LearnSkill(kRoot));
 	CHECK_EQ((int)MSkillDomain::SKILLSTATUS_LEARNED, (int)domain.GetSkillStatus(kRoot));
 	CHECK_EQ((int)MSkillDomain::SKILLSTATUS_NEXT, (int)domain.GetSkillStatus(kChild));
 	CHECK(g_pSkillAvailable->IsEnableSkill(kRoot));
-	CHECK_EQ(false, domain.LearnSkill(kRoot));		// twice over, no
 
-	// A skill the domain does not hold is not learnable.
-	CHECK_EQ(false, domain.LearnSkill(SKILL_FLOURISH));
+	// Learning spends the point, so each refusal below is given one of
+	// its own: otherwise they would all stop at that first gate.
+	domain.SetNewSkill();
+	CHECK_EQ(false, domain.LearnSkill(kRoot));		// already learned
+	domain.SetNewSkill();
+	CHECK_EQ(false, domain.LearnSkill(SKILL_FLOURISH));	// not in this domain
 
-	// Unlearning takes the deepest one back off, and out of use.
-	CHECK_EQ(false, domain.UnLearnSkill(kChild));	// not learned
+	// Unlearning takes the deepest one back off, and out of use. The
+	// child is refused for not being learned, at its own gate.
+	domain.SetNewSkill();
+	CHECK(domain.LearnSkill(kChild));
+	CHECK_EQ((int)MSkillDomain::SKILLSTATUS_NEXT, (int)domain.GetSkillStatus(kLeaf));
+	CHECK_EQ(false, domain.UnLearnSkill(kRoot));	// not the deepest any more
+	CHECK(domain.UnLearnSkill(kChild));
+	// Its parent is still learned, so it is learnable again rather than
+	// out of reach; what followed it is out of reach.
+	CHECK_EQ((int)MSkillDomain::SKILLSTATUS_NEXT, (int)domain.GetSkillStatus(kChild));
+	CHECK_EQ((int)MSkillDomain::SKILLSTATUS_OTHER, (int)domain.GetSkillStatus(kLeaf));
+	CHECK_EQ(false, g_pSkillAvailable->IsEnableSkill(kChild));
 	CHECK(domain.UnLearnSkill(kRoot));
 	CHECK_EQ((int)MSkillDomain::SKILLSTATUS_OTHER, (int)domain.GetSkillStatus(kRoot));
 	CHECK_EQ(false, g_pSkillAvailable->IsEnableSkill(kRoot));
@@ -321,4 +359,67 @@ TEST(SkillManager, InitGivesEveryDomainItsRootSkill)
 	// A domain holds only its own root's tree.
 	CHECK_EQ((int)MSkillDomain::SKILLSTATUS_NULL,
 			(int)(*g_pSkillManager)[SKILLDOMAIN_OUSTERS].GetSkillStatus(SKILL_SINGLE_BLOW));
+
+	// The other five roots are there too.
+	CHECK((*g_pSkillManager)[SKILLDOMAIN_GUN].GetSkillStatus(SKILL_FAST_RELOAD)
+			!= MSkillDomain::SKILLSTATUS_NULL);
+	CHECK((*g_pSkillManager)[SKILLDOMAIN_ENCHANT].GetSkillStatus(MAGIC_CREATE_HOLY_WATER)
+			!= MSkillDomain::SKILLSTATUS_NULL);
+	CHECK((*g_pSkillManager)[SKILLDOMAIN_HEAL].GetSkillStatus(MAGIC_CURE_LIGHT_WOUNDS)
+			!= MSkillDomain::SKILLSTATUS_NULL);
+	CHECK((*g_pSkillManager)[SKILLDOMAIN_VAMPIRE].GetSkillStatus(MAGIC_HIDE)
+			!= MSkillDomain::SKILLSTATUS_NULL);
+	CHECK((*g_pSkillManager)[SKILLDOMAIN_ETC].GetSkillStatus(SKILL_SOUL_CHAIN)
+			!= MSkillDomain::SKILLSTATUS_NULL);
+}
+
+TEST(SkillManager, ADomainTheFileNamesPastTheTableIsRefused)
+{
+	SkillWorld world;
+	g_pSkillManager->Init();
+
+	// The domain-experience file names a domain per row, and the table
+	// is indexed raw. A row naming a domain outside it stops the read
+	// rather than writing through a wild pointer.
+	{
+		std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
+		const int rows = 2;
+		const int past = MAX_SKILLDOMAIN + 4;
+		const int payload = 0;
+		out.write((const char*)&rows, 4);
+		out.write((const char*)&past, 4);
+		for (int i = 0; i < 8; i++)
+			out.write((const char*)&payload, 4);
+	}
+	{
+		std::ifstream in(kTempFile, std::ios::binary);
+		g_pSkillManager->LoadFromFileServerDomainInfo(in);
+	}
+
+	// A negative one, and a row that ends before its domain does.
+	{
+		std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
+		const int rows = 1;
+		const int negative = -3;
+		out.write((const char*)&rows, 4);
+		out.write((const char*)&negative, 4);
+	}
+	{
+		std::ifstream in(kTempFile, std::ios::binary);
+		g_pSkillManager->LoadFromFileServerDomainInfo(in);
+	}
+	{
+		std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
+		const int rows = 40;
+		out.write((const char*)&rows, 4);
+	}
+	{
+		std::ifstream in(kTempFile, std::ios::binary);
+		g_pSkillManager->LoadFromFileServerDomainInfo(in);
+	}
+	std::remove(kTempFile);
+
+	// The tree the manager built is still the tree it built.
+	CHECK_EQ(MAX_SKILLDOMAIN, g_pSkillManager->GetSize());
+	CHECK_EQ(3, (*g_pSkillManager)[SKILLDOMAIN_BLADE].GetSize());
 }
