@@ -28,8 +28,12 @@ public:
 
 	int GetLineHeight(const TextStyle& style) const;
 
-	// Simple text rendering API (compatibility layer for SDL_RenderText)
-	// Renders white text at the specified position
+	// Simple text rendering API (compatibility layer for SDL_RenderText).
+	// Renders white text at the specified position through g_pLast, the
+	// back buffer the executable owns - so it is the one member of this
+	// class the library does not define. Client/TextServiceScreen.cpp
+	// does (docs/RESTRUCTURING.md task 5.3), which is what lets a test
+	// binary link TextSystem without inventing that global.
 	static void RenderText(int x, int y, const std::string& text);
 
 	// Encoding normalization: converts CP949/EUC-KR/other encodings to UTF-8

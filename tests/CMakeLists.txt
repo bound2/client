@@ -29,13 +29,22 @@ target_include_directories(test_framework PUBLIC
 file(GLOB UNIT_TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/unit/*.cpp)
 
 #----------------------------------------------------------------------
-# stubs/ defines globals that a linked library references but that are
-# defined in the DarkEden executable. See the file for why each one is
-# there; they are not a general escape hatch for pulling game logic in.
+# There is no stubs/ directory any more (docs/RESTRUCTURING.md task
+# 5.3). It held the globals and functions a linked library referenced
+# but the DarkEden executable defined, and every one of them turned out
+# to be a seam worth cutting rather than filling. Of the libraries this
+# binary links, g_pLast was reached only by TextService::RenderText,
+# which draws through the back buffer and has ~45 live call sites; it
+# is defined in Client/TextServiceScreen.cpp now, on the executable
+# side of the split. SendBugReport moved into packetwire in 5.1.
+# (VS_UI reaches g_pLast too, and is not linked here.)
+# A library that needs
+# something from the program around it asks through a host struct - see
+# MItemHost, MPriceHost, WireHost - which a test can install, rather
+# than through a symbol a test binary has to invent.
 #----------------------------------------------------------------------
 add_executable(unit_tests
 	framework/test_main.cpp
-	stubs/client_globals.cpp
 	${UNIT_TEST_SOURCES}
 )
 
