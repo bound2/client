@@ -4,12 +4,7 @@
 #include "Client_PCH.h"
 #include "MPlayerGear.h"
 #include "MItem.h"
-#include "MHelpManager.h"
-#include "DebugInfo.h"
-
-#ifdef __GAME_CLIENT__
-	#include "ClientConfig.h"
-#endif
+#include "ClientConfig.h"
 
 //----------------------------------------------------------------------
 // 
@@ -190,33 +185,34 @@ MPlayerGear::CheckItemStatus(const MItem* pItem, int slot)
 {
 	ITEM_STATUS oldStatus = m_pItemStatus[slot];
 
-	TYPE_ITEM_DURATION	maxDur = pItem->GetMaxDurability();
+	// The maximum is signed: MItem answers -1 for an item with no
+	// durability, and read into the unsigned duration type that was a
+	// huge maximum and an almost-broken piece.
+	int					maxDur = pItem->GetMaxDurability();
 	TYPE_ITEM_DURATION	curDur = pItem->GetCurrentDurability();
 
-	// 내구성 상태.. % 
-	TYPE_ITEM_DURATION	itemStatusPer = 0;
+	// The remaining durability, in percent
+	// Signed, and so are the two thresholds it is compared against:
+	// they are read from the configuration file unchecked, and a
+	// negative one read as unsigned made every worn item the worst
+	// grade.
+	int					itemStatusPer = 0;
 
 	if(maxDur <= 0 ||pItem->IsSpecialColorItem() || pItem->IsDurationAlwaysOkay())
-		itemStatusPer = 100; 
+		itemStatusPer = 100;
 	else
-		itemStatusPer = curDur*100 / maxDur;
+		itemStatusPer = (int)(((__int64)curDur * 100) / maxDur);
 
 
 	//----------------------------------------------------------
-	// 정상적인 상태		
+	// Whole
 	//----------------------------------------------------------
-	if (itemStatusPer > 
-#ifdef __GAME_CLIENT__
-		g_pClientConfig->PERCENTAGE_ITEM_SOMEWHAT_BROKEN
-#else
-		25
-#endif
-		)
+	if (itemStatusPer > g_pClientConfig->PERCENTAGE_ITEM_SOMEWHAT_BROKEN)
 	{
 		m_pItemStatus[slot] = ITEM_STATUS_OK;
 
 		//----------------------------------------------------------
-		// 부서졌다가 좋아진 상태이다.
+		// Repaired since it was last graded
 		//----------------------------------------------------------
 		if (oldStatus!=ITEM_STATUS_OK)
 		{
@@ -227,25 +223,19 @@ MPlayerGear::CheckItemStatus(const MItem* pItem, int slot)
 		}
 	}
 	//----------------------------------------------------------
-	// 부서진 경우..
+	// Breaking
 	//----------------------------------------------------------
 	else
 	{
 		//----------------------------------------------------------
-		// 거의 부서져가는 상태 --> 빨간색
+		// Almost gone: red
 		//----------------------------------------------------------
-		if (itemStatusPer <= 
-#ifdef __GAME_CLIENT__
-			g_pClientConfig->PERCENTAGE_ITEM_ALMOST_BROKEN
-#else
-			10
-#endif
-			)
+		if (itemStatusPer <= g_pClientConfig->PERCENTAGE_ITEM_ALMOST_BROKEN)
 		{
 			m_pItemStatus[slot] = ITEM_STATUS_ALMOST_BROKEN;
 		}
 		//----------------------------------------------------------
-		// 약간? 부서진 상태			
+		// Somewhat worn
 		//----------------------------------------------------------
 		else
 		{
@@ -291,46 +281,42 @@ MPlayerGear::ModifyDurability(BYTE n, int changeValue)
 
 	int modifyDurability = changeValue;//currentDurability + changeValue;
 
-	//---------------------------------------------------------	
-	// max를 넘어가는 경우
-	//---------------------------------------------------------	
-	if ( modifyDurability > maxDurability)
+	//---------------------------------------------------------
+	// Over the maximum, where there is one: an item with no
+	// durability (a negative maximum) has nothing to clamp to.
+	//---------------------------------------------------------
+	if ( maxDurability >= 0 && modifyDurability > maxDurability)
 	{
 		pItem->SetCurrentDurability( maxDurability );
 	}
-	//---------------------------------------------------------	
-	// 0보다 적은 경우
-	//---------------------------------------------------------	
+	//---------------------------------------------------------
+	// Under zero
+	//---------------------------------------------------------
 	else if (modifyDurability < 0)
 	{
 		pItem->SetCurrentDurability( 0 );
 	}
-	//---------------------------------------------------------	
-	// 정상적으로 바뀌는 경우
-	//---------------------------------------------------------	
+	//---------------------------------------------------------
+	// In range
+	//---------------------------------------------------------
 	else
 	{
 		pItem->SetCurrentDurability( modifyDurability );
 	}
 
-	//---------------------------------------------------------	
-	// Item상태 체크
-	//---------------------------------------------------------	
+	//---------------------------------------------------------
+	// The item's state, and the repair hint the first time it
+	// leaves OK.
+	//---------------------------------------------------------
 	ITEM_STATUS oldStatus = m_pItemStatus[n];
-	
+
 	CheckItemStatus( pItem, n );
-#ifdef __GAME_CLIENT__
-//#ifdef __USE_HELP_EVENT
-//	__BEGIN_HELP_EVENT	
-//		// OK였는데.. OK가 아니게 되는 경우
-		if (oldStatus==ITEM_STATUS_OK && m_pItemStatus[n]!=ITEM_STATUS_OK)
-		{
-			// [도움말] 아이템이 부서져가는 경우
-			ExecuteHelpEvent( HELP_EVENT_ITEM_REPAIR );
-		}
-//	__END_HELP_EVENT
-//#endif
-#endif	
+
+	if (oldStatus==ITEM_STATUS_OK && m_pItemStatus[n]!=ITEM_STATUS_OK)
+	{
+		MItem::RepairHint();
+	}
+
 	return true;
 }
 

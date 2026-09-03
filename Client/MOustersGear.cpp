@@ -5,12 +5,6 @@
 #include "MItem.h"
 #include "MOustersGear.h"
 #include "MQuickSlot.h"
-
-#ifdef __GAME_CLIENT__
-	#include "UIFunction.h"
-	#include "ClientFunction.h"
-	#include "MPlayer.h"
-#endif
 #include "MTimeItemManager.h"
 
 //----------------------------------------------------------------------
@@ -119,11 +113,7 @@ MOustersGear::Init()
 void			
 MOustersGear::CheckAffectStatus(MItem* pItem)
 {
-	#ifdef __GAME_CLIENT__
-
-		g_pPlayer->CheckAffectStatus( pItem );
-
-	#endif
+	MItem::RefreshAffect( pItem );
 }
 
 //----------------------------------------------------------------------
@@ -374,12 +364,10 @@ MOustersGear::AddItem(MItem* pItem, GEAR_OUSTERS n)
 				m_ItemSlot[GEAR_OUSTERS_LEFTHAND] = pItem;
 
 				//-------------------------------------------------
-				// 제대로 추가된 경우 --> sound출력
+				// on: the gear sound, and the player's stats follow
 				//-------------------------------------------------
-				#ifdef __GAME_CLIENT__
-					PlaySound( pItem->GetGearSoundID() );
-					g_pPlayer->CalculateStatus();	
-				#endif
+				MItem::PlayItemSound( pItem->GetGearSoundID() );
+				MItem::RecalculateStatus();	
 
 				return true;
 			}
@@ -401,12 +389,10 @@ MOustersGear::AddItem(MItem* pItem, GEAR_OUSTERS n)
 				if (MPlayerGear::AddItem( pItem, n ))	
 				{
 					//-------------------------------------------------
-					// 제대로 추가된 경우 --> sound출력
+					// on: the gear sound, and the player's stats follow
 					//-------------------------------------------------
-					#ifdef __GAME_CLIENT__
-						PlaySound( pItem->GetGearSoundID() );
-						g_pPlayer->CalculateStatus();	
-					#endif
+					MItem::PlayItemSound( pItem->GetGearSoundID() );
+					MItem::RecalculateStatus();	
 
 					return true;
 				}
@@ -415,17 +401,16 @@ MOustersGear::AddItem(MItem* pItem, GEAR_OUSTERS n)
 		else 
 		if (pItem->IsGearSlotOustersCoreZap())
 		{
-			if (m_ItemSlot[n-m_Gilles_CoreZap]!=NULL && m_ItemSlot[n]==NULL) // 해당위치에 링이 있고 코어잽이 없을 경우만 코어잽 추가
+			// A zap needs the stone at n under it and its own slot free.
+			if (m_ItemSlot[n]!=NULL && m_ItemSlot[n+m_Gilles_CoreZap]==NULL)
 			{		
 				if (MPlayerGear::AddItem( pItem, n + m_Gilles_CoreZap ))// 코어잽 위치에 추가
 				{
 					//-------------------------------------------------
-					// 제대로 추가된 경우 --> sound출력
+					// on: the gear sound, and the player's stats follow
 					//-------------------------------------------------
-					#ifdef __GAME_CLIENT__
-						PlaySound( pItem->GetGearSoundID() );
-						g_pPlayer->CalculateStatus();	
-					#endif
+					MItem::PlayItemSound( pItem->GetGearSoundID() );
+					MItem::RecalculateStatus();	
 
 					return true;
 				}
@@ -448,34 +433,26 @@ MOustersGear::AddItem(MItem* pItem, GEAR_OUSTERS n)
 		bool bAdd = MPlayerGear::AddItem( pItem, n );
 
 		//-------------------------------------------------
-		// 제대로 추가된 경우 --> sound출력
+		// on: the gear sound, and the player's stats follow
 		//-------------------------------------------------
 		if (bAdd)
 		{
-			#ifdef __GAME_CLIENT__		
-				PlaySound( pItem->GetGearSoundID() );
-				g_pPlayer->CalculateStatus();
-			#endif
+			MItem::PlayItemSound( pItem->GetGearSoundID() );
+			MItem::RecalculateStatus();
 
 			if( n == GEAR_OUSTERS_ARMSBAND1	)
 			{
 				g_pArmsBand1 = (MOustersArmsBand*)pItem;
-				#ifdef __GAME_CLIENT__		
-				UI_ResetQuickItemSlot();
-				#endif
+				MItem::ResetQuickItemSlot();
 			}
 			else if ( n == GEAR_OUSTERS_ARMSBAND2 )
 			{
 				g_pArmsBand2 = (MOustersArmsBand*)pItem;
-				#ifdef __GAME_CLIENT__		
-				UI_ResetQuickItemSlot();
-				#endif
+				MItem::ResetQuickItemSlot();
 			}
 			
-			#ifdef __GAME_CLIENT__		
-			PlaySound( pItem->GetGearSoundID() );
-			g_pPlayer->CalculateStatus();	
-			#endif
+			MItem::PlayItemSound( pItem->GetGearSoundID() );
+			MItem::RecalculateStatus();	
 
 			return true;
 		}		
@@ -491,11 +468,20 @@ MOustersGear::AddItem(MItem* pItem, GEAR_OUSTERS n)
 //----------------------------------------------------------------------
 MItem*			
 MOustersGear::RemoveItem(GEAR_OUSTERS n)
-{ 
+{
+	//-----------------------------------------------------
+	// The slot arrives in GCRemoveFromGear, so it is bounded
+	// before it indexes the array.
+	//-----------------------------------------------------
+	if ((unsigned int)n >= (unsigned int)m_Size)
+	{
+		return NULL;
+	}
+
 	MItem* pItem = m_ItemSlot[n];
 
 	//-----------------------------------------------------
-	// 없는 경우
+	// Nothing there
 	//-----------------------------------------------------
 	if (pItem==NULL)
 	{
@@ -548,9 +534,7 @@ MOustersGear::RemoveItem(GEAR_OUSTERS n)
 		m_ItemSlot[GEAR_OUSTERS_RIGHTHAND] = NULL;
 	}
 	
-	#ifdef __GAME_CLIENT__
-		g_pPlayer->CalculateStatus();
-	#endif
+	MItem::RecalculateStatus();
 
 	// 있으면...
 	return pItem;
@@ -589,9 +573,7 @@ MOustersGear::RemoveItem(TYPE_OBJECTID id)
 	}
 
 
-	#ifdef __GAME_CLIENT__
-		g_pPlayer->CalculateStatus();
-	#endif
+	MItem::RecalculateStatus();
 
 	// 있~으면...
 	return pItem;
@@ -676,12 +658,10 @@ MOustersGear::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 					m_ItemSlot[GEAR_OUSTERS_RIGHTHAND] = pItem;
 
 					//-------------------------------------------------
-					// 제대로 추가된 경우 --> sound출력
+					// on: the gear sound, and the player's stats follow
 					//-------------------------------------------------
-					#ifdef __GAME_CLIENT__
-						PlaySound( pItem->GetGearSoundID() );						
-						g_pPlayer->CalculateStatus();			
-					#endif
+					MItem::PlayItemSound( pItem->GetGearSoundID() );						
+					MItem::RecalculateStatus();			
 
 					return true;
 				}
@@ -715,12 +695,10 @@ MOustersGear::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 						//m_ItemSlot[GEAR_OUSTERS_RIGHTHAND] = pItem;
 
 						//-------------------------------------------------
-						// 제대로 추가된 경우 --> sound출력
+						// on: the gear sound, and the player's stats follow
 						//-------------------------------------------------
-						#ifdef __GAME_CLIENT__
-							PlaySound( pItem->GetGearSoundID() );
-							g_pPlayer->CalculateStatus();	
-						#endif	
+						MItem::PlayItemSound( pItem->GetGearSoundID() );
+						MItem::RecalculateStatus();	
 
 						return true;
 					}
@@ -775,12 +753,10 @@ MOustersGear::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 				m_ItemSlot[GEAR_OUSTERS_RIGHTHAND] = pItem;
 		
 				//-------------------------------------------------
-				// 제대로 추가된 경우 --> sound출력
+				// on: the gear sound, and the player's stats follow
 				//-------------------------------------------------
-				#ifdef __GAME_CLIENT__
-					PlaySound( pItem->GetGearSoundID() );
-					g_pPlayer->CalculateStatus();
-				#endif
+				MItem::PlayItemSound( pItem->GetGearSoundID() );
+				MItem::RecalculateStatus();
 
 				return true;
 			}
@@ -817,12 +793,10 @@ MOustersGear::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 				CheckItemStatus( pItem, GEAR_OUSTERS_RIGHTHAND );
 
 				//-------------------------------------------------
-				// 제대로 추가된 경우 --> sound출력
+				// on: the gear sound, and the player's stats follow
 				//-------------------------------------------------
-				#ifdef __GAME_CLIENT__
-					PlaySound( pItem->GetGearSoundID() );
-					g_pPlayer->CalculateStatus();
-				#endif
+				MItem::PlayItemSound( pItem->GetGearSoundID() );
+				MItem::RecalculateStatus();
 
 				return true;
 			}
@@ -858,12 +832,10 @@ MOustersGear::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 				CheckItemStatus( pItem, GEAR_OUSTERS_LEFTHAND );
 				
 				//-------------------------------------------------
-				// 제대로 추가된 경우 --> sound출력
+				// on: the gear sound, and the player's stats follow
 				//-------------------------------------------------
-				#ifdef __GAME_CLIENT__
-					PlaySound( pItem->GetGearSoundID() );
-					g_pPlayer->CalculateStatus();
-				#endif	
+				MItem::PlayItemSound( pItem->GetGearSoundID() );
+				MItem::RecalculateStatus();
 
 				return true;
 			}
@@ -912,10 +884,8 @@ MOustersGear::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 
 				if (bAdd) // 잘 추가 됐으면 
 				{
-					#ifdef __GAME_CLIENT__
-						PlaySound( pItem->GetGearSoundID() );
-						g_pPlayer->CalculateStatus();
-					#endif
+					MItem::PlayItemSound( pItem->GetGearSoundID() );
+					MItem::RecalculateStatus();
 					return true;
 				}
 				else 
@@ -944,29 +914,21 @@ MOustersGear::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 			CheckItemStatus( pItem, n );			
 
 			//-------------------------------------------------
-			// 제대로 추가된 경우 --> sound출력
+			// on: the gear sound, and the player's stats follow
 			//-------------------------------------------------
-			#ifdef __GAME_CLIENT__
-				PlaySound( pItem->GetGearSoundID() );
-			#endif
+			MItem::PlayItemSound( pItem->GetGearSoundID() );
 
-			#ifdef __GAME_CLIENT__
-				g_pPlayer->CalculateStatus();
-			#endif
+			MItem::RecalculateStatus();
 
 			if( n == GEAR_OUSTERS_ARMSBAND1	)
 			{
 				g_pArmsBand1 = (MOustersArmsBand*)pItem;
-				#ifdef __GAME_CLIENT__		
-				UI_ResetQuickItemSlot();
-				#endif
+				MItem::ResetQuickItemSlot();
 			}
 			else if ( n == GEAR_OUSTERS_ARMSBAND2 )
 			{
 				g_pArmsBand2 = (MOustersArmsBand*)pItem;
-				#ifdef __GAME_CLIENT__		
-				UI_ResetQuickItemSlot();
-				#endif
+				MItem::ResetQuickItemSlot();
 			}
 			return true;
 		}

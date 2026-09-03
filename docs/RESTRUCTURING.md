@@ -116,10 +116,10 @@ an unrecorded drop, so tightening lands in the same commit as the progress.
 
 | # | Metric | Baseline | Command |
 |---|--------|---------:|---------|
-| R1 | Translation units compiled directly into the DarkEden target | **502** (503 before 4.2's third slice moved `MPriceManager.cpp` into `gamemodel`; 505 before 4.2's second slice moved `MTradeManager.cpp` and `MSortedItemManager.cpp` into `gamemodel`; 508 before 4.3's second slice moved `MInventory.cpp`, `MStorage.cpp` and `MShopShelf.cpp` into `gamemodel`; 512 before 4.3's first slice moved the three item managers and `MQuickSlot.cpp` into `gamemodel`; 515 before 4.4's second slice moved `MItem.cpp`, `MObject.cpp`, `UserInformation.cpp`, `ClientConfig.cpp` and `MTimeItemManager.cpp` into `gamemodel` and split their executable halves out as `MItemUse.cpp` and `MObjectScreen.cpp`, +2 −5; 516 before 5.2 deleted the dead `MitemTableInit.cpp`; 517 before 4.4's first slice moved `MItemTable.cpp`; 518 before 4.2 moved `MMoneyManager.cpp`, another double-compiled VS_UI entry; 528 before task 4.1's `gamemodel` took its ten members out — the four support sources, and the six tables that the relative `VS_UI_CLIENT_SOURCES` list had never actually removed from the exe glob, so they compiled into both VS_UI and the executable — as the 36 files still on that list do; 529 before task 2.5 deleted the dead `CRRequest2Handler.cpp`; 992 before task 2.4 moved the 465 packet/table/info sources into `packetwire`, +1 for the split-out `GCExchangeBuyHandler.cpp`; 1,044 before task 1.1; the task-2.2 composition root `PacketHandlerRegistry.cpp` was a recorded +1, offset when finishing the migration deleted `CGHandlersStub.cpp`) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` — `ratchets.sh` reads the generated vcxproj, preferring the ctest run's own build dir; on generators with no vcxproj it reports SKIP, not PASS |
+| R1 | Translation units compiled directly into the DarkEden target | **497** (502 before 4.4's third slice moved `MPlayerGear.cpp`, the three race gears and `MShop.cpp` into `gamemodel`; 503 before 4.2's third slice moved `MPriceManager.cpp` into `gamemodel`; 505 before 4.2's second slice moved `MTradeManager.cpp` and `MSortedItemManager.cpp` into `gamemodel`; 508 before 4.3's second slice moved `MInventory.cpp`, `MStorage.cpp` and `MShopShelf.cpp` into `gamemodel`; 512 before 4.3's first slice moved the three item managers and `MQuickSlot.cpp` into `gamemodel`; 515 before 4.4's second slice moved `MItem.cpp`, `MObject.cpp`, `UserInformation.cpp`, `ClientConfig.cpp` and `MTimeItemManager.cpp` into `gamemodel` and split their executable halves out as `MItemUse.cpp` and `MObjectScreen.cpp`, +2 −5; 516 before 5.2 deleted the dead `MitemTableInit.cpp`; 517 before 4.4's first slice moved `MItemTable.cpp`; 518 before 4.2 moved `MMoneyManager.cpp`, another double-compiled VS_UI entry; 528 before task 4.1's `gamemodel` took its ten members out — the four support sources, and the six tables that the relative `VS_UI_CLIENT_SOURCES` list had never actually removed from the exe glob, so they compiled into both VS_UI and the executable — as the 36 files still on that list do; 529 before task 2.5 deleted the dead `CRRequest2Handler.cpp`; 992 before task 2.4 moved the 465 packet/table/info sources into `packetwire`, +1 for the split-out `GCExchangeBuyHandler.cpp`; 1,044 before task 1.1; the task-2.2 composition root `PacketHandlerRegistry.cpp` was a recorded +1, offset when finishing the migration deleted `CGHandlersStub.cpp`) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` — `ratchets.sh` reads the generated vcxproj, preferring the ctest run's own build dir; on generators with no vcxproj it reports SKIP, not PASS |
 | R2 | Packet `.cpp` files still defining a packet-style `::execute(Player` | **0** (448 → 432 in slice 1 → 0 when 2.2/2.3 finished; regex refined at 0 to stop matching comments and the in-file handler body in `GCExchangeBuy.cpp`) | `grep -rlE '^void\s+\w+::execute\s*\(\s*Player' Client/Packet/{Gpackets,Cpackets,Lpackets,Rpackets,Upackets} --include='*.cpp' \| grep -v Handler \| wc -l` |
 | R3 | Live `sprintf`/`strcpy`/`strcat` lines under `Client/Packet` **and `Client/PacketHandler`** | 46 (unchanged by task 2.4, which widened the scope to follow the handlers out of `Client/Packet`; 61 at first measurement — the 2026-09-01 adversarial review showed a quarter of that was commented-out code, so the measurement now excludes `//` matches) | see `ratchets.sh` — the grep excludes comment-prefixed matches |
-| R4 | Library-compiled `.cpp` files referencing `g_p*` client globals **no library file defines** | **28** (35 before 4.4's second slice — a reclassification again, 35 + 1 − 8: the subtraction became library-wide, so a library file reading a global another library file defines is no longer a seam; `MItem.cpp` joined reading `gamemodel`'s own tables, +1 under the old per-file rule, and the union rule excludes it with seven earlier members — `Datagram.cpp` reading `packetwire`'s factory manager, and six `VS_UI` sources whose only reaches are `gamemodel`'s tables, `packetwire`'s `g_pFileDef` or `VS_UI`'s own globals; 59 before task 4.0 — a reclassification, not seam-cutting: the 36 `VS_UI_CLIENT_SOURCES` files stopped being library-compiled, so the 24 of them that reach globals are executable debt now, counted by R1 and outside this ratchet; 61 before task 4.1 cut the two `g_pFileDef` seams in `MGameStringTable` and `SystemAvailabilities` and added the `gamemodel` membership file, whose four new members reference no game global; 81 before task 2.4 grew the membership from 52 to 518 files; the number fell because the measurement stopped counting a file's references to globals it defines — the packet tables own `g_pPacketFactoryManager`/`g_pPacketValidator` — and the two dead server-only bodies that reached game globals were deleted; 83 at first measurement, before two never-compiled files were filtered) | `ratchets.sh` computes it over the library dirs (minus CMake-excluded files) plus the `packetwire` and `gamemodel` membership files |
+| R4 | Library-compiled `.cpp` files referencing `g_p*` client globals **no library file defines** | **27** (28 before 4.4's third slice moved the gear into `gamemodel` — a reclassification: `VS_UI_Game.cpp`'s only reaches past the libraries were `g_pSlayerGear`, `g_pVampireGear` and `g_pOustersGear`, which the gear sources define; 35 before 4.4's second slice — a reclassification again, 35 + 1 − 8: the subtraction became library-wide, so a library file reading a global another library file defines is no longer a seam; `MItem.cpp` joined reading `gamemodel`'s own tables, +1 under the old per-file rule, and the union rule excludes it with seven earlier members — `Datagram.cpp` reading `packetwire`'s factory manager, and six `VS_UI` sources whose only reaches are `gamemodel`'s tables, `packetwire`'s `g_pFileDef` or `VS_UI`'s own globals; 59 before task 4.0 — a reclassification, not seam-cutting: the 36 `VS_UI_CLIENT_SOURCES` files stopped being library-compiled, so the 24 of them that reach globals are executable debt now, counted by R1 and outside this ratchet; 61 before task 4.1 cut the two `g_pFileDef` seams in `MGameStringTable` and `SystemAvailabilities` and added the `gamemodel` membership file, whose four new members reference no game global; 81 before task 2.4 grew the membership from 52 to 518 files; the number fell because the measurement stopped counting a file's references to globals it defines — the packet tables own `g_pPacketFactoryManager`/`g_pPacketValidator` — and the two dead server-only bodies that reached game globals were deleted; 83 at first measurement, before two never-compiled files were filtered) | `ratchets.sh` computes it over the library dirs (minus CMake-excluded files) plus the `packetwire` and `gamemodel` membership files |
 | R5 | Direct packet `execute()` call sites outside `Client/Packet` (handlers under `Client/PacketHandler` are in scope) | 1 (a commented-out block in `CGameUpdate.cpp`; added 2026-09-01 after the review found live local-echo callers the receive-loop enumeration had missed; task 2.4 found two more inside handlers — `GCReconnectLoginHandler`/`LCReconnectHandler` fabricating a `CGConnectSetKey` — invisible while handlers lived under the excluded `Client/Packet`, caught by the compiler once `Packet::execute` was deleted, and routed through the dispatcher; a live caller is now a compile error before it is a ratchet failure) | see `ratchets.sh` |
 
 R1 is the headline number: it counts what still cannot be unit-tested. R2 is
@@ -1145,8 +1145,8 @@ starting each — the scan is one grep, and the ranking below is from a
   > violation and called anyway; the factory answers NULL now and both
   > handlers return on it. Suite: 235 tests (3,810 checks). **4.3 is
   > complete** but for `MItemManager`'s executable-side siblings that
-  > were never on its list; the next 4.x work is 4.4's remainder
-  > (`MItemManager` is in, the skill core and the gear classes are not);
+  > were never on its list; the next 4.x work is 4.4's remainder —
+  > the skill core, now that the gear followed as 4.4's third slice;
   > 4.2's trade and price managers followed as its second and third
   > slices, on what is now in the library.
   > **Adversarial review round (2026-09-03, with 4.2's second slice, 4
@@ -1174,7 +1174,9 @@ starting each — the scan is one grep, and the ranking below is from a
 - [ ] **4.4 Item/skill cores:** `MItem.cpp`, `MItemManager.cpp`,
   `MSkillManager.cpp`, `SkillDef.cpp`, gear classes. Likely partial —
   whatever stays coupled goes on the exemption list explicitly.
-  > **Status:** first slice done — the item table (2026-09-02,
+  > **Status:** in progress (the skill core, `MSkillManager.cpp` and
+  > `SkillDef.cpp`; the item table, the item core, the item managers and
+  > the gear are in). First slice — the item table (2026-09-02,
   > `restructuring/gamemodel-items`; live verification gates the
   > merge). The scan of the item family: `MItem.h` is clean (`MObject`,
   > `MItemTable`, the two item managers, `ItemClassDef`), three of the
@@ -1290,6 +1292,100 @@ starting each — the scan is one grep, and the ranking below is from a
   > pre-init item construction, drop or colour read (every `NewItem`
   > caller is in-game), the widened requirement getters safe at all 64
   > call sites, each fix's test failing before its fix.
+  > **Third slice (2026-09-03, `restructuring/gamemodel-gear`; live
+  > verification gates the merge):** the gear. `MPlayerGear` (the slot
+  > container a player wears its items in, grading each piece by its
+  > remaining durability against the configuration's two thresholds),
+  > `MSlayerGear`, `MVampireGear` and `MOustersGear` (the races' slot
+  > rules over it: two-handers, ring-and-zap pairs, the belt and the
+  > arms bands that become quick slots) and `MShop` (a shelf per type)
+  > join `gamemodel`. Their reaches were the player's affect check and
+  > stat recalculation, the gear sound, the UI's quick-slot rebuild, the
+  > repair help event and — for a gun worn without a magazine — the item
+  > factory. `MItemHost` gains four entries (`RecalculateStatus`,
+  > `ResetQuickItemSlot`, `RepairHint`, `EmptyMagazineFor`, the last
+  > carrying the magazine-fitting loop into `GameInit`); the affect
+  > check and the sound go through the entries the containers already
+  > use; the quick-slot globals are `MQuickSlot.cpp`'s, in the library
+  > since 4.3. Dropped on the way: the 61 `__GAME_CLIENT__` guards
+  > (always on) with the `UIFunction.h`, `ClientFunction.h` and
+  > `MPlayer.h` includes they wrapped, the two plain includes the strip
+  > left unused (`MPlayerGear.cpp`'s `DebugInfo.h` and
+  > `MHelpManager.h`), and the two `#else` thresholds a non-client build
+  > would have used. One behaviour delta, kept and recorded: the host's
+  > `RecalculateStatus` checks for a player where the ~40 call sites it
+  > replaced dereferenced one unguarded, so the no-player window is a
+  > skipped recompute rather than a crash — the same trade the
+  > containers' affect check made in 4.3. R1 502 → 497; R4 28 → 27 — a reclassification, not a cut:
+  > `VS_UI_Game.cpp`'s only reaches past the libraries were the three
+  > race gears' globals, library-defined now. Tests
+  > (`test_player_gear.cpp`, 11): the base grades by durability at the
+  > configured thresholds, treats a piece with no durability or one
+  > that never wears as fine, clears a removed item's status and the
+  > broken count, hands back what `Replace` displaces without grading
+  > the newcomer (the race gears do), clamps `ModifyDurability` and
+  > raises the repair hint once each time a piece leaves OK, and owns
+  > its items; the slayer's gear wears a slayer item in its slot and
+  > refuses the taken slot, the wrong slot, another race's item and
+  > non-gear, tells the host on the way on and off, takes both hands
+  > for a two-hander and frees both, makes a belt the quick slot and
+  > resets it, seats a zap behind its ring and takes it off first; the
+  > vampire's refuses a slayer's helm; the Ousters' arms band becomes a
+  > quick slot; the shop asks the player about everything on the shelf
+  > it switches to and owns its shelves. **Observed, not fixed:** the
+  > Ousters gear plays the gear sound and recomputes the stats twice
+  > for every item that goes on through its slot table (the two-hand
+  > and stone branches call each once). **One defect fixed test-first,
+  > after the move:** `CheckItemStatus` read the item's maximum
+  > durability into the unsigned duration type, so the -1 `MItem`
+  > answers for a piece with none failed the "no durability" test as
+  > 4,294,967,295 and the piece graded almost broken (0 of a huge
+  > maximum); the maximum is read signed now. Suite: 261 tests (4,164
+  > checks).
+  > **Adversarial review round (2026-09-03, 2 reviewers, both SHIP with
+  > findings), fixed on the branch:** the round overturned that fix's
+  > premise and found the reachable defect underneath it. `MGearItem`
+  > clamps its maximum to at least 1,000 and every race gear admits
+  > only `IsGearItem()` items, so no live piece of gear can report a
+  > negative maximum — the test reaches that path only through an
+  > override, which makes it a **regression guard**, not a
+  > reproduction, and the claim that "a gear entry whose table maximum
+  > is unset shows red" was false. The symptom was real but had another
+  > cause, one MSVC had been printing as C4018 in this slice's own
+  > build log: `itemStatusPer` was unsigned while both thresholds are
+  > `int` read unchecked from the configuration file, so a negative
+  > threshold graded **every** worn piece as almost broken. Both
+  > comparisons are signed now, the percentage is computed in 64 bits,
+  > and `ModifyDurability` no longer clamps to a negative maximum
+  > (which stored 4,294,967,295 as the new durability).
+  > **Three more defects, each fixed test-first:** the zap branch of
+  > `AddItem` in all three gears read `m_ItemSlot[n-m_Gilles_CoreZap]`
+  > — a glove, belt or trouser slot for the slayer, a ring for the
+  > Ousters — and required the ring slot itself to be *empty*, so it
+  > both refused a zap over its own ring and **accepted a ring-less zap**
+  > whenever the unrelated slot happened to be filled; `CanReplaceItem`
+  > and `ReplaceItem` in the same files already wrote the intended
+  > condition, which the branch now matches. `RemoveItem(GEAR_*)` in
+  > all three gears indexed the slot array before any bound, with the
+  > slot id taken straight from `GCRemoveFromGear` — the new test
+  > crashes the process against the old code, the C13 shape again.
+  > `MShop::SetShelf` wrote `m_pShelf[n]` unbounded, contradicting its
+  > own header's promise that a shelf number past the shop's own is
+  > refused and left to the caller to delete — three `VS_UI` call sites
+  > are written against that promise. Tidy-ups: two tests were weak —
+  > one leaked the item it said it handed back, and the "not gear"
+  > refusal was really a race refusal because the fixture left the
+  > potion's race unset; `EmptyMagazineFor` is typed `MMagazine*` and
+  > checks the factory's NULL contract; `MItem`'s two older host
+  > services guard the function pointer as the four new ones do;
+  > `GameModelWorld` cannot be copied. **Noted, not done:** the five
+  > gear and shop sources still hold 492 Korean comment lines (89 of
+  > them inside the functions this slice touched) and their headers
+  > 184 — translating them wholesale would swamp the byte-identity the
+  > move rests on, so it is debt with a number; and `MSlayerGear::ReplaceItem`,
+  > `GetFitSlot`, the PDA, shoulder and blood-bible slots, the Ousters
+  > stones and `MPlayerGear::ReplaceItem` over a broken newcomer have
+  > no tests. Suite: 264 tests (4,196 checks).
   - Owner (all of 4.x): `gamemodel`'s membership file
     (`tests/arch/gamemodel_files.txt`), the M0–M2 include rules in
     `check_includes.pl` (in force since 4.1), R4 shrinking.

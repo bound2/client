@@ -15,19 +15,11 @@
 
 #include "test_framework.h"
 
-#include "MItem.h"
-#include "MItemTable.h"
-#include "MItemOptionTable.h"
+#include "gamemodel_world.h"
 #include "MItemManager.h"
 #include "MGridItemManager.h"
 #include "MSlotItemManager.h"
 #include "MItemFinder.h"
-#include "MGameStringTable.h"
-#include "MStringArray.h"
-#include "UserInformation.h"
-#include "ClientConfig.h"
-#include "MTimeItemManager.h"
-#include "ItemClassDef.h"
 
 namespace {
 
@@ -39,13 +31,11 @@ namespace {
 // of live ones proves Release's ownership. Each fixture starts it at 0.
 int	s_Alive = 0;
 
-struct ContainerWorld
+struct ContainerWorld : GameModelWorld
 {
 	ContainerWorld()
 	{
 		s_Alive = 0;
-		g_pItemTable = new ITEMCLASS_TABLE;
-		g_pItemTable->Init(MAX_ITEM_CLASS);
 		g_pItemTable->InitClass(ITEM_CLASS_SWORD, 3);
 		(*g_pItemTable)[ITEM_CLASS_SWORD][0].SetGrid(2, 1);
 		(*g_pItemTable)[ITEM_CLASS_SWORD][1].SetGrid(1, 1);
@@ -54,24 +44,6 @@ struct ContainerWorld
 		(*g_pItemTable)[ITEM_CLASS_BELT][0].SetValue(0, 0, 3);	// Value3: pockets
 		g_pItemTable->InitClass(ITEM_CLASS_POTION, 1);
 		(*g_pItemTable)[ITEM_CLASS_POTION][0].SetGrid(1, 1);
-
-		g_pItemOptionTable = new ITEMOPTION_TABLE;
-		g_pItemOptionTable->Init(1);
-		g_pGameStringTable = new MStringArray;
-		g_pUserInformation = new UserInformation;
-		g_pClientConfig = new ClientConfig;
-		g_pTimeItemManager = new MTimeItemManager;
-		MItem::SetHost(NULL);
-	}
-
-	~ContainerWorld()
-	{
-		delete g_pTimeItemManager;	g_pTimeItemManager = NULL;
-		delete g_pClientConfig;		g_pClientConfig = NULL;
-		delete g_pUserInformation;	g_pUserInformation = NULL;
-		delete g_pGameStringTable;	g_pGameStringTable = NULL;
-		delete g_pItemOptionTable;	g_pItemOptionTable = NULL;
-		delete g_pItemTable;		g_pItemTable = NULL;
 	}
 };
 

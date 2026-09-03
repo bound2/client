@@ -105,6 +105,22 @@ Client/MSortedItemManager.h
 Client/MPriceManager.cpp
 Client/MPriceManager.h
 
+# The gear (task 4.4, third slice): the slot container a player wears
+# its items in, the three races' slot rules over it, and the shop that
+# holds a shelf per type. Their reaches - the player's affect check and
+# stat recalculation, the gear sound, the quick-slot rebuild, the repair
+# hint and the empty magazine a gun is given - go through MItem's host.
+Client/MPlayerGear.cpp
+Client/MPlayerGear.h
+Client/MSlayerGear.cpp
+Client/MSlayerGear.h
+Client/MVampireGear.cpp
+Client/MVampireGear.h
+Client/MOustersGear.cpp
+Client/MOustersGear.h
+Client/MShop.cpp
+Client/MShop.h
+
 # The seams MItem reads (task 4.4): the user's display settings (the
 # gore level picks the skull names), the client configuration (the
 # colour-set bases) and the timed-item register (quest items). All

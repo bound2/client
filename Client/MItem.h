@@ -70,20 +70,25 @@
 #include "RaceType.h"
 class MCreature;
 class MItem;
+class MMagazine;
 
 //----------------------------------------------------------------------
 // MItemHost - what MItem needs from the executable (docs/RESTRUCTURING.md
 // task 4.4). The item model compiles into gamemodel, which cannot see
-// the two clocks, the top view's item-drop frame pack or the player,
-// so the executable installs these once at start-up (GameInit.cpp); a
-// test binary installs its own, or none.
+// the two clocks, the top view's item-drop frame pack, the player, the
+// UI or the item factory, so the executable installs these once at
+// start-up (GameInit.cpp); a test binary installs its own, or none.
 //----------------------------------------------------------------------
 struct MItemHost {
 	const DWORD*	pCurrentFrame;							// the animation clock the colour cycles follow
 	int				(*DropFrameCount)(TYPE_FRAMEID dropID);	// frames in the drop animation of a drop frame id
 	void			(*RefreshAffect)(MItem* pItem);			// the player re-evaluates whether it can use the item (containers on add, a pet before its colour is read)
-	void			(*PlayItemSound)(TYPE_SOUNDID soundID);	// the inventory sound an item makes when it lands in a container
+	void			(*PlayItemSound)(TYPE_SOUNDID soundID);	// the sound an item makes landing in a container or going on as gear
 	const DWORD*	pCurrentTime;							// the millisecond clock the trade manager's accept delay runs on; NULL means no delay
+	void			(*RecalculateStatus)();					// the player recomputes its stats after its gear changed
+	void			(*ResetQuickItemSlot)();				// the UI rebuilds the quick-item slots after the belt or an arms band changed
+	void			(*RepairHint)();						// the help event for a piece of gear that started to break
+	MMagazine*		(*EmptyMagazineFor)(MItem* pGun);		// a fresh, empty magazine of the type the gun takes, or NULL
 };
 
 
@@ -431,9 +436,14 @@ class MItem : public MObject, public CAnimationFrame {
 		void		SetDropping();
 		static void				SetHost(const MItemHost* pHost)	{ s_pHost = pHost; }
 		static const MItemHost*	GetHost()						{ return s_pHost; }
-		// The host's services, safe to call without one (a test binary).
-		static void				RefreshAffect(MItem* pItem)		{ if (s_pHost!=NULL) s_pHost->RefreshAffect(pItem); }
-		static void				PlayItemSound(TYPE_SOUNDID soundID)	{ if (s_pHost!=NULL) s_pHost->PlayItemSound(soundID); }
+		// The host's services, safe to call without one (a test binary),
+		// and safe against a host that carries only some of them.
+		static void				RefreshAffect(MItem* pItem)		{ if (s_pHost!=NULL && s_pHost->RefreshAffect!=NULL) s_pHost->RefreshAffect(pItem); }
+		static void				PlayItemSound(TYPE_SOUNDID soundID)	{ if (s_pHost!=NULL && s_pHost->PlayItemSound!=NULL) s_pHost->PlayItemSound(soundID); }
+		static void				RecalculateStatus()				{ if (s_pHost!=NULL && s_pHost->RecalculateStatus!=NULL) s_pHost->RecalculateStatus(); }
+		static void				ResetQuickItemSlot()			{ if (s_pHost!=NULL && s_pHost->ResetQuickItemSlot!=NULL) s_pHost->ResetQuickItemSlot(); }
+		static void				RepairHint()					{ if (s_pHost!=NULL && s_pHost->RepairHint!=NULL) s_pHost->RepairHint(); }
+		static MMagazine*		EmptyMagazineFor(MItem* pGun)	{ return s_pHost!=NULL && s_pHost->EmptyMagazineFor!=NULL ? s_pHost->EmptyMagazineFor(pGun) : NULL; }
 		// The executable's millisecond clock; NULL without a host, or with one that carries none.
 		static const DWORD*		Clock()							{ return s_pHost!=NULL ? s_pHost->pCurrentTime : NULL; }
 		BOOL		IsDropping() const		{ return m_bDropping; }

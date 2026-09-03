@@ -4,11 +4,6 @@
 #include "Client_PCH.h"
 #include "MItem.h"
 #include "MVampireGear.h"
-
-#ifdef __GAME_CLIENT__
-	#include "ClientFunction.h"
-	#include "MPlayer.h"
-#endif
 #include "MTimeItemManager.h"
 
 //----------------------------------------------------------------------
@@ -110,11 +105,7 @@ MVampireGear::Init()
 void			
 MVampireGear::CheckAffectStatus(MItem* pItem)
 {
-	#ifdef __GAME_CLIENT__
-
-		g_pPlayer->CheckAffectStatus( pItem );
-
-	#endif
+	MItem::RefreshAffect( pItem );
 }
 
 //----------------------------------------------------------------------
@@ -325,12 +316,10 @@ MVampireGear::AddItem(MItem* pItem, GEAR_VAMPIRE n)
 				m_ItemSlot[GEAR_VAMPIRE_LEFTHAND] = pItem;
 
 				//-------------------------------------------------
-				// 제대로 추가된 경우 --> sound출력
+				// on: the gear sound, and the player's stats follow
 				//-------------------------------------------------
-				#ifdef __GAME_CLIENT__
-					PlaySound( pItem->GetGearSoundID() );
-					g_pPlayer->CalculateStatus();	
-				#endif
+				MItem::PlayItemSound( pItem->GetGearSoundID() );
+				MItem::RecalculateStatus();	
 
 				return true;
 			}
@@ -352,12 +341,10 @@ MVampireGear::AddItem(MItem* pItem, GEAR_VAMPIRE n)
 				if (MPlayerGear::AddItem( pItem, n ))	
 				{
 					//-------------------------------------------------
-					// 제대로 추가된 경우 --> sound출력
+					// on: the gear sound, and the player's stats follow
 					//-------------------------------------------------
-					#ifdef __GAME_CLIENT__
-						PlaySound( pItem->GetGearSoundID() );
-						g_pPlayer->CalculateStatus();	
-					#endif
+					MItem::PlayItemSound( pItem->GetGearSoundID() );
+					MItem::RecalculateStatus();	
 
 					return true;
 				}
@@ -366,17 +353,16 @@ MVampireGear::AddItem(MItem* pItem, GEAR_VAMPIRE n)
 		else 
 		if (pItem->IsGearSlotVampireCoreZap())
 		{
-			if (m_ItemSlot[n-m_Gilles_CoreZap]!=NULL && m_ItemSlot[n]==NULL) // 해당위치에 링이 있고 코어잽이 없을 경우만 코어잽 추가
+			// A zap needs the ring at n under it and its own slot free.
+			if (m_ItemSlot[n]!=NULL && m_ItemSlot[n+m_Gilles_CoreZap]==NULL)
 			{		
 				if (MPlayerGear::AddItem( pItem, n + m_Gilles_CoreZap ))// 코어잽 위치에 추가
 				{
 					//-------------------------------------------------
-					// 제대로 추가된 경우 --> sound출력
+					// on: the gear sound, and the player's stats follow
 					//-------------------------------------------------
-					#ifdef __GAME_CLIENT__
-						PlaySound( pItem->GetGearSoundID() );
-						g_pPlayer->CalculateStatus();	
-					#endif
+					MItem::PlayItemSound( pItem->GetGearSoundID() );
+					MItem::RecalculateStatus();	
 
 					return true;
 				}
@@ -400,14 +386,12 @@ MVampireGear::AddItem(MItem* pItem, GEAR_VAMPIRE n)
 		bool bAdd = MPlayerGear::AddItem( pItem, n );
 
 		//-------------------------------------------------
-		// 제대로 추가된 경우 --> sound출력
+		// on: the gear sound, and the player's stats follow
 		//-------------------------------------------------
 		if (bAdd)
 		{
-			#ifdef __GAME_CLIENT__		
-				PlaySound( pItem->GetGearSoundID() );
-				g_pPlayer->CalculateStatus();
-			#endif
+			MItem::PlayItemSound( pItem->GetGearSoundID() );
+			MItem::RecalculateStatus();
 
 			return true;
 		}		
@@ -423,11 +407,20 @@ MVampireGear::AddItem(MItem* pItem, GEAR_VAMPIRE n)
 //----------------------------------------------------------------------
 MItem*			
 MVampireGear::RemoveItem(GEAR_VAMPIRE n)
-{ 
+{
+	//-----------------------------------------------------
+	// The slot arrives in GCRemoveFromGear, so it is bounded
+	// before it indexes the array.
+	//-----------------------------------------------------
+	if ((unsigned int)n >= (unsigned int)m_Size)
+	{
+		return NULL;
+	}
+
 	MItem* pItem = m_ItemSlot[n];
 
 	//-----------------------------------------------------
-	// 없는 경우
+	// Nothing there
 	//-----------------------------------------------------
 	if (pItem==NULL)
 	{
@@ -472,9 +465,7 @@ MVampireGear::RemoveItem(GEAR_VAMPIRE n)
 		m_ItemSlot[GEAR_VAMPIRE_RIGHTHAND] = NULL;
 	}
 	
-	#ifdef __GAME_CLIENT__
-		g_pPlayer->CalculateStatus();
-	#endif
+	MItem::RecalculateStatus();
 
 	// 있으면...
 	return pItem;
@@ -506,9 +497,7 @@ MVampireGear::RemoveItem(TYPE_OBJECTID id)
 	}
 
 
-	#ifdef __GAME_CLIENT__
-		g_pPlayer->CalculateStatus();
-	#endif
+	MItem::RecalculateStatus();
 
 	// 있으면...
 	return pItem;
@@ -564,12 +553,10 @@ MVampireGear::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 					m_ItemSlot[GEAR_VAMPIRE_RIGHTHAND] = pItem;
 
 					//-------------------------------------------------
-					// 제대로 추가된 경우 --> sound출력
+					// on: the gear sound, and the player's stats follow
 					//-------------------------------------------------
-					#ifdef __GAME_CLIENT__
-						PlaySound( pItem->GetGearSoundID() );						
-						g_pPlayer->CalculateStatus();			
-					#endif
+					MItem::PlayItemSound( pItem->GetGearSoundID() );						
+					MItem::RecalculateStatus();			
 
 					return true;
 				}
@@ -603,12 +590,10 @@ MVampireGear::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 						//m_ItemSlot[GEAR_VAMPIRE_RIGHTHAND] = pItem;
 
 						//-------------------------------------------------
-						// 제대로 추가된 경우 --> sound출력
+						// on: the gear sound, and the player's stats follow
 						//-------------------------------------------------
-						#ifdef __GAME_CLIENT__
-							PlaySound( pItem->GetGearSoundID() );
-							g_pPlayer->CalculateStatus();	
-						#endif	
+						MItem::PlayItemSound( pItem->GetGearSoundID() );
+						MItem::RecalculateStatus();	
 
 						return true;
 					}
@@ -663,12 +648,10 @@ MVampireGear::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 				m_ItemSlot[GEAR_VAMPIRE_RIGHTHAND] = pItem;
 		
 				//-------------------------------------------------
-				// 제대로 추가된 경우 --> sound출력
+				// on: the gear sound, and the player's stats follow
 				//-------------------------------------------------
-				#ifdef __GAME_CLIENT__
-					PlaySound( pItem->GetGearSoundID() );
-					g_pPlayer->CalculateStatus();
-				#endif
+				MItem::PlayItemSound( pItem->GetGearSoundID() );
+				MItem::RecalculateStatus();
 
 				return true;
 			}
@@ -705,12 +688,10 @@ MVampireGear::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 				CheckItemStatus( pItem, GEAR_VAMPIRE_RIGHTHAND );
 
 				//-------------------------------------------------
-				// 제대로 추가된 경우 --> sound출력
+				// on: the gear sound, and the player's stats follow
 				//-------------------------------------------------
-				#ifdef __GAME_CLIENT__
-					PlaySound( pItem->GetGearSoundID() );
-					g_pPlayer->CalculateStatus();
-				#endif
+				MItem::PlayItemSound( pItem->GetGearSoundID() );
+				MItem::RecalculateStatus();
 
 				return true;
 			}
@@ -746,12 +727,10 @@ MVampireGear::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 				CheckItemStatus( pItem, GEAR_VAMPIRE_LEFTHAND );
 				
 				//-------------------------------------------------
-				// 제대로 추가된 경우 --> sound출력
+				// on: the gear sound, and the player's stats follow
 				//-------------------------------------------------
-				#ifdef __GAME_CLIENT__
-					PlaySound( pItem->GetGearSoundID() );
-					g_pPlayer->CalculateStatus();
-				#endif	
+				MItem::PlayItemSound( pItem->GetGearSoundID() );
+				MItem::RecalculateStatus();
 
 				return true;
 			}
@@ -800,10 +779,8 @@ MVampireGear::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 
 				if (bAdd) // 잘 추가 됐으면 
 				{
-					#ifdef __GAME_CLIENT__
-						PlaySound( pItem->GetGearSoundID() );
-						g_pPlayer->CalculateStatus();
-					#endif
+					MItem::PlayItemSound( pItem->GetGearSoundID() );
+					MItem::RecalculateStatus();
 					return true;
 				}
 				else 
@@ -831,15 +808,11 @@ MVampireGear::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 			CheckItemStatus( pItem, n );			
 
 			//-------------------------------------------------
-			// 제대로 추가된 경우 --> sound출력
+			// on: the gear sound, and the player's stats follow
 			//-------------------------------------------------
-			#ifdef __GAME_CLIENT__
-				PlaySound( pItem->GetGearSoundID() );
-			#endif
+			MItem::PlayItemSound( pItem->GetGearSoundID() );
 
-			#ifdef __GAME_CLIENT__
-				g_pPlayer->CalculateStatus();
-			#endif
+			MItem::RecalculateStatus();
 
 			return true;
 		}

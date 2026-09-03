@@ -114,7 +114,7 @@ class MShop {
 		//-------------------------------------------------------		
 		void				SetCurrent(unsigned int shopType);
 		unsigned int		GetCurrent() const			{ return m_CurrentShelf; }
-		MShopShelf*			GetCurrentShelf() const		{ return m_pShelf[m_CurrentShelf]; }
+		MShopShelf*			GetCurrentShelf() const		{ return m_pShelf!=NULL ? m_pShelf[m_CurrentShelf] : NULL; }
 
 
 	protected :
