@@ -6,7 +6,7 @@
 //#include "RequestClientPlayerManager.h"
 #include "ClientConfig.h"
 #include "ClientDef.h"
-#include "DebugInfo.h"
+#include "DebugLog.h"
 #include "ServerInfo.h"
 
 // Platform-specific threading includes

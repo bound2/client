@@ -151,5 +151,3 @@ Client/MStringArray.cpp
 Client/MStringArray.h
 Client/CTypeTable.h
 Client/MTypeDef.h
-Client/DebugLog.cpp
-Client/DebugLog.h

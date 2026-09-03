@@ -9,7 +9,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <time.h>
-#include "../../basic/Platform.h"
+#include "Platform.h"
 
 #ifdef PLATFORM_WINDOWS
 	#include <sys/timeb.h>

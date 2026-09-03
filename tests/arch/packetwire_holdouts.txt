@@ -1,16 +1,34 @@
 # Client/Packet sources compiled into the DarkEden executable, not the
-# packetwire library: the receive loops and connection state machines,
-# which include game headers (MZone.h, UserInformation.h, ClientConfig.h)
-# and the executable's debug facilities. They become library candidates
-# only when those includes go (docs/RESTRUCTURING.md task 5.1 for the
-# debug facilities). Rule W0 in tests/arch/check_includes.pl requires every
-# .cpp under Client/Packet to be in exactly one of this file and
+# packetwire library: the receive loops and connection state machines.
+# Rule W0 in tests/arch/check_includes.pl requires every .cpp under
+# Client/Packet to be in exactly one of this file and
 # tests/arch/packetwire_files.txt.
+#
+# The debug facilities no longer keep any of them out: task 5.1 moved
+# the logging header into basic/, where every library may include it,
+# and the six below reach for game headers instead. What each one still
+# needs, as of 2026-09-03:
+#
+#   ClientCommunicationManager.cpp  ClientConfig.h
+#   ClientPlayer.cpp                ClientConfig.h, MZone.h,
+#                                   UserInformation.h
+#   RequestClientPlayer.cpp         ClientConfig.h, ClientDef.h,
+#                                   RequestFileManager.h
+#   RequestClientPlayerManager.cpp  ClientConfig.h, ClientDef.h,
+#                                   MPlayer.h, MGameStringTable.h,
+#                                   UserInformation.h, ProfileManager.h,
+#                                   ServerInfo.h, WhisperManager.h,
+#                                   RequestUserManager.h
+#   RequestServerPlayer.cpp         ClientConfig.h, ClientDef.h,
+#                                   RequestFileManager.h
+#   RequestServerPlayerManager.cpp  ClientConfig.h, ClientDef.h,
+#                                   ServerInfo.h
+#
+# ClientConfig.h is the common one: all six read it for tuning values,
+# and it is the next thing to cut.
 
 Client/Packet/ClientCommunicationManager.cpp
 Client/Packet/ClientPlayer.cpp
-Client/Packet/DatagramSocket.cpp
-Client/Packet/Player.cpp
 Client/Packet/RequestClientPlayer.cpp
 Client/Packet/RequestClientPlayerManager.cpp
 Client/Packet/RequestServerPlayer.cpp

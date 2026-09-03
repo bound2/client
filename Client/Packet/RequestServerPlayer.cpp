@@ -16,7 +16,7 @@
 #include "ClientConfig.h"
 #include "RequestFileManager.h"
 #include "ClientDef.h"
-#include "DebugInfo.h"
+#include "DebugLog.h"
 
 
 #if defined(_DEBUG) && defined(OUTPUT_DEBUG)

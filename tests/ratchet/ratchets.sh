@@ -62,6 +62,9 @@ check () {
 # relative VS_UI_CLIENT_SOURCES list never matched the exe glob's
 # absolute paths in REMOVE_ITEM, so they compiled into both (the
 # LNK4217 trap); the membership removal is absolute and asserted.
+# History: 493 = 495 - 2 (task 5.1: Player.cpp and DatagramSocket.cpp
+# moved into packetwire once the debug facilities stopped gating the
+# wire layer's include rules - the logging header is in basic/ now).
 # History: 495 = 497 - 3 + 1 (task 4.4's fourth slice: MSkillManager.cpp,
 # MSkillInfoTable.cpp and SkillDef.cpp moved into gamemodel; the
 # player-facing half split out of the first, MSkillAvailable.cpp, is a
@@ -95,7 +98,7 @@ check () {
 # before (0 net). 992 = 993 - 1 (task 2.2's PacketHandlerRegistry.cpp,
 # a recorded +1, offset by the finished migration deleting
 # CGHandlersStub.cpp).
-R1_BASELINE=495
+R1_BASELINE=493
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do
@@ -299,6 +302,50 @@ R5=$(grep -rnE '(\.|->)execute\s*\(\s*(g_pSocket|NULL|this|0)\s*\)' \
 	Client VS_UI --include='*.cpp' 2>/dev/null \
 	| grep -v 'Client/Packet/' | grep -vE ':\s*//' | wc -l)
 check "R5 (direct packet execute callers outside Client/Packet)" "$R5" "$R5_BASELINE"
+
+#----------------------------------------------------------------------
+# R6 - packetwire members calling SendBugReport, which the executable
+# defines (Client/PacketFunction.cpp).
+#
+# A library file calling an executable-side FUNCTION is the one seam
+# nothing else here can see: W1/W2 in check_includes.pl read includes,
+# and R4 greps for g_p* globals. Task 5.1 found it the only way left -
+# the test binary refused to link Player.obj - and then stubbed the
+# symbol in tests/stubs/client_globals.cpp so the suite builds, which
+# disarms that detector for every future caller. This ratchet is what
+# replaces it. The baseline of 1 is Player::processCommand reporting an
+# oversized packet; it leaves when SendBugReport itself moves into
+# packetwire behind a Player* (its only reach outside the wire layer is
+# g_pSocket). A new caller among the members fails here instead of
+# linking quietly against the stub.
+#
+# Measured over the packetwire membership file rather than the
+# directory, because the six holdouts in
+# tests/arch/packetwire_holdouts.txt compile into the executable and
+# may call it freely - three of them do.
+#----------------------------------------------------------------------
+R6_BASELINE=1
+
+if [ ! -f tests/arch/packetwire_files.txt ]; then
+	echo "FAIL R6: tests/arch/packetwire_files.txt is missing"
+	FAIL=1
+else
+	R6=0
+	while IFS= read -r member; do
+		case "$member" in ''|\#*) continue ;; esac
+		case "$member" in *.cpp) ;; *) continue ;; esac
+		[ -f "$member" ] || continue
+		# Commented-out calls do not link: Datagram.cpp carries one.
+		# Same line-based blindness as R5 - a call inside a /* */ block
+		# would count - which is why this counts files, not lines, and
+		# a new one is meant to be looked at rather than trusted.
+		if grep -E '(^|[^A-Za-z0-9_])SendBugReport\s*\(' "$member" \
+			| grep -qvE '^\s*(//|\*)'; then
+			R6=$((R6 + 1))
+		fi
+	done < tests/arch/packetwire_files.txt
+	check "R6 (packetwire members calling SendBugReport)" "$R6" "$R6_BASELINE"
+fi
 
 #----------------------------------------------------------------------
 

@@ -11,8 +11,11 @@
 #include "DatagramSocket.h"
 #include "PacketAssert.h"
 #include "PacketFileAPI.h"
-#include "DebugInfo.h"
-#include "MTestDef.h"
+#include "DebugLog.h"
+// MTestDef.h is gone: its one struct sits behind __METROTECH_TEST__,
+// which nothing defines (the OUTPUT_DEBUG block that would have is
+// commented out), so all it carried here was DebugInfo.h - and with
+// it MinTr.h, which the wire layer may not reach.
 
 //////////////////////////////////////////////////////////////////////
 //

@@ -16,7 +16,7 @@
 #include "ClientDef.h"
 #include "RequestFileManager.h"
 #include "ClientConfig.h"
-#include "DebugInfo.h"
+#include "DebugLog.h"
 
 #if defined(_DEBUG) && defined(OUTPUT_DEBUG)
 	extern CMessageArray*		g_pGameMessage;

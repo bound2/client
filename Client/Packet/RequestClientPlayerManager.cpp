@@ -12,7 +12,7 @@
 #include "MGameStringTable.h"
 #include "RequestUserManager.h"
 #include "ProfileManager.h"
-#include "DebugInfo.h"
+#include "DebugLog.h"
 #include "ServerInfo.h"
 #include "ClientDef.h"
 

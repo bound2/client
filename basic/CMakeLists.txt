@@ -39,6 +39,14 @@ set(BASIC_SOURCES
 	Timer2.cpp
 	BasicException.cpp
 	ColorDraw.cpp
+	# The logging facility (docs/RESTRUCTURING.md task 5.1). It lived in
+	# Client/ and was a gamemodel member, which put it above packetwire
+	# in the link order and out of reach of the wire layer's include
+	# rules. It needs nothing but the C library and Platform.h, so the
+	# bottom library is where it belongs: every target links basic, and
+	# this directory is a PUBLIC include directory, so #include
+	# "DebugLog.h" resolves everywhere it did before.
+	DebugLog.cpp
 )
 
 # Platform-specific sources
