@@ -13,20 +13,12 @@
 
 #include "test_framework.h"
 
-#include "MItem.h"				// first: it carries the platform types the container headers use
+#include "gamemodel_world.h"
 #include "MTradeManager.h"
 #include "MSortedItemManager.h"
 #include "MInventory.h"
 #include "MMoneyManager.h"
-#include "MItemTable.h"
-#include "MItemOptionTable.h"
 #include "MGameDef.h"
-#include "MGameStringTable.h"
-#include "MStringArray.h"
-#include "UserInformation.h"
-#include "ClientConfig.h"
-#include "MTimeItemManager.h"
-#include "ItemClassDef.h"
 
 namespace {
 
@@ -41,27 +33,18 @@ void	PlayItemSound(TYPE_SOUNDID)		{}
 // A host that carries the clock and nothing else of note.
 const MItemHost	s_Host = { &s_Frame, DropFrameCount, RefreshAffect, PlayItemSound, &s_Now };
 
-struct TradeWorld
+struct TradeWorld : GameModelWorld
 {
 	TradeWorld()
 	{
 		s_Alive = 0;
 		s_Now = 0;
 
-		g_pItemTable = new ITEMCLASS_TABLE;
-		g_pItemTable->Init(MAX_ITEM_CLASS);
 		g_pItemTable->InitClass(ITEM_CLASS_SWORD, 3);
 		(*g_pItemTable)[ITEM_CLASS_SWORD][0].SetGrid(1, 1);
 		(*g_pItemTable)[ITEM_CLASS_SWORD][1].SetGrid(2, 2);
 		(*g_pItemTable)[ITEM_CLASS_SWORD][2].SetGrid(3, 1);
-
-		g_pItemOptionTable = new ITEMOPTION_TABLE;
-		g_pItemOptionTable->Init(1);
-		g_pGameStringTable = new MStringArray;
-		g_pUserInformation = new UserInformation;
-		g_pClientConfig = new ClientConfig;
 		g_pClientConfig->TRADE_ACCEPT_DELAY_TIME = 5000;
-		g_pTimeItemManager = new MTimeItemManager;
 
 		// The player's side: a small grid and a wallet with a ceiling.
 		g_pInventory = new MInventory;
@@ -75,15 +58,8 @@ struct TradeWorld
 
 	~TradeWorld()
 	{
-		MItem::SetHost(NULL);
 		delete g_pMoneyManager;		g_pMoneyManager = NULL;
 		delete g_pInventory;		g_pInventory = NULL;
-		delete g_pTimeItemManager;	g_pTimeItemManager = NULL;
-		delete g_pClientConfig;		g_pClientConfig = NULL;
-		delete g_pUserInformation;	g_pUserInformation = NULL;
-		delete g_pGameStringTable;	g_pGameStringTable = NULL;
-		delete g_pItemOptionTable;	g_pItemOptionTable = NULL;
-		delete g_pItemTable;		g_pItemTable = NULL;
 	}
 };
 

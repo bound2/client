@@ -16,16 +16,8 @@
 
 #include "test_framework.h"
 
-#include "MItem.h"
-#include "MItemTable.h"
-#include "MItemOptionTable.h"
+#include "gamemodel_world.h"
 #include "MItemLimits.h"
-#include "MGameStringTable.h"
-#include "MStringArray.h"
-#include "UserInformation.h"
-#include "ClientConfig.h"
-#include "MTimeItemManager.h"
-#include "ItemClassDef.h"
 #include "RaceType.h"
 
 #include <cstring>
@@ -33,52 +25,30 @@
 namespace {
 
 //----------------------------------------------------------------------
-// The globals MItem reads, owned by one fixture per test so no test
-// sees another's tables.
+// The tables these tests read, over the world every gamemodel test
+// shares.
 //----------------------------------------------------------------------
-struct ItemWorld
+struct ItemWorld : GameModelWorld
 {
-	ItemWorld()
+	ItemWorld() : GameModelWorld(3)
 	{
-		g_pItemTable = new ITEMCLASS_TABLE;
-		g_pItemTable->Init(MAX_ITEM_CLASS);
 		g_pItemTable->InitClass(ITEM_CLASS_SWORD, 2);
 		g_pItemTable->InitClass(ITEM_CLASS_SKULL, 1);
 		g_pItemTable->InitClass(ITEM_CLASS_PET_ITEM, 1);
 
 		// Option 0 is the "no option" row; 1 and 2 carry requirements.
-		g_pItemOptionTable = new ITEMOPTION_TABLE;
-		g_pItemOptionTable->Init(3);
 		g_pItemOptionTable->Get(1).RequireSUM = 10;
 		g_pItemOptionTable->Get(1).ColorSet = 501;
 		g_pItemOptionTable->Get(2).RequireSUM = 25;
 		g_pItemOptionTable->Get(2).ColorSet = 502;
 
-		g_pGameStringTable = new MStringArray;
 		g_pGameStringTable->Init(STRING_MESSAGE_SOUL_STONE + 1);
 		(*g_pGameStringTable)[STRING_MESSAGE_SOUL_STONE] = "Soul Stone";
 
-		g_pUserInformation = new UserInformation;
 		g_pUserInformation->GoreLevel = true;
 
-		g_pClientConfig = new ClientConfig;
 		g_pClientConfig->UniqueItemColorSet = 405;
 		g_pClientConfig->QuestItemColorSet = 345;
-
-		// The executable creates the register at start-up, before any item.
-		g_pTimeItemManager = new MTimeItemManager;
-		MItem::SetHost(NULL);
-	}
-
-	~ItemWorld()
-	{
-		MItem::SetHost(NULL);
-		delete g_pTimeItemManager;	g_pTimeItemManager = NULL;
-		delete g_pClientConfig;		g_pClientConfig = NULL;
-		delete g_pUserInformation;	g_pUserInformation = NULL;
-		delete g_pGameStringTable;	g_pGameStringTable = NULL;
-		delete g_pItemOptionTable;	g_pItemOptionTable = NULL;
-		delete g_pItemTable;		g_pItemTable = NULL;
 	}
 };
 

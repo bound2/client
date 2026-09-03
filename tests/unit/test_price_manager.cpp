@@ -13,16 +13,8 @@
 
 #include "test_framework.h"
 
-#include "MItem.h"				// first: it carries the platform types the other headers use
+#include "gamemodel_world.h"
 #include "MPriceManager.h"
-#include "MItemTable.h"
-#include "MItemOptionTable.h"
-#include "MGameStringTable.h"
-#include "MStringArray.h"
-#include "UserInformation.h"
-#include "ClientConfig.h"
-#include "MTimeItemManager.h"
-#include "ItemClassDef.h"
 
 #include <cstdio>
 #include <fstream>
@@ -77,9 +69,9 @@ void	LoadClassFromFile(ITEM_CLASS itemClass, int firstPrice, int secondPrice)
 //----------------------------------------------------------------------
 // The globals the prices read, owned by one fixture per test.
 //----------------------------------------------------------------------
-struct PriceWorld
+struct PriceWorld : GameModelWorld
 {
-	PriceWorld()
+	PriceWorld() : GameModelWorld(6)
 	{
 		s_Race = -1;
 		s_Level = 0;
@@ -89,8 +81,6 @@ struct PriceWorld
 		s_GambleHalf = false;
 		s_TaxPercent = 100;
 
-		g_pItemTable = new ITEMCLASS_TABLE;
-		g_pItemTable->Init(MAX_ITEM_CLASS);
 		g_pItemTable->InitClass(ITEM_CLASS_SWORD, 2);
 		(*g_pItemTable)[ITEM_CLASS_SWORD][0].Price = 1000;
 		(*g_pItemTable)[ITEM_CLASS_SWORD][0].SilverMax = 50;
@@ -118,8 +108,6 @@ struct PriceWorld
 
 		// Row 0 is the "no option" row; the others carry a part and a
 		// price multiplier in percent.
-		g_pItemOptionTable = new ITEMOPTION_TABLE;
-		g_pItemOptionTable->Init(6);
 		g_pItemOptionTable->Get(0).Part = ITEMOPTION_TABLE::PART_HP;
 		g_pItemOptionTable->Get(1).Part = ITEMOPTION_TABLE::PART_DAMAGE;
 		g_pItemOptionTable->Get(1).PriceMultiplier = 150;
@@ -132,26 +120,14 @@ struct PriceWorld
 		g_pItemOptionTable->Get(5).Part = ITEMOPTION_TABLE::PART_DEX;
 		g_pItemOptionTable->Get(5).PriceMultiplier = 100;
 
-		g_pGameStringTable = new MStringArray;
-		g_pUserInformation = new UserInformation;
 		g_pUserInformation->HeadPrice = 100;
-		g_pClientConfig = new ClientConfig;
-		g_pTimeItemManager = new MTimeItemManager;
 
-		MItem::SetHost(NULL);
 		MPriceManager::SetHost(&s_Host);
 	}
 
 	~PriceWorld()
 	{
 		MPriceManager::SetHost(NULL);
-		MItem::SetHost(NULL);
-		delete g_pTimeItemManager;	g_pTimeItemManager = NULL;
-		delete g_pClientConfig;		g_pClientConfig = NULL;
-		delete g_pUserInformation;	g_pUserInformation = NULL;
-		delete g_pGameStringTable;	g_pGameStringTable = NULL;
-		delete g_pItemOptionTable;	g_pItemOptionTable = NULL;
-		delete g_pItemTable;		g_pItemTable = NULL;
 	}
 };
 

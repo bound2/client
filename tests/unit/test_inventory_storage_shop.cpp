@@ -14,20 +14,12 @@
 
 #include "test_framework.h"
 
-#include "MItem.h"
-#include "MItemTable.h"
-#include "MItemOptionTable.h"
+#include "gamemodel_world.h"
 #include "MInventory.h"
 #include "MStorage.h"
 #include "MShopShelf.h"
 #include "MGameDef.h"
 #include "MMoneyManager.h"
-#include "MGameStringTable.h"
-#include "MStringArray.h"
-#include "UserInformation.h"
-#include "ClientConfig.h"
-#include "MTimeItemManager.h"
-#include "ItemClassDef.h"
 
 #include <vector>
 
@@ -48,7 +40,7 @@ void	PlayItemSound(TYPE_SOUNDID sound)	{ s_Sounds.push_back(sound); }
 
 const MItemHost	s_Host = { &s_Frame, DropFrameCount, RefreshAffect, PlayItemSound, NULL };
 
-struct ContainerWorld
+struct ContainerWorld : GameModelWorld
 {
 	ContainerWorld()
 	{
@@ -56,8 +48,6 @@ struct ContainerWorld
 		s_Refreshed.clear();
 		s_Sounds.clear();
 
-		g_pItemTable = new ITEMCLASS_TABLE;
-		g_pItemTable->Init(MAX_ITEM_CLASS);
 		g_pItemTable->InitClass(ITEM_CLASS_SWORD, 2);
 		(*g_pItemTable)[ITEM_CLASS_SWORD][0].SetGrid(2, 1);
 		// (tile, inventory, gear, use): the slots differ, so a container
@@ -69,24 +59,7 @@ struct ContainerWorld
 		(*g_pItemTable)[ITEM_CLASS_POTION][0].SetGrid(1, 1);
 		(*g_pItemTable)[ITEM_CLASS_POTION][0].SetSoundID(172, 73, 272, 372);
 
-		g_pItemOptionTable = new ITEMOPTION_TABLE;
-		g_pItemOptionTable->Init(1);
-		g_pGameStringTable = new MStringArray;
-		g_pUserInformation = new UserInformation;
-		g_pClientConfig = new ClientConfig;
-		g_pTimeItemManager = new MTimeItemManager;
 		MItem::SetHost(&s_Host);
-	}
-
-	~ContainerWorld()
-	{
-		MItem::SetHost(NULL);
-		delete g_pTimeItemManager;	g_pTimeItemManager = NULL;
-		delete g_pClientConfig;		g_pClientConfig = NULL;
-		delete g_pUserInformation;	g_pUserInformation = NULL;
-		delete g_pGameStringTable;	g_pGameStringTable = NULL;
-		delete g_pItemOptionTable;	g_pItemOptionTable = NULL;
-		delete g_pItemTable;		g_pItemTable = NULL;
 	}
 };
 
