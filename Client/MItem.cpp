@@ -78,6 +78,14 @@ MItem::MItem()
 
 	m_bAffectStatus = true;
 
+	// Not in any grid, not worn, not offered in a trade: the
+	// container that takes the item sets the first, the packet that
+	// creates it the second, and the trade UI the third.
+	m_GridX = 0;
+	m_GridY = 0;
+	m_CurrentDurability = 0;
+	m_bTrade = FALSE;
+
 	m_Silver = 0;
 
 	m_Grade = -1;

@@ -149,6 +149,12 @@ TEST(ItemCore, FreshItemStartsUnoptionedUndroppedAndUncoloured)
 	CHECK_EQ(0, (int)item.GetEnchantLevel());
 	CHECK_EQ(0xFFFF, (int)item.GetItemColorSet());
 	CHECK_EQ(0, item.IsQuestItem());
+	// Never placed, never worn, never offered: the trade manager
+	// deletes every inventory item whose flag reads true.
+	CHECK_EQ(0, (int)item.GetGridX());
+	CHECK_EQ(0, (int)item.GetGridY());
+	CHECK_EQ(0, (int)item.GetCurrentDurability());
+	CHECK_EQ(0, (int)item.IsTrade());
 	CHECK(MItem::GetHost() == NULL);
 }
 
