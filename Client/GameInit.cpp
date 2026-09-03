@@ -85,6 +85,7 @@
 #include "MItem.h"
 #include "MTopView.h"
 #include "MPlayer.h"
+#include "MTradeManager.h"
 #include "FameInfo.h"
 #include "MWarManager.h"
 #include "CSprite555.h"
@@ -3038,6 +3039,7 @@ InitGameObject()
 	}
 
 	MItem::SetHost(&s_ItemHost);
+	MTradeManager::SetClock(&g_CurrentTime);
 
 	if (g_pPCTalkBox==NULL)
 	{

@@ -48,6 +48,12 @@ class MTradeManager {
 		//-------------------------------------------------------
 		// Trade OK ?
 		//-------------------------------------------------------
+		// The accept delay is measured on the executable's millisecond
+		// clock (g_CurrentTime), installed once at start-up; without one
+		// (a test binary) the clock reads 0 (docs/RESTRUCTURING.md task 4.2).
+		static void			SetClock(const DWORD* pClock)	{ s_pClock = pClock; }
+		static DWORD		Now()							{ return s_pClock!=NULL ? *s_pClock : 0; }
+
 		bool				IsAcceptTime() const;
 		void				SetNextAcceptTime();		// 다음 교환 가능한 시간 설정
 
@@ -89,6 +95,8 @@ class MTradeManager {
 		bool				m_bAcceptOtherTrade;		// 남의 교한확인
 
 		DWORD				m_NextAcceptTime;		// OK 누를 수 있는 시간
+
+		static const DWORD*	s_pClock;
 };
 
 extern MTradeManager*		g_pTradeManager;

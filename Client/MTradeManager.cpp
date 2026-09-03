@@ -5,15 +5,11 @@
 #include "MTradeManager.h"
 #include "MSortedItemManager.h"
 #include "MGameDef.h"
-#include "DebugInfo.h"
+#include "DebugLog.h"
 
 #define SAFE_DELETE(x)		{ if(x!=NULL) delete x; x=NULL; }
 
-#ifdef __GAME_CLIENT__
-	#include "PacketDef.h"
-	#include "ClientConfig.h"
-	extern DWORD	g_CurrentTime;
-#endif
+#include "ClientConfig.h"
 
 //-----------------------------------------------------------------------------
 // Item위치를 기억하기 위한 것..
@@ -56,6 +52,7 @@ class ItemPositionMap : public std::map<TYPE_OBJECTID, ItemPosition*> {
 // Global
 //-----------------------------------------------------------------------------
 MTradeManager*		g_pTradeManager = NULL;
+const DWORD*		MTradeManager::s_pClock = NULL;
 
 //-----------------------------------------------------------------------------
 //
@@ -156,7 +153,7 @@ bool
 MTradeManager::IsAcceptTime() const
 {
 	#ifdef __GAME_CLIENT__
-		return g_CurrentTime >= m_NextAcceptTime;
+		return Now() >= m_NextAcceptTime;
 	#else
 		return true;
 	#endif
@@ -169,7 +166,7 @@ void
 MTradeManager::SetNextAcceptTime()
 {
 	#ifdef __GAME_CLIENT__
-		m_NextAcceptTime = g_CurrentTime + g_pClientConfig->TRADE_ACCEPT_DELAY_TIME;
+		m_NextAcceptTime = Now() + g_pClientConfig->TRADE_ACCEPT_DELAY_TIME;
 	#endif
 }
 
