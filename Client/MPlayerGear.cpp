@@ -185,16 +185,19 @@ MPlayerGear::CheckItemStatus(const MItem* pItem, int slot)
 {
 	ITEM_STATUS oldStatus = m_pItemStatus[slot];
 
-	TYPE_ITEM_DURATION	maxDur = pItem->GetMaxDurability();
+	// The maximum is signed: MItem answers -1 for an item with no
+	// durability, and read into the unsigned duration type that was a
+	// huge maximum and an almost-broken piece.
+	int					maxDur = pItem->GetMaxDurability();
 	TYPE_ITEM_DURATION	curDur = pItem->GetCurrentDurability();
 
-	// 내구성 상태.. % 
+	// The remaining durability, in percent
 	TYPE_ITEM_DURATION	itemStatusPer = 0;
 
 	if(maxDur <= 0 ||pItem->IsSpecialColorItem() || pItem->IsDurationAlwaysOkay())
-		itemStatusPer = 100; 
+		itemStatusPer = 100;
 	else
-		itemStatusPer = curDur*100 / maxDur;
+		itemStatusPer = curDur*100 / (TYPE_ITEM_DURATION)maxDur;
 
 
 	//----------------------------------------------------------

@@ -237,10 +237,13 @@ TEST(PlayerGear, AddGradesTheItemByItsRemainingDurability)
 	CHECK_EQ((int)MPlayerGear::ITEM_STATUS_ALMOST_BROKEN, (int)gear.GetItemStatus(3));
 	CHECK_EQ((int)MPlayerGear::ITEM_STATUS_ALMOST_BROKEN, (int)gear.GetItemStatus(4));
 
-	// No durability to lose, or one that never counts: always fine.
+	// No durability to lose (zero, or MItem's -1 for an item that has
+	// none), or one that never counts: always fine.
 	CHECK(gear.AddItem(new Helm(6, 0, 0), 5));
+	CHECK(gear.AddItem(new Helm(7, -1, 0), 6));
 	CHECK(gear.AddItem(new EverlastingHelm(8, 0), 7));
 	CHECK_EQ((int)MPlayerGear::ITEM_STATUS_OK, (int)gear.GetItemStatus(5));
+	CHECK_EQ((int)MPlayerGear::ITEM_STATUS_OK, (int)gear.GetItemStatus(6));
 	CHECK_EQ((int)MPlayerGear::ITEM_STATUS_OK, (int)gear.GetItemStatus(7));
 	CHECK(gear.HasBrokenItem());
 
