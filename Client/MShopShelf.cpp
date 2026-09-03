@@ -59,8 +59,9 @@ MShopShelf::NewShelf(MShopShelf::SHELF_TYPE ShelfClass)
 
 	// The type arrives in a shop-list packet, so it is validated before it
 	// indexes the factory table - one past the table is a code pointer to
-	// call through. Every caller handles a NULL return.
-	if (ShelfClass < 0 || ShelfClass >= MAX_SHELF)
+	// call through. The two shop-list handlers return on NULL; MNPC and
+	// GCShopVersionHandler pass in-range enumerators and never see one.
+	if ((unsigned int)ShelfClass >= (unsigned int)MAX_SHELF)
 	{
 		DEBUG_ADD_FORMAT_ERR("[Error] MShopShelf::NewShelf: invalid shelf type %d", ShelfClass);
 		return NULL;
@@ -163,7 +164,7 @@ MShopShelf::SetItem(unsigned int  slot, MItem* pItem)
 	m_pItems[slot] = pItem;
 
 	//------------------------------------------------------
-	// 사용 가능 여부 체크
+	// Can the player use it?
 	//------------------------------------------------------
 	MItem::RefreshAffect( pItem );
 

@@ -38,7 +38,7 @@ MInventory::~MInventory()
 // 사용가능한지 체크
 //----------------------------------------------------------------------
 void			
-MInventory::CheckAffectStatus(MItem* pItem)	// 특정 아이템
+MInventory::CheckAffectStatus(MItem* pItem)	// one item
 {
 	MItem::RefreshAffect( pItem );
 }
@@ -56,7 +56,7 @@ MInventory::AddItem(MItem* pItem)
 	{
 		if (MGridItemManager::AddItem( pItem ))
 		{
-			// 제대로 추가된 경우 --> sound출력
+			// placed: play its inventory sound
 			MItem::PlayItemSound( pItem->GetInventorySoundID() );
 		
 						
@@ -82,7 +82,7 @@ MInventory::AddItem(MItem* pItem, BYTE x, BYTE y)
 	{
 		if (MGridItemManager::AddItem( pItem, x, y ))
 		{
-			// 제대로 추가된 경우 --> sound출력
+			// placed: play its inventory sound
 			MItem::PlayItemSound( pItem->GetInventorySoundID() );
 
 			return true;
@@ -108,7 +108,7 @@ MInventory::ReplaceItem(MItem* pItem, BYTE x, BYTE y, MItem*& pOldItem)
 	{
 		if (MGridItemManager::ReplaceItem(pItem, x,y, pOldItem))
 		{
-			// 제대로 추가된 경우 --> sound출력
+			// placed: play its inventory sound
 			MItem::PlayItemSound( pItem->GetInventorySoundID() );
 
 			return true;

@@ -88,12 +88,6 @@
 #include "MItem.h"
 #include <list>
 
-/*
-#ifdef __GAME_CLIENT__
-	class MEffect;
-#endif
-	*/
-
 class MInventory : public MGridItemManager {
 	public :
 		MInventory();
@@ -118,31 +112,11 @@ class MInventory : public MGridItemManager {
 		MItem*			FindItem( ITEM_CLASS itemClass, TYPE_ITEMTYPE itemType=ITEMTYPE_NULL);
 
 		//------------------------------------------------------
-		// 현재 사용가능한건가?
+		// Can the player use it now?
 		//------------------------------------------------------
 		// One item (the whole inventory is MItemManager::CheckAffectStatusAll;
 		// a no-argument overload used to be declared here and defined nowhere).
 		void			CheckAffectStatus(MItem* pItem);
-
-		/*
-	#ifdef __GAME_CLIENT__
-		public :
-			typedef std::list<MEffect*>						EFFECT_LIST;
-
-		public :
-			//------------------------------------------------------		
-			// Effect
-			//------------------------------------------------------
-			bool			AddEffect(MEffect* pEffect);
-			void			UpdateEffects();
-			int				GetEffectCount()				{ return m_listEffect.size(); }
-			EFFECT_LIST::const_iterator GetEffects()		{ return m_listEffect.begin(); }
-
-		protected :
-			EFFECT_LIST		m_listEffect;
-	#endif
-	*/
-
 };
 
 extern MInventory*		g_pInventory;

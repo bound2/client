@@ -97,8 +97,11 @@ set_source_files_properties(
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_factories.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_goldens.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_stringstream.cpp
-	# gamemodel compiles with the same definitions (its headers share
-	# Client/Packet's Properties and RaceType).
+	# gamemodel compiles with the same definitions: its headers reach
+	# Client/Packet/Exception.h, whose inline bodies switch on __WIN32__,
+	# and Client/Packet/Types/CreatureTypes.h, which switches on
+	# __GAME_CLIENT__. Every test that includes a Client/ header needs an
+	# entry here.
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_gamemodel_tables.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_item_table.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_item_core.cpp

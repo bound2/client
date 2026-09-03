@@ -175,7 +175,10 @@ check "R3 (unsafe format/copy lines in Client/Packet + Client/PacketHandler)" "$
 # the packetwire and gamemodel membership files (tests/arch/
 # packetwire_files.txt, tests/arch/gamemodel_files.txt - the CMake
 # targets and the include checker read the same files). Extraction work
-# (Phase 4) shrinks this by cutting the global seams.
+# (Phase 4) shrinks this by cutting the global seams. The pattern is the
+# g_p prefix: the two clocks the item host carries (g_CurrentFrame,
+# g_CurrentTime) were never in this count, so cutting them did not move
+# it.
 #
 # 28: 35 + 1 - 8, again a reclassification, by the library-wide
 # definition rule below (task 4.4's second slice). MItem.cpp joined the

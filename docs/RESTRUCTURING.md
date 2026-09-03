@@ -46,8 +46,11 @@ adversarial reviews recorded the traps.
   reviewable and are what the ratchet script parses. After moving files,
   reconfigure both trees.
 - **Moving a file between targets must not change its bytes** in the same
-  commit. Move first, prove the build, then fix — separate commits, so the
-  diff that changes behavior is readable.
+  commit when it has no seam to cut. Move first, prove the build, then fix —
+  separate commits, so the diff that changes behavior is readable. A file
+  that only links once its reaches go through a host moves and cuts in one
+  commit (the Phase 4 pattern), and that commit names every change that is
+  not the move.
 - Sources are CRLF; use the Edit tool, not `sed -i`/`awk`, to modify them.
 - Wire layout is pinned: any change under `Client/Packet` that touches
   `read()`/`write()`/`getPacketMaxSize()` must keep
@@ -863,8 +866,8 @@ starting each — the scan is one grep, and the ranking below is from a
   > heap corruption at startup; a 4.3/4.4 seam.
 - [ ] **4.2 Money/price/trade logic:** `MMoneyManager.cpp`,
   `MPriceManager.cpp`, `MTradeManager.cpp` (seams to `g_pShop`/UI to cut).
-  > **Status:** money and trade done, price remains; price/trade
-  > re-ranked (2026-09-02,
+  > **Status:** in progress (the price manager); money and trade done.
+  > Price/trade re-ranked (2026-09-02,
   > `restructuring/gamemodel-money`; live verification gates the merge).
   > The include scan the plan asks for overturned the 2026-09-01
   > ranking for two of the three: `MPriceManager` prices through
@@ -913,15 +916,21 @@ starting each — the scan is one grep, and the ranking below is from a
   > `MSortedItemManager` (the size-ordered map the packing goes through,
   > biggest footprint first, then by id) join `gamemodel`. Its one reach
   > was the executable's millisecond clock, `g_CurrentTime`, read through
-  > a guarded `extern`; the manager keeps a static clock pointer now
-  > (`SetClock`), `GameInit` installs it beside the item host, and without
-  > one (a test binary) the clock reads 0, so a started delay never
-  > elapses. Its other reaches — `g_pInventory`, `g_pMoneyManager`, the
-  > accept delay in `g_pClientConfig` — are library-defined.
-  > `MTradeManager.cpp` includes `DebugLog.h` instead of `DebugInfo.h`
-  > and `ClientConfig.h` unguarded; the `__GAME_CLIENT__` guards around
-  > the delay stay (always on in the client, always on in the library).
-  > `MPriceManager` stays out: it prices through `g_pPlayer`,
+  > a guarded `extern`; the clock is an `MItemHost` entry now,
+  > `pCurrentTime`, beside the animation clock, and without one (a test
+  > binary, or a host that carries none) there is no delay — the
+  > semantics of the `#else return true` branch the file used to carry
+  > for a non-client build. Its other reaches — `g_pInventory`,
+  > `g_pMoneyManager`, the accept delay in `g_pClientConfig` — are
+  > library-defined. Dropped on the way: the `__GAME_CLIENT__` guards
+  > around the delay (always on in every build of the file), the
+  > `PacketDef.h` include (an aggregation header the file used nothing
+  > of), the 112-line commented-out `CancelTrade` body, and
+  > `MSortedItemManager`'s two commented-out functions with the 2×2
+  > packing path only that comment reached; `MTradeManager.cpp` includes
+  > `DebugLog.h` instead of `DebugInfo.h` and `ClientConfig.h`
+  > unguarded, and `Release` forgets the player's inventory it never
+  > owned. `MPriceManager` stays out: it prices through `g_pPlayer`,
   > `g_pEventManager` and `g_pSkillAvailable`, a later slice. R1 505 →
   > 503; R4 unchanged. Tests (`test_trade_manager.cpp`, 6): `Init` builds
   > the other side over the player's inventory and `Release` deletes only
@@ -933,8 +942,8 @@ starting each — the scan is one grep, and the ranking below is from a
   > refuses money the wallet cannot take; `Trade` swaps only once both
   > accepted, deletes the player's offered items, lands the other's in
   > the free space with the trade flag cleared, moves the money and
-  > consumes both acceptances; `CancelTrade` refunds what the player put
-  > up; the sorted map orders bigger footprints first, then lower ids,
+  > consumes both acceptances; `CancelTrade` refunds the money the player
+  > put up; the sorted map orders bigger footprints first, then lower ids,
   > and refuses the same key twice. **One defect fixed test-first, in
   > the item core:** `MItem`'s constructor never set `m_bTrade` (nor the
   > grid position or the durability), so a fresh item read heap garbage
@@ -944,13 +953,41 @@ starting each — the scan is one grep, and the ranking below is from a
   > every inventory and gear item), but an item that arrives during a
   > trade — a pickup, a purchase — carries whatever its bytes held, and a
   > `TRUE` there leaves it out of the feasibility check and deletes it on
-  > `Trade`; the constructor defines all three now. Suite: 241 tests
-  > (3,894 checks).
+  > `Trade`; the constructor defines all four members now. Suite: 241
+  > tests (3,894 checks).
+  > **Adversarial review round (2026-09-03, 4 reviewers over this slice
+  > and 4.3's second, all SHIP with findings, no runtime defect), fixed
+  > on the branch:** the clock had gone in as a second static seam on
+  > `MTradeManager`, beside the host struct and the money manager's
+  > per-wallet hook, and made CLAUDE.md's "behind the `MItemHost`"
+  > untrue for it — it is a host entry now, and a missing clock means no
+  > delay rather than a delay that never ends; the fix commit called its
+  > new checks a regression guard, but `/RTC1` fills the test's
+  > stack-local item with `0xCC`, so they fail deterministically without
+  > the fix — a reproduction, and the commit's wording is corrected here;
+  > `MPetItem` never set its remaining experience or its food type, the
+  > same defect one class away, fixed executable-side (`Test path:
+  > exempt`); `Release` left `GetMyInventory` pointing at the player's
+  > inventory — NULL now, pinned; the dropped `PacketDef.h` include, the
+  > commented-out `CancelTrade` body and `MSortedItemManager`'s dead
+  > packing path are named above and gone; "not worn" on a zero
+  > durability read backwards (zero is worn out); the fix commit says
+  > four members where the record said three things; `CancelTrade`
+  > refunds money only — the offered items keep their flag until the
+  > next trade start clears it, and a refused refund still answers true
+  > (pre-existing, recorded, not tested); the tests/CMakeLists comment
+  > named the wrong headers for the definitions (`Exception.h` and
+  > `CreatureTypes.h` are the ones that switch on them); the restore
+  > check pins both offers' positions and the other grid's cells. Noted,
+  > not done: the four `gamemodel` test fixtures share a byte-identical
+  > teardown — a `tests/support` base fixture is the next tidy-up. Suite:
+  > 241 tests (3,903 checks).
 - [ ] **4.3 Containers:** `MInventory.cpp`, `MStorage.cpp`,
   `MShopShelf.cpp`, `MQuickSlot.cpp` — the shop/stash index-bounds fixes
   from the review live here and deserve permanent tests.
-  > **Status:** not started. Unblocked by 4.4's second slice
-  > (the item core links); next.
+  > **Status:** done (4cede66 the managers, 0feaf59 the containers;
+  > owner: the `gamemodel` membership file, the CMake assertion that no
+  > member is in the executable's list, and the include checker).
   > **First slice (2026-09-02, `restructuring/gamemodel-containers`; live
   > verification gates the merge):** the managers. `MItemManager` (the
   > id map), `MGridItemManager` (the grid) and `MSlotItemManager` (the
@@ -1041,6 +1078,28 @@ starting each — the scan is one grep, and the ranking below is from a
   > (`MItemManager` is in, the skill core and the gear classes are not)
   > and 4.2's price manager (the trade manager followed as 4.2's second
   > slice), which stands on what is now in the library.
+  > **Adversarial review round (2026-09-03, with 4.2's second slice, 4
+  > reviewers, all SHIP with findings, no runtime defect), fixed on the
+  > branch:** the move's "the same call" was not quite — the containers'
+  > `g_pPlayer->CheckAffectStatus` was unguarded and the host body it now
+  > goes through carries the pet path's `if (g_pPlayer!=NULL)`, so a NULL
+  > player is a skipped refresh rather than a crash (kept, recorded
+  > here); the comment the shelf fix added, "every caller handles a NULL
+  > return", was false for three of five callers — `GCShopVersionHandler`
+  > and `MNPC` pass in-range enumerators and never see NULL
+  > (`SHOP_RACK_SPECIAL` and `SHELF_SPECIAL` are both 1, now said at the
+  > call), reworded, and the guard is one unsigned compare so it reads
+  > the same on every compiler; the test pinned the inventory sound with
+  > all four sound slots equal, so a wrong slot would have passed — the
+  > slots differ now; the `MInventory.h` half of the effect list the
+  > `.cpp` side dropped is gone too (the record said its members left
+  > "long ago" — commented out, not gone); a dead vector in the shelf
+  > test; the refactor commit's suite count was 234 tests, not 233; the
+  > Korean banners above the rewritten calls are English; and the status
+  > line above said "not started" beside a record that said complete.
+  > Noted, not done: `MShop::SetCurrent` and the three gear classes still
+  > reach `g_pPlayer->CheckAffectStatus` unguarded, the reach the
+  > containers cut — 4.4's remainder.
 - [ ] **4.4 Item/skill cores:** `MItem.cpp`, `MItemManager.cpp`,
   `MSkillManager.cpp`, `SkillDef.cpp`, gear classes. Likely partial —
   whatever stays coupled goes on the exemption list explicitly.
