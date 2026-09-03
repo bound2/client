@@ -657,50 +657,36 @@ MSkillDomain::SetMaxLevel()
 //----------------------------------------------------------------------
 void			
 MSkillDomain::Clear()
-{ 
-//	SKILLID_MAP::iterator	iSkill = m_mapSkillID.begin();
-//	SKILLID_MAP::iterator	endItr = m_mapSkillID.end();
-//
-//	while (iSkill!=endItr)
-//	{		
-//		//-----------------------------------------------
-//		// 현재 사용 가능한 Skill에서 제거한다.
-//		//-----------------------------------------------
-//		(*g_pSkillAvailable).RemoveSkill( (*iSkill).first );
-//
-//		iSkill++;
-//	}
-//
-//	m_iterator = NULL; 
-//	m_mapSkillID.clear();
-
+{
 	ClearSkillList();
 
 	//-----------------------------------------------
-	// 배운 level 제거
+	// Forget the levels of what was learned.
 	//-----------------------------------------------
-	if (m_pLearnedSkillID!=NULL)
-	{
-		delete [] m_pLearnedSkillID;
-		
-		m_MaxLevel = 0;
-		m_MaxLearnedLevel = -1;	
-		m_pLearnedSkillID = NULL;
-	}
+	// ClearSkillList has already freed the array, so these are reset
+	// whatever it found: a test for the pointer here could never fire,
+	// and left the two counters naming a level of an array that is
+	// gone - which the learn and unlearn paths then index.
+	//-----------------------------------------------
+	m_MaxLevel = 0;
+	m_MaxLearnedLevel = -1;
 }
 
-void			
+void
 MSkillDomain::ClearSkillList()
-{ 
+{
 	SKILLID_MAP::iterator	iSkill = m_mapSkillID.begin();
 	SKILLID_MAP::iterator	endItr = m_mapSkillID.end();
 
 	while (iSkill!=endItr)
-	{		
+	{
 		//-----------------------------------------------
-		// 현재 사용 가능한 Skill에서 제거한다.
+		// Take it out of the skills usable now.
 		//-----------------------------------------------
-		(*g_pSkillAvailable).RemoveSkill( (*iSkill).first );
+		if (g_pSkillAvailable!=NULL)
+		{
+			(*g_pSkillAvailable).RemoveSkill( (*iSkill).first );
+		}
 
 		iSkill++;
 	}
@@ -814,23 +800,9 @@ MSkillDomain::AddSkill(ACTIONINFO id)
 		}	
 		
 		//-----------------------------------------------
-		// 이 skill의 SkillStep에 관한 정보를 설정한다.
+		// Put it in the step list it belongs to here.
 		//-----------------------------------------------
-
-		SKILL_STEP skillStep = (*g_pSkillInfoTable)[id].GetSkillStep();
-		if(skillStep == SKILL_STEP_ETC && id == SKILL_SOUL_CHAIN)
-		{
-			if(this == &(*g_pSkillManager)[SKILL_DOMAIN_VAMPIRE])
-				AddSkillStep(SKILL_STEP_VAMPIRE_INNATE, id);
-			else if( this == &(*g_pSkillManager)[SKILL_DOMAIN_OUSTERS])
-				AddSkillStep(SKILL_STEP_OUSTERS_ETC, id);
-			else
-				AddSkillStep(SKILL_STEP_APPRENTICE, id);
-		}
-		else
-		{
-			AddSkillStep(skillStep, id);
-		}
+		AddSkillStep( GetSkillStepFor( id ), id );
 
 		//--------------------------------------------------
 		// 다음에 배울 수 있는 것들을 찾아서 추가한다.
@@ -1078,17 +1050,18 @@ MSkillDomain::RemoveNextSkill(ACTIONINFO id)
 		return;
 	}
 
-	SKILLID_MAP::iterator iPreviousSkill = m_mapSkillID.find( id );
-
-	// 바로 전에 배웠던 기술의 ID		
-	ACTIONINFO previousID = (*iPreviousSkill).first;
-
 	//--------------------------------------------------
 	//
-	// 다음에 배울 수 있는 것들을 찾아서 설정한다.
+	// Take the mark off what the skill just given back led to.
 	//
 	//--------------------------------------------------
-	const SKILLINFO_NODE::SKILLID_LIST& listNextSkill = (*g_pSkillInfoTable)[previousID].GetNextSkillList();
+	// <id> is the skill learned just before. It used to be read back
+	// out of the map, which answers a lookup with the key that was
+	// looked up when it holds it and with the end iterator when it
+	// does not - so the lookup could only ever return <id>, and
+	// dereferencing it was the one thing it could get wrong.
+	//--------------------------------------------------
+	const SKILLINFO_NODE::SKILLID_LIST& listNextSkill = (*g_pSkillInfoTable)[id].GetNextSkillList();
 
 	SKILLINFO_NODE::SKILLID_LIST::const_iterator iNextSkill = listNextSkill.begin();
 
@@ -1169,18 +1142,33 @@ MSkillDomain::LearnSkill(ACTIONINFO id)
 		return false;
 	}
 
-	
 	//-----------------------------------------------
-	// 현재 사용 가능한 Skill에 추가한다.
-	//-----------------------------------------------
-	(*g_pSkillAvailable).AddSkill( id );
-
-	//-----------------------------------------------
-	// 배운 기술 level 체크
+	// Which level of the domain it sits at.
 	//-----------------------------------------------
 	int skillLevel = (*g_pSkillInfoTable)[id].GetLevel();
 
-	// 현재 level에서 배운 기술 설정
+	//-----------------------------------------------
+	// The levels come out of the skill file and the array is as long
+	// as the deepest skill the tree walk counted, so a skill at a
+	// level the walk never saw - or a domain whose array a clear or a
+	// load took away - is refused rather than written past. Refused
+	// before the skill is made usable, so a refusal leaves nothing
+	// behind.
+	//-----------------------------------------------
+	if (m_pLearnedSkillID==NULL || skillLevel<0 || skillLevel>m_MaxLevel)
+	{
+		return false;
+	}
+
+	//-----------------------------------------------
+	// Add it to the skills usable now.
+	//-----------------------------------------------
+	if (g_pSkillAvailable!=NULL)
+	{
+		(*g_pSkillAvailable).AddSkill( id );
+	}
+
+	// It is what is learned at that level.
 	m_pLearnedSkillID[skillLevel] = id;
 
 	if (skillLevel > m_MaxLearnedLevel)
@@ -1286,24 +1274,36 @@ MSkillDomain::UnLearnSkill(ACTIONINFO id)
 	}
 	
 	//--------------------------------------------------
-	// 제거할려는 기술의 다음 기술들을 
-	// 못 배우는 걸로 체크한다.
+	// Nothing is learned unless the array that says what is learned
+	// at each level is there, and unless the level that indexes it is
+	// one the array holds.
+	//--------------------------------------------------
+	if (m_pLearnedSkillID==NULL || m_MaxLearnedLevel<0 || m_MaxLearnedLevel>m_MaxLevel)
+	{
+		return false;
+	}
+
+	//--------------------------------------------------
+	// Mark what the skill being given back led to as out of reach.
 	//--------------------------------------------------
 	RemoveNextSkill( m_pLearnedSkillID[m_MaxLearnedLevel] );
 
 	//--------------------------------------------------
-	// 기술 level 없애주기
+	// Clear the level.
 	//--------------------------------------------------
 	m_pLearnedSkillID[m_MaxLearnedLevel] = MAX_ACTIONINFO;//ACTIONINFO_NULL;
 	m_MaxLearnedLevel--;
-	
 
-	(*iSkill).second = SKILLSTATUS_OTHER;	// 실제로는 NEXTSKILL이지만..머..
+
+	(*iSkill).second = SKILLSTATUS_OTHER;	// really NEXTSKILL, but never mind
 
 	//-----------------------------------------------
-	// 현재 사용 가능한 Skill에서 제거한다.
+	// Take it out of the skills usable now.
 	//-----------------------------------------------
-	(*g_pSkillAvailable).RemoveSkill( id );
+	if (g_pSkillAvailable!=NULL)
+	{
+		(*g_pSkillAvailable).RemoveSkill( id );
+	}
 	
 	//--------------------------------------------------
 	//
@@ -1363,7 +1363,7 @@ MSkillDomain::AddSkillStep(SKILL_STEP ss, ACTIONINFO ai)
 
 	if (iList == m_mapSkillStep.end())
 	{
-		// 없으면 new해서 추가한다.
+		// Not there yet, so new one up.
 		pList = new SKILL_STEP_LIST;
 	}
 	else
@@ -1371,18 +1371,18 @@ MSkillDomain::AddSkillStep(SKILL_STEP ss, ACTIONINFO ai)
 		pList = iList->second;
 	}
 
-	// list에 ai추가
-	SKILL_STEP_LIST list = *pList;
+	// Is ai in the list already? The list itself is searched; it used
+	// to be copied whole for this, once per skill added.
 	bool bExist = false;
-	for(int i=0;i<list.size();i++)
+	for(size_t i=0;i<pList->size();i++)
 	{
-		if( list[i] == ai )
-		{			
+		if( (*pList)[i] == ai )
+		{
 			bExist = true;
 			break;
 		}
 	}
-	
+
 	if(bExist == false)
 //		pList->push_back( ai );	
 	{
@@ -1416,8 +1416,105 @@ MSkillDomain::AddSkillStep(SKILL_STEP ss, ACTIONINFO ai)
 		}
 	}
 
-	// (다시) 설정한다.
+	// Store it (again).
 	m_mapSkillStep[ss] = pList;
+}
+
+//----------------------------------------------------------------------
+// Get SkillStep for a skill in this domain
+//----------------------------------------------------------------------
+// The step is the skill file's, except for the one skill the three
+// races share: it sits in a step of its own for each of them, and the
+// domain it is being added to is what says which.
+//----------------------------------------------------------------------
+SKILL_STEP
+MSkillDomain::GetSkillStepFor(ACTIONINFO id) const
+{
+	const SKILL_STEP	skillStep = (*g_pSkillInfoTable)[id].GetSkillStep();
+
+	if (skillStep!=SKILL_STEP_ETC || id!=SKILL_SOUL_CHAIN || g_pSkillManager==NULL)
+	{
+		return skillStep;
+	}
+
+	if (this == &(*g_pSkillManager)[SKILL_DOMAIN_VAMPIRE])
+	{
+		return SKILL_STEP_VAMPIRE_INNATE;
+	}
+
+	if (this == &(*g_pSkillManager)[SKILL_DOMAIN_OUSTERS])
+	{
+		return SKILL_STEP_OUSTERS_ETC;
+	}
+
+	return SKILL_STEP_APPRENTICE;
+}
+
+//----------------------------------------------------------------------
+// Set State From SkillList
+//----------------------------------------------------------------------
+// The skill list carries one status per skill and nothing else, while
+// the skill window reads the step lists and the learn and unlearn
+// paths index an array of what is learned at each level. Both of those
+// follow from the list and the skill file, so both are rebuilt here -
+// otherwise a list that arrived any way other than a tree walk leaves
+// the domain indexing an array it does not have.
+//----------------------------------------------------------------------
+void
+MSkillDomain::SetStateFromSkillList()
+{
+	SKILLID_MAP::const_iterator	iSkill = m_mapSkillID.begin();
+
+	//-----------------------------------------------
+	// The domain reaches as deep as the deepest skill in it.
+	//-----------------------------------------------
+	m_MaxLevel = 0;
+
+	while (iSkill != m_mapSkillID.end())
+	{
+		const int	skillLevel = (*g_pSkillInfoTable)[(*iSkill).first].GetLevel();
+
+		if (m_MaxLevel < skillLevel)
+		{
+			m_MaxLevel = skillLevel;
+		}
+
+		AddSkillStep( GetSkillStepFor( (*iSkill).first ), (*iSkill).first );
+
+		iSkill++;
+	}
+
+	//-----------------------------------------------
+	// An empty array of that depth, then one entry per skill the list
+	// says is learned - and those skills are usable again.
+	//-----------------------------------------------
+	SetMaxLevel();
+
+	iSkill = m_mapSkillID.begin();
+
+	while (iSkill != m_mapSkillID.end())
+	{
+		const ACTIONINFO	id = (*iSkill).first;
+		const int			skillLevel = (*g_pSkillInfoTable)[id].GetLevel();
+
+		if ((*iSkill).second==SKILLSTATUS_LEARNED
+			&& skillLevel>=0 && skillLevel<=m_MaxLevel)
+		{
+			m_pLearnedSkillID[skillLevel] = id;
+
+			if (skillLevel > m_MaxLearnedLevel)
+			{
+				m_MaxLearnedLevel = skillLevel;
+			}
+
+			if (g_pSkillAvailable!=NULL)
+			{
+				(*g_pSkillAvailable).AddSkill( id );
+			}
+		}
+
+		iSkill++;
+	}
 }
 
 //----------------------------------------------------------------------
@@ -1456,24 +1553,46 @@ void
 MSkillDomain::LoadFromFile(std::ifstream& file)
 {
 	Clear();
-	//m_mapSkillID.clear();
-	
-	// size읽어오기
-	int size;
-	file.read((char*)&size, 4);
 
-	// 읽어와서 저장
-	WORD id;
-	BYTE status;
-	for (int i=0; i<size; i++)
-	{		
-		file.read((char*)&id, 2);
-		file.read((char*)&status, 1);
+	// How many skills follow.
+	int size = 0;
 
-		m_mapSkillID.insert(SKILLID_MAP::value_type( 
-										(enum ACTIONINFO)id, 
-										(enum SKILLSTATUS)status ));
-	} 
+	if (file.read((char*)&size, 4) && size>0)
+	{
+		// Read them and store them.
+		for (int i=0; i<size; i++)
+		{
+			WORD id = 0;
+			BYTE status = 0;
+
+			//-----------------------------------------------
+			// Three bytes to a skill, so a count larger than what is
+			// left of the file names skills that are not there.
+			// Reading them used to leave the last id and status in
+			// place and store that one skill over and over - and on
+			// an empty file, whatever the two locals happened to
+			// hold.
+			//-----------------------------------------------
+			if (!file.read((char*)&id, 2) || !file.read((char*)&status, 1))
+			{
+				break;
+			}
+
+			// Neither a status the enum does not have nor the one
+			// that means the skill is not in the domain at all.
+			if (status==SKILLSTATUS_NULL || status>SKILLSTATUS_OTHER)
+			{
+				continue;
+			}
+
+			m_mapSkillID.insert(SKILLID_MAP::value_type(
+											(enum ACTIONINFO)id,
+											(enum SKILLSTATUS)status ));
+		}
+	}
+
+	// The file carries the statuses only; the rest follows from them.
+	SetStateFromSkillList();
 }
 
 //----------------------------------------------------------------------
@@ -1481,13 +1600,28 @@ MSkillDomain::LoadFromFile(std::ifstream& file)
 //----------------------------------------------------------------------
 void		
 MSkillDomain::LoadFromFileServerDomainInfo(std::ifstream& file)
-{	
-	int level;
+{
+	int level = 0;
 
-	file.read((char*)&level, 4);
+	if (!file.read((char*)&level, 4))
+	{
+		return;
+	}
 
-	// level에 맞춰서 loading..
-	m_DomainExpTable[level].LoadFromFile( file );	
+	//--------------------------------------------------
+	// The level names the row to fill. A table answers every index it
+	// does not hold with one row shared across the program, so a
+	// level outside this table would not be stored under that level -
+	// it would become what every level past the end of every table
+	// reads. The level is the file's, so it is checked here.
+	//--------------------------------------------------
+	if (level<0 || level>=m_DomainExpTable.GetSize())
+	{
+		return;
+	}
+
+	// Load into the row for that level.
+	m_DomainExpTable[level].LoadFromFile( file );
 }
 
 bool		

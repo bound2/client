@@ -565,8 +565,21 @@ class MSkillDomain {
 		//------------------------------------------------------
 		// Add Skill Step
 		//------------------------------------------------------
-		// ss에 ai를 추가한다.
+		// Add ai to the step list ss.
 		void		AddSkillStep(SKILL_STEP ss, ACTIONINFO ai);
+
+		//------------------------------------------------------
+		// Skill Step of a skill in this domain
+		//------------------------------------------------------
+		// Which step list a skill belongs to here.
+		SKILL_STEP	GetSkillStepFor(ACTIONINFO id) const;
+
+		//------------------------------------------------------
+		// Set State From SkillList
+		//------------------------------------------------------
+		// Rebuild what the skill list implies: the step lists and
+		// the level of what is learned.
+		void		SetStateFromSkillList();
 
 
 	protected :
