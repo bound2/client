@@ -2,26 +2,30 @@
 // test_player_base.cpp
 //----------------------------------------------------------------------
 //
-// Player, the base of the two player classes (docs/RESTRUCTURING.md
-// task 5.1): the send/receive plumbing over a socket, with no game
-// state of its own. It became linkable into a test binary when the
-// logging header moved into basic/ and the wire layer stopped reaching
-// for the executable's debug facilities, so this file is first of all
-// the proof that it links.
+// The two files task 5.1 moved into packetwire: Player, the base under
+// all three player classes - the send/receive plumbing over a socket,
+// with no game state of its own - and DatagramSocket. Both became
+// linkable into a test binary when the logging header moved into
+// basic/ and the wire layer stopped reaching for the executable's
+// debug facilities, so this file is first of all the proof that they
+// link.
 //
-// What it can reach is the socket-free half. Everything past the
-// default constructor - processInput, processOutput, sendPacket,
-// disconnect, toString - dereferences the socket or a stream without
-// testing either, and the constructor that takes a socket cannot be
-// driven from here: its destructor closes the socket, and closesocket
-// on a descriptor Winsock never handed out throws an Error the catch
-// inside SocketImpl::close does not catch. The plan records both.
+// Most of Player still cannot be driven from here: processCommand,
+// processInput, processOutput, sendPacket, disconnect and toString all
+// dereference a stream or the socket without testing either, and a
+// player holding a real socket would have to be given a peer. What is
+// reachable is the two constructors, the id, the socket accessors and
+// the encryption table.
 //
 //----------------------------------------------------------------------
 
 #include "test_framework.h"
 
+#include "packet_stream_access.h"		// EnsureSocketsInitialised
+#include "DatagramSocket.h"
 #include "Player.h"
+#include "Socket.h"
+#include "SocketImpl.h"
 
 #include <cstring>
 
@@ -53,8 +57,11 @@ TEST(PlayerBase, TheEncryptionTableFollowsTheHashKeyAndIsGivenBack)
 	player.setKey(7, 1234);
 	CHECK(player.pHashTable != NULL);
 
-	// The table is 512 bytes derived from the hash key alone, so the
-	// same key gives the same table.
+	// The table is 512 bytes walked out of an 8-bit state seeded with
+	// (HashKey + 4658) & 0xFF, so it follows the hash key modulo 256
+	// and nothing else - the encrypt key only picks an offset into it.
+	// The same key therefore gives the same table, and 1234 against 99
+	// below differ modulo 256; 1234 against 1490 would not.
 	BYTE first[512];
 	std::memcpy(first, player.pHashTable, 512);
 
@@ -78,13 +85,21 @@ TEST(PlayerBase, TheEncryptionTableFollowsTheHashKeyAndIsGivenBack)
 	player.delKey();
 }
 
-TEST(PlayerBase, SettingASocketOnAPlayerThatHasNoStreamsMakesNone)
+TEST(PlayerBase, SettingASocketKeepsIt)
 {
 	Player player;
 
-	// setSocket replaces the streams only if they are there, and the
-	// socket-free constructor makes none - so the player still has
-	// nothing to read or write through, whatever socket it is given.
+	// A socket the player is only ever asked to hand back, never to
+	// read or write: setSocket replaces the streams only if they are
+	// there, and the socket-free constructor made none, so nothing
+	// dereferences it.
+	Socket*	pFake = (Socket*)0x1;
+
+	player.setSocket(pFake);
+	CHECK(pFake == player.getSocket());
+
+	// Put it back before the player is destroyed - the destructor
+	// closes and deletes whatever socket it holds.
 	player.setSocket(NULL);
 	CHECK(player.getSocket() == NULL);
 
@@ -94,4 +109,79 @@ TEST(PlayerBase, SettingASocketOnAPlayerThatHasNoStreamsMakesNone)
 	CHECK(player.pHashTable != NULL);
 	player.delKey();
 	CHECK(player.pHashTable == NULL);
+}
+
+//----------------------------------------------------------------------
+// The constructor that takes a socket
+//----------------------------------------------------------------------
+TEST(PlayerBase, ASocketBuiltPlayerHasNoKeyToGiveBack)
+{
+	//------------------------------------------------------------------
+	// The constructor RequestClientPlayer and RequestServerPlayer both
+	// forward to. It set every member but pHashTable, which delKey
+	// then delete[]s - and delKey has two live callers, the reconnect
+	// handlers. They are safe only because ClientPlayer, the class
+	// they cast to, leaves its base default-constructed; a base
+	// initialiser on that one class would have made every reconnect a
+	// free of whatever the memory held.
+	//------------------------------------------------------------------
+	EnsureSocketsInitialised();
+
+	{
+		// A socket over a descriptor nothing ever created: the player
+		// takes ownership and closes it, which Winsock answers with
+		// the exception SocketImpl::close catches.
+		Player	player(new Socket(new SocketImpl()));
+
+		CHECK(player.pHashTable == NULL);
+		CHECK(player.getSocket() != NULL);
+
+		// So giving back a key it was never given is not a free of a
+		// wild pointer.
+		player.delKey();
+		CHECK(player.pHashTable == NULL);
+
+		// And a table it is given really is given back - the streams
+		// exist here, so setKey reaches their (no-op) setKey too.
+		player.setKey(3, 77);
+		CHECK(player.pHashTable != NULL);
+		player.delKey();
+		CHECK(player.pHashTable == NULL);
+
+		// Asking twice replaces the table rather than stranding the
+		// first one; the destructor frees whatever is left.
+		player.setKey(3, 77);
+		player.setKey(4, 88);
+		CHECK(player.pHashTable != NULL);
+	}
+}
+
+//----------------------------------------------------------------------
+// The other file this slice moved
+//----------------------------------------------------------------------
+TEST(DatagramSocketLink, ItsObjectIsInTheLibrary)
+{
+	//------------------------------------------------------------------
+	// A static library hands the linker only the objects that resolve
+	// something, so a member nothing references is never pulled in and
+	// a build says nothing about whether it could have been. Taking
+	// the address of each entry point is what forces it: the whole
+	// object has to come in, and with it every symbol it references -
+	// which is how the wire layer's one remaining seam to the
+	// executable, Player::processCommand's SendBugReport, showed up.
+	//
+	// Nothing here opens a socket. Both constructors do, and the
+	// server one binds a port, which is not a thing a unit test should
+	// need to be free.
+	//------------------------------------------------------------------
+	uint (DatagramSocket::*pSend)(Datagram*) = &DatagramSocket::send;
+	Datagram* (DatagramSocket::*pReceive)() = &DatagramSocket::receive;
+	SOCKET (DatagramSocket::*pGet)() const = &DatagramSocket::getSOCKET;
+
+	CHECK(pSend != NULL);
+	CHECK(pReceive != NULL);
+	CHECK(pGet != NULL);
+
+	// Its buffer is sized for the largest datagram it can be handed.
+	CHECK(sizeof(DatagramSocket) > DATAGRAM_SOCKET_BUFFER_LEN);
 }

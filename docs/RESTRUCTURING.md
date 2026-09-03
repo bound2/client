@@ -121,6 +121,7 @@ an unrecorded drop, so tightening lands in the same commit as the progress.
 | R3 | Live `sprintf`/`strcpy`/`strcat` lines under `Client/Packet` **and `Client/PacketHandler`** | 46 (unchanged by task 2.4, which widened the scope to follow the handlers out of `Client/Packet`; 61 at first measurement — the 2026-09-01 adversarial review showed a quarter of that was commented-out code, so the measurement now excludes `//` matches) | see `ratchets.sh` — the grep excludes comment-prefixed matches |
 | R4 | Library-compiled `.cpp` files referencing `g_p*` client globals **no library file defines** | **25** (27 before 4.4's fourth slice moved the skill core into `gamemodel` — a reclassification again: `VS_UI_SKILL_VIEW.cpp` and `VS_UI_skill_tree.cpp` reached past the libraries only for `g_pSkillInfoTable`, `g_pSkillManager` and `g_pSkillAvailable`, which `MSkillManager.cpp` defines; 28 before 4.4's third slice moved the gear into `gamemodel` — a reclassification: `VS_UI_Game.cpp`'s only reaches past the libraries were `g_pSlayerGear`, `g_pVampireGear` and `g_pOustersGear`, which the gear sources define; 35 before 4.4's second slice — a reclassification again, 35 + 1 − 8: the subtraction became library-wide, so a library file reading a global another library file defines is no longer a seam; `MItem.cpp` joined reading `gamemodel`'s own tables, +1 under the old per-file rule, and the union rule excludes it with seven earlier members — `Datagram.cpp` reading `packetwire`'s factory manager, and six `VS_UI` sources whose only reaches are `gamemodel`'s tables, `packetwire`'s `g_pFileDef` or `VS_UI`'s own globals; 59 before task 4.0 — a reclassification, not seam-cutting: the 36 `VS_UI_CLIENT_SOURCES` files stopped being library-compiled, so the 24 of them that reach globals are executable debt now, counted by R1 and outside this ratchet; 61 before task 4.1 cut the two `g_pFileDef` seams in `MGameStringTable` and `SystemAvailabilities` and added the `gamemodel` membership file, whose four new members reference no game global; 81 before task 2.4 grew the membership from 52 to 518 files; the number fell because the measurement stopped counting a file's references to globals it defines — the packet tables own `g_pPacketFactoryManager`/`g_pPacketValidator` — and the two dead server-only bodies that reached game globals were deleted; 83 at first measurement, before two never-compiled files were filtered) | `ratchets.sh` computes it over the library dirs (minus CMake-excluded files) plus the `packetwire` and `gamemodel` membership files |
 | R5 | Direct packet `execute()` call sites outside `Client/Packet` (handlers under `Client/PacketHandler` are in scope) | 1 (a commented-out block in `CGameUpdate.cpp`; added 2026-09-01 after the review found live local-echo callers the receive-loop enumeration had missed; task 2.4 found two more inside handlers — `GCReconnectLoginHandler`/`LCReconnectHandler` fabricating a `CGConnectSetKey` — invisible while handlers lived under the excluded `Client/Packet`, caught by the compiler once `Packet::execute` was deleted, and routed through the dispatcher; a live caller is now a compile error before it is a ratchet failure) | see `ratchets.sh` |
+| R6 | `packetwire` members calling `SendBugReport`, which the executable defines | 1 (`Player.cpp`'s oversized-packet report; added 2026-09-03 by task 5.1, whose review round pointed out that stubbing the symbol for the test binary silences the only detector that found this class of seam — a library file calling an executable-side *function* is invisible to W1/W2, which read includes, and to R4, which greps `g_p*`. It leaves when `SendBugReport` moves into `packetwire` behind a `Player*`: its only reach outside the wire layer is `g_pSocket`. Measured over the membership file, not the directory, because the six holdouts compile into the executable and may call it freely) | see `ratchets.sh` |
 
 R1 is the headline number: it counts what still cannot be unit-tested. R2 is
 the client twin of the server's R4 (which it drove to 0). R3 tracks
@@ -1626,7 +1627,7 @@ starting each — the scan is one grep, and the ranking below is from a
   > prefixes. It needs nothing but the C library and `Platform.h`, so
   > the bottom library is where it belongs: every target links `basic`
   > and that directory is a PUBLIC include directory, so not one of the
-  > fourteen `#include "DebugLog.h"` lines had to change. That also
+  > fifteen `#include "DebugLog.h"` lines had to change - fourteen in sources plus the one in `DebugInfo.h` itself. That also
   > ended a *second* copy of it: `Client/SpriteLib/CMakeLists.txt`
   > compiled `../DebugLog.cpp` into `SpriteLib` as well, so the same
   > translation unit was in two libraries; `SpriteLib` links `basic`
@@ -1636,7 +1637,7 @@ starting each — the scan is one grep, and the ranking below is from a
   > externs that went with it), and `MTestDef.h` from two files, whose
   > one struct sits behind a `__METROTECH_TEST__` nothing defines.
   > **Two holdouts became members:** `Player.cpp` (the send/receive
-  > plumbing under both player classes) and `DatagramSocket.cpp`. R1
+  > plumbing under all three player classes) and `DatagramSocket.cpp`. R1
   > 495 → 493; gamemodel membership 35 → 34 files, packetwire 517 → 519.
   > The other six reach for game headers, and the holdouts file now
   > lists which ones each still needs — `ClientConfig.h` is common to
@@ -1652,27 +1653,44 @@ starting each — the scan is one grep, and the ranking below is from a
   > fix recorded: `SendBugReport` builds a `CGSay` and sends it through
   > `g_pSocket`, so its only reach outside the wire layer is that one
   > global, and it can move into packetwire behind a `Player*`.
-  > Tests (`test_player_base.cpp`, 3): `Player`'s socket-free half —
-  > the default constructor holding no socket and no key, the
-  > encryption table following the hash key and being given back
-  > (including a second `delKey` being harmless), and `setSocket`
-  > making no streams on a player that had none. Coverage and a link
-  > proof, not reproductions. Suite: 286 tests (4,415 checks).
-  > **Noted, not done:** `Player`'s socket constructor — the one
-  > `RequestClientPlayer` forwards to, on a live path — never sets
-  > `pHashTable`, so a `delKey()` there frees a garbage pointer; the
-  > destructor never frees it either, and a second `setKey` leaks the
-  > first table. Nothing calls `setKey`/`delKey` in the client today
-  > (`SocketInputStream::setKey` is an empty stub whose comment says it
-  > survives only for `Player::setKey`), so all three are latent, and
-  > the socket constructor cannot be driven from a test binary: its
-  > destructor closes the socket, and `closesocket` on a descriptor
-  > Winsock never handed out throws an `Error` that
-  > `SocketImpl::close`'s catch does not catch. `SocketImpl`'s default
-  > constructor is the only one of its four that leaves `m_key` unset.
-  > And `Player::processInput`, `processOutput`, `sendPacket`,
-  > `disconnect` and `toString` all dereference the socket or a stream
-  > without testing either, which the default constructor leaves NULL.
+  > **A defect fixed test-first, which the review round turned up.**
+  > `Player`'s socket constructor — the one `RequestClientPlayer` and
+  > `RequestServerPlayer` both forward to — set every member but
+  > `pHashTable`, which the default constructor's body was the only
+  > place that ever set. `delKey()` `delete[]`s that pointer, and the
+  > first draft of this record claimed nothing called `delKey`: it has
+  > **two live callers**, `GCReconnectLoginHandler.cpp:72` and
+  > `LCReconnectHandler.cpp:178`, both on every reconnect. They are
+  > safe today only because `ClientPlayer` — the class those two cast
+  > to — writes `: m_PlayerStatus(CPS_NONE)` and so default-constructs
+  > its base; a base initialiser on that one class would have made
+  > every reconnect a free of whatever the memory held. Both
+  > constructors set it in their initialiser list now, the destructor
+  > frees it (nothing did, so a player that had been given a key leaked
+  > 512 bytes), and `setKey` frees the previous table before building
+  > another. The new test drives the socket constructor and the ASan
+  > tree aborts against the old code: *"AddressSanitizer: bad-free …
+  > in Player::delKey"*.
+  > Tests (`test_player_base.cpp`, 5): the default constructor holding
+  > no socket and no key; the encryption table following the hash key
+  > modulo 256 (all it depends on — the encrypt key only picks an
+  > offset) and being given back, with a second `delKey` harmless;
+  > `setSocket` keeping the socket it is given; the socket constructor
+  > leaving no key to give back, and a second `setKey` replacing the
+  > table; and a link proof for `DatagramSocket.cpp`, which — unlike
+  > `Player.cpp`, whose link genuinely fired — nothing in the test
+  > binary would otherwise reference, so a static library would never
+  > hand its object to the linker at all. Suite: 288 tests (4,426
+  > checks).
+  > **A ratchet for the seam, R6.** Stubbing `SendBugReport` for the
+  > test binary silences the only detector that found it, so R6 counts
+  > packetwire members that call it: baseline 1, `Player.cpp`, and it
+  > leaves when `SendBugReport` moves into the library.
+  > **Noted, not done:** `SocketImpl`'s default constructor is the only
+  > one of its four that leaves `m_key` unset. `Player::processCommand`,
+  > `processInput`, `processOutput`, `sendPacket`, `disconnect` and
+  > `toString` all dereference the socket or a stream without testing
+  > either, which the default constructor leaves NULL.
 - [ ] **5.2 Dead/duplicate source removal** (code-health priority 3): the
   `_bak` files are already excluded by the build — delete them; sort the
   `GameHelpers`/`GameFunctions`/`GamePacketFunctions` exclusion graveyard

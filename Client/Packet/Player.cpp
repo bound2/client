@@ -27,7 +27,7 @@ void	SendBugReport(const char *bug, ...);
 //////////////////////////////////////////////////////////////////////
 Player::Player ()
 	 throw ( Error )
-: m_pSocket(NULL), m_pInputStream(NULL), m_pOutputStream(NULL)
+: pHashTable(NULL), m_pSocket(NULL), m_pInputStream(NULL), m_pOutputStream(NULL)
 {
 	__BEGIN_TRY
 
@@ -43,9 +43,11 @@ Player::Player ()
 
 	Assert( m_pOutputStream == NULL );
 
-	//add by viva
-	pHashTable = NULL;
-	//end
+	// pHashTable is in the initialiser list now, so both constructors
+	// set it. This one used to be the only place it was written, and
+	// the socket constructor - which RequestClientPlayer and
+	// RequestServerPlayer both forward to - left it holding whatever
+	// the memory did, for delKey to delete[].
 
 	__END_CATCH
 }
@@ -58,7 +60,7 @@ Player::Player ()
 //////////////////////////////////////////////////////////////////////
 Player::Player ( Socket * pSocket )
 	 throw ( ProtocolException , Error )
-: m_pSocket(pSocket), m_pInputStream(NULL), m_pOutputStream(NULL)
+: pHashTable(NULL), m_pSocket(pSocket), m_pInputStream(NULL), m_pOutputStream(NULL)
 {
 	__BEGIN_TRY
 		
@@ -87,7 +89,15 @@ Player::~Player ()
 	 throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
-		
+
+	// delete the encryption table
+	// Nothing freed it, so a player that had been given a key leaked
+	// 512 bytes. Freed before the streams, which hold a pointer to it.
+	if ( pHashTable != NULL ) {
+		delete [] pHashTable;
+		pHashTable = NULL;
+	}
+
 	// delete socket input stream
 	if ( m_pInputStream != NULL ) {
 		delete m_pInputStream;
@@ -335,6 +345,12 @@ std::string Player::toString () const
 void Player::setKey(WORD EncryptKey, WORD HashKey) 
 	throw()
 {
+	// A second key used to leak the table the first one built.
+	if ( pHashTable != NULL )
+	{
+		delete [] pHashTable;
+	}
+
 	pHashTable = new BYTE[512];
 	BYTE key = (HashKey + 4658)&0x00FF;
 	for(int i = 0; i<512; i++)

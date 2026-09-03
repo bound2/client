@@ -30,7 +30,10 @@
 // the three the wire layer may not reach (docs/RESTRUCTURING.md task
 // 5.1).
 
-extern void PrintMessageDetail(ofstream file, char *strMsg, int length);
+// PrintMessageDetail, defined in Client/DebugKit.cpp, went with them:
+// its one call sits inside that same comment. Its declaration takes an
+// ofstream by value, so the call could not compile if the block were
+// ever uncommented.
 
 void	SendBugReport(const char *bug, ...);
 //--------------------------------------------------------------------------------

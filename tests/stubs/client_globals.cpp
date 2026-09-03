@@ -37,6 +37,14 @@
 // stay a symbol the library expects the executable to supply. Doing it
 // here would mean moving a file this slice does not touch.
 //
+// Note what this stub costs: the failed link was the only thing that
+// found this seam - W1/W2 in check_includes.pl read includes and R4
+// greps for g_p* globals, so neither can see a library file calling an
+// executable-side function - and defining the symbol here means the
+// next caller links quietly instead. R6 in tests/ratchet/ratchets.sh
+// replaces the signal: it counts packetwire members calling
+// SendBugReport, and its baseline is the one there is.
+//
 //----------------------------------------------------------------------
 
 #include <cstddef>

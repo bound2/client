@@ -33,8 +33,8 @@ Client/Packet/Socket.cpp
 Client/Packet/SocketAPI.cpp
 Client/Packet/SocketImpl.cpp
 
-# The base of the two player classes: the send/receive plumbing over a
-# socket, with no game state of its own (task 5.1)
+# The base under all three player classes: the send/receive plumbing
+# over a socket, with no game state of its own (task 5.1)
 Client/Packet/Player.cpp
 
 # Packet id tables: the factory manager, the id sets and the validator

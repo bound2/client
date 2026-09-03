@@ -153,7 +153,10 @@ set(SPRITELIB_HEADERS
 # Create SpriteLib library
 add_library(SpriteLib STATIC ${SPRITELIB_SOURCES})
 
-# Two of its sources log through DebugLog.h, which basic provides.
+# CSpriteSurface_Adapter.cpp logs through DebugLog.h, which basic
+# provides. The include directory was already listed below; this is the
+# link edge, which a static archive needs so that SpriteLib's consumers
+# get basic on the final link line.
 target_link_libraries(SpriteLib PUBLIC basic)
 
 # Include directories

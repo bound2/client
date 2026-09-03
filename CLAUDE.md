@@ -65,8 +65,9 @@ right now stays executable-side) - with the user, config and
 timed-item loaders it reads, and their string support, membership in
 `tests/arch/gamemodel_files.txt` —
 `docs/RESTRUCTURING.md` tasks 4.1, 4.2, 4.3 and 4.4),
-`framelib`, `TextSystem`, `VS_UI`, and `packetwire` — the whole wire layer: socket
-streams (datagram ones too) and the `Player` base under both player classes, the
+`framelib`, `TextSystem`, `VS_UI`, and `packetwire` — the whole wire layer: the
+sockets (TCP and datagram), the socket streams, the `Player` base under all three
+player classes, the
 encrypter, the info classes, every packet class in every direction and
 the factory/validator tables (`docs/RESTRUCTURING.md` tasks 1.1, 2.4 and 5.1;
 membership is `tests/arch/packetwire_files.txt`, read by CMake, the include checker
@@ -146,7 +147,7 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **286 tests, 4,415 checks, 0 failed** in both trees.
+baseline: **288 tests, 4,426 checks, 0 failed** in both trees.
 
 ## Traps
 
