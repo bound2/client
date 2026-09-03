@@ -3191,10 +3191,31 @@ InitGameObject()
 
 	//--------------------------------------------------
 	//
-	// Skill Tree 초기화
+	// The skill tree
 	//
 	//--------------------------------------------------
-	g_pSkillManager->Init();
+	InitSkillTree();
 
 	return TRUE;
+}
+
+//-----------------------------------------------------------------------------
+// Init SkillTree
+//-----------------------------------------------------------------------------
+// The skill manager builds the tree itself; the per-domain experience
+// the server ships comes from a file, which the executable opens for it
+// (docs/RESTRUCTURING.md task 4.4).
+//-----------------------------------------------------------------------------
+void
+InitSkillTree()
+{
+	g_pSkillManager->Init();
+
+	std::ifstream serverDomainInfoFile;
+
+	if (FileOpenBinary(g_pFileDef->getProperty("FILE_INFO_SKILL_DOMAIN_EXP").c_str(), serverDomainInfoFile))
+	{
+		g_pSkillManager->LoadFromFileServerDomainInfo( serverDomainInfoFile );
+		serverDomainInfoFile.close();
+	}
 }

@@ -1259,7 +1259,7 @@ SetMode(enum CLIENT_MODE mode)
 			// Skill Tree 초기화 - 임시로.. - -;;
 			//
 			//--------------------------------------------------
-			g_pSkillManager->Init();
+			InitSkillTree();
 
 			//------------------------------
 			// 게임 UI 를 시작한다.

@@ -121,6 +121,17 @@ Client/MOustersGear.h
 Client/MShop.cpp
 Client/MShop.h
 
+# The skill core (task 4.4, fourth slice): the skill info table, the set
+# of skills a character may use, and the domains and the tree over them.
+# The half that asks what the player can use right now is the
+# executable's MSkillAvailable.cpp; the delays run on the item host's
+# clock. SkillDef.h, the enumerations, is listed with the fame table
+# above, which already needed its SKILLDOMAIN enum.
+Client/MSkillManager.cpp
+Client/MSkillManager.h
+Client/MSkillInfoTable.cpp
+Client/SkillDef.cpp
+
 # The seams MItem reads (task 4.4): the user's display settings (the
 # gore level picks the skull names), the client configuration (the
 # colour-set bases) and the timed-item register (quest items). All

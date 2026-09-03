@@ -259,6 +259,7 @@ BOOL		InitInfomation();
 BOOL		InitGameObject();
 BOOL		InitGameUpdate();
 BOOL		InitPlayer(int x, int y, int dir);
+void		InitSkillTree();		// the skill tree, and the domain experience the server ships
 BOOL		InitSocket();
 
 // Utility Func

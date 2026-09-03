@@ -59,7 +59,9 @@ Only code compiled into a **static library**: `basic`, `SpriteLib`, `dxlib`,
 core - `MItem`, the gear families, the item managers, the containers
 (inventory, storage, shop shelves), the trade manager over them, the gear the
 three races wear and the shop, behind the `MItemHost` the executable installs,
-and the price manager behind its `MPriceHost` - with the user, config and
+the price manager behind its `MPriceHost`, and the skill core (the info
+table, the skill set, the domains and their tree; what the player can use
+right now stays executable-side) - with the user, config and
 timed-item loaders it reads, and their string/log support, membership in
 `tests/arch/gamemodel_files.txt` —
 `docs/RESTRUCTURING.md` tasks 4.1, 4.2, 4.3 and 4.4),
@@ -139,7 +141,7 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **264 tests, 4,196 checks, 0 failed** in both trees.
+baseline: **273 tests, 4,301 checks, 0 failed** in both trees.
 
 ## Traps
 

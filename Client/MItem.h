@@ -84,7 +84,7 @@ struct MItemHost {
 	int				(*DropFrameCount)(TYPE_FRAMEID dropID);	// frames in the drop animation of a drop frame id
 	void			(*RefreshAffect)(MItem* pItem);			// the player re-evaluates whether it can use the item (containers on add, a pet before its colour is read)
 	void			(*PlayItemSound)(TYPE_SOUNDID soundID);	// the sound an item makes landing in a container or going on as gear
-	const DWORD*	pCurrentTime;							// the millisecond clock the trade manager's accept delay runs on; NULL means no delay
+	const DWORD*	pCurrentTime;							// the millisecond clock the trade accept delay and the skill use delays run on; NULL means no delay
 	void			(*RecalculateStatus)();					// the player recomputes its stats after its gear changed
 	void			(*ResetQuickItemSlot)();				// the UI rebuilds the quick-item slots after the belt or an arms band changed
 	void			(*RepairHint)();						// the help event for a piece of gear that started to break

@@ -62,6 +62,10 @@ check () {
 # relative VS_UI_CLIENT_SOURCES list never matched the exe glob's
 # absolute paths in REMOVE_ITEM, so they compiled into both (the
 # LNK4217 trap); the membership removal is absolute and asserted.
+# History: 495 = 497 - 3 + 1 (task 4.4's fourth slice: MSkillManager.cpp,
+# MSkillInfoTable.cpp and SkillDef.cpp moved into gamemodel; the
+# player-facing half split out of the first, MSkillAvailable.cpp, is a
+# new exe TU).
 # History: 497 = 502 - 5 (task 4.4's third slice: MPlayerGear.cpp,
 # MSlayerGear.cpp, MVampireGear.cpp, MOustersGear.cpp and MShop.cpp
 # moved into gamemodel).
@@ -91,7 +95,7 @@ check () {
 # before (0 net). 992 = 993 - 1 (task 2.2's PacketHandlerRegistry.cpp,
 # a recorded +1, offset by the finished migration deleting
 # CGHandlersStub.cpp).
-R1_BASELINE=497
+R1_BASELINE=495
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do
@@ -185,6 +189,15 @@ check "R3 (unsafe format/copy lines in Client/Packet + Client/PacketHandler)" "$
 # g_CurrentTime) were never in this count, so cutting them did not move
 # it.
 #
+# 25: 27 - 2, a reclassification (task 4.4's fourth slice moved the skill
+# core into gamemodel): VS_UI_SKILL_VIEW.cpp and VS_UI_skill_tree.cpp
+# reached past the libraries only for g_pSkillInfoTable and
+# g_pSkillManager, which MSkillManager.cpp defines. Note what this
+# ratchet cannot see: it matches g_p* only, so a library file calling an
+# executable-side function - VS_UI_GameCommon.cpp calls
+# g_pSkillAvailable->SetAvailableSkills(), which lives in the
+# executable's MSkillAvailable.cpp - is a seam the number does not
+# count, before or after.
 # 27: 28 - 1, a reclassification (task 4.4's third slice moved the gear
 # into gamemodel): VS_UI_Game.cpp's only reaches past the libraries were
 # g_pSlayerGear, g_pVampireGear and g_pOustersGear, which the gear
@@ -219,7 +232,7 @@ check "R3 (unsafe format/copy lines in Client/Packet + Client/PacketHandler)" "$
 # GCStashList::setStashItem from a live Item*) were deleted rather than
 # grandfathered.
 #----------------------------------------------------------------------
-R4_BASELINE=27
+R4_BASELINE=25
 
 lib_members () {
 	# The directory trees minus the files CMake excludes from the
