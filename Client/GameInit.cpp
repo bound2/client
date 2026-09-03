@@ -2913,6 +2913,43 @@ static void	PlayItemSound(TYPE_SOUNDID soundID)
 static const MItemHost	s_ItemHost = { &g_CurrentFrame, ItemDropFrameCount, RefreshAffect, PlayItemSound, &g_CurrentTime };
 
 //-----------------------------------------------------------------------------
+// The price manager's host (docs/RESTRUCTURING.md task 4.2): the player's
+// race, level and stat sums, the two half-price sources and the shop tax,
+// read the way MPriceManager read them before it moved into gamemodel.
+//-----------------------------------------------------------------------------
+static int	PriceRace()
+{
+	if (g_pPlayer->IsSlayer())	return RACE_SLAYER;
+	if (g_pPlayer->IsVampire())	return RACE_VAMPIRE;
+	if (g_pPlayer->IsOusters())	return RACE_OUSTERS;
+	return -1;
+}
+
+static int	PriceLevel()			{ return g_pPlayer->GetLEVEL(); }
+static int	PriceStatSum()			{ return g_pPlayer->GetSTR() + g_pPlayer->GetDEX() + g_pPlayer->GetINT(); }
+static int	PriceBasicStatSum()		{ return g_pPlayer->GetBASIC_STR() + g_pPlayer->GetBASIC_DEX() + g_pPlayer->GetBASIC_INT(); }
+
+static bool	PricePotionHalf()
+{
+	return g_pEventManager->IsEvent(EVENTID_PREMIUM_HALF)
+		|| g_pSkillAvailable->IsEnableSkill(SKILL_HOLYLAND_BLOOD_BIBLE_NEMA);
+}
+
+static bool	PriceGambleHalf()		{ return g_pSkillAvailable->IsEnableSkill(SKILL_HOLYLAND_BLOOD_BIBLE_JAVE); }
+
+static int	PriceShopTaxPercent()
+{
+	if (g_pEventManager->IsEvent(EVENTID_TAX_CHANGE))
+	{
+		return (int)g_pEventManager->GetEvent(EVENTID_TAX_CHANGE)->parameter1;
+	}
+
+	return 100;
+}
+
+static const MPriceHost	s_PriceHost = { PriceRace, PriceLevel, PriceStatSum, PriceBasicStatSum, PricePotionHalf, PriceGambleHalf, PriceShopTaxPercent };
+
+//-----------------------------------------------------------------------------
 // Init GameObject
 //-----------------------------------------------------------------------------
 BOOL
@@ -3038,6 +3075,7 @@ InitGameObject()
 	}
 
 	MItem::SetHost(&s_ItemHost);
+	MPriceManager::SetHost(&s_PriceHost);
 
 	if (g_pPCTalkBox==NULL)
 	{

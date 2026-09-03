@@ -1,0 +1,500 @@
+//----------------------------------------------------------------------
+// test_price_manager.cpp
+//----------------------------------------------------------------------
+//
+// The price manager (docs/RESTRUCTURING.md task 4.2, third slice): what
+// a shop charges or pays for an item. It reads the item and option
+// tables, the timed-item register and the user's head-price rate, all
+// library-defined; the player's race, level and stats, the half-price
+// event and skills, and the shop tax come through MPriceHost, driven
+// here by hand.
+//
+//----------------------------------------------------------------------
+
+#include "test_framework.h"
+
+#include "MItem.h"				// first: it carries the platform types the other headers use
+#include "MPriceManager.h"
+#include "MItemTable.h"
+#include "MItemOptionTable.h"
+#include "MGameStringTable.h"
+#include "MStringArray.h"
+#include "UserInformation.h"
+#include "ClientConfig.h"
+#include "MTimeItemManager.h"
+#include "ItemClassDef.h"
+
+#include <cstdio>
+#include <fstream>
+#include <vector>
+
+namespace {
+
+//----------------------------------------------------------------------
+// A host the tests drive by hand.
+//----------------------------------------------------------------------
+int		s_Race = -1;
+int		s_Level = 0;
+int		s_StatSum = 0;
+int		s_BasicStatSum = 0;
+bool	s_PotionHalf = false;
+bool	s_GambleHalf = false;
+int		s_TaxPercent = 100;
+
+int		Race()				{ return s_Race; }
+int		Level()				{ return s_Level; }
+int		StatSum()			{ return s_StatSum; }
+int		BasicStatSum()		{ return s_BasicStatSum; }
+bool	IsPotionHalfPrice()	{ return s_PotionHalf; }
+bool	IsGambleHalfPrice()	{ return s_GambleHalf; }
+int		ShopTaxPercent()	{ return s_TaxPercent; }
+
+const MPriceHost	s_Host = { Race, Level, StatSum, BasicStatSum, IsPotionHalfPrice, IsGambleHalfPrice, ShopTaxPercent };
+
+const char* const	kTempFile = "price_manager_test.bin";
+
+// The class average the mysterious price scales comes only from a
+// loaded table, so one class is written out and read back.
+void	LoadBladesFromFile(int firstPrice, int secondPrice)
+{
+	{
+		std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
+		const int count = 2;
+		out.write((const char*)&count, 4);
+		ITEMTABLE_INFO first;
+		first.Price = firstPrice;
+		first.SaveToFile(out);
+		ITEMTABLE_INFO second;
+		second.Price = secondPrice;
+		second.SaveToFile(out);
+	}
+	std::ifstream in(kTempFile, std::ios::binary);
+	(*g_pItemTable)[ITEM_CLASS_BLADE].LoadFromFile(in);
+	in.close();
+	std::remove(kTempFile);
+}
+
+//----------------------------------------------------------------------
+// The globals the prices read, owned by one fixture per test.
+//----------------------------------------------------------------------
+struct PriceWorld
+{
+	PriceWorld()
+	{
+		s_Race = -1;
+		s_Level = 0;
+		s_StatSum = 0;
+		s_BasicStatSum = 0;
+		s_PotionHalf = false;
+		s_GambleHalf = false;
+		s_TaxPercent = 100;
+
+		g_pItemTable = new ITEMCLASS_TABLE;
+		g_pItemTable->Init(MAX_ITEM_CLASS);
+		g_pItemTable->InitClass(ITEM_CLASS_SWORD, 2);
+		(*g_pItemTable)[ITEM_CLASS_SWORD][0].Price = 1000;
+		(*g_pItemTable)[ITEM_CLASS_SWORD][0].SilverMax = 50;
+		(*g_pItemTable)[ITEM_CLASS_SWORD][1].Price = 2000;
+		g_pItemTable->InitClass(ITEM_CLASS_MACE, 1);
+		(*g_pItemTable)[ITEM_CLASS_MACE][0].Price = 1000;		// SilverMax 0: cannot be coated
+		g_pItemTable->InitClass(ITEM_CLASS_POTION, 6);
+		for (int i = 0; i < 6; i++)
+			(*g_pItemTable)[ITEM_CLASS_POTION][i].Price = 100;
+		g_pItemTable->InitClass(ITEM_CLASS_SERUM, 1);
+		(*g_pItemTable)[ITEM_CLASS_SERUM][0].Price = 200;
+		g_pItemTable->InitClass(ITEM_CLASS_SKULL, 1);
+		(*g_pItemTable)[ITEM_CLASS_SKULL][0].Price = 400;
+		g_pItemTable->InitClass(ITEM_CLASS_MOON_CARD, 5);
+		for (int i = 0; i < 5; i++)
+			(*g_pItemTable)[ITEM_CLASS_MOON_CARD][i].Price = 300;
+		g_pItemTable->InitClass(ITEM_CLASS_VAMPIRE_PORTAL_ITEM, 1);
+		(*g_pItemTable)[ITEM_CLASS_VAMPIRE_PORTAL_ITEM][0].Price = 500;
+		g_pItemTable->InitClass(ITEM_CLASS_BLOOD_BIBLE_SIGN, 1);
+		(*g_pItemTable)[ITEM_CLASS_BLOOD_BIBLE_SIGN][0].Price = 500;
+		g_pItemTable->InitClass(ITEM_CLASS_OUSTERS_SUMMON_ITEM, 1);
+		(*g_pItemTable)[ITEM_CLASS_OUSTERS_SUMMON_ITEM][0].Price = 1000;
+		// Blades: 4200 and 6000, so the class average is 5100 -> 500 in hundreds.
+		LoadBladesFromFile(4200, 6000);
+
+		// Row 0 is the "no option" row; the others carry a part and a
+		// price multiplier in percent.
+		g_pItemOptionTable = new ITEMOPTION_TABLE;
+		g_pItemOptionTable->Init(6);
+		g_pItemOptionTable->Get(0).Part = ITEMOPTION_TABLE::PART_HP;
+		g_pItemOptionTable->Get(1).Part = ITEMOPTION_TABLE::PART_DAMAGE;
+		g_pItemOptionTable->Get(1).PriceMultiplier = 150;
+		g_pItemOptionTable->Get(2).Part = ITEMOPTION_TABLE::PART_STR;
+		g_pItemOptionTable->Get(2).PriceMultiplier = 50;
+		g_pItemOptionTable->Get(3).Part = ITEMOPTION_TABLE::PART_ATTACK_SPEED;
+		g_pItemOptionTable->Get(3).PriceMultiplier = 100;
+		g_pItemOptionTable->Get(4).Part = ITEMOPTION_TABLE::PART_INT;
+		g_pItemOptionTable->Get(4).PriceMultiplier = 100;
+		g_pItemOptionTable->Get(5).Part = ITEMOPTION_TABLE::PART_DEX;
+		g_pItemOptionTable->Get(5).PriceMultiplier = 100;
+
+		g_pGameStringTable = new MStringArray;
+		g_pUserInformation = new UserInformation;
+		g_pUserInformation->HeadPrice = 100;
+		g_pClientConfig = new ClientConfig;
+		g_pTimeItemManager = new MTimeItemManager;
+
+		MItem::SetHost(NULL);
+		MPriceManager::SetHost(&s_Host);
+	}
+
+	~PriceWorld()
+	{
+		MPriceManager::SetHost(NULL);
+		delete g_pTimeItemManager;	g_pTimeItemManager = NULL;
+		delete g_pClientConfig;		g_pClientConfig = NULL;
+		delete g_pUserInformation;	g_pUserInformation = NULL;
+		delete g_pGameStringTable;	g_pGameStringTable = NULL;
+		delete g_pItemOptionTable;	g_pItemOptionTable = NULL;
+		delete g_pItemTable;		g_pItemTable = NULL;
+	}
+};
+
+//----------------------------------------------------------------------
+// Test items: a plain one of any class, one that wears, one that
+// holds charges.
+//----------------------------------------------------------------------
+struct Item : public MItem
+{
+	ITEM_CLASS	m_Class;
+
+	Item(ITEM_CLASS itemClass, TYPE_ITEMTYPE type = 0, TYPE_OBJECTID id = 1)
+		: m_Class(itemClass)
+	{
+		SetID(id);
+		SetItemType(type);
+	}
+
+	ITEM_CLASS	GetItemClass() const	{ return m_Class; }
+};
+
+struct Gear : public Item
+{
+	int		m_MaxDurability;
+
+	Gear(ITEM_CLASS itemClass, int maxDurability, TYPE_ITEM_DURATION current, TYPE_OBJECTID id = 1)
+		: Item(itemClass, 0, id), m_MaxDurability(maxDurability)
+	{
+		SetCurrentDurability(current);
+	}
+
+	int		GetMaxDurability() const	{ return m_MaxDurability; }
+};
+
+struct Charged : public Item
+{
+	Charged(ITEM_CLASS itemClass, TYPE_ITEM_NUMBER charges)
+		: Item(itemClass)
+	{
+		SetNumber(charges);
+	}
+
+	bool				IsChargeItem() const	{ return true; }
+	TYPE_ITEM_NUMBER	GetMaxNumber() const	{ return 10; }
+};
+
+} // namespace
+
+//----------------------------------------------------------------------
+// The short circuits
+//----------------------------------------------------------------------
+TEST(PriceManager, NothingEventCardsAndUnidentifiedItemsShortCircuit)
+{
+	PriceWorld world;
+	MPriceManager prices;
+
+	CHECK_EQ(0, prices.GetItemPrice(NULL, MPriceManager::NPC_TO_PC));
+
+	// The fourth moon card is worth whatever the server last said.
+	Item eventCard(ITEM_CLASS_MOON_CARD, 4);
+	Item otherCard(ITEM_CLASS_MOON_CARD, 3);
+	prices.SetEventItemPrice(777);
+	CHECK_EQ(777, prices.GetItemPrice(&eventCard, MPriceManager::NPC_TO_PC));
+	CHECK_EQ(777, prices.GetItemPrice(&eventCard, MPriceManager::PC_TO_NPC));
+	CHECK_EQ(300, prices.GetItemPrice(&otherCard, MPriceManager::NPC_TO_PC));
+
+	// An unidentified item is priced as a gamble, whatever the trade.
+	Item blade(ITEM_CLASS_BLADE);
+	CHECK_EQ(4200, prices.GetItemPrice(&blade, MPriceManager::NPC_TO_PC));
+	blade.UnSetIdentified();
+	CHECK_EQ(500, prices.GetMysteriousPrice(&blade));
+	CHECK_EQ(500, prices.GetItemPrice(&blade, MPriceManager::NPC_TO_PC));
+	CHECK_EQ(500, prices.GetItemPrice(&blade, MPriceManager::REPAIR));
+}
+
+//----------------------------------------------------------------------
+// The market conditions
+//----------------------------------------------------------------------
+TEST(PriceManager, BuyingAndSellingFollowTheMarketConditions)
+{
+	PriceWorld world;
+	MPriceManager prices;
+	Item sword(ITEM_CLASS_SWORD);
+	Item skull(ITEM_CLASS_SKULL);
+
+	// The NPC sells at 100% and buys at 25% until the server says otherwise.
+	CHECK_EQ(100, prices.GetMarketCondSell());
+	CHECK_EQ(25, prices.GetMarketCondBuy());
+	CHECK_EQ(1000, prices.GetItemPrice(&sword, MPriceManager::NPC_TO_PC));
+	CHECK_EQ(250, prices.GetItemPrice(&sword, MPriceManager::PC_TO_NPC));
+
+	prices.SetMarketCondSell(120);
+	prices.SetMarketCondBuy(30);
+	CHECK_EQ(1200, prices.GetItemPrice(&sword, MPriceManager::NPC_TO_PC));
+	CHECK_EQ(300, prices.GetItemPrice(&sword, MPriceManager::PC_TO_NPC));
+
+	// A skull is only ever sold to the shop, so both directions use the
+	// buying rate.
+	CHECK_EQ(120, prices.GetItemPrice(&skull, MPriceManager::NPC_TO_PC));
+	CHECK_EQ(120, prices.GetItemPrice(&skull, MPriceManager::PC_TO_NPC));
+}
+
+//----------------------------------------------------------------------
+// Options and wear
+//----------------------------------------------------------------------
+TEST(PriceManager, OptionsRaiseThePriceAndWearLowersIt)
+{
+	PriceWorld world;
+	MPriceManager prices;
+
+	// The option multipliers add up: 150% + 50% = 200%.
+	Item optioned(ITEM_CLASS_SWORD);
+	optioned.AddItemOption(1);
+	optioned.AddItemOption(2);
+	CHECK_EQ(2000, prices.GetItemPrice(&optioned, MPriceManager::NPC_TO_PC));
+	CHECK_EQ(500, prices.GetItemPrice(&optioned, MPriceManager::PC_TO_NPC));
+
+	// Half worn is half price; worn out is never free.
+	Gear halfWorn(ITEM_CLASS_SWORD, 100, 50);
+	Gear wornOut(ITEM_CLASS_SWORD, 100, 0);
+	Gear fresh(ITEM_CLASS_SWORD, 100, 100);
+	CHECK_EQ(500, prices.GetItemPrice(&halfWorn, MPriceManager::NPC_TO_PC));
+	CHECK_EQ(1, prices.GetItemPrice(&wornOut, MPriceManager::NPC_TO_PC));
+	CHECK_EQ(1000, prices.GetItemPrice(&fresh, MPriceManager::NPC_TO_PC));
+}
+
+//----------------------------------------------------------------------
+// Repair
+//----------------------------------------------------------------------
+TEST(PriceManager, RepairCostsATenthOfTheDamageAndSomeItemsAreNeverRepaired)
+{
+	PriceWorld world;
+	MPriceManager prices;
+
+	// A quarter of the wear at a tenth of the price: 1000 * 0.25 * 10%.
+	Gear dented(ITEM_CLASS_SWORD, 100, 75);
+	Gear fresh(ITEM_CLASS_SWORD, 100, 100);
+	Item noDurability(ITEM_CLASS_SWORD);
+	CHECK_EQ(25, prices.GetItemPrice(&dented, MPriceManager::REPAIR));
+	CHECK_EQ(0, prices.GetItemPrice(&fresh, MPriceManager::REPAIR));
+	CHECK_EQ(0, prices.GetItemPrice(&noDurability, MPriceManager::REPAIR));
+
+	// A vampire portal, a blood bible sign and a timed item are never repaired.
+	Gear portal(ITEM_CLASS_VAMPIRE_PORTAL_ITEM, 100, 50);
+	Gear sign(ITEM_CLASS_BLOOD_BIBLE_SIGN, 100, 50);
+	Gear timed(ITEM_CLASS_SWORD, 100, 50, 77);
+	CHECK_EQ(0, prices.GetItemPrice(&portal, MPriceManager::REPAIR));
+	CHECK_EQ(0, prices.GetItemPrice(&sign, MPriceManager::REPAIR));
+	CHECK_EQ(50, prices.GetItemPrice(&timed, MPriceManager::REPAIR));
+	g_pTimeItemManager->AddTimeItem(77, 60);
+	CHECK_EQ(0, prices.GetItemPrice(&timed, MPriceManager::REPAIR));
+}
+
+//----------------------------------------------------------------------
+// Charges
+//----------------------------------------------------------------------
+TEST(PriceManager, ChargedItemsPriceEveryChargeAndRepairRefillsThem)
+{
+	PriceWorld world;
+	MPriceManager prices;
+
+	// 1000 for the item and 5000 a charge, three of ten held.
+	Charged charged(ITEM_CLASS_SWORD, 3);
+	CHECK_EQ(16000, prices.GetItemPrice(&charged, MPriceManager::NPC_TO_PC));
+	CHECK_EQ(4000, prices.GetItemPrice(&charged, MPriceManager::PC_TO_NPC));
+	CHECK_EQ(35000, prices.GetItemPrice(&charged, MPriceManager::REPAIR));
+
+	// An Ousters summon item's charges cost 1000 each.
+	Charged summon(ITEM_CLASS_OUSTERS_SUMMON_ITEM, 3);
+	CHECK_EQ(4000, prices.GetItemPrice(&summon, MPriceManager::NPC_TO_PC));
+	CHECK_EQ(7000, prices.GetItemPrice(&summon, MPriceManager::REPAIR));
+}
+
+//----------------------------------------------------------------------
+// Silvering
+//----------------------------------------------------------------------
+TEST(PriceManager, SilveringCostsTheFullCoatUntilTheCoatIsFull)
+{
+	PriceWorld world;
+	MPriceManager prices;
+
+	Item sword(ITEM_CLASS_SWORD);
+	CHECK_EQ(50, prices.GetItemPrice(&sword, MPriceManager::SILVERING));
+	sword.SetSilver(20);
+	CHECK_EQ(50, prices.GetItemPrice(&sword, MPriceManager::SILVERING));
+	sword.SetSilver(50);
+	CHECK_EQ(0, prices.GetItemPrice(&sword, MPriceManager::SILVERING));
+
+	// A mace that takes no coat, and a potion, cost nothing to coat.
+	Item mace(ITEM_CLASS_MACE);
+	Item potion(ITEM_CLASS_POTION);
+	CHECK_EQ(0, prices.GetItemPrice(&mace, MPriceManager::SILVERING));
+	CHECK_EQ(0, prices.GetItemPrice(&potion, MPriceManager::SILVERING));
+}
+
+//----------------------------------------------------------------------
+// What the host changes
+//----------------------------------------------------------------------
+TEST(PriceManager, TheHostShapesPotionSkullAndTaxedPrices)
+{
+	PriceWorld world;
+	MPriceManager prices;
+	Item potion(ITEM_CLASS_POTION, 0);
+	Item otherPotion(ITEM_CLASS_POTION, 3);
+	Item serum(ITEM_CLASS_SERUM);
+	Item sword(ITEM_CLASS_SWORD);
+	Item skull(ITEM_CLASS_SKULL);
+
+	// Without a host nothing about the player or the world applies.
+	MPriceManager::SetHost(NULL);
+	CHECK_EQ(100, prices.GetItemPrice(&potion, MPriceManager::NPC_TO_PC));
+	CHECK_EQ(100, prices.GetItemPrice(&skull, MPriceManager::NPC_TO_PC));
+	MPriceManager::SetHost(&s_Host);
+
+	// A slayer with 40 or fewer stat points pays 70% for the basic potions.
+	s_Race = RACE_SLAYER;
+	s_StatSum = 40;
+	CHECK_EQ(70, prices.GetItemPrice(&potion, MPriceManager::NPC_TO_PC));
+	CHECK_EQ(100, prices.GetItemPrice(&otherPotion, MPriceManager::NPC_TO_PC));
+	s_StatSum = 41;
+	CHECK_EQ(100, prices.GetItemPrice(&potion, MPriceManager::NPC_TO_PC));
+	s_Race = RACE_VAMPIRE;
+	s_StatSum = 10;
+	CHECK_EQ(100, prices.GetItemPrice(&potion, MPriceManager::NPC_TO_PC));
+
+	// The consumables go to half price; a sword does not.
+	s_Race = RACE_SLAYER;
+	s_StatSum = 40;
+	s_PotionHalf = true;
+	CHECK_EQ(35, prices.GetItemPrice(&potion, MPriceManager::NPC_TO_PC));
+	CHECK_EQ(100, prices.GetItemPrice(&serum, MPriceManager::NPC_TO_PC));
+	CHECK_EQ(1000, prices.GetItemPrice(&sword, MPriceManager::NPC_TO_PC));
+
+	// The shop tax scales what the shop charges, not what it pays.
+	s_TaxPercent = 120;
+	CHECK_EQ(42, prices.GetItemPrice(&potion, MPriceManager::NPC_TO_PC));
+	CHECK_EQ(1200, prices.GetItemPrice(&sword, MPriceManager::NPC_TO_PC));
+	CHECK_EQ(250, prices.GetItemPrice(&sword, MPriceManager::PC_TO_NPC));
+	s_TaxPercent = 100;
+	s_PotionHalf = false;
+
+	// A skull (400 at the 25% buying rate: 100) is worth half to a
+	// vampire and three quarters to an Ousters, then the server's
+	// head-price rate applies.
+	CHECK_EQ(100, prices.GetItemPrice(&skull, MPriceManager::PC_TO_NPC));
+	s_Race = RACE_VAMPIRE;
+	CHECK_EQ(50, prices.GetItemPrice(&skull, MPriceManager::PC_TO_NPC));
+	s_Race = RACE_OUSTERS;
+	CHECK_EQ(75, prices.GetItemPrice(&skull, MPriceManager::PC_TO_NPC));
+	g_pUserInformation->HeadPrice = 40;
+	CHECK_EQ(30, prices.GetItemPrice(&skull, MPriceManager::PC_TO_NPC));
+	s_Race = RACE_SLAYER;
+	CHECK_EQ(40, prices.GetItemPrice(&skull, MPriceManager::PC_TO_NPC));
+	CHECK_EQ(1000, prices.GetItemPrice(&sword, MPriceManager::NPC_TO_PC));	// the rate is for skulls only
+}
+
+//----------------------------------------------------------------------
+// Star prices
+//----------------------------------------------------------------------
+TEST(PriceManager, StarPriceFollowsTheFirstOptionsPartAndTheItemType)
+{
+	PriceWorld world;
+	MPriceManager prices;
+	STAR_ITEM_PRICE price;
+
+	prices.GetItemPrice(NULL, price);
+	CHECK_EQ(-1, price.type);
+	CHECK_EQ(0, price.number);
+
+	// No option reads the "no option" row, whose part earns no stars.
+	Item plain(ITEM_CLASS_SWORD, 3);
+	prices.GetItemPrice(&plain, price);
+	CHECK_EQ(-1, price.type);
+	CHECK_EQ(0, price.number);
+
+	// Damage, strength, intelligence, dexterity and attack speed are
+	// star types 0 to 4; the item type minus one, in twenties, is the
+	// count.
+	const int parts[5] = { 1, 2, 4, 5, 3 };
+	for (int i = 0; i < 5; i++)
+	{
+		Item item(ITEM_CLASS_SWORD, 3);
+		item.AddItemOption(parts[i]);
+		prices.GetItemPrice(&item, price);
+		CHECK_EQ(i, price.type);
+		CHECK_EQ(40, price.number);
+	}
+
+	// Only the first option counts.
+	Item two(ITEM_CLASS_SWORD, 5);
+	two.AddItemOption(2);
+	two.AddItemOption(1);
+	prices.GetItemPrice(&two, price);
+	CHECK_EQ(1, price.type);
+	CHECK_EQ(80, price.number);
+}
+
+//----------------------------------------------------------------------
+// The gamble
+//----------------------------------------------------------------------
+TEST(PriceManager, MysteriousPriceScalesTheClassAverageByTheCharacter)
+{
+	PriceWorld world;
+	MPriceManager prices;
+	Item blade(ITEM_CLASS_BLADE);
+	blade.UnSetIdentified();
+
+	// Without a host: once the average.
+	MPriceManager::SetHost(NULL);
+	CHECK_EQ(500, prices.GetMysteriousPrice(&blade));
+	MPriceManager::SetHost(&s_Host);
+
+	// A slayer pays by basic stats in fifteens, never less than once.
+	s_Race = RACE_SLAYER;
+	s_BasicStatSum = 45;
+	s_Level = 100;											// ignored for a slayer
+	CHECK_EQ(1500, prices.GetMysteriousPrice(&blade));
+	s_BasicStatSum = 10;
+	CHECK_EQ(500, prices.GetMysteriousPrice(&blade));
+	s_BasicStatSum = 0;
+	CHECK_EQ(500, prices.GetMysteriousPrice(&blade));
+
+	// Everyone else by level in fives.
+	s_Race = RACE_VAMPIRE;
+	s_Level = 50;
+	CHECK_EQ(5000, prices.GetMysteriousPrice(&blade));
+	s_Level = 4;
+	CHECK_EQ(500, prices.GetMysteriousPrice(&blade));
+	s_Race = RACE_OUSTERS;
+	s_Level = 100;
+	CHECK_EQ(10000, prices.GetMysteriousPrice(&blade));
+
+	// Half under the gamble skill, then the shop tax, in every trade.
+	s_Race = RACE_VAMPIRE;
+	s_Level = 50;
+	s_GambleHalf = true;
+	CHECK_EQ(2500, prices.GetMysteriousPrice(&blade));
+	s_TaxPercent = 150;
+	CHECK_EQ(3750, prices.GetMysteriousPrice(&blade));
+	CHECK_EQ(3750, prices.GetItemPrice(&blade, MPriceManager::PC_TO_NPC));
+	CHECK_EQ(3750, prices.GetItemPrice(&blade, MPriceManager::REPAIR));
+
+	// A class with no loaded average is worth nothing as a gamble.
+	Item sword(ITEM_CLASS_SWORD);
+	sword.UnSetIdentified();
+	CHECK_EQ(0, prices.GetMysteriousPrice(&sword));
+}

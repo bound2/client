@@ -7,26 +7,32 @@
 #include "MPriceManager.h"
 #include "MItem.h"
 #include "MItemOptionTable.h"
-#include "MEventManager.h"
-#include "MSkillManager.h"
 #include "UserInformation.h"
-
-#ifdef __GAME_CLIENT__
-	#include "MPlayer.h"
-	#include "MZone.h"
-	#include "MTimeItemManager.h"
-#else
-	#include "VS_UI.h"
-#endif
+#include "MTimeItemManager.h"
 
 #define CHARGE_PRICE		5000
-
-//extern std::map<int, bool> g_mapPremiumZone;
 
 //-----------------------------------------------------------------------------
 // Global
 //-----------------------------------------------------------------------------
 MPriceManager*		g_pPriceManager = NULL;
+const MPriceHost*	MPriceManager::s_pHost = NULL;
+
+//-----------------------------------------------------------------------------
+// The host's answers, and what they are without a host: no race, no
+// level, no stats, no discount, no tax.
+//-----------------------------------------------------------------------------
+namespace {
+
+int		HostRace()				{ const MPriceHost* p = MPriceManager::GetHost(); return p!=NULL ? p->Race() : -1; }
+int		HostLevel()				{ const MPriceHost* p = MPriceManager::GetHost(); return p!=NULL ? p->Level() : 0; }
+int		HostStatSum()			{ const MPriceHost* p = MPriceManager::GetHost(); return p!=NULL ? p->StatSum() : 0; }
+int		HostBasicStatSum()		{ const MPriceHost* p = MPriceManager::GetHost(); return p!=NULL ? p->BasicStatSum() : 0; }
+bool	HostPotionHalfPrice()	{ const MPriceHost* p = MPriceManager::GetHost(); return p!=NULL && p->IsPotionHalfPrice(); }
+bool	HostGambleHalfPrice()	{ const MPriceHost* p = MPriceManager::GetHost(); return p!=NULL && p->IsGambleHalfPrice(); }
+int		HostShopTaxPercent()	{ const MPriceHost* p = MPriceManager::GetHost(); return p!=NULL ? p->ShopTaxPercent() : 100; }
+
+} // namespace
 
 //-----------------------------------------------------------------------------
 //
@@ -139,9 +145,7 @@ MPriceManager::GetItemPrice(MItem* pItem, TRADE_TYPE type, bool bMysterious)
 			// vampire 포탈은 수리 안된다.
 			if (pItem->GetItemClass()==ITEM_CLASS_VAMPIRE_PORTAL_ITEM 
 				// 2004, 8, 17, sobeit add start - 시간제 아이템 착용시 전체 수리가 안되던 버그 수정 때문에 추가.
-#ifdef __GAME_CLIENT__
 				|| g_pTimeItemManager->IsExist( pItem->GetID() )
-#endif
 				// 2004, 8, 17, sobeit add end
 
 				// 2004, 10, 21, sobeit add start = 블러드 바이블 수리 할필요 없음.
@@ -293,73 +297,56 @@ MPriceManager::GetItemPrice(MItem* pItem, TRADE_TYPE type, bool bMysterious)
 	//-------------------------------------------------------
 	// potion인 경우
 	//-------------------------------------------------------
-#ifdef __GAME_CLIENT__
+	// A weak slayer pays 70% for the two basic potions.
 	if (pItem->GetItemClass()==ITEM_CLASS_POTION)
 	{
 		if ((pItem->GetItemType()==0 || pItem->GetItemType()==5)
-			&& g_pPlayer->IsSlayer()			
-			&& g_pPlayer->GetSTR() + g_pPlayer->GetDEX() + g_pPlayer->GetINT() <= 40)
+			&& HostRace()==RACE_SLAYER
+			&& HostStatSum() <= 40)
 		{
 			finalPrice = finalPrice * 70 / 100;
 		}
-
 	}
 
-	if(//g_pZone != NULL && g_mapPremiumZone[g_pZone->GetID()] == true &&
-			(
-				pItem->GetItemClass() == ITEM_CLASS_POTION ||
-				pItem->GetItemClass() == ITEM_CLASS_SERUM ||
-				pItem->GetItemClass() == ITEM_CLASS_LARVA ||
-				pItem->GetItemClass() == ITEM_CLASS_PUPA ||
-				pItem->GetItemClass() == ITEM_CLASS_COMPOS_MEI
-			) &&
-		g_pEventManager->IsEvent(EVENTID_PREMIUM_HALF)
-		)
-	{
-		finalPrice /= 2;
-	}
-	else if(g_pSkillAvailable->IsEnableSkill(SKILL_HOLYLAND_BLOOD_BIBLE_NEMA)
-			&&
-				(
-					pItem->GetItemClass() == ITEM_CLASS_POTION ||
-					pItem->GetItemClass() == ITEM_CLASS_SERUM ||
-					pItem->GetItemClass() == ITEM_CLASS_LARVA ||
-					pItem->GetItemClass() == ITEM_CLASS_PUPA ||
-					pItem->GetItemClass() == ITEM_CLASS_COMPOS_MEI
-				)
-			)
+	// The consumables are half price under the premium event or the
+	// NEMA blood bible.
+	if ((pItem->GetItemClass() == ITEM_CLASS_POTION ||
+		 pItem->GetItemClass() == ITEM_CLASS_SERUM ||
+		 pItem->GetItemClass() == ITEM_CLASS_LARVA ||
+		 pItem->GetItemClass() == ITEM_CLASS_PUPA ||
+		 pItem->GetItemClass() == ITEM_CLASS_COMPOS_MEI)
+		&& HostPotionHalfPrice())
 	{
 		finalPrice /= 2;
 	}
 
-	if(g_pEventManager->IsEvent(EVENTID_TAX_CHANGE) && type == NPC_TO_PC)
+	// The tax-change event scales what the shop charges.
+	if (type == NPC_TO_PC)
 	{
-		// finalPrice = finalPrice + finalPrice * tax / 100;
-		finalPrice = finalPrice *(g_pEventManager->GetEvent(EVENTID_TAX_CHANGE)->parameter1)/100;
+		finalPrice = finalPrice * HostShopTaxPercent() / 100;
 	}
-#endif
 
-	// 최하 가격은 1이다.
+	// Nothing is free.
 	if (finalPrice==0)
 	{
 		return 1;
 	}
 
-	#ifdef __GAME_CLIENT__
-		if (pItem->GetItemClass()==ITEM_CLASS_SKULL
-			&& g_pPlayer->IsVampire())
+	// A skull is worth half to a vampire and three quarters to an Ousters.
+	if (pItem->GetItemClass()==ITEM_CLASS_SKULL)
+	{
+		if (HostRace()==RACE_VAMPIRE)
 		{
-			finalPrice >>= 1;	// 값을 반으로 줄인다.
-		} 
-		else
-		if (pItem->GetItemClass()==ITEM_CLASS_SKULL &&g_pPlayer->IsOusters() )
+			finalPrice >>= 1;
+		}
+		else if (HostRace()==RACE_OUSTERS)
 		{
 			finalPrice = finalPrice * 75 / 100;
 		}
-	#endif
+	}
 
 		
-	// 서버에서 보내준 머리가격 배율을 적용한다
+	// Then the head-price rate the server sent.
 	if(pItem->GetItemClass() == ITEM_CLASS_SKULL)
 	{
 		finalPrice    = finalPrice * g_pUserInformation->HeadPrice / 100;
@@ -406,70 +393,43 @@ MPriceManager::GetItemPrice(MItem* pItem, STAR_ITEM_PRICE& price)
 }
 
 
-// Mysterious Item 가격
-// itemClass와 pCreature의 능력치에 따라서 가격이 달라진다.
+//-----------------------------------------------------------------------------
+// Get Mysterious Price
+//-----------------------------------------------------------------------------
+// The gamble: an unidentified item's price follows its class and the
+// character buying it.
+//-----------------------------------------------------------------------------
 int MPriceManager::GetMysteriousPrice(MItem *pItem) const
 {
+	// A slayer pays by basic stats, everyone else by level: one to
+	// twenty times the class's average price.
 	int multiplier = 1;
-#ifdef __GAME_CLIENT__
-	if (g_pPlayer->IsSlayer())
-	{
-		int CSTR = g_pPlayer->GetBASIC_STR();
-		int CDEX = g_pPlayer->GetBASIC_DEX();
-		int CINT = g_pPlayer->GetBASIC_INT();
-		int CSUM = CSTR + CDEX + CINT;
 
-		// 0~20 사이
+	if (HostRace()==RACE_SLAYER)
+	{
+		int CSUM = HostBasicStatSum();
+
 		if(CSUM > 0)
 			multiplier = CSUM / 15;
 	}
 	else
 	{
-		int CLevel = g_pPlayer->GetLEVEL();
-
-		// 0~20 사이
-		multiplier = CLevel / 5;
-	}
-
-	// 1~20사이
-	multiplier = max(1, multiplier);
-
-	// 가격 평균을 알아온다.
-	int avr = (*g_pItemTable)[pItem->GetItemClass()].GetAveragePrice();
-#else
-	if(g_eRaceInterface == RACE_SLAYER)
-	{
-		int CLevel = g_char_slot_ingame.level;
-
-		multiplier = CLevel / 5;
-	} else
-	{
-		int CSTR = g_char_slot_ingame.STR_PURE;
-		int CDEX = g_char_slot_ingame.DEX_PURE;
-		int CINT = g_char_slot_ingame.INT_PURE;
-		int CSUM = CSTR + CDEX + CINT;
-
-		if(CSUM > 0)
-			multiplier = CSUM / 15;
+		multiplier = HostLevel() / 5;
 	}
 
 	multiplier = max(1, multiplier);
-	int avr = (*g_pItemTable)[pItem->GetItemClass()].GetAveragePrice();
-#endif
 
-	// 가격 평균 * 능력치 비율?
+	int avr = (*g_pItemTable)[pItem->GetItemClass()].GetAveragePrice();
+
 	int final_price = avr * multiplier;
 
-	if(g_pSkillAvailable->IsEnableSkill(SKILL_HOLYLAND_BLOOD_BIBLE_JAVE))
+	// Half under the JAVE blood bible, then the shop tax.
+	if (HostGambleHalfPrice())
 	{
 		final_price /= 2;
 	}
 
-	if(g_pEventManager->IsEvent(EVENTID_TAX_CHANGE))
-	{
-		// finalPrice = finalPrice + finalPrice * tax / 100;
-		final_price = final_price *(g_pEventManager->GetEvent(EVENTID_TAX_CHANGE)->parameter1)/100;
-	}
+	final_price = final_price * HostShopTaxPercent() / 100;
 
 	return final_price;
 }
