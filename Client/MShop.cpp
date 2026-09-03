@@ -82,7 +82,16 @@ MShop::SetShelf(unsigned int n, MShopShelf* pShelf)
 	}
 
 	//--------------------------------------------------------
-	// 기존에 다른 shelf가 이미 있는 경우... --> 지운다.
+	// A shelf number past the shop's own is refused, as the
+	// header promises: the caller still owns the shelf.
+	//--------------------------------------------------------
+	if (m_pShelf==NULL || n>=m_Size)
+	{
+		return false;
+	}
+
+	//--------------------------------------------------------
+	// Replacing a shelf deletes the one that was there.
 	//--------------------------------------------------------
 	if (m_pShelf[n]!=NULL)
 	{

@@ -409,7 +409,8 @@ MSlayerGear::AddItem(MItem* pItem, GEAR_SLAYER n)
 		else 
 		if (pItem->IsGearSlotCoreZap())
 		{
-			if (m_ItemSlot[n-m_Gilles_CoreZap]!=NULL && m_ItemSlot[n]==NULL) // 해당위치에 링이 있고 코어잽이 없을 경우만 코어잽 추가
+			// A zap needs the ring at n under it and its own slot free.
+			if (m_ItemSlot[n]!=NULL && m_ItemSlot[n+m_Gilles_CoreZap]==NULL)
 			{		
 				if (MPlayerGear::AddItem( pItem, n + m_Gilles_CoreZap ))// 코어잽 위치에 추가
 				{
@@ -497,11 +498,20 @@ MSlayerGear::AddItem(MItem* pItem, GEAR_SLAYER n)
 //----------------------------------------------------------------------
 MItem*			
 MSlayerGear::RemoveItem(GEAR_SLAYER n)
-{ 
-	MItem* pItem = m_ItemSlot[n];
-		
+{
 	//-----------------------------------------------------
-	// 없는 경우
+	// The slot arrives in GCRemoveFromGear, so it is bounded
+	// before it indexes the array.
+	//-----------------------------------------------------
+	if ((unsigned int)n >= (unsigned int)m_Size)
+	{
+		return NULL;
+	}
+
+	MItem* pItem = m_ItemSlot[n];
+
+	//-----------------------------------------------------
+	// Nothing there
 	//-----------------------------------------------------
 	if (pItem==NULL)
 	{
@@ -720,7 +730,7 @@ MSlayerGear::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 						{
 							// A gun without a magazine gets an empty one of
 							// the type it takes, from the executable's factory.
-							MMagazine* pMagazine = (MMagazine*)MItem::EmptyMagazineFor( pItem );
+							MMagazine* pMagazine = MItem::EmptyMagazineFor( pItem );
 
 							if (pMagazine!=NULL)
 							{

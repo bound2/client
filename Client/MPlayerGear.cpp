@@ -192,23 +192,27 @@ MPlayerGear::CheckItemStatus(const MItem* pItem, int slot)
 	TYPE_ITEM_DURATION	curDur = pItem->GetCurrentDurability();
 
 	// The remaining durability, in percent
-	TYPE_ITEM_DURATION	itemStatusPer = 0;
+	// Signed, and so are the two thresholds it is compared against:
+	// they are read from the configuration file unchecked, and a
+	// negative one read as unsigned made every worn item the worst
+	// grade.
+	int					itemStatusPer = 0;
 
 	if(maxDur <= 0 ||pItem->IsSpecialColorItem() || pItem->IsDurationAlwaysOkay())
 		itemStatusPer = 100;
 	else
-		itemStatusPer = curDur*100 / (TYPE_ITEM_DURATION)maxDur;
+		itemStatusPer = (int)(((__int64)curDur * 100) / maxDur);
 
 
 	//----------------------------------------------------------
-	// 정상적인 상태		
+	// Whole
 	//----------------------------------------------------------
 	if (itemStatusPer > g_pClientConfig->PERCENTAGE_ITEM_SOMEWHAT_BROKEN)
 	{
 		m_pItemStatus[slot] = ITEM_STATUS_OK;
 
 		//----------------------------------------------------------
-		// 부서졌다가 좋아진 상태이다.
+		// Repaired since it was last graded
 		//----------------------------------------------------------
 		if (oldStatus!=ITEM_STATUS_OK)
 		{
@@ -219,19 +223,19 @@ MPlayerGear::CheckItemStatus(const MItem* pItem, int slot)
 		}
 	}
 	//----------------------------------------------------------
-	// 부서진 경우..
+	// Breaking
 	//----------------------------------------------------------
 	else
 	{
 		//----------------------------------------------------------
-		// 거의 부서져가는 상태 --> 빨간색
+		// Almost gone: red
 		//----------------------------------------------------------
 		if (itemStatusPer <= g_pClientConfig->PERCENTAGE_ITEM_ALMOST_BROKEN)
 		{
 			m_pItemStatus[slot] = ITEM_STATUS_ALMOST_BROKEN;
 		}
 		//----------------------------------------------------------
-		// 약간? 부서진 상태			
+		// Somewhat worn
 		//----------------------------------------------------------
 		else
 		{
@@ -277,23 +281,24 @@ MPlayerGear::ModifyDurability(BYTE n, int changeValue)
 
 	int modifyDurability = changeValue;//currentDurability + changeValue;
 
-	//---------------------------------------------------------	
-	// max를 넘어가는 경우
-	//---------------------------------------------------------	
-	if ( modifyDurability > maxDurability)
+	//---------------------------------------------------------
+	// Over the maximum, where there is one: an item with no
+	// durability (a negative maximum) has nothing to clamp to.
+	//---------------------------------------------------------
+	if ( maxDurability >= 0 && modifyDurability > maxDurability)
 	{
 		pItem->SetCurrentDurability( maxDurability );
 	}
-	//---------------------------------------------------------	
-	// 0보다 적은 경우
-	//---------------------------------------------------------	
+	//---------------------------------------------------------
+	// Under zero
+	//---------------------------------------------------------
 	else if (modifyDurability < 0)
 	{
 		pItem->SetCurrentDurability( 0 );
 	}
-	//---------------------------------------------------------	
-	// 정상적으로 바뀌는 경우
-	//---------------------------------------------------------	
+	//---------------------------------------------------------
+	// In range
+	//---------------------------------------------------------
 	else
 	{
 		pItem->SetCurrentDurability( modifyDurability );

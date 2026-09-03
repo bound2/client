@@ -51,6 +51,11 @@ struct GameModelWorld
 		delete g_pItemOptionTable;	g_pItemOptionTable = NULL;
 		delete g_pItemTable;		g_pItemTable = NULL;
 	}
+
+private:
+	// Copying one would delete the six globals twice.
+	GameModelWorld(const GameModelWorld&);
+	void	operator=(const GameModelWorld&);
 };
 
 #endif

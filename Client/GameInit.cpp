@@ -2932,9 +2932,14 @@ static void	RepairHint()
 // A gun worn without a magazine gets an empty one: the first magazine
 // type that fits the gun, no options, no rounds (the loop the slayer
 // gear ran itself before it moved into gamemodel).
-static MItem*	EmptyMagazineFor(MItem* pGun)
+static MMagazine*	EmptyMagazineFor(MItem* pGun)
 {
 	MMagazine* pMagazine = (MMagazine*)MItem::NewItem( (ITEM_CLASS)ITEM_CLASS_MAGAZINE );
+
+	if (pMagazine==NULL)
+	{
+		return NULL;
+	}
 
 	pMagazine->SetID( 0 );
 

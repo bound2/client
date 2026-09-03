@@ -48,7 +48,7 @@ void	PlayItemSound(TYPE_SOUNDID sound)	{ s_Sounds.push_back(sound); }
 void	RecalculateStatus()					{ s_Recalculated++; }
 void	ResetQuickItemSlot()				{ s_QuickSlotResets++; }
 void	RepairHint()						{ s_RepairHints++; }
-MItem*	EmptyMagazineFor(MItem*)			{ return NULL; }
+MMagazine*	EmptyMagazineFor(MItem*)		{ return NULL; }
 
 const MItemHost	s_Host = { &s_Frame, DropFrameCount, RefreshAffect, PlayItemSound, NULL,
 							RecalculateStatus, ResetQuickItemSlot, RepairHint, EmptyMagazineFor };
@@ -91,7 +91,13 @@ struct GearWorld : GameModelWorld
 		(*g_pItemTable)[ITEM_CLASS_OUSTERS_ARMSBAND][0].Race = FLAG_RACE_OUSTERS;
 		(*g_pItemTable)[ITEM_CLASS_OUSTERS_ARMSBAND][0].SetSoundID(10, 20, 87, 40);
 		(*g_pItemTable)[ITEM_CLASS_OUSTERS_ARMSBAND][0].SetValue(0, 0, 2);
+		g_pItemTable->InitClass(ITEM_CLASS_GLOVE, 1);
+		(*g_pItemTable)[ITEM_CLASS_GLOVE][0].Race = FLAG_RACE_SLAYER;
+		(*g_pItemTable)[ITEM_CLASS_GLOVE][0].SetSoundID(10, 20, 88, 40);
+		// A slayer's potion, so the gear refuses it for not being gear
+		// rather than for the race.
 		g_pItemTable->InitClass(ITEM_CLASS_POTION, 1);
+		(*g_pItemTable)[ITEM_CLASS_POTION][0].Race = FLAG_RACE_SLAYER;
 
 		// A piece is "somewhat broken" at a quarter of its durability
 		// and "almost broken" at a tenth.
@@ -162,6 +168,12 @@ struct CoreZap : public Gear
 	bool	IsGearSlotCoreZap() const			{ return true; }
 };
 
+struct Glove : public Gear
+{
+	Glove(TYPE_OBJECTID id) : Gear(ITEM_CLASS_GLOVE, id) {}
+	bool	IsGearSlotGlove() const				{ return true; }
+};
+
 struct VampireCoat : public Gear
 {
 	VampireCoat(TYPE_OBJECTID id) : Gear(ITEM_CLASS_VAMPIRE_COAT, id) {}
@@ -206,16 +218,19 @@ TEST(PlayerGear, InitStartsEverySlotOkAndReleaseOwnsTheItems)
 
 	Helm* whole = new Helm(1, 100, 100);
 	Helm* worn = new Helm(2, 100, 20);
+	Helm* refused = new Helm(3);
 	CHECK(gear.AddItem(whole, 0));
 	CHECK(gear.AddItem(worn, 1));
-	CHECK_EQ(false, gear.AddItem(new Helm(3), 5));		// past the slots
+	CHECK_EQ(false, gear.AddItem(refused, 5));			// past the slots
 	CHECK_EQ(2, gear.GetItemNum());
 	CHECK(gear.GetItem(1) == worn);
+	CHECK(gear.GetItem(5) == NULL);
 	CHECK(gear.HasBrokenItem());
 
 	gear.Release();
 	CHECK_EQ(1, s_Alive);		// the refused helm is still the caller's
-	delete gear.GetItem(5);		// NULL past the slots
+	delete refused;
+	CHECK_EQ(0, s_Alive);
 }
 
 TEST(PlayerGear, AddGradesTheItemByItsRemainingDurability)
@@ -338,6 +353,33 @@ TEST(PlayerGear, ModifyDurabilityClampsRegradesAndHintsOnceAsGearStartsToBreak)
 	CHECK_EQ(false, gear.ModifyDurability(2, 50));
 	CHECK_EQ(2, s_RepairHints);
 
+	// An item with no durability has no maximum to clamp to, so the
+	// value stands as given.
+	Helm* noWear = new Helm(2, -1, 0);
+	CHECK(gear.AddItem(noWear, 1));
+	CHECK(gear.ModifyDurability(1, 40));
+	CHECK_EQ(40, (int)noWear->GetCurrentDurability());
+	CHECK_EQ((int)MPlayerGear::ITEM_STATUS_OK, (int)gear.GetItemStatus(1));
+
+	gear.Release();
+	CHECK_EQ(0, s_Alive);
+}
+
+TEST(PlayerGear, ANegativeThresholdDoesNotCondemnEveryItem)
+{
+	GearWorld world;
+	MPlayerGear gear;
+	gear.Init(1);
+
+	// The thresholds are read from the configuration file unchecked.
+	// Compared as unsigned, a negative one made every item the worst
+	// grade; compared as written, nothing clears a negative bar.
+	g_pClientConfig->PERCENTAGE_ITEM_SOMEWHAT_BROKEN = -1;
+	g_pClientConfig->PERCENTAGE_ITEM_ALMOST_BROKEN = -1;
+	CHECK(gear.AddItem(new Helm(1, 100, 100), 0));
+	CHECK_EQ((int)MPlayerGear::ITEM_STATUS_OK, (int)gear.GetItemStatus(0));
+	CHECK_EQ(false, (bool)gear.HasBrokenItem());
+
 	gear.Release();
 	CHECK_EQ(0, s_Alive);
 }
@@ -455,14 +497,11 @@ TEST(SlayerGear, ACoreZapSitsOnItsRingAndComesOffFirst)
 	Ring* another = new Ring(3);
 	CoreZap* loose = new CoreZap(4);
 
-	// A zap goes into the zap slot behind its ring (the server names
-	// that slot). Offered to the ring's own slot it is refused: that
-	// route reads the slot five below the ring, not the ring - today's
-	// behaviour, pinned and recorded.
+	// A zap offered to its ring's slot lands in the zap slot behind it.
 	CHECK(gear.AddItem(ring, MSlayerGear::GEAR_SLAYER_RING1));
-	CHECK_EQ(false, gear.AddItem(zap, MSlayerGear::GEAR_SLAYER_RING1));
-	CHECK(gear.AddItem(zap, MSlayerGear::GEAR_SLAYER_ZAP1));
+	CHECK(gear.AddItem(zap, MSlayerGear::GEAR_SLAYER_RING1));
 	CHECK(gear.GetItem(MSlayerGear::GEAR_SLAYER_ZAP1) == zap);
+	CHECK(gear.GetItem(MSlayerGear::GEAR_SLAYER_RING1) == ring);
 	CHECK_EQ((int)MSlayerGear::GEAR_SLAYER_ZAP1, (int)zap->GetItemSlot());
 
 	// A ring cannot take a slot that has a ring or a zap; a zap slot
@@ -471,6 +510,17 @@ TEST(SlayerGear, ACoreZapSitsOnItsRingAndComesOffFirst)
 	CHECK(gear.AddItem(another, MSlayerGear::GEAR_SLAYER_RING2));
 	CHECK(gear.AddItem(loose, MSlayerGear::GEAR_SLAYER_ZAP3));
 	CHECK_EQ(4, gear.GetItemNum());
+
+	// A zap needs the ring under it, and nothing else worn stands in
+	// for one: the glove sits five slots below RING4, which is where
+	// this branch used to look.
+	Glove* glove = new Glove(6);
+	CoreZap* ringless = new CoreZap(7);
+	CHECK(gear.AddItem(glove, MSlayerGear::GEAR_SLAYER_GLOVE));
+	CHECK(gear.GetItem(MSlayerGear::GEAR_SLAYER_RING4) == NULL);
+	CHECK_EQ(false, gear.AddItem(ringless, MSlayerGear::GEAR_SLAYER_RING4));
+	CHECK(gear.GetItem(MSlayerGear::GEAR_SLAYER_ZAP4) == NULL);
+	delete ringless;
 
 	// Taking from the ring's slot takes the zap first, then the ring.
 	CHECK(gear.RemoveItem(MSlayerGear::GEAR_SLAYER_RING1) == zap);
@@ -481,7 +531,37 @@ TEST(SlayerGear, ACoreZapSitsOnItsRingAndComesOffFirst)
 
 	delete ring;
 	delete zap;
-	gear.Release();			// the other ring and the loose zap are the gear's
+	gear.Release();			// the rest is the gear's
+	CHECK_EQ(0, s_Alive);
+}
+
+TEST(PlayerGear, EveryRaceRefusesAGearSlotPastItsRack)
+{
+	GearWorld world;
+	MSlayerGear slayer;
+	MVampireGear vampire;
+	MOustersGear ousters;
+	slayer.Init();
+	vampire.Init();
+	ousters.Init();
+
+	// The slot arrives in GCRemoveFromGear, so a value past the rack -
+	// or a negative one - must not index the slot array.
+	CHECK(slayer.RemoveItem(MSlayerGear::MAX_GEAR_SLAYER) == NULL);
+	CHECK(slayer.RemoveItem((MSlayerGear::GEAR_SLAYER)200) == NULL);
+	CHECK(slayer.RemoveItem((MSlayerGear::GEAR_SLAYER)-1) == NULL);
+	CHECK(vampire.RemoveItem(MVampireGear::MAX_GEAR_VAMPIRE) == NULL);
+	CHECK(vampire.RemoveItem((MVampireGear::GEAR_VAMPIRE)-1) == NULL);
+	CHECK(ousters.RemoveItem(MOustersGear::MAX_GEAR_OUSTERS) == NULL);
+	CHECK(ousters.RemoveItem((MOustersGear::GEAR_OUSTERS)-1) == NULL);
+
+	// What is worn is still worn.
+	Helm* helm = new Helm(1);
+	CHECK(slayer.AddItem(helm, MSlayerGear::GEAR_SLAYER_HELM));
+	CHECK(slayer.RemoveItem((MSlayerGear::GEAR_SLAYER)200) == NULL);
+	CHECK(slayer.GetItem(MSlayerGear::GEAR_SLAYER_HELM) == helm);
+
+	slayer.Release();
 	CHECK_EQ(0, s_Alive);
 }
 
@@ -578,4 +658,30 @@ TEST(Shop, SettingTheCurrentShelfAsksThePlayerAboutEverythingOnIt)
 	shop.Release();
 	CHECK_EQ(0, s_Alive);
 	CHECK_EQ(0, (int)shop.GetSize());
+	CHECK(shop.GetCurrentShelf() == NULL);		// nothing to read after a release
+}
+
+TEST(Shop, ARefusedShelfStaysTheCallersToDelete)
+{
+	GearWorld world;
+	MShop shop;
+	shop.Init(2);
+
+	// The header promises a shelf number past the shop's own is
+	// refused, and three call sites delete the shelf on false; before
+	// the bound it wrote past the array instead.
+	MShopShelf* past = MShopShelf::NewShelf(MShopShelf::SHELF_FIXED);
+	CHECK(past != NULL);
+	CHECK_EQ(false, shop.SetShelf(2, past));
+	CHECK_EQ(false, shop.SetShelf(4000, past));
+	delete past;
+
+	// A shop that was never given its shelves refuses everything.
+	MShop empty;
+	MShopShelf* orphan = MShopShelf::NewShelf(MShopShelf::SHELF_FIXED);
+	CHECK_EQ(false, empty.SetShelf(0, orphan));
+	CHECK(empty.GetCurrentShelf() == NULL);
+	delete orphan;
+
+	CHECK_EQ(0, s_Alive);
 }

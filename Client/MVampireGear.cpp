@@ -353,7 +353,8 @@ MVampireGear::AddItem(MItem* pItem, GEAR_VAMPIRE n)
 		else 
 		if (pItem->IsGearSlotVampireCoreZap())
 		{
-			if (m_ItemSlot[n-m_Gilles_CoreZap]!=NULL && m_ItemSlot[n]==NULL) // 해당위치에 링이 있고 코어잽이 없을 경우만 코어잽 추가
+			// A zap needs the ring at n under it and its own slot free.
+			if (m_ItemSlot[n]!=NULL && m_ItemSlot[n+m_Gilles_CoreZap]==NULL)
 			{		
 				if (MPlayerGear::AddItem( pItem, n + m_Gilles_CoreZap ))// 코어잽 위치에 추가
 				{
@@ -406,11 +407,20 @@ MVampireGear::AddItem(MItem* pItem, GEAR_VAMPIRE n)
 //----------------------------------------------------------------------
 MItem*			
 MVampireGear::RemoveItem(GEAR_VAMPIRE n)
-{ 
+{
+	//-----------------------------------------------------
+	// The slot arrives in GCRemoveFromGear, so it is bounded
+	// before it indexes the array.
+	//-----------------------------------------------------
+	if ((unsigned int)n >= (unsigned int)m_Size)
+	{
+		return NULL;
+	}
+
 	MItem* pItem = m_ItemSlot[n];
 
 	//-----------------------------------------------------
-	// 없는 경우
+	// Nothing there
 	//-----------------------------------------------------
 	if (pItem==NULL)
 	{
