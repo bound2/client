@@ -5046,54 +5046,10 @@ SkillBlazeWalk(MCreature* pUserCreature, MCreature* pTargetCreature, int skillID
 	}
 }
 
-void
-SendBugReport(const char *bug, ...)
-{	
-	if( bug == NULL )
-		return;
-
-	
-	va_list		vl;
-	char Buffer[256];
-
-	va_start(vl, bug);
-	int written = vsnprintf(Buffer, sizeof(Buffer), bug, vl);
-    va_end(vl);
-
-	// vsnprintf NUL terminates within sizeof(Buffer), so a report longer than
-	// the buffer is truncated instead of overrunning the stack. That also makes
-	// the strlen and the Buffer[100] cut below safe, which they were not while
-	// vsprintf could already have run past the end. A negative return is an
-	// encoding error: nothing usable was produced, so send nothing.
-	if (written < 0)
-		return;
-
-#ifdef __DEBUG_OUTPUT__
-	DEBUG_ADD_FORMAT("[BUG_REPORT] %s",Buffer);
-#endif
-	
-	int len = strlen(Buffer);
-
-	if( len <= 1 )
-		return;
-
-	if( len >= 100 )
-		Buffer[100] = '\0';
-
-	std::string message;
-
-	message = "*bug_report ";
-	message += Buffer;
-
-	CGSay _CGSay;
-
-	_CGSay.setMessage( message );
-	_CGSay.setColor( 0 );
-	
-	if( g_pSocket != NULL )
-		g_pSocket->sendPacket( &_CGSay );
-	
-}
+// SendBugReport moved into the wire layer (Client/Packet/WireHost.cpp,
+// docs/RESTRUCTURING.md task 5.1). It only ever needed a CGSay and
+// somewhere to send it, and the library files that call it could not
+// resolve a definition that lived here.
 
 void
 SetPetInfo(PetInfo* pPetInfo, TYPE_OBJECTID objectID)

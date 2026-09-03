@@ -17,8 +17,8 @@
 #include "PacketDispatcher.h"
 #include "PacketFactoryManager.h"
 #include "DebugLog.h"
+#include "WireHost.h"
 
-void	SendBugReport(const char *bug, ...);
 
 //////////////////////////////////////////////////////////////////////
 //

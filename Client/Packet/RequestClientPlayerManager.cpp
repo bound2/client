@@ -6,7 +6,7 @@
 #include "Client_PCH.h"
 #include "RequestClientPlayerManager.h"
 #include "WhisperManager.h"
-#include "ClientConfig.h"
+#include "WireHost.h"
 #include "MPlayer.h"
 #include "UserInformation.h"
 #include "MGameStringTable.h"
@@ -223,7 +223,7 @@ void
 RequestClientPlayerManager::Connect(const char* pIP, const char* pRequestName, REQUEST_CLIENT_MODE requestMode)
 {
 	// 넘 많을 경우는 더 이상 접속을 안하도록 해야한다.
-	if (m_mapRequestClientPlayer.size() >= g_pClientConfig->MAX_REQUEST_SERVICE)
+	if (m_mapRequestClientPlayer.size() >= Wire::MaxRequestService())
 	{
 		return;
 	}
@@ -401,7 +401,7 @@ RequestClientPlayerManager::AddRequestClientPlayer(RequestClientPlayer* pRequest
 	if (g_Mode==MODE_GAME)
 	{		
 		// 넘 많을 경우는 더 이상 접속을 안하도록 해야한다.
-		//if (m_mapRequestClientPlayer.size() < g_pClientConfig->MAX_REQUEST_SERVICE)
+		//if (m_mapRequestClientPlayer.size() < Wire::MaxRequestService())
 		{
 			//------------------------------------------------------------
 			// 일단 list에 넣어둔다.

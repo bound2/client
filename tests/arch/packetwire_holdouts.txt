@@ -4,30 +4,28 @@
 # Client/Packet to be in exactly one of this file and
 # tests/arch/packetwire_files.txt.
 #
-# The debug facilities no longer keep any of them out: task 5.1 moved
-# the logging header into basic/, where every library may include it,
-# and the six below reach for game headers instead. What each one still
-# needs, as of 2026-09-03:
+# Neither the debug facilities nor the client's tuning values keep any
+# of them out any more: task 5.1's first slice moved the logging header
+# into basic/, and its second put the three tuning values they read
+# behind WireHost. What each of the five still needs, as of 2026-09-03:
 #
-#   ClientCommunicationManager.cpp  ClientConfig.h
-#   ClientPlayer.cpp                ClientConfig.h, MZone.h,
-#                                   UserInformation.h
-#   RequestClientPlayer.cpp         ClientConfig.h, ClientDef.h,
-#                                   RequestFileManager.h
-#   RequestClientPlayerManager.cpp  ClientConfig.h, ClientDef.h,
-#                                   MPlayer.h, MGameStringTable.h,
-#                                   UserInformation.h, ProfileManager.h,
-#                                   ServerInfo.h, WhisperManager.h,
-#                                   RequestUserManager.h
-#   RequestServerPlayer.cpp         ClientConfig.h, ClientDef.h,
-#                                   RequestFileManager.h
-#   RequestServerPlayerManager.cpp  ClientConfig.h, ClientDef.h,
-#                                   ServerInfo.h
+#   ClientPlayer.cpp                MZone.h, UserInformation.h
+#   RequestClientPlayer.cpp         ClientDef.h, RequestFileManager.h
+#   RequestClientPlayerManager.cpp  ClientDef.h, MPlayer.h,
+#                                   MGameStringTable.h, ProfileManager.h,
+#                                   RequestUserManager.h, ServerInfo.h,
+#                                   UserInformation.h, WhisperManager.h
+#   RequestServerPlayer.cpp         ClientDef.h, RequestFileManager.h
+#   RequestServerPlayerManager.cpp  ClientDef.h, ServerInfo.h
 #
-# ClientConfig.h is the common one: all six read it for tuning values,
-# and it is the next thing to cut.
+# These are game state, not tuning: g_pGameMessage and g_pGameStringTable
+# for the messages the request path shows the player, g_pPlayer,
+# g_pUserInformation, g_pRequestFileManager, g_pProfileManager,
+# g_pWhisperManager, g_pRequestUserManager - and ClientDef.h is wanted
+# for g_Mode and the MODE_* enum, which four of them branch on. A host
+# struct the size of WireHost would not cover that; the request-service
+# family is its own slice.
 
-Client/Packet/ClientCommunicationManager.cpp
 Client/Packet/ClientPlayer.cpp
 Client/Packet/RequestClientPlayer.cpp
 Client/Packet/RequestClientPlayerManager.cpp
