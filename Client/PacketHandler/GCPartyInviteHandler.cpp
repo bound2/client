@@ -239,7 +239,7 @@ throw ( ProtocolException , Error )
 
 		if (pCreature!=NULL)
 		{
-			g_pGameMessage->AddFormat((*g_pGameStringTable)[STRING_MESSAGE_SOMEONE_JOINED_PARTY].GetString(), pCreature->GetName());
+			g_pGameMessage->AddSafeFormat(GetGameString(STRING_MESSAGE_SOMEONE_JOINED_PARTY), pCreature->GetName());
 		}
 	}
 

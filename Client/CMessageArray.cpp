@@ -259,6 +259,59 @@ CMessageArray::AddToFile(const char *str)
 }
 
 //--------------------------------------------------------------------------
+// Store Row
+//--------------------------------------------------------------------------
+// The tail every Add*Format shares: the log file, the row width, the ring
+// advance. It was written out twice, identically, in AddFormat and
+// AddFormatVL; a third copy for the checked formatter would have been three
+// places to keep a row-width rule in step, so there is one.
+//
+// Not locked here. The public entry points hold __BEGIN_LOCK across the
+// whole operation, which is what has to be atomic - the format and the
+// store together, not the store alone.
+//--------------------------------------------------------------------------
+void
+CMessageArray::StoreRow(const char* pBuffer, int nLength)
+{
+	// file log
+	if (m_bLog)
+	{
+		// [ TEST CODE ] print the time
+		//sprintf(g_MessageBuffer, "[%4d] ", timeGetTime() % 10000);
+		//PLATFORM_WRITE( m_LogFile, g_MessageBuffer, strlen(g_MessageBuffer) );
+
+		//m_LogFile << str << endl;
+		PLATFORM_WRITE( m_LogFile, pBuffer, nLength );
+		PLATFORM_WRITE( m_LogFile, "\n", 1 );
+
+		// [ TEST CODE ] close the file and open it again
+		#ifdef OUTPUT_FILE_LOG
+			PLATFORM_CLOSE( m_LogFile );
+			m_LogFile = PLATFORM_OPEN(m_Filename, _O_WRONLY | _O_TEXT | _O_APPEND | _O_CREAT);
+		#endif
+	}
+
+	// in case it runs over.. (this one is serious. - -;;)
+	if (nLength >= m_Length)
+	{
+		for (int i=0; i<m_Length; i++)
+		{
+			m_ppMessage[m_Current][i] = pBuffer[i];
+		}
+
+		m_ppMessage[m_Current][m_Length] = NULL;
+	}
+	else
+	{
+		// store
+		strcpy(m_ppMessage[m_Current], pBuffer);
+	}
+
+	m_Current++;
+	if (m_Current==m_Max) m_Current=0;
+}
+
+//--------------------------------------------------------------------------
 // Add Format VL
 //--------------------------------------------------------------------------
 void
@@ -289,45 +342,44 @@ CMessageArray::AddFormatVL(const char* format, va_list& vl)
 		Buffer[sizeof(Buffer)-1] = '\0';
 	}
 
-	int len = strlen(Buffer);
+	StoreRow(Buffer, strlen(Buffer));
 
-	// file log
-	if (m_bLog)
-	{
-		// [ TEST CODE ] print the time
-		//sprintf(g_MessageBuffer, "[%4d] ", timeGetTime() % 10000);
-		//PLATFORM_WRITE( m_LogFile, g_MessageBuffer, strlen(g_MessageBuffer) );
+	__END_LOCK
+}
 
-		//m_LogFile << str << endl;
-		PLATFORM_WRITE( m_LogFile, Buffer, len );
-		PLATFORM_WRITE( m_LogFile, "\n", 1 );
+//--------------------------------------------------------------------------
+// Add Safe Format VL
+//--------------------------------------------------------------------------
+// AddFormat for a format string that came out of Data/Info/String.inf
+// (docs/RESTRUCTURING.md task 5.4, code-health finding C19). The arguments
+// arrive already packed with their types, so SafeFormat can decline a
+// conversion the call site never supplied instead of reading a stack word
+// as a char*. See CMessageArray.h for why a bounded vsnprintf was not
+// enough on its own.
+//
+// SafeFormat::FormatV always terminates and returns what it really wrote,
+// so there is no negative-return case to handle here and no need to take
+// the length again with strlen.
+//--------------------------------------------------------------------------
+void
+CMessageArray::AddSafeFormatV(const char* format,
+							  const SafeFormat::Arg* pArgs, size_t nCount)
+{
+	// Mirrors AddFormat's guard rather than AddFormatVL's lack of one,
+	// because AddFormat is what these call sites used to call. Neither
+	// guard fires today: __LOGGING__ is defined unconditionally at the
+	// top of this file.
+	#ifndef __LOGGING__
+		return;
+	#endif
 
-		// [ TEST CODE ] close the file and open it again
-		#ifdef OUTPUT_FILE_LOG
-			PLATFORM_CLOSE( m_LogFile );
-			m_LogFile = PLATFORM_OPEN(m_Filename, _O_WRONLY | _O_TEXT | _O_APPEND | _O_CREAT);
-		#endif
-	}
+	__BEGIN_LOCK
 
-	// in case it runs over.. (this one is serious. - -;;)
-	if (len >= m_Length)
-	{
-		for (int i=0; i<m_Length; i++)
-		{
-			m_ppMessage[m_Current][i] = Buffer[i];
-		}
+	char	Buffer[4096];
 
-		m_ppMessage[m_Current][m_Length] = NULL;
-	}
-	else
-	{
-		// store
-		strcpy(m_ppMessage[m_Current], Buffer);
-	}
-	
+	const int len = SafeFormat::FormatV(Buffer, sizeof(Buffer), format, pArgs, nCount);
 
-	m_Current++;
-	if (m_Current==m_Max) m_Current=0;
+	StoreRow(Buffer, len);
 
 	__END_LOCK
 }
@@ -369,45 +421,7 @@ CMessageArray::AddFormat(const char* format, ...)
 		Buffer[sizeof(Buffer)-1] = '\0';
 	}
 
-	int len = strlen(Buffer);
-
-	// file log
-	if (m_bLog)
-	{
-		// [ TEST CODE ] print the time
-		//sprintf(g_MessageBuffer, "[%4d] ", timeGetTime() % 10000);
-		//PLATFORM_WRITE( m_LogFile, g_MessageBuffer, strlen(g_MessageBuffer) );
-
-		//m_LogFile << str << endl;
-		PLATFORM_WRITE( m_LogFile, Buffer, len );
-		PLATFORM_WRITE( m_LogFile, "\n", 1 );
-
-		// [ TEST CODE ] close the file and open it again
-		#ifdef OUTPUT_FILE_LOG
-			PLATFORM_CLOSE( m_LogFile );
-			m_LogFile = PLATFORM_OPEN(m_Filename, _O_WRONLY | _O_TEXT | _O_APPEND | _O_CREAT);
-		#endif
-	}
-
-	// in case it runs over.. (this one is serious. - -;;)
-	if (len >= m_Length)
-	{
-		for (int i=0; i<m_Length; i++)
-		{
-			m_ppMessage[m_Current][i] = Buffer[i];
-		}
-
-		m_ppMessage[m_Current][m_Length] = NULL;
-	}
-	else
-	{
-		// store
-		strcpy(m_ppMessage[m_Current], Buffer);
-	}
-	
-
-	m_Current++;
-	if (m_Current==m_Max) m_Current=0;
+	StoreRow(Buffer, strlen(Buffer));
 
 	__END_LOCK
 }

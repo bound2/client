@@ -73,7 +73,7 @@ throw ( ProtocolException , Error )
 	//------------------------------------------------------------
 	// 기술 배웠다는 message 추가
 	//------------------------------------------------------------
-	g_pGameMessage->AddFormat((*g_pGameStringTable)[STRING_LEARN_SKILL].GetString(), (*g_pSkillInfoTable)[skillType].GetHName());
+	g_pGameMessage->AddSafeFormat(GetGameString(STRING_LEARN_SKILL), (*g_pSkillInfoTable)[skillType].GetHName());
 
 	// [도움말] Skill배웠을때
 //	__BEGIN_HELP_EVENT
