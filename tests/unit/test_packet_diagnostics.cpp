@@ -3,10 +3,16 @@
 //----------------------------------------------------------------------
 //
 // PacketDiagnostics (docs/RESTRUCTURING.md task 2.4): the wire library's
-// bug-report seam. The executable installs its SendBugReport at the
-// composition root; a test binary installs nothing and a report must
-// then be a silent no-op - which is also exactly what the library's
-// standalone link relies on.
+// bug-report seam. It existed because SendBugReport was defined in the
+// executable, which installed it here at its composition root so the
+// library could report without linking against it.
+//
+// Task 5.1's second slice moved SendBugReport into the library, so the
+// hook is an interception point now rather than the way out: with none
+// installed a report goes to SendBugReport directly, and that drops it
+// when the wire host names no connection. These tests install their own
+// hook, so what they pin is unchanged - a hook, once installed, is
+// where the text goes and the only place it goes.
 //
 //----------------------------------------------------------------------
 
@@ -38,8 +44,10 @@ struct HookGuard
 } // namespace
 
 // Prove the counter moves with a hook, then that removing the hook
-// stops it - otherwise "no report" would be true by construction.
-TEST(PacketDiagnostics, ReportWithoutAHookIsANoOp)
+// stops it reaching the capture - otherwise "no report" would be true
+// by construction. Since 5.1 the report still leaves, through
+// SendBugReport; what this pins is that the hook is exclusive.
+TEST(PacketDiagnostics, AHookIsTheOnlyPlaceTheTextGoes)
 {
 	HookGuard guard;
 	PacketDiagnostics::setBugReportHook(&Capture);

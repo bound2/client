@@ -7,6 +7,7 @@
 
 #include "Client_PCH.h"
 #include "PacketDiagnostics.h"
+#include "WireHost.h"
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -27,7 +28,7 @@ PacketDiagnostics::BugReportFn PacketDiagnostics::getBugReportHook()
 
 void PacketDiagnostics::reportBug(const char* format, ...)
 {
-	if (s_pfnBugReport == NULL || format == NULL)
+	if (format == NULL)
 		return;
 
 	char buffer[256];
@@ -42,5 +43,19 @@ void PacketDiagnostics::reportBug(const char* format, ...)
 	if (written < 0)
 		return;
 
-	s_pfnBugReport(buffer);
+	//------------------------------------------------------------------
+	// With a hook installed the text goes there and nowhere else, which
+	// is what lets a test capture it. Without one it goes to
+	// SendBugReport, which is in this library now (task 5.1's second
+	// slice) - so the report reaches the server on its own rather than
+	// through the executable installing a hook that called back in
+	// here. SendBugReport drops it when the host names no connection.
+	//------------------------------------------------------------------
+	if (s_pfnBugReport != NULL)
+	{
+		s_pfnBugReport(buffer);
+		return;
+	}
+
+	SendBugReport("%s", buffer);
 }

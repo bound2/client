@@ -4,7 +4,7 @@
 #include "Client_PCH.h"
 #include "RequestServerPlayerManager.h"
 //#include "RequestClientPlayerManager.h"
-#include "ClientConfig.h"
+#include "WireHost.h"
 #include "ClientDef.h"
 #include "DebugLog.h"
 #include "ServerInfo.h"
@@ -174,7 +174,7 @@ RequestServerPlayerManager::AddRequestServerPlayer(RequestServerPlayer* pRequest
 		Lock();
 
 		// 넘 많을 경우는 더 이상 요청을 안 받도록 해야한다.
-		if (m_listRequestServerPlayer.size() < g_pClientConfig->MAX_REQUEST_SERVICE)
+		if (m_listRequestServerPlayer.size() < Wire::MaxRequestService())
 		{
 			// 일단 list에 넣어둔다.
 			m_listRequestServerPlayer.push_back( pRequestServerPlayer );

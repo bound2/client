@@ -24,6 +24,7 @@
 #include "GameObject.h"
 #include "AddonDef.h"
 #include "ServerInfo.h"
+#include "Packet/WireHost.h"
 #include "PacketDef.h"
 #include "PacketHandlerRegistry.h"
 #include "VS_UI.h"
@@ -3003,6 +3004,22 @@ static DWORD	PriceShopTaxPercent()
 static const MPriceHost	s_PriceHost = { PriceRace, PriceLevel, PriceStatSum, PriceBasicStatSum, PricePotionHalf, PriceGambleHalf, PriceShopTaxPercent };
 
 //-----------------------------------------------------------------------------
+// The wire layer's host (docs/RESTRUCTURING.md task 5.1): three tuning
+// values out of the config, and the connection a bug report goes to.
+//-----------------------------------------------------------------------------
+// The config is built in GameInitInfo and deleted at shutdown, so each
+// of these is read when it is asked for rather than copied once. Wire's
+// own defaults - ClientConfig's constructor values - answer while there
+// is none.
+//-----------------------------------------------------------------------------
+static int	WireMaxProcessPacket()	{ return g_pClientConfig!=NULL ? g_pClientConfig->MAX_PROCESS_PACKET : WIRE_DEFAULT_MAX_PROCESS_PACKET; }
+static int	WireMaxRequestService()	{ return g_pClientConfig!=NULL ? g_pClientConfig->MAX_REQUEST_SERVICE : WIRE_DEFAULT_MAX_REQUEST_SERVICE; }
+static uint	WireUDPPort()			{ return g_pClientConfig!=NULL ? (uint)g_pClientConfig->CLIENT_COMMUNICATION_UDP_PORT : WIRE_DEFAULT_UDP_PORT; }
+static Player*	WireBugReportTarget()	{ return g_pSocket; }
+
+static const WireHost	s_WireHost = { WireMaxProcessPacket, WireMaxRequestService, WireUDPPort, WireBugReportTarget };
+
+//-----------------------------------------------------------------------------
 // Init GameObject
 //-----------------------------------------------------------------------------
 BOOL
@@ -3128,6 +3145,7 @@ InitGameObject()
 	}
 
 	MItem::SetHost(&s_ItemHost);
+	Wire::SetHost(&s_WireHost);
 	MPriceManager::SetHost(&s_PriceHost);
 
 	if (g_pPCTalkBox==NULL)

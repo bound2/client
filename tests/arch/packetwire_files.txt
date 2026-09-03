@@ -37,6 +37,14 @@ Client/Packet/SocketImpl.cpp
 # over a socket, with no game state of its own (task 5.1)
 Client/Packet/Player.cpp
 
+# What the wire layer asks of the program around it: three tuning
+# values and somewhere to send a bug report, behind a host the
+# executable installs (task 5.1)
+Client/Packet/WireHost.cpp
+
+# The UDP side: its own datagram socket and receive loop
+Client/Packet/ClientCommunicationManager.cpp
+
 # Packet id tables: the factory manager, the id sets and the validator
 Client/Packet/PacketFactoryManager.cpp
 Client/Packet/PacketIDSet.cpp

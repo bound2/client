@@ -13,7 +13,7 @@
 #include "PacketDispatcher.h"
 #include "PacketFactoryManager.h"
 #include "PacketValidator.h"
-#include "ClientConfig.h"
+#include "WireHost.h"
 #include "RequestFileManager.h"
 #include "ClientDef.h"
 #include "DebugLog.h"
@@ -26,7 +26,6 @@
 
 #define	EXPIRE_DELAY	60000		//60*1000	// 1분
 
-void	SendBugReport(const char *bug, ...);
 
 //--------------------------------------------------------------------------------
 //
@@ -112,7 +111,7 @@ void RequestServerPlayer::processCommand ()
 			// 다 처리하다보면 .. 시간이 많이 걸려서 client가 안 돌아간다
 			// 그래서 일정 개수만 처리한다.
 			//---------------------------------------------------------
-			int maxProcessPacket = g_pClientConfig->MAX_PROCESS_PACKET;
+			int maxProcessPacket = Wire::MaxProcessPacket();
 			int processedPacket = 0;
 
 			// 입력버퍼에 들어있는 완전한 패킷들을 모조리 처리한다.

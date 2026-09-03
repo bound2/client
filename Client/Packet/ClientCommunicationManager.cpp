@@ -8,7 +8,7 @@
 #include "Datagram.h"
 #include "DatagramPacket.h"
 #include "PacketDispatcher.h"
-#include "ClientConfig.h"
+#include "WireHost.h"
 #include "PacketValidator.h"
 #include "DebugLog.h"
 // MTestDef.h is gone: its one struct sits behind __METROTECH_TEST__,
@@ -21,7 +21,6 @@
 //--------------------------------------------------------------------------------
 ClientCommunicationManager*	g_pClientCommunicationManager = NULL;
 
-void	SendBugReport(const char *bug, ...);
 
 //--------------------------------------------------------------------------------
 // constructor
@@ -35,7 +34,7 @@ ClientCommunicationManager::ClientCommunicationManager ()
     try {
         try {
             // create datagram server socket
-            m_pDatagramSocket = new DatagramSocket( g_pClientConfig->CLIENT_COMMUNICATION_UDP_PORT );
+            m_pDatagramSocket = new DatagramSocket( Wire::ClientCommunicationUDPPort() );
 
             SocketAPI::setsocketnonblocking_ex( m_pDatagramSocket->getSOCKET(), true );
 
@@ -171,7 +170,7 @@ ClientCommunicationManager::Update()
 	if (m_pDatagramSocket == NULL)
 		return;
 
-	const int maxPacket = g_pClientConfig->MAX_PROCESS_PACKET;
+	const int maxPacket = Wire::MaxProcessPacket();
 
 	for (int i=0; i<maxPacket; i++)
 	{
