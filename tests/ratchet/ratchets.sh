@@ -366,12 +366,19 @@ check "R5 (direct packet execute callers outside Client/Packet)" "$R5" "$R5_BASE
 # own buffer (finding C20, fixed in 0e9d247): what is left there is the
 # arity half of the same defect.
 #
-# Three measurement decisions, each of them earned while this was
-# written:
+# Two measurement decisions, each of them earned while this was written:
 #
-#   -a   VS_UI's sources are CP949 encoded, so grep calls them binary
-#        and stops at the first byte it dislikes. Without this the
-#        metric reported 113 of VS_UI's real 192.
+#   -a   Defensive, and NOT the reason it is here. VS_UI's sources are
+#        CP949 encoded, and grep calls such a file binary and stops at
+#        the first byte it dislikes - which is how the exploratory
+#        per-file `grep -r` used to survey this population reported 113
+#        of VS_UI's real 192. It does not bite the pipeline below,
+#        where everything arrives on one stdin stream that grep does not
+#        classify per file: measured, this pattern gives 192 with the
+#        flag and 192 without. The review round of task 5.4's first
+#        slice caught the comment claiming otherwise. The flag stays,
+#        because a future per-file variant would need it and nothing
+#        signals when binary detection truncates a scan.
 #   tr   The files are joined into one stream before matching, because
 #        four of Client/PacketHandler's sites put the destination and
 #        the format on different lines. A line-based count cannot see
@@ -385,7 +392,7 @@ check "R5 (direct packet execute callers outside Client/Packet)" "$R5" "$R5_BASE
 # It stays a count of sites rather than of files, because a file here is
 # converted a call at a time and half a file is real progress.
 #----------------------------------------------------------------------
-R7_BASELINE=256
+R7_BASELINE=257
 
 for d in Client VS_UI; do
 	if [ ! -d "$d" ]; then
@@ -394,9 +401,31 @@ for d in Client VS_UI; do
 	fi
 done
 
+# The format is at a different argument position in each of the three
+# families, which is why this is three alternatives and not one. The
+# first draft had only the first and the third, and so could not match a
+# counted call in ANY form - it listed _snprintf and swprintf in the
+# alternation while requiring the format at argument two, where those
+# take a size. That was not academic: it missed a live site
+# (vs_ui_gamecommon2.cpp, the guild quest mission line), and it left the
+# door open, since a newly written snprintf(dst, sizeof dst,
+# GetGameString(...), ...) could not have raised the count.
+GAMESTRING='(\(\*g_pGameStringTable\)\[|GetGameString[[:space:]]*\()'
+
+# sprintf family: format at argument 2.
+R7_PATTERN="\\b(sprintf|wsprintf|swprintf|vsprintf)[[:space:]]*\\([[:space:]]*[^,;()\"]+,[[:space:]]*$GAMESTRING"
+
+# counted family: format at argument 3, argument 2 being a size, which is
+# usually sizeof(dst) and so may contain parentheses - bounded instead by
+# refusing a semicolon or a quote and by a length cap.
+R7_PATTERN="$R7_PATTERN|\\b(_?snprintf|_?vsnprintf|_?swprintf)[[:space:]]*\\([[:space:]]*[^,;()\"]+,[^;\"]{0,60},[[:space:]]*$GAMESTRING"
+
+# message array family: format at argument 1.
+R7_PATTERN="$R7_PATTERN|\\bAddFormat(VL)?[[:space:]]*\\([[:space:]]*$GAMESTRING"
+
 R7=$(find Client VS_UI -name '*.cpp' -print0 2>/dev/null | xargs -0 cat 2>/dev/null \
 	| sed -e 's://.*::' | tr '\n' ' ' \
-	| grep -aoE '\b(sprintf|wsprintf|swprintf|_snprintf|vsprintf)[[:space:]]*\([[:space:]]*[^,;()"]+,[[:space:]]*(\(\*g_pGameStringTable\)\[|GetGameString[[:space:]]*\()|\bAddFormat(VL)?[[:space:]]*\([[:space:]]*(\(\*g_pGameStringTable\)\[|GetGameString[[:space:]]*\()' \
+	| grep -aoE "$R7_PATTERN" \
 	| wc -l)
 check "R7 (data-file format strings passed to printf)" "$R7" "$R7_BASELINE"
 

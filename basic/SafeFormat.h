@@ -5,8 +5,10 @@
 // A printf that treats its format string as data.
 //
 // Every UI string in this client comes from Data/Info/String.inf and is
-// handed to sprintf as the *format* argument in the two hundred places
-// that remain (docs/code-health-review-2026-08-29.md finding C19,
+// handed to sprintf as the *format* argument in every place that has
+// not yet been converted to this - ratchet R7 in
+// tests/ratchet/ratchets.sh is the current count, so that this comment
+// cannot go stale (docs/code-health-review-2026-08-29.md finding C19,
 // docs/RESTRUCTURING.md task 5.4). printf's contract is that the format
 // and the argument list agree, and on those call sites they cannot: the
 // format is read off disk and the arguments are fixed in the source, so
