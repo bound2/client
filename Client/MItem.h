@@ -69,6 +69,20 @@
 #include "CAnimationFrame.h"
 #include "RaceType.h"
 class MCreature;
+class MItem;
+
+//----------------------------------------------------------------------
+// MItemHost - what MItem needs from the executable (docs/RESTRUCTURING.md
+// task 4.4). The item model compiles into gamemodel, which cannot see
+// the animation clock, the top view's item-drop frame pack or the
+// player, so the executable installs these once at start-up
+// (GameInit.cpp); a test binary installs its own, or none.
+//----------------------------------------------------------------------
+struct MItemHost {
+	const DWORD*	pCurrentFrame;							// the animation clock the colour cycles follow
+	int				(*DropFrameCount)(TYPE_FRAMEID dropID);	// frames in the drop animation of a drop frame id
+	void			(*RefreshPetAffect)(MItem* pItem);		// re-evaluate a pet item's affect before its colour is read
+};
 
 
 #define	MAX_DROP_COUNT					6
@@ -337,11 +351,13 @@ class MItem : public MObject, public CAnimationFrame {
 		//---------------------------------------------------
 		// 필요능력
 		//---------------------------------------------------
-		BYTE					GetRequireSTR()	const;
-		BYTE					GetRequireDEX()	const;
-		BYTE					GetRequireINT()	const;
-		BYTE					GetRequireLevel() const;		
-		WORD					GetRequireSUM() const;		
+		// int, not BYTE: the slayer ceiling is 295 and Ousters gear is uncapped,
+		// so a byte return wrapped level-150 requirements (task 4.4 fix).
+		int					GetRequireSTR()	const;
+		int					GetRequireDEX()	const;
+		int					GetRequireINT()	const;
+		int					GetRequireLevel() const;
+		int					GetRequireSUM() const;
 
 		//---------------------------------------------------
 		// 장착했을 때 바뀌는.. BasicActionInfo
@@ -411,6 +427,8 @@ class MItem : public MObject, public CAnimationFrame {
 		// Item떨어뜨리기..
 		//---------------------------------------------------
 		void		SetDropping();
+		static void				SetHost(const MItemHost* pHost)	{ s_pHost = pHost; }
+		static const MItemHost*	GetHost()						{ return s_pHost; }
 		BOOL		IsDropping() const		{ return m_bDropping; }
 		int			GetDropHeight() const	{ return s_DropHeight[m_DropCount]; }
 		void		NextDropFrame();		
@@ -528,6 +546,8 @@ class MItem : public MObject, public CAnimationFrame {
 		BOOL					m_bDropping;					// 떨어지고 있는 중
 		int						m_DropCount;					// 현재 count
 		static int				s_DropHeight[MAX_DROP_COUNT];	// Drop 높이
+		static const MItemHost*	s_pHost;						// the executable's services, NULL in a test binary
+		static DWORD			CurrentFrame()	{ return s_pHost!=NULL ? *s_pHost->pCurrentFrame : 0; }
 
 		//---------------------------------------------------
 		// identified

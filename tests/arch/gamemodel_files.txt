@@ -55,6 +55,40 @@ Client/SkillDef.h
 Client/MMoneyManager.cpp
 Client/MMoneyManager.h
 
+# Item core (task 4.4, second slice): MItem, the gear/armour/weapon
+# families and (since 4.3) the container-based gear; the use handlers
+# are the executable's MItemUse.cpp. MObject is the base; MItemLimits.h
+# holds the pile sizes both halves read.
+Client/MItem.cpp
+Client/MItem.h
+Client/MItemLimits.h
+Client/MObject.cpp
+Client/MObject.h
+# The item managers (task 4.3, first slice): the id map, the grid and the
+# slot containers, the finder predicates, and the quick-slot globals the
+# id map clears on release (MQuickSlot.cpp defines them).
+Client/MItemManager.cpp
+Client/MItemManager.h
+Client/MGridItemManager.h
+Client/MSlotItemManager.h
+Client/MGridItemManager.cpp
+Client/MSlotItemManager.cpp
+Client/MItemFinder.h
+Client/MQuickSlot.cpp
+Client/MQuickSlot.h
+
+# The seams MItem reads (task 4.4): the user's display settings (the
+# gore level picks the skull names), the client configuration (the
+# colour-set bases) and the timed-item register (quest items). All
+# three are pure loaders over their own state.
+Client/UserInformation.cpp
+Client/UserInformation.h
+Client/ClientConfig.cpp
+Client/ClientConfig.h
+Client/MusicDef.h
+Client/MTimeItemManager.cpp
+Client/MTimeItemManager.h
+
 # Support: the string class, the typed table template and the logger
 Client/MString.cpp
 Client/MString.h

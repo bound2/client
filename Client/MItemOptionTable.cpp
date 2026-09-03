@@ -71,7 +71,22 @@ ITEMOPTION_TABLE*		g_pItemOptionTable = NULL;
 //
 //--------------------------------------------------------------------------
 ITEMOPTION_INFO::ITEMOPTION_INFO()
+: Part(0)
+, PlusPoint(0)
+, PriceMultiplier(0)
+, RequireSTR(0)
+, RequireDEX(0)
+, RequireINT(0)
+, RequireSUM(0)
+, RequireLevel(0)
+, ColorSet(0)
+, UpgradeOptionType(0)
+, PreviousOptionType(0)
 {
+	// The loader fills every row it sizes; a table sized but never
+	// loaded (a test's), or a load that returned early, must still hand
+	// out defined rows - the none row an unoptioned item reads its
+	// colour from above all.
 }
 
 ITEMOPTION_INFO::~ITEMOPTION_INFO()

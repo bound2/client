@@ -4,12 +4,6 @@
 #include "Client_PCH.h"
 #include "MItem.h"
 #include "MSlotItemManager.h"
-#include "DebugInfo.h"
-
-#ifdef __GAME_CLIENT__
-//	#define	new			DEBUG_NEW
-#endif
-//#define	delete		DEBUG_DELETE
 
 //----------------------------------------------------------------------
 // 
@@ -91,17 +85,19 @@ MSlotItemManager::AddItem(MItem* pItem, BYTE n)
 		return false;
 	}
 
-	m_ItemSlot[n] = pItem;
+	//-------------------------------------------------
+	// The id map decides first: an item it refuses (its id is already
+	// held) must not be left in a slot the map knows nothing about.
+	//-------------------------------------------------
+	if (!MItemManager::AddItem( pItem ))
+	{
+		return false;
+	}
 
-	//-------------------------------------------------
-	// item의 slot에서의 위치를 지정한다.
-	//-------------------------------------------------
+	m_ItemSlot[n] = pItem;
 	pItem->SetItemSlot( n );
 
-	//-------------------------------------------------
-	// ItemManager의 map에 추가
-	//-------------------------------------------------
-	return MItemManager::AddItem( pItem );
+	return true;
 }
 
 //----------------------------------------------------------------------
@@ -244,17 +240,16 @@ MSlotItemManager::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 		//-------------------------------------------------
 		pOldItem = NULL;
 
-		m_ItemSlot[n] = pItem;
+		// The id map decides first (see AddItem).
+		if (!MItemManager::AddItem( pItem ))
+		{
+			return false;
+		}
 
-		//-------------------------------------------------
-		// item의 slot에서의 위치를 지정한다.
-		//-------------------------------------------------
+		m_ItemSlot[n] = pItem;
 		pItem->SetItemSlot( n );
 
-		//-------------------------------------------------
-		// ItemManager의 map에 추가
-		//-------------------------------------------------
-		return MItemManager::AddItem( pItem );
+		return true;
 	}
 
 	//---------------------------------------------------------	
@@ -283,19 +278,20 @@ MSlotItemManager::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 	
 
 	//-------------------------------------------------
-	// n slot에 pItem을 추가한다.
+	// If the map refuses the newcomer (its id is held by a third item),
+	// the occupant goes back where it was rather than being dropped.
 	//-------------------------------------------------
-	m_ItemSlot[n] = pItem;		
+	if (!MItemManager::AddItem( pItem ))
+	{
+		MItemManager::AddItem( pOldItem );
+		pOldItem = NULL;
+		return false;
+	}
 
-	//-------------------------------------------------
-	// item의 slot에서의 위치를 지정한다.
-	//-------------------------------------------------
+	m_ItemSlot[n] = pItem;
 	pItem->SetItemSlot( n );
 
-	//-------------------------------------------------
-	// ItemManager의 map에 추가
-	//-------------------------------------------------
-	return MItemManager::AddItem( pItem );	
+	return true;
 }
 
 //----------------------------------------------------------------------

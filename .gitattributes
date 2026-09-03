@@ -13,3 +13,7 @@ tests/ratchet/*.sh text eol=lf
 # Golden wire bytes (tests/unit/test_packet_goldens.cpp): one hex line per
 # file, compared byte for byte and shared with the server repo's copies.
 tests/golden/*.hex text eol=lf
+
+# Executed by sh as a git hook after `git config core.hooksPath tools/git-hooks`;
+# a CRLF checkout would put a carriage return in every command.
+tools/git-hooks/* text eol=lf

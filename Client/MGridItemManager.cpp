@@ -676,28 +676,41 @@ MGridItemManager::ReplaceItem(MItem* pItem, BYTE x, BYTE y, MItem*& pOldItem)
 		pOldItem = pCheckItem;
 	}
 
-	//---------------------------------------------------------
-	// pItem을 (x,y)에 추가한다.
-	//---------------------------------------------------------
-	// 내부의 map에 추가시킨다.
-	// 제대로 추가되면. grid에도 표시를 한다.
-	//---------------------------------------------------------
-	if (MItemManager::AddItem( pItem ))
+	//--------------------------------------------------------------
+	// The id map decides: if it refuses the newcomer (its id is held by
+	// a third item), the occupant goes back onto its cells and into the
+	// map, and the call reports no replacement.
+	//--------------------------------------------------------------
+	if (!MItemManager::AddItem( pItem ))
 	{
-		//---------------------------------------------------------
-		// item의 grid좌표를 설정
-		//---------------------------------------------------------
-		pItem->SetGridXY( x, y );
-
-		//---------------------------------------------------------
-		// Grid에 표시
-		//---------------------------------------------------------
-		for (i=y; i<yPlusHeight; i++)
+		if (pOldItem!=NULL)
 		{
-			for (j=x; j<xPlusWidth; j++)
+			MItemManager::AddItem( pOldItem );
+
+			int oyPlusHeight = pOldItem->GetGridY() + pOldItem->GetGridHeight();
+			int oxPlusWidth = pOldItem->GetGridX() + pOldItem->GetGridWidth();
+
+			for (i=pOldItem->GetGridY(); i<oyPlusHeight; i++)
 			{
-				m_ItemGrid[i][j] = pItem;
+				for (j=pOldItem->GetGridX(); j<oxPlusWidth; j++)
+				{
+					m_ItemGrid[i][j] = pOldItem;
+				}
 			}
+
+			pOldItem = NULL;
+		}
+
+		return false;
+	}
+
+	pItem->SetGridXY( x, y );
+
+	for (i=y; i<yPlusHeight; i++)
+	{
+		for (j=x; j<xPlusWidth; j++)
+		{
+			m_ItemGrid[i][j] = pItem;
 		}
 	}
 

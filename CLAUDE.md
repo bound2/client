@@ -55,9 +55,12 @@ the output and hides all progress.
 ### What can be tested
 
 Only code compiled into a **static library**: `basic`, `SpriteLib`, `dxlib`,
-`gamemodel` (the pure data tables, the item table, the money manager and their
+`gamemodel` (the pure data tables, the item table, the money manager, the item
+core - `MItem`, the gear families and the three item managers, behind the
+`MItemHost` the executable installs - with the user, config and timed-item
+loaders it reads, and their
 string/log support, membership in `tests/arch/gamemodel_files.txt` —
-`docs/RESTRUCTURING.md` tasks 4.1, 4.2 and 4.4),
+`docs/RESTRUCTURING.md` tasks 4.1, 4.2, 4.3 and 4.4),
 `framelib`, `TextSystem`, `VS_UI`, and `packetwire` — the whole wire layer: socket
 streams, the encrypter, the info classes, every packet class in every direction and
 the factory/validator tables (`docs/RESTRUCTURING.md` tasks 1.1 and 2.4; membership
@@ -134,7 +137,7 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **201 tests, 3,423 checks, 0 failed** in both trees.
+baseline: **227 tests, 3,668 checks, 0 failed** in both trees.
 
 ## Traps
 
@@ -181,7 +184,10 @@ baseline: **201 tests, 3,423 checks, 0 failed** in both trees.
   and sections — follow the file you are in.
 - Commit messages: `type: lowercase imperative summary`, then prose covering why the
   change is right, what was verified, and what is deliberately out of scope. `a41eec9`
-  is the model. Trailer: `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`.
+  is the model. A `fix:` commit also carries a `Test path:` line (`lib + test`,
+  `moved, then fixed` or `exempt` - `docs/RESTRUCTURING.md` task 3.1); the
+  `tools/git-hooks/commit-msg` hook refuses one without, after
+  `git config core.hooksPath tools/git-hooks` once per clone. Trailer: `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`.
 
 ## Layout
 
