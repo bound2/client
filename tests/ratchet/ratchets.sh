@@ -398,8 +398,11 @@ check "R5 (direct packet execute callers outside Client/Packet)" "$R5" "$R5_BASE
 # 37: 64 - 27. Task 5.4's third slice took the AddFormat family through
 # CMessageArray::AddSafeFormat, which packs its arguments with their
 # types instead of as varargs. What is left is 37 ordinary sprintf sites,
-# all executable-side, concentrated in ModifyStatusManager.cpp,
-# UIMessageManager.cpp and MTopView.cpp.
+# all executable-side: UIMessageManager.cpp 14, MTopView.cpp 10,
+# GameUI.cpp 7, ModifyStatusManager.cpp 3, CGameUpdate.cpp 2,
+# PacketFunction.cpp 1. (The first draft of this line named
+# ModifyStatusManager.cpp among the top three, copied from the text the
+# slice had just made false by taking 16 of its 19 away.)
 # History: 64 = 262 - 198 (the second slice: VS_UI's 193 sites and the 5
 # offset-append sites its review round exposed). 262 = 293 - 31 (the
 # first slice, Client/PacketHandler).
