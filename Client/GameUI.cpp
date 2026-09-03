@@ -25,6 +25,7 @@
 #include "SkillDef.h"
 #include "ClientFunction.h"
 #include "MGameStringTable.h"
+#include "SafeFormat.h"
 #include "MItemOptionTable.h"
 #include "CToken.h"
 #include "UserOption.h"
@@ -1849,7 +1850,7 @@ UI_RunSkillTree(int domain, int maxLevel)
 		}
 		else
 		{
-			sprintf(str, (*g_pGameStringTable)[STRING_MESSAGE_WHAT_SKILL_TO_LEARN].GetString(), 
+			SafeFormat::Format(str, GetGameString(STRING_MESSAGE_WHAT_SKILL_TO_LEARN), 
 							(*g_pGameStringTable)[SKILLDOMAIN_NAME[domain]].GetString());			
 		}
 		
@@ -4028,7 +4029,7 @@ void		UI_RunQuestList(GCSelectQuestID *pPacket)
 				{
 					bContinue = true;
 					char temp[100];
-					sprintf(temp,(*g_pGameStringTable)[UI_STRING_MESSAGE_HOUR].GetString(), hour );
+					SafeFormat::Format(temp, GetGameString(UI_STRING_MESSAGE_HOUR), hour );
 					strcat(tempstr, temp);
 					strcat(tempstr, " ");
 				}
@@ -4036,7 +4037,7 @@ void		UI_RunQuestList(GCSelectQuestID *pPacket)
 				{
 					bContinue = true;
 					char temp[100];
-					sprintf(temp,(*g_pGameStringTable)[UI_STRING_MESSAGE_MINUTE].GetString(), minute );
+					SafeFormat::Format(temp, GetGameString(UI_STRING_MESSAGE_MINUTE), minute );
 					strcat(tempstr, temp);			
 				}
 				char selectType = 0;
@@ -4045,10 +4046,15 @@ void		UI_RunQuestList(GCSelectQuestID *pPacket)
 				case QUEST_INFO_MONSTER_KILL :
 					if( g_pPlayer->IsVampire() )
 					{
-						wsprintf(str,(*g_pGameStringTable)[STRING_MESSAGE_MONSTER_KILL_QUEST_STRING_SET_VAMPIRE],mkq->GetName(),mkq->GetGoal(),tempstr);
+						// These two took the table entry as their format without
+						// GetString(), leaning on MString's implicit conversion
+						// to const char* - which is why the mechanical sweep
+						// could not match them and why they were the last two
+						// R7 counted.
+						SafeFormat::Format(str, GetGameString(STRING_MESSAGE_MONSTER_KILL_QUEST_STRING_SET_VAMPIRE), mkq->GetName(), mkq->GetGoal(), tempstr);
 					} else
 					{
-						wsprintf(str,(*g_pGameStringTable)[STRING_MESSAGE_MONSTER_KILL_QUEST_STRING_SET],mkq->GetName(),mkq->GetGoal(),tempstr);
+						SafeFormat::Format(str, GetGameString(STRING_MESSAGE_MONSTER_KILL_QUEST_STRING_SET), mkq->GetName(), mkq->GetGoal(), tempstr);
 					}						
 					break;
 				case QUEST_INFO_MEET_NPC :
@@ -4132,7 +4138,7 @@ void		UI_RunQuestList(GCSelectQuestID *pPacket)
 				{
 					bContinue = true;
 					char temp[100];
-					sprintf(temp,(*g_pGameStringTable)[UI_STRING_MESSAGE_HOUR].GetString(), hour );
+					SafeFormat::Format(temp, GetGameString(UI_STRING_MESSAGE_HOUR), hour );
 					strcat(timestr, temp);
 					strcat(timestr, " ");
 				}
@@ -4140,7 +4146,7 @@ void		UI_RunQuestList(GCSelectQuestID *pPacket)
 				{
 					bContinue = true;
 					char temp[100];
-					sprintf(temp,(*g_pGameStringTable)[UI_STRING_MESSAGE_MINUTE].GetString(), minute );
+					SafeFormat::Format(temp, GetGameString(UI_STRING_MESSAGE_MINUTE), minute );
 					strcat(timestr, temp);			
 				}		
 				switch(mkq->GetType() )

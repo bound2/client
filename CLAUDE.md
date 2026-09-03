@@ -234,15 +234,18 @@ baseline: **332 tests, 4,510 checks, 0 failed** in both trees.
 2. Fixed-size buffers fed by variable-length server strings (the 21-byte chat rows
    are fixed; 128-byte stack buffers remain in other handlers), and format strings
    loaded from data files passed to sprintf (C19/C20/C22). That last one is
-   **37 call sites**, measured by ratchet R7 rather than estimated, and it now
+   **0 call sites** - ratchet R7 holds it at zero, so a new one fails the suite. It
    has a fix to apply rather than a policy to argue about: `SafeFormat::Format`
    in `basic/SafeFormat.h` checks a table entry's conversions against the
-   arguments the call site really passed. `Client/PacketHandler`, all of `VS_UI`
-   and the whole `AddFormat` family (through `CMessageArray::AddSafeFormat`) are
-   converted; what is left is 37 ordinary `sprintf` sites, all executable-side
-   and concentrated in `UIMessageManager.cpp`, `MTopView.cpp` and `GameUI.cpp`.
+   arguments the call site really passed. All 293 sites are converted, across
+   `Client`, `VS_UI` and the `AddFormat` family (through
+   `CMessageArray::AddSafeFormat`), so **finding C19 is closed** — a corrupt
+   table can still print wrong text, but it can no longer make the program read
+   or write something it was not given.
    `tests/tools/check_format_arity.pl` (ctest `format_arity`) audits every
    converted site against the built-in English table and fails the suite when an
-   entry asks for more arguments than its call site passes.
+   entry asks for more arguments than its call site passes; it also ratchets how
+   many sites it finds *and* how many it resolves, because it has three times
+   passed while silently checking less than it should.
 3. Dead and duplicate source sitting alongside live code, which is a correctness trap
    when the wrong file gets edited.
