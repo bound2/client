@@ -11612,12 +11612,19 @@ bool	C_VS_UI_PARTY_MANAGER::MouseControl(UINT message, int _x, int _y)
 					PARTY_INFO *info = g_pParty->GetMemberInfo(m_away_focused-1);
 					if(info != NULL)
 					{
-						static char zonename[20];
-						static char zonexy[10];
+						static char zonename[64];
+						// "X:%d Y:%d" against two BYTEs needs 12 bytes, and
+						// this held 10: the old sprintf ran two past the end
+						// of the static for any party member beyond x/y 99,
+						// and bounding the call without widening the buffer
+						// would have truncated the coordinates instead. The
+						// zone name is a data-file string, so it is bounded
+						// here too rather than left to fit by luck.
+						static char zonexy[20];
 						static S_DEFAULT_HELP_STRING party_string;
 						party_string.sz_main_str = zonename;
 						party_string.sz_sub_str = zonexy;
-						wsprintf(zonename, "%s", g_pZoneTable->Get(info->zoneID)->Name.GetString());
+						SafeFormat::Format(zonename, "%s", g_pZoneTable->Get(info->zoneID)->Name.GetString());
 						SafeFormat::Format(zonexy, GetGameString(UI_STRING_MESSAGE_ZONEINFO_XY), info->zoneX, info->zoneY);
 						g_descriptor_manager.Set(DID_HELP, x+9, y+1+window_gap*m_away_focused+window_default_height, (void *)&party_string,0,0);
 					}

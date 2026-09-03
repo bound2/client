@@ -54,6 +54,7 @@ use strict;
 use warnings;
 use File::Basename;
 use File::Spec;
+use File::Find;
 
 my $root = File::Spec->rel2abs(
 	File::Spec->catdir(dirname(__FILE__), File::Spec->updir, File::Spec->updir));
@@ -180,11 +181,17 @@ sub arg_kind
 	return 'str' if $a =~ /GetHName\s*\(\s*\)$/;
 	return 'str' if $a =~ /^"/;
 
-	# A number, or arithmetic over names and numbers with no call, index,
-	# member access or address-of in it - i+1, n*2, LEVEL_BASE+g. Nothing
-	# of that shape is a char*.
+	# A numeric literal, or arithmetic that cannot be pointer arithmetic.
+	#
+	# '+' and '-' over a bare identifier are excluded on purpose: szName+1
+	# is a char*, and an earlier draft that called any operator expression
+	# 'num' would have failed such a site against a %s. There is none in
+	# the tree today, which is exactly when a rule like that gets written
+	# and never tested. '*', '/' and '%' cannot appear in pointer
+	# arithmetic, so they stay.
 	return 'num' if $a =~ /^-?\d+$/;
-	return 'num' if $a =~ /^[A-Za-z_0-9 \t+\-*\/%]+$/ && $a =~ /[+\-*\/%]/;
+	return 'num' if $a =~ /^[A-Za-z_0-9 \t+\-*\/%]+$/ && $a =~ /[*\/%]/;
+	return 'num' if $a =~ /^[-+ \t0-9*\/%()]+$/ && $a =~ /\d/;
 
 	return '';
 }
@@ -192,22 +199,42 @@ sub arg_kind
 #----------------------------------------------------------------------
 # Every converted call site.
 #----------------------------------------------------------------------
+#
+# File::Find, not a shell-out to find(1). The first version ran
+# `find "$path" -name '*.cpp'` through the shell, which is GNU find under
+# bash and C:\Windows\system32\find.exe under PowerShell - where it
+# printed "File not found - *.cpp", returned nothing, and this check
+# reported OK over zero sites. CLAUDE.md documents ctest as the way to
+# run the suite and PowerShell is this machine's primary shell, so that
+# was the normal invocation, not an exotic one. tests/arch/
+# check_includes.pl already used File::Find; this now does too.
+#
 my @sources;
 for my $dir ('Client', 'VS_UI')
 {
 	my $path = File::Spec->catdir($root, $dir);
-	open my $find, '-|', "find \"$path\" -name '*.cpp'"
-		or die "check_format_arity: cannot list $path: $!\n";
-	while (<$find>) { chomp; push @sources, $_ }
-	close $find;
+
+	die "check_format_arity: $path is missing - fix the path list in this script\n"
+		unless -d $path;
+
+	find(sub { push @sources, $File::Find::name if /\.cpp$/i }, $path);
 }
+
+die "check_format_arity: found no .cpp files under Client or VS_UI - the scan is broken\n"
+	unless @sources;
 
 my ($sites, $checked, $unresolved, $failures, $notes, $unclassified)
 	= (0, 0, 0, 0, 0, 0);
 
+# Conversion positions seen, and how many of those a kind could be told
+# for. Printed, because "0 type failures" over a handful of comparisons
+# is a much weaker statement than it sounds.
+my ($positions, $compared) = (0, 0);
+
 for my $file (@sources)
 {
-	open my $fh, '<:raw', $file or next;
+	open my $fh, '<:raw', $file
+		or die "check_format_arity: cannot read $file: $!\n";
 	local $/;
 	my $text = <$fh>;
 	close $fh;
@@ -223,10 +250,24 @@ for my $file (@sources)
 		my $open = pos $text;
 
 		# The line this call starts on, and whether it is commented out.
+		#
+		# String literals are removed from the prefix before looking for
+		# a "//", because a URL in an argument would otherwise make the
+		# whole call vanish from the audit - silently, taking any defect
+		# in it along. Proven by injecting a strcpy of "http://..." above
+		# a call with a dropped argument: the failure disappeared and the
+		# tool still exited 0.
 		my $before = substr($text, 0, $open);
 		my $line   = 1 + ($before =~ tr/\n//);
 		my ($tail) = ($before =~ /([^\n]*)$/);
-		next if defined $tail && $tail =~ m{//};
+
+		if (defined $tail)
+		{
+			my $bare = $tail;
+			$bare =~ s/"(?:[^"\\]|\\.)*"//g;
+			$bare =~ s/'(?:[^'\\]|\\.)*'//g;
+			next if $bare =~ m{//};
+		}
 
 		my $depth = 1;
 		my $i = $open;
@@ -242,15 +283,25 @@ for my $file (@sources)
 		next if @a < 2;
 		$sites++;
 
+		# SafeFormat::Format has two overloads: the format is argument 2
+		# against a real array, and argument 3 when the caller states the
+		# size. Looking only at argument 2 is the exact blindness that
+		# kept ratchet R7 from seeing the offset-append sites, so this
+		# finds the format wherever it is rather than assuming.
+		my $fmt_at = 1;
+		$fmt_at = 2 if @a > 2
+					&& $a[1] !~ /GetGameString\s*\(/
+					&& $a[1] !~ /^\s*"/;
+
 		# A literal format is not a table site at all - the formatter is
 		# used at a few of those purely for the bound.
-		if ($a[1] =~ /^\s*"/)
+		if ($a[$fmt_at] =~ /^\s*"/)
 		{
 			$sites--;
 			next;
 		}
 
-		my ($id) = ($a[1] =~ /GetGameString\s*\(\s*([A-Za-z_]\w*)\s*\)/);
+		my ($id) = ($a[$fmt_at] =~ /GetGameString\s*\(\s*([A-Za-z_]\w*)\s*\)/);
 
 		unless (defined $id && exists $entry{$id})
 		{
@@ -263,7 +314,7 @@ for my $file (@sources)
 		$checked++;
 
 		my @conv = conversions($entry{$id});
-		my @args = @a[2 .. $#a];
+		my @args = @a[$fmt_at+1 .. $#a];
 
 		if (@conv > @args)
 		{
@@ -288,6 +339,8 @@ for my $file (@sources)
 
 			next unless $wants;
 
+			$positions++;
+
 			my $got = arg_kind($args[$j]);
 
 			unless ($got)
@@ -295,6 +348,8 @@ for my $file (@sources)
 				$unclassified++;
 				next;
 			}
+
+			$compared++;
 
 			next if $got eq $wants;
 
@@ -311,18 +366,40 @@ for my $file (@sources)
 	}
 }
 
-printf "\ncheck_format_arity: %d converted site(s), %d checked against the built-in table, %d with an id it does not set, %d argument(s) whose kind could not be told, %d note(s)\n",
-	$sites, $checked, $unresolved, $unclassified, $notes;
+printf "\ncheck_format_arity: %d converted site(s), %d checked against the built-in table, %d with an id it does not set; %d of %d conversion positions had an argument kind that could be told\n",
+	$sites, $checked, $unresolved, $compared, $positions;
+printf "check_format_arity: %d note(s)\n", $notes;
 
 #----------------------------------------------------------------------
 # A check that checked nothing must not report OK.
 #
-# The first draft of this file did exactly that: a Perl list assignment
-# whose first target is an array left every scalar in split_args undef,
-# so no call parsed, all 224 sites fell into the unresolved bucket, and
-# it printed OK. A tool written to catch a silent failure is worth
-# nothing if it can fail silently itself.
+# This file has now failed that way twice, which is why the floor below
+# is a number and not a shrug. Its first draft used a Perl list
+# assignment whose first target was an array, leaving every scalar in
+# split_args undef: no call parsed, all 224 sites fell into the
+# unresolved bucket, and it printed OK. Its second enumerated sources by
+# shelling out to find(1), which under PowerShell is Windows' find.exe -
+# no files, no sites, OK again, and ctest green with a real arity defect
+# sitting in the tree.
+#
+# Both were invisible because nothing pinned the DENOMINATOR. Every way
+# this scan can shrink - a dead file walk, an unreadable source, a call
+# skipped as commented - reports a smaller number and exits 0. So the
+# count is ratcheted like the numbers in tests/ratchet/ratchets.sh: it
+# may rise freely as sites are converted, and a fall has to be explained
+# by editing this line in the same commit.
 #----------------------------------------------------------------------
+my $MINIMUM_SITES = 229;
+
+if ($sites < $MINIMUM_SITES)
+{
+	printf "FAIL: scanned %d converted site(s), fewer than the %d recorded here.\n", $sites, $MINIMUM_SITES;
+	print  "      Either the scan is broken - which is how this check has failed twice before,\n";
+	print  "      both times silently - or sites were legitimately removed, in which case lower\n";
+	print  "      \$MINIMUM_SITES in this file in the same commit.\n";
+	exit 1;
+}
+
 if ($sites && !$checked)
 {
 	print "FAIL: found converted sites but resolved none of them to a table entry - the parse is broken\n";

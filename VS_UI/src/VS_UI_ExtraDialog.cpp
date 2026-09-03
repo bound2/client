@@ -1862,7 +1862,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 						snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE));
 					bl_required = true;
 					
-					wsprintf(sz_temp + strlen(sz_temp), (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_STR].GetString(), p_item->GetRequireSTR());
+					SafeFormat::Format(sz_temp + strlen(sz_temp), sizeof(sz_temp) - strlen(sz_temp), GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_STR), p_item->GetRequireSTR());
 					if (p_item->GetRequireDEX() > 0 ||
 						p_item->GetRequireINT() > 0 ||
 						//					p_item->GetRequireLevel() > 0 ||
@@ -1880,7 +1880,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 						snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE));
 					bl_required = true;
 					
-					wsprintf(sz_temp + strlen(sz_temp), (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_DEX].GetString(), p_item->GetRequireDEX());
+					SafeFormat::Format(sz_temp + strlen(sz_temp), sizeof(sz_temp) - strlen(sz_temp), GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_DEX), p_item->GetRequireDEX());
 					if (p_item->GetRequireINT() > 0 ||
 						//					p_item->GetRequireLevel() > 0 ||
 						(p_item->GetRequireSUM() > 0 && p_item->GetRequireSUM() > p_item->GetRequireDEX()))
@@ -1897,7 +1897,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 						snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE));
 					bl_required = true;
 					
-					wsprintf(sz_temp + strlen(sz_temp), (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_INT].GetString(), p_item->GetRequireINT());
+					SafeFormat::Format(sz_temp + strlen(sz_temp), sizeof(sz_temp) - strlen(sz_temp), GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_INT), p_item->GetRequireINT());
 					
 					if (//p_item->GetRequireLevel() > 0 || 
 						(p_item->GetRequireSUM() > 0 && p_item->GetRequireSUM() > p_item->GetRequireINT()))
@@ -1920,7 +1920,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 					//				if (p_item->GetRequireLevel() > 0)
 					//					strcat(sz_temp, " and");
 	
-					wsprintf(sz_temp + strlen(sz_temp),(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_ALL_STAT_SUM].GetString(), p_item->GetRequireSUM());
+					SafeFormat::Format(sz_temp + strlen(sz_temp), sizeof(sz_temp) - strlen(sz_temp), GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_ALL_STAT_SUM), p_item->GetRequireSUM());
 					temp_string = sz_temp;
 					m_rep_string.push_back(temp_string);
 				}
@@ -1935,7 +1935,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 						snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE));
 					bl_required = true;
 					
-					wsprintf(sz_temp + strlen(sz_temp), (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_LEVEL].GetString(), p_item->GetRequireLevel());
+					SafeFormat::Format(sz_temp + strlen(sz_temp), sizeof(sz_temp) - strlen(sz_temp), GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE_LEVEL), p_item->GetRequireLevel());
 					temp_string = sz_temp;
 					m_rep_string.push_back(temp_string);
 				}

@@ -372,10 +372,10 @@ check "R5 (direct packet execute callers outside Client/Packet)" "$R5" "$R5_BASE
 #        CP949 encoded, and grep calls such a file binary and stops at
 #        the first byte it dislikes - which is how the exploratory
 #        per-file `grep -r` used to survey this population reported 113
-#        of VS_UI's real 192. It does not bite the pipeline below,
+#        of VS_UI's real 198. It does not bite the pipeline below,
 #        where everything arrives on one stdin stream that grep does not
-#        classify per file: measured, this pattern gives 192 with the
-#        flag and 192 without. The review round of task 5.4's first
+#        classify per file: measured, this pattern gives the same count with the
+#        flag and without it. The review round of task 5.4's first
 #        slice caught the comment claiming otherwise. The flag stays,
 #        because a future per-file variant would need it and nothing
 #        signals when binary detection truncates a scan.
@@ -392,12 +392,20 @@ check "R5 (direct packet execute callers outside Client/Packet)" "$R5" "$R5_BASE
 # It stays a count of sites rather than of files, because a file here is
 # converted a call at a time and half a file is real progress.
 #----------------------------------------------------------------------
-# 64: 257 - 193. Task 5.4's second slice converted every VS_UI site, so
-# what is left is the executable's own 64 - of which 3 are the AddFormat
-# family in Client/PacketHandler. History: 257 = 288 - 31 (the first
-# slice, Client/PacketHandler); those two numbers were first recorded as
-# 256 and 287, before the review round found the pattern could not match
-# a counted call in any form.
+# 64: 262 - 198. Task 5.4's second slice converted VS_UI's 193 sites and
+# the 5 offset-append sites its review round exposed, so what is left is
+# the executable's own 64 - of which 27 are the AddFormat family, 3 of
+# those in Client/PacketHandler. History: 262 = 293 - 31 (the first
+# slice, Client/PacketHandler).
+#
+# Those history numbers have been restated twice, both times because the
+# pattern could not see a whole shape rather than because the tree
+# changed. First recorded as 287 and 256, when the pattern demanded the
+# format at argument two and so matched no counted call at all; then as
+# 288 and 257, before the offset-append alternative below. The lesson is
+# in the numbers: this metric has been wrong twice in the same direction,
+# and each time the missing shape was live code in a file the slice had
+# just edited.
 R7_BASELINE=64
 
 for d in Client VS_UI; do
@@ -428,6 +436,15 @@ R7_PATTERN="$R7_PATTERN|\\b(_?snprintf|_?vsnprintf|_?swprintf)[[:space:]]*\\([[:
 
 # message array family: format at argument 1.
 R7_PATTERN="$R7_PATTERN|\\bAddFormat(VL)?[[:space:]]*\\([[:space:]]*$GAMESTRING"
+
+# appending at an offset: sprintf(buf + strlen(buf), <entry>, ...). The
+# destination class above forbids parentheses, so it cannot match this -
+# and forbidding them is what keeps a joined stream from running across
+# two statements, so the shape gets its own alternative instead. Five
+# live sites in VS_UI_ExtraDialog.cpp hid behind that for a whole slice,
+# in a file the slice edited, and both reviewers found them. They were
+# the least safe form left: an unbounded append into char[200].
+R7_PATTERN="$R7_PATTERN|\\b(w?sprintf)[[:space:]]*\\([[:space:]]*[A-Za-z_][A-Za-z0-9_]*[[:space:]]*\\+[[:space:]]*strlen[[:space:]]*\\([^)]*\\)[[:space:]]*,[[:space:]]*$GAMESTRING"
 
 R7=$(find Client VS_UI -name '*.cpp' -print0 2>/dev/null | xargs -0 cat 2>/dev/null \
 	| sed -e 's://.*::' | tr '\n' ' ' \
