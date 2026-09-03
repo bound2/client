@@ -1308,10 +1308,15 @@ starting each — the scan is one grep, and the ranking below is from a
   > check and the sound go through the entries the containers already
   > use; the quick-slot globals are `MQuickSlot.cpp`'s, in the library
   > since 4.3. Dropped on the way: the 61 `__GAME_CLIENT__` guards
-  > (always on) with the `UIFunction.h`, `ClientFunction.h`,
-  > `MPlayer.h`, `DebugInfo.h` and `MHelpManager.h` includes they
-  > wrapped, and the two `#else` thresholds a non-client build would
-  > have used. R1 502 → 497; R4 28 → 27 — a reclassification, not a cut:
+  > (always on) with the `UIFunction.h`, `ClientFunction.h` and
+  > `MPlayer.h` includes they wrapped, the two plain includes the strip
+  > left unused (`MPlayerGear.cpp`'s `DebugInfo.h` and
+  > `MHelpManager.h`), and the two `#else` thresholds a non-client build
+  > would have used. One behaviour delta, kept and recorded: the host's
+  > `RecalculateStatus` checks for a player where the ~40 call sites it
+  > replaced dereferenced one unguarded, so the no-player window is a
+  > skipped recompute rather than a crash — the same trade the
+  > containers' affect check made in 4.3. R1 502 → 497; R4 28 → 27 — a reclassification, not a cut:
   > `VS_UI_Game.cpp`'s only reaches past the libraries were the three
   > race gears' globals, library-defined now. Tests
   > (`test_player_gear.cpp`, 11): the base grades by durability at the
@@ -1327,18 +1332,60 @@ starting each — the scan is one grep, and the ranking below is from a
   > resets it, seats a zap behind its ring and takes it off first; the
   > vampire's refuses a slayer's helm; the Ousters' arms band becomes a
   > quick slot; the shop asks the player about everything on the shelf
-  > it switches to and owns its shelves. **Observed, not fixed:**
-  > offering a core zap to its ring's slot is refused — that branch of
-  > `AddItem` reads the slot five below the ring, not the ring under
-  > the zap slot — so zaps go on by their zap slot, which is what the
-  > server names; the Ousters gear plays the gear sound and recomputes
-  > the stats twice per item worn. **One defect fixed test-first, after
-  > the move:** `CheckItemStatus` read the item's maximum durability into
-  > the unsigned duration type, so the -1 `MItem` answers for a piece
-  > with none failed the "no durability" test as 4,294,967,295 and the
-  > piece graded almost broken (0 of a huge maximum) — a gear entry
-  > whose table maximum is unset shows red; the maximum is read signed
-  > now. Suite: 261 tests (4,164 checks).
+  > it switches to and owns its shelves. **Observed, not fixed:** the
+  > Ousters gear plays the gear sound and recomputes the stats twice
+  > for every item that goes on through its slot table (the two-hand
+  > and stone branches call each once). **One defect fixed test-first,
+  > after the move:** `CheckItemStatus` read the item's maximum
+  > durability into the unsigned duration type, so the -1 `MItem`
+  > answers for a piece with none failed the "no durability" test as
+  > 4,294,967,295 and the piece graded almost broken (0 of a huge
+  > maximum); the maximum is read signed now. Suite: 261 tests (4,164
+  > checks).
+  > **Adversarial review round (2026-09-03, 2 reviewers, both SHIP with
+  > findings), fixed on the branch:** the round overturned that fix's
+  > premise and found the reachable defect underneath it. `MGearItem`
+  > clamps its maximum to at least 1,000 and every race gear admits
+  > only `IsGearItem()` items, so no live piece of gear can report a
+  > negative maximum — the test reaches that path only through an
+  > override, which makes it a **regression guard**, not a
+  > reproduction, and the claim that "a gear entry whose table maximum
+  > is unset shows red" was false. The symptom was real but had another
+  > cause, one MSVC had been printing as C4018 in this slice's own
+  > build log: `itemStatusPer` was unsigned while both thresholds are
+  > `int` read unchecked from the configuration file, so a negative
+  > threshold graded **every** worn piece as almost broken. Both
+  > comparisons are signed now, the percentage is computed in 64 bits,
+  > and `ModifyDurability` no longer clamps to a negative maximum
+  > (which stored 4,294,967,295 as the new durability).
+  > **Three more defects, each fixed test-first:** the zap branch of
+  > `AddItem` in all three gears read `m_ItemSlot[n-m_Gilles_CoreZap]`
+  > — a glove, belt or trouser slot for the slayer, a ring for the
+  > Ousters — and required the ring slot itself to be *empty*, so it
+  > both refused a zap over its own ring and **accepted a ring-less zap**
+  > whenever the unrelated slot happened to be filled; `CanReplaceItem`
+  > and `ReplaceItem` in the same files already wrote the intended
+  > condition, which the branch now matches. `RemoveItem(GEAR_*)` in
+  > all three gears indexed the slot array before any bound, with the
+  > slot id taken straight from `GCRemoveFromGear` — the new test
+  > crashes the process against the old code, the C13 shape again.
+  > `MShop::SetShelf` wrote `m_pShelf[n]` unbounded, contradicting its
+  > own header's promise that a shelf number past the shop's own is
+  > refused and left to the caller to delete — three `VS_UI` call sites
+  > are written against that promise. Tidy-ups: two tests were weak —
+  > one leaked the item it said it handed back, and the "not gear"
+  > refusal was really a race refusal because the fixture left the
+  > potion's race unset; `EmptyMagazineFor` is typed `MMagazine*` and
+  > checks the factory's NULL contract; `MItem`'s two older host
+  > services guard the function pointer as the four new ones do;
+  > `GameModelWorld` cannot be copied. **Noted, not done:** the five
+  > gear and shop sources still hold 492 Korean comment lines (89 of
+  > them inside the functions this slice touched) and their headers
+  > 184 — translating them wholesale would swamp the byte-identity the
+  > move rests on, so it is debt with a number; and `MSlayerGear::ReplaceItem`,
+  > `GetFitSlot`, the PDA, shoulder and blood-bible slots, the Ousters
+  > stones and `MPlayerGear::ReplaceItem` over a broken newcomer have
+  > no tests. Suite: 264 tests (4,196 checks).
   - Owner (all of 4.x): `gamemodel`'s membership file
     (`tests/arch/gamemodel_files.txt`), the M0–M2 include rules in
     `check_includes.pl` (in force since 4.1), R4 shrinking.
