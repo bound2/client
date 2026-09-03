@@ -2156,6 +2156,8 @@ MPetItem::MPetItem()
 {
 	m_UpdateTime = timeGetTime();
 	m_PetKeepedDay = 0;
+	m_PetExpRemain = 0;
+	m_PetFoodType = 0;
 	m_bCanGamble = false;
 	m_bCutHead = false;
 	m_bCanAttack = false;
