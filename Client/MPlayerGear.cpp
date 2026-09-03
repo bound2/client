@@ -4,12 +4,7 @@
 #include "Client_PCH.h"
 #include "MPlayerGear.h"
 #include "MItem.h"
-#include "MHelpManager.h"
-#include "DebugInfo.h"
-
-#ifdef __GAME_CLIENT__
-	#include "ClientConfig.h"
-#endif
+#include "ClientConfig.h"
 
 //----------------------------------------------------------------------
 // 
@@ -205,13 +200,7 @@ MPlayerGear::CheckItemStatus(const MItem* pItem, int slot)
 	//----------------------------------------------------------
 	// 정상적인 상태		
 	//----------------------------------------------------------
-	if (itemStatusPer > 
-#ifdef __GAME_CLIENT__
-		g_pClientConfig->PERCENTAGE_ITEM_SOMEWHAT_BROKEN
-#else
-		25
-#endif
-		)
+	if (itemStatusPer > g_pClientConfig->PERCENTAGE_ITEM_SOMEWHAT_BROKEN)
 	{
 		m_pItemStatus[slot] = ITEM_STATUS_OK;
 
@@ -234,13 +223,7 @@ MPlayerGear::CheckItemStatus(const MItem* pItem, int slot)
 		//----------------------------------------------------------
 		// 거의 부서져가는 상태 --> 빨간색
 		//----------------------------------------------------------
-		if (itemStatusPer <= 
-#ifdef __GAME_CLIENT__
-			g_pClientConfig->PERCENTAGE_ITEM_ALMOST_BROKEN
-#else
-			10
-#endif
-			)
+		if (itemStatusPer <= g_pClientConfig->PERCENTAGE_ITEM_ALMOST_BROKEN)
 		{
 			m_pItemStatus[slot] = ITEM_STATUS_ALMOST_BROKEN;
 		}
@@ -313,24 +296,19 @@ MPlayerGear::ModifyDurability(BYTE n, int changeValue)
 		pItem->SetCurrentDurability( modifyDurability );
 	}
 
-	//---------------------------------------------------------	
-	// Item상태 체크
-	//---------------------------------------------------------	
+	//---------------------------------------------------------
+	// The item's state, and the repair hint the first time it
+	// leaves OK.
+	//---------------------------------------------------------
 	ITEM_STATUS oldStatus = m_pItemStatus[n];
-	
+
 	CheckItemStatus( pItem, n );
-#ifdef __GAME_CLIENT__
-//#ifdef __USE_HELP_EVENT
-//	__BEGIN_HELP_EVENT	
-//		// OK였는데.. OK가 아니게 되는 경우
-		if (oldStatus==ITEM_STATUS_OK && m_pItemStatus[n]!=ITEM_STATUS_OK)
-		{
-			// [도움말] 아이템이 부서져가는 경우
-			ExecuteHelpEvent( HELP_EVENT_ITEM_REPAIR );
-		}
-//	__END_HELP_EVENT
-//#endif
-#endif	
+
+	if (oldStatus==ITEM_STATUS_OK && m_pItemStatus[n]!=ITEM_STATUS_OK)
+	{
+		MItem::RepairHint();
+	}
+
 	return true;
 }
 

@@ -4,10 +4,7 @@
 #include "Client_PCH.h"
 #include "MShop.h"
 #include "MShopShelf.h"
-
-#ifdef __GAME_CLIENT__
-	#include "MPlayer.h"
-#endif
+#include "MItem.h"
 
 //----------------------------------------------------------------------
 //
@@ -128,24 +125,22 @@ MShop::SetCurrent(unsigned int n)
 	}
 
 	//------------------------------------------------------
-	// 사용 가능 여부 체크
+	// Can the player use what is on it?
 	//------------------------------------------------------
-	#ifdef __GAME_CLIENT__
-		MShopShelf* pShopShelf = m_pShelf[n];
+	MShopShelf* pShopShelf = m_pShelf[n];
 
-		if (pShopShelf!=NULL)
-		{		
-			for (int i=0; i<SHOP_SHELF_SLOT; i++)
+	if (pShopShelf!=NULL)
+	{
+		for (int i=0; i<SHOP_SHELF_SLOT; i++)
+		{
+			MItem* pItem = pShopShelf->GetItem( i );
+
+			if (pItem!=NULL)
 			{
-				MItem* pItem = pShopShelf->GetItem( i );
-
-				if (pItem!=NULL)
-				{	
-					g_pPlayer->CheckAffectStatus( pItem );
-				}
+				MItem::RefreshAffect( pItem );
 			}
 		}
-	#endif
+	}
 
 	m_CurrentShelf = n;
 }

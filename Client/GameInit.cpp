@@ -2911,7 +2911,50 @@ static void	PlayItemSound(TYPE_SOUNDID soundID)
 	PlaySound(soundID);
 }
 
-static const MItemHost	s_ItemHost = { &g_CurrentFrame, ItemDropFrameCount, RefreshAffect, PlayItemSound, &g_CurrentTime };
+static void	RecalculateStatus()
+{
+	if (g_pPlayer!=NULL)
+	{
+		g_pPlayer->CalculateStatus();
+	}
+}
+
+static void	ResetQuickItemSlot()
+{
+	UI_ResetQuickItemSlot();
+}
+
+static void	RepairHint()
+{
+	ExecuteHelpEvent( HELP_EVENT_ITEM_REPAIR );
+}
+
+// A gun worn without a magazine gets an empty one: the first magazine
+// type that fits the gun, no options, no rounds (the loop the slayer
+// gear ran itself before it moved into gamemodel).
+static MItem*	EmptyMagazineFor(MItem* pGun)
+{
+	MMagazine* pMagazine = (MMagazine*)MItem::NewItem( (ITEM_CLASS)ITEM_CLASS_MAGAZINE );
+
+	pMagazine->SetID( 0 );
+
+	for (int j=0; j<(*g_pItemTable)[ITEM_CLASS_MAGAZINE].GetSize(); j++)
+	{
+		pMagazine->SetItemType( j );
+
+		if (pMagazine->IsInsertToItem( pGun ))
+		{
+			break;
+		}
+	}
+
+	pMagazine->ClearItemOption();
+	pMagazine->SetNumber( 0 );
+
+	return pMagazine;
+}
+
+static const MItemHost	s_ItemHost = { &g_CurrentFrame, ItemDropFrameCount, RefreshAffect, PlayItemSound, &g_CurrentTime, RecalculateStatus, ResetQuickItemSlot, RepairHint, EmptyMagazineFor };
 
 //-----------------------------------------------------------------------------
 // The price manager's host (docs/RESTRUCTURING.md task 4.2): the player's

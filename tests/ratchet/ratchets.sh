@@ -62,6 +62,9 @@ check () {
 # relative VS_UI_CLIENT_SOURCES list never matched the exe glob's
 # absolute paths in REMOVE_ITEM, so they compiled into both (the
 # LNK4217 trap); the membership removal is absolute and asserted.
+# History: 497 = 502 - 5 (task 4.4's third slice: MPlayerGear.cpp,
+# MSlayerGear.cpp, MVampireGear.cpp, MOustersGear.cpp and MShop.cpp
+# moved into gamemodel).
 # History: 502 = 503 - 1 (task 4.2's third slice: MPriceManager.cpp moved
 # into gamemodel).
 # History: 503 = 505 - 2 (task 4.2's second slice: MTradeManager.cpp and
@@ -88,7 +91,7 @@ check () {
 # before (0 net). 992 = 993 - 1 (task 2.2's PacketHandlerRegistry.cpp,
 # a recorded +1, offset by the finished migration deleting
 # CGHandlersStub.cpp).
-R1_BASELINE=502
+R1_BASELINE=497
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do
@@ -182,6 +185,10 @@ check "R3 (unsafe format/copy lines in Client/Packet + Client/PacketHandler)" "$
 # g_CurrentTime) were never in this count, so cutting them did not move
 # it.
 #
+# 27: 28 - 1, a reclassification (task 4.4's third slice moved the gear
+# into gamemodel): VS_UI_Game.cpp's only reaches past the libraries were
+# g_pSlayerGear, g_pVampireGear and g_pOustersGear, which the gear
+# sources define.
 # 28: 35 + 1 - 8, again a reclassification, by the library-wide
 # definition rule below (task 4.4's second slice). MItem.cpp joined the
 # library reading gamemodel's own tables (+1 under the old per-file
@@ -212,7 +219,7 @@ check "R3 (unsafe format/copy lines in Client/Packet + Client/PacketHandler)" "$
 # GCStashList::setStashItem from a live Item*) were deleted rather than
 # grandfathered.
 #----------------------------------------------------------------------
-R4_BASELINE=28
+R4_BASELINE=27
 
 lib_members () {
 	# The directory trees minus the files CMake excludes from the

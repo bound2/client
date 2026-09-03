@@ -5,13 +5,6 @@
 #include "MItem.h"
 #include "MSlayerGear.h"
 #include "MQuickSlot.h"
-
-#ifdef __GAME_CLIENT__
-	#include "UIFunction.h"
-	#include "ClientFunction.h"
-	#include "MPlayer.h"
-	#include "DebugInfo.h"
-#endif
 #include "MTimeItemManager.h"
 
 //----------------------------------------------------------------------
@@ -125,11 +118,7 @@ MSlayerGear::Init()
 void			
 MSlayerGear::CheckAffectStatus(MItem* pItem)
 {
-	#ifdef __GAME_CLIENT__
-
-		g_pPlayer->CheckAffectStatus( pItem );
-
-	#endif
+	MItem::RefreshAffect( pItem );
 }
 
 //----------------------------------------------------------------------
@@ -374,7 +363,7 @@ MSlayerGear::AddItem(MItem* pItem, GEAR_SLAYER n)
 				m_ItemSlot[GEAR_SLAYER_LEFTHAND] = pItem;
 
 				//-------------------------------------------------
-				// 총이면 현재 탄창 설정
+				// A gun's magazine becomes the current one
 				//-------------------------------------------------
 				if (pItem->IsGunItem())
 				{
@@ -383,12 +372,10 @@ MSlayerGear::AddItem(MItem* pItem, GEAR_SLAYER n)
 				}
 
 				//-------------------------------------------------
-				// 제대로 추가된 경우 --> sound출력
+				// on: the gear sound, and the player's stats follow
 				//-------------------------------------------------
-				#ifdef __GAME_CLIENT__
-					PlaySound( pItem->GetGearSoundID() );
-					g_pPlayer->CalculateStatus();	
-				#endif
+				MItem::PlayItemSound( pItem->GetGearSoundID() );
+				MItem::RecalculateStatus();	
 
 				return true;
 			}
@@ -410,12 +397,10 @@ MSlayerGear::AddItem(MItem* pItem, GEAR_SLAYER n)
 				if (MPlayerGear::AddItem( pItem, n ))	
 				{
 					//-------------------------------------------------
-					// 제대로 추가된 경우 --> sound출력
+					// on: the gear sound, and the player's stats follow
 					//-------------------------------------------------
-					#ifdef __GAME_CLIENT__
-						PlaySound( pItem->GetGearSoundID() );
-						g_pPlayer->CalculateStatus();	
-					#endif
+					MItem::PlayItemSound( pItem->GetGearSoundID() );
+					MItem::RecalculateStatus();	
 
 					return true;
 				}
@@ -429,12 +414,10 @@ MSlayerGear::AddItem(MItem* pItem, GEAR_SLAYER n)
 				if (MPlayerGear::AddItem( pItem, n + m_Gilles_CoreZap ))// 코어잽 위치에 추가
 				{
 					//-------------------------------------------------
-					// 제대로 추가된 경우 --> sound출력
+					// on: the gear sound, and the player's stats follow
 					//-------------------------------------------------
-					#ifdef __GAME_CLIENT__
-						PlaySound( pItem->GetGearSoundID() );
-						g_pPlayer->CalculateStatus();	
-					#endif
+					MItem::PlayItemSound( pItem->GetGearSoundID() );
+					MItem::RecalculateStatus();	
 
 					return true;
 				}
@@ -472,9 +455,7 @@ MSlayerGear::AddItem(MItem* pItem, GEAR_SLAYER n)
 				{
 					g_pQuickSlot = (MBelt*)pItem;
 					
-					#ifdef __GAME_CLIENT__
-						UI_ResetQuickItemSlot();
-					#endif
+					MItem::ResetQuickItemSlot();
 				}
 				else
 				{
@@ -484,7 +465,7 @@ MSlayerGear::AddItem(MItem* pItem, GEAR_SLAYER n)
 			else
 			{
 				//-------------------------------------------------
-				// 총이면 현재 탄창 설정
+				// A gun's magazine becomes the current one
 				//-------------------------------------------------
 				if (pItem->IsGunItem())
 				{
@@ -494,12 +475,10 @@ MSlayerGear::AddItem(MItem* pItem, GEAR_SLAYER n)
 			}
 
 			//-------------------------------------------------
-			// 제대로 추가된 경우 --> sound출력
+			// on: the gear sound, and the player's stats follow
 			//-------------------------------------------------
-			#ifdef __GAME_CLIENT__
-				PlaySound( pItem->GetGearSoundID() );
-				g_pPlayer->CalculateStatus();	
-			#endif
+			MItem::PlayItemSound( pItem->GetGearSoundID() );
+			MItem::RecalculateStatus();	
 
 			return true;
 		}
@@ -566,9 +545,7 @@ MSlayerGear::RemoveItem(GEAR_SLAYER n)
 	{
 		g_pQuickSlot = NULL;
 
-		#ifdef __GAME_CLIENT__
-			g_pPlayer->CalculateStatus();
-		#endif
+		MItem::RecalculateStatus();
 
 		return pItem;
 	}
@@ -590,9 +567,7 @@ MSlayerGear::RemoveItem(GEAR_SLAYER n)
 		g_pCurrentMagazine = NULL;
 	}
 
-	#ifdef __GAME_CLIENT__
-		g_pPlayer->CalculateStatus();
-	#endif
+	MItem::RecalculateStatus();
 
 	return pItem;
 }
@@ -624,9 +599,7 @@ MSlayerGear::RemoveItem(TYPE_OBJECTID id)
 	{
 		g_pQuickSlot = NULL;
 
-		#ifdef __GAME_CLIENT__
-			g_pPlayer->CalculateStatus();
-		#endif
+		MItem::RecalculateStatus();
 
 		return pItem;
 	}
@@ -648,9 +621,7 @@ MSlayerGear::RemoveItem(TYPE_OBJECTID id)
 		g_pCurrentMagazine = NULL;
 	}
 
-	#ifdef __GAME_CLIENT__
-		g_pPlayer->CalculateStatus();
-	#endif
+	MItem::RecalculateStatus();
 
 	return pItem;
 }
@@ -735,7 +706,7 @@ MSlayerGear::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 					m_ItemSlot[GEAR_SLAYER_RIGHTHAND] = pItem;
 
 					//-------------------------------------------------
-					// 총이면 현재 탄창 설정
+					// A gun's magazine becomes the current one
 					//-------------------------------------------------
 					if (pItem->IsGunItem())
 					{
@@ -743,44 +714,26 @@ MSlayerGear::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 						g_pCurrentMagazine = pGunItem->GetMagazine();
 
 						//------------------------------------------
-						// 총알이 없는 경우
+						// No magazine yet
 						//------------------------------------------
 						if (g_pCurrentMagazine==NULL)
 						{
-							MMagazine* pMagazine = (MMagazine*)MItem::NewItem( (ITEM_CLASS)ITEM_CLASS_MAGAZINE );
+							// A gun without a magazine gets an empty one of
+							// the type it takes, from the executable's factory.
+							MMagazine* pMagazine = (MMagazine*)MItem::EmptyMagazineFor( pItem );
 
-							// 의미 없음 - -;
-							pMagazine->SetID( 0 );
-
-							// 이거는 총에 맞춰서 해줘야된다.
-							for (int j=0; j<(*g_pItemTable)[ITEM_CLASS_MAGAZINE].GetSize(); j++)			
+							if (pMagazine!=NULL)
 							{
-								pMagazine->SetItemType(	j );
-
-								if (pMagazine->IsInsertToItem( pItem ))
-								{
-									break;
-								}
+								pGunItem->SetMagazine( pMagazine );
 							}
-
-							// 의미 없음
-							pMagazine->ClearItemOption();
-						
-							// 탄창 개수
-							pMagazine->SetNumber( 0 );
-
-							// 탄창 설정
-							pGunItem->SetMagazine( pMagazine );
 						}
 					}				
 
 					//-------------------------------------------------
-					// 제대로 추가된 경우 --> sound출력
+					// on: the gear sound, and the player's stats follow
 					//-------------------------------------------------
-					#ifdef __GAME_CLIENT__
-						PlaySound( pItem->GetGearSoundID() );						
-						g_pPlayer->CalculateStatus();			
-					#endif
+					MItem::PlayItemSound( pItem->GetGearSoundID() );						
+					MItem::RecalculateStatus();			
 
 					return true;
 				}
@@ -822,7 +775,7 @@ MSlayerGear::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 						}
 
 						//-------------------------------------------------
-						// 총이면 현재 탄창 설정
+						// A gun's magazine becomes the current one
 						//-------------------------------------------------
 						if (pItem->IsGunItem())
 						{
@@ -831,12 +784,10 @@ MSlayerGear::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 						}
 					
 						//-------------------------------------------------
-						// 제대로 추가된 경우 --> sound출력
+						// on: the gear sound, and the player's stats follow
 						//-------------------------------------------------
-						#ifdef __GAME_CLIENT__
-							PlaySound( pItem->GetGearSoundID() );
-							g_pPlayer->CalculateStatus();	
-						#endif	
+						MItem::PlayItemSound( pItem->GetGearSoundID() );
+						MItem::RecalculateStatus();	
 
 						return true;
 					}
@@ -899,7 +850,7 @@ MSlayerGear::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 				}
 
 				//-------------------------------------------------
-				// 총이면 현재 탄창 설정
+				// A gun's magazine becomes the current one
 				//-------------------------------------------------
 				if (pItem->IsGunItem())
 				{
@@ -908,12 +859,10 @@ MSlayerGear::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 				}				
 		
 				//-------------------------------------------------
-				// 제대로 추가된 경우 --> sound출력
+				// on: the gear sound, and the player's stats follow
 				//-------------------------------------------------
-				#ifdef __GAME_CLIENT__
-					PlaySound( pItem->GetGearSoundID() );
-					g_pPlayer->CalculateStatus();
-				#endif
+				MItem::PlayItemSound( pItem->GetGearSoundID() );
+				MItem::RecalculateStatus();
 
 				return true;
 			}
@@ -957,12 +906,10 @@ MSlayerGear::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 				CheckItemStatus( pItem, GEAR_SLAYER_RIGHTHAND );
 
 				//-------------------------------------------------
-				// 제대로 추가된 경우 --> sound출력
+				// on: the gear sound, and the player's stats follow
 				//-------------------------------------------------
-				#ifdef __GAME_CLIENT__
-					PlaySound( pItem->GetGearSoundID() );
-					g_pPlayer->CalculateStatus();
-				#endif
+				MItem::PlayItemSound( pItem->GetGearSoundID() );
+				MItem::RecalculateStatus();
 
 				return true;
 			}
@@ -1005,12 +952,10 @@ MSlayerGear::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 				CheckItemStatus( pItem, GEAR_SLAYER_LEFTHAND );
 				
 				//-------------------------------------------------
-				// 제대로 추가된 경우 --> sound출력
+				// on: the gear sound, and the player's stats follow
 				//-------------------------------------------------
-				#ifdef __GAME_CLIENT__
-					PlaySound( pItem->GetGearSoundID() );
-					g_pPlayer->CalculateStatus();
-				#endif	
+				MItem::PlayItemSound( pItem->GetGearSoundID() );
+				MItem::RecalculateStatus();
 
 				return true;
 			}
@@ -1059,10 +1004,8 @@ MSlayerGear::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 
 				if (bAdd) // 잘 추가 됐으면 
 				{
-					#ifdef __GAME_CLIENT__
-						PlaySound( pItem->GetGearSoundID() );
-						g_pPlayer->CalculateStatus();
-					#endif
+					MItem::PlayItemSound( pItem->GetGearSoundID() );
+					MItem::RecalculateStatus();
 					return true;
 				}
 				else 
@@ -1144,7 +1087,7 @@ MSlayerGear::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 				}
 
 				//-------------------------------------------------
-				// 총이면 현재 탄창 설정
+				// A gun's magazine becomes the current one
 				//-------------------------------------------------
 				if (pItem->IsGunItem())
 				{
@@ -1154,12 +1097,10 @@ MSlayerGear::ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem)
 			}
 
 			//-------------------------------------------------
-			// 제대로 추가된 경우 --> sound출력
+			// on: the gear sound, and the player's stats follow
 			//-------------------------------------------------
-			#ifdef __GAME_CLIENT__
-				PlaySound( pItem->GetGearSoundID() );
-				g_pPlayer->CalculateStatus();
-			#endif
+			MItem::PlayItemSound( pItem->GetGearSoundID() );
+			MItem::RecalculateStatus();
 
 			return true;
 		}
