@@ -982,7 +982,8 @@ starting each — the scan is one grep, and the ranking below is from a
   > named the wrong headers for the definitions (`Exception.h` and
   > `CreatureTypes.h` are the ones that switch on them); the restore
   > check pins both offers' positions and the other grid's cells. Noted,
-  > not done: the four `gamemodel` test fixtures share a byte-identical
+  > not done: the four `gamemodel` test fixtures (five after the price
+  > slice) share a byte-identical
   > teardown — a `tests/support` base fixture is the next tidy-up. Suite:
   > 241 tests (3,903 checks).
   > **Third slice (2026-09-03, `restructuring/gamemodel-price`; live
@@ -999,13 +1000,16 @@ starting each — the scan is one grep, and the ranking below is from a
   > `IsPotionHalfPrice` (the event or NEMA — the code applied them as
   > two half-price branches of which at most one fired),
   > `IsGambleHalfPrice`, `ShopTaxPercent` (100 without the event, a
-  > multiply by one where the code skipped the multiply). Without a
-  > host a price carries no player, event or skill adjustment. Dropped
-  > on the way: the `#else` half of every `__GAME_CLIENT__` block — a
-  > `VS_UI`-only build's reading of the race and stats from
-  > `g_char_slot_ingame`, which no target compiles — with the
-  > `MEventManager.h`, `MSkillManager.h`, `MPlayer.h` and `MZone.h`
-  > includes and a commented-out `g_mapPremiumZone` extern.
+  > multiply by one — in 64 bits on both paths — where the code skipped
+  > the multiply). Without a host a price carries no player, event or
+  > skill adjustment. Dropped on the way: the five `__GAME_CLIENT__`
+  > guards, two of them with an `#else` half — a `VS_UI`-only build's
+  > `VS_UI.h` include and its reading of the race and stats from
+  > `g_char_slot_ingame`, which no target compiles (`Client_PCH.h`
+  > defines the macro unconditionally) — with the `MEventManager.h`,
+  > `MSkillManager.h`, `MPlayer.h` and `MZone.h` includes, a
+  > commented-out `g_mapPremiumZone` extern, and two commented-out
+  > blocks (a skull rule, the `bMysterious` five-times rule).
   > `g_pItemTable`, `g_pItemOptionTable`, `g_pTimeItemManager` and
   > `g_pUserInformation` are library-defined. R1 503 → 502; R4
   > unchanged. Tests (`test_price_manager.cpp`, 9): the short circuits
@@ -1022,6 +1026,33 @@ starting each — the scan is one grep, and the ranking below is from a
   > first option's part and the item type; the gamble scaling the loaded
   > class average by basic stats or by level, halved and taxed.
   > **4.2 is complete.** Suite: 250 tests (3,987 checks).
+  > **Adversarial review round (2026-09-03, 3 reviewers, all SHIP with
+  > findings), fixed on the branch:** two deltas the move had
+  > introduced — the gamble price's tax multiply ran in a 32-bit `int`
+  > on every call where the old code multiplied only under the event
+  > (an overflow above 21,474,836, data-dependent; both paths compute
+  > in 64 bits now), and the host narrowed the server-sent `DWORD`
+  > percentage to `int`, flipping the sign of a hostile value (the seam
+  > carries it unsigned, as the old multiply did); the host's player
+  > readers answer "none" for the window between `MODE_WAIT_UPDATEINFO`
+  > and the next `GCUpdateInfo` in which there is no player (the old
+  > code would have crashed there; nothing prices an item then); the
+  > seven host readers are private statics on the class, the `MItem`
+  > pattern, not free functions; "the `#else` half of every block"
+  > overstated — three of the five guards had none; the two no-host
+  > checks could not fail (the fixture's defaults were the no-host
+  > answers) and now set answers that would move the price; the sixth
+  > potion type, a negative maximum durability and a charged consumable
+  > (its charges alone, no half price, no tax) are covered; the mace
+  > silvering comment named the wrong branch; the Korean left inside
+  > the touched function is English, with two dead commented-out blocks
+  > gone. Noted, not done: `bMysterious` is a dead parameter (its only
+  > uses were the dropped comment) that `UIMessageManager` still
+  > computes an argument for; a star price for item type 0 is −20
+  > stars; the **five** `gamemodel` test fixtures now share a
+  > byte-identical teardown — the `tests/support` base fixture is the
+  > next commit before the next slice, not a note to walk past again.
+  > Suite: 250 tests (3,995 checks).
 - [ ] **4.3 Containers:** `MInventory.cpp`, `MStorage.cpp`,
   `MShopShelf.cpp`, `MQuickSlot.cpp` — the shop/stash index-bounds fixes
   from the review live here and deserve permanent tests.
