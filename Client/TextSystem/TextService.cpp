@@ -12,12 +12,6 @@
 #include <vector>
 #endif
 
-#include "SpriteLib/CSpriteSurface.h"
-#include "RenderTargetSpriteSurface.h"
-
-// Global surface pointer from Client
-extern CSpriteSurface* g_pLast;
-
 namespace TextSystem {
 
 // Forward declaration of SDL backend factory
@@ -460,30 +454,12 @@ void TextService::DrawLines(RenderTarget& target, const std::vector<std::string>
 	}
 }
 
-void TextService::RenderText(int x, int y, const std::string& text)
-{
-	// Simple text rendering API for compatibility with SDL_RenderText
-	// Renders white text at the specified position using the global surface
-
-	auto& service = Get();
-
-	// Get global surface reference (from SpriteLib)
-	if (!::g_pLast || !::g_pLast->GetBackendSurface())
-		return;
-
-	// Create render target from global surface
-	SpriteSurfaceRenderTarget target(::g_pLast);
-
-	// Use default style with white color
-	TextStyle style = service.GetDefaultStyle();
-	// Override color to white
-	style.color.r = 255;
-	style.color.g = 255;
-	style.color.b = 255;
-	style.color.a = 255;
-
-	// Draw the text
-	service.DrawLine(target, text, x, y, 0, style);
-}
+// RenderText is not here: it is the one member of this class that draws
+// through g_pLast, the back buffer the executable owns, which made this
+// library unlinkable without that global - a test binary had to invent
+// it. Client/TextServiceScreen.cpp defines it now, on the executable
+// side of the same split MItem/MItemUse took (docs/RESTRUCTURING.md
+// task 5.3). Everything else in this file draws through a RenderTarget
+// the caller supplies, which is what kept the rest of it clean.
 
 } // namespace TextSystem

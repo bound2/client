@@ -116,7 +116,7 @@ an unrecorded drop, so tightening lands in the same commit as the progress.
 
 | # | Metric | Baseline | Command |
 |---|--------|---------:|---------|
-| R1 | Translation units compiled directly into the DarkEden target | **492** (493 before task 5.1's second slice moved `ClientCommunicationManager.cpp` into `packetwire`, the three tuning values it read from the executable's config having gone behind `WireHost`; 495 before task 5.1 moved `Player.cpp` and `DatagramSocket.cpp` into `packetwire`, the two holdouts the debug facilities were the only thing keeping out; 497 before 4.4's fourth slice moved `MSkillManager.cpp`, `MSkillInfoTable.cpp` and `SkillDef.cpp` into `gamemodel` and split the player-facing half out as `MSkillAvailable.cpp`, −3 +1; 502 before 4.4's third slice moved `MPlayerGear.cpp`, the three race gears and `MShop.cpp` into `gamemodel`; 503 before 4.2's third slice moved `MPriceManager.cpp` into `gamemodel`; 505 before 4.2's second slice moved `MTradeManager.cpp` and `MSortedItemManager.cpp` into `gamemodel`; 508 before 4.3's second slice moved `MInventory.cpp`, `MStorage.cpp` and `MShopShelf.cpp` into `gamemodel`; 512 before 4.3's first slice moved the three item managers and `MQuickSlot.cpp` into `gamemodel`; 515 before 4.4's second slice moved `MItem.cpp`, `MObject.cpp`, `UserInformation.cpp`, `ClientConfig.cpp` and `MTimeItemManager.cpp` into `gamemodel` and split their executable halves out as `MItemUse.cpp` and `MObjectScreen.cpp`, +2 −5; 516 before 5.2 deleted the dead `MitemTableInit.cpp`; 517 before 4.4's first slice moved `MItemTable.cpp`; 518 before 4.2 moved `MMoneyManager.cpp`, another double-compiled VS_UI entry; 528 before task 4.1's `gamemodel` took its ten members out — the four support sources, and the six tables that the relative `VS_UI_CLIENT_SOURCES` list had never actually removed from the exe glob, so they compiled into both VS_UI and the executable — as the 36 files still on that list do; 529 before task 2.5 deleted the dead `CRRequest2Handler.cpp`; 992 before task 2.4 moved the 465 packet/table/info sources into `packetwire`, +1 for the split-out `GCExchangeBuyHandler.cpp`; 1,044 before task 1.1; the task-2.2 composition root `PacketHandlerRegistry.cpp` was a recorded +1, offset when finishing the migration deleted `CGHandlersStub.cpp`) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` — `ratchets.sh` reads the generated vcxproj, preferring the ctest run's own build dir; on generators with no vcxproj it reports SKIP, not PASS |
+| R1 | Translation units compiled directly into the DarkEden target | **493** (492 before task 5.3 split `TextService::RenderText` out as `Client/TextServiceScreen.cpp` — a recorded growth, the price of a TextSystem that links without a test stub; 493 before task 5.1's second slice moved `ClientCommunicationManager.cpp` into `packetwire`, the three tuning values it read from the executable's config having gone behind `WireHost`; 495 before task 5.1 moved `Player.cpp` and `DatagramSocket.cpp` into `packetwire`, the two holdouts the debug facilities were the only thing keeping out; 497 before 4.4's fourth slice moved `MSkillManager.cpp`, `MSkillInfoTable.cpp` and `SkillDef.cpp` into `gamemodel` and split the player-facing half out as `MSkillAvailable.cpp`, −3 +1; 502 before 4.4's third slice moved `MPlayerGear.cpp`, the three race gears and `MShop.cpp` into `gamemodel`; 503 before 4.2's third slice moved `MPriceManager.cpp` into `gamemodel`; 505 before 4.2's second slice moved `MTradeManager.cpp` and `MSortedItemManager.cpp` into `gamemodel`; 508 before 4.3's second slice moved `MInventory.cpp`, `MStorage.cpp` and `MShopShelf.cpp` into `gamemodel`; 512 before 4.3's first slice moved the three item managers and `MQuickSlot.cpp` into `gamemodel`; 515 before 4.4's second slice moved `MItem.cpp`, `MObject.cpp`, `UserInformation.cpp`, `ClientConfig.cpp` and `MTimeItemManager.cpp` into `gamemodel` and split their executable halves out as `MItemUse.cpp` and `MObjectScreen.cpp`, +2 −5; 516 before 5.2 deleted the dead `MitemTableInit.cpp`; 517 before 4.4's first slice moved `MItemTable.cpp`; 518 before 4.2 moved `MMoneyManager.cpp`, another double-compiled VS_UI entry; 528 before task 4.1's `gamemodel` took its ten members out — the four support sources, and the six tables that the relative `VS_UI_CLIENT_SOURCES` list had never actually removed from the exe glob, so they compiled into both VS_UI and the executable — as the 36 files still on that list do; 529 before task 2.5 deleted the dead `CRRequest2Handler.cpp`; 992 before task 2.4 moved the 465 packet/table/info sources into `packetwire`, +1 for the split-out `GCExchangeBuyHandler.cpp`; 1,044 before task 1.1; the task-2.2 composition root `PacketHandlerRegistry.cpp` was a recorded +1, offset when finishing the migration deleted `CGHandlersStub.cpp`) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` — `ratchets.sh` reads the generated vcxproj, preferring the ctest run's own build dir; on generators with no vcxproj it reports SKIP, not PASS |
 | R2 | Packet `.cpp` files still defining a packet-style `::execute(Player` | **0** (448 → 432 in slice 1 → 0 when 2.2/2.3 finished; regex refined at 0 to stop matching comments and the in-file handler body in `GCExchangeBuy.cpp`) | `grep -rlE '^void\s+\w+::execute\s*\(\s*Player' Client/Packet/{Gpackets,Cpackets,Lpackets,Rpackets,Upackets} --include='*.cpp' \| grep -v Handler \| wc -l` |
 | R3 | Live `sprintf`/`strcpy`/`strcat` lines under `Client/Packet` **and `Client/PacketHandler`** | 46 (unchanged by task 2.4, which widened the scope to follow the handlers out of `Client/Packet`; 61 at first measurement — the 2026-09-01 adversarial review showed a quarter of that was commented-out code, so the measurement now excludes `//` matches) | see `ratchets.sh` — the grep excludes comment-prefixed matches |
 | R4 | Library-compiled `.cpp` files referencing `g_p*` client globals **no library file defines** | **25** (27 before 4.4's fourth slice moved the skill core into `gamemodel` — a reclassification again: `VS_UI_SKILL_VIEW.cpp` and `VS_UI_skill_tree.cpp` reached past the libraries only for `g_pSkillInfoTable`, `g_pSkillManager` and `g_pSkillAvailable`, which `MSkillManager.cpp` defines; 28 before 4.4's third slice moved the gear into `gamemodel` — a reclassification: `VS_UI_Game.cpp`'s only reaches past the libraries were `g_pSlayerGear`, `g_pVampireGear` and `g_pOustersGear`, which the gear sources define; 35 before 4.4's second slice — a reclassification again, 35 + 1 − 8: the subtraction became library-wide, so a library file reading a global another library file defines is no longer a seam; `MItem.cpp` joined reading `gamemodel`'s own tables, +1 under the old per-file rule, and the union rule excludes it with seven earlier members — `Datagram.cpp` reading `packetwire`'s factory manager, and six `VS_UI` sources whose only reaches are `gamemodel`'s tables, `packetwire`'s `g_pFileDef` or `VS_UI`'s own globals; 59 before task 4.0 — a reclassification, not seam-cutting: the 36 `VS_UI_CLIENT_SOURCES` files stopped being library-compiled, so the 24 of them that reach globals are executable debt now, counted by R1 and outside this ratchet; 61 before task 4.1 cut the two `g_pFileDef` seams in `MGameStringTable` and `SystemAvailabilities` and added the `gamemodel` membership file, whose four new members reference no game global; 81 before task 2.4 grew the membership from 52 to 518 files; the number fell because the measurement stopped counting a file's references to globals it defines — the packet tables own `g_pPacketFactoryManager`/`g_pPacketValidator` — and the two dead server-only bodies that reached game globals were deleted; 83 at first measurement, before two never-compiled files were filtered) | `ratchets.sh` computes it over the library dirs (minus CMake-excluded files) plus the `packetwire` and `gamemodel` membership files |
@@ -1895,7 +1895,54 @@ starting each — the scan is one grep, and the ranking below is from a
   text utilities from its `g_pLast` drawing entry point so
   `tests/stubs/client_globals.cpp` can shrink (the stub file itself
   documents this as the real fix).
-  > **Status:** not started.
+  > **Status:** done (2026-09-03, `restructuring/textsystem-stub`; live
+  > verification gates the merge). The split the task describes, done
+  > as described. `TextService::RenderText` — a compatibility shim for
+  > `SDL_RenderText` that draws white text through `g_pLast` — is the
+  > only member of that class reaching a client global; everything else
+  > draws through a `RenderTarget` the caller supplies, which is what
+  > kept the rest of the library clean. Its definition moves to
+  > `Client/TextServiceScreen.cpp`, which the executable compiles, with
+  > the declaration left in the header where its ~45 call sites expect
+  > it. `TextService` has no virtual members, so defining the class
+  > across two targets costs no vtable — the same trade
+  > `MItem`/`MItemUse` and `MSkillManager`/`MSkillAvailable` made.
+  > **A wrong turn worth recording:** the first attempt deleted
+  > `RenderText` outright, on the strength of a tree-wide grep that
+  > found no callers. The grep was `grep -rn RenderText ... | grep -v
+  > TextService`, and every call site is spelled
+  > `TextSystem::TextService::RenderText`, so the filter meant to skip
+  > the definition hid all forty-five of them. The executable build
+  > caught it in one step — but a grep that excludes the name it is
+  > searching for is a trap worth naming.
+  > **`tests/stubs/` is gone.** It held one line after 5.1's second
+  > slice moved `SendBugReport` into `packetwire`, and that line was
+  > `g_pLast`. Both of the things it ever defined turned out to be
+  > seams worth cutting rather than filling, so the directory is
+  > deleted and `tests/CMakeLists.txt` says why in its place: a library
+  > that needs something from the program around it asks through a host
+  > struct — `MItemHost`, `MPriceHost`, `WireHost` — which a test can
+  > install, rather than through a symbol a test binary has to invent.
+  > The proof is the link: `unit_tests` builds and runs with no stub
+  > translation unit at all.
+  > `VS_UI/src/widget/U_edit.cpp` still reaches `g_pLast`, and
+  > `VS_UI_Title.cpp` and the unbuilt `WinMain.cpp` still call
+  > `RenderText` — all fine: `VS_UI` is not one of the libraries
+  > `unit_tests` links, and the executable defines both.
+  > **R1 492 → 493, a recorded growth.** The new executable translation
+  > unit is the price of the split, exactly as `MItemUse.cpp`,
+  > `MObjectScreen.cpp` and `MSkillAvailable.cpp` were; the ratchet
+  > flags growth by design, so the baseline moves with the reason
+  > written beside it. R4 and the suite are unchanged, and no behaviour
+  > changed: the body is the one that was there, and the only thing
+  > that moved is which target compiles it.
+  > **Untested by construction.** `RenderText` needs the back buffer,
+  > so nothing in a test binary can drive it — that is the whole reason
+  > it is on the executable side now. What the suite proves is the
+  > negative: `unit_tests` links `TextSystem` with no stub translation
+  > unit at all. Whether the client still draws its FPS counter, its
+  > network-condition warning and its debug overlays is what running it
+  > shows.
 - [ ] **5.4 Format-string audit** (code-health C19/C20/C22, ~600 sprintf
   sites fed by data files) — becomes tractable per-library as R3-style
   counts once the owning code is in libs.

@@ -62,6 +62,14 @@ check () {
 # relative VS_UI_CLIENT_SOURCES list never matched the exe glob's
 # absolute paths in REMOVE_ITEM, so they compiled into both (the
 # LNK4217 trap); the membership removal is absolute and asserted.
+# History: 493 = 492 + 1 (task 5.3: TextServiceScreen.cpp is a new exe TU.
+# A recorded GROWTH, the same trade as 4.4's MItemUse.cpp and
+# MSkillAvailable.cpp: TextService::RenderText draws through g_pLast, the
+# executable's back buffer, and was the only thing in the TextSystem
+# library reaching a client global - so a test binary had to define that
+# global to link the library at all. The definition moved to the
+# executable side and tests/stubs/ is deleted. One more TU here buys a
+# library that links on its own.)
 # History: 492 = 493 - 1 (task 5.1's second slice: ClientCommunicationManager.cpp
 # moved into packetwire once the three tuning values it read from the
 # executable's config went behind WireHost).
@@ -101,7 +109,7 @@ check () {
 # before (0 net). 992 = 993 - 1 (task 2.2's PacketHandlerRegistry.cpp,
 # a recorded +1, offset by the finished migration deleting
 # CGHandlersStub.cpp).
-R1_BASELINE=492
+R1_BASELINE=493
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do
