@@ -22,13 +22,13 @@ struct STAR_ITEM_PRICE {
 // no player, event or skill adjustment.
 //-----------------------------------------------------------------------------
 struct MPriceHost {
-	int		(*Race)();					// RACE_SLAYER, RACE_VAMPIRE or RACE_OUSTERS (RaceType.h)
+	int		(*Race)();					// RACE_SLAYER, RACE_VAMPIRE or RACE_OUSTERS (RaceType.h); -1 for none of them
 	int		(*Level)();
 	int		(*StatSum)();				// STR + DEX + INT as worn
 	int		(*BasicStatSum)();			// STR + DEX + INT before gear and affects
 	bool	(*IsPotionHalfPrice)();		// the premium half-price event, or the NEMA blood bible
 	bool	(*IsGambleHalfPrice)();		// the JAVE blood bible
-	int		(*ShopTaxPercent)();		// the tax-change event's percentage; 100 without one
+	DWORD	(*ShopTaxPercent)();		// the tax-change event's percentage as the server sent it; 100 without one
 };
 
 class MPriceManager {
@@ -64,9 +64,18 @@ class MPriceManager {
 		void		SetEventItemPrice(int Price)		{ m_EventFixPrice = Price; }
 
 		static void					SetHost(const MPriceHost* pHost)	{ s_pHost = pHost; }
-		static const MPriceHost*	GetHost()							{ return s_pHost; }
 
 	protected :
+		// The host's answers, and what they are without one: no race,
+		// no level, no stats, no discount, no tax.
+		static int		HostRace()				{ return s_pHost!=NULL ? s_pHost->Race() : -1; }
+		static int		HostLevel()				{ return s_pHost!=NULL ? s_pHost->Level() : 0; }
+		static int		HostStatSum()			{ return s_pHost!=NULL ? s_pHost->StatSum() : 0; }
+		static int		HostBasicStatSum()		{ return s_pHost!=NULL ? s_pHost->BasicStatSum() : 0; }
+		static bool		HostPotionHalfPrice()	{ return s_pHost!=NULL && s_pHost->IsPotionHalfPrice(); }
+		static bool		HostGambleHalfPrice()	{ return s_pHost!=NULL && s_pHost->IsGambleHalfPrice(); }
+		static DWORD	HostShopTaxPercent()	{ return s_pHost!=NULL ? s_pHost->ShopTaxPercent() : 100; }
+
 
 		// The market conditions, as the NPC sees them
 		int					m_MarketCondBuy;		// when the NPC buys (25)

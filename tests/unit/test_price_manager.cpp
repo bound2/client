@@ -47,15 +47,15 @@ int		StatSum()			{ return s_StatSum; }
 int		BasicStatSum()		{ return s_BasicStatSum; }
 bool	IsPotionHalfPrice()	{ return s_PotionHalf; }
 bool	IsGambleHalfPrice()	{ return s_GambleHalf; }
-int		ShopTaxPercent()	{ return s_TaxPercent; }
+DWORD	ShopTaxPercent()	{ return (DWORD)s_TaxPercent; }
 
 const MPriceHost	s_Host = { Race, Level, StatSum, BasicStatSum, IsPotionHalfPrice, IsGambleHalfPrice, ShopTaxPercent };
 
 const char* const	kTempFile = "price_manager_test.bin";
 
 // The class average the mysterious price scales comes only from a
-// loaded table, so one class is written out and read back.
-void	LoadBladesFromFile(int firstPrice, int secondPrice)
+// loaded table, so a class is written out and read back.
+void	LoadClassFromFile(ITEM_CLASS itemClass, int firstPrice, int secondPrice)
 {
 	{
 		std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
@@ -69,7 +69,7 @@ void	LoadBladesFromFile(int firstPrice, int secondPrice)
 		second.SaveToFile(out);
 	}
 	std::ifstream in(kTempFile, std::ios::binary);
-	(*g_pItemTable)[ITEM_CLASS_BLADE].LoadFromFile(in);
+	(*g_pItemTable)[itemClass].LoadFromFile(in);
 	in.close();
 	std::remove(kTempFile);
 }
@@ -114,7 +114,7 @@ struct PriceWorld
 		g_pItemTable->InitClass(ITEM_CLASS_OUSTERS_SUMMON_ITEM, 1);
 		(*g_pItemTable)[ITEM_CLASS_OUSTERS_SUMMON_ITEM][0].Price = 1000;
 		// Blades: 4200 and 6000, so the class average is 5100 -> 500 in hundreds.
-		LoadBladesFromFile(4200, 6000);
+		LoadClassFromFile(ITEM_CLASS_BLADE, 4200, 6000);
 
 		// Row 0 is the "no option" row; the others carry a part and a
 		// price multiplier in percent.
@@ -145,6 +145,7 @@ struct PriceWorld
 	~PriceWorld()
 	{
 		MPriceManager::SetHost(NULL);
+		MItem::SetHost(NULL);
 		delete g_pTimeItemManager;	g_pTimeItemManager = NULL;
 		delete g_pClientConfig;		g_pClientConfig = NULL;
 		delete g_pUserInformation;	g_pUserInformation = NULL;
@@ -268,13 +269,16 @@ TEST(PriceManager, OptionsRaiseThePriceAndWearLowersIt)
 	CHECK_EQ(2000, prices.GetItemPrice(&optioned, MPriceManager::NPC_TO_PC));
 	CHECK_EQ(500, prices.GetItemPrice(&optioned, MPriceManager::PC_TO_NPC));
 
-	// Half worn is half price; worn out is never free.
+	// Half worn is half price; worn out is never free; an item with no
+	// durability to speak of (a negative maximum) does not wear at all.
 	Gear halfWorn(ITEM_CLASS_SWORD, 100, 50);
 	Gear wornOut(ITEM_CLASS_SWORD, 100, 0);
 	Gear fresh(ITEM_CLASS_SWORD, 100, 100);
+	Gear noWear(ITEM_CLASS_SWORD, -5, 50);
 	CHECK_EQ(500, prices.GetItemPrice(&halfWorn, MPriceManager::NPC_TO_PC));
 	CHECK_EQ(1, prices.GetItemPrice(&wornOut, MPriceManager::NPC_TO_PC));
 	CHECK_EQ(1000, prices.GetItemPrice(&fresh, MPriceManager::NPC_TO_PC));
+	CHECK_EQ(1000, prices.GetItemPrice(&noWear, MPriceManager::NPC_TO_PC));
 }
 
 //----------------------------------------------------------------------
@@ -322,6 +326,13 @@ TEST(PriceManager, ChargedItemsPriceEveryChargeAndRepairRefillsThem)
 	Charged summon(ITEM_CLASS_OUSTERS_SUMMON_ITEM, 3);
 	CHECK_EQ(4000, prices.GetItemPrice(&summon, MPriceManager::NPC_TO_PC));
 	CHECK_EQ(7000, prices.GetItemPrice(&summon, MPriceManager::REPAIR));
+
+	// A charged consumable is priced by its charges alone: no half
+	// price, no tax (today's behaviour, pinned).
+	Charged chargedPotion(ITEM_CLASS_POTION, 2);
+	s_PotionHalf = true;
+	s_TaxPercent = 200;
+	CHECK_EQ(10100, prices.GetItemPrice(&chargedPotion, MPriceManager::NPC_TO_PC));
 }
 
 //----------------------------------------------------------------------
@@ -339,7 +350,8 @@ TEST(PriceManager, SilveringCostsTheFullCoatUntilTheCoatIsFull)
 	sword.SetSilver(50);
 	CHECK_EQ(0, prices.GetItemPrice(&sword, MPriceManager::SILVERING));
 
-	// A mace that takes no coat, and a potion, cost nothing to coat.
+	// A mace with no coat capacity reads as already full; a potion is
+	// not a coatable class at all.
 	Item mace(ITEM_CLASS_MACE);
 	Item potion(ITEM_CLASS_POTION);
 	CHECK_EQ(0, prices.GetItemPrice(&mace, MPriceManager::SILVERING));
@@ -354,21 +366,33 @@ TEST(PriceManager, TheHostShapesPotionSkullAndTaxedPrices)
 	PriceWorld world;
 	MPriceManager prices;
 	Item potion(ITEM_CLASS_POTION, 0);
+	Item fifthPotion(ITEM_CLASS_POTION, 5);
 	Item otherPotion(ITEM_CLASS_POTION, 3);
 	Item serum(ITEM_CLASS_SERUM);
 	Item sword(ITEM_CLASS_SWORD);
 	Item skull(ITEM_CLASS_SKULL);
 
-	// Without a host nothing about the player or the world applies.
+	// Without a host nothing about the player or the world applies,
+	// however much the answers it would give would move the price.
+	s_Race = RACE_VAMPIRE;
+	s_StatSum = 10;
+	s_PotionHalf = true;
+	s_TaxPercent = 200;
 	MPriceManager::SetHost(NULL);
 	CHECK_EQ(100, prices.GetItemPrice(&potion, MPriceManager::NPC_TO_PC));
 	CHECK_EQ(100, prices.GetItemPrice(&skull, MPriceManager::NPC_TO_PC));
 	MPriceManager::SetHost(&s_Host);
+	CHECK_EQ(100, prices.GetItemPrice(&potion, MPriceManager::NPC_TO_PC));		// 100 / 2 * 200%
+	CHECK_EQ(100, prices.GetItemPrice(&skull, MPriceManager::NPC_TO_PC));		// 100 * 200% / 2
+	s_PotionHalf = false;
+	s_TaxPercent = 100;
 
-	// A slayer with 40 or fewer stat points pays 70% for the basic potions.
+	// A slayer with 40 or fewer stat points pays 70% for the two basic
+	// potions, the first and the sixth.
 	s_Race = RACE_SLAYER;
 	s_StatSum = 40;
 	CHECK_EQ(70, prices.GetItemPrice(&potion, MPriceManager::NPC_TO_PC));
+	CHECK_EQ(70, prices.GetItemPrice(&fifthPotion, MPriceManager::NPC_TO_PC));
 	CHECK_EQ(100, prices.GetItemPrice(&otherPotion, MPriceManager::NPC_TO_PC));
 	s_StatSum = 41;
 	CHECK_EQ(100, prices.GetItemPrice(&potion, MPriceManager::NPC_TO_PC));
@@ -458,10 +482,17 @@ TEST(PriceManager, MysteriousPriceScalesTheClassAverageByTheCharacter)
 	Item blade(ITEM_CLASS_BLADE);
 	blade.UnSetIdentified();
 
-	// Without a host: once the average.
+	// Without a host: once the average, whatever the host would have said.
+	s_Race = RACE_SLAYER;
+	s_BasicStatSum = 45;
+	s_GambleHalf = true;
+	s_TaxPercent = 200;
 	MPriceManager::SetHost(NULL);
 	CHECK_EQ(500, prices.GetMysteriousPrice(&blade));
 	MPriceManager::SetHost(&s_Host);
+	CHECK_EQ(1500, prices.GetMysteriousPrice(&blade));		// 500 * 3 / 2 * 200%
+	s_GambleHalf = false;
+	s_TaxPercent = 100;
 
 	// A slayer pays by basic stats in fifteens, never less than once.
 	s_Race = RACE_SLAYER;
@@ -497,4 +528,18 @@ TEST(PriceManager, MysteriousPriceScalesTheClassAverageByTheCharacter)
 	Item sword(ITEM_CLASS_SWORD);
 	sword.UnSetIdentified();
 	CHECK_EQ(0, prices.GetMysteriousPrice(&sword));
+
+	// The tax is applied in 64 bits: an expensive class at the top
+	// multiplier is 120,000,000, which times a percentage does not fit
+	// a 32-bit int on the way to the division.
+	LoadClassFromFile(ITEM_CLASS_CROSS, 60000000, 60000000);
+	Item cross(ITEM_CLASS_CROSS);
+	cross.UnSetIdentified();
+	s_Race = RACE_OUSTERS;
+	s_Level = 100;
+	s_GambleHalf = false;
+	s_TaxPercent = 100;
+	CHECK_EQ(120000000, prices.GetMysteriousPrice(&cross));
+	s_TaxPercent = 150;
+	CHECK_EQ(180000000, prices.GetMysteriousPrice(&cross));
 }

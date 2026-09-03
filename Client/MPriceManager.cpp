@@ -9,6 +9,7 @@
 #include "MItemOptionTable.h"
 #include "UserInformation.h"
 #include "MTimeItemManager.h"
+#include "RaceType.h"
 
 #define CHARGE_PRICE		5000
 
@@ -19,30 +20,14 @@ MPriceManager*		g_pPriceManager = NULL;
 const MPriceHost*	MPriceManager::s_pHost = NULL;
 
 //-----------------------------------------------------------------------------
-// The host's answers, and what they are without a host: no race, no
-// level, no stats, no discount, no tax.
-//-----------------------------------------------------------------------------
-namespace {
-
-int		HostRace()				{ const MPriceHost* p = MPriceManager::GetHost(); return p!=NULL ? p->Race() : -1; }
-int		HostLevel()				{ const MPriceHost* p = MPriceManager::GetHost(); return p!=NULL ? p->Level() : 0; }
-int		HostStatSum()			{ const MPriceHost* p = MPriceManager::GetHost(); return p!=NULL ? p->StatSum() : 0; }
-int		HostBasicStatSum()		{ const MPriceHost* p = MPriceManager::GetHost(); return p!=NULL ? p->BasicStatSum() : 0; }
-bool	HostPotionHalfPrice()	{ const MPriceHost* p = MPriceManager::GetHost(); return p!=NULL && p->IsPotionHalfPrice(); }
-bool	HostGambleHalfPrice()	{ const MPriceHost* p = MPriceManager::GetHost(); return p!=NULL && p->IsGambleHalfPrice(); }
-int		HostShopTaxPercent()	{ const MPriceHost* p = MPriceManager::GetHost(); return p!=NULL ? p->ShopTaxPercent() : 100; }
-
-} // namespace
-
-//-----------------------------------------------------------------------------
 //
 // contructor / destructor
 // 
 //-----------------------------------------------------------------------------
 MPriceManager::MPriceManager()
 {
-	m_MarketCondBuy		= 25;		// NPC가 살때(25)
-	m_MarketCondSell	= 100;		// NPC가 팔때(100)
+	m_MarketCondBuy		= 25;		// when the NPC buys
+	m_MarketCondSell	= 100;		// when the NPC sells
 	m_EventFixPrice		= 0;
 }
 
@@ -76,19 +61,19 @@ MPriceManager::GetItemPrice(MItem* pItem, TRADE_TYPE type, bool bMysterious)
 		return m_EventFixPrice;
 	// 2004, 08, 02, sobeit add end				
 	//-------------------------------------------------------
-	// 살때, 팔때..
+	// The rate, by what the player is doing
 	//-------------------------------------------------------
 	int nRatio;
 
 	switch (type)
 	{
 		//-------------------------------------------------------
-		// 상점에서 살때
+		// Buying from the shop
 		//-------------------------------------------------------
 		case NPC_TO_PC :
 			if (pItem->GetItemClass()==ITEM_CLASS_SKULL)
 			{
-				// 해골은 파는 경우밖에 없다.
+				// A skull is only ever sold to the shop.
 				nRatio = m_MarketCondBuy;
 			}
 			else
@@ -98,14 +83,14 @@ MPriceManager::GetItemPrice(MItem* pItem, TRADE_TYPE type, bool bMysterious)
 		break;
 
 		//-------------------------------------------------------
-		// 상점에 팔 때
+		// Selling to the shop
 		//-------------------------------------------------------
 		case PC_TO_NPC :
 			nRatio = m_MarketCondBuy;
 		break;
 
 		//-------------------------------------------------------
-		// 은도금
+		// Silver coating
 		//-------------------------------------------------------
 		case SILVERING :
 		{
@@ -120,13 +105,13 @@ MPriceManager::GetItemPrice(MItem* pItem, TRADE_TYPE type, bool bMysterious)
 				double    curSilver  = pItem->GetSilver();
 				double    finalPrice = 0;
 
-				// 은도금 꽉차있는상태..
+				// The coat is full.
 				if (maxSilver==curSilver)
 				{
 					return 0;
 				}
 
-				// 땜빵으로 집어넣은 은의 가격이다.
+				// The price of the silver that fills the coat.
 				finalPrice = maxSilver; 
 
 				return (int)finalPrice;
@@ -139,33 +124,27 @@ MPriceManager::GetItemPrice(MItem* pItem, TRADE_TYPE type, bool bMysterious)
 		break;
 
 		//-------------------------------------------------------
-		// 수리
+		// Repair
 		//-------------------------------------------------------
 		case REPAIR :
-			// vampire 포탈은 수리 안된다.
-			if (pItem->GetItemClass()==ITEM_CLASS_VAMPIRE_PORTAL_ITEM 
-				// 2004, 8, 17, sobeit add start - 시간제 아이템 착용시 전체 수리가 안되던 버그 수정 때문에 추가.
+			// A vampire portal, a timed item and a blood bible sign
+			// are never repaired.
+			if (pItem->GetItemClass()==ITEM_CLASS_VAMPIRE_PORTAL_ITEM
 				|| g_pTimeItemManager->IsExist( pItem->GetID() )
-				// 2004, 8, 17, sobeit add end
-
-				// 2004, 10, 21, sobeit add start = 블러드 바이블 수리 할필요 없음.
 				|| pItem->GetItemClass() == ITEM_CLASS_BLOOD_BIBLE_SIGN
-				// 2004, 10, 21, sobeit add end
 				)
 			{
 				return 0;	
 			}
 
-			// 수리할때는 원래 가격의 1/10
+			// A repair costs a tenth of the price.
 			nRatio = 10;
-
-			// 음.. - -; 
-//			bMysterious = false;
 		break;
 	}
 
 	//-------------------------------------------------------
-	// Charge Item인 경우
+	// A charged item is priced by its charges, and nothing below
+	// applies to it.
 	//-------------------------------------------------------
 	if (pItem->IsChargeItem())
 	{		
@@ -179,7 +158,7 @@ MPriceManager::GetItemPrice(MItem* pItem, TRADE_TYPE type, bool bMysterious)
 
 		if (type==REPAIR)
 		{
-			// 부족한 charge를 채워준다.
+			// Refill the missing charges.
 			int charge = maxCharge - curCharge;
 
 			return charge * ChargePrice;
@@ -195,38 +174,15 @@ MPriceManager::GetItemPrice(MItem* pItem, TRADE_TYPE type, bool bMysterious)
 	}	
 
 	//-------------------------------------------------------
-	//
-	//						Skull
-	//
+	// Everything else: the table price, by options and by wear.
 	//-------------------------------------------------------
-	/*
-	if (pItem->GetItemClass()==ITEM_CLASS_SKULL)
 	{
-		if (type==REPAIR)
-		{
-			return 0;
-		}
-
-		//finalPrice = pItem->GetCurrentDurability();
-	}
-	*/
-	//-------------------------------------------------------
-	//
-	//					일반적인 Item들..
-	//
-	//-------------------------------------------------------
-	//else
-	{
-		//-------------------------------------------------------
-		// Item의 정보를 읽는다.
-		//-------------------------------------------------------
-		// 원래 물건 값과 최대 내구치를 알아낸다.
 		int		itemDur = pItem->GetMaxDurability();
 		long	curDurability = pItem->GetCurrentDurability();
 		
 		//--------------------------------------------------
-		// 수리할때는 maxDur==curDur이면 가격이 0이다.
-		// maxDurability가 0이하이면 수리할 필요가 없는 item이다.
+		// Nothing to repair on a whole item, or on one with no
+		// durability to lose.
 		//--------------------------------------------------
 		if (type==REPAIR)
 		{
@@ -247,27 +203,15 @@ MPriceManager::GetItemPrice(MItem* pItem, TRADE_TYPE type, bool bMysterious)
 			
 		finalPrice = originalPrice;
 		
-		//-------------------------------------------------------
-		// Gamble은 비싸다
-		//-------------------------------------------------------
-//		if (bMysterious)
-//		{
-//			// 할인율에 따라서 물건값을 낮춘다.
-//			finalPrice = finalPrice*nRatio / 100;
-//
-//			// MYSTERIOUS 아이템은 무조건 5배다. 카카
-//			finalPrice = finalPrice * 5;
-//		}
-//		else
 		{
-			// 옵션 여부에 따라서 물건값을 더한다.
+			// The options add their multipliers.
 			if (!pItem->IsEmptyItemOptionList())
 			{
 				int priceMult = pItem->GetItemOptionPriceMultiplier();//(*g_pItemOptionTable)[pItem->GetItemOption()].PriceMultiplier;
 				finalPrice = finalPrice * priceMult / 100;
 			}
 			
-			// 내구성이 얼마나 떨어졌는가에 따라 물건값을 낮춘다.
+			// Wear takes its share of the price...
 			float damaged;
 			if (maxDurability==0)
 			{
@@ -279,7 +223,7 @@ MPriceManager::GetItemPrice(MItem* pItem, TRADE_TYPE type, bool bMysterious)
 			}
 
 			//--------------------------------------------------
-			// 수리할때는 damage 받은 만큼 비싸진다.
+			// ...and a repair charges for that share.
 			//--------------------------------------------------
 			if (type==REPAIR)
 			{
@@ -288,15 +232,12 @@ MPriceManager::GetItemPrice(MItem* pItem, TRADE_TYPE type, bool bMysterious)
 			
 			finalPrice = finalPrice * damaged;
 			
-			// 할인율에 따라서 물건값을 낮춘다.
+			// Then the rate.
 			finalPrice = finalPrice * nRatio / 100;
 		}	
 	}
 
 	
-	//-------------------------------------------------------
-	// potion인 경우
-	//-------------------------------------------------------
 	// A weak slayer pays 70% for the two basic potions.
 	if (pItem->GetItemClass()==ITEM_CLASS_POTION)
 	{
@@ -335,11 +276,13 @@ MPriceManager::GetItemPrice(MItem* pItem, TRADE_TYPE type, bool bMysterious)
 	// A skull is worth half to a vampire and three quarters to an Ousters.
 	if (pItem->GetItemClass()==ITEM_CLASS_SKULL)
 	{
-		if (HostRace()==RACE_VAMPIRE)
+		int race = HostRace();
+
+		if (race==RACE_VAMPIRE)
 		{
 			finalPrice >>= 1;
 		}
-		else if (HostRace()==RACE_OUSTERS)
+		else if (race==RACE_OUSTERS)
 		{
 			finalPrice = finalPrice * 75 / 100;
 		}
@@ -421,7 +364,7 @@ int MPriceManager::GetMysteriousPrice(MItem *pItem) const
 
 	int avr = (*g_pItemTable)[pItem->GetItemClass()].GetAveragePrice();
 
-	int final_price = avr * multiplier;
+	__int64 final_price = (__int64)avr * multiplier;
 
 	// Half under the JAVE blood bible, then the shop tax.
 	if (HostGambleHalfPrice())
@@ -431,6 +374,6 @@ int MPriceManager::GetMysteriousPrice(MItem *pItem) const
 
 	final_price = final_price * HostShopTaxPercent() / 100;
 
-	return final_price;
+	return (int)final_price;
 }
 

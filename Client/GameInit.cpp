@@ -85,6 +85,7 @@
 #include "MItem.h"
 #include "MTopView.h"
 #include "MPlayer.h"
+#include "MSkillManager.h"
 #include "FameInfo.h"
 #include "MWarManager.h"
 #include "CSprite555.h"
@@ -2917,17 +2918,21 @@ static const MItemHost	s_ItemHost = { &g_CurrentFrame, ItemDropFrameCount, Refre
 // race, level and stat sums, the two half-price sources and the shop tax,
 // read the way MPriceManager read them before it moved into gamemodel.
 //-----------------------------------------------------------------------------
+// Between MODE_WAIT_UPDATEINFO and the next GCUpdateInfo there is no
+// player; nothing prices an item then, but the answers are "none"
+// rather than a crash.
 static int	PriceRace()
 {
+	if (g_pPlayer==NULL)		return -1;
 	if (g_pPlayer->IsSlayer())	return RACE_SLAYER;
 	if (g_pPlayer->IsVampire())	return RACE_VAMPIRE;
 	if (g_pPlayer->IsOusters())	return RACE_OUSTERS;
 	return -1;
 }
 
-static int	PriceLevel()			{ return g_pPlayer->GetLEVEL(); }
-static int	PriceStatSum()			{ return g_pPlayer->GetSTR() + g_pPlayer->GetDEX() + g_pPlayer->GetINT(); }
-static int	PriceBasicStatSum()		{ return g_pPlayer->GetBASIC_STR() + g_pPlayer->GetBASIC_DEX() + g_pPlayer->GetBASIC_INT(); }
+static int	PriceLevel()			{ return g_pPlayer!=NULL ? (int)g_pPlayer->GetLEVEL() : 0; }
+static int	PriceStatSum()			{ return g_pPlayer!=NULL ? (int)(g_pPlayer->GetSTR() + g_pPlayer->GetDEX() + g_pPlayer->GetINT()) : 0; }
+static int	PriceBasicStatSum()		{ return g_pPlayer!=NULL ? (int)(g_pPlayer->GetBASIC_STR() + g_pPlayer->GetBASIC_DEX() + g_pPlayer->GetBASIC_INT()) : 0; }
 
 static bool	PricePotionHalf()
 {
@@ -2937,11 +2942,11 @@ static bool	PricePotionHalf()
 
 static bool	PriceGambleHalf()		{ return g_pSkillAvailable->IsEnableSkill(SKILL_HOLYLAND_BLOOD_BIBLE_JAVE); }
 
-static int	PriceShopTaxPercent()
+static DWORD	PriceShopTaxPercent()
 {
 	if (g_pEventManager->IsEvent(EVENTID_TAX_CHANGE))
 	{
-		return (int)g_pEventManager->GetEvent(EVENTID_TAX_CHANGE)->parameter1;
+		return g_pEventManager->GetEvent(EVENTID_TAX_CHANGE)->parameter1;
 	}
 
 	return 100;
