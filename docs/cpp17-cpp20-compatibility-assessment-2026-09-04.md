@@ -335,6 +335,15 @@ They indicate where to investigate, not how many mechanical replacements are saf
 | 8 | `std::jthread` and `std::stop_token` for owned workers | Makes join and cancellation responsibilities explicit and exception-safe. Raw Win32 thread/synchronization primitives appear in about 36 locations. | Prototype on one clearly owned worker; preserve required Windows event and message-loop integration. | Large/staged |
 | 9 | Ownership RAII | Replacing proven owning raw pointers with `unique_ptr` prevents leaks and partial-initialization cleanup bugs. This is not C++20-specific, but the migration makes it a natural follow-up. | Inventory ownership in one manager and convert only pointers with unambiguous single ownership. | Large/staged |
 
+**Span status (2026-09-04):** the first priority-3 slice is implemented in PR
+#84. `SocketInputStream` and `SocketOutputStream` now expose
+bounded `std::span<char>` and `std::span<std::byte>` overloads while retaining the
+pointer/length APIs as adapters. `GCExchangeList` is the representative migrated
+packet: its seven length-prefixed strings and two raw 64-bit fields use spans, and
+a pre-migration golden pins the complete body byte-for-byte. Future slices should
+migrate small packet families behind equivalent round-trip/golden coverage rather
+than expanding this into a mechanical whole-tree rewrite.
+
 ### Packet modernization guardrails
 
 Packet I/O is the highest-value area but also the easiest place to cause a silent

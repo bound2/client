@@ -17,6 +17,7 @@
 #include "PacketAssert.h"
 #include "Packet.h"
 #include <cstdio>
+#include <limits>
 
 #if __LINUX__
 	#include <sys/ioctl.h>
@@ -73,15 +74,29 @@ SocketInputStream::~SocketInputStream ()
 // read data from input buffer
 //
 //////////////////////////////////////////////////////////////////////
-uint SocketInputStream::read ( char * buf , uint len ) 
+uint SocketInputStream::read ( char * buf , uint len )
+	throw ( ProtocolException , Error )
+{
+	Assert( buf != NULL );
+	return read(std::span<char>(buf, len));
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// read data into a bounded destination
+//
+//////////////////////////////////////////////////////////////////////
+uint SocketInputStream::read ( std::span<char> buf )
 	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
-		
-	Assert( buf != NULL );	
 	
-	if ( len == 0 )
+	if ( buf.empty() )
 		throw InvalidProtocolException("len==0");
+	if ( buf.size() > (std::numeric_limits<uint>::max)() )
+		throw InvalidProtocolException("span is too large");
+
+	const uint len = static_cast<uint>(buf.size());
 	
 	// 요청한 만큼의 데이타가 버퍼내에 존재하지 않을 경우 예외를 던진다.
 	// 만약 모든 read 가 peek() 로 체크한 후 호출된다면, 아래 if-throw 는 
@@ -99,7 +114,7 @@ uint SocketInputStream::read ( char * buf , uint len )
         // ...abcd...
         //
 
-		memcpy( buf , &m_Buffer[m_Head] , len );
+		memcpy( buf.data() , &m_Buffer[m_Head] , len );
 
 	} else {					// reversed order ( m_Head > m_Tail )
 		
@@ -111,9 +126,9 @@ uint SocketInputStream::read ( char * buf , uint len )
 	 
 		uint rightLen = m_BufferLen - m_Head;
 		if ( len <= rightLen ) {
-			memcpy( buf , &m_Buffer[m_Head] , len );
+			memcpy( buf.data() , &m_Buffer[m_Head] , len );
 		} else {
-			memcpy( buf , &m_Buffer[m_Head] , rightLen );
+			memcpy( buf.data() , &m_Buffer[m_Head] , rightLen );
 			memcpy( &buf[rightLen] , m_Buffer , len - rightLen );
 		}
 
@@ -134,6 +149,29 @@ uint SocketInputStream::read ( char * buf , uint len )
 	return len;
 		
 	__END_CATCH
+}
+
+//////////////////////////////////////////////////////////////////////
+// read a prefix into a bounded destination
+//////////////////////////////////////////////////////////////////////
+uint SocketInputStream::read ( std::span<char> buf , std::size_t len )
+	throw ( ProtocolException , Error )
+{
+	if ( len > buf.size() )
+		throw InvalidProtocolException("read length exceeds destination span");
+	if ( len > (std::numeric_limits<uint>::max)() )
+		throw InvalidProtocolException("read length exceeds stream limit");
+
+	return read(buf.first(len));
+}
+
+//////////////////////////////////////////////////////////////////////
+// read raw bytes into a bounded destination
+//////////////////////////////////////////////////////////////////////
+uint SocketInputStream::read ( std::span<std::byte> buf )
+	throw ( ProtocolException , Error )
+{
+	return read(std::span<char>(reinterpret_cast<char*>(buf.data()), buf.size()));
 }
 
 //////////////////////////////////////////////////////////////////////

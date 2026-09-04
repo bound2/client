@@ -14,6 +14,8 @@
 #include "PacketAssert.h"
 #include "Packet.h"
 
+#include <limits>
+
 //////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////
@@ -68,8 +70,27 @@ SocketOutputStream::~SocketOutputStream ()
 uint SocketOutputStream::write ( const char * buf , uint len )
      throw ( ProtocolException , Error )
 {
+	if ( len == 0 )
+		return 0;
+	Assert( buf != NULL );
+	return write(std::span<const char>(buf, len));
+}
+
+//////////////////////////////////////////////////////////////////////
+// write data from a bounded source
+//////////////////////////////////////////////////////////////////////
+uint SocketOutputStream::write ( std::span<const char> buf )
+     throw ( ProtocolException , Error )
+{
 	__BEGIN_TRY
-		
+
+	if ( buf.empty() )
+		return 0;
+	if ( buf.size() > (std::numeric_limits<uint>::max)() )
+		throw InvalidProtocolException("span is too large");
+
+	const uint len = static_cast<uint>(buf.size());
+
 	// 현재 버퍼의 빈 영역을 계산한다.
 	uint nFree = ( ( m_Head <= m_Tail ) ?  m_BufferLen - m_Tail + m_Head - 1 : m_Head - m_Tail - 1 );
 	//m_Tail - m_Head - 1 );
@@ -89,15 +110,15 @@ uint SocketOutputStream::write ( const char * buf , uint len )
 		if ( m_Head == 0 ) {
 			
 			nFree = m_BufferLen - m_Tail - 1;
-			memcpy( &m_Buffer[m_Tail] , buf , len );
+			memcpy( &m_Buffer[m_Tail] , buf.data() , len );
 
 		} else {
 
 			nFree = m_BufferLen - m_Tail;
 			if ( len <= nFree )
-				memcpy( &m_Buffer[m_Tail] , buf , len );
+				memcpy( &m_Buffer[m_Tail] , buf.data() , len );
 			else {
-				memcpy( &m_Buffer[m_Tail] , buf , nFree );
+				memcpy( &m_Buffer[m_Tail] , buf.data() , nFree );
 				memcpy( m_Buffer , &buf[nFree] , len - nFree );
 			}
 
@@ -111,7 +132,7 @@ uint SocketOutputStream::write ( const char * buf , uint len )
 		// abcd...efg
 		//
 		
-		memcpy( &m_Buffer[m_Tail] , buf , len );
+		memcpy( &m_Buffer[m_Tail] , buf.data() , len );
 
 	}
 	
@@ -121,6 +142,16 @@ uint SocketOutputStream::write ( const char * buf , uint len )
 	return len;
 	
 	__END_CATCH
+}
+
+//////////////////////////////////////////////////////////////////////
+// write raw bytes from a bounded source
+//////////////////////////////////////////////////////////////////////
+uint SocketOutputStream::write ( std::span<const std::byte> buf )
+	throw ( ProtocolException , Error )
+{
+	return write(std::span<const char>(
+		reinterpret_cast<const char*>(buf.data()), buf.size()));
 }
 	
 

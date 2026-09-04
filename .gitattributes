@@ -22,3 +22,9 @@ tests/golden/*.hex text eol=lf
 # Executed by sh as a git hook after `git config core.hooksPath tools/git-hooks`;
 # a CRLF checkout would put a carriage return in every command.
 tools/git-hooks/* text eol=lf
+
+# Much of the legacy C++ tree is stored as CRLF. Keep diff whitespace checks
+# sensitive to real trailing spaces without treating the CR terminator itself
+# as trailing whitespace.
+*.cpp whitespace=cr-at-eol
+*.h whitespace=cr-at-eol
