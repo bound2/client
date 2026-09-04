@@ -28,12 +28,8 @@ extern RECT g_GameRect;
 //-----------------------------------------------------------------------------
 // AskString
 //
-// GetGameString for the dialog message arrays, which are char* because
-// C_VS_UI_DIALOG::SetMessage takes char**. The table's own accessor is no
-// stricter - MString::GetString() returns a mutable pointer into the
-// entry - so this only puts the cast in one place instead of at each of
-// the thirty assignments below. The reason to go through GetGameString
-// at all is that it answers "" for an id the table does not hold, where
+// Use GetGameString for the dialog message arrays because it answers ""
+// for an id the table does not hold, where
 // the subscript answers a default MString whose GetString() is NULL, and
 // these rows are handed to strlen().
 //-----------------------------------------------------------------------------

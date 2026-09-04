@@ -17,6 +17,7 @@
 #else
 	// CDirectDraw include removed - using ColorDraw instead
 #endif
+#include <algorithm>
 #include <vector>
 
 using std::ifstream;
@@ -328,7 +329,7 @@ bool CTypePack<Type>::SaveToFile(std::ofstream&dataFile, std::ofstream&indexFile
 template <class Type>
 bool CTypePack<Type>::LoadFromFilePart(int first, int last)
 {
-	last = min(last, 0xFFFE);
+	last = (std::min)(last, 0xFFFE);
 	for(int i = first; i <= last; i++)
 		operator[](i);
 
@@ -866,7 +867,7 @@ bool CTypePack2<TypeBase, Type1, Type2>::SaveToFile(std::ofstream&dataFile, std:
 template <class TypeBase, class Type1, class Type2>
 bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFilePart(int first, int last)
 {
-	last = min(last, 0xFFFE);
+	last = (std::min)(last, 0xFFFE);
 	for(int i = first; i <= last; i++)
 		operator[](i);
 
