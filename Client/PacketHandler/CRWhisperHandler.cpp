@@ -164,7 +164,7 @@ throw ( ProtocolException , Error )
 
 				// 귓속말 대상 설정 ID+' '
 				char strWhisperID[128];
-				sprintf(strWhisperID, "%s ", pPacket->getName().c_str());
+				snprintf(strWhisperID, sizeof(strWhisperID), "%s ", pPacket->getName().c_str());
 				g_pUserInformation->WhisperID = strWhisperID;
 
 				// [도움말] 귓속말 받을 때

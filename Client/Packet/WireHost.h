@@ -24,8 +24,13 @@
 #define __WIREHOST_H__
 
 #include "Types.h"
+#include "Types/ZoneTypes.h"
+
+#include <string>
 
 class Player;
+class RequestClientPlayer;
+class RequestServerPlayer;
 
 //----------------------------------------------------------------------
 // The answers with no host, which are ClientConfig's own constructor
@@ -57,7 +62,73 @@ struct WireHost {
 	// dropped.
 	Player*	(*BugReportTarget)();
 
+	// The two values ClientPlayer::setEncryptCode() derives the stream
+	// cipher's seed from: the zone the player is in, and the account's
+	// server number.
+	ZoneID_t	(*EncryptZoneID)();
+	int		(*EncryptServerID)();
+
+	// Which of the two seed formulas to use. The English client spaces
+	// the server number differently; every other region shares one
+	// formula. See WireEncryptSeed below.
+	bool		(*EncryptUsesEnglishSeed)();
+
+	//------------------------------------------------------------------
+	// The request-service family (docs/RESTRUCTURING.md task 5.1's
+	// fourth slice) - the peer-to-peer side, where two clients talk to
+	// each other directly to transfer a file or a whisper.
+	//------------------------------------------------------------------
+
+	// The clock its timeouts are measured against, in milliseconds.
+	DWORD		(*CurrentTime)();
+
+	// Whether the client is in the game world. RequestClientPlayer
+	// refuses a request packet that arrives outside it.
+	bool		(*InGameMode)();
+
+	// The peer file-transfer manager, which stays executable-side: it
+	// draws progress, writes into the profile directory and reads the
+	// UI's own state. What the wire layer needs of it is six calls -
+	// the request players hand themselves to it when a transfer starts
+	// and take themselves back out when the connection ends.
+	//
+	// Every one answers false with no host, which is what an
+	// unregistered transfer looks like, so a receive loop that asks
+	// about one cleans up rather than waiting.
+	bool		(*ReceiveMyRequest)(const std::string& name, RequestClientPlayer* pPlayer);
+	bool		(*HasMyRequest)(const std::string& name);
+	bool		(*RemoveMyRequest)(const std::string& name);
+	bool		(*SendOtherRequest)(const std::string& name, RequestServerPlayer* pPlayer);
+	bool		(*HasOtherRequest)(const std::string& name);
+	bool		(*RemoveOtherRequest)(const std::string& name);
+
 };
+
+//----------------------------------------------------------------------
+// The stream cipher's seed.
+//----------------------------------------------------------------------
+// Pulled out of ClientPlayer::setEncryptCode() so that it can be
+// tested. THIS IS LIVE CODE. The slice that moved it said the opposite
+// - that nothing defines __USE_ENCRYPTER__, so the encrypted streams
+// are never constructed - and that was wrong: Encrypter.h defines it,
+// and ClientPlayer.cpp includes SocketEncryptInputStream.h two lines
+// before its first #ifdef on it. tests/unit/test_packet_goldens.cpp had
+// the truth written down the whole time ("0 is the plain branch, 1..5
+// the __USE_ENCRYPTER__ branch"); the claim was made without checking
+// against it. Both reviewers of the following slice found it.
+//
+// So the seed is on the live connection path: GCUpdateInfoHandler calls
+// setEncryptCode() right after MoveZone/LoadZone, and the byte it
+// derives has to agree with the server's exactly.
+//
+// The original wrote four branches - Netmarble, Chinese, English, and a
+// default - of which three computed the identical expression. Only the
+// English one differs, multiplying the server number by 51 where the
+// others shift it left by four. That collapse is behaviour-preserving,
+// which a test asserts across every server number a byte can hold
+// rather than leaving to this comment.
+//----------------------------------------------------------------------
+uchar	WireEncryptSeed ( ZoneID_t zoneID , int serverID , bool bEnglishSeed ) throw ();
 
 //----------------------------------------------------------------------
 // The wire layer's view of it
@@ -73,6 +144,31 @@ public :
 	static int	MaxRequestService () throw ();
 	static uint	ClientCommunicationUDPPort () throw ();
 	static Player *	BugReportTarget () throw ();
+	static ZoneID_t	EncryptZoneID () throw ();
+	static int	EncryptServerID () throw ();
+	static bool	EncryptUsesEnglishSeed () throw ();
+
+	static DWORD	CurrentTime () throw ();
+	static bool	InGameMode () throw ();
+
+	// These two are NOT nothrow, and the omission is deliberate. The
+	// file-transfer manager behind them reads and writes the peer
+	// socket, and throwing is how a transfer ends: RequestFileManager::
+	// SendOtherRequest throws ConnectException("No File to Send"), and
+	// both reach RequestClientPlayer::readInputStream /
+	// RequestServerPlayer::send, which are throw(ProtocolException,
+	// Error). The call sites sit outside processCommand's try, so the
+	// exception unwinds to RequestServerPlayerManager::Update's
+	// catch (Throwable&), which disconnects that peer - the designed
+	// teardown. A throw() here would make that path undefined under
+	// MSVC and std::terminate under C++17 or on clang/gcc.
+	static bool	ReceiveMyRequest ( const std::string & name , RequestClientPlayer * pPlayer );
+	static bool	SendOtherRequest ( const std::string & name , RequestServerPlayer * pPlayer );
+
+	static bool	HasMyRequest ( const std::string & name ) throw ();
+	static bool	RemoveMyRequest ( const std::string & name ) throw ();
+	static bool	HasOtherRequest ( const std::string & name ) throw ();
+	static bool	RemoveOtherRequest ( const std::string & name ) throw ();
 
 private :
 

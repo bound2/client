@@ -56,7 +56,7 @@ throw ( ProtocolException , Error )
 				
 				if (pRemovedItem->IsEmptyItemOptionList() )
 				{
-					sprintf(str, "%s %s",					
+					snprintf(str, sizeof(str), "%s %s",					
 						pRemovedItem->GetName(),
 						(*g_pGameStringTable)[STRING_MESSAGE_ITEM_BROKEN].GetString());
 				}
@@ -69,7 +69,7 @@ throw ( ProtocolException , Error )
 						if(i != pRemovedItem->GetItemOptionListCount())
 							option_name += " ";
 					}
-					sprintf(str, "%s%s %s",					
+					snprintf(str, sizeof(str), "%s%s %s",					
 						option_name.c_str(),	
 						pRemovedItem->GetName(),
 						(*g_pGameStringTable)[STRING_MESSAGE_ITEM_BROKEN].GetString());
@@ -118,7 +118,18 @@ throw ( ProtocolException , Error )
 			//----------------------------------------------------------
 			// 복장을 바꿔준다.
 			//----------------------------------------------------------
-			int addonSlotID = addonSlot[slotID];
+			// addonSlot maps a gear slot to the visual addon it drives,
+			// but slotID ranges over ALL of them: RemoveItem above
+			// bounds it to m_Size, which is
+			// MAX_GEAR_SLAYER (27), against fifteen entries here.
+			// Unequipping a ZAP, a PDA, a shoulder or a blood bible
+			// therefore read past a stack array and handed the result
+			// to RemoveAddon. Those slots drive no addon, which is what
+			// ADDON_NULL says, so that is the answer past the end.
+			const int nAddonSlots = (int)(sizeof(addonSlot) / sizeof(addonSlot[0]));
+			int addonSlotID = (slotID >= 0 && slotID < nAddonSlots)
+					? addonSlot[slotID]
+					: ADDON_NULL;
 
 			if (addonSlotID != ADDON_NULL)
 			{
@@ -172,7 +183,7 @@ throw ( ProtocolException , Error )
 				
 				if (pRemovedItem->IsEmptyItemOptionList())
 				{
-					sprintf(str, "%s %s",					
+					snprintf(str, sizeof(str), "%s %s",					
 						pRemovedItem->GetName(),
 						(*g_pGameStringTable)[STRING_MESSAGE_ITEM_BROKEN].GetString());
 				}
@@ -185,7 +196,7 @@ throw ( ProtocolException , Error )
 						if(i != pRemovedItem->GetItemOptionListCount())
 							option_name += " ";
 					}
-					sprintf(str, "%s%s %s",					
+					snprintf(str, sizeof(str), "%s%s %s",					
 						option_name.c_str(),	
 						pRemovedItem->GetName(),
 						(*g_pGameStringTable)[STRING_MESSAGE_ITEM_BROKEN].GetString());
@@ -233,7 +244,18 @@ throw ( ProtocolException , Error )
 			//----------------------------------------------------------
 			// 복장을 바꿔준다.
 			//----------------------------------------------------------
-			int addonSlotID = addonSlot[slotID];
+			// addonSlot maps a gear slot to the visual addon it drives,
+			// but slotID ranges over ALL of them: RemoveItem above
+			// bounds it to m_Size, which is
+			// MAX_GEAR_VAMPIRE (28), against sixteen entries here.
+			// Unequipping a ZAP, a PDA, a shoulder or a blood bible
+			// therefore read past a stack array and handed the result
+			// to RemoveAddon. Those slots drive no addon, which is what
+			// ADDON_NULL says, so that is the answer past the end.
+			const int nAddonSlots = (int)(sizeof(addonSlot) / sizeof(addonSlot[0]));
+			int addonSlotID = (slotID >= 0 && slotID < nAddonSlots)
+					? addonSlot[slotID]
+					: ADDON_NULL;
 
 			if (addonSlotID != ADDON_NULL)
 			{
@@ -284,7 +306,7 @@ throw ( ProtocolException , Error )
 				
 				if (pRemovedItem->IsEmptyItemOptionList())
 				{
-					sprintf(str, "%s %s",					
+					snprintf(str, sizeof(str), "%s %s",					
 						pRemovedItem->GetName(),
 						(*g_pGameStringTable)[STRING_MESSAGE_ITEM_BROKEN].GetString());
 				}
@@ -297,7 +319,7 @@ throw ( ProtocolException , Error )
 						if(i != pRemovedItem->GetItemOptionListCount())
 							option_name += " ";
 					}
-					sprintf(str, "%s%s %s",					
+					snprintf(str, sizeof(str), "%s%s %s",					
 						option_name.c_str(),	
 						pRemovedItem->GetName(),
 						(*g_pGameStringTable)[STRING_MESSAGE_ITEM_BROKEN].GetString());
@@ -345,7 +367,18 @@ throw ( ProtocolException , Error )
 			//----------------------------------------------------------
 			// 복장을 바꿔준다.
 			//----------------------------------------------------------
-			int addonSlotID = addonSlot[slotID];
+			// addonSlot maps a gear slot to the visual addon it drives,
+			// but slotID ranges over ALL of them: RemoveItem above
+			// bounds it to m_Size, which is
+			// MAX_GEAR_OUSTERS (28), against sixteen entries here.
+			// Unequipping a ZAP, a PDA, a shoulder or a blood bible
+			// therefore read past a stack array and handed the result
+			// to RemoveAddon. Those slots drive no addon, which is what
+			// ADDON_NULL says, so that is the answer past the end.
+			const int nAddonSlots = (int)(sizeof(addonSlot) / sizeof(addonSlot[0]));
+			int addonSlotID = (slotID >= 0 && slotID < nAddonSlots)
+					? addonSlot[slotID]
+					: ADDON_NULL;
 
 			if (addonSlotID != ADDON_NULL)
 			{

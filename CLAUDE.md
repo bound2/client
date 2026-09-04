@@ -72,7 +72,8 @@ encrypter, the info classes, every packet class in every direction and
 the factory/validator tables (`docs/RESTRUCTURING.md` tasks 1.1, 2.4 and 5.1;
 membership is `tests/arch/packetwire_files.txt`, read by CMake, the include checker
 and the ratchet script, and `tests/arch/packetwire_holdouts.txt` says what keeps
-each of the remaining six out). The logging facility (`DebugLog.h`) is in
+the last one out — `RequestClientPlayerManager.cpp`, which reaches the
+whisper queue and the logged-in character). The logging facility (`DebugLog.h`) is in
 `basic`, so every library may log; `Client/DebugInfo.h` is the executable's
 front end to it and pulls in `MinTr.h`, which is why the libraries may not
 include it. The checked formatter (`SafeFormat.h`, `docs/RESTRUCTURING.md`
@@ -132,8 +133,11 @@ the failure count, so the exit code is 0 only when the suite is clean.
 - **Then run the same suite under ASan**, where the invalid access aborts the process.
   Both trees green, or the fix is not verified.
 - **Executable-only code has no test path.** It gets verified by running the client
-  against a live server. The eight defects under *Runtime defects* in the review were
-  all found that way, and none were reachable from a test binary.
+  against a live server. The nine defects under *Runtime defects* in the review were
+  all found that way, and none were reachable from a test binary. The five in the
+  short table below them were found by *reading*, during remediation passes, and are
+  filed separately for exactly that reason — the heading is a claim about how a
+  defect was found, not a bin for anything executable-side.
 - A fix that could not be reproduced is called a **regression guard** in its commit
   message, not described as a reproduction.
 - Substantial remediation work gets an **adversarial review** afterwards. The last one
@@ -150,7 +154,7 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **332 tests, 4,510 checks, 0 failed** in both trees.
+baseline: **348 tests, 4,863 checks, 0 failed** in both trees.
 
 ## Traps
 
@@ -222,31 +226,51 @@ baseline: **332 tests, 4,510 checks, 0 failed** in both trees.
 
 ## Current focus
 
-`docs/code-health-review-2026-08-29.md` holds 197 findings, 82 fixed. In priority order:
+`docs/code-health-review-2026-08-29.md` holds 197 findings, 83 fixed — every
+Critical among them. In priority order:
 
-1. **Unvalidated network input is the top open risk.** `Client/Packet/Gpackets/` passes
-   server-supplied lengths, indices and item classes straight into array subscripts,
-   `strcpy`/`sprintf` targets, and a function-pointer table. The critical findings
-   (shop/stash indices, chat/guild/system-message bounds, the NewItem table, the
-   peer file-transfer filename) are fixed on `harden/packet-index-bounds` and
-   `harden/network-input`, but the parsers beyond those findings are unaudited — a
-   hostile *or merely buggy* server can still corrupt the client heap.
+1. **Unvalidated network input is the top open risk**, and the two halves of it
+   now have instruments rather than estimates. `Client/Packet/Gpackets/` passes
+   server-supplied lengths, indices and item classes into array subscripts,
+   `strcpy`/`sprintf` targets, and a function-pointer table.
+   - **Lengths into copies: ratchet R3, at 0.** Every `sprintf`/`strcpy`/`strcat`
+     under `Client/Packet` and `Client/PacketHandler` is bounded or gone, so a
+     new one fails the suite.
+   - **Indices into subscripts: ctest `packet_indices`**, over `Client/Packet`
+     and `Client/PacketHandler`. It walks the *value*, not the spelling —
+     `array[pPacket->getSlotID()]` has two live instances while
+     `int slot = pPacket->getSlotID();` twenty lines above `array[slot]` has a
+     hundred. **114** packet-indexed subscripts, 101 of them into a named,
+     verified `CTypeTable` that range-checks itself, **13 into a container that
+     is not**, all guarded. A fourteenth fails the suite and has to be read.
+     It **fails closed**: a container it does not recognise counts as raw, so
+     adding a name to its allowlist is a deliberate act. Its first version
+     hardcoded the receiver name `pPacket` and so was blind to the 19 handlers
+     that call their parameter something else — the same
+     measure-the-spelling mistake it was built to answer for R7, which is why
+     its header is long.
+   - Both passes found live defects, listed under *Found by reading* in the
+     review — including one that needs no hostile server at all.
+   What remains unaudited is everything the two instruments do not model: a
+   length or index that reaches memory by some third route.
 2. Fixed-size buffers fed by variable-length server strings (the 21-byte chat rows
    are fixed; 128-byte stack buffers remain in other handlers), and format strings
    loaded from data files passed to sprintf (C19/C20/C22). That last one is
-   **0 call sites** - ratchet R7 holds it at zero, so a new one fails the suite. It
-   has a fix to apply rather than a policy to argue about: `SafeFormat::Format`
-   in `basic/SafeFormat.h` checks a table entry's conversions against the
-   arguments the call site really passed. 294 sites are converted, across
-   `Client`, `VS_UI` and the `AddFormat` family (through
-   `CMessageArray::AddSafeFormat`). **R7 being 0 does not mean C19 is closed**,
-   and this file said it did for about an hour on 2026-09-04: R7 sees a format
-   *spelled at the call site* as a table lookup, and **24 live sites
-   read the entry out of a static array or a local first** — 21 of them in
-   `VS_UI_ExtraDialog.cpp`, 12 passing no varargs at all, into buffers sized
-   from the format string. That is C19's exploitable half, still open. Measure
-   it with `scratchpad`-style sweeps or extend R7; do not trust R7 alone for
-   this finding.
+   **closed** (C19, 2026-09-04, task 5.4's fifth slice). **321 sites** are
+   converted to `SafeFormat::Format` in `basic/SafeFormat.h`, which checks a
+   table entry's conversions against the arguments the call site really passed,
+   across `Client`, `VS_UI`, the `AddFormat` family (through
+   `CMessageArray::AddSafeFormat`) and `MString::FormatChecked`.
+   **Two ratchets hold it, and the pair is the point.** R7 counts a lookup
+   *spelled at the format argument*; R8 counts every printf-family call whose
+   format is not a string literal, whatever it is spelled as. This file claimed
+   C19 was closed once before, for about an hour on 2026-09-04, on R7 alone —
+   and 24 live sites were reading the entry out of a static array or a local
+   first, invisible to it. **A ratchet at zero is a claim about the ratchet.**
+   If you need to know the state of this finding, read the C19 entry in the
+   review: it lists five measurements, and R7 is one of them. If you need to
+   look for a new site, sweep the *format argument*, never another spelling of
+   the lookup.
    `tests/tools/check_format_arity.pl` (ctest `format_arity`) audits every
    converted site against the built-in English table and fails the suite when an
    entry asks for more arguments than its call site passes; it also ratchets how

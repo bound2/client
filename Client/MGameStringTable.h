@@ -2083,6 +2083,18 @@ enum GAME_STRINGID
 	UI_STRING_MESSAGE_DELETE_INPUT_NAME,					// Enter the character's name to confirm.
 	UI_STRING_MESSAGE_DELETE_NAME_MISMATCH,					// The name does not match the character you selected.
 
+	// The six ask dialogs the friend list raises. Upstream commented
+	// their ids out of this enum but left the dialogs themselves live and
+	// server-reachable, so C_VS_UI_ASK_DIALOG read six rows of
+	// m_sz_question_msg it had never assigned. Added after the shipped
+	// String.inf was generated, so read them through GetGameString().
+	UI_STRING_MESSAGE_ASK_FRIEND_REQUEST,					// %s wants to add you as a friend.
+	UI_STRING_MESSAGE_ASK_FRIEND_REFUSE,					// %s has declined your friend request.
+	UI_STRING_MESSAGE_ASK_FRIEND_WAIT,						// Waiting for %s to answer.
+	UI_STRING_MESSAGE_ASK_FRIEND_EXIST,						// %s is already on your friend list.
+	UI_STRING_MESSAGE_ASK_FRIEND_BLACK,						// %s is on your block list.
+	UI_STRING_MESSAGE_ASK_FRIEND_DELETE,					// Remove %s from your friend list?
+
 	MAX_GAME_STRING,
 };
 

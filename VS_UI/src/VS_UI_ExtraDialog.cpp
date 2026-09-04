@@ -25,6 +25,23 @@
 extern RECT g_GameRect;
 #include <algorithm>
 
+//-----------------------------------------------------------------------------
+// AskString
+//
+// GetGameString for the dialog message arrays, which are char* because
+// C_VS_UI_DIALOG::SetMessage takes char**. The table's own accessor is no
+// stricter - MString::GetString() returns a mutable pointer into the
+// entry - so this only puts the cast in one place instead of at each of
+// the thirty assignments below. The reason to go through GetGameString
+// at all is that it answers "" for an id the table does not hold, where
+// the subscript answers a default MString whose GetString() is NULL, and
+// these rows are handed to strlen().
+//-----------------------------------------------------------------------------
+static char* AskString(int nStringID)
+{
+	return const_cast<char*>(GetGameString(nStringID));
+}
+
 Window* g_desc_dialog_window_id = NULL;
 /*
 
@@ -62,7 +79,7 @@ char * C_VS_UI_ASK_DIALOG::m_sz_question_msg[MAX_ASK_DIALOG_TYPE][2] = {	// by s
 C_VS_UI_EDIT_DIALOG::C_VS_UI_EDIT_DIALOG(int _x, int _y, int center_x, int center_y, void (*exec_fp)(C_VS_UI_DIALOG *, id_t), WORD dd_button, int cur_val, int max_val) :
 							C_VS_UI_DIALOG(_x, _y, center_x, center_y, exec_fp, dd_button)
 {
-	m_sz_question_msg[0] =(*g_pGameStringTable)[UI_STRING_MESSAGE_BUY_ITEM_NUM].GetString();
+	m_sz_question_msg[0] = AskString(UI_STRING_MESSAGE_BUY_ITEM_NUM);
 	SetMessage(m_sz_question_msg, 1, SMO_NOFIT);
 
 //	if (digit_count < 0)
@@ -547,15 +564,15 @@ C_VS_UI_MONEY_DIALOG::C_VS_UI_MONEY_DIALOG(int _x, int _y, int center_x, int cen
 	else
 		SetMessage(m_sz_question_msg_for_storage, 1);//, SMO_NOFIT);
 	*/
-	m_sz_question_msg[0][0]=(*g_pGameStringTable)[UI_STRING_MESSAGE_TRHOW_MONEY_IN_DIALOG].GetString();
-	m_sz_question_msg[1][0]=(*g_pGameStringTable)[UI_STRING_MESSAGE_SAVE_MONEY_IN_DIALOG].GetString();
-	m_sz_question_msg[2][0]=(*g_pGameStringTable)[UI_STRING_MESSAGE_BRING_MONEY_IN_DIALOG].GetString();
-	m_sz_question_msg[3][0]=(*g_pGameStringTable)[UI_STRING_MESSAGE_TRADE_MONEY_IN_DIALOG].GetString();
-	m_sz_question_msg[4][0]=(*g_pGameStringTable)[UI_STRING_MESSAGE_DIVIDE_MONEY_IN_DIALOG].GetString();	
-	m_sz_question_msg[5][0]=(*g_pGameStringTable)[UI_STRING_MESSAGE_HOLY_LAND_INPUT_BRING_FEE].GetString();	
-	m_sz_question_msg[6][0]=(*g_pGameStringTable)[UI_STRING_MESSAGE_MODIFY_TAX].GetString();	
-	m_sz_question_msg[7][0]=(*g_pGameStringTable)[UI_STRING_MESSAGE_SELL_MONEY_IN_DIALOG].GetString();	
-	m_sz_question_msg[8][0]=(*g_pGameStringTable)[UI_STRING_MESSAGE_CAMPAIGN_HELP_REQUEST].GetString();	
+	m_sz_question_msg[0][0]=AskString(UI_STRING_MESSAGE_TRHOW_MONEY_IN_DIALOG);
+	m_sz_question_msg[1][0]=AskString(UI_STRING_MESSAGE_SAVE_MONEY_IN_DIALOG);
+	m_sz_question_msg[2][0]=AskString(UI_STRING_MESSAGE_BRING_MONEY_IN_DIALOG);
+	m_sz_question_msg[3][0]=AskString(UI_STRING_MESSAGE_TRADE_MONEY_IN_DIALOG);
+	m_sz_question_msg[4][0]=AskString(UI_STRING_MESSAGE_DIVIDE_MONEY_IN_DIALOG);	
+	m_sz_question_msg[5][0]=AskString(UI_STRING_MESSAGE_HOLY_LAND_INPUT_BRING_FEE);	
+	m_sz_question_msg[6][0]=AskString(UI_STRING_MESSAGE_MODIFY_TAX);	
+	m_sz_question_msg[7][0]=AskString(UI_STRING_MESSAGE_SELL_MONEY_IN_DIALOG);	
+	m_sz_question_msg[8][0]=AskString(UI_STRING_MESSAGE_CAMPAIGN_HELP_REQUEST);	
 	
 
 	m_type = type;										
@@ -588,6 +605,51 @@ C_VS_UI_MONEY_DIALOG::~C_VS_UI_MONEY_DIALOG()
 }
 
 
+//-----------------------------------------------------------------------------
+// AllocAskMessage
+//
+// Allocates one row of an ask dialog's message and fills it through the
+// checked formatter.
+//
+// Every row is formatted with a String.inf entry as the *format*
+// argument (docs/code-health-review-2026-08-29.md finding C19) into a
+// block sized from that same entry, and twelve of the call sites below
+// pass no arguments at all - so a %s an operator left in an entry made
+// the CRT read a stack word as a char* and copy it, unbounded, into a
+// buffer that had no room for it. Ratchet R7 never saw any of this,
+// because the format is not spelled at the call site: it is read out of
+// m_sz_question_msg, which InitString() fills from the table.
+//
+// Allocating and formatting in one place is what stops the bound and the
+// destination from drifting apart, which is the mistake the hand-written
+// pairs kept making. nExtra is the room over strlen(pFormat) that the
+// arguments need, carried over unchanged from each site's own
+// arithmetic; SafeFormat refuses a conversion it has no argument for and
+// copies the specification out as text, which can never be longer than
+// the format it came from, so the format's own length is always a floor.
+//-----------------------------------------------------------------------------
+template <typename ...Args>
+static char* AllocAskMessage(const char* pFormat, size_t nExtra, Args... args)
+{
+	if (pFormat == NULL)
+	{
+		pFormat = "";
+	}
+
+	// At least one byte over the format, for the terminator.
+	if (nExtra < 1)
+	{
+		nExtra = 1;
+	}
+
+	const size_t	nSize	= strlen(pFormat) + nExtra;
+	char* const		pRow	= new char [nSize];
+
+	SafeFormat::Format(pRow, nSize, pFormat, args...);
+
+	return pRow;
+}
+
 void	C_VS_UI_ASK_DIALOG::InitString()
 {
 	/*	(*g_pGameStringTable)[UI_STRING_MESSAGE_ASK_DIALOG_BUY_STORAGE] = "보관함을 $%d에 사시겠습니까?";
@@ -608,81 +670,94 @@ void	C_VS_UI_ASK_DIALOG::InitString()
 	{  "검색 결과를 찾을 수 없습니다."  },
 	{  "이 아이템을 Enchant하시겠습니까?",   "취소하시려면 Cancel을 누르세요."  },
 */
+	// Every row first, then the ones this dialog knows about. The rows
+	// were left indeterminate before: upstream commented the six
+	// ASK_FRIEND_* assignments out of this function but left the cases
+	// that read them live, so opening a friend dialog ran strlen() over
+	// an uninitialised pointer and handed it to sprintf as a format.
+	// m_sz_question_msg is an ordinary member array, so nothing else
+	// gives it a value.
+	for (int nRow = 0; nRow < MAX_ASK_DIALOG_TYPE; ++nRow)
+	{
+		for (int nCol = 0; nCol < 5; ++nCol)
+		{
+			m_sz_question_msg[nRow][nCol] = "";
+		}
+	}
+
+	// GetGameString rather than the table's operator[]: a subscript that
+	// misses answers a default MString whose GetString() is NULL, and
+	// these rows are handed to strlen().
 	//m_sz_question_msg
-	m_sz_question_msg[0][0]=(*g_pGameStringTable)[UI_STRING_MESSAGE_ASK_DIALOG_BUY_STORAGE].GetString();
+	m_sz_question_msg[0][0]=AskString(UI_STRING_MESSAGE_ASK_DIALOG_BUY_STORAGE);
 	m_sz_question_msg[0][1]="";
 
-	m_sz_question_msg[1][0]=(*g_pGameStringTable)[UI_STRING_MESSAGE_ASK_DIALOG_TRADE_OTHER_PLAYER].GetString();
+	m_sz_question_msg[1][0]=AskString(UI_STRING_MESSAGE_ASK_DIALOG_TRADE_OTHER_PLAYER);
 	m_sz_question_msg[1][1]="";
 	
-	m_sz_question_msg[2][0]=(*g_pGameStringTable)[UI_STRING_MESSAGE_ASK_DIALOG_WAIT_OTHER_PLAYER].GetString();
-	m_sz_question_msg[2][1]=(*g_pGameStringTable)[UI_STRING_MESSAGE_ASK_DIALOG_CANCEL].GetString();
+	m_sz_question_msg[2][0]=AskString(UI_STRING_MESSAGE_ASK_DIALOG_WAIT_OTHER_PLAYER);
+	m_sz_question_msg[2][1]=AskString(UI_STRING_MESSAGE_ASK_DIALOG_CANCEL);
 
-	m_sz_question_msg[3][0]=(*g_pGameStringTable)[UI_STRING_MESSAGE_ASK_DIALOG_REQUEST_JOIN].GetString();
+	m_sz_question_msg[3][0]=AskString(UI_STRING_MESSAGE_ASK_DIALOG_REQUEST_JOIN);
 	m_sz_question_msg[3][1]="";
 
-	m_sz_question_msg[4][0]=(*g_pGameStringTable)[UI_STRING_MESSAGE_ASK_DIALOG_INVITE].GetString();
+	m_sz_question_msg[4][0]=AskString(UI_STRING_MESSAGE_ASK_DIALOG_INVITE);
 	m_sz_question_msg[4][1]="";
 
-	m_sz_question_msg[5][0]=(*g_pGameStringTable)[UI_STRING_MESSAGE_ASK_DIALOG_WAIT_OTHER_PLAYER].GetString();
-	m_sz_question_msg[5][1]=(*g_pGameStringTable)[UI_STRING_MESSAGE_ASK_DIALOG_CANCEL].GetString();
+	m_sz_question_msg[5][0]=AskString(UI_STRING_MESSAGE_ASK_DIALOG_WAIT_OTHER_PLAYER);
+	m_sz_question_msg[5][1]=AskString(UI_STRING_MESSAGE_ASK_DIALOG_CANCEL);
 
-	m_sz_question_msg[6][0]=(*g_pGameStringTable)[UI_STRING_MESSAGE_CANNOT_FIND_RESULT].GetString();
+	m_sz_question_msg[6][0]=AskString(UI_STRING_MESSAGE_CANNOT_FIND_RESULT);
 	m_sz_question_msg[6][1]="";
 
-	m_sz_question_msg[7][0]=(*g_pGameStringTable)[UI_STRING_MESSAGE_ENCHANT_CONFIRM].GetString();
-	m_sz_question_msg[7][1]=(*g_pGameStringTable)[UI_STRING_MESSAGE_ENCHANT_CONFIRM_2].GetString();
-	m_sz_question_msg[7][2]=(*g_pGameStringTable)[UI_STRING_MESSAGE_PET_RESSURECT].GetString();
-	m_sz_question_msg[7][3]=(*g_pGameStringTable)[UI_STRING_MESSAGE_REMOVE_PET_OPTION].GetString();
-	m_sz_question_msg[7][4]=(*g_pGameStringTable)[UI_STRING_MESSAGE_PET_MUTANT].GetString();
+	m_sz_question_msg[7][0]=AskString(UI_STRING_MESSAGE_ENCHANT_CONFIRM);
+	m_sz_question_msg[7][1]=AskString(UI_STRING_MESSAGE_ENCHANT_CONFIRM_2);
+	m_sz_question_msg[7][2]=AskString(UI_STRING_MESSAGE_PET_RESSURECT);
+	m_sz_question_msg[7][3]=AskString(UI_STRING_MESSAGE_REMOVE_PET_OPTION);
+	m_sz_question_msg[7][4]=AskString(UI_STRING_MESSAGE_PET_MUTANT);
 	
-	m_sz_question_msg[8][0]=(*g_pGameStringTable)[UI_STRING_MESSAGE_DEPOSIT_LIMIT].GetString();
+	m_sz_question_msg[8][0]=AskString(UI_STRING_MESSAGE_DEPOSIT_LIMIT);
 	m_sz_question_msg[8][1]="";
 
-	m_sz_question_msg[9][0]=(*g_pGameStringTable)[UI_STRING_MESSAGE_WITHDRAW_LIMIT].GetString();
+	m_sz_question_msg[9][0]=AskString(UI_STRING_MESSAGE_WITHDRAW_LIMIT);
 	m_sz_question_msg[9][1]="";
 
-	m_sz_question_msg[10][0]=(*g_pGameStringTable)[UI_STRING_MESSAGE_BRING_FEE_LIMIT].GetString();
+	m_sz_question_msg[10][0]=AskString(UI_STRING_MESSAGE_BRING_FEE_LIMIT);
 	m_sz_question_msg[10][1]="";
 	
-	m_sz_question_msg[11][0]=(*g_pGameStringTable)[UI_STRING_MESSAGE_TRANS_ITEM].GetString();
+	m_sz_question_msg[11][0]=AskString(UI_STRING_MESSAGE_TRANS_ITEM);
 	m_sz_question_msg[11][1]="";
 
-	m_sz_question_msg[12][0]=(*g_pGameStringTable)[UI_STRING_MESSAGE_USE_PET_FOOD].GetString();
-	m_sz_question_msg[12][1]=(*g_pGameStringTable)[UI_STRING_MESSAGE_CANNOT_DETACH].GetString();
+	m_sz_question_msg[12][0]=AskString(UI_STRING_MESSAGE_USE_PET_FOOD);
+	m_sz_question_msg[12][1]=AskString(UI_STRING_MESSAGE_CANNOT_DETACH);
 	
-	m_sz_question_msg[13][0]=(*g_pGameStringTable)[STRING_MESSAGE_KEEP_PETITEM].GetString();
+	m_sz_question_msg[13][0]=AskString(STRING_MESSAGE_KEEP_PETITEM);
 	m_sz_question_msg[13][1]="";
 
-	m_sz_question_msg[14][0]=(*g_pGameStringTable)[STRING_MESSAGE_GET_KEEP_PETITEM].GetString();
+	m_sz_question_msg[14][0]=AskString(STRING_MESSAGE_GET_KEEP_PETITEM);
 	m_sz_question_msg[14][1]="";
 
-	m_sz_question_msg[15][0]=(*g_pGameStringTable)[UI_STRING_MESSAGE_USE_SMSITEM].GetString();
+	m_sz_question_msg[15][0]=AskString(UI_STRING_MESSAGE_USE_SMSITEM);
 	m_sz_question_msg[15][1]="";
 
-	m_sz_question_msg[16][0]=(*g_pGameStringTable)[UI_STRING_MESSAGE_USE_NAMINGITEM].GetString();
+	m_sz_question_msg[16][0]=AskString(UI_STRING_MESSAGE_USE_NAMINGITEM);
 	m_sz_question_msg[16][1]="";
 
-	m_sz_question_msg[17][0]=(*g_pGameStringTable)[UI_STRING_MESSAGE_REQUEST_GET_EVENT_ITEM].GetString();
+	m_sz_question_msg[17][0]=AskString(UI_STRING_MESSAGE_REQUEST_GET_EVENT_ITEM);
 	m_sz_question_msg[17][1]="";
-//---------------------------------------------------friend string : add by viva-----------------------------------
-//	m_sz_question_msg[18][0]=(*g_pGameStringTable)[UI_STRING_ASK_FRIEND_REQUEST].GetString();
-//	m_sz_question_msg[18][1]="";
-
-//	m_sz_question_msg[19][0]=(*g_pGameStringTable)[UI_STRING_ASK_FRIEND_REFUSE].GetString();
-//	m_sz_question_msg[19][1]="";
-
-//	m_sz_question_msg[20][0]=(*g_pGameStringTable)[UI_STRING_ASK_FRIEND_WAIT].GetString();
-//	m_sz_question_msg[20][1]="";
-	
-//	m_sz_question_msg[21][0]=(*g_pGameStringTable)[UI_STRING_ASK_FRIEND_EXSIT].GetString();
-//	m_sz_question_msg[21][1]="";
-
-//	m_sz_question_msg[22][0]=(*g_pGameStringTable)[UI_STRING_ASK_FRIEND_BLACK].GetString();
-//	m_sz_question_msg[22][1]="";
-
-//	m_sz_question_msg[23][0]=(*g_pGameStringTable)[UI_STRING_ASK_FRIEND_DELETE].GetString();
-//	m_sz_question_msg[23][1]="";
+	//-------------------------------------------------friend strings------------------------------------------------
+	// These six were commented out upstream, ids and all, while the six
+	// cases that read them stayed live and reachable from a
+	// GCFriendChatting packet - so the rows below held whatever the
+	// allocation left behind and the constructor ran strlen() over it.
+	// Subscripted by the enum rather than by a literal, so a new type
+	// inserted above them cannot silently move a row again.
+	m_sz_question_msg[ASK_FRIEND_REQUEST][0]=AskString(UI_STRING_MESSAGE_ASK_FRIEND_REQUEST);
+	m_sz_question_msg[ASK_FRIEND_REFUSE][0]=AskString(UI_STRING_MESSAGE_ASK_FRIEND_REFUSE);
+	m_sz_question_msg[ASK_FRIEND_WAIT][0]=AskString(UI_STRING_MESSAGE_ASK_FRIEND_WAIT);
+	m_sz_question_msg[ASK_FRIEND_EXIST][0]=AskString(UI_STRING_MESSAGE_ASK_FRIEND_EXIST);
+	m_sz_question_msg[ASK_FRIEND_BLACK][0]=AskString(UI_STRING_MESSAGE_ASK_FRIEND_BLACK);
+	m_sz_question_msg[ASK_FRIEND_DELETE][0]=AskString(UI_STRING_MESSAGE_ASK_FRIEND_DELETE);
 }
 //-----------------------------------------------------------------------------
 // C_VS_UI_ASK_DIALOG::C_VS_UI_ASK_DIALOG
@@ -701,7 +776,7 @@ C_VS_UI_ASK_DIALOG::C_VS_UI_ASK_DIALOG(int _x, int _y, int center_x, int center_
 	m_pTemporayValue = pValue;
 
 	InitString();
-	char *PartyName = (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_PARTY_NAME].GetString();
+	const char *PartyName = GetGameString(UI_STRING_MESSAGE_DESC_PARTY_NAME);
 
 	AttrKeyboardControl(true);
 
@@ -710,8 +785,7 @@ C_VS_UI_ASK_DIALOG::C_VS_UI_ASK_DIALOG(int _x, int _y, int center_x, int center_
 		// 숫자가 하나 들어가는 경우.. - -;
 		case ASK_STORAGE_BUY :
 		{
-			m_sz_question_msg_temp[0] = new char [strlen(m_sz_question_msg[type][0])+20];
-			sprintf(m_sz_question_msg_temp[0], m_sz_question_msg[type][0], value);
+			m_sz_question_msg_temp[0] = AllocAskMessage(m_sz_question_msg[type][0], 20, value);
 			SetMessage(m_sz_question_msg_temp, 1, SMO_NOFIT);	
 		}
 		break;
@@ -720,8 +794,7 @@ C_VS_UI_ASK_DIALOG::C_VS_UI_ASK_DIALOG(int _x, int _y, int center_x, int center_
 		{
 			const char* pName = (const char*)m_pTemporayValue;
 
-			m_sz_question_msg_temp[0] = new char [strlen(m_sz_question_msg[type][0])+strlen(pName)+5];
-			sprintf(m_sz_question_msg_temp[0], m_sz_question_msg[type][0], pName);
+			m_sz_question_msg_temp[0] = AllocAskMessage(m_sz_question_msg[type][0], strlen(pName)+5, pName);
 			SetMessage(m_sz_question_msg_temp, 1, SMO_NOFIT);	
 		}
 		break;
@@ -729,10 +802,8 @@ C_VS_UI_ASK_DIALOG::C_VS_UI_ASK_DIALOG(int _x, int _y, int center_x, int center_
 		case ASK_EXCHANGE_CANCEL :
 		{
 			const char* pName = (const char*)m_pTemporayValue;
-			m_sz_question_msg_temp[0] = new char [strlen(m_sz_question_msg[type][0])+strlen(pName)+5];
-			m_sz_question_msg_temp[1] = new char [strlen(m_sz_question_msg[type][1])+1];
-			sprintf(m_sz_question_msg_temp[0], m_sz_question_msg[type][0], pName);
-			sprintf(m_sz_question_msg_temp[1], m_sz_question_msg[type][1]);
+			m_sz_question_msg_temp[0] = AllocAskMessage(m_sz_question_msg[type][0], strlen(pName)+5, pName);
+			m_sz_question_msg_temp[1] = AllocAskMessage(m_sz_question_msg[type][1], 1);
 			SetMessage(m_sz_question_msg_temp, 2, SMO_NOFIT);	
 		}
 		break;
@@ -753,8 +824,9 @@ C_VS_UI_ASK_DIALOG::C_VS_UI_ASK_DIALOG(int _x, int _y, int center_x, int center_
 		{
 			const char* pName = (const char*)m_pTemporayValue;
 
-			m_sz_question_msg_temp[0] = new char [strlen(m_sz_question_msg[type][0])+strlen(pName)+5];
-			sprintf(m_sz_question_msg_temp[0], m_sz_question_msg[type][0], pName, PartyName);
+			// Both entries carry two %s ("%s is asking to join your %s."),
+			// and the allocation this replaces budgeted for pName only.
+			m_sz_question_msg_temp[0] = AllocAskMessage(m_sz_question_msg[type][0], strlen(pName)+strlen(PartyName)+5, pName, PartyName);
 			SetMessage(m_sz_question_msg_temp, 1, SMO_NOFIT);	
 		}
 		break;
@@ -763,8 +835,9 @@ C_VS_UI_ASK_DIALOG::C_VS_UI_ASK_DIALOG(int _x, int _y, int center_x, int center_
 		{
 			const char* pName = (const char*)m_pTemporayValue;
 
-			m_sz_question_msg_temp[0] = new char [strlen(m_sz_question_msg[type][0])+strlen(pName)+5];
-			sprintf(m_sz_question_msg_temp[0], m_sz_question_msg[type][0], pName, PartyName);
+			// Both entries carry two %s ("%s is asking to join your %s."),
+			// and the allocation this replaces budgeted for pName only.
+			m_sz_question_msg_temp[0] = AllocAskMessage(m_sz_question_msg[type][0], strlen(pName)+strlen(PartyName)+5, pName, PartyName);
 			SetMessage(m_sz_question_msg_temp, 1, SMO_NOFIT);	
 		}
 		break;
@@ -773,10 +846,8 @@ C_VS_UI_ASK_DIALOG::C_VS_UI_ASK_DIALOG(int _x, int _y, int center_x, int center_
 		{
 			const char* pName = (const char*)m_pTemporayValue;
 
-			m_sz_question_msg_temp[0] = new char [strlen(m_sz_question_msg[type][0])+strlen(pName)+5];
-			m_sz_question_msg_temp[1] = new char [strlen(m_sz_question_msg[type][1])+1];
-			sprintf(m_sz_question_msg_temp[0], m_sz_question_msg[type][0], pName);
-			sprintf(m_sz_question_msg_temp[1], m_sz_question_msg[type][1]);
+			m_sz_question_msg_temp[0] = AllocAskMessage(m_sz_question_msg[type][0], strlen(pName)+5, pName);
+			m_sz_question_msg_temp[1] = AllocAskMessage(m_sz_question_msg[type][1], 1);
 			SetMessage(m_sz_question_msg_temp, 2, SMO_NOFIT);	
 		}
 		break;
@@ -786,36 +857,30 @@ C_VS_UI_ASK_DIALOG::C_VS_UI_ASK_DIALOG(int _x, int _y, int center_x, int center_
 			switch(value)
 			{
 			case 0:		// 일반 아이템 인첸트
-				m_sz_question_msg_temp[0] = new char [strlen(m_sz_question_msg[type][0])+1];
-				sprintf(m_sz_question_msg_temp[0], m_sz_question_msg[type][0]);
-				m_sz_question_msg_temp[1] = new char [strlen(m_sz_question_msg[type][1])+1];
-				sprintf(m_sz_question_msg_temp[1], m_sz_question_msg[type][1]);
+				m_sz_question_msg_temp[0] = AllocAskMessage(m_sz_question_msg[type][0], 1);
+				m_sz_question_msg_temp[1] = AllocAskMessage(m_sz_question_msg[type][1], 1);
 				
 				SetMessage(m_sz_question_msg_temp, 2, SMO_NOFIT);	
 				break;
 				
 			case 1:		// 펫 인첸트
-				m_sz_question_msg_temp[0] = new char [strlen(m_sz_question_msg[type][0])+1];
-				sprintf(m_sz_question_msg_temp[0], m_sz_question_msg[type][0]);
+				m_sz_question_msg_temp[0] = AllocAskMessage(m_sz_question_msg[type][0], 1);
 				
 				SetMessage(m_sz_question_msg_temp, 1, SMO_NOFIT);	
 				break;
 				
 			case 2:		// 펫 부활
-				m_sz_question_msg_temp[0] = new char [strlen(m_sz_question_msg[type][2])+1];
-				sprintf(m_sz_question_msg_temp[0], m_sz_question_msg[type][2]);
+				m_sz_question_msg_temp[0] = AllocAskMessage(m_sz_question_msg[type][2], 1);
 				SetMessage(m_sz_question_msg_temp, 1, SMO_NOFIT);	
 				break;
 
 			case 3:		// 펫 퓨리타스
-				m_sz_question_msg_temp[0] = new char [strlen(m_sz_question_msg[type][3])+1];
-				sprintf(m_sz_question_msg_temp[0], m_sz_question_msg[type][3]);
+				m_sz_question_msg_temp[0] = AllocAskMessage(m_sz_question_msg[type][3], 1);
 				SetMessage(m_sz_question_msg_temp, 1, SMO_NOFIT);	
 				break;
 
 			case 4:		// 펫 변신
-				m_sz_question_msg_temp[0] = new char [strlen(m_sz_question_msg[type][4])+1];
-				sprintf(m_sz_question_msg_temp[0], m_sz_question_msg[type][4]);
+				m_sz_question_msg_temp[0] = AllocAskMessage(m_sz_question_msg[type][4], 1);
 				SetMessage(m_sz_question_msg_temp, 1, SMO_NOFIT);	
 				break;
 
@@ -826,38 +891,32 @@ C_VS_UI_ASK_DIALOG::C_VS_UI_ASK_DIALOG(int _x, int _y, int center_x, int center_
 
 		case ASK_TRANS_ITEM :
 		{
-			m_sz_question_msg_temp[0] = new char [strlen( m_sz_question_msg[type][0])+1];
-			sprintf(m_sz_question_msg_temp[0], m_sz_question_msg[type][0]);
+			m_sz_question_msg_temp[0] = AllocAskMessage(m_sz_question_msg[type][0], 1);
 			SetMessage(m_sz_question_msg_temp, 1, SMO_NOFIT );
 		}
 		break;		
 
 		case ASK_USE_PET_FOOD :
 			{
-				m_sz_question_msg_temp[0] = new char [strlen( m_sz_question_msg[type][0])+1];
-				sprintf(m_sz_question_msg_temp[0], m_sz_question_msg[type][0]);
-				m_sz_question_msg_temp[1] = new char [strlen( m_sz_question_msg[type][1])+1];
-				sprintf(m_sz_question_msg_temp[1], m_sz_question_msg[type][1]);
+				m_sz_question_msg_temp[0] = AllocAskMessage(m_sz_question_msg[type][0], 1);
+				m_sz_question_msg_temp[1] = AllocAskMessage(m_sz_question_msg[type][1], 1);
 				
 				SetMessage(m_sz_question_msg_temp, 2, SMO_NOFIT );
 			}
 			break;		
 
 		case ASK_KEEP_PETITEM:
-			m_sz_question_msg_temp[0] = new char [strlen( m_sz_question_msg[type][0])+1];
-			sprintf(m_sz_question_msg_temp[0], m_sz_question_msg[type][0]);
+			m_sz_question_msg_temp[0] = AllocAskMessage(m_sz_question_msg[type][0], 1);
 			SetMessage(m_sz_question_msg_temp, 1, SMO_NOFIT );
 			break;
 			
 		case ASK_GET_KEEP_PETITEM:
-			m_sz_question_msg_temp[0] = new char [strlen( m_sz_question_msg[type][0])+1];
-			sprintf(m_sz_question_msg_temp[0], m_sz_question_msg[type][0]);
+			m_sz_question_msg_temp[0] = AllocAskMessage(m_sz_question_msg[type][0], 1);
 			SetMessage(m_sz_question_msg_temp, 1, SMO_NOFIT );
 			break;
 
 		case ASK_USE_SMSITEM:
-			m_sz_question_msg_temp[0] = new char [strlen( m_sz_question_msg[type][0])+1];
-			sprintf(m_sz_question_msg_temp[0], m_sz_question_msg[type][0]);
+			m_sz_question_msg_temp[0] = AllocAskMessage(m_sz_question_msg[type][0], 1);
 			SetMessage(m_sz_question_msg_temp, 1, SMO_NOFIT );
 			break;
 
@@ -870,8 +929,7 @@ C_VS_UI_ASK_DIALOG::C_VS_UI_ASK_DIALOG(int _x, int _y, int center_x, int center_
 		case ASK_FRIEND_DELETE:
 			{
 				const char* pName = (const char*)m_pTemporayValue;
-				m_sz_question_msg_temp[0] = new char [strlen(m_sz_question_msg[type][0])+strlen(pName)+5];
-				sprintf(m_sz_question_msg_temp[0], m_sz_question_msg[type][0], pName);
+				m_sz_question_msg_temp[0] = AllocAskMessage(m_sz_question_msg[type][0], strlen(pName)+5, pName);
 				SetMessage(m_sz_question_msg_temp, 1, SMO_NOFIT);	
 				break;
 			}

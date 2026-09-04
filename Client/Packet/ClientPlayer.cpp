@@ -18,22 +18,17 @@
 #include "SocketEncryptOutputStream.h"
 #include "DebugLog.h"
 //#include "MPlayer.h"
-#include "MZone.h"
-#include "UserInformation.h"
 //#include "minTR.H" 
 #include <fstream>
 
-// DebugKit.h and the four externs that went with it are gone: the one
-// block that used them - the DEBUG_INFO message log below - is inside
-// a /* */ comment, and DEBUG_INFO is defined only under
-// WINDOWS_SCREEN_DISPLAY, which nothing defines. The header is one of
-// the three the wire layer may not reach (docs/RESTRUCTURING.md task
-// 5.1).
-
-// PrintMessageDetail, defined in Client/DebugKit.cpp, went with them:
-// its one call sits inside that same comment. Its declaration takes an
-// ofstream by value, so the call could not compile if the block were
-// ever uncommented.
+// DebugKit.h, the four externs that went with it and the DEBUG_INFO
+// message log that used them are all gone. The log was commented out by
+// upstream and guarded by a macro only WINDOWS_SCREEN_DISPLAY defines,
+// which nothing does; it was deleted in the R3 pass over this tree, and
+// took with it the last unbounded sprintf under Client/Packet and the
+// last executable symbols this library source named. DebugKit.h is one
+// of the three headers the wire layer may not reach anyway
+// (docs/RESTRUCTURING.md task 5.1).
 
 //--------------------------------------------------------------------------------
 //
@@ -161,32 +156,14 @@ void ClientPlayer::processCommand ()
 				file.close();
 #endif
 
-/*
-#ifdef DEBUG_INFO
-				if(g_bMsgOutPutFlag)
-				{
-					SYSTEMTIME curTime;
-					GetLocalTime(&curTime);
-					char strTime[64];
-					memset(strTime,0,sizeof(strTime));
-					sprintf(strTime,"(%02d-%02d %02d:%02d:%02d)",
-						(BYTE)curTime.wMonth,(BYTE)curTime.wDay,
-						(BYTE)curTime.wHour,(BYTE)curTime.wMinute,(BYTE)curTime.wSecond);
-					ofstream file("MessageLog.log", ios::out | ios::app);
-					file << strTime << "<-- RCV[ " << g_MessageStringTable.GetMessageName(packetID) << " ]" << ", \tPacketID=" << packetID << ", PacketSize=" << packetSize << endl;
-					if(g_bMsgContentFlag)
-					{
-						char strMsg[1024];
-						int nMsgLength = szPacketHeader + packetSize;
-						if(nMsgLength>64)
-							nMsgLength = 64;
-						m_pInputStream->peek(strMsg,nMsgLength);
-						PrintMessageDetail(file,strMsg,nMsgLength);
-					}
-					file.close();
-				}
-#endif
-*/
+				// A packet-by-packet message log lived here, commented out
+				// by upstream and guarded by DEBUG_INFO, which only
+				// WINDOWS_SCREEN_DISPLAY defines and nothing does. Deleted
+				// with the R3 pass over this tree: its dead lines held the
+				// last unbounded sprintf under Client/Packet, and it named
+				// three executable symbols - g_bMsgOutPutFlag,
+				// g_MessageStringTable and PrintMessageDetail - from a
+				// library source. Recover it from history if wanted.
 				//#ifdef	__DEBUG_OUTPUT__
 					//	DEBUG_ADD_FORMAT("ID=%d (%s), size=%d", packetID, g_pPacketFactoryManager->getPacketName( packetID ), packetSize);
 				//#else
@@ -486,27 +463,17 @@ void ClientPlayer::setEncryptCode()
     __BEGIN_TRY
 
 //	Assert(g_pPlayer!=NULL);
-	Assert(g_pZone!=NULL);
+	// The zone and the account's server number come from the host now,
+	// which is what took this file's last two game-code includes away
+	// (MZone.h and UserInformation.h) and made it a packetwire member -
+	// docs/RESTRUCTURING.md task 5.1. The Assert(g_pZone!=NULL) that
+	// stood here went with them: the host answers whether or not there
+	// is a zone.
+	ZoneID_t zoneID = Wire::EncryptZoneID();
+	int serverID = Wire::EncryptServerID();
 
-	// 일단은 ObjectID를 이용한다.
-//	ObjectID_t objectID = g_pPlayer->GetID();
-	ZoneID_t zoneID = g_pZone->GetID();
-	int serverID = g_pUserInformation->ServerID;
-
-//	if (objectID!=0)
 	{
-//		uchar code = (uchar)(objectID / zoneID + objectID);		
-		uchar code;
-
-		if( g_pUserInformation->IsNetmarble )
-			code = (uchar)( ( ( ( zoneID ) >> 8 ) ^ ( zoneID ) ) ^ ( ( ( serverID ) + 1 ) << 4 ) );
-		else if ( g_pUserInformation->bChinese )
-//			code = (uchar) ( ( ( ( ( serverID ) + 1 ) << 4 ) | ( zoneID ) ) ^ ( ( zoneID ) >> 8 ) );
-			code = (uchar)( ( ( ( zoneID ) >> 8 ) ^ ( zoneID ) ) ^ ( ( ( serverID ) + 1 ) << 4 ) );
-		else if ( g_pUserInformation->bEnglish )
-			code = (uchar)( ( ( ( zoneID ) >> 8 ) ^ ( zoneID ) ) ^ ( ( ( serverID ) + 1 ) * 51 ) );
-		else
-			code = (uchar)( ( ( ( zoneID ) >> 8 ) ^ ( zoneID ) ) ^ ( ( ( serverID ) + 1 ) << 4 ) );
+		const uchar code = WireEncryptSeed(zoneID, serverID, Wire::EncryptUsesEnglishSeed());
 
 		SocketEncryptOutputStream* pEOS = dynamic_cast<SocketEncryptOutputStream*>(m_pOutputStream);
 		Assert(pEOS!=NULL);

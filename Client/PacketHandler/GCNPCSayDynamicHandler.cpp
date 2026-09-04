@@ -56,7 +56,7 @@ throw ( ProtocolException , Error )
 			{
 				// 채팅~~
 				char str[256];
-				strcpy(str, pPacket->getMessage().c_str());				
+				snprintf(str, sizeof(str), "%s", pPacket->getMessage().c_str());				
 				
 				pCreature->SetChatString( str );
 			}

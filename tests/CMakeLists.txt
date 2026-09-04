@@ -184,6 +184,29 @@ else()
 endif()
 
 #----------------------------------------------------------------------
+# Packet-index audit (tests/tools/check_packet_indices.pl) - the other
+# half of code-health priority 1.
+#
+# Ratchet R3 covers the lengths a server sends into a copy. This covers
+# the indices it sends into a subscript, and it walks the VALUE rather
+# than the spelling: the population is not `array[pPacket->getSlotID()]`
+# but a local assigned from it and used twenty lines later. Handlers are
+# executable-side, so this is the only kind of check they can have.
+#
+# The repo root is passed so the script does not have to guess it from
+# its own location. Needs perl (found above); without it the check is
+# skipped, not passed.
+#----------------------------------------------------------------------
+if(PERL_EXECUTABLE)
+	add_test(
+		NAME packet_indices
+		COMMAND ${PERL_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_packet_indices.pl ${CMAKE_SOURCE_DIR}
+	)
+else()
+	message(STATUS "perl not found: the packet_indices test is not registered")
+endif()
+
+#----------------------------------------------------------------------
 # The committed WireInventory.inc must match a fresh generation, so a
 # new or changed factory cannot go unconstructed and uninventoried. Needs perl (Git for
 # Windows ships one, found above); without it the check is skipped,

@@ -62,6 +62,168 @@ Wire::BugReportTarget () throw ()
 }
 
 //----------------------------------------------------------------------
+// The encrypt-seed inputs.
+//----------------------------------------------------------------------
+// Zone 0 and server 0 with no host, which is what the seed would be
+// built from before the player is in a zone. There is no better answer
+// to invent: a binary with no host has no zone and no account, and the
+// one caller runs only after MoveZone/LoadZone (see WireEncryptSeed).
+//----------------------------------------------------------------------
+ZoneID_t
+Wire::EncryptZoneID () throw ()
+{
+	if (s_pHost==NULL || s_pHost->EncryptZoneID==NULL)
+	{
+		return 0;
+	}
+
+	return s_pHost->EncryptZoneID();
+}
+
+int
+Wire::EncryptServerID () throw ()
+{
+	if (s_pHost==NULL || s_pHost->EncryptServerID==NULL)
+	{
+		return 0;
+	}
+
+	return s_pHost->EncryptServerID();
+}
+
+bool
+Wire::EncryptUsesEnglishSeed () throw ()
+{
+	if (s_pHost==NULL || s_pHost->EncryptUsesEnglishSeed==NULL)
+	{
+		return false;
+	}
+
+	return s_pHost->EncryptUsesEnglishSeed();
+}
+
+//----------------------------------------------------------------------
+// The request-service family's seams.
+//----------------------------------------------------------------------
+// A clock of 0 and "not in the game world" with no host. The second is
+// the conservative answer rather than the convenient one:
+// RequestClientPlayer throws on a request packet that arrives outside
+// the game, so a binary with no host refuses them all rather than
+// accepting them all.
+//
+// The six file-transfer calls answer false, which is what an
+// unregistered transfer looks like - a caller asking whether it still
+// has one cleans up instead of waiting on a manager that is not there.
+//----------------------------------------------------------------------
+DWORD
+Wire::CurrentTime () throw ()
+{
+	if (s_pHost==NULL || s_pHost->CurrentTime==NULL)
+	{
+		return 0;
+	}
+
+	return s_pHost->CurrentTime();
+}
+
+bool
+Wire::InGameMode () throw ()
+{
+	if (s_pHost==NULL || s_pHost->InGameMode==NULL)
+	{
+		return false;
+	}
+
+	return s_pHost->InGameMode();
+}
+
+bool
+Wire::ReceiveMyRequest ( const std::string & name , RequestClientPlayer * pPlayer )
+{
+	if (s_pHost==NULL || s_pHost->ReceiveMyRequest==NULL)
+	{
+		return false;
+	}
+
+	return s_pHost->ReceiveMyRequest(name, pPlayer);
+}
+
+bool
+Wire::HasMyRequest ( const std::string & name ) throw ()
+{
+	if (s_pHost==NULL || s_pHost->HasMyRequest==NULL)
+	{
+		return false;
+	}
+
+	return s_pHost->HasMyRequest(name);
+}
+
+bool
+Wire::RemoveMyRequest ( const std::string & name ) throw ()
+{
+	if (s_pHost==NULL || s_pHost->RemoveMyRequest==NULL)
+	{
+		return false;
+	}
+
+	return s_pHost->RemoveMyRequest(name);
+}
+
+bool
+Wire::SendOtherRequest ( const std::string & name , RequestServerPlayer * pPlayer )
+{
+	if (s_pHost==NULL || s_pHost->SendOtherRequest==NULL)
+	{
+		return false;
+	}
+
+	return s_pHost->SendOtherRequest(name, pPlayer);
+}
+
+bool
+Wire::HasOtherRequest ( const std::string & name ) throw ()
+{
+	if (s_pHost==NULL || s_pHost->HasOtherRequest==NULL)
+	{
+		return false;
+	}
+
+	return s_pHost->HasOtherRequest(name);
+}
+
+bool
+Wire::RemoveOtherRequest ( const std::string & name ) throw ()
+{
+	if (s_pHost==NULL || s_pHost->RemoveOtherRequest==NULL)
+	{
+		return false;
+	}
+
+	return s_pHost->RemoveOtherRequest(name);
+}
+
+//----------------------------------------------------------------------
+// The stream cipher's seed.
+//----------------------------------------------------------------------
+// Preserved from ClientPlayer::setEncryptCode() unchanged, including
+// the parentheses, so the two formulas can be compared with the
+// server's without reading past a rewrite. What is gone is the
+// duplication: the Netmarble, Chinese and default branches were the
+// same expression written three times.
+//----------------------------------------------------------------------
+uchar
+WireEncryptSeed ( ZoneID_t zoneID , int serverID , bool bEnglishSeed ) throw ()
+{
+	if (bEnglishSeed)
+	{
+		return (uchar)( ( ( ( zoneID ) >> 8 ) ^ ( zoneID ) ) ^ ( ( ( serverID ) + 1 ) * 51 ) );
+	}
+
+	return (uchar)( ( ( ( zoneID ) >> 8 ) ^ ( zoneID ) ) ^ ( ( ( serverID ) + 1 ) << 4 ) );
+}
+
+//----------------------------------------------------------------------
 // Send Bug Report
 //----------------------------------------------------------------------
 // Moved here verbatim from Client/PacketFunction.cpp, with the

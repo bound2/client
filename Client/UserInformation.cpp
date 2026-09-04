@@ -21,9 +21,16 @@ UserInformation::UserInformation()
 //	Invisible	= false;
 	
 	PCSNumber	= 0;
-	OtherPCSNumber[0] = 0;
-	OtherPCSNumber[1] = 0;
-	OtherPCSNumber[2] = 0;
+
+	// Looped rather than unrolled, so that raising MAX_PCS_SLOT cannot
+	// leave the new entries uninitialised while the handler guards
+	// already admit them. The index pass that added those guards said
+	// "the arrays and the guards cannot disagree" and left these three
+	// literals behind, which is only half of that.
+	for (int i = 0; i < MAX_PCS_SLOT; i++)
+	{
+		OtherPCSNumber[i] = 0;
+	}
 
 	FaceStyleSlot[0] = 0;
 	FaceStyleSlot[1] = 0;

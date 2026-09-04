@@ -32,8 +32,20 @@ throw ( ProtocolException , Error )
 	// 새로 배울 Skill이 있다고 표시한다.
 	int domainType = pPacket->getSkillDomainType();
 
+	// SkillDomainType_t is a BYTE and GCLearnSkillReady::read does not
+	// bound it, so this is 0..255 against MAX_SKILLDOMAIN domains.
+	// (*g_pSkillManager)[] survives that - MSkillManager is a
+	// CTypeTable, which range-checks in every build - but
+	// SKILLDOMAIN_NAME below is a plain int array and would read past
+	// its end, then hand the garbage to the string table as an id.
+	if (domainType < 0 || domainType >= MAX_SKILLDOMAIN)
+	{
+		DEBUG_ADD_FORMAT("[PacketError-GCLearnSkillReadyHandler] domain out of range: %d", domainType);
+		return;
+	}
+
 	(*g_pSkillManager)[domainType].SetNewSkill();
-	
+
 	// SKILLDOMAIN_NAME holds string table ids, not strings, so look the name up
 	// before formatting it.
 	g_pGameMessage->AddFormat( "You can learn a new %s skill.",

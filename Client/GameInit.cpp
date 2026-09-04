@@ -69,6 +69,8 @@
 #include "MGuildMarkManager.h"
 #include "MEventManager.h"
 #include "RequestFileManager.h"
+#include "Packet/RequestClientPlayer.h"
+#include "Packet/RequestServerPlayer.h"
 #include "RequestUserManager.h"
 #include "MJusticeAttackManager.h"
 #include "Profiler.h"
@@ -3017,7 +3019,62 @@ static int	WireMaxRequestService()	{ return g_pClientConfig!=NULL ? g_pClientCon
 static uint	WireUDPPort()			{ return g_pClientConfig!=NULL ? (uint)g_pClientConfig->CLIENT_COMMUNICATION_UDP_PORT : WIRE_DEFAULT_UDP_PORT; }
 static Player*	WireBugReportTarget()	{ return g_pSocket; }
 
-static const WireHost	s_WireHost = { WireMaxProcessPacket, WireMaxRequestService, WireUDPPort, WireBugReportTarget };
+// The encrypt-seed inputs, and they are asked for on every login:
+// Encrypter.h defines __USE_ENCRYPTER__, so ClientPlayer::setEncryptCode()
+// IS compiled, and GCUpdateInfoHandler calls it right after
+// MoveZone/LoadZone. (The slice that introduced these said the opposite.
+// It was wrong, and both reviewers of the next slice caught it.) They
+// are also the reason ClientPlayer.cpp no longer includes MZone.h or
+// UserInformation.h. Each is guarded anyway: the guards cost nothing,
+// and a wrong seed is a silently dead connection rather than a crash.
+static ZoneID_t	WireEncryptZoneID()		{ return g_pZone!=NULL ? g_pZone->GetID() : 0; }
+static int	WireEncryptServerID()		{ return g_pUserInformation!=NULL ? g_pUserInformation->ServerID : 0; }
+static bool	WireEncryptUsesEnglishSeed()
+{
+	// Of the four original branches only the English one differed; the
+	// Netmarble, Chinese and default cases were the same expression.
+	return g_pUserInformation!=NULL && g_pUserInformation->bEnglish;
+}
+
+//-----------------------------------------------------------------------------
+// The request-service family's seams (task 5.1's fourth slice).
+//-----------------------------------------------------------------------------
+// The peer file-transfer manager stays here: it draws progress, writes
+// into the profile directory and reads the UI's own state. Six calls of
+// it are all the wire layer needs, and each is guarded, because
+// g_pRequestFileManager is built after start-up and the request players
+// outlive it at shutdown - which is what the NULL tests they used to
+// write at the call site were for.
+//
+// The guard is not complete, and saying so is better than implying it
+// is. At shutdown the pointer is deleted AND nulled, so the test holds.
+// On the re-login path it is deleted without nulling and the accept
+// thread is started fifteen lines before it is reassigned, so for that
+// window `g_pRequestFileManager != NULL` is a test on a dangling
+// pointer. The old call sites tested the same expression, so nothing
+// here widens the window - but nothing here closes it either.
+//-----------------------------------------------------------------------------
+static DWORD	WireCurrentTime()		{ return g_CurrentTime; }
+static bool	WireInGameMode()		{ return g_Mode == MODE_GAME; }
+
+static bool	WireReceiveMyRequest(const std::string& name, RequestClientPlayer* pPlayer)
+		{ return g_pRequestFileManager!=NULL && g_pRequestFileManager->ReceiveMyRequest(name, pPlayer); }
+static bool	WireHasMyRequest(const std::string& name)
+		{ return g_pRequestFileManager!=NULL && g_pRequestFileManager->HasMyRequest(name); }
+static bool	WireRemoveMyRequest(const std::string& name)
+		{ return g_pRequestFileManager!=NULL && g_pRequestFileManager->RemoveMyRequest(name); }
+static bool	WireSendOtherRequest(const std::string& name, RequestServerPlayer* pPlayer)
+		{ return g_pRequestFileManager!=NULL && g_pRequestFileManager->SendOtherRequest(name, pPlayer); }
+static bool	WireHasOtherRequest(const std::string& name)
+		{ return g_pRequestFileManager!=NULL && g_pRequestFileManager->HasOtherRequest(name); }
+static bool	WireRemoveOtherRequest(const std::string& name)
+		{ return g_pRequestFileManager!=NULL && g_pRequestFileManager->RemoveOtherRequest(name); }
+
+static const WireHost	s_WireHost = { WireMaxProcessPacket, WireMaxRequestService, WireUDPPort, WireBugReportTarget,
+					WireEncryptZoneID, WireEncryptServerID, WireEncryptUsesEnglishSeed,
+					WireCurrentTime, WireInGameMode,
+					WireReceiveMyRequest, WireHasMyRequest, WireRemoveMyRequest,
+					WireSendOtherRequest, WireHasOtherRequest, WireRemoveOtherRequest };
 
 //-----------------------------------------------------------------------------
 // Init GameObject

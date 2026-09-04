@@ -239,7 +239,7 @@ for my $file (@sources)
 	my $text = <$fh>;
 	close $fh;
 
-	next unless $text =~ /SafeFormat::Format|AddSafeFormat/;
+	next unless $text =~ /SafeFormat::Format|AddSafeFormat|FormatChecked/;
 
 	my $rel = $file;
 	$rel =~ s/^\Q$root\E[\/\\]?//;
@@ -250,7 +250,7 @@ for my $file (@sources)
 	# first, CMessageArray::AddSafeFormat owns its destination and so
 	# takes the format as argument one. Assuming a position is how this
 	# audit came to skip a whole family of its own sites once already.
-	while ($text =~ /(SafeFormat::Format|AddSafeFormat)\s*\(/g)
+	while ($text =~ /(SafeFormat::Format|AddSafeFormat|FormatChecked)\s*\(/g)
 	{
 		my $entry = $1;
 		my $open  = pos $text;
@@ -295,7 +295,11 @@ for my $file (@sources)
 		# at one position is the exact blindness that kept ratchet R7 from
 		# seeing the offset-append sites, so this finds the format rather
 		# than assuming where it is.
-		my $fmt_at = ($entry eq 'AddSafeFormat') ? 0 : 1;
+		# MString::FormatChecked takes the format first, like
+		# AddSafeFormat: it is a method on the destination, so there is
+		# no destination argument to precede it.
+		my $fmt_at = ($entry eq 'AddSafeFormat'
+					|| $entry eq 'FormatChecked') ? 0 : 1;
 
 		$fmt_at = 2 if $fmt_at == 1
 					&& @a > 2
@@ -408,8 +412,21 @@ printf "check_format_arity: %d note(s)\n", $notes;
 # converted; a fall has to be explained by editing these lines in the
 # same commit.
 #----------------------------------------------------------------------
-my $MINIMUM_SITES   = 294;
-my $MINIMUM_CHECKED = 286;
+# 301 = 294 + 7: task 5.4's fifth slice. Three are VS_UI_GameCommon.cpp's
+# title arrays, three are MString::FormatChecked in GameUI.cpp, and one is
+# AllocAskMessage in VS_UI_ExtraDialog.cpp.
+#
+# That last one stands in for TWENTY-ONE converted call sites and counts
+# as one, because it takes the entry as a parameter - exactly the shape
+# the paragraph above predicted would count toward the site floor and
+# contribute nothing to coverage. So this number is a floor on what the
+# audit can see, and NOT the number of converted call sites, which is
+# 321. Do not quote it as one.
+#
+# $MINIMUM_CHECKED moves by 3 rather than 7: the FormatChecked sites name
+# their id through GetGameString and resolve, the other four do not.
+my $MINIMUM_SITES   = 301;
+my $MINIMUM_CHECKED = 289;
 
 if ($sites < $MINIMUM_SITES)
 {

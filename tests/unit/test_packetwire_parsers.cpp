@@ -34,10 +34,14 @@
 #include "ModifyInfo.h"
 #include "InventoryInfo.h"
 #include "Gpackets/GCUpdateInfo.h"
+#include "Gpackets/GCGlobalChat.h"
+#include "Gpackets/GCPhoneConnected.h"
+#include "UserInformation.h"
 #include "Exception.h"
 
 #include <string>
 #include <string.h>
+#include <vector>
 
 namespace {
 
@@ -335,4 +339,155 @@ TEST(InventoryInfo, OversizedCountHitsTheUnderflowGuard)
 		bThrew = true;
 	}
 	CHECK(bThrew);
+}
+
+//----------------------------------------------------------------------
+// The chat length guards the handlers' buffers rest on
+//----------------------------------------------------------------------
+//
+// Every one of these packets carries a BYTE length and then that many
+// bytes of server-supplied text, and each read() decides for itself how
+// long is too long. The handlers copy the result into a fixed buffer,
+// so these numbers and those buffer sizes have to be read together -
+// and until the R3 pass they were not. GCNPCSayDynamic accepts 2048
+// where its handler copied into char[256], which is a 1792-byte stack
+// overflow a server could send at will; the copy is bounded now
+// (docs/code-health-review-2026-08-29.md, the packet-tree copy pass).
+//
+// Pinned here because the packets are library code and the handlers are
+// not: if someone widens one of these limits, this is the only place
+// that can notice.
+//----------------------------------------------------------------------
+namespace {
+
+// A GCGlobalChat body, in the order read() takes it: a uint colour,
+// a BYTE length, that many bytes of text, then a Race_t.
+void	PreloadGlobalChat(StreamFixture& f, unsigned int declaredLength, unsigned int textBytes)
+{
+	std::vector<unsigned char> body;
+
+	for (unsigned int i = 0; i < sizeof(uint); ++i)
+		body.push_back(0);			// colour
+
+	body.push_back((unsigned char)declaredLength);
+
+	for (unsigned int i = 0; i < textBytes; ++i)
+		body.push_back('A');
+
+	for (unsigned int i = 0; i < sizeof(Race_t); ++i)
+		body.push_back(0);			// race
+
+	f.Preload(&body[0], (unsigned int)body.size());
+}
+
+bool	GlobalChatReadThrows(unsigned int declaredLength, unsigned int textBytes)
+{
+	StreamFixture f(4096);
+	PreloadGlobalChat(f, declaredLength, textBytes);
+
+	GCGlobalChat packet;
+
+	try {
+		packet.read(f.m_Stream);
+	} catch (ProtocolException&) {
+		return true;
+	} catch (Error&) {
+		return true;
+	}
+
+	return false;
+}
+
+} // namespace
+
+TEST(GCGlobalChat, RejectsAZeroLengthAndAnOverLongMessage)
+{
+	// Zero is rejected outright.
+	CHECK_EQ(true, GlobalChatReadThrows(0, 0));
+
+	// 128 is the limit the handler's char[256] is sized against, so it
+	// has to be accepted...
+	CHECK_EQ(false, GlobalChatReadThrows(128, 128));
+
+	// ...and 129 refused. If this ever stops throwing, the buffer in
+	// GCGlobalChatHandler is the thing to look at.
+	CHECK_EQ(true, GlobalChatReadThrows(129, 129));
+	CHECK_EQ(true, GlobalChatReadThrows(255, 255));
+}
+
+TEST(GCGlobalChat, KeepsTheWholeMessageItAccepted)
+{
+	StreamFixture f(4096);
+	PreloadGlobalChat(f, 128, 128);
+
+	GCGlobalChat packet;
+	packet.read(f.m_Stream);
+
+	// Truncating here rather than at the copy would hide the defect the
+	// R3 pass fixed, so the packet has to hand over all 128 bytes.
+	CHECK_EQ(128, (int)packet.getMessage().size());
+}
+
+//----------------------------------------------------------------------
+// The slot id the PCS handlers rest a guard on
+//----------------------------------------------------------------------
+//
+// GCPhoneConnected, GCPhoneDisconnected, GCPhoneSay and GCRing all carry
+// a SlotID_t - a BYTE - and index UserInformation's PCSUserName and
+// OtherPCSNumber with it. Those arrays hold MAX_PCS_SLOT (3) entries,
+// and read() bounds the NAME but not the SLOT, so until the index pass
+// a server could assign an MString hundreds of bytes past the end of
+// g_pUserInformation: MString::operator= reads m_pString out of
+// whatever is there and delete[]s it.
+//
+// The four handlers guard it now. This pins the fact that makes those
+// guards load-bearing rather than belt-and-braces: the wire accepts any
+// slot a BYTE can hold. If someone later adds a limit to read(), this
+// test is what tells them the handler guards changed meaning.
+//----------------------------------------------------------------------
+namespace {
+
+bool	PhoneConnectedAcceptsSlot(unsigned int slot)
+{
+	StreamFixture f(256);
+
+	std::vector<unsigned char> body;
+
+	for (unsigned int i = 0; i < sizeof(PhoneNumber_t); ++i)
+		body.push_back(0);			// phone number
+
+	body.push_back((unsigned char)slot);		// SlotID_t
+
+	body.push_back(4);				// name length
+	for (int i = 0; i < 4; ++i)
+		body.push_back('n');
+
+	f.Preload(&body[0], (unsigned int)body.size());
+
+	GCPhoneConnected packet;
+
+	try {
+		packet.read(f.m_Stream);
+	} catch (ProtocolException&) {
+		return false;
+	} catch (Error&) {
+		return false;
+	}
+
+	return (unsigned int)packet.getSlotID() == slot;
+}
+
+} // namespace
+
+TEST(GCPhoneConnected, AcceptsAnySlotIdAByteCanHold)
+{
+	// The three that address a real array...
+	CHECK_EQ(true, PhoneConnectedAcceptsSlot(0));
+	CHECK_EQ(true, PhoneConnectedAcceptsSlot(MAX_PCS_SLOT - 1));
+
+	// ...and the ones that do not. Every one of these reaches the
+	// handler, which is why the handler is where the guard lives.
+	CHECK_EQ(true, PhoneConnectedAcceptsSlot(MAX_PCS_SLOT));
+	CHECK_EQ(true, PhoneConnectedAcceptsSlot(200));
+	CHECK_EQ(true, PhoneConnectedAcceptsSlot(255));
 }
