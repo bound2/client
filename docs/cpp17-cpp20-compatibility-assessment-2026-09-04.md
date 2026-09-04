@@ -345,7 +345,7 @@ migrate small packet families behind equivalent round-trip/golden coverage rathe
 than expanding this into a mechanical whole-tree rewrite.
 
 **Typed-scalar status (2026-09-04):** the first priority-4 slice is implemented
-on `feature/typed-wire-scalars`. The stream layer accepts only exact-width signed
+in PR #85. The stream layer accepts only exact-width signed
 and unsigned integers, or enums backed by those types, through constrained
 `readWire`/`writeWire` entry points. Existing plain and encrypted scalar overloads
 remain compatible and delegate to that implementation; ambiguous `bool` and plain
