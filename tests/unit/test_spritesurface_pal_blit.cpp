@@ -21,6 +21,18 @@
 // and those are what is driven here, against a small array with every
 // pixel outside the expected footprint checked untouched.
 //
+// Three details of the fixtures matter, each because a first version
+// of this file lacked it and passed anyway:
+//
+//   - The surface rows carry padding beyond the visible width, so a
+//     blit that strode by the width rather than the pitch would fail.
+//   - The blend tests draw over a grey, not black. Over black a screen
+//     blend and a plain copy produce identical bytes, and so do an
+//     opaque alpha and a copy.
+//   - The clipping tests use a sprite with several segments and
+//     transparent runs, so the clip variants' skip-into-a-run and
+//     later-segment branches actually execute.
+//
 // Sprite container layout (CSpritePalBase::LoadFromFile):
 //
 //      DWORD  size      bytes of packed pixel data
@@ -48,8 +60,19 @@
 namespace {
 
 const char* const	kTempFile		= "spritesurface_pal_blit_test.bin";
+
+// The plain fixture: every pixel opaque.
 const int		kSpriteWidth	= 4;
 const int		kSpriteHeight	= 2;
+
+// The segmented fixture: three segments per row over seven columns,
+// (2 transparent, 1 colour)(1 transparent, 2 colour)(0 transparent, 1 colour).
+const int		kSegmentedWidth	= 7;
+const bool		kSegmentedColumn[kSegmentedWidth] = { false, false, true, false, true, true, true };
+
+// Alpha 32 makes the source replace the destination; 16 halves the way.
+const BYTE		kOpaque		= 0x20;
+const BYTE		kHalf		= 0x10;
 
 // A colour whose three channels are distinct and mid-range, so a
 // channel put in the wrong place or scaled wrongly shows up.
@@ -70,39 +93,51 @@ void	PushDword(std::vector<unsigned char>& bytes, DWORD value)
 }
 
 //----------------------------------------------------------------------
-// One fully opaque scanline of palette index 1, with or without the
-// alpha byte an alpha sprite carries per pixel.
+// Scanline builders. Every colour pixel is palette index 1.
 //----------------------------------------------------------------------
-std::vector<unsigned char>	OpaqueScanline(bool withAlpha)
+void	PushSegment(std::vector<unsigned char>& scanline, int transparentRun, int colourRun, bool withAlpha, BYTE alpha)
 {
-	std::vector<unsigned char>	scanline;
-
-	scanline.push_back(1);						// one segment
-	scanline.push_back(0);						// no transparent run
-	scanline.push_back((unsigned char)kSpriteWidth);	// colour run
-
-	for (int i = 0; i < kSpriteWidth; i++)
+	scanline.push_back((unsigned char)transparentRun);
+	scanline.push_back((unsigned char)colourRun);
+	for (int i = 0; i < colourRun; i++)
 	{
 		if (withAlpha)
-			scanline.push_back(0x20);			// alpha 32: source replaces dest
-		scanline.push_back(0x01);				// palette index
+			scanline.push_back(alpha);
+		scanline.push_back(0x01);
 	}
+}
 
+std::vector<unsigned char>	OpaqueScanline(bool withAlpha, BYTE alpha = kOpaque)
+{
+	std::vector<unsigned char>	scanline;
+	scanline.push_back(1);
+	PushSegment(scanline, 0, kSpriteWidth, withAlpha, alpha);
+	return scanline;
+}
+
+std::vector<unsigned char>	SegmentedScanline(bool withAlpha)
+{
+	std::vector<unsigned char>	scanline;
+	scanline.push_back(3);
+	PushSegment(scanline, 2, 1, withAlpha, kOpaque);
+	PushSegment(scanline, 1, 2, withAlpha, kOpaque);
+	PushSegment(scanline, 0, 1, withAlpha, kOpaque);
 	return scanline;
 }
 
 //----------------------------------------------------------------------
-// Writes a kSpriteWidth x kSpriteHeight sprite whose every pixel is
-// opaque palette index 1, and loads it into the sprite handed in.
+// Writes a sprite of kSpriteHeight rows, each the scanline given, in
+// the container format, and loads it into the sprite handed in. The
+// declared width is a parameter so a scanline wider than its sprite
+// can be written to exercise the loader's rejection.
 //----------------------------------------------------------------------
 template <class Sprite>
-bool	LoadOpaqueSprite(Sprite& sprite, bool withAlpha)
+bool	LoadSprite(Sprite& sprite, const std::vector<unsigned char>& scanline, int declaredWidth)
 {
-	std::vector<unsigned char>	scanline = OpaqueScanline(withAlpha);
 	std::vector<unsigned char>	bytes;
 
 	PushDword(bytes, (DWORD)(scanline.size() * kSpriteHeight));
-	PushWord(bytes, (WORD)kSpriteWidth);
+	PushWord(bytes, (WORD)declaredWidth);
 	PushWord(bytes, (WORD)kSpriteHeight);
 
 	for (int row = 0; row < kSpriteHeight; row++)
@@ -125,6 +160,18 @@ bool	LoadOpaqueSprite(Sprite& sprite, bool withAlpha)
 	return loaded;
 }
 
+template <class Sprite>
+bool	LoadOpaqueSprite(Sprite& sprite, bool withAlpha, BYTE alpha = kOpaque)
+{
+	return LoadSprite(sprite, OpaqueScanline(withAlpha, alpha), kSpriteWidth);
+}
+
+template <class Sprite>
+bool	LoadSegmentedSprite(Sprite& sprite, bool withAlpha)
+{
+	return LoadSprite(sprite, SegmentedScanline(withAlpha), kSegmentedWidth);
+}
+
 //----------------------------------------------------------------------
 // A palette with the test colour at index 1.
 //----------------------------------------------------------------------
@@ -135,48 +182,91 @@ void	FillPalette(MPalette& pal)
 	pal[1] = ColorDraw::Color(kRed, kGreen, kBlue);
 }
 
+WORD	TestColour()
+{
+	return ColorDraw::Color(kRed, kGreen, kBlue);
+}
+
 //----------------------------------------------------------------------
-// A pixel buffer standing in for a locked surface, cleared to black.
-// Footprint(x, y, w, h) says whether every pixel inside that rectangle
-// holds the test colour and every pixel outside it is still black -
-// the whole statement a clipped blit has to satisfy.
+// A pixel buffer standing in for a locked surface. Each row is padded
+// by kPadding words beyond the visible width, as an SDL surface's rows
+// can be, so the pitch and the width differ; the padding is checked
+// untouched like every other pixel outside a footprint.
 //----------------------------------------------------------------------
+const int	kPadding = 3;
+
 class Surface
 {
 public:
 	Surface(int width, int height)
-		: m_Width(width), m_Height(height), m_Pixels((size_t)(width * height), 0) {}
+		: m_Width(width), m_Height(height), m_Stride(width + kPadding),
+		  m_Pixels((size_t)((width + kPadding) * height), 0) {}
 
 	void	Fill(WORD value)	{ m_Pixels.assign(m_Pixels.size(), value); }
 
 	WORD*	Pixels()		{ return &m_Pixels[0]; }
-	int	Pitch() const		{ return m_Width * (int)sizeof(WORD); }
+	int	Pitch() const		{ return m_Stride * (int)sizeof(WORD); }
 	int	Width() const		{ return m_Width; }
 	int	Height() const		{ return m_Height; }
-	WORD	At(int x, int y) const	{ return m_Pixels[(size_t)(y * m_Width + x)]; }
+	WORD	At(int x, int y) const	{ return m_Pixels[(size_t)(y * m_Stride + x)]; }
 
+	//------------------------------------------------------------
+	// Every pixel inside the rectangle holds `inside`, every pixel
+	// outside it - padding included - holds `outside`.
+	//------------------------------------------------------------
 	bool	FootprintIs(int left, int top, int width, int height,
-				WORD inside = ColorDraw::Color(kRed, kGreen, kBlue), WORD outside = 0) const
+				WORD inside, WORD outside = 0) const
 	{
 		for (int y = 0; y < m_Height; y++)
 		{
-			for (int x = 0; x < m_Width; x++)
+			for (int x = 0; x < m_Stride; x++)
 			{
 				bool	covered = (x >= left && x < left + width && y >= top && y < top + height);
-				WORD	expected = covered ? inside : outside;
 
-				if (At(x, y) != expected)
+				if (At(x, y) != (covered ? inside : outside))
 					return false;
 			}
 		}
 		return true;
 	}
 
+	bool	FootprintIs(int left, int top, int width, int height) const
+	{
+		return FootprintIs(left, top, width, height, TestColour(), 0);
+	}
+
 	bool	IsBlack() const	{ return FootprintIs(0, 0, 0, 0); }
+
+	//------------------------------------------------------------
+	// The segmented sprite placed with its origin at (originX,
+	// originY): a pixel holds the colour exactly when it maps to one
+	// of the sprite's coloured columns within its rows, and to a
+	// column the surface can hold.
+	//------------------------------------------------------------
+	bool	SegmentedFootprintIs(int originX, int originY) const
+	{
+		for (int y = 0; y < m_Height; y++)
+		{
+			for (int x = 0; x < m_Stride; x++)
+			{
+				int	sx = x - originX;
+				int	sy = y - originY;
+				bool	covered = (x < m_Width)
+						&& sx >= 0 && sx < kSegmentedWidth
+						&& sy >= 0 && sy < kSpriteHeight
+						&& kSegmentedColumn[sx];
+
+				if (At(x, y) != (covered ? TestColour() : 0))
+					return false;
+			}
+		}
+		return true;
+	}
 
 private:
 	int			m_Width;
 	int			m_Height;
+	int			m_Stride;
 	std::vector<WORD>	m_Pixels;
 };
 
@@ -185,6 +275,7 @@ void	ScreenBlit(Surface& surface, int x, int y, CSpritePal& sprite, MPalette& pa
 	POINT	point;
 	point.x = x;
 	point.y = y;
+	CSpriteSurface::InitEffectTable();
 	CSpriteSurface::SetPalEffect(CSpriteSurface::EFFECT_SCREEN);
 	CSpriteSurface::BltSpritePalEffectTo(surface.Pixels(), surface.Pitch(),
 										surface.Width(), surface.Height(),
@@ -209,7 +300,8 @@ void	AlphaBlit(Surface& surface, int x, int y, CAlphaSpritePal& sprite, MPalette
 
 //----------------------------------------------------------------------
 // A sprite that fits needs no clipping: the whole sprite rectangle,
-// drawn at the point given.
+// drawn at the point given. That includes one whose far edge lands
+// exactly on the surface's, and one that covers the surface exactly.
 //----------------------------------------------------------------------
 TEST(ClipSpriteToSurface, WhollyVisibleSpriteIsNotClipped)
 {
@@ -224,6 +316,16 @@ TEST(ClipSpriteToSurface, WhollyVisibleSpriteIsNotClipped)
 	CHECK_EQ(2, rect.bottom);
 	CHECK_EQ(1, dest.x);
 	CHECK_EQ(1, dest.y);
+
+	CHECK_EQ((int)CSpriteSurface::SPRITE_CLIP_NONE,
+		(int)CSpriteSurface::ClipSpriteToSurface(2, 2, 4, 2, 6, 4, &rect, &dest));
+	CHECK_EQ(4, rect.right);
+	CHECK_EQ(2, rect.bottom);
+
+	CHECK_EQ((int)CSpriteSurface::SPRITE_CLIP_NONE,
+		(int)CSpriteSurface::ClipSpriteToSurface(0, 0, 6, 4, 6, 4, &rect, &dest));
+	CHECK_EQ(6, rect.right);
+	CHECK_EQ(4, rect.bottom);
 }
 
 //----------------------------------------------------------------------
@@ -389,7 +491,7 @@ TEST(ScreenBlend, SelectingScreenBlendsThePixel)
 
 	CSpriteSurface::memcpyPalEffect(dest, source, 2, pal);
 
-	CHECK_EQ(ColorDraw::Color(kRed, kGreen, kBlue), dest[0]);
+	CHECK_EQ(TestColour(), dest[0]);
 	CHECK_EQ((WORD)0xFFFF, dest[1]);
 }
 
@@ -399,8 +501,6 @@ TEST(ScreenBlend, SelectingScreenBlendsThePixel)
 
 TEST(BltSpritePalEffectTo, DrawsTheWholeSpriteWhenItFits)
 {
-	CSpriteSurface::InitEffectTable();
-
 	CSpritePal	sprite;
 	CHECK(LoadOpaqueSprite(sprite, false));
 
@@ -415,15 +515,13 @@ TEST(BltSpritePalEffectTo, DrawsTheWholeSpriteWhenItFits)
 
 //----------------------------------------------------------------------
 // Over a black surface the screen blend and a plain copy produce the
-// same bytes, so the footprint tests above cannot tell them apart.
-// This one draws over a grey and asserts the blended value: per
-// channel, high + low * (max - high) / max, with red and blue out of
-// 32 and green out of 64. A plain copy would leave the palette colour.
+// same bytes, so the footprint tests cannot tell them apart. This one
+// draws over a grey and asserts the blended value: per channel,
+// high + low * (max - high) / max, with red and blue out of 32 and
+// green out of 64. A plain copy would leave the palette colour.
 //----------------------------------------------------------------------
 TEST(BltSpritePalEffectTo, BlendsOverANonBlackSurface)
 {
-	CSpriteSurface::InitEffectTable();
-
 	CSpritePal	sprite;
 	CHECK(LoadOpaqueSprite(sprite, false));
 
@@ -441,7 +539,7 @@ TEST(BltSpritePalEffectTo, BlendsOverANonBlackSurface)
 	surface.Fill(grey);
 	ScreenBlit(surface, 1, 1, sprite, pal);
 
-	CHECK(blended != ColorDraw::Color(kRed, kGreen, kBlue));
+	CHECK(blended != TestColour());
 	CHECK(surface.FootprintIs(1, 1, kSpriteWidth, kSpriteHeight, blended, grey));
 }
 
@@ -451,8 +549,6 @@ TEST(BltSpritePalEffectTo, BlendsOverANonBlackSurface)
 //----------------------------------------------------------------------
 TEST(BltSpritePalEffectTo, ClipsAtTheTopLeftCorner)
 {
-	CSpriteSurface::InitEffectTable();
-
 	CSpritePal	sprite;
 	CHECK(LoadOpaqueSprite(sprite, false));
 
@@ -467,8 +563,6 @@ TEST(BltSpritePalEffectTo, ClipsAtTheTopLeftCorner)
 
 TEST(BltSpritePalEffectTo, ClipsAtTheBottomRightCorner)
 {
-	CSpriteSurface::InitEffectTable();
-
 	CSpritePal	sprite;
 	CHECK(LoadOpaqueSprite(sprite, false));
 
@@ -486,8 +580,6 @@ TEST(BltSpritePalEffectTo, ClipsAtTheBottomRightCorner)
 //----------------------------------------------------------------------
 TEST(BltSpritePalEffectTo, ClipsBothSidesOfAWideSprite)
 {
-	CSpriteSurface::InitEffectTable();
-
 	CSpritePal	sprite;
 	CHECK(LoadOpaqueSprite(sprite, false));
 
@@ -505,8 +597,6 @@ TEST(BltSpritePalEffectTo, ClipsBothSidesOfAWideSprite)
 //----------------------------------------------------------------------
 TEST(BltSpritePalEffectTo, ClipsRowsOnly)
 {
-	CSpriteSurface::InitEffectTable();
-
 	CSpritePal	sprite;
 	CHECK(LoadOpaqueSprite(sprite, false));
 
@@ -519,10 +609,50 @@ TEST(BltSpritePalEffectTo, ClipsRowsOnly)
 	CHECK(surface.FootprintIs(1, 0, kSpriteWidth, kSpriteHeight - 1));
 }
 
-TEST(BltSpritePalEffectTo, DrawsNothingOutsideOrUninitialised)
+//----------------------------------------------------------------------
+// The segmented sprite under each kind of clipping. The placements
+// are chosen so the cut lands inside a transparent run, inside a
+// colour run, and at a segment boundary, and so that segments after
+// the first are reached on both the left- and right-clipped walks.
+//----------------------------------------------------------------------
+TEST(BltSpritePalEffectTo, ClipsASegmentedSpriteCorrectly)
 {
-	CSpriteSurface::InitEffectTable();
+	CSpritePal	sprite;
+	CHECK(LoadSegmentedSprite(sprite, false));
 
+	MPalette	pal;
+	FillPalette(pal);
+
+	const int	placements[][3] =
+	{
+		//  x,  y, surface width
+		{  0,  1, 9 },		// fits
+		{ -1,  0, 9 },		// left cut inside the first transparent run
+		{ -3,  0, 9 },		// left cut inside a colour run (column 2 gone)
+		{ -5,  0, 9 },		// left cut at the last segment
+		{  4,  1, 9 },		// right cut inside the middle colour run
+		{  6,  1, 9 },		// right cut inside the first transparent run
+		{ -1,  0, 3 },		// both sides cut
+		{ -3, -1, 2 },		// both sides and the top cut
+	};
+
+	for (size_t i = 0; i < sizeof(placements) / sizeof(placements[0]); i++)
+	{
+		Surface	surface(placements[i][2], 4);
+		ScreenBlit(surface, placements[i][0], placements[i][1], sprite, pal);
+		CHECK(surface.SegmentedFootprintIs(placements[i][0], placements[i][1]));
+	}
+}
+
+//----------------------------------------------------------------------
+// Nothing drawn when the sprite is off the surface, never loaded, or
+// refused by the loader. The refused case is the one worth having:
+// sprite rejection is silent in this client and the return value is
+// ignored, so a rejected sprite reaches the blit as an initialised,
+// empty one.
+//----------------------------------------------------------------------
+TEST(BltSpritePalEffectTo, DrawsNothingOutsideUnloadedOrRejected)
+{
 	CSpritePal	sprite;
 	CHECK(LoadOpaqueSprite(sprite, false));
 
@@ -535,8 +665,14 @@ TEST(BltSpritePalEffectTo, DrawsNothingOutsideOrUninitialised)
 	ScreenBlit(surface, -4, 0, sprite, pal);
 	CHECK(surface.IsBlack());
 
-	CSpritePal	empty;
-	ScreenBlit(surface, 1, 1, empty, pal);
+	CSpritePal	unloaded;
+	ScreenBlit(surface, 1, 1, unloaded, pal);
+	CHECK(surface.IsBlack());
+
+	// A scanline wider than the sprite it claims to belong to.
+	CSpritePal	rejected;
+	CHECK_EQ(false, LoadSprite(rejected, OpaqueScanline(false), kSpriteWidth - 1));
+	ScreenBlit(surface, 1, 1, rejected, pal);
 	CHECK(surface.IsBlack());
 }
 
@@ -556,6 +692,33 @@ TEST(BltAlphaSpritePalTo, DrawsTheWholeSpriteWhenItFits)
 	AlphaBlit(surface, 1, 1, sprite, pal);
 
 	CHECK(surface.FootprintIs(1, 1, kSpriteWidth, kSpriteHeight));
+}
+
+//----------------------------------------------------------------------
+// An opaque alpha over black is indistinguishable from a copy. Half
+// alpha over a darker grey is not: per channel, d + (s - d) * 16 / 32.
+//----------------------------------------------------------------------
+TEST(BltAlphaSpritePalTo, BlendsByAlphaOverANonBlackSurface)
+{
+	CAlphaSpritePal	sprite;
+	CHECK(LoadOpaqueSprite(sprite, true, kHalf));
+
+	MPalette	pal;
+	FillPalette(pal);
+
+	const WORD	grey = ColorDraw::Color(4, 20, 8);
+
+	// red:   4  + (10 - 4)  * 16 / 32 = 7
+	// green: 20 + (40 - 20) * 16 / 32 = 30
+	// blue:  8  + (20 - 8)  * 16 / 32 = 14
+	const WORD	blended = ColorDraw::Color(7, 30, 14);
+
+	Surface		surface(6, 4);
+	surface.Fill(grey);
+	AlphaBlit(surface, 1, 1, sprite, pal);
+
+	CHECK(blended != TestColour());
+	CHECK(surface.FootprintIs(1, 1, kSpriteWidth, kSpriteHeight, blended, grey));
 }
 
 //----------------------------------------------------------------------
@@ -618,7 +781,35 @@ TEST(BltAlphaSpritePalTo, ClipsBothSidesOfAWideSprite)
 	CHECK(surface.FootprintIs(0, 1, 2, kSpriteHeight));
 }
 
-TEST(BltAlphaSpritePalTo, DrawsNothingOutsideOrUninitialised)
+TEST(BltAlphaSpritePalTo, ClipsASegmentedSpriteCorrectly)
+{
+	CAlphaSpritePal	sprite;
+	CHECK(LoadSegmentedSprite(sprite, true));
+
+	MPalette	pal;
+	FillPalette(pal);
+
+	const int	placements[][3] =
+	{
+		{  0,  1, 9 },
+		{ -1,  0, 9 },
+		{ -3,  0, 9 },
+		{ -5,  0, 9 },
+		{  4,  1, 9 },
+		{  6,  1, 9 },
+		{ -1,  0, 3 },
+		{ -3, -1, 2 },
+	};
+
+	for (size_t i = 0; i < sizeof(placements) / sizeof(placements[0]); i++)
+	{
+		Surface	surface(placements[i][2], 4);
+		AlphaBlit(surface, placements[i][0], placements[i][1], sprite, pal);
+		CHECK(surface.SegmentedFootprintIs(placements[i][0], placements[i][1]));
+	}
+}
+
+TEST(BltAlphaSpritePalTo, DrawsNothingOutsideUnloadedOrRejected)
 {
 	CAlphaSpritePal	sprite;
 	CHECK(LoadOpaqueSprite(sprite, true));
@@ -632,7 +823,12 @@ TEST(BltAlphaSpritePalTo, DrawsNothingOutsideOrUninitialised)
 	AlphaBlit(surface, 0, -2, sprite, pal);
 	CHECK(surface.IsBlack());
 
-	CAlphaSpritePal	empty;
-	AlphaBlit(surface, 1, 1, empty, pal);
+	CAlphaSpritePal	unloaded;
+	AlphaBlit(surface, 1, 1, unloaded, pal);
+	CHECK(surface.IsBlack());
+
+	CAlphaSpritePal	rejected;
+	CHECK_EQ(false, LoadSprite(rejected, OpaqueScanline(true), kSpriteWidth - 1));
+	AlphaBlit(surface, 1, 1, rejected, pal);
 	CHECK(surface.IsBlack());
 }
