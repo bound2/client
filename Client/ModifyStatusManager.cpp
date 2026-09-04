@@ -12,6 +12,7 @@
 #include "MSkillManager.h"
 #include "ClientDef.h"
 #include "MGameStringTable.h"
+#include "SafeFormat.h"
 #include "MSlayerGear.h"
 #include "MVampireGear.h"
 #include "MOustersGear.h"
@@ -959,7 +960,7 @@ ModifyStatusManager::Function_MODIFY_ALIGNMENT(void* pVoid)
 		if (g_Mode==MODE_GAME)
 		{
 			char str[256];
-			sprintf(str, (*g_pGameStringTable)[stringSelect[alignment]].GetString(), alignmentName[alignment]);
+			SafeFormat::Format(str, GetGameString(stringSelect[alignment]), alignmentName[alignment]);
 			g_pGameMessage->Add(str);					
 
 			g_char_slot_ingame.alignment = (ALIGNMENT)alignment;
@@ -1309,7 +1310,7 @@ ModifyStatusManager::Function_MODIFY_PET_HP(void *pVoid)
 		{
 			std::string petName = pPetItem->GetPetName().c_str();
 			char szTemp[512];
-			sprintf(szTemp, (*g_pGameStringTable)[UI_STRING_MESSAGE_HOUR].GetString(), 1);
+			SafeFormat::Format(szTemp, GetGameString(UI_STRING_MESSAGE_HOUR), 1);
 
 			g_pSystemMessage->AddSafeFormat(GetGameString(STRING_MESSAGE_PET_DIE_WARNING), petName.c_str(), szTemp);
 			g_pSystemMessage->Add((*g_pGameStringTable)[STRING_MESSAGE_PET_REQUEST_REFILL].GetString());
@@ -1318,7 +1319,7 @@ ModifyStatusManager::Function_MODIFY_PET_HP(void *pVoid)
 		{
 			std::string petName = pPetItem->GetPetName().c_str();
 			char szTemp[512];
-			sprintf(szTemp, (*g_pGameStringTable)[UI_STRING_MESSAGE_MINUTE].GetString(), 10);
+			SafeFormat::Format(szTemp, GetGameString(UI_STRING_MESSAGE_MINUTE), 10);
 
 			g_pSystemMessage->AddSafeFormat(GetGameString(STRING_MESSAGE_PET_DIE_WARNING), petName.c_str(), szTemp);
 			g_pSystemMessage->Add((*g_pGameStringTable)[STRING_MESSAGE_PET_REQUEST_REFILL].GetString());

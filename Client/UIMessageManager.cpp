@@ -25,6 +25,7 @@
 #include "SkillDef.h"
 #include "ClientFunction.h"
 #include "MGameStringTable.h"
+#include "SafeFormat.h"
 #include "MItemOptionTable.h"
 #include "CToken.h"
 #include "UserOption.h"
@@ -1157,7 +1158,7 @@ UIMessageManager::Execute_UI_NEW_CHARACTER(intptr_t left, intptr_t right, void* 
 	if (len<PlayerInfo::minIDLength || len>PlayerInfo::maxIDLength)
 	{
 		char strTemp[128];
-		sprintf(strTemp, (*g_pGameStringTable)[STRING_USER_REGISTER_ID_LENGTH].GetString(), PlayerInfo::minIDLength, PlayerInfo::maxIDLength);
+		SafeFormat::Format(strTemp, GetGameString(STRING_USER_REGISTER_ID_LENGTH), PlayerInfo::minIDLength, PlayerInfo::maxIDLength);
 		g_pUIDialog->PopupFreeMessageDlg( strTemp );
 		bAllOK = FALSE;
 	}
@@ -1719,7 +1720,7 @@ UIMessageManager::Execute_UI_NEW_USER_REGISTRATION(intptr_t left, intptr_t right
 		
 		if (len<PlayerInfo::minIDLength || len>PlayerInfo::maxIDLength)
 		{
-			sprintf(strTemp, (*g_pGameStringTable)[STRING_USER_REGISTER_ID_LENGTH].GetString(), PlayerInfo::minIDLength, PlayerInfo::maxIDLength);
+			SafeFormat::Format(strTemp, GetGameString(STRING_USER_REGISTER_ID_LENGTH), PlayerInfo::minIDLength, PlayerInfo::maxIDLength);
 			g_pUIDialog->PopupFreeMessageDlg( strTemp );
 			AllOK = FALSE;
 		}
@@ -1757,7 +1758,7 @@ UIMessageManager::Execute_UI_NEW_USER_REGISTRATION(intptr_t left, intptr_t right
 			
 			if (len<PlayerInfo::minPasswordLength || len>PlayerInfo::maxPasswordLength)
 			{
-				sprintf(strTemp, (*g_pGameStringTable)[STRING_USER_REGISTER_PASSWORD_LENGTH].GetString(), PlayerInfo::minPasswordLength, PlayerInfo::maxPasswordLength);
+				SafeFormat::Format(strTemp, GetGameString(STRING_USER_REGISTER_PASSWORD_LENGTH), PlayerInfo::minPasswordLength, PlayerInfo::maxPasswordLength);
 				g_pUIDialog->PopupFreeMessageDlg( strTemp );
 				AllOK = FALSE;
 			}
@@ -1813,7 +1814,7 @@ UIMessageManager::Execute_UI_NEW_USER_REGISTRATION(intptr_t left, intptr_t right
 			
 			if (len>PlayerInfo::maxNameLength)
 			{
-				sprintf(strTemp, (*g_pGameStringTable)[STRING_USER_REGISTER_NAME_LENGTH].GetString(), PlayerInfo::maxNameLength);
+				SafeFormat::Format(strTemp, GetGameString(STRING_USER_REGISTER_NAME_LENGTH), PlayerInfo::maxNameLength);
 				g_pUIDialog->PopupFreeMessageDlg( strTemp );
 				AllOK = FALSE;
 			}		
@@ -2751,7 +2752,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 									if (nameLen<PlayerInfo::minIDLength || nameLen>PlayerInfo::maxIDLength)
 									{
 										char strTemp[256];
-										sprintf(strTemp, (*g_pGameStringTable)[STRING_USER_REGISTER_ID_LENGTH].GetString(), 
+										SafeFormat::Format(strTemp, GetGameString(STRING_USER_REGISTER_ID_LENGTH), 
 													PlayerInfo::minIDLength,
 													PlayerInfo::maxIDLength);
 
@@ -2854,7 +2855,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 										g_pChatManager->AddID( g_pUserInformation->CharacterID.GetString() );
 
 										char strTemp[128];
-										sprintf(strTemp, (*g_pGameStringTable)[STRING_MESSAGE_CHAT_IGNORE_ALL].GetString(), pData);
+										SafeFormat::Format(strTemp, GetGameString(STRING_MESSAGE_CHAT_IGNORE_ALL), pData);
 										UI_AddChatToHistory( strTemp, NULL, CLD_INFO, right );
 
 										// [도움말] 대화거부
@@ -2875,7 +2876,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 										if (nameLen<PlayerInfo::minIDLength || nameLen>PlayerInfo::maxIDLength)
 										{
 											char strTemp[256];
-											sprintf(strTemp, (*g_pGameStringTable)[STRING_USER_REGISTER_ID_LENGTH].GetString(), 
+											SafeFormat::Format(strTemp, GetGameString(STRING_USER_REGISTER_ID_LENGTH), 
 													PlayerInfo::minIDLength,
 													nameLen>PlayerInfo::maxIDLength);
 
@@ -2896,7 +2897,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 											}
 
 											char strTemp[128];
-											sprintf(strTemp, (*g_pGameStringTable)[STRING_MESSAGE_CHAT_IGNORE].GetString(), pData);
+											SafeFormat::Format(strTemp, GetGameString(STRING_MESSAGE_CHAT_IGNORE), pData);
 											UI_AddChatToHistory( strTemp, NULL, CLD_INFO, right );
 
 											// [도움말] 대화거부 한 명
@@ -2921,7 +2922,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 										g_pChatManager->SetAcceptMode();	
 
 										char strTemp[128];
-										sprintf(strTemp, (*g_pGameStringTable)[STRING_MESSAGE_CHAT_ACCEPT_ALL].GetString(), pData);
+										SafeFormat::Format(strTemp, GetGameString(STRING_MESSAGE_CHAT_ACCEPT_ALL), pData);
 										UI_AddChatToHistory( strTemp, NULL, CLD_INFO, right );
 									}
 									//-------------------------------------------------------
@@ -2937,7 +2938,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 										if (nameLen<PlayerInfo::minIDLength || nameLen>PlayerInfo::maxIDLength)
 										{
 											char strTemp[256];
-											sprintf(strTemp, (*g_pGameStringTable)[STRING_USER_REGISTER_ID_LENGTH].GetString(), 
+											SafeFormat::Format(strTemp, GetGameString(STRING_USER_REGISTER_ID_LENGTH), 
 													PlayerInfo::minIDLength,
 													nameLen>PlayerInfo::maxIDLength);
 
@@ -2958,7 +2959,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 											}
 
 											char strTemp[128];
-											sprintf(strTemp, (*g_pGameStringTable)[STRING_MESSAGE_CHAT_ACCEPT].GetString(), pData);
+											SafeFormat::Format(strTemp, GetGameString(STRING_MESSAGE_CHAT_ACCEPT), pData);
 											UI_AddChatToHistory( strTemp, NULL, CLD_INFO, right );
 										}
 									}
@@ -2972,7 +2973,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 									g_pUserOption->FilteringCurse = FALSE;
 
 									char strTemp[128];
-									sprintf(strTemp, (*g_pGameStringTable)[STRING_MESSAGE_CHAT_ACCEPT_CURSE].GetString(), pData);
+									SafeFormat::Format(strTemp, GetGameString(STRING_MESSAGE_CHAT_ACCEPT_CURSE), pData);
 									UI_AddChatToHistory( strTemp, NULL, CLD_INFO, right );
 								}
 								//-------------------------------------------------------
@@ -2984,7 +2985,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 									g_pUserOption->FilteringCurse = TRUE;
 
 									char strTemp[128];
-									sprintf(strTemp, (*g_pGameStringTable)[STRING_MESSAGE_CHAT_FILTER_CURSE].GetString(), pData);
+									SafeFormat::Format(strTemp, GetGameString(STRING_MESSAGE_CHAT_FILTER_CURSE), pData);
 									UI_AddChatToHistory( strTemp, NULL, CLD_INFO, right );
 								}
 
@@ -9110,7 +9111,7 @@ UIMessageManager::Execute_UI_NEWCHARACTER_CHECK(intptr_t left, intptr_t right, v
 			if (len<PlayerInfo::minIDLength || len>PlayerInfo::maxIDLength)
 			{
 				char strTemp[128];
-				sprintf(strTemp, (*g_pGameStringTable)[STRING_USER_REGISTER_ID_LENGTH].GetString(), PlayerInfo::minIDLength, PlayerInfo::maxIDLength);
+				SafeFormat::Format(strTemp, GetGameString(STRING_USER_REGISTER_ID_LENGTH), PlayerInfo::minIDLength, PlayerInfo::maxIDLength);
 				g_pUIDialog->PopupFreeMessageDlg( strTemp );
 				bAllOK = FALSE;
 			}

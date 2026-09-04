@@ -35,6 +35,7 @@
 #include "DXLibBackend.h"  // For SDL text input functions
 #include "MMoneyManager.h"
 #include "MGameStringTable.h"
+#include "SafeFormat.h"
 #include "MObjectSelector.h"
 #include "ClientFunction.h"
 #include "MMusic.h"
@@ -6453,7 +6454,7 @@ CGameUpdate::Update(void)
 		{
 			g_pGameTime->SetCurrentTime( g_CurrentTime );
 		
-			sprintf(str, (*g_pGameStringTable)[STRING_DRAW_GAME_TIME].GetString(),
+			SafeFormat::Format(str, GetGameString(STRING_DRAW_GAME_TIME),
 							g_pGameTime->GetHour(),
 							g_pGameTime->GetMinute(),
 							g_pGameTime->GetSecond()
@@ -6467,7 +6468,7 @@ CGameUpdate::Update(void)
 		//---------------------------------------------
 		// 시간
 		//---------------------------------------------
-		sprintf(str, (*g_pGameStringTable)[STRING_DRAW_GAME_DATE].GetString(),
+		SafeFormat::Format(str, GetGameString(STRING_DRAW_GAME_DATE),
 					g_pGameTime->GetYear(),
 					g_pGameTime->GetMonth(),
 					g_pGameTime->GetDay()

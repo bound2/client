@@ -61,6 +61,7 @@
 #include "MWorkThread.h"
 #include "MLoadingSPKWorkNode.h"
 #include "MGameStringTable.h"
+#include "SafeFormat.h"
 //#include "MZoneInfo.h"
 #include "MObjectSelector.h"
 #include "MPortal.h"
@@ -9297,13 +9298,13 @@ MTopView::DrawInformation()
 	{
 		if (g_bZonePlayerInLarge)
 		{
-			sprintf(str, (*g_pGameStringTable)[STRING_DRAW_ZONE_NAME].GetString(),
+			SafeFormat::Format(str, GetGameString(STRING_DRAW_ZONE_NAME),
 							g_pZoneTable->Get( g_nZoneLarge )->Name.GetString(),
 							g_pPlayer->GetX(), g_pPlayer->GetY());		
 		}
 		else
 		{
-			sprintf(str, (*g_pGameStringTable)[STRING_DRAW_ZONE_NAME].GetString(),
+			SafeFormat::Format(str, GetGameString(STRING_DRAW_ZONE_NAME),
 							g_pZoneTable->Get( g_nZoneSmall )->Name.GetString(),
 							g_pPlayer->GetX(), g_pPlayer->GetY());
 		}
@@ -9335,7 +9336,7 @@ MTopView::DrawInformation()
 		g_pGameTime->SetCurrentTime( g_CurrentTime );
 
 
-		sprintf(str, (*g_pGameStringTable)[STRING_DRAW_GAME_TIME].GetString(),
+		SafeFormat::Format(str, GetGameString(STRING_DRAW_GAME_TIME),
 						g_pGameTime->GetHour(),
 						g_pGameTime->GetMinute(),
 						g_pGameTime->GetSecond()
@@ -9695,7 +9696,7 @@ MTopView::DrawEventString(int& strX, int& strY)
 
 					if(stringID >= 0 && stringID < g_pGameStringTable->GetSize()
 						&& (*g_pGameStringTable)[stringID].GetString() != NULL)
-						sprintf(str, (*g_pGameStringTable)[stringID].GetString(), (event->eventDelay - (GetTickCount() - event->eventStartTickCount)+999)/1000);
+						SafeFormat::Format(str, GetGameString(stringID), (event->eventDelay - (GetTickCount() - event->eventStartTickCount)+999)/1000);
 				}
 				break;
 			}			
@@ -9777,7 +9778,7 @@ MTopView::DrawEventString(int& strX, int& strY)
 							{
 								bContinue = true;
 								char temp[100];
-								sprintf(temp,(*g_pGameStringTable)[UI_STRING_MESSAGE_HOUR].GetString(), hour );
+								SafeFormat::Format(temp, GetGameString(UI_STRING_MESSAGE_HOUR), hour );
 								strcat(str2, temp);
 								strcat(str2, " ");
 							}
@@ -9785,14 +9786,14 @@ MTopView::DrawEventString(int& strX, int& strY)
 							{
 								bContinue = true;
 								char temp[100];
-								sprintf(temp,(*g_pGameStringTable)[UI_STRING_MESSAGE_MINUTE].GetString(), minute );
+								SafeFormat::Format(temp, GetGameString(UI_STRING_MESSAGE_MINUTE), minute );
 								strcat(str2, temp);
 								strcat(str2, " ");
 							}
 							if(sec> 0 && minute <= 0 && hour <= 0)
 							{
 								char temp[100];
-								sprintf(temp,(*g_pGameStringTable)[UI_STRING_MESSAGE_SECOND].GetString(), sec );
+								SafeFormat::Format(temp, GetGameString(UI_STRING_MESSAGE_SECOND), sec );
 								strcat(str2, temp);					
 							}
 							//sprintf(str2,"%s",(*g_pGameStringTable)[UI_STRING_MESSAGE_CAN_REQUITAL_FROM_NPC].GetString() );
@@ -9816,7 +9817,7 @@ MTopView::DrawEventString(int& strX, int& strY)
 							{
 								bContinue = true;
 								char temp[100];
-								sprintf(temp,(*g_pGameStringTable)[UI_STRING_MESSAGE_HOUR].GetString(), hour );
+								SafeFormat::Format(temp, GetGameString(UI_STRING_MESSAGE_HOUR), hour );
 								strcat(str, temp);
 								strcat(str, " ");
 							}
@@ -9824,7 +9825,7 @@ MTopView::DrawEventString(int& strX, int& strY)
 							{
 								bContinue = true;
 								char temp[100];
-								sprintf(temp,(*g_pGameStringTable)[UI_STRING_MESSAGE_MINUTE].GetString(), minute );
+								SafeFormat::Format(temp, GetGameString(UI_STRING_MESSAGE_MINUTE), minute );
 								strcat(str, temp);
 								strcat(str, " ");
 							}
@@ -9832,7 +9833,7 @@ MTopView::DrawEventString(int& strX, int& strY)
 							{
 								bContinue = true;
 								char temp[100];
-								sprintf(temp,(*g_pGameStringTable)[UI_STRING_MESSAGE_SECOND].GetString(), sec );
+								SafeFormat::Format(temp, GetGameString(UI_STRING_MESSAGE_SECOND), sec );
 								strcat(str, temp);
 								strcat(str, " ");
 							}

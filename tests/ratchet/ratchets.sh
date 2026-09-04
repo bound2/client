@@ -395,7 +395,27 @@ check "R5 (direct packet execute callers outside Client/Packet)" "$R5" "$R5_BASE
 # It stays a count of sites rather than of files, because a file here is
 # converted a call at a time and half a file is real progress.
 #----------------------------------------------------------------------
-# 37: 64 - 27. Task 5.4's third slice took the AddFormat family through
+# 0: 37 - 37. Task 5.4's fourth slice converted the last site THIS METRIC
+# CAN SEE, so from here it holds a line rather than tracking a retreat:
+# any new one fails the suite.
+#
+# Read that sentence literally, because the first draft of it did not and
+# claimed the client no longer hands a String.inf entry to a printf as
+# its format at all. It still does, at 24 sites. What this pattern
+# matches is a lookup spelled AT THE FORMAT ARGUMENT. An entry copied
+# into a static array or a local first, and formatted with from there, is
+# invisible to it - and VS_UI_ExtraDialog.cpp does exactly that 21 times,
+# 12 of them passing no varargs, into buffers sized strlen(format)+1.
+# Both reviewers of that slice found them; the ratchet did not, and
+# cannot. Finding C19 is open, and a zero here is a statement about this
+# grep rather than about the code.
+#
+# The last two sites it could see never had a GetString() at all -
+# GameUI.cpp passed the MString itself and leaned on its implicit
+# conversion to const char*, which is why the mechanical sweeps could not
+# match them and why they outlived every other site.
+#
+# History: 37 = 64 - 27. Task 5.4's third slice took the AddFormat family through
 # CMessageArray::AddSafeFormat, which packs its arguments with their
 # types instead of as varargs. What is left is 37 ordinary sprintf sites,
 # all executable-side: UIMessageManager.cpp 14, MTopView.cpp 10,
@@ -415,7 +435,7 @@ check "R5 (direct packet execute callers outside Client/Packet)" "$R5" "$R5_BASE
 # in the numbers: this metric has been wrong twice in the same direction,
 # and each time the missing shape was live code in a file the slice had
 # just edited.
-R7_BASELINE=37
+R7_BASELINE=0
 
 for d in Client VS_UI; do
 	if [ ! -d "$d" ]; then

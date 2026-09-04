@@ -32,6 +32,7 @@
 #include "MOustersGear.h"
 #include "MMoneyManager.h"
 #include "MGameStringTable.h"
+#include "SafeFormat.h"
 #include "VS_UI_mouse_pointer.h"
 #include "VS_UI.h"
 #include "UIDialog.h"
@@ -1155,7 +1156,7 @@ AddItemToZone(GCAddItemToZone* pPacket, BOOL bDropping)
 		int highWord = pItem->GetSilver();
 		int money = (highWord << 16) | lowWord;
 		
-		sprintf(str, (*g_pGameStringTable)[STRING_DRAW_ITEM_NAME_MONEY].GetString(), pItem->GetName(), money);
+		SafeFormat::Format(str, GetGameString(STRING_DRAW_ITEM_NAME_MONEY), pItem->GetName(), money);
 
 		pItem->SetName( str );
 	}
