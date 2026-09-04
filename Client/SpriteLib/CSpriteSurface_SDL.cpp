@@ -31,13 +31,49 @@ int CSpriteSurface::s_Value1 = 1;
 int CSpriteSurface::s_Value2 = 31;
 int CSpriteSurface::s_Value3 = 1;
 
+/*
+ * The 16-bit (non-palette) effect routines were never ported: the
+ * header declares memcpyEffectDarker and its siblings, but no SDL
+ * translation unit defines them, so this table has to stay empty and
+ * memcpyEffect falls back to a plain copy.
+ */
 FUNCTION_MEMCPYEFFECT CSpriteSurface::s_pMemcpyEffectFunction = NULL;
 FUNCTION_MEMCPYEFFECT CSpriteSurface::s_pMemcpyEffectFunctionTable[MAX_EFFECT] = {0};
+
+/*
+ * The palette effect routines are compiled (CSpriteSurface_Effects.cpp),
+ * but they were written for three 5-bit channels, and on this backend
+ * ColorDraw::Green decodes the full 6-bit field of a 5:6:5 pixel. The
+ * screen blend is ported below (its green table is 64 wide for that
+ * reason) and is the only effect any call site selects - every
+ * DRAW_NORMALSPRITEPAL_EFFECT in MTopView.cpp passes EFFECT_SCREEN.
+ * The rest still assume a green of 0..31: ColorDodge, for one, divides
+ * by (32 - green), which is zero or negative for half the range. They
+ * stay unregistered until someone ports them, so selecting one gets
+ * memcpyPalEffect's plain copy rather than a wrong or crashing blend.
+ * The table is indexed by FUNCTION_EFFECT; the entries are positional.
+ */
 FUNCTION_MEMCPYPALEFFECT CSpriteSurface::s_pMemcpyPalEffectFunction = NULL;
-FUNCTION_MEMCPYPALEFFECT CSpriteSurface::s_pMemcpyPalEffectFunctionTable[MAX_EFFECT] = {0};
+FUNCTION_MEMCPYPALEFFECT CSpriteSurface::s_pMemcpyPalEffectFunctionTable[MAX_EFFECT] =
+{
+	NULL,									/* EFFECT_DARKER */
+	NULL,									/* EFFECT_GRAY_SCALE */
+	NULL,									/* EFFECT_LIGHTEN */
+	NULL,									/* EFFECT_DARKEN */
+	NULL,									/* EFFECT_COLOR_DODGE */
+	CSpriteSurface::memcpyPalEffectScreen,	/* EFFECT_SCREEN */
+	NULL,									/* EFFECT_DODGE_BURN */
+	NULL,									/* EFFECT_DIFFERENT */
+	NULL,									/* EFFECT_GRADATION */
+	NULL,									/* EFFECT_SIMPLE_OUTLINE */
+	NULL,									/* EFFECT_WIPE_OUT */
+	NULL,									/* EFFECT_NET */
+	NULL,									/* EFFECT_GRAY_SCALE_VARIOUS */
+	NULL,									/* EFFECT_SCREEN_ALPHA (an empty body) */
+};
 
 WORD CSpriteSurface::s_EffectScreenTableR[32][32] = {0};
-WORD CSpriteSurface::s_EffectScreenTableG[32][32] = {0};
+WORD CSpriteSurface::s_EffectScreenTableG[64][64] = {0};
 WORD CSpriteSurface::s_EffectScreenTableB[32][32] = {0};
 
 /* ============================================================================
@@ -358,9 +394,45 @@ void CSpriteSurface::BltColorAlpha(RECT* pRect, WORD color, BYTE alpha2)
 	/* TODO: Implement */
 }
 
+/*
+ * Screen blend, per channel with maximum M:
+ *
+ *     screen = max(d, s) + min(d, s) * (M - max(d, s)) / M
+ *
+ * which is the integer form of 1 - (1 - d)(1 - s). The table holds the
+ * result already shifted into the channel's bit position, so the blend
+ * routine ORs the three lookups together. Red and blue are 5-bit
+ * (M = 32); green is the 6-bit field ColorDraw::Green returns (M = 64).
+ * GameInit calls this once before anything draws.
+ */
+static WORD ScreenBlendChannel(int d, int s, int maximum)
+{
+	int	high = (d > s) ? d : s;
+	int	low  = (d > s) ? s : d;
+
+	return (WORD)((((maximum - high) * low) / maximum) + high);
+}
+
 void CSpriteSurface::InitEffectTable()
 {
-	/* Initialize effect tables if needed */
+	int d, s;
+
+	for (d = 0; d < 32; d++)
+	{
+		for (s = 0; s < 32; s++)
+		{
+			s_EffectScreenTableR[d][s] = ScreenBlendChannel(d, s, 32) << ColorDraw::s_bSHIFT_R;
+			s_EffectScreenTableB[d][s] = ScreenBlendChannel(d, s, 32) << ColorDraw::s_bSHIFT_B;
+		}
+	}
+
+	for (d = 0; d < 64; d++)
+	{
+		for (s = 0; s < 64; s++)
+		{
+			s_EffectScreenTableG[d][s] = ScreenBlendChannel(d, s, 64) << ColorDraw::s_bSHIFT_G;
+		}
+	}
 }
 
 void CSpriteSurface::memcpyHalf(WORD* pDest, WORD* pSource, WORD pixels)

@@ -500,8 +500,177 @@ void CSpriteSurface::BltSprite1555NotTrans(POINT* pPoint, CSprite* pSprite) {
 	BltSprite(pPoint, pSprite);
 }
 
+/* ============================================================================
+ * Clipping a sprite against the surface
+ *
+ * See the declaration in CSpriteSurface.h. The visible rectangle is in
+ * sprite coordinates, and pDest is the surface pixel its top-left maps
+ * to, which is where every CSpritePal / CAlphaSpritePal clip variant
+ * expects to start drawing.
+ * ============================================================================ */
+CSpriteSurface::SPRITE_CLIP
+CSpriteSurface::ClipSpriteToSurface(int x, int y, int width, int height,
+									int surfaceWidth, int surfaceHeight,
+									RECT* pRect, POINT* pDest)
+{
+	if (pRect == NULL || pDest == NULL)
+		return SPRITE_CLIP_OUTSIDE;
+
+	if (width <= 0 || height <= 0 || surfaceWidth <= 0 || surfaceHeight <= 0)
+		return SPRITE_CLIP_OUTSIDE;
+
+	if (x >= surfaceWidth || y >= surfaceHeight || x + width <= 0 || y + height <= 0)
+		return SPRITE_CLIP_OUTSIDE;
+
+	int	left	= (x < 0) ? -x : 0;
+	int	top		= (y < 0) ? -y : 0;
+	int	right	= (x + width  > surfaceWidth)  ? surfaceWidth  - x : width;
+	int	bottom	= (y + height > surfaceHeight) ? surfaceHeight - y : height;
+
+	pRect->left		= left;
+	pRect->top		= top;
+	pRect->right	= right;
+	pRect->bottom	= bottom;
+
+	pDest->x		= x + left;
+	pDest->y		= y + top;
+
+	bool	leftClip	= (left > 0);
+	bool	rightClip	= (right < width);
+
+	if (leftClip && rightClip)
+		return SPRITE_CLIP_WIDTH;
+	if (leftClip)
+		return SPRITE_CLIP_LEFT;
+	if (rightClip)
+		return SPRITE_CLIP_RIGHT;
+	if (top > 0 || bottom < height)
+		return SPRITE_CLIP_HEIGHT;
+
+	return SPRITE_CLIP_NONE;
+}
+
+/*
+ * The clip variants take their pitch as a WORD. A locked surface wider
+ * than 32767 pixels would not fit; nothing here is, but the cast must
+ * not silently wrap.
+ */
+static bool PitchFitsBlt(int pitch)
+{
+	return pitch > 0 && pitch <= 0xFFFF;
+}
+
+/* ============================================================================
+ * BltSpritePalEffectTo
+ *
+ * Draws a palette sprite through the effect routine SetPalEffect
+ * selected - the screen blend, for every effect in the effect sprite
+ * table with BltType BLT_SCREEN - into a locked pixel buffer, clipped to
+ * the buffer's edges.
+ * ============================================================================ */
+void CSpriteSurface::BltSpritePalEffectTo(WORD* pPixels, int pitch,
+										int surfaceWidth, int surfaceHeight,
+										const POINT* pPoint, CSpritePal* pSprite, MPalette &pal)
+{
+	if (pPixels == NULL || pPoint == NULL || pSprite == NULL || pSprite->IsNotInit())
+		return;
+
+	if (!PitchFitsBlt(pitch))
+		return;
+
+	RECT	rect;
+	POINT	dest;
+
+	SPRITE_CLIP	clip = ClipSpriteToSurface(pPoint->x, pPoint->y,
+										pSprite->GetWidth(), pSprite->GetHeight(),
+										surfaceWidth, surfaceHeight, &rect, &dest);
+
+	if (clip == SPRITE_CLIP_OUTSIDE)
+		return;
+
+	WORD*	pDest	= (WORD*)((BYTE*)pPixels + dest.y * pitch + (dest.x << 1));
+	WORD	wPitch	= (WORD)pitch;
+
+	switch (clip)
+	{
+		case SPRITE_CLIP_NONE:		pSprite->BltEffect(pDest, wPitch, pal);						break;
+		case SPRITE_CLIP_HEIGHT:	pSprite->BltEffectClipHeight(pDest, wPitch, &rect, pal);	break;
+		case SPRITE_CLIP_LEFT:		pSprite->BltEffectClipLeft(pDest, wPitch, &rect, pal);		break;
+		case SPRITE_CLIP_RIGHT:		pSprite->BltEffectClipRight(pDest, wPitch, &rect, pal);		break;
+		case SPRITE_CLIP_WIDTH:		pSprite->BltEffectClipWidth(pDest, wPitch, &rect, pal);		break;
+		default:																				break;
+	}
+}
+
+/* ============================================================================
+ * BltAlphaSpritePalTo
+ *
+ * The alpha-blended palette sprite, clipped the same way. Until this
+ * existed the member blit refused any sprite that crossed a surface
+ * edge, which is how a tall bolt from the sky vanished near the top of
+ * the screen.
+ * ============================================================================ */
+void CSpriteSurface::BltAlphaSpritePalTo(WORD* pPixels, int pitch,
+										int surfaceWidth, int surfaceHeight,
+										const POINT* pPoint, CAlphaSpritePal* pSprite, MPalette &pal)
+{
+	if (pPixels == NULL || pPoint == NULL || pSprite == NULL || pSprite->IsNotInit())
+		return;
+
+	if (!PitchFitsBlt(pitch))
+		return;
+
+	RECT	rect;
+	POINT	dest;
+
+	SPRITE_CLIP	clip = ClipSpriteToSurface(pPoint->x, pPoint->y,
+										pSprite->GetWidth(), pSprite->GetHeight(),
+										surfaceWidth, surfaceHeight, &rect, &dest);
+
+	if (clip == SPRITE_CLIP_OUTSIDE)
+		return;
+
+	WORD*	pDest	= (WORD*)((BYTE*)pPixels + dest.y * pitch + (dest.x << 1));
+	WORD	wPitch	= (WORD)pitch;
+
+	switch (clip)
+	{
+		case SPRITE_CLIP_NONE:		pSprite->Blt(pDest, wPitch, pal);					break;
+		case SPRITE_CLIP_HEIGHT:	pSprite->BltClipHeight(pDest, wPitch, &rect, pal);	break;
+		case SPRITE_CLIP_LEFT:		pSprite->BltClipLeft(pDest, wPitch, &rect, pal);	break;
+		case SPRITE_CLIP_RIGHT:		pSprite->BltClipRight(pDest, wPitch, &rect, pal);	break;
+		case SPRITE_CLIP_WIDTH:		pSprite->BltClipWidth(pDest, wPitch, &rect, pal);	break;
+		default:																		break;
+	}
+}
+
+/* ============================================================================
+ * BltSpritePalEffect
+ *
+ * The BLT_SCREEN effect path: MTopView's DRAW_NORMALSPRITEPAL_EFFECT
+ * selects the effect and calls this. It was an empty stub from the SDL
+ * port until 2026-09-04, which is why every screen-blend skill effect
+ * drew nothing.
+ * ============================================================================ */
 void CSpriteSurface::BltSpritePalEffect(POINT* pPoint, CSpritePal* pSprite, MPalette &pal) {
-	/* TODO: Implement palette effect */
+	if (!pPoint || !pSprite || pSprite->IsNotInit()) {
+		return;
+	}
+
+	spritectl_surface_info_t surface_info;
+	if (spritectl_lock_surface(m_backend_surface, &surface_info) != 0) {
+		static int lockFailCount = 0;
+		if (lockFailCount < 3) {
+			LOG_WARN("[BltSpritePalEffect] ERROR: Failed to lock surface\n");
+			lockFailCount++;
+		}
+		return;
+	}
+
+	BltSpritePalEffectTo((WORD*)surface_info.pixels, surface_info.pitch,
+						m_width, m_height, pPoint, pSprite, pal);
+
+	spritectl_unlock_surface(m_backend_surface);
 }
 
 void CSpriteSurface::BltSpritePal1555SmallNotTrans(POINT* pPoint, CSpritePal* pSprite, BYTE shift, MPalette &pal) {
@@ -594,45 +763,6 @@ void CSpriteSurface::BltAlphaSpritePal(POINT* pPoint, CAlphaSpritePal* pSprite, 
 		return;
 	}
 
-	/* Basic clipping check - skip if completely outside surface */
-	int spriteWidth = pSprite->GetWidth();
-	int spriteHeight = pSprite->GetHeight();
-
-	/* Get surface dimensions */
-	int surfaceWidth = m_width;
-	int surfaceHeight = m_height;
-
-	/* Check if sprite is completely outside the surface */
-	bool outsideBounds = (pPoint->x >= surfaceWidth) ||
-	                     (pPoint->y >= surfaceHeight) ||
-	                     (pPoint->x + spriteWidth <= 0) ||
-	                     (pPoint->y + spriteHeight <= 0);
-
-	if (outsideBounds) {
-		/* Sprite is completely outside, skip rendering */
-		static int skipCount = 0;
-		if (skipCount < 5) {
-			LOG_WARN("[BltAlphaSpritePal] WARNING: Sprite at (%d,%d) size=%dx%d outside surface %dx%d, skipping\n",
-			       pPoint->x, pPoint->y, spriteWidth, spriteHeight, surfaceWidth, surfaceHeight);
-			skipCount++;
-		}
-		return;
-	}
-
-	/* Additional check: if sprite starts outside surface bounds, skip for now */
-	/* TODO: Implement proper partial clipping */
-	if (pPoint->x < 0 || pPoint->y < 0 ||
-	    pPoint->x + spriteWidth > surfaceWidth ||
-	    pPoint->y + spriteHeight > surfaceHeight) {
-		static int partialCount = 0;
-		if (partialCount < 5) {
-			LOG_WARN("[BltAlphaSpritePal] WARNING: Partial clipping at (%d,%d) size=%dx%d, skipping (TODO: implement)\n",
-			       pPoint->x, pPoint->y, spriteWidth, spriteHeight);
-			partialCount++;
-		}
-		return;
-	}
-
 	/* Lock backend surface for direct pixel access */
 	spritectl_surface_info_t surface_info;
 	if (spritectl_lock_surface(m_backend_surface, &surface_info) != 0) {
@@ -644,17 +774,9 @@ void CSpriteSurface::BltAlphaSpritePal(POINT* pPoint, CAlphaSpritePal* pSprite, 
 		return;
 	}
 
-	/* Get pixel pointer and pitch (pitch is in bytes, like Windows) */
-	WORD* pixels = (WORD*)surface_info.pixels;
-	int pitch = surface_info.pitch;
-
-	/* Calculate destination pointer with offset */
-	WORD* pDest = (WORD*)((BYTE*)pixels + pPoint->y * pitch + (pPoint->x << 1));
-
-	/* Call sprite's Blt method to render with palette */
-	/* Pass pitch in bytes (same as Windows version) */
-	/* TODO: Implement proper clipping for partially visible sprites */
-	pSprite->Blt(pDest, pitch, pal);
+	/* Clipped to the surface; a sprite crossing an edge draws its visible part */
+	BltAlphaSpritePalTo((WORD*)surface_info.pixels, surface_info.pitch,
+						m_width, m_height, pPoint, pSprite, pal);
 
 	/* Unlock surface */
 	spritectl_unlock_surface(m_backend_surface);

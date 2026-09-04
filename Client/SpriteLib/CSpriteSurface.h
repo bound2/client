@@ -249,9 +249,51 @@ class CSpriteSurface {
 		static FUNCTION_MEMCPYEFFECT		s_pMemcpyEffectFunctionTable[MAX_EFFECT];
 		static FUNCTION_MEMCPYPALEFFECT		s_pMemcpyPalEffectFunctionTable[MAX_EFFECT];
 
+		// The screen blend tables are indexed [dest][source] by
+		// channel value. Red and blue are 5 bits on this backend;
+		// ColorDraw::Green decodes the full 6-bit 5:6:5 field, so
+		// its table is 64 wide - a 32-wide table read with a green
+		// of 32 or more runs off its end. InitEffectTable fills them.
 		static WORD		s_EffectScreenTableR[32][32];
-		static WORD		s_EffectScreenTableG[32][32];
+		static WORD		s_EffectScreenTableG[64][64];
 		static WORD		s_EffectScreenTableB[32][32];
+
+		//------------------------------------------------------------
+		// Clipping a sprite against the surface
+		//
+		// This backend has no clip rectangle of its own (SetClip is
+		// a no-op), so every blit clips to the whole surface.
+		// ClipSpriteToSurface reduces a placement to the sprite-local
+		// rectangle that is visible, the surface pixel its top-left
+		// lands on, and which of the CSpritePal / CAlphaSpritePal
+		// clip variants draws it: each variant walks the rows
+		// pRect->top..bottom from the pDest it is handed, and the
+		// Left/Width variants skip pRect->left source pixels per row.
+		//
+		// The *To functions draw into an already locked pixel buffer.
+		// They are what the member blits call once the backend
+		// surface is locked, and they exist as statics so a test can
+		// drive the same code against a plain array.
+		//------------------------------------------------------------
+		enum SPRITE_CLIP
+		{
+			SPRITE_CLIP_OUTSIDE = 0,	// nothing of the sprite is visible
+			SPRITE_CLIP_NONE,			// the whole sprite is visible
+			SPRITE_CLIP_HEIGHT,			// rows cut, every column visible
+			SPRITE_CLIP_LEFT,			// left columns cut, right edge visible
+			SPRITE_CLIP_RIGHT,			// right columns cut, left edge visible
+			SPRITE_CLIP_WIDTH			// both edges cut
+		};
+
+		static SPRITE_CLIP	ClipSpriteToSurface(int x, int y, int width, int height,
+											int surfaceWidth, int surfaceHeight,
+											RECT* pRect, POINT* pDest);
+		static void		BltSpritePalEffectTo(WORD* pPixels, int pitch,
+											int surfaceWidth, int surfaceHeight,
+											const POINT* pPoint, CSpritePal* pSprite, MPalette &pal);
+		static void		BltAlphaSpritePalTo(WORD* pPixels, int pitch,
+											int surfaceWidth, int surfaceHeight,
+											const POINT* pPoint, CAlphaSpritePal* pSprite, MPalette &pal);
 
 		//------------------------------------------------------------
 		// DirectX Compatibility Methods (Stubs for SDL backend)
