@@ -133,8 +133,8 @@ the failure count, so the exit code is 0 only when the suite is clean.
 - **Then run the same suite under ASan**, where the invalid access aborts the process.
   Both trees green, or the fix is not verified.
 - **Executable-only code has no test path.** It gets verified by running the client
-  against a live server. The nine defects under *Runtime defects* in the review were
-  all found that way, and none were reachable from a test binary. The five in the
+  against a live server. The ten defects under *Runtime defects* in the review were
+  all found that way, and none were reachable from a test binary. The seven in the
   short table below them were found by *reading*, during remediation passes, and are
   filed separately for exactly that reason — the heading is a claim about how a
   defect was found, not a bin for anything executable-side.
@@ -154,7 +154,7 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **348 tests, 4,863 checks, 0 failed** in both trees.
+baseline: **373 tests, 4,979 checks, 0 failed** in both trees.
 
 ## Traps
 
@@ -226,7 +226,7 @@ baseline: **348 tests, 4,863 checks, 0 failed** in both trees.
 
 ## Current focus
 
-`docs/code-health-review-2026-08-29.md` holds 197 findings, 83 fixed — every
+`docs/code-health-review-2026-08-29.md` holds 197 findings, 85 fixed — every
 Critical among them. In priority order:
 
 1. **Unvalidated network input is the top open risk**, and the two halves of it

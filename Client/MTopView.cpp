@@ -17399,13 +17399,11 @@ MTopView::DrawAttachEffect(POINT* pPoint, ATTACHEFFECT_LIST::const_iterator iEff
 							//-------------------------------------------------------
 							else
 							{
-								DRAW_NORMALSPRITEPAL_EFFECT(&pointTemp, 
-													sprite, 
-													m_EffectScreenSPK, 
-													m_EffectScreenPPK[frameID],
-//													m_EffectScreenSPKI, 
-//													m_EffectScreenSPKFile,
-													CSpriteSurface::EFFECT_SCREEN)
+								// The sprite was already drawn above, unconditionally,
+								// and s_bUse3DLight is a constant false, so a draw here
+								// screen-blended the same pixels twice. Only the light
+								// filter belongs on this branch, as at the frame draw
+								// in DrawEffect and the first site in this function.
 
 								AddLightFilter2D( pPoint->x + 24, 
 											pPoint->y + 24, 
@@ -17486,15 +17484,9 @@ MTopView::DrawAttachEffect(POINT* pPoint, ATTACHEFFECT_LIST::const_iterator iEff
 									//-------------------------------------------------------
 									else
 									{
-										DRAW_NORMALSPRITEPAL_EFFECT(&pointTemp, 
-															sprite, 
-															m_EffectScreenSPK, 
-															m_EffectScreenPPK[pairFrameID],
-//															m_EffectScreenSPKI, 
-//															m_EffectScreenSPKFile,
-															CSpriteSurface::EFFECT_SCREEN)
-
-										AddLightFilter2D( pPoint->x + 24, 
+										// Same as the frame above: drawn already, only the
+										// light filter belongs here.
+										AddLightFilter2D( pPoint->x + 24,
 													pPoint->y + 24, 
 													Frame.GetLight(),			// 빛의 밝기
 													false);		// false = screen좌표
