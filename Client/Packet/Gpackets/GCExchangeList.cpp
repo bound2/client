@@ -10,6 +10,8 @@
 
 #include "Player.h"
 
+#include <span>
+
 // Out-of-line definitions so the constants may also be odr-used (bound to a
 // reference) by the UI and tests, not only read as compile-time constants.
 const PacketSize_t GCExchangeList::kMaxListingString;
@@ -58,17 +60,18 @@ void GCExchangeList::read(SocketInputStream & iStream)
 	{
 		ExchangeListing listing;
 
-		// char buf[256] is safe for any BYTE length : at 255 the terminator
-		// lands on buf[255], the last element. Every string's else-branch is
-		// kept so that read() fully overwrites the listing it fills, exactly
-		// as write() emits every field unconditionally.
+		// The bounded view makes the 256-byte staging capacity part of every
+		// string read. A BYTE length leaves room for the terminator at index
+		// 255. Every string's else-branch stays so read() fully overwrites the
+		// listing it fills, exactly as write() emits every field.
 		char buf[256];
+		std::span<char> buffer(buf);
 		uint8_t len;
 
 		// 64-bit values travel as little-endian raw bytes; the stream has no
-		// 64-bit overload, so read them through the raw byte interface.
+		// 64-bit scalar overload, so make their byte extent explicit.
 		ulonglong listingID = 0;
-		iStream.read((char*)&listingID, 8);
+		iStream.read(std::as_writable_bytes(std::span(&listingID, 1)));
 		listing.listingID = (int64_t)listingID;
 
 		ushort serverID = 0;
@@ -79,7 +82,7 @@ void GCExchangeList::read(SocketInputStream & iStream)
 		iStream.read(len);
 		if (len > 0)
 		{
-			iStream.read(buf, len);
+			iStream.read(buffer, len);
 			buf[len] = '\0';
 			listing.sellerAccount = buf;
 		}
@@ -92,7 +95,7 @@ void GCExchangeList::read(SocketInputStream & iStream)
 		iStream.read(len);
 		if (len > 0)
 		{
-			iStream.read(buf, len);
+			iStream.read(buffer, len);
 			buf[len] = '\0';
 			listing.sellerPlayer = buf;
 		}
@@ -106,7 +109,7 @@ void GCExchangeList::read(SocketInputStream & iStream)
 		iStream.read(listing.itemType);
 
 		ulonglong itemID = 0;
-		iStream.read((char*)&itemID, 8);
+		iStream.read(std::as_writable_bytes(std::span(&itemID, 1)));
 		listing.itemID = (int64_t)itemID;
 
 		iStream.read(listing.objectID);
@@ -118,7 +121,7 @@ void GCExchangeList::read(SocketInputStream & iStream)
 		iStream.read(len);
 		if (len > 0)
 		{
-			iStream.read(buf, len);
+			iStream.read(buffer, len);
 			buf[len] = '\0';
 			listing.buyerAccount = buf;
 		}
@@ -131,7 +134,7 @@ void GCExchangeList::read(SocketInputStream & iStream)
 		iStream.read(len);
 		if (len > 0)
 		{
-			iStream.read(buf, len);
+			iStream.read(buffer, len);
 			buf[len] = '\0';
 			listing.buyerPlayer = buf;
 		}
@@ -147,7 +150,7 @@ void GCExchangeList::read(SocketInputStream & iStream)
 		iStream.read(len);
 		if (len > 0)
 		{
-			iStream.read(buf, len);
+			iStream.read(buffer, len);
 			buf[len] = '\0';
 			listing.createdAt = buf;
 		}
@@ -159,7 +162,7 @@ void GCExchangeList::read(SocketInputStream & iStream)
 		iStream.read(len);
 		if (len > 0)
 		{
-			iStream.read(buf, len);
+			iStream.read(buffer, len);
 			buf[len] = '\0';
 			listing.expireAt = buf;
 		}
@@ -175,7 +178,7 @@ void GCExchangeList::read(SocketInputStream & iStream)
 		iStream.read(len);
 		if (len > 0)
 		{
-			iStream.read(buf, len);
+			iStream.read(buffer, len);
 			buf[len] = '\0';
 			listing.itemName = buf;
 		}
@@ -231,7 +234,7 @@ void GCExchangeList::write(SocketOutputStream & oStream) const
 		uint8_t len;
 
 		ulonglong listingID = (ulonglong)listing.listingID;
-		oStream.write((const char*)&listingID, 8);
+		oStream.write(std::as_bytes(std::span(&listingID, 1)));
 
 		oStream.write((ushort)listing.serverID);
 
@@ -239,20 +242,20 @@ void GCExchangeList::write(SocketOutputStream & oStream) const
 		len = (uint8_t)(listing.sellerAccount.length() > kMaxListingString ? kMaxListingString : listing.sellerAccount.length());
 		oStream.write(len);
 		if (len > 0)
-			oStream.write(listing.sellerAccount.c_str(), len);
+			oStream.write(std::span<const char>(listing.sellerAccount.data(), len));
 
 		// SellerPlayer
 		len = (uint8_t)(listing.sellerPlayer.length() > kMaxListingString ? kMaxListingString : listing.sellerPlayer.length());
 		oStream.write(len);
 		if (len > 0)
-			oStream.write(listing.sellerPlayer.c_str(), len);
+			oStream.write(std::span<const char>(listing.sellerPlayer.data(), len));
 
 		oStream.write(listing.sellerRace);
 		oStream.write(listing.itemClass);
 		oStream.write(listing.itemType);
 
 		ulonglong itemID = (ulonglong)listing.itemID;
-		oStream.write((const char*)&itemID, 8);
+		oStream.write(std::as_bytes(std::span(&itemID, 1)));
 
 		oStream.write(listing.objectID);
 		oStream.write(listing.pricePoint);
@@ -263,13 +266,13 @@ void GCExchangeList::write(SocketOutputStream & oStream) const
 		len = (uint8_t)(listing.buyerAccount.length() > kMaxListingString ? kMaxListingString : listing.buyerAccount.length());
 		oStream.write(len);
 		if (len > 0)
-			oStream.write(listing.buyerAccount.c_str(), len);
+			oStream.write(std::span<const char>(listing.buyerAccount.data(), len));
 
 		// BuyerPlayer
 		len = (uint8_t)(listing.buyerPlayer.length() > kMaxListingString ? kMaxListingString : listing.buyerPlayer.length());
 		oStream.write(len);
 		if (len > 0)
-			oStream.write(listing.buyerPlayer.c_str(), len);
+			oStream.write(std::span<const char>(listing.buyerPlayer.data(), len));
 
 		oStream.write(listing.taxRate);
 		oStream.write(listing.taxAmount);
@@ -278,12 +281,12 @@ void GCExchangeList::write(SocketOutputStream & oStream) const
 		len = (uint8_t)(listing.createdAt.length() > kMaxListingString ? kMaxListingString : listing.createdAt.length());
 		oStream.write(len);
 		if (len > 0)
-			oStream.write(listing.createdAt.c_str(), len);
+			oStream.write(std::span<const char>(listing.createdAt.data(), len));
 
 		len = (uint8_t)(listing.expireAt.length() > kMaxListingString ? kMaxListingString : listing.expireAt.length());
 		oStream.write(len);
 		if (len > 0)
-			oStream.write(listing.expireAt.c_str(), len);
+			oStream.write(std::span<const char>(listing.expireAt.data(), len));
 
 		oStream.write(listing.version);
 
@@ -291,7 +294,7 @@ void GCExchangeList::write(SocketOutputStream & oStream) const
 		len = (uint8_t)(listing.itemName.length() > kMaxListingString ? kMaxListingString : listing.itemName.length());
 		oStream.write(len);
 		if (len > 0)
-			oStream.write(listing.itemName.c_str(), len);
+			oStream.write(std::span<const char>(listing.itemName.data(), len));
 
 		oStream.write(listing.enchantLevel);
 		oStream.write(listing.grade);

@@ -14,6 +14,9 @@
 #include "Exception.h"
 #include "Socket.h"
 
+#include <cstddef>
+#include <span>
+
 // constant definitions
 const unsigned int DefaultSocketOutputBufferSize = 8192;
 
@@ -52,7 +55,12 @@ public :
 	// 패킷의 크기는 작을 수록 좋다는 정책하에서 필요에 따라서 string size 값을
 	// BYTE 또는 WORD 를 수동으로 사용하도록 한다.
 	uint write ( const char * buf , uint len ) throw ( ProtocolException , Error );
-	uint write ( const std::string & buf ) throw ( ProtocolException , Error ) { return write(buf.c_str(),buf.size()); }
+	uint write ( std::span<const char> buf ) throw ( ProtocolException , Error );
+	uint write ( std::span<const std::byte> buf ) throw ( ProtocolException , Error );
+	uint write ( const std::string & buf ) throw ( ProtocolException , Error )
+	{
+		return write(std::span<const char>(buf.data(), buf.size()));
+	}
 	void write ( const Packet * pPacket ) throw ( ProtocolException , Error );
 	
     uint write ( bool   buf ) throw ( ProtocolException , Error ) { return write( (const char*)&buf, szbool   ); }

@@ -84,6 +84,7 @@
 #include "Gpackets/GCMoveOK.h"
 #include "Gpackets/GCSay.h"
 #include "Gpackets/GCSystemMessage.h"
+#include "Gpackets/GCExchangeList.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -478,6 +479,47 @@ void	Fill(CLLogin& p)
 	p.setMacAddress(mac);
 }
 
+void	Fill(GCExchangeList& p)
+{
+	p.setPage(0x11223344);
+	p.setPageSize(0x55667788);
+	p.setTotal(0x10203040);
+
+	ExchangeListing listing;
+	listing.listingID = 0x1122334455667788LL;
+	listing.serverID = (int16_t)0x99AA;
+	listing.sellerAccount = "seller-account";
+	listing.sellerPlayer = "seller-player";
+	listing.sellerRace = 0xB1;
+	listing.itemClass = 0xC2;
+	listing.itemType = 0xD3E4;
+	listing.itemID = 0x2132435465768798LL;
+	listing.objectID = 0x31425364;
+	listing.pricePoint = 0x41526374;
+	listing.currency = 0xD5;
+	listing.status = 0xE6;
+	listing.buyerAccount = "buyer-account";
+	listing.buyerPlayer = "buyer-player";
+	listing.taxRate = 0xA7;
+	listing.taxAmount = 0x52637415;
+	listing.createdAt = "2026-09-04 12:34:56";
+	listing.expireAt = "2026-09-11 12:34:56";
+	listing.version = 0x63748526;
+	listing.itemName = "span-wire-item";
+	listing.enchantLevel = 0xB8;
+	listing.grade = 0xC9DA;
+	listing.durability = 0x74859637;
+	listing.silver = 0xDBEC;
+	listing.optionType1 = 0x81;
+	listing.optionType2 = 0x92;
+	listing.optionType3 = 0xA3;
+	listing.optionValue1 = 0xB4C5;
+	listing.optionValue2 = 0xC6D7;
+	listing.optionValue3 = 0xD8E9;
+	listing.stackCount = 0x596A7B4C;
+	p.addListing(listing);
+}
+
 } // namespace
 
 //----------------------------------------------------------------------
@@ -731,6 +773,33 @@ TEST(GCSystemMessage, RoundTripsAndMatchesGolden)
 	CHECK_EQ(src.getColor(), dst.getColor());
 	CHECK_EQ((int)src.getType(), (int)dst.getType());
 	ExpectGolden("GCSystemMessage", 0, WriteBody(src, 0));
+}
+
+// GCExchangeList is a representative span migration: its body contains two
+// raw 64-bit values and seven length-prefixed strings copied through a fixed
+// staging buffer. Pin both parsing and every emitted byte before changing the
+// stream calls.
+TEST(GCExchangeList, SpanMigrationPreservesTheWireLayout)
+{
+	GCExchangeList src, dst;
+	Fill(src);
+	CHECK(EncrypterFree(src));
+	RoundTrip(src, dst, 0);
+
+	CHECK_EQ(src.getPage(), dst.getPage());
+	CHECK_EQ(src.getPageSize(), dst.getPageSize());
+	CHECK_EQ(src.getTotal(), dst.getTotal());
+	CHECK_EQ(1, dst.getListings().size());
+	if (dst.getListings().size() == 1)
+	{
+		const ExchangeListing& listing = dst.getListings()[0];
+		CHECK_EQ(0x1122334455667788LL, listing.listingID);
+		CHECK(listing.sellerAccount == std::string("seller-account"));
+		CHECK(listing.buyerPlayer == std::string("buyer-player"));
+		CHECK(listing.itemName == std::string("span-wire-item"));
+		CHECK_EQ(0x596A7B4C, listing.stackCount);
+	}
+	ExpectGolden("GCExchangeList", 0, WriteBody(src, 0));
 }
 
 // CLLogin is written by this client and read by the login server, whose
