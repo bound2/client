@@ -1,0 +1,314 @@
+# C++17/C++20 compatibility assessment
+
+**Date:** 2026-09-04
+
+**Scope:** Language-standard upgrade of the existing client, libraries, tests, and
+tools. This is not an operating-system port or a general modernization rewrite.
+
+**Current live platform:** Windows x64, Visual Studio 2022, vcpkg, SDL2.
+
+## Executive conclusion
+
+The project is close to **building in a newer MSVC language mode**, but it is not
+currently ISO C++17- or C++20-conforming.
+
+For the supported Windows/MSVC path, this is moderate work rather than a rewrite:
+
+| Delivery level | Estimated effort for one engineer | Result |
+|---|---:|---|
+| C++17, current MSVC extensions allowed | **3-5 working days** | All targets build and tests pass in `/std:c++17`, but removed syntax remains and another conforming compiler will reject it. |
+| C++20, current MSVC extensions allowed | **5-8 working days** | All targets build and tests pass in `/std:c++20`; the known `char*`/literal failures are fixed, but removed exception syntax and `register` remain as MSVC extensions. |
+| ISO-clean C++20 with MSVC and Clang validation | **15-25 working days** | Removed syntax is eliminated, strict compilation is enabled, and both compiler paths are kept green. |
+
+The range includes implementation, review, full builds, automated tests, and a
+basic in-game smoke test. It does not include fixing unrelated warnings or doing a
+Linux/macOS port.
+
+**Recommendation:** target C++20 directly. The measured increment from C++17 to
+C++20 is small compared with the shared conformance cleanup, and Visual Studio
+2022 already supports the target. Do not first land a large C++17 cleanup and then
+repeat the stabilization cycle for C++20.
+
+If the requirement only means "the current Windows build accepts `/std:c++20`,"
+budget about one engineer-week. If it means "valid C++20 that is checked by more
+than MSVC," budget three to five engineer-weeks.
+
+## What "compatible" means in this assessment
+
+There are three materially different outcomes:
+
+1. **MSVC build-compatible:** every configured target compiles and links with the
+   selected `/std:c++17` or `/std:c++20` mode using Visual Studio's default
+   permissiveness.
+2. **ISO source-compatible:** project code does not depend on MSVC accepting
+   constructs removed from the selected C++ standard. A current Clang build is the
+   practical second check.
+3. **Modernized:** old ownership, strings, containers, and error handling are
+   redesigned to use newer standard-library facilities.
+
+Only the first two are a port. The third is a much larger refactor and is not
+included in the estimates.
+
+Likewise, C++20 source compatibility does not make the non-Windows path supported.
+The repository describes Windows/MSVC as the live path, has platform-specific ATL
+and Win32 integration, and does not currently have a Linux/macOS CI build. An OS
+port needs a separate assessment.
+
+## Measured project size
+
+The repository is large, which makes validation and large mechanical diffs more
+expensive even though the number of root causes is small.
+
+| Surface | Files | Lines |
+|---|---:|---:|
+| `.cpp` | 1,232 | 408,556 |
+| `.c` | 45 | 14,947 |
+| `.h` | 1,056 | 126,478 |
+| Unique C/C++ implementation files in the generated target graph | 1,220 | 390,088 |
+
+The largest configured projects are `packetwire` (525 translation units),
+`DarkEden` (489), `VS_UI` (53), `unit_tests` (39), `gamemodel` (34), and
+`SpriteLib` (30). This count includes every normal executable and tool, not only
+the game executable.
+
+The external libraries are not a major standard-version risk. SDL2, SDL2_image,
+SDL2_ttf, SDL2_mixer, iconv, and libjpeg-turbo are consumed through stable C APIs
+or supported CMake packages. The 14 configured `.c` files are compiled as C and
+are unaffected by the selected C++ standard.
+
+## Current build contract
+
+The root build is explicitly pinned to C++11 at `CMakeLists.txt:13-14`, while both
+the root and test projects claim a CMake 3.10 minimum. The existing MSVC projects
+generated from that configuration contain no `LanguageStandard` setting because
+MSVC has no selectable C++11 mode; the effective Windows mode is the compiler's
+default C++14-like mode.
+
+For a real upgrade, the build contract should:
+
+- raise `CMAKE_CXX_STANDARD` directly to 20 (or 17 if that is the chosen target);
+- keep `CMAKE_CXX_STANDARD_REQUIRED ON`;
+- set `CMAKE_CXX_EXTENSIONS OFF`;
+- raise the declared CMake minimum to the already documented requirement of 3.20;
+- compile at least one MSVC configuration with `/permissive-`;
+- add a second compiler job so MSVC extensions cannot silently become required.
+
+Passing `/std:c++20` in an ad hoc flags variable is useful for an audit but should
+not be the committed implementation.
+
+## Build experiments
+
+The audit used CMake 4.4.3, MSVC 19.44.35228, Windows SDK 10.0.22621, the existing
+vcpkg installation, and a fresh out-of-tree Debug build with `BUILD_TESTS=ON`.
+The final successful diagnostic build retained MSVC's normal `/EHsc` exception
+mode.
+
+| Experiment | Result |
+|---|---|
+| Plain MSVC `/std:c++17` | Failed on ambiguity between C++17 `std::byte` and the Windows SDK's global `byte`. |
+| C++17 with `std::byte` temporarily disabled | Reached the executable and failed on the one removed `std::auto_ptr`. |
+| C++17 with `_HAS_STD_BYTE=0` and `_HAS_AUTO_PTR_ETC=1` probes | The complete target graph built; all six CTest entries passed. |
+| C++17 plus `/permissive-` | Exposed 81 distinct legacy string-literal/`char*` error sites in `VS_UI` before the dependent game target could build. |
+| C++20 with the two library probes | Exposed 126 unique string-literal/`char*` error sites across 24 files: 81 in `VS_UI`, plus 48 in executable sources, with three shared header sites counted once. |
+| C++20 plus `_HAS_STD_BYTE=0`, `_HAS_AUTO_PTR_ETC=1`, and `/Zc:strictStrings-` probes | The complete target graph built; all six CTest entries passed. The unit binary reported **375 tests, 5,066 checks, 0 failures**. |
+| Clang 19.1.5 C++17 compile probe | Rejected non-empty dynamic exception specifications immediately; one representative packet translation unit hit Clang's 20-error limit in `SocketAPI.h`. |
+| Clang 19.1.5 SpriteLib probe | Rejected `register` declarations as invalid ISO C++17. |
+
+The `_HAS_*` macros and `/Zc:strictStrings-` were used only to expose the next
+layer of errors. They are **not proposed fixes**: they disable new library features
+or retain non-conforming source behavior.
+
+Only Debug was compiled in this audit. Release, ASan, and in-game behavior remain
+acceptance work for the implementation.
+
+## Findings
+
+### 1. C++17 `std::byte` conflicts with global namespace imports
+
+`Client/Client_PCH.h:30` contains `using namespace std;`. Some translation units
+then include Windows headers such as `wtypes.h`, whose unqualified `byte` collides
+with `std::byte`. `Properties.cpp` and `StringStream.cpp` reproduce this failure.
+
+A repository scan found 65 `using namespace std` directives in 63 files. Fifty
+matches are in headers; two of those are commented out, leaving approximately 48
+active header-level imports. The precompiled header is the high-impact instance
+because it affects most client translation units.
+
+The preferred fix is to remove namespace directives from headers and qualify the
+standard-library names they expose. A Windows-only `_HAS_STD_BYTE=0` definition is
+a small compatibility shim, but it hides rather than fixes the namespace problem
+and prevents use of a standard C++17 feature.
+
+### 2. One removed standard-library type is used
+
+`Client/PacketHandler/GCMonsterKillQuestInfoHandler.cpp:30` has the repository's
+only `std::auto_ptr` occurrence. It owns the raw pointer returned by
+`popQuestInfo()`, so replacing it with `std::unique_ptr` should be local and low
+risk.
+
+The scan found no uses of the other common C++17/C++20 removals: `random_shuffle`,
+`bind1st`/`bind2nd`, `mem_fun`, `std::iterator`, `result_of`, old allocator member
+functions, `uncaught_exception`, or `get_temporary_buffer`. It also found no `u8`
+string literals that would trigger the C++20 `char8_t` type change.
+
+### 3. Dynamic exception specifications are the main conformance workload
+
+The packet subsystem uses old specifications on declarations and definitions; for
+example, `Client/Packet/SocketAPI.h:78-203`. A syntax-focused scan found:
+
+- **3,304 non-empty type-list specifications** such as
+  `throw(ProtocolException, Error)`;
+- **1,317 files** containing those non-empty specifications;
+- **8,655 empty specifications** written as `throw()`.
+
+The non-empty form was removed in C++17. MSVC continues to accept and ignore it as
+an extension (the existing C4290 warning family), which is why a permissive MSVC
+C++20 build can succeed. Clang rejects it.
+
+The safe mechanical mapping for the current Windows behavior is:
+
+```cpp
+throw()                         -> noexcept
+throw(ProtocolException, Error) -> noexcept(false)
+```
+
+MSVC already ignores the list of permitted exception types, so `noexcept(false)`
+matches the effective supported-platform behavior more closely than attempting to
+recreate the old runtime type filter. Declarations, definitions, base classes, and
+overrides must be changed consistently because exception specifications are part
+of the function type in modern C++.
+
+This edit is scriptable, but it touches most of the packet tree and therefore has
+substantial review, merge-conflict, and clean-build cost. A syntax-aware rewrite
+or tightly constrained pattern is required so parenthesized `throw` expressions
+and comments are not altered.
+
+There is a related pre-existing correctness concern: MSVC reports functions
+declared `throw()` whose bodies can throw. Converting `throw()` to `noexcept`
+preserves today's termination behavior; deciding that those functions should
+propagate instead is a separate behavioral audit and should not be mixed into the
+language port.
+
+### 4. `register` remains in C++ source
+
+There are roughly 650 declaration-like uses of the removed `register` storage
+specifier. They are concentrated in SpriteLib drawing loops, `MTopView.cpp`, and
+several UI loops. Twenty-six textual occurrences are in `.c` files and do not need
+to change because those files remain C.
+
+MSVC accepts the C++ occurrences as extensions. Clang 19 rejects them in C++17.
+Removing `register` is mechanical and has no intended runtime effect, but it must
+be included for an ISO-clean result.
+
+### 5. C++20 makes legacy string-literal conversions hard errors
+
+With the two removed-library issues bypassed, MSVC C++20 reported at least **126
+unique error sites across 24 files**. These are not 126 independent designs:
+
+- `basic/BasicException.h:30` declares read-only error text and `__FILE__` as
+  mutable `char*`; making the declaration and definition const-correct resolves
+  many repeated sites.
+- Tables such as `VS_UI/src/VS_UI_GameSlayer.cpp:1100`,
+  `Client/CrashReport.cpp:33`, and `Client/md5.cpp:30` store string literals in
+  mutable pointer types. Most should be arrays of `const char*`.
+- Several APIs accept `char*` even when their implementations appear to read only,
+  including help-key lookup, chat text, login-ID backup, opening-video paths, and
+  UI cursor setup.
+
+Every affected API must be checked before changing its parameter to `const char*`.
+Using `const_cast` or retaining `/Zc:strictStrings-` would conceal a real contract
+problem and is not an acceptable final fix.
+
+Strict C++17/Clang validation will expose the same const-correctness debt even
+though default MSVC C++17 still permits many of the conversions.
+
+### 6. C++20 adds little after the shared cleanup
+
+Once `std::byte`, `auto_ptr`, and strict string literals were temporarily handled,
+the entire MSVC C++20 graph compiled and all tests passed. The static scan also
+found no live identifiers conflicting with `concept`, `requires`, `module`, or the
+coroutine keywords, and no additional removed standard-library APIs.
+
+This does not prove there are no errors hidden behind the known failures. Only a
+complete Clang build after the exception-specification and `register` sweeps can do
+that. A 25-35% contingency is included in the ISO-clean estimate for such
+second-order failures.
+
+### 7. Automated coverage is useful but not sufficient
+
+The six CTest entries cover the unit binary plus architecture, formatting, packet
+index, and generated-inventory checks. The unit binary exercises the static
+libraries, including `packetwire` and `gamemodel`, and its wire goldens are valuable
+because the port should not change packet bytes.
+
+`tests/CMakeLists.txt` explicitly records the main limit: game logic compiled
+directly into `DarkEden`, including packet handlers, cannot be linked into the unit
+test binary. The language change therefore also needs an in-game smoke test against
+a live server. Compile success alone cannot validate UI string lifetime, exception
+paths, login, zone loading, chat, or shutdown.
+
+There is no checked-in CI workflow, so compatibility could regress immediately
+unless the new language mode becomes the only supported build contract or is
+enforced in CI.
+
+## Estimated work breakdown
+
+The following is the recommended ISO-clean C++20 scope. Some tasks overlap, so the
+total is a range rather than a direct sum of maximums.
+
+| Workstream | Effort | Notes |
+|---|---:|---|
+| Build contract and compiler matrix | 1-2 days | CMake minimum/standard, extensions off, strict MSVC job, Clang job, Debug and Release. |
+| `std::byte`, namespace hygiene, and `auto_ptr` | 1-3 days | The one ownership change is trivial; removing header namespace pollution determines the range. |
+| Const-correct string interfaces | 2-4 days | At least 126 observed sites in 24 files; several collapse to shared API fixes, but mutation contracts need review. |
+| Exception-specification migration | 4-7 days | About 11,959 total specification sites, 3,304 of them illegal type lists, spread over 1,317 files. Includes a codemod, declaration/definition repair, and review. |
+| Remove C++ `register` and fix remaining strict-compiler findings | 2-4 days | Roughly 650 candidates plus issues revealed only after the dominant blockers are gone. |
+| Verification and stabilization | 3-5 days | Clean Debug/Release builds, ordinary and ASan tests, wire checks, startup/login/zone/chat/UI/shutdown smoke tests. |
+
+Expected total: **15-25 engineer-days**. A reviewer familiar with the packet
+generator-style files can keep the work near the low end. Discovering behavioral
+exception issues or cross-platform requirements would push it beyond the range.
+
+The MSVC-extension estimates are shorter because they deliberately skip the
+exception-specification and `register` sweeps. That is a valid staged milestone,
+but it should be named "MSVC C++20 build" rather than "portable C++20."
+
+## Recommended implementation sequence
+
+1. Add a C++20 audit configuration and record the current failure counts. Keep the
+   existing C++11 build green during the first fixes.
+2. Replace the single `auto_ptr`, correct the `std::byte` namespace collision, and
+   fix the const-string API families. Do not commit the diagnostic `_HAS_*` or
+   `/Zc:strictStrings-` switches as solutions.
+3. Land the exception-specification conversion in reviewable subsystem batches.
+   Add a zero-growth/zero-target ratchet so old `throw(Type)` syntax cannot return.
+4. Remove C++ `register` uses, leaving C sources alone. Add the same kind of
+   ratchet for C++ files.
+5. Turn on C++20, `CMAKE_CXX_EXTENSIONS OFF`, and strict MSVC compilation as the
+   normal build. Build every target from a clean directory.
+6. Add Clang compilation. The local machine has a Clang 19 executable, but the
+   Visual Studio ClangCL toolset integration is not installed, so this audit could
+   run representative compile probes rather than a complete Clang target graph.
+7. Run all tests in ordinary and ASan trees, add Release coverage, then perform the
+   live-server smoke test before declaring the port complete.
+
+## Acceptance criteria
+
+The port is complete when all of the following are true:
+
+- CMake requests C++20 directly and refuses an older standard;
+- no diagnostic feature-disabling macros or permissive string-literal switch are
+  required;
+- no non-empty dynamic exception specification remains;
+- no `register` specifier remains in C++ source;
+- all configured libraries, tools, tests, and `DarkEden` build cleanly in Debug and
+  Release with the supported MSVC toolset;
+- a second compiler builds the intended portable subset or complete Windows graph,
+  depending on the agreed support promise;
+- all CTest checks and the unit suite pass in ordinary and ASan builds;
+- packet wire inventories and golden bytes are unchanged;
+- startup, login, zone entry, UI interaction, chat, and clean shutdown are verified
+  against a live server.
+
+Modernizing unrelated raw pointers, containers, rendering code, platform APIs, or
+the remaining warning backlog is explicitly outside these criteria.
