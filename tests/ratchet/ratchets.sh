@@ -118,7 +118,23 @@ check () {
 # includes served is never compiled, and moving them proves nothing at
 # runtime. What it does is make the file's dead branch expressible
 # without game headers, which is the only reason the file was a holdout.
-R1_BASELINE=492
+#
+# 489: 492 - 3. Task 5.1's fourth slice took the request-service family
+# bar one: RequestClientPlayer.cpp, RequestServerPlayer.cpp and
+# RequestServerPlayerManager.cpp. The clock, the in-game test and six
+# calls of the peer file-transfer manager are behind WireHost; the
+# manager itself stays in the executable, because it draws, writes the
+# profile directory and reads the UI.
+#
+# One of the three needed nothing at all. RequestServerPlayerManager.cpp
+# reached no executable symbol on any live line - both ClientDef.h and
+# ServerInfo.h were unused includes - and had sat in the holdouts file
+# for two slices because the list there was compiled by grepping for
+# symbol names without asking whether the line was live. Every
+# g_pGameMessage use in all four files is inside
+# `#if defined(_DEBUG) && defined(OUTPUT_DEBUG)`, and nothing defines
+# OUTPUT_DEBUG.
+R1_BASELINE=489
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do

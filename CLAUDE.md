@@ -72,7 +72,8 @@ encrypter, the info classes, every packet class in every direction and
 the factory/validator tables (`docs/RESTRUCTURING.md` tasks 1.1, 2.4 and 5.1;
 membership is `tests/arch/packetwire_files.txt`, read by CMake, the include checker
 and the ratchet script, and `tests/arch/packetwire_holdouts.txt` says what keeps
-each of the remaining six out). The logging facility (`DebugLog.h`) is in
+the last one out — `RequestClientPlayerManager.cpp`, which reaches the
+whisper queue and the logged-in character). The logging facility (`DebugLog.h`) is in
 `basic`, so every library may log; `Client/DebugInfo.h` is the executable's
 front end to it and pulls in `MinTr.h`, which is why the libraries may not
 include it. The checked formatter (`SafeFormat.h`, `docs/RESTRUCTURING.md`
@@ -153,7 +154,7 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **338 tests, 4,547 checks, 0 failed** in both trees.
+baseline: **345 tests, 4,839 checks, 0 failed** in both trees.
 
 ## Traps
 

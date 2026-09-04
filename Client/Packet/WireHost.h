@@ -26,7 +26,11 @@
 #include "Types.h"
 #include "Types/ZoneTypes.h"
 
+#include <string>
+
 class Player;
+class RequestClientPlayer;
+class RequestServerPlayer;
 
 //----------------------------------------------------------------------
 // The answers with no host, which are ClientConfig's own constructor
@@ -69,6 +73,35 @@ struct WireHost {
 	// formula. See WireEncryptSeed below.
 	bool		(*EncryptUsesEnglishSeed)();
 
+	//------------------------------------------------------------------
+	// The request-service family (docs/RESTRUCTURING.md task 5.1's
+	// fourth slice) - the peer-to-peer side, where two clients talk to
+	// each other directly to transfer a file or a whisper.
+	//------------------------------------------------------------------
+
+	// The clock its timeouts are measured against, in milliseconds.
+	DWORD		(*CurrentTime)();
+
+	// Whether the client is in the game world. RequestClientPlayer
+	// refuses a request packet that arrives outside it.
+	bool		(*InGameMode)();
+
+	// The peer file-transfer manager, which stays executable-side: it
+	// draws progress, writes into the profile directory and reads the
+	// UI's own state. What the wire layer needs of it is six calls -
+	// the request players hand themselves to it when a transfer starts
+	// and take themselves back out when the connection ends.
+	//
+	// Every one answers false with no host, which is what an
+	// unregistered transfer looks like, so a receive loop that asks
+	// about one cleans up rather than waiting.
+	bool		(*ReceiveMyRequest)(const std::string& name, RequestClientPlayer* pPlayer);
+	bool		(*HasMyRequest)(const std::string& name);
+	bool		(*RemoveMyRequest)(const std::string& name);
+	bool		(*SendOtherRequest)(const std::string& name, RequestServerPlayer* pPlayer);
+	bool		(*HasOtherRequest)(const std::string& name);
+	bool		(*RemoveOtherRequest)(const std::string& name);
+
 };
 
 //----------------------------------------------------------------------
@@ -106,6 +139,16 @@ public :
 	static ZoneID_t	EncryptZoneID () throw ();
 	static int	EncryptServerID () throw ();
 	static bool	EncryptUsesEnglishSeed () throw ();
+
+	static DWORD	CurrentTime () throw ();
+	static bool	InGameMode () throw ();
+
+	static bool	ReceiveMyRequest ( const std::string & name , RequestClientPlayer * pPlayer ) throw ();
+	static bool	HasMyRequest ( const std::string & name ) throw ();
+	static bool	RemoveMyRequest ( const std::string & name ) throw ();
+	static bool	SendOtherRequest ( const std::string & name , RequestServerPlayer * pPlayer ) throw ();
+	static bool	HasOtherRequest ( const std::string & name ) throw ();
+	static bool	RemoveOtherRequest ( const std::string & name ) throw ();
 
 private :
 

@@ -103,6 +103,107 @@ Wire::EncryptUsesEnglishSeed () throw ()
 }
 
 //----------------------------------------------------------------------
+// The request-service family's seams.
+//----------------------------------------------------------------------
+// A clock of 0 and "not in the game world" with no host. The second is
+// the conservative answer rather than the convenient one:
+// RequestClientPlayer throws on a request packet that arrives outside
+// the game, so a binary with no host refuses them all rather than
+// accepting them all.
+//
+// The six file-transfer calls answer false, which is what an
+// unregistered transfer looks like - a caller asking whether it still
+// has one cleans up instead of waiting on a manager that is not there.
+//----------------------------------------------------------------------
+DWORD
+Wire::CurrentTime () throw ()
+{
+	if (s_pHost==NULL || s_pHost->CurrentTime==NULL)
+	{
+		return 0;
+	}
+
+	return s_pHost->CurrentTime();
+}
+
+bool
+Wire::InGameMode () throw ()
+{
+	if (s_pHost==NULL || s_pHost->InGameMode==NULL)
+	{
+		return false;
+	}
+
+	return s_pHost->InGameMode();
+}
+
+bool
+Wire::ReceiveMyRequest ( const std::string & name , RequestClientPlayer * pPlayer ) throw ()
+{
+	if (s_pHost==NULL || s_pHost->ReceiveMyRequest==NULL)
+	{
+		return false;
+	}
+
+	return s_pHost->ReceiveMyRequest(name, pPlayer);
+}
+
+bool
+Wire::HasMyRequest ( const std::string & name ) throw ()
+{
+	if (s_pHost==NULL || s_pHost->HasMyRequest==NULL)
+	{
+		return false;
+	}
+
+	return s_pHost->HasMyRequest(name);
+}
+
+bool
+Wire::RemoveMyRequest ( const std::string & name ) throw ()
+{
+	if (s_pHost==NULL || s_pHost->RemoveMyRequest==NULL)
+	{
+		return false;
+	}
+
+	return s_pHost->RemoveMyRequest(name);
+}
+
+bool
+Wire::SendOtherRequest ( const std::string & name , RequestServerPlayer * pPlayer ) throw ()
+{
+	if (s_pHost==NULL || s_pHost->SendOtherRequest==NULL)
+	{
+		return false;
+	}
+
+	return s_pHost->SendOtherRequest(name, pPlayer);
+}
+
+bool
+Wire::HasOtherRequest ( const std::string & name ) throw ()
+{
+	if (s_pHost==NULL || s_pHost->HasOtherRequest==NULL)
+	{
+		return false;
+	}
+
+	return s_pHost->HasOtherRequest(name);
+}
+
+bool
+Wire::RemoveOtherRequest ( const std::string & name ) throw ()
+{
+	if (s_pHost==NULL || s_pHost->RemoveOtherRequest==NULL)
+	{
+		return false;
+	}
+
+	return s_pHost->RemoveOtherRequest(name);
+}
+
+//----------------------------------------------------------------------
 // The stream cipher's seed.
 //----------------------------------------------------------------------
 // Preserved from ClientPlayer::setEncryptCode() unchanged, including

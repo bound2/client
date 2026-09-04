@@ -19,6 +19,9 @@
 
 #include "ClientCommunicationManager.h"
 #include "ClientPlayer.h"
+#include "RequestClientPlayer.h"
+#include "RequestServerPlayer.h"
+#include "RequestServerPlayerManager.h"
 #include "Player.h"
 #include "PacketDiagnostics.h"
 #include "WireHost.h"
@@ -34,6 +37,22 @@ ZoneID_t	s_EncryptZoneID		= 0;
 int		s_EncryptServerID	= 0;
 bool		s_EnglishSeed		= false;
 
+DWORD		s_Now			= 0;
+bool		s_InGame		= false;
+
+// The six file-transfer entries have the same signature in pairs, so a
+// host wired to the wrong one would still answer. Recording the name
+// makes the test say WHICH was reached.
+std::string	s_RequestAsked;
+
+void	Asked(const char* pWhich, const std::string& name)
+{
+	s_RequestAsked += pWhich;
+	s_RequestAsked += "(";
+	s_RequestAsked += name;
+	s_RequestAsked += ") ";
+}
+
 int	HostMaxProcessPacket()		{ return s_MaxProcessPacket; }
 int	HostMaxRequestService()		{ return s_MaxRequestService; }
 uint	HostUDPPort()			{ return s_UDPPort; }
@@ -42,11 +61,25 @@ ZoneID_t	HostEncryptZoneID()	{ return s_EncryptZoneID; }
 int	HostEncryptServerID()		{ return s_EncryptServerID; }
 bool	HostEnglishSeed()		{ return s_EnglishSeed; }
 
+DWORD	HostCurrentTime()		{ return s_Now; }
+bool	HostInGameMode()		{ return s_InGame; }
+
+bool	HostReceiveMyRequest(const std::string& n, RequestClientPlayer*)	{ Asked("ReceiveMy", n); return true; }
+bool	HostHasMyRequest(const std::string& n)				{ Asked("HasMy", n); return true; }
+bool	HostRemoveMyRequest(const std::string& n)			{ Asked("RemoveMy", n); return true; }
+bool	HostSendOtherRequest(const std::string& n, RequestServerPlayer*)	{ Asked("SendOther", n); return true; }
+bool	HostHasOtherRequest(const std::string& n)			{ Asked("HasOther", n); return true; }
+bool	HostRemoveOtherRequest(const std::string& n)			{ Asked("RemoveOther", n); return true; }
+
 const WireHost	s_Host = { HostMaxProcessPacket, HostMaxRequestService, HostUDPPort, HostBugReportTarget,
-				HostEncryptZoneID, HostEncryptServerID, HostEnglishSeed };
+				HostEncryptZoneID, HostEncryptServerID, HostEnglishSeed,
+				HostCurrentTime, HostInGameMode,
+				HostReceiveMyRequest, HostHasMyRequest, HostRemoveMyRequest,
+				HostSendOtherRequest, HostHasOtherRequest, HostRemoveOtherRequest };
 
 // A host that answers nothing, which is not the same as no host.
-const WireHost	s_EmptyHost = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+const WireHost	s_EmptyHost = { NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+				NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 
 // SendBugReport asks for a target only once it has decided the report
 // is worth sending, so the count is the observable half of a function
@@ -56,7 +89,10 @@ int	s_Asked = 0;
 Player*	CountingBugReportTarget()	{ s_Asked++; return s_pTarget; }
 
 const WireHost	s_CountingHost = { HostMaxProcessPacket, HostMaxRequestService, HostUDPPort, CountingBugReportTarget,
-					HostEncryptZoneID, HostEncryptServerID, HostEnglishSeed };
+					HostEncryptZoneID, HostEncryptServerID, HostEnglishSeed,
+					HostCurrentTime, HostInGameMode,
+					HostReceiveMyRequest, HostHasMyRequest, HostRemoveMyRequest,
+					HostSendOtherRequest, HostHasOtherRequest, HostRemoveOtherRequest };
 
 // Puts the library back the way every other test expects it.
 struct NoHost
@@ -307,4 +343,94 @@ TEST(WireHostSeam, TheGameConnectionsObjectIsInTheLibrary)
 
 	CHECK(pStatus != NULL);
 	CHECK(pOldPacket != NULL);
+}
+
+//----------------------------------------------------------------------
+// The request-service family's seams
+//----------------------------------------------------------------------
+TEST(WireHostSeam, TheRequestSeamsAnswerConservativelyWithNoHost)
+{
+	NoHost	restore;
+
+	Wire::SetHost(NULL);
+
+	// A clock of zero, and NOT in the game world. The second is the
+	// conservative answer rather than the convenient one:
+	// RequestClientPlayer throws on a request packet that arrives
+	// outside the game, so a binary with no host refuses them all
+	// rather than accepting them all.
+	CHECK_EQ(0, (int)Wire::CurrentTime());
+	CHECK_EQ(false, Wire::InGameMode());
+
+	// And no file transfer is registered, which is what a caller
+	// asking whether it still has one needs to hear so that it cleans
+	// up instead of waiting on a manager that is not there.
+	CHECK_EQ(false, Wire::ReceiveMyRequest("peer", NULL));
+	CHECK_EQ(false, Wire::HasMyRequest("peer"));
+	CHECK_EQ(false, Wire::RemoveMyRequest("peer"));
+	CHECK_EQ(false, Wire::SendOtherRequest("peer", NULL));
+	CHECK_EQ(false, Wire::HasOtherRequest("peer"));
+	CHECK_EQ(false, Wire::RemoveOtherRequest("peer"));
+
+	// A host that answers nothing answers the same way, one entry at a
+	// time - the accessors test the pointer, not just the host.
+	Wire::SetHost(&s_EmptyHost);
+	CHECK_EQ(0, (int)Wire::CurrentTime());
+	CHECK_EQ(false, Wire::InGameMode());
+	CHECK_EQ(false, Wire::HasMyRequest("peer"));
+	CHECK_EQ(false, Wire::HasOtherRequest("peer"));
+}
+
+TEST(WireHostSeam, AHostAnswersTheRequestSeamsAndIsAskedTheRightOne)
+{
+	NoHost	restore;
+
+	s_Now		= 4321;
+	s_InGame	= true;
+	s_RequestAsked.clear();
+
+	Wire::SetHost(&s_Host);
+
+	CHECK_EQ(4321, (int)Wire::CurrentTime());
+	CHECK_EQ(true, Wire::InGameMode());
+
+	// Read each time. The request timeouts are differences against this
+	// clock, so a value copied once would freeze every one of them.
+	s_Now = 9999;
+	CHECK_EQ(9999, (int)Wire::CurrentTime());
+
+	// The six file-transfer calls are near-identical in shape, which is
+	// exactly how one gets wired to the wrong host entry. Each records
+	// its own name, so the test says which was reached rather than only
+	// that something was.
+	Wire::ReceiveMyRequest("a", NULL);
+	Wire::HasMyRequest("b");
+	Wire::RemoveMyRequest("c");
+	Wire::SendOtherRequest("d", NULL);
+	Wire::HasOtherRequest("e");
+	Wire::RemoveOtherRequest("f");
+
+	CHECK(s_RequestAsked ==
+		"ReceiveMy(a) HasMy(b) RemoveMy(c) SendOther(d) HasOther(e) RemoveOther(f) ");
+}
+
+//----------------------------------------------------------------------
+// The three files this slice let into the library
+//----------------------------------------------------------------------
+TEST(WireHostSeam, TheRequestServiceObjectsAreInTheLibrary)
+{
+	// Non-virtual members whose definitions are in the .cpp files, for
+	// the reason the ClientPlayer proof below records: a pointer to a
+	// virtual member is a vtable index and need not reference the
+	// defining object, and an inline member in the header is not in the
+	// object at all. Constructing any of these would open a socket.
+	uint (RequestClientPlayer::*pLen)() const = &RequestClientPlayer::getInputStreamLength;
+	uint (RequestServerPlayer::*pSend)(const char*, uint) = &RequestServerPlayer::send;
+	void (RequestServerPlayerManager::*pInit)(int) = &RequestServerPlayerManager::Init;
+	void (RequestServerPlayerManager::*pWait)() = &RequestServerPlayerManager::WaitRequest;
+
+	CHECK(pLen != NULL);
+	CHECK(pSend != NULL);
+	CHECK(pInit != NULL);
+	CHECK(pWait != NULL);
 }

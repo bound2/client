@@ -44,6 +44,15 @@ Client/Packet/Player.cpp
 # now (task 5.1)
 Client/Packet/ClientPlayer.cpp
 
+# The peer-to-peer side: two clients talking to each other directly for
+# a file transfer or a whisper. What kept them out was the clock, the
+# in-game test and six calls of the file-transfer manager, all behind
+# WireHost now; the manager itself stays executable-side because it
+# draws, writes the profile directory and reads the UI (task 5.1)
+Client/Packet/RequestClientPlayer.cpp
+Client/Packet/RequestServerPlayer.cpp
+Client/Packet/RequestServerPlayerManager.cpp
+
 # What the wire layer asks of the program around it: three tuning
 # values and somewhere to send a bug report, behind a host the
 # executable installs (task 5.1)

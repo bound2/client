@@ -4,46 +4,45 @@
 # Client/Packet to be in exactly one of this file and
 # tests/arch/packetwire_files.txt.
 #
-# Neither the debug facilities nor the client's tuning values keep any
-# of them out any more: task 5.1's first slice moved the logging header
-# into basic/, and its second put the three tuning values they read
-# behind WireHost. Its third took ClientPlayer.cpp, whose only two were
-# MZone.h and UserInformation.h and both were wanted by one function the
-# build never compiles. What each of the remaining four needs, as of
-# 2026-09-04:
+# One file left, as of 2026-09-04. Task 5.1 took the rest a slice at a
+# time: the first put the logging header into basic/, the second the
+# three tuning values behind WireHost, the third ClientPlayer.cpp, and
+# the fourth the request-service family bar this one.
 #
-#   RequestClientPlayer.cpp         ClientDef.h, RequestFileManager.h
 #   RequestClientPlayerManager.cpp  ClientDef.h, MPlayer.h,
 #                                   MGameStringTable.h, ProfileManager.h,
 #                                   RequestUserManager.h, ServerInfo.h,
 #                                   UserInformation.h, WhisperManager.h
-#   RequestServerPlayer.cpp         ClientDef.h, RequestFileManager.h
-#   RequestServerPlayerManager.cpp  ClientDef.h, ServerInfo.h
 #
-# These are game state, not tuning: g_pGameMessage and g_pGameStringTable
-# for the messages the request path shows the player, g_pPlayer,
-# g_pUserInformation, g_pRequestFileManager, g_pProfileManager,
-# g_pWhisperManager, g_pRequestUserManager - and ClientDef.h is wanted
-# for g_Mode and the MODE_* enum. A host struct the size of WireHost
-# would not cover that; the request-service family is its own slice.
+# What it really reaches, with comments and dead #ifdef blocks removed
+# first: g_pWhisperManager (4), g_pUserInformation (3), g_pPlayer,
+# g_pProfileManager, g_pRequestUserManager, g_Mode, and the
+# WHISPER_MESSAGE type. The clock and the in-game test are already
+# behind WireHost; what is left is the whisper queue and the character
+# the client is logged in as, which is a bigger seam than a host of
+# function pointers wants to be.
 #
-# One correction while ClientPlayer.cpp was being taken out, because the
-# line above used to say four of them branch on g_Mode: only TWO do.
-# RequestClientPlayer.cpp:212 throws when it is not MODE_GAME and
-# RequestClientPlayerManager.cpp:401 tests it; in RequestServerPlayer.cpp
-# the test is commented out and in RequestServerPlayerManager.cpp it
-# reads `if (1)//g_Mode==MODE_GAME)`. Those two want ClientDef.h for
-# something else, and whoever takes this slice should find out what
-# rather than build a g_Mode accessor for four callers that are two.
+# READ THAT LIST RATHER THAN THE INCLUDES. This file used to say the
+# family needed g_pGameMessage "for the messages the request path shows
+# the player", and that four of the five branch on g_Mode. Both were
+# wrong, and wrong the same way: compiled by grepping for a symbol
+# without asking whether the line was live.
+#
+#   - EVERY g_pGameMessage use in all four files sits inside
+#     `#if defined(_DEBUG) && defined(OUTPUT_DEBUG)`, and nothing in
+#     this build defines OUTPUT_DEBUG. Not one was a dependency.
+#   - Only TWO branched on g_Mode. RequestServerPlayer.cpp has the test
+#     commented out, and RequestServerPlayerManager.cpp reads
+#     `if (1)//g_Mode==MODE_GAME)`.
+#   - RequestServerPlayerManager.cpp reached NOTHING executable-side.
+#     Both ClientDef.h and ServerInfo.h were unused includes, and it had
+#     sat here for two slices because of them.
 #
 # The four managers the family reaches - RequestFileManager,
-# WhisperManager, RequestUserManager, ProfileManager - are not all alike
-# either. RequestUserManager.cpp includes nothing but Client_PCH.h and
-# its own header, and UserInformation.cpp the same; ProfileManager.cpp
-# pulls CDirectDraw.h, CSpritePack.h and UIFunction.h and is staying
-# where it is.
+# WhisperManager, RequestUserManager, ProfileManager - are not all alike.
+# RequestUserManager.cpp includes nothing but Client_PCH.h and its own
+# header, and UserInformation.cpp the same, so both could move ahead of
+# the last holdout; ProfileManager.cpp pulls CDirectDraw.h,
+# CSpritePack.h and UIFunction.h and is staying where it is.
 
-Client/Packet/RequestClientPlayer.cpp
 Client/Packet/RequestClientPlayerManager.cpp
-Client/Packet/RequestServerPlayer.cpp
-Client/Packet/RequestServerPlayerManager.cpp

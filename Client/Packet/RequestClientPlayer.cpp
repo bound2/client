@@ -13,14 +13,9 @@
 #include "PacketDispatcher.h"
 #include "PacketFactoryManager.h"
 #include "PacketValidator.h"
-#include "ClientDef.h"
-#include "RequestFileManager.h"
 #include "WireHost.h"
 #include "DebugLog.h"
 
-#if defined(_DEBUG) && defined(OUTPUT_DEBUG)
-	extern CMessageArray*		g_pGameMessage;
-#endif
 
 #define	EXPIRE_DELAY	60000		//60*1000	// 1분
 
@@ -37,7 +32,7 @@ RequestClientPlayer::RequestClientPlayer ( Socket * pSocket )
 {
 	m_RequestMode = REQUEST_CLIENT_MODE_NULL;
 
-	m_ExpireTime = g_CurrentTime + EXPIRE_DELAY;
+	m_ExpireTime = Wire::CurrentTime() + EXPIRE_DELAY;
 }
 
 //--------------------------------------------------------------------------------
@@ -74,10 +69,6 @@ RequestClientPlayer::~RequestClientPlayer ()
 {
 	__BEGIN_TRY
 	
-	#if defined(_DEBUG) && defined(OUTPUT_DEBUG)
-		if (g_pGameMessage!=NULL)
-			g_pGameMessage->AddFormat("Disonnected From %s", m_RequestServerName.c_str());
-	#endif
 
 	// 그 어떤 플레이어 객체가 삭제될 때에도, 그 상태는 로그아웃이어야 한다.
 	// 즉 어떤 플레이어를 접속 종료 시키려면, 그 상태를 로그아웃으로 만들어야 한다.
@@ -105,10 +96,10 @@ void RequestClientPlayer::processCommand ()
 		// Profile을 보내는 중..
 		//-----------------------------------------------------------------
 		case REQUEST_CLIENT_MODE_PROFILE :
-			if (g_pRequestFileManager->ReceiveMyRequest(m_RequestServerName, this))
+			if (Wire::ReceiveMyRequest(m_RequestServerName, this))
 			{
 				// 화일을 보내는 중이므로 processCommand()가 필요없다.
-				m_ExpireTime = g_CurrentTime + EXPIRE_DELAY;
+				m_ExpireTime = Wire::CurrentTime() + EXPIRE_DELAY;
 				return;
 			}			
 		break;
@@ -209,7 +200,7 @@ void RequestClientPlayer::processCommand ()
 					throw InsufficientDataException();
 				}
 
-				if (g_Mode!=MODE_GAME)	
+				if (!Wire::InGameMode())	
 					throw InvalidProtocolException("not MODE_GAME");
 
 				
@@ -244,7 +235,7 @@ void RequestClientPlayer::processCommand ()
 				pPacket = NULL;
 
 
-				m_ExpireTime = g_CurrentTime + EXPIRE_DELAY;
+				m_ExpireTime = Wire::CurrentTime() + EXPIRE_DELAY;
 
 				//---------------------------------------------------------	
 				// 한번에 처리하는 packet의 한계 개수를 넘어간 경우
@@ -270,9 +261,9 @@ void RequestClientPlayer::processCommand ()
 		} catch ( InsufficientDataException ) {
 
 			// 단지 루프의 탈출 조건일 뿐이다. 상위로 전달할 필요는 없다.
-			if (g_CurrentTime > m_ExpireTime)
+			if (Wire::CurrentTime() > m_ExpireTime)
 			{
-				throw InvalidProtocolException("timeout - -;;");			
+				throw InvalidProtocolException("timeout - -;;");
 			}
 		}
 	} catch (Throwable)	{
@@ -298,10 +289,12 @@ void RequestClientPlayer::disconnect ( bool bDisconnected )
 	__BEGIN_TRY
 
 	// file요청중이던거 있으면 제거한다.
-	if (g_pRequestFileManager!=NULL
-		&& g_pRequestFileManager->HasMyRequest(m_RequestServerName.c_str()))
+	// The NULL test the host replaces was on the manager itself: with no
+	// manager there is nothing registered, which is what HasMyRequest
+	// answers without a host.
+	if (Wire::HasMyRequest(m_RequestServerName.c_str()))
 	{
-		g_pRequestFileManager->RemoveMyRequest(m_RequestServerName.c_str());
+		Wire::RemoveMyRequest(m_RequestServerName.c_str());
 	}
 
 	if ( bDisconnected == UNDISCONNECTED ) {

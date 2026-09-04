@@ -5,9 +5,7 @@
 #include "RequestServerPlayerManager.h"
 //#include "RequestClientPlayerManager.h"
 #include "WireHost.h"
-#include "ClientDef.h"
 #include "DebugLog.h"
-#include "ServerInfo.h"
 
 // Platform-specific threading includes
 #ifdef PLATFORM_WINDOWS
@@ -63,17 +61,6 @@
 
 // Note: CreateThread stub removed - use platform_thread_create from Platform.h
 // #ifdef PLATFORM_WINDOWS... (removed)
-
-//#include "Rpackets/RCPositionInfo.h"
-
-#if defined(_DEBUG) && defined(OUTPUT_DEBUG)
-	extern CMessageArray*		g_pGameMessage;
-#endif
-
-#ifdef OUTPUT_DEBUG
-	extern CRITICAL_SECTION			g_Lock;
-#endif
-
 
 //--------------------------------------------------------------------------------
 // Global
@@ -179,30 +166,6 @@ RequestServerPlayerManager::AddRequestServerPlayer(RequestServerPlayer* pRequest
 			// 일단 list에 넣어둔다.
 			m_listRequestServerPlayer.push_back( pRequestServerPlayer );
 
-			#if defined(_DEBUG) && defined(OUTPUT_DEBUG)
-			
-				EnterCriticalSection(&g_Lock);
-	
-				if (g_pGameMessage!=NULL)
-				{
-					Socket* pSocket = pRequestServerPlayer->getSocket();
-
-					if (pSocket!=NULL)
-					{
-						// getHost() returns std::string by value, so binding
-						// its c_str() would dangle before AddFormat reads it.
-						const std::string strIP = pSocket->getHost();
-						g_pGameMessage->AddFormat("New Connection From %s", strIP.c_str());
-					}
-					else
-					{
-						g_pGameMessage->AddFormat("New Connection From where?");
-					}
-				}
-
-				LeaveCriticalSection(&g_Lock);
-			#endif
-
 			Unlock();
 			return true;
 		}
@@ -284,59 +247,17 @@ RequestServerPlayerManager::Broadcast(Packet* pPacket)
 
 
 //--------------------------------------------------------------------------------
-// Update
+// ProcessMode
 //--------------------------------------------------------------------------------
-void		
+void
 RequestServerPlayerManager::ProcessMode(RequestServerPlayer* pPlayer)
 {
-	/*
-	switch (pPlayer->getRequestMode())
-	{		
-		//------------------------------------------------------
-		// 지속적으로 좌표를 보내는 경우
-		//------------------------------------------------------		
-		case REQUEST_CLIENT_MODE_POSITION_REPEATLY :
-		{
-			static DWORD nextTime = g_CurrentTime;
-			static DWORD sendTime = g_CurrentTime;
-
-			static int oldX = -1;
-			static int oldY = -1;
-			static int oldZoneID = -1;
-
-			if (g_CurrentTime >= nextTime)
-			{
-				int x		= g_pPlayer->GetX();
-				int y		= g_pPlayer->GetY();
-				int zoneID	= (g_bZonePlayerInLarge?g_nZoneLarge : g_nZoneSmall);
-
-				// 좌표가 달라졌으면 보낸다.
-				if (oldX!=x || oldY!=y || oldZoneID!=zoneID
-					|| g_CurrentTime >= sendTime)
-				{
-					RCPositionInfo _RCPositionInfo;
-
-					_RCPositionInfo.setZoneX( x );
-					_RCPositionInfo.setZoneY( y );
-					_RCPositionInfo.setZoneID( zoneID );
-
-					pPlayer->sendPacket( &_RCPositionInfo );
-
-					// 보낸 정보 기억
-					oldX = x;
-					oldY = y;
-					oldZoneID = zoneID;
-
-					sendTime = g_CurrentTime + 30000;	// 30*1000;  // 30초
-				}
-
-				// 1초에 한번 갱신
-				nextTime = g_CurrentTime + 1000;				
-			}
-		}
-		break;
-	}
-	*/
+	// Upstream left this entire body commented out: a periodic
+	// position broadcast that was never finished. Deleted with the
+	// file's move into packetwire, because the dead lines named
+	// g_pPlayer and g_CurrentTime and a library source naming an
+	// executable global is what ratchet R4 exists to flag. Recover it
+	// from history if the feature is ever wanted.
 }
 
 

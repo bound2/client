@@ -69,6 +69,8 @@
 #include "MGuildMarkManager.h"
 #include "MEventManager.h"
 #include "RequestFileManager.h"
+#include "Packet/RequestClientPlayer.h"
+#include "Packet/RequestServerPlayer.h"
 #include "RequestUserManager.h"
 #include "MJusticeAttackManager.h"
 #include "Profiler.h"
@@ -3032,8 +3034,37 @@ static bool	WireEncryptUsesEnglishSeed()
 	return g_pUserInformation!=NULL && g_pUserInformation->bEnglish;
 }
 
+//-----------------------------------------------------------------------------
+// The request-service family's seams (task 5.1's fourth slice).
+//-----------------------------------------------------------------------------
+// The peer file-transfer manager stays here: it draws progress, writes
+// into the profile directory and reads the UI's own state. Six calls of
+// it are all the wire layer needs, and each is guarded, because
+// g_pRequestFileManager is built after start-up and the request players
+// outlive it at shutdown - which is what the NULL tests they used to
+// write at the call site were for.
+//-----------------------------------------------------------------------------
+static DWORD	WireCurrentTime()		{ return g_CurrentTime; }
+static bool	WireInGameMode()		{ return g_Mode == MODE_GAME; }
+
+static bool	WireReceiveMyRequest(const std::string& name, RequestClientPlayer* pPlayer)
+		{ return g_pRequestFileManager!=NULL && g_pRequestFileManager->ReceiveMyRequest(name, pPlayer); }
+static bool	WireHasMyRequest(const std::string& name)
+		{ return g_pRequestFileManager!=NULL && g_pRequestFileManager->HasMyRequest(name); }
+static bool	WireRemoveMyRequest(const std::string& name)
+		{ return g_pRequestFileManager!=NULL && g_pRequestFileManager->RemoveMyRequest(name); }
+static bool	WireSendOtherRequest(const std::string& name, RequestServerPlayer* pPlayer)
+		{ return g_pRequestFileManager!=NULL && g_pRequestFileManager->SendOtherRequest(name, pPlayer); }
+static bool	WireHasOtherRequest(const std::string& name)
+		{ return g_pRequestFileManager!=NULL && g_pRequestFileManager->HasOtherRequest(name); }
+static bool	WireRemoveOtherRequest(const std::string& name)
+		{ return g_pRequestFileManager!=NULL && g_pRequestFileManager->RemoveOtherRequest(name); }
+
 static const WireHost	s_WireHost = { WireMaxProcessPacket, WireMaxRequestService, WireUDPPort, WireBugReportTarget,
-					WireEncryptZoneID, WireEncryptServerID, WireEncryptUsesEnglishSeed };
+					WireEncryptZoneID, WireEncryptServerID, WireEncryptUsesEnglishSeed,
+					WireCurrentTime, WireInGameMode,
+					WireReceiveMyRequest, WireHasMyRequest, WireRemoveMyRequest,
+					WireSendOtherRequest, WireHasOtherRequest, WireRemoveOtherRequest };
 
 //-----------------------------------------------------------------------------
 // Init GameObject
