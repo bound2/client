@@ -106,11 +106,11 @@ SetDomainLevel( int domain, int domainLevel )
 		int num1 = domainLevel % 10;
 		if (num1==2 || num1==4 || num1==5 || num1==9)
 		{
-			g_pGameMessage->AddFormat((*g_pGameStringTable)[STRING_MESSAGE_NEW_DOMAIN_LEVEL_1].GetString(), (*g_pGameStringTable)[SKILLDOMAIN_NAME[domain]].GetString(), domainLevel);
+			g_pGameMessage->AddSafeFormat(GetGameString(STRING_MESSAGE_NEW_DOMAIN_LEVEL_1), (*g_pGameStringTable)[SKILLDOMAIN_NAME[domain]].GetString(), domainLevel);
 		}
 		else
 		{
-			g_pGameMessage->AddFormat((*g_pGameStringTable)[STRING_MESSAGE_NEW_DOMAIN_LEVEL_2].GetString(), (*g_pGameStringTable)[SKILLDOMAIN_NAME[domain]].GetString(), domainLevel);
+			g_pGameMessage->AddSafeFormat(GetGameString(STRING_MESSAGE_NEW_DOMAIN_LEVEL_2), (*g_pGameStringTable)[SKILLDOMAIN_NAME[domain]].GetString(), domainLevel);
 		}
 
 		//--------------------------------------------------
@@ -277,11 +277,11 @@ ModifyStatusManager::Function_MODIFY_MAX_HP(void* pVoid)
 		int num1 = value % 10;
 		if (num1==2 || num1==4 || num1==5 || num1==9)
 		{
-			g_pGameMessage->AddFormat((*g_pGameStringTable)[STRING_STATUS_HP_MAX_1].GetString(), value);
+			g_pGameMessage->AddSafeFormat(GetGameString(STRING_STATUS_HP_MAX_1), value);
 		}
 		else
 		{
-			g_pGameMessage->AddFormat((*g_pGameStringTable)[STRING_STATUS_HP_MAX_2].GetString(), value);
+			g_pGameMessage->AddSafeFormat(GetGameString(STRING_STATUS_HP_MAX_2), value);
 		}
 	}
 }
@@ -317,7 +317,7 @@ ModifyStatusManager::Function_MODIFY_MAX_MP(void* pVoid)
 			if(g_pPlayer->IsOusters())
 				stringID = STRING_STATUS_EP_MAX_2;
 		}
-		g_pGameMessage->AddFormat((*g_pGameStringTable)[stringID].GetString(), value);
+		g_pGameMessage->AddSafeFormat(GetGameString(stringID), value);
 	}
 }
 
@@ -564,11 +564,11 @@ ModifyStatusManager::Function_MODIFY_CURRENT_STR(void* pVoid)
 		int num1 = value % 10;
 		if (num1==2 || num1==4 || num1==5 || num1==9)
 		{
-			g_pGameMessage->AddFormat((*g_pGameStringTable)[STRING_STATUS_STR_1].GetString(), value);
+			g_pGameMessage->AddSafeFormat(GetGameString(STRING_STATUS_STR_1), value);
 		}
 		else
 		{
-			g_pGameMessage->AddFormat((*g_pGameStringTable)[STRING_STATUS_STR_2].GetString(), value);
+			g_pGameMessage->AddSafeFormat(GetGameString(STRING_STATUS_STR_2), value);
 		}
 	}
 	
@@ -603,11 +603,11 @@ ModifyStatusManager::Function_MODIFY_CURRENT_DEX(void* pVoid)
 		int num1 = value % 10;
 		if (num1==2 || num1==4 || num1==5 || num1==9)
 		{
-			g_pGameMessage->AddFormat((*g_pGameStringTable)[STRING_STATUS_DEX_1].GetString(), value);
+			g_pGameMessage->AddSafeFormat(GetGameString(STRING_STATUS_DEX_1), value);
 		}
 		else
 		{
-			g_pGameMessage->AddFormat((*g_pGameStringTable)[STRING_STATUS_DEX_2].GetString(), value);
+			g_pGameMessage->AddSafeFormat(GetGameString(STRING_STATUS_DEX_2), value);
 		}
 	}
 	//C_VS_UI_SLAYER_PDS::m_dex		= value;
@@ -641,11 +641,11 @@ ModifyStatusManager::Function_MODIFY_CURRENT_INT(void* pVoid)
 		int num1 = value % 10;
 		if (num1==2 || num1==4 || num1==5 || num1==9)
 		{
-			g_pGameMessage->AddFormat((*g_pGameStringTable)[STRING_STATUS_INT_1].GetString(), value);
+			g_pGameMessage->AddSafeFormat(GetGameString(STRING_STATUS_INT_1), value);
 		}
 		else
 		{
-			g_pGameMessage->AddFormat((*g_pGameStringTable)[STRING_STATUS_INT_2].GetString(), value);
+			g_pGameMessage->AddSafeFormat(GetGameString(STRING_STATUS_INT_2), value);
 		}
 	}
 	//C_VS_UI_SLAYER_PDS::m_int		= value;
@@ -826,7 +826,7 @@ ModifyStatusManager::Function_MODIFY_LEVEL(void* pVoid)
 
 	if (g_Mode==MODE_GAME)
 	{
-		g_pGameMessage->AddFormat((*g_pGameStringTable)[STRING_STATUS_LEVEL].GetString(), value);				
+		g_pGameMessage->AddSafeFormat(GetGameString(STRING_STATUS_LEVEL), value);				
 
 		if (CanLearnDomainSkill(SKILLDOMAIN_VAMPIRE))
 		{
@@ -1263,12 +1263,12 @@ ModifyStatusManager::Function_MODIFY_SKILL_LEVEL(void *pVoid)
 			int num1 = SkillLev % 10;
 			if (num1==2 || num1==4 || num1==5 || num1==9)
 			{
-				g_pGameMessage->AddFormat((*g_pGameStringTable)[STRING_MESSAGE_MODIFY_SKILL_LEVEL_2].GetString(), 
+				g_pGameMessage->AddSafeFormat(GetGameString(STRING_MESSAGE_MODIFY_SKILL_LEVEL_2), 
 					(*g_pSkillInfoTable)[SkillID].GetHName(), SkillLev );
 			}
 			else
 			{
-				g_pGameMessage->AddFormat((*g_pGameStringTable)[STRING_MESSAGE_MODIFY_SKILL_LEVEL_1].GetString(), 
+				g_pGameMessage->AddSafeFormat(GetGameString(STRING_MESSAGE_MODIFY_SKILL_LEVEL_1), 
 					(*g_pSkillInfoTable)[SkillID].GetHName(), SkillLev);
 			}
 		}
@@ -1311,7 +1311,7 @@ ModifyStatusManager::Function_MODIFY_PET_HP(void *pVoid)
 			char szTemp[512];
 			sprintf(szTemp, (*g_pGameStringTable)[UI_STRING_MESSAGE_HOUR].GetString(), 1);
 
-			g_pSystemMessage->AddFormat((*g_pGameStringTable)[STRING_MESSAGE_PET_DIE_WARNING].GetString(), petName.c_str(), szTemp);
+			g_pSystemMessage->AddSafeFormat(GetGameString(STRING_MESSAGE_PET_DIE_WARNING), petName.c_str(), szTemp);
 			g_pSystemMessage->Add((*g_pGameStringTable)[STRING_MESSAGE_PET_REQUEST_REFILL].GetString());
 		}
 		else if(value == 10)
@@ -1320,7 +1320,7 @@ ModifyStatusManager::Function_MODIFY_PET_HP(void *pVoid)
 			char szTemp[512];
 			sprintf(szTemp, (*g_pGameStringTable)[UI_STRING_MESSAGE_MINUTE].GetString(), 10);
 
-			g_pSystemMessage->AddFormat((*g_pGameStringTable)[STRING_MESSAGE_PET_DIE_WARNING].GetString(), petName.c_str(), szTemp);
+			g_pSystemMessage->AddSafeFormat(GetGameString(STRING_MESSAGE_PET_DIE_WARNING), petName.c_str(), szTemp);
 			g_pSystemMessage->Add((*g_pGameStringTable)[STRING_MESSAGE_PET_REQUEST_REFILL].GetString());
 		}
 		else if(value == 0)

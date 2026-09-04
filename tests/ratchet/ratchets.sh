@@ -363,8 +363,11 @@ check "R5 (direct packet execute callers outside Client/Packet)" "$R5" "$R5_BASE
 # what is left to do (task 5.4).
 #
 # The AddFormat family is in scope even though CMessageArray bounds its
-# own buffer (finding C20, fixed in 0e9d247): what is left there is the
-# arity half of the same defect.
+# own buffer (finding C20, fixed in 0e9d247): what was left there was the
+# arity half of the same defect, and task 5.4's third slice closed it
+# through CMessageArray::AddSafeFormat. The alternative stays in the
+# pattern, because what it guards now is a NEW AddFormat written against
+# a table entry - which is the door a ratchet exists to hold.
 #
 # Two measurement decisions, each of them earned while this was written:
 #
@@ -392,11 +395,17 @@ check "R5 (direct packet execute callers outside Client/Packet)" "$R5" "$R5_BASE
 # It stays a count of sites rather than of files, because a file here is
 # converted a call at a time and half a file is real progress.
 #----------------------------------------------------------------------
-# 64: 262 - 198. Task 5.4's second slice converted VS_UI's 193 sites and
-# the 5 offset-append sites its review round exposed, so what is left is
-# the executable's own 64 - of which 27 are the AddFormat family, 3 of
-# those in Client/PacketHandler. History: 262 = 293 - 31 (the first
-# slice, Client/PacketHandler).
+# 37: 64 - 27. Task 5.4's third slice took the AddFormat family through
+# CMessageArray::AddSafeFormat, which packs its arguments with their
+# types instead of as varargs. What is left is 37 ordinary sprintf sites,
+# all executable-side: UIMessageManager.cpp 14, MTopView.cpp 10,
+# GameUI.cpp 7, ModifyStatusManager.cpp 3, CGameUpdate.cpp 2,
+# PacketFunction.cpp 1. (The first draft of this line named
+# ModifyStatusManager.cpp among the top three, copied from the text the
+# slice had just made false by taking 16 of its 19 away.)
+# History: 64 = 262 - 198 (the second slice: VS_UI's 193 sites and the 5
+# offset-append sites its review round exposed). 262 = 293 - 31 (the
+# first slice, Client/PacketHandler).
 #
 # Those history numbers have been restated twice, both times because the
 # pattern could not see a whole shape rather than because the tree
@@ -406,7 +415,7 @@ check "R5 (direct packet execute callers outside Client/Packet)" "$R5" "$R5_BASE
 # in the numbers: this metric has been wrong twice in the same direction,
 # and each time the missing shape was live code in a file the slice had
 # just edited.
-R7_BASELINE=64
+R7_BASELINE=37
 
 for d in Client VS_UI; do
 	if [ ! -d "$d" ]; then

@@ -209,7 +209,7 @@ throw ( ProtocolException , Error )
 		{
 			int raceString[3] = {STRING_MESSAGE_SLAYER, STRING_MESSAGE_VAMPIRE, STRING_MESSAGE_OUSTERS};
 			g_pNoticeMessage->Add( (*g_pGameStringTable)[STRING_MESSAGE_EVENT_FLAG_WAR_FINISH].GetString() );
-			g_pNoticeMessage->AddFormat( (*g_pGameStringTable)[STRING_MESSAGE_EVENT_FLAG_WAR_WINNER].GetString(), (*g_pGameStringTable)[raceString[min(2,max(0,HIWORD(pPacket->getParameter())))]].GetString() ,  LOWORD(pPacket->getParameter()));
+			g_pNoticeMessage->AddSafeFormat(GetGameString(STRING_MESSAGE_EVENT_FLAG_WAR_WINNER), (*g_pGameStringTable)[raceString[min(2,max(0,HIWORD(pPacket->getParameter())))]].GetString() ,  LOWORD(pPacket->getParameter()));
 			g_pNoticeMessage->Add( (*g_pGameStringTable)[STRING_MESSAGE_EVENT_FLAG_WILL_POUR_ITEM_AFTER_3MIN].GetString() );
 			
 			MEvent event;

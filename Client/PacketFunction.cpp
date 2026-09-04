@@ -5155,11 +5155,11 @@ SetPetInfo(PetInfo* pPetInfo, TYPE_OBJECTID objectID)
 									int num1 = pPetInfo->getPetLevel() % 10;
 									if (num1==2 || num1==4 || num1==5 || num1==9)
 									{
-										g_pGameMessage->AddFormat((*g_pGameStringTable)[STRING_MESSAGE_NEW_PET_LEVEL_1].GetString(), pPetItem->GetPetName().c_str(), pPetInfo->getPetLevel());
+										g_pGameMessage->AddSafeFormat(GetGameString(STRING_MESSAGE_NEW_PET_LEVEL_1), pPetItem->GetPetName().c_str(), pPetInfo->getPetLevel());
 									}
 									else
 									{
-										g_pGameMessage->AddFormat((*g_pGameStringTable)[STRING_MESSAGE_NEW_PET_LEVEL_2].GetString(), pPetItem->GetPetName().c_str(), pPetInfo->getPetLevel());
+										g_pGameMessage->AddSafeFormat(GetGameString(STRING_MESSAGE_NEW_PET_LEVEL_2), pPetItem->GetPetName().c_str(), pPetInfo->getPetLevel());
 									}
 
 									// 레벨 10이 되서 속성을 부여할 수 있다
@@ -5171,7 +5171,7 @@ SetPetInfo(PetInfo* pPetInfo, TYPE_OBJECTID objectID)
 									// 레벨이 49가 되서 옵션을 붙일 수 있다.
 									if(pPetInfo->getPetLevel() == 49)
 									{
-										g_pGameMessage->AddFormat((*g_pGameStringTable)[STRING_MESSAGE_PET_CAN_GET_OPTION].GetString(), pPetItem->GetPetName().c_str());
+										g_pGameMessage->AddSafeFormat(GetGameString(STRING_MESSAGE_PET_CAN_GET_OPTION), pPetItem->GetPetName().c_str());
 									}
 
 									// 아직 2차 능력이 없고
@@ -5184,7 +5184,7 @@ SetPetInfo(PetInfo* pPetInfo, TYPE_OBJECTID objectID)
 								// 2차 겜블 성공
 								if(pPetInfo->canCutHead() != false && pPetItem->IsCanCutHead() == false)
 								{
-									g_pGameMessage->AddFormat((*g_pGameStringTable)[STRING_MESSAGE_PET_GAMBLE_OK].GetString(), pPetItem->GetPetName().c_str());
+									g_pGameMessage->AddSafeFormat(GetGameString(STRING_MESSAGE_PET_GAMBLE_OK), pPetItem->GetPetName().c_str());
 									if(g_pUserOption->UseTeenVersion == TRUE)
 									{
 										g_pGameMessage->Add((*g_pGameStringTable)[STRING_MESSAGE_PET_GAMBLE_DESC_TEEN].GetString());
@@ -5199,16 +5199,16 @@ SetPetInfo(PetInfo* pPetInfo, TYPE_OBJECTID objectID)
 								// 3차 겜블 성공
 								else if(pPetInfo->canAttack() != false && pPetItem->IsCanAttack() == false)
 								{
-									g_pGameMessage->AddFormat((*g_pGameStringTable)[STRING_MESSAGE_PET_3RD_GAMBLE_OK].GetString(), pPetItem->GetPetName().c_str());
+									g_pGameMessage->AddSafeFormat(GetGameString(STRING_MESSAGE_PET_3RD_GAMBLE_OK), pPetItem->GetPetName().c_str());
 									UI_UnlockItem();
 								}
 								// 겜블 실패
 								else if(pPetInfo->canGamble() == false && pPetItem->IsCanGamble() != false)
 								{
 									if(pPetInfo->canCutHead())
-										g_pGameMessage->AddFormat((*g_pGameStringTable)[STRING_MESSAGE_PET_3RD_GAMBLE_FAIL].GetString(), pPetItem->GetPetName().c_str());
+										g_pGameMessage->AddSafeFormat(GetGameString(STRING_MESSAGE_PET_3RD_GAMBLE_FAIL), pPetItem->GetPetName().c_str());
 									else
-										g_pGameMessage->AddFormat((*g_pGameStringTable)[STRING_MESSAGE_PET_GAMBLE_FAIL].GetString(), pPetItem->GetPetName().c_str());
+										g_pGameMessage->AddSafeFormat(GetGameString(STRING_MESSAGE_PET_GAMBLE_FAIL), pPetItem->GetPetName().c_str());
 									UI_UnlockItem();
 								}
 							}
@@ -5312,7 +5312,7 @@ SetPetInfo(PetInfo* pPetInfo, TYPE_OBJECTID objectID)
 
 						if(pCreature == g_pPlayer)	// 자기 펫인 경우
 						{
-							g_pSystemMessage->AddFormat((*g_pGameStringTable)[STRING_MESSAGE_PET_SUMMON].GetString(), pItem->GetPetName().c_str());
+							g_pSystemMessage->AddSafeFormat(GetGameString(STRING_MESSAGE_PET_SUMMON), pItem->GetPetName().c_str());
 						}
 					}
 				}

@@ -239,15 +239,21 @@ for my $file (@sources)
 	my $text = <$fh>;
 	close $fh;
 
-	next unless $text =~ /SafeFormat::Format/;
+	next unless $text =~ /SafeFormat::Format|AddSafeFormat/;
 
 	my $rel = $file;
 	$rel =~ s/^\Q$root\E[\/\\]?//;
 	$rel =~ s/\\/\//g;
 
-	while ($text =~ /SafeFormat::Format\s*\(/g)
+	# Both front ends onto the checked formatter, and they do not put the
+	# format in the same place: SafeFormat::Format takes a destination
+	# first, CMessageArray::AddSafeFormat owns its destination and so
+	# takes the format as argument one. Assuming a position is how this
+	# audit came to skip a whole family of its own sites once already.
+	while ($text =~ /(SafeFormat::Format|AddSafeFormat)\s*\(/g)
 	{
-		my $open = pos $text;
+		my $entry = $1;
+		my $open  = pos $text;
 
 		# The line this call starts on, and whether it is commented out.
 		#
@@ -280,16 +286,19 @@ for my $file (@sources)
 		}
 
 		my @a = split_args(substr($text, $open, $i - $open - 1));
-		next if @a < 2;
+		next if @a < ($entry eq 'AddSafeFormat' ? 1 : 2);
 		$sites++;
 
-		# SafeFormat::Format has two overloads: the format is argument 2
-		# against a real array, and argument 3 when the caller states the
-		# size. Looking only at argument 2 is the exact blindness that
-		# kept ratchet R7 from seeing the offset-append sites, so this
-		# finds the format wherever it is rather than assuming.
-		my $fmt_at = 1;
-		$fmt_at = 2 if @a > 2
+		# Where the format sits. AddSafeFormat takes it first.
+		# SafeFormat::Format has two overloads: argument 2 against a real
+		# array, argument 3 when the caller states the size. Looking only
+		# at one position is the exact blindness that kept ratchet R7 from
+		# seeing the offset-append sites, so this finds the format rather
+		# than assuming where it is.
+		my $fmt_at = ($entry eq 'AddSafeFormat') ? 0 : 1;
+
+		$fmt_at = 2 if $fmt_at == 1
+					&& @a > 2
 					&& $a[1] !~ /GetGameString\s*\(/
 					&& $a[1] !~ /^\s*"/;
 
@@ -371,32 +380,53 @@ printf "\ncheck_format_arity: %d converted site(s), %d checked against the built
 printf "check_format_arity: %d note(s)\n", $notes;
 
 #----------------------------------------------------------------------
-# A check that checked nothing must not report OK.
+# A check that checked less than it used to must not report OK.
 #
-# This file has now failed that way twice, which is why the floor below
-# is a number and not a shrug. Its first draft used a Perl list
-# assignment whose first target was an array, leaving every scalar in
-# split_args undef: no call parsed, all 224 sites fell into the
-# unresolved bucket, and it printed OK. Its second enumerated sources by
-# shelling out to find(1), which under PowerShell is Windows' find.exe -
-# no files, no sites, OK again, and ctest green with a real arity defect
-# sitting in the tree.
+# This file has now failed that way three times, which is why the floors
+# below are numbers and not a shrug.
 #
-# Both were invisible because nothing pinned the DENOMINATOR. Every way
-# this scan can shrink - a dead file walk, an unreadable source, a call
-# skipped as commented - reports a smaller number and exits 0. So the
-# count is ratcheted like the numbers in tests/ratchet/ratchets.sh: it
-# may rise freely as sites are converted, and a fall has to be explained
-# by editing this line in the same commit.
+#   1. A Perl list assignment whose first target was an array left every
+#      scalar in split_args undef. No call parsed, all 224 sites fell
+#      into the unresolved bucket, and it printed OK.
+#   2. It enumerated sources by shelling out to find(1), which under
+#      PowerShell is Windows' find.exe. No files, no sites, OK again -
+#      and ctest green with a real arity defect in the tree.
+#   3. A call was dropped if anything earlier on its line held "//",
+#      which a URL in a string literal satisfies.
+#
+# All three were invisible because nothing pinned the DENOMINATOR. The
+# first floor - the site count - was the answer to that, and the review
+# round of task 5.4's third slice showed it only half works: renaming
+# GetGameString to something else across Client/PacketHandler moved 34
+# sites out of "checked" and into "unresolved" while $sites stayed at
+# 256, so coverage collapsed and the check still exited 0. Where the
+# format sits is decided by spelling (see $fmt_at above), so any future
+# call that says `const char* fmt = GetGameString(X); Format(dst, fmt,
+# a);` counts toward the site floor and contributes nothing to coverage.
+#
+# So both numbers are ratcheted. They may rise freely as sites are
+# converted; a fall has to be explained by editing these lines in the
+# same commit.
 #----------------------------------------------------------------------
-my $MINIMUM_SITES = 229;
+my $MINIMUM_SITES   = 256;
+my $MINIMUM_CHECKED = 250;
 
 if ($sites < $MINIMUM_SITES)
 {
 	printf "FAIL: scanned %d converted site(s), fewer than the %d recorded here.\n", $sites, $MINIMUM_SITES;
-	print  "      Either the scan is broken - which is how this check has failed twice before,\n";
-	print  "      both times silently - or sites were legitimately removed, in which case lower\n";
-	print  "      \$MINIMUM_SITES in this file in the same commit.\n";
+	print  "      Either the scan is broken - which is how this check has failed three times\n";
+	print  "      before, every time silently - or sites were legitimately removed, in which\n";
+	print  "      case lower \$MINIMUM_SITES in this file in the same commit.\n";
+	exit 1;
+}
+
+if ($checked < $MINIMUM_CHECKED)
+{
+	printf "FAIL: resolved %d site(s) to a table entry, fewer than the %d recorded here.\n", $checked, $MINIMUM_CHECKED;
+	print  "      The site count can hold steady while coverage collapses - a site whose format\n";
+	print  "      this cannot resolve still counts as a site. Either the resolution broke, or\n";
+	print  "      call sites legitimately moved to a form it cannot read, in which case say so\n";
+	print  "      and lower \$MINIMUM_CHECKED in this file in the same commit.\n";
 	exit 1;
 }
 
