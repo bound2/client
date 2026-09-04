@@ -47,21 +47,21 @@ public :
 	// BYTE 또는 WORD 를 수동으로 사용하도록 한다.
     uint readEncrypt (bool   &buf) throw (ProtocolException, Error) { uint re = read((char*)&buf, szbool  ); buf = m_Encrypter.convert(buf); return re; }
     uint readEncrypt (char   &buf) throw (ProtocolException, Error) { uint re = read((char*)&buf, szchar  ); buf = m_Encrypter.convert(buf); return re; }
-    uint readEncrypt (uchar  &buf) throw (ProtocolException, Error) { uint re = read((char*)&buf, szuchar ); buf = m_Encrypter.convert(buf); return re; }
-    uint readEncrypt (short  &buf) throw (ProtocolException, Error) { uint re = read((char*)&buf, szshort ); buf = m_Encrypter.convert(buf); return re; }
-    uint readEncrypt (ushort &buf) throw (ProtocolException, Error) { uint re = read((char*)&buf, szushort); buf = m_Encrypter.convert(buf); return re; }
-    uint readEncrypt (int    &buf) throw (ProtocolException, Error) { uint re = read((char*)&buf, szint   ); buf = m_Encrypter.convert(buf); return re; }
-    uint readEncrypt (uint   &buf) throw (ProtocolException, Error) { uint re = read((char*)&buf, szuint  ); buf = m_Encrypter.convert(buf); return re; }
+    uint readEncrypt (uchar  &buf) throw (ProtocolException, Error) { uint re = readWire(buf); buf = m_Encrypter.convert(buf); return re; }
+    uint readEncrypt (short  &buf) throw (ProtocolException, Error) { uint re = readWire(buf); buf = m_Encrypter.convert(buf); return re; }
+    uint readEncrypt (ushort &buf) throw (ProtocolException, Error) { uint re = readWire(buf); buf = m_Encrypter.convert(buf); return re; }
+    uint readEncrypt (int    &buf) throw (ProtocolException, Error) { uint re = readWire(buf); buf = m_Encrypter.convert(buf); return re; }
+    uint readEncrypt (uint   &buf) throw (ProtocolException, Error) { uint re = readWire(buf); buf = m_Encrypter.convert(buf); return re; }
     uint readEncrypt (long   &buf) throw (ProtocolException, Error) {
         int32_t tmp = 0;
-        uint re = read((char*)&tmp, szlong);
+        uint re = readWire(tmp);
         tmp = static_cast<int32_t>(m_Encrypter.convert(static_cast<long>(tmp)));
         buf = static_cast<long>(tmp);
         return re;
     }
     uint readEncrypt (ulong  &buf) throw (ProtocolException, Error) {
         uint32_t tmp = 0;
-        uint re = read((char*)&tmp, szulong);
+        uint re = readWire(tmp);
         tmp = static_cast<uint32_t>(m_Encrypter.convert(static_cast<ulong>(tmp)));
         buf = static_cast<ulong>(tmp);
         return re;

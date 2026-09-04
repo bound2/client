@@ -25,6 +25,7 @@
 #include "Types.h"
 #include "Exception.h"
 #include "Socket.h"
+#include "WireScalar.h"
 
 #include <cstddef>
 #include <span>
@@ -68,22 +69,35 @@ public :
 	uint read ( std::string & str , uint len ) throw ( ProtocolException , Error );
 	void read ( Packet * p ) throw ( ProtocolException , Error );
 
+	template <packetwire::WireScalar T>
+	uint readWire ( T & value )
+	{
+		using Storage = packetwire::WireStorageT<T>;
+		Storage storage = 0;
+		const uint count = read(std::as_writable_bytes(std::span(&storage, 1)));
+		if constexpr (std::is_enum_v<T>)
+			value = static_cast<T>(storage);
+		else
+			value = storage;
+		return count;
+	}
+
 	uint read ( bool   & buf ) throw ( ProtocolException , Error ) { return read( (char*)&buf, szbool   ); }
 	uint read ( char   & buf ) throw ( ProtocolException , Error ) { return read( (char*)&buf, szchar   ); }
-	uint read ( uchar  & buf ) throw ( ProtocolException , Error ) { return read( (char*)&buf, szuchar  ); }
-	uint read ( short  & buf ) throw ( ProtocolException , Error ) { return read( (char*)&buf, szshort  ); }
-	uint read ( ushort & buf ) throw ( ProtocolException , Error ) { return read( (char*)&buf, szushort ); }
-	uint read ( int    & buf ) throw ( ProtocolException , Error ) { return read( (char*)&buf, szint    ); }
-	uint read ( uint   & buf ) throw ( ProtocolException , Error ) { return read( (char*)&buf, szuint   ); }
+	uint read ( uchar  & buf ) throw ( ProtocolException , Error ) { return readWire(buf); }
+	uint read ( short  & buf ) throw ( ProtocolException , Error ) { return readWire(buf); }
+	uint read ( ushort & buf ) throw ( ProtocolException , Error ) { return readWire(buf); }
+	uint read ( int    & buf ) throw ( ProtocolException , Error ) { return readWire(buf); }
+	uint read ( uint   & buf ) throw ( ProtocolException , Error ) { return readWire(buf); }
 	uint read ( long   & buf ) throw ( ProtocolException , Error ) {
 		int32_t tmp = 0;
-		uint ret = read( (char*)&tmp, szlong );
+		uint ret = readWire(tmp);
 		buf = static_cast<long>(tmp);
 		return ret;
 	}
 	uint read ( ulong  & buf ) throw ( ProtocolException , Error ) {
 		uint32_t tmp = 0;
-		uint ret = read( (char*)&tmp, szulong );
+		uint ret = readWire(tmp);
 		buf = static_cast<ulong>(tmp);
 		return ret;
 	}

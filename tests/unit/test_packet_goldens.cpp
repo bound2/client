@@ -60,6 +60,7 @@
 #include "Cpackets/CGSay.h"
 #include "Cpackets/CGWhisper.h"
 #include "Cpackets/CLLogin.h"
+#include "Cpackets/CGExchangeBuy.h"
 #include "Cpackets/CGAddMouseToZone.h"
 #include "Cpackets/CGAddZoneToInventory.h"
 #include "Cpackets/CGAddZoneToMouse.h"
@@ -84,6 +85,7 @@
 #include "Gpackets/GCMoveOK.h"
 #include "Gpackets/GCSay.h"
 #include "Gpackets/GCSystemMessage.h"
+#include "Gpackets/GCExchangeBuy.h"
 #include "Gpackets/GCExchangeList.h"
 
 #include <cstdio>
@@ -477,6 +479,19 @@ void	Fill(CLLogin& p)
 	p.setID("reiot");
 	p.setPassword("wirepin");
 	p.setMacAddress(mac);
+}
+
+void	Fill(CGExchangeBuy& p)
+{
+	p.setListingID(0xF9E8D7C6B5A49382ULL);
+	p.setIdempotencyKey("idem-key-0123456789abcdef");
+}
+
+void	Fill(GCExchangeBuy& p)
+{
+	p.setSuccess(true);
+	p.setMessage("purchase complete");
+	p.setOrderID(0x8192A3B4C5D6E7F8ULL);
 }
 
 std::string	ExchangeHighBytes(size_t length, unsigned char seed)
@@ -927,6 +942,29 @@ TEST(GCExchangeList, SpanMigrationPreservesMaxLengthStrings)
 		CHECK_EQ(GCExchangeList::kMaxListingString,
 			dst.getListings()[0].itemName.size());
 	}
+}
+
+TEST(CGExchangeBuy, TypedScalarMigrationPreservesSharedGolden)
+{
+	CGExchangeBuy src, dst;
+	Fill(src);
+	CHECK(EncrypterFree(src));
+	RoundTrip(src, dst, 0);
+	CHECK_EQ(src.getListingID(), dst.getListingID());
+	CHECK(src.getIdempotencyKey() == dst.getIdempotencyKey());
+	ExpectGolden("CGExchangeBuy", 0, WriteBody(src, 0));
+}
+
+TEST(GCExchangeBuy, TypedScalarMigrationPreservesSharedGolden)
+{
+	GCExchangeBuy src, dst;
+	Fill(src);
+	CHECK(EncrypterFree(src));
+	RoundTrip(src, dst, 0);
+	CHECK_EQ(src.isSuccess(), dst.isSuccess());
+	CHECK(src.getMessage() == dst.getMessage());
+	CHECK_EQ(src.getOrderID(), dst.getOrderID());
+	ExpectGolden("GCExchangeBuy", 0, WriteBody(src, 0));
 }
 
 // CLLogin is written by this client and read by the login server, whose

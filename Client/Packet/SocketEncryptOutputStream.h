@@ -47,20 +47,20 @@ public :
 	// BYTE 또는 WORD 를 수동으로 사용하도록 한다.
     uint writeEncrypt (bool   buf) throw (ProtocolException, Error) { buf = m_Encrypter.convert(buf); return write((const char*)&buf, szbool  ); }
     uint writeEncrypt (char   buf) throw (ProtocolException, Error) { buf = m_Encrypter.convert(buf); return write((const char*)&buf, szchar  ); }
-    uint writeEncrypt (uchar  buf) throw (ProtocolException, Error) { buf = m_Encrypter.convert(buf); return write((const char*)&buf, szuchar ); }
-    uint writeEncrypt (short  buf) throw (ProtocolException, Error) { buf = m_Encrypter.convert(buf); return write((const char*)&buf, szshort ); }
-    uint writeEncrypt (ushort buf) throw (ProtocolException, Error) { buf = m_Encrypter.convert(buf); return write((const char*)&buf, szushort); }
-    uint writeEncrypt (int    buf) throw (ProtocolException, Error) { buf = m_Encrypter.convert(buf); return write((const char*)&buf, szint   ); }
-    uint writeEncrypt (uint   buf) throw (ProtocolException, Error) { buf = m_Encrypter.convert(buf); return write((const char*)&buf, szuint  ); }
+    uint writeEncrypt (uchar  buf) throw (ProtocolException, Error) { buf = m_Encrypter.convert(buf); return writeWire(buf); }
+    uint writeEncrypt (short  buf) throw (ProtocolException, Error) { buf = m_Encrypter.convert(buf); return writeWire(buf); }
+    uint writeEncrypt (ushort buf) throw (ProtocolException, Error) { buf = m_Encrypter.convert(buf); return writeWire(buf); }
+    uint writeEncrypt (int    buf) throw (ProtocolException, Error) { buf = m_Encrypter.convert(buf); return writeWire(buf); }
+    uint writeEncrypt (uint   buf) throw (ProtocolException, Error) { buf = m_Encrypter.convert(buf); return writeWire(buf); }
     uint writeEncrypt (long   buf) throw (ProtocolException, Error) {
         int32_t tmp = static_cast<int32_t>(buf);
         tmp = static_cast<int32_t>(m_Encrypter.convert(static_cast<long>(tmp)));
-        return write((const char*)&tmp, szlong);
+        return writeWire(tmp);
     }
     uint writeEncrypt (ulong  buf) throw (ProtocolException, Error) {
         uint32_t tmp = static_cast<uint32_t>(buf);
         tmp = static_cast<uint32_t>(m_Encrypter.convert(static_cast<ulong>(tmp)));
-        return write((const char*)&tmp, szulong);
+        return writeWire(tmp);
     }
 
 	void	setEncryptCode(uchar code)	{ m_Encrypter.setCode(code); }

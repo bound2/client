@@ -68,10 +68,10 @@ void GCExchangeList::read(SocketInputStream & iStream)
 		std::span<char> buffer(buf);
 		uint8_t len;
 
-		// 64-bit values travel as little-endian raw bytes; the stream has no
-		// 64-bit scalar overload, so make their byte extent explicit.
+		// IDs are unsigned 64-bit values on the wire. The typed helper makes
+		// that width and the protocol's little-endian requirement explicit.
 		ulonglong listingID = 0;
-		iStream.read(std::as_writable_bytes(std::span(&listingID, 1)));
+		iStream.readWire(listingID);
 		listing.listingID = (int64_t)listingID;
 
 		ushort serverID = 0;
@@ -109,7 +109,7 @@ void GCExchangeList::read(SocketInputStream & iStream)
 		iStream.read(listing.itemType);
 
 		ulonglong itemID = 0;
-		iStream.read(std::as_writable_bytes(std::span(&itemID, 1)));
+		iStream.readWire(itemID);
 		listing.itemID = (int64_t)itemID;
 
 		iStream.read(listing.objectID);
@@ -234,7 +234,7 @@ void GCExchangeList::write(SocketOutputStream & oStream) const
 		uint8_t len;
 
 		ulonglong listingID = (ulonglong)listing.listingID;
-		oStream.write(std::as_bytes(std::span(&listingID, 1)));
+		oStream.writeWire(listingID);
 
 		oStream.write((ushort)listing.serverID);
 
@@ -255,7 +255,7 @@ void GCExchangeList::write(SocketOutputStream & oStream) const
 		oStream.write(listing.itemType);
 
 		ulonglong itemID = (ulonglong)listing.itemID;
-		oStream.write(std::as_bytes(std::span(&itemID, 1)));
+		oStream.writeWire(itemID);
 
 		oStream.write(listing.objectID);
 		oStream.write(listing.pricePoint);

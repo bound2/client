@@ -13,6 +13,7 @@
 #include "Types.h"
 #include "Exception.h"
 #include "Socket.h"
+#include "WireScalar.h"
 
 #include <cstddef>
 #include <span>
@@ -63,20 +64,28 @@ public :
 	}
 	void write ( const Packet * pPacket ) throw ( ProtocolException , Error );
 	
+	template <packetwire::WireScalar T>
+	uint writeWire ( T value )
+	{
+		using Storage = packetwire::WireStorageT<T>;
+		const Storage storage = static_cast<Storage>(value);
+		return write(std::as_bytes(std::span(&storage, 1)));
+	}
+
     uint write ( bool   buf ) throw ( ProtocolException , Error ) { return write( (const char*)&buf, szbool   ); }
     uint write ( char   buf ) throw ( ProtocolException , Error ) { return write( (const char*)&buf, szchar   ); }
-    uint write ( uchar  buf ) throw ( ProtocolException , Error ) { return write( (const char*)&buf, szuchar  ); }
-    uint write ( short  buf ) throw ( ProtocolException , Error ) { return write( (const char*)&buf, szshort  ); }
-    uint write ( ushort buf ) throw ( ProtocolException , Error ) { return write( (const char*)&buf, szushort ); }
-    uint write ( int    buf ) throw ( ProtocolException , Error ) { return write( (const char*)&buf, szint    ); }
-    uint write ( uint   buf ) throw ( ProtocolException , Error ) { return write( (const char*)&buf, szuint   ); }
+    uint write ( uchar  buf ) throw ( ProtocolException , Error ) { return writeWire(buf); }
+    uint write ( short  buf ) throw ( ProtocolException , Error ) { return writeWire(buf); }
+    uint write ( ushort buf ) throw ( ProtocolException , Error ) { return writeWire(buf); }
+    uint write ( int    buf ) throw ( ProtocolException , Error ) { return writeWire(buf); }
+    uint write ( uint   buf ) throw ( ProtocolException , Error ) { return writeWire(buf); }
     uint write ( long   buf ) throw ( ProtocolException , Error ) {
         int32_t tmp = static_cast<int32_t>(buf);
-        return write( (const char*)&tmp, szlong );
+		return writeWire(tmp);
     }
     uint write ( ulong  buf ) throw ( ProtocolException , Error ) {
         uint32_t tmp = static_cast<uint32_t>(buf);
-        return write( (const char*)&tmp, szulong );
+		return writeWire(tmp);
     }
 
 	// flush stream (output buffer) to socket
