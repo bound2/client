@@ -35,6 +35,8 @@
 #include "InventoryInfo.h"
 #include "Gpackets/GCUpdateInfo.h"
 #include "Gpackets/GCGlobalChat.h"
+#include "Gpackets/GCPhoneConnected.h"
+#include "UserInformation.h"
 #include "Exception.h"
 
 #include <string>
@@ -424,4 +426,68 @@ TEST(GCGlobalChat, KeepsTheWholeMessageItAccepted)
 	// Truncating here rather than at the copy would hide the defect the
 	// R3 pass fixed, so the packet has to hand over all 128 bytes.
 	CHECK_EQ(128, (int)packet.getMessage().size());
+}
+
+//----------------------------------------------------------------------
+// The slot id the PCS handlers rest a guard on
+//----------------------------------------------------------------------
+//
+// GCPhoneConnected, GCPhoneDisconnected, GCPhoneSay and GCRing all carry
+// a SlotID_t - a BYTE - and index UserInformation's PCSUserName and
+// OtherPCSNumber with it. Those arrays hold MAX_PCS_SLOT (3) entries,
+// and read() bounds the NAME but not the SLOT, so until the index pass
+// a server could assign an MString hundreds of bytes past the end of
+// g_pUserInformation: MString::operator= reads m_pString out of
+// whatever is there and delete[]s it.
+//
+// The four handlers guard it now. This pins the fact that makes those
+// guards load-bearing rather than belt-and-braces: the wire accepts any
+// slot a BYTE can hold. If someone later adds a limit to read(), this
+// test is what tells them the handler guards changed meaning.
+//----------------------------------------------------------------------
+namespace {
+
+bool	PhoneConnectedAcceptsSlot(unsigned int slot)
+{
+	StreamFixture f(256);
+
+	std::vector<unsigned char> body;
+
+	for (unsigned int i = 0; i < sizeof(PhoneNumber_t); ++i)
+		body.push_back(0);			// phone number
+
+	body.push_back((unsigned char)slot);		// SlotID_t
+
+	body.push_back(4);				// name length
+	for (int i = 0; i < 4; ++i)
+		body.push_back('n');
+
+	f.Preload(&body[0], (unsigned int)body.size());
+
+	GCPhoneConnected packet;
+
+	try {
+		packet.read(f.m_Stream);
+	} catch (ProtocolException&) {
+		return false;
+	} catch (Error&) {
+		return false;
+	}
+
+	return (unsigned int)packet.getSlotID() == slot;
+}
+
+} // namespace
+
+TEST(GCPhoneConnected, AcceptsAnySlotIdAByteCanHold)
+{
+	// The three that address a real array...
+	CHECK_EQ(true, PhoneConnectedAcceptsSlot(0));
+	CHECK_EQ(true, PhoneConnectedAcceptsSlot(MAX_PCS_SLOT - 1));
+
+	// ...and the ones that do not. Every one of these reaches the
+	// handler, which is why the handler is where the guard lives.
+	CHECK_EQ(true, PhoneConnectedAcceptsSlot(MAX_PCS_SLOT));
+	CHECK_EQ(true, PhoneConnectedAcceptsSlot(200));
+	CHECK_EQ(true, PhoneConnectedAcceptsSlot(255));
 }

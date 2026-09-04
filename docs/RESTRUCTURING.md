@@ -136,6 +136,19 @@ pair on purpose. R7 is precise and blind to indirection; R8 is coarse and
 cannot be evaded by spelling. Reading either one alone as the state of finding
 C19 is the mistake that cost a retraction on 2026-09-04.
 
+**Two checkers sit beside the ratchets**, in `tests/tools/`, because what
+they measure needs parsing rather than grepping and `ratchets.sh` is
+grep-only by design. `check_format_arity.pl` (ctest `format_arity`)
+compares every converted format site's arguments against the built-in
+English table. `check_packet_indices.pl` (ctest `packet_indices`) is the
+index half of code-health priority 1: it walks the **value** rather than
+the spelling, because `array[pPacket->getSlotID()]` has two live
+instances in the tree while `int slot = pPacket->getSlotID();` twenty
+lines above `array[slot]` has a hundred. It reports 102 packet-indexed
+subscripts, 91 of them into a `CTypeTable` that range-checks itself, and
+holds a ceiling of **11 into a raw container** — all guarded today, and a
+twelfth has to be read before the number moves.
+
 ---
 
 ## Phase 0 — Scaffolding

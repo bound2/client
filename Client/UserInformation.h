@@ -28,7 +28,17 @@ struct WAR_INFO
 
 class MPetItem;
 
-class UserInformation {	
+//----------------------------------------------------------------------
+// How many PCS slots there are.
+//----------------------------------------------------------------------
+// The number was written as a bare 3 at each array below, and the
+// handlers that index them took the slot straight off the wire as a
+// SlotID_t - a BYTE, so 0..255 into an array of 3. Named here so the
+// arrays and the guards cannot disagree.
+//----------------------------------------------------------------------
+enum { MAX_PCS_SLOT = 3 };
+
+class UserInformation {
 	public :
 		UserInformation();
 		~UserInformation();
@@ -56,8 +66,8 @@ class UserInformation {
 		int				BatColor;
 		MString			WhisperID;			// 방금 전의 귓속말 대상
 
-		MString			PCSUserName[3];		// 사용자 이름
-		int				OtherPCSNumber[3];		// 접속중인 번호
+		MString			PCSUserName[MAX_PCS_SLOT];		// 사용자 이름
+		int				OtherPCSNumber[MAX_PCS_SLOT];		// 접속중인 번호
 
 		// 완성형 한글
 		//MString			UserIDW;			// 사용자의 ID

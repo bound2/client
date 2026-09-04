@@ -10,6 +10,11 @@ tests/arch/*.txt text eol=lf
 tests/arch/*.pl text eol=lf
 tests/ratchet/*.sh text eol=lf
 
+# The audit scripts, for the same reason: all three carry a shebang, and
+# all three are LF in the repository already - this only stops a CRLF
+# checkout from being the first thing to change that.
+tests/tools/*.pl text eol=lf
+
 # Golden wire bytes (tests/unit/test_packet_goldens.cpp): one hex line per
 # file, compared byte for byte and shared with the server repo's copies.
 tests/golden/*.hex text eol=lf

@@ -257,11 +257,15 @@ Nine defects in the `DarkEden` executable, found by running the client against a
 | Effect start position set only on the "start at user" and "start at target" branches | `/RTC1` failure on casting Meteor: `MAGIC_METEOR`, `RESULT_MAGIC_METEOR` and `SKILL_ERUPTION` are flagged sky-only in `Action.inf`, so `x`/`y` reached the effect generator uninitialised | `6b57bfa` |
 ### Found by reading, not by running
 
-One defect of the same weight as the ten above, kept out of that table because it does not meet its definition: it was found while converting the format-string sites in task 5.4's fifth slice, and has never been observed in play.
+Defects of the same weight as the ten above, kept out of that table because they do not meet its definition: each was found by reading during a remediation pass, and none has been observed in play.
 
 | Defect | Symptom | Commit |
 |---|---|---|
 | Six rows of `C_VS_UI_ASK_DIALOG::m_sz_question_msg` never assigned, and read as format strings | any of the six friend dialogs runs `strlen()` over an indeterminate pointer and hands it to `sprintf` as a format. Upstream commented the `ASK_FRIEND_*` assignments — and their string ids — out of `InitString()` while leaving the six cases that read them live; `m_sz_question_msg` is an ordinary member array, so nothing else gives those rows a value. Reachable from a `GCFriendChatting` packet, which makes it server-triggered rather than merely latent — but a friend dialog is a corner of the UI, which is the likeliest reason nobody hit it | task 5.4's fifth slice |
+| `GCNPCSayDynamic`'s message `strcpy`'d into `char[256]` | `GCNPCSayDynamic::read` accepts a message of up to **2048** bytes; the handler copied it into a 256-byte stack buffer and passed it to `MCreature::SetChatString`. 1792 bytes of stack past the end, at a server's discretion, on the ordinary NPC-dialogue path | the packet-tree copy pass |
+| The four PCS handlers index `UserInformation` with an unbounded wire slot | `SlotID_t` is a `BYTE` and no `read()` bounds it, against `PCSUserName[3]` and `OtherPCSNumber[3]`. `MString::operator=` reads `m_pString` out of whatever lies at that offset and `delete[]`s it, so `GCPhoneConnected`, `GCPhoneDisconnected`, `GCPhoneSay` and `GCRing` gave a server an **arbitrary free and an arbitrary write** into the heap | the packet-index pass |
+| `GCRemoveFromGear` reads `addonSlot[slotID]` past the end of a stack array | `MSlayerGear::RemoveItem` bounds `slotID` to `m_Size` — `MAX_GEAR_SLAYER` (27), or 28 for the other two races — while the `addonSlot` arrays hold 15 and 16 entries. Unequipping a ZAP, a PDA, a shoulder or a blood bible read up to **twelve ints** past the array and handed the result to `RemoveAddon`. **No hostile server needed**: this fires in ordinary play | the packet-index pass |
+| `GCLearnSkillReady` reads `SKILLDOMAIN_NAME[domainType]` from an unbounded `BYTE` | `SkillDomainType_t` is a `BYTE`, `read()` does not bound it, and `SKILLDOMAIN_NAME` is a plain `int[MAX_SKILLDOMAIN]`. The out-of-range read was then handed to the string table as an id. (`(*g_pSkillManager)[domainType]` on the line above survives it — `MSkillManager` is a `CTypeTable`, which range-checks in every build) | the packet-index pass |
 
 ### Caveats
 

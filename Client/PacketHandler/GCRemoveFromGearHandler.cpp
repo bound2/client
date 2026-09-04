@@ -118,7 +118,20 @@ throw ( ProtocolException , Error )
 			//----------------------------------------------------------
 			// 복장을 바꿔준다.
 			//----------------------------------------------------------
-			int addonSlotID = addonSlot[slotID];
+			// addonSlot stops at the last gear slot that carries a
+			// visual addon, but slotID ranges over ALL of them -
+			// MSlayerGear::RemoveItem above bounds it to m_Size, which
+			// is MAX_GEAR_SLAYER (27) against fifteen entries here, and
+			// MAX_GEAR_VAMPIRE / MAX_GEAR_OUSTERS (28) against sixteen
+			// in the two branches below. Unequipping a ZAP, a PDA, a
+			// shoulder or a blood bible therefore read up to twelve
+			// ints past a stack array and handed the result to
+			// RemoveAddon. Those slots have no addon, which is what
+			// ADDON_NULL says, so that is the answer past the end.
+			const int nAddonSlots = (int)(sizeof(addonSlot) / sizeof(addonSlot[0]));
+			int addonSlotID = (slotID >= 0 && slotID < nAddonSlots)
+					? addonSlot[slotID]
+					: ADDON_NULL;
 
 			if (addonSlotID != ADDON_NULL)
 			{
@@ -233,7 +246,20 @@ throw ( ProtocolException , Error )
 			//----------------------------------------------------------
 			// 복장을 바꿔준다.
 			//----------------------------------------------------------
-			int addonSlotID = addonSlot[slotID];
+			// addonSlot stops at the last gear slot that carries a
+			// visual addon, but slotID ranges over ALL of them -
+			// MSlayerGear::RemoveItem above bounds it to m_Size, which
+			// is MAX_GEAR_SLAYER (27) against fifteen entries here, and
+			// MAX_GEAR_VAMPIRE / MAX_GEAR_OUSTERS (28) against sixteen
+			// in the two branches below. Unequipping a ZAP, a PDA, a
+			// shoulder or a blood bible therefore read up to twelve
+			// ints past a stack array and handed the result to
+			// RemoveAddon. Those slots have no addon, which is what
+			// ADDON_NULL says, so that is the answer past the end.
+			const int nAddonSlots = (int)(sizeof(addonSlot) / sizeof(addonSlot[0]));
+			int addonSlotID = (slotID >= 0 && slotID < nAddonSlots)
+					? addonSlot[slotID]
+					: ADDON_NULL;
 
 			if (addonSlotID != ADDON_NULL)
 			{
@@ -345,7 +371,20 @@ throw ( ProtocolException , Error )
 			//----------------------------------------------------------
 			// 복장을 바꿔준다.
 			//----------------------------------------------------------
-			int addonSlotID = addonSlot[slotID];
+			// addonSlot stops at the last gear slot that carries a
+			// visual addon, but slotID ranges over ALL of them -
+			// MSlayerGear::RemoveItem above bounds it to m_Size, which
+			// is MAX_GEAR_SLAYER (27) against fifteen entries here, and
+			// MAX_GEAR_VAMPIRE / MAX_GEAR_OUSTERS (28) against sixteen
+			// in the two branches below. Unequipping a ZAP, a PDA, a
+			// shoulder or a blood bible therefore read up to twelve
+			// ints past a stack array and handed the result to
+			// RemoveAddon. Those slots have no addon, which is what
+			// ADDON_NULL says, so that is the answer past the end.
+			const int nAddonSlots = (int)(sizeof(addonSlot) / sizeof(addonSlot[0]));
+			int addonSlotID = (slotID >= 0 && slotID < nAddonSlots)
+					? addonSlot[slotID]
+					: ADDON_NULL;
 
 			if (addonSlotID != ADDON_NULL)
 			{

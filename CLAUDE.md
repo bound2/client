@@ -134,10 +134,10 @@ the failure count, so the exit code is 0 only when the suite is clean.
   Both trees green, or the fix is not verified.
 - **Executable-only code has no test path.** It gets verified by running the client
   against a live server. The nine defects under *Runtime defects* in the review were
-  all found that way, and none were reachable from a test binary. The tenth, in the
-  short table below them, was found by reading and is filed separately for exactly
-  that reason — the heading is a claim about how a defect was found, not a bin for
-  anything executable-side.
+  all found that way, and none were reachable from a test binary. The five in the
+  short table below them were found by *reading*, during remediation passes, and are
+  filed separately for exactly that reason — the heading is a claim about how a
+  defect was found, not a bin for anything executable-side.
 - A fix that could not be reproduced is called a **regression guard** in its commit
   message, not described as a reproduction.
 - Substantial remediation work gets an **adversarial review** afterwards. The last one
@@ -154,7 +154,7 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **347 tests, 4,853 checks, 0 failed** in both trees.
+baseline: **348 tests, 4,863 checks, 0 failed** in both trees.
 
 ## Traps
 
@@ -229,13 +229,23 @@ baseline: **347 tests, 4,853 checks, 0 failed** in both trees.
 `docs/code-health-review-2026-08-29.md` holds 197 findings, 83 fixed — every
 Critical among them. In priority order:
 
-1. **Unvalidated network input is the top open risk.** `Client/Packet/Gpackets/` passes
-   server-supplied lengths, indices and item classes straight into array subscripts,
-   `strcpy`/`sprintf` targets, and a function-pointer table. The critical findings
-   (shop/stash indices, chat/guild/system-message bounds, the NewItem table, the
-   peer file-transfer filename) are fixed on `harden/packet-index-bounds` and
-   `harden/network-input`, but the parsers beyond those findings are unaudited — a
-   hostile *or merely buggy* server can still corrupt the client heap.
+1. **Unvalidated network input is the top open risk**, and the two halves of it
+   now have instruments rather than estimates. `Client/Packet/Gpackets/` passes
+   server-supplied lengths, indices and item classes into array subscripts,
+   `strcpy`/`sprintf` targets, and a function-pointer table.
+   - **Lengths into copies: ratchet R3, at 0.** Every `sprintf`/`strcpy`/`strcat`
+     under `Client/Packet` and `Client/PacketHandler` is bounded or gone, so a
+     new one fails the suite.
+   - **Indices into subscripts: ctest `packet_indices`.** It walks the *value*,
+     not the spelling — `array[pPacket->getSlotID()]` has two live instances
+     while `int slot = pPacket->getSlotID();` twenty lines above `array[slot]`
+     has a hundred. 102 packet-indexed subscripts, 91 of them into a
+     `CTypeTable` that range-checks itself, **11 into a raw container**, all
+     guarded. A twelfth fails the suite and has to be read.
+   - Both passes found live defects, listed under *Found by reading* in the
+     review — including one that needs no hostile server at all.
+   What remains unaudited is everything the two instruments do not model: a
+   length or index that reaches memory by some third route.
 2. Fixed-size buffers fed by variable-length server strings (the 21-byte chat rows
    are fixed; 128-byte stack buffers remain in other handlers), and format strings
    loaded from data files passed to sprintf (C19/C20/C22). That last one is

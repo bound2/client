@@ -34,6 +34,13 @@ throw ( ProtocolException , Error )
 //	UI_PleaseConnectPCS(pName, pcsNumber, slot);
 
 	// 번호 기억
+	// Unbounded on the wire; see the guard in GCPhoneConnectedHandler.
+	if (slot < 0 || slot >= MAX_PCS_SLOT)
+	{
+		DEBUG_ADD_FORMAT("[PacketError-GCRingHandler] slot out of range: %d", slot);
+		return;
+	}
+
 	g_pUserInformation->OtherPCSNumber[ slot ] = pPacket->getPhoneNumber();
 	g_pUserInformation->PCSUserName[ slot ] = pPacket->getName().c_str();
 

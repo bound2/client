@@ -28,8 +28,18 @@ throw ( ProtocolException , Error )
 
 	int slot = pPacket->getSlotID();
 
+	// Unbounded on the wire; see the guard in GCPhoneConnectedHandler.
+	// This one only reads the array, but it reads an MString from past
+	// the end and calls GetString() on it, so the %s below prints from
+	// whatever pointer was there.
+	if (slot < 0 || slot >= MAX_PCS_SLOT)
+	{
+		DEBUG_ADD_FORMAT("[PacketError-GCPhoneSayHandler] slot out of range: %d", slot);
+		return;
+	}
+
 	char message[128];
-	snprintf(message, sizeof(message), "[%s] %s", 
+	snprintf(message, sizeof(message), "[%s] %s",
 						g_pUserInformation->PCSUserName[ slot ].GetString(), 
 						pPacket->getMessage().c_str());
 
