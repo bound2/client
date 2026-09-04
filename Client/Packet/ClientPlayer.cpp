@@ -18,8 +18,6 @@
 #include "SocketEncryptOutputStream.h"
 #include "DebugLog.h"
 //#include "MPlayer.h"
-#include "MZone.h"
-#include "UserInformation.h"
 //#include "minTR.H" 
 #include <fstream>
 
@@ -486,27 +484,17 @@ void ClientPlayer::setEncryptCode()
     __BEGIN_TRY
 
 //	Assert(g_pPlayer!=NULL);
-	Assert(g_pZone!=NULL);
+	// The zone and the account's server number come from the host now,
+	// which is what took this file's last two game-code includes away
+	// (MZone.h and UserInformation.h) and made it a packetwire member -
+	// docs/RESTRUCTURING.md task 5.1. The Assert(g_pZone!=NULL) that
+	// stood here went with them: the host answers whether or not there
+	// is a zone.
+	ZoneID_t zoneID = Wire::EncryptZoneID();
+	int serverID = Wire::EncryptServerID();
 
-	// 일단은 ObjectID를 이용한다.
-//	ObjectID_t objectID = g_pPlayer->GetID();
-	ZoneID_t zoneID = g_pZone->GetID();
-	int serverID = g_pUserInformation->ServerID;
-
-//	if (objectID!=0)
 	{
-//		uchar code = (uchar)(objectID / zoneID + objectID);		
-		uchar code;
-
-		if( g_pUserInformation->IsNetmarble )
-			code = (uchar)( ( ( ( zoneID ) >> 8 ) ^ ( zoneID ) ) ^ ( ( ( serverID ) + 1 ) << 4 ) );
-		else if ( g_pUserInformation->bChinese )
-//			code = (uchar) ( ( ( ( ( serverID ) + 1 ) << 4 ) | ( zoneID ) ) ^ ( ( zoneID ) >> 8 ) );
-			code = (uchar)( ( ( ( zoneID ) >> 8 ) ^ ( zoneID ) ) ^ ( ( ( serverID ) + 1 ) << 4 ) );
-		else if ( g_pUserInformation->bEnglish )
-			code = (uchar)( ( ( ( zoneID ) >> 8 ) ^ ( zoneID ) ) ^ ( ( ( serverID ) + 1 ) * 51 ) );
-		else
-			code = (uchar)( ( ( ( zoneID ) >> 8 ) ^ ( zoneID ) ) ^ ( ( ( serverID ) + 1 ) << 4 ) );
+		const uchar code = WireEncryptSeed(zoneID, serverID, Wire::EncryptUsesEnglishSeed());
 
 		SocketEncryptOutputStream* pEOS = dynamic_cast<SocketEncryptOutputStream*>(m_pOutputStream);
 		Assert(pEOS!=NULL);

@@ -109,7 +109,16 @@ check () {
 # before (0 net). 992 = 993 - 1 (task 2.2's PacketHandlerRegistry.cpp,
 # a recorded +1, offset by the finished migration deleting
 # CGHandlersStub.cpp).
-R1_BASELINE=493
+#
+# 492: 493 - 1. Task 5.1's third slice took ClientPlayer.cpp into
+# packetwire. Its last two game-code includes - MZone.h and
+# UserInformation.h - were wanted by setEncryptCode() alone, and both
+# are behind WireHost now. Read that carefully before trusting it: no
+# target in this build defines __USE_ENCRYPTER__, so the body those
+# includes served is never compiled, and moving them proves nothing at
+# runtime. What it does is make the file's dead branch expressible
+# without game headers, which is the only reason the file was a holdout.
+R1_BASELINE=492
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do

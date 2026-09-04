@@ -116,7 +116,7 @@ an unrecorded drop, so tightening lands in the same commit as the progress.
 
 | # | Metric | Baseline | Command |
 |---|--------|---------:|---------|
-| R1 | Translation units compiled directly into the DarkEden target | **493** (492 before task 5.3 split `TextService::RenderText` out as `Client/TextServiceScreen.cpp` — a recorded growth, the price of a TextSystem that links without a test stub; 493 before task 5.1's second slice moved `ClientCommunicationManager.cpp` into `packetwire`, the three tuning values it read from the executable's config having gone behind `WireHost`; 495 before task 5.1 moved `Player.cpp` and `DatagramSocket.cpp` into `packetwire`, the two holdouts the debug facilities were the only thing keeping out; 497 before 4.4's fourth slice moved `MSkillManager.cpp`, `MSkillInfoTable.cpp` and `SkillDef.cpp` into `gamemodel` and split the player-facing half out as `MSkillAvailable.cpp`, −3 +1; 502 before 4.4's third slice moved `MPlayerGear.cpp`, the three race gears and `MShop.cpp` into `gamemodel`; 503 before 4.2's third slice moved `MPriceManager.cpp` into `gamemodel`; 505 before 4.2's second slice moved `MTradeManager.cpp` and `MSortedItemManager.cpp` into `gamemodel`; 508 before 4.3's second slice moved `MInventory.cpp`, `MStorage.cpp` and `MShopShelf.cpp` into `gamemodel`; 512 before 4.3's first slice moved the three item managers and `MQuickSlot.cpp` into `gamemodel`; 515 before 4.4's second slice moved `MItem.cpp`, `MObject.cpp`, `UserInformation.cpp`, `ClientConfig.cpp` and `MTimeItemManager.cpp` into `gamemodel` and split their executable halves out as `MItemUse.cpp` and `MObjectScreen.cpp`, +2 −5; 516 before 5.2 deleted the dead `MitemTableInit.cpp`; 517 before 4.4's first slice moved `MItemTable.cpp`; 518 before 4.2 moved `MMoneyManager.cpp`, another double-compiled VS_UI entry; 528 before task 4.1's `gamemodel` took its ten members out — the four support sources, and the six tables that the relative `VS_UI_CLIENT_SOURCES` list had never actually removed from the exe glob, so they compiled into both VS_UI and the executable — as the 36 files still on that list do; 529 before task 2.5 deleted the dead `CRRequest2Handler.cpp`; 992 before task 2.4 moved the 465 packet/table/info sources into `packetwire`, +1 for the split-out `GCExchangeBuyHandler.cpp`; 1,044 before task 1.1; the task-2.2 composition root `PacketHandlerRegistry.cpp` was a recorded +1, offset when finishing the migration deleted `CGHandlersStub.cpp`) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` — `ratchets.sh` reads the generated vcxproj, preferring the ctest run's own build dir; on generators with no vcxproj it reports SKIP, not PASS |
+| R1 | Translation units compiled directly into the DarkEden target | **492** (493 before task 5.1's third slice took `ClientPlayer.cpp` into packetwire — its last two game-code includes served one function the build never compiles, and they are behind `WireHost` now; 492 before task 5.3 split `TextService::RenderText` out as `Client/TextServiceScreen.cpp` — a recorded growth, the price of a TextSystem that links without a test stub; 493 before task 5.1's second slice moved `ClientCommunicationManager.cpp` into `packetwire`, the three tuning values it read from the executable's config having gone behind `WireHost`; 495 before task 5.1 moved `Player.cpp` and `DatagramSocket.cpp` into `packetwire`, the two holdouts the debug facilities were the only thing keeping out; 497 before 4.4's fourth slice moved `MSkillManager.cpp`, `MSkillInfoTable.cpp` and `SkillDef.cpp` into `gamemodel` and split the player-facing half out as `MSkillAvailable.cpp`, −3 +1; 502 before 4.4's third slice moved `MPlayerGear.cpp`, the three race gears and `MShop.cpp` into `gamemodel`; 503 before 4.2's third slice moved `MPriceManager.cpp` into `gamemodel`; 505 before 4.2's second slice moved `MTradeManager.cpp` and `MSortedItemManager.cpp` into `gamemodel`; 508 before 4.3's second slice moved `MInventory.cpp`, `MStorage.cpp` and `MShopShelf.cpp` into `gamemodel`; 512 before 4.3's first slice moved the three item managers and `MQuickSlot.cpp` into `gamemodel`; 515 before 4.4's second slice moved `MItem.cpp`, `MObject.cpp`, `UserInformation.cpp`, `ClientConfig.cpp` and `MTimeItemManager.cpp` into `gamemodel` and split their executable halves out as `MItemUse.cpp` and `MObjectScreen.cpp`, +2 −5; 516 before 5.2 deleted the dead `MitemTableInit.cpp`; 517 before 4.4's first slice moved `MItemTable.cpp`; 518 before 4.2 moved `MMoneyManager.cpp`, another double-compiled VS_UI entry; 528 before task 4.1's `gamemodel` took its ten members out — the four support sources, and the six tables that the relative `VS_UI_CLIENT_SOURCES` list had never actually removed from the exe glob, so they compiled into both VS_UI and the executable — as the 36 files still on that list do; 529 before task 2.5 deleted the dead `CRRequest2Handler.cpp`; 992 before task 2.4 moved the 465 packet/table/info sources into `packetwire`, +1 for the split-out `GCExchangeBuyHandler.cpp`; 1,044 before task 1.1; the task-2.2 composition root `PacketHandlerRegistry.cpp` was a recorded +1, offset when finishing the migration deleted `CGHandlersStub.cpp`) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` — `ratchets.sh` reads the generated vcxproj, preferring the ctest run's own build dir; on generators with no vcxproj it reports SKIP, not PASS |
 | R2 | Packet `.cpp` files still defining a packet-style `::execute(Player` | **0** (448 → 432 in slice 1 → 0 when 2.2/2.3 finished; regex refined at 0 to stop matching comments and the in-file handler body in `GCExchangeBuy.cpp`) | `grep -rlE '^void\s+\w+::execute\s*\(\s*Player' Client/Packet/{Gpackets,Cpackets,Lpackets,Rpackets,Upackets} --include='*.cpp' \| grep -v Handler \| wc -l` |
 | R3 | Live `sprintf`/`strcpy`/`strcat` lines under `Client/Packet` **and `Client/PacketHandler`** | **18** (19 before the review round of task 5.4's first slice found a pre-existing overflow one line below a converted site — `GCBloodBibleListHandler` `sprintf`ing `"%3d %s"` into `char[192]` from a `char[192]`, four bytes short — and bounding it converted a 28th `sprintf` line whose format is a literal and was never a C19 site, which is the difference between R3 and R7 in one example; 46 before task 5.4's first slice converted all 31 game-string-table format sites in `Client/PacketHandler` to `SafeFormat::Format`; only 27 of the 31 move this number, because `\b` rejects the `w` in `wsprintf` — R7 counts all 31, and each ratchet is blind to something the other sees; 46 was unchanged by task 2.4, which widened the scope to follow the handlers out of `Client/Packet`; 61 at first measurement — the 2026-09-01 adversarial review showed a quarter of that was commented-out code, so the measurement now excludes `//` matches) | see `ratchets.sh` — the grep excludes comment-prefixed matches |
 | R4 | Library-compiled `.cpp` files referencing `g_p*` client globals **no library file defines**, comment lines excluded | **21** (25 before task 5.3, which both cut a real reach and refined the measurement: `TextService.cpp` lost its live `g_pLast` when `RenderText` moved to the executable, and R4 — unlike R3 and R5 — counted comment lines, so the sentence 5.3 wrote *about* that cut kept the file in the number. Stripping comments drops three more that never had a reach: `SocketOutputStream.cpp`, `SpriteLibBackendSDL.cpp`, `VS_UI_WebBrowser.cpp`. All 21 remaining are real and every one is a `VS_UI` file; 27 before 4.4's fourth slice moved the skill core into `gamemodel` — a reclassification again: `VS_UI_SKILL_VIEW.cpp` and `VS_UI_skill_tree.cpp` reached past the libraries only for `g_pSkillInfoTable`, `g_pSkillManager` and `g_pSkillAvailable`, which `MSkillManager.cpp` defines; 28 before 4.4's third slice moved the gear into `gamemodel` — a reclassification: `VS_UI_Game.cpp`'s only reaches past the libraries were `g_pSlayerGear`, `g_pVampireGear` and `g_pOustersGear`, which the gear sources define; 35 before 4.4's second slice — a reclassification again, 35 + 1 − 8: the subtraction became library-wide, so a library file reading a global another library file defines is no longer a seam; `MItem.cpp` joined reading `gamemodel`'s own tables, +1 under the old per-file rule, and the union rule excludes it with seven earlier members — `Datagram.cpp` reading `packetwire`'s factory manager, and six `VS_UI` sources whose only reaches are `gamemodel`'s tables, `packetwire`'s `g_pFileDef` or `VS_UI`'s own globals; 59 before task 4.0 — a reclassification, not seam-cutting: the 36 `VS_UI_CLIENT_SOURCES` files stopped being library-compiled, so the 24 of them that reach globals are executable debt now, counted by R1 and outside this ratchet; 61 before task 4.1 cut the two `g_pFileDef` seams in `MGameStringTable` and `SystemAvailabilities` and added the `gamemodel` membership file, whose four new members reference no game global; 81 before task 2.4 grew the membership from 52 to 518 files; the number fell because the measurement stopped counting a file's references to globals it defines — the packet tables own `g_pPacketFactoryManager`/`g_pPacketValidator` — and the two dead server-only bodies that reached game globals were deleted; 83 at first measurement, before two never-compiled files were filtered) | `ratchets.sh` computes it over the library dirs (minus CMake-excluded files) plus the `packetwire` and `gamemodel` membership files |
@@ -1788,6 +1788,57 @@ starting each — the scan is one grep, and the ranking below is from a
   > through `WIRE_DEFAULT_*` in `WireHost.h` rather than a second copy
   > of the numbers, so at least the two cannot drift.
   > Suite: 293 tests (4,449 checks).
+  >
+  > **Third slice (2026-09-04): `ClientPlayer.cpp`, and a holdout list
+  > that was wrong about the other four.** Its last two game-code
+  > includes were `MZone.h` and `UserInformation.h`, and both existed
+  > for one function: `setEncryptCode()`, which reads the zone id, the
+  > account's server number and three region flags to derive the stream
+  > cipher's seed. All three are behind `WireHost` now, so R1 493 → 492
+  > and packetwire 521 → 522 files.
+  >
+  > **Read that carefully.** Nothing in this repository or its build
+  > ever defines `__USE_ENCRYPTER__`, so the encrypted socket streams
+  > are never constructed and `setEncryptCode()`'s body is not
+  > compiled. Moving its inputs behind the host proves nothing at
+  > runtime; what it does is make the dead branch expressible without
+  > game headers, which was the only thing keeping the file out. The
+  > seed itself is extracted as `WireEncryptSeed` and pinned by tests,
+  > because if the encrypter is ever turned back on those are the bytes
+  > the server has to agree with. Its four original branches -
+  > Netmarble, Chinese, English, default - computed only **two** distinct
+  > expressions; the three non-English ones were identical, which a test
+  > asserts across every server number a byte can hold rather than
+  > leaving to a comment.
+  >
+  > **The first version of the link proof proved nothing**, and it is
+  > the lesson worth carrying: it took the address of `processCommand`
+  > and `disconnect`, both **virtual**. A pointer to a virtual member is
+  > a vtable index and need not reference the defining object, so the
+  > test linked cleanly with `ClientPlayer.cpp` taken back out of
+  > `packetwire_files.txt` — verified, not reasoned. With two
+  > non-virtual members it fails to link, also verified. The two older
+  > link proofs (`ClientCommunicationManager`, `DatagramSocket`) were
+  > checked for the same trap and are sound; neither class declares a
+  > virtual.
+  >
+  > **A correction to the holdouts file** while the entry was being
+  > removed. It said four of the five branch on `g_Mode`; only **two**
+  > do. `RequestServerPlayer.cpp` has the test commented out and
+  > `RequestServerPlayerManager.cpp` reads `if (1)//g_Mode==MODE_GAME)`.
+  > Whoever takes the request-service slice should find out what those
+  > two actually want `ClientDef.h` for rather than build an accessor
+  > for four callers that are two. Also recorded there: of the four
+  > managers the family reaches, `RequestUserManager.cpp` and
+  > `UserInformation.cpp` include nothing but `Client_PCH.h` and their
+  > own headers, while `ProfileManager.cpp` pulls `CDirectDraw.h`,
+  > `CSpritePack.h` and `UIFunction.h` and is staying where it is.
+  >
+  > Tests (`test_wire_host.cpp`, +4): the three new host entries with no
+  > host and with an empty host, a host answering them and re-read each
+  > time, the seed against the expression it came from, the
+  > three-regions-agree property, and the link proof.
+  > Suite: 342 tests (4,819 checks).
 - [ ] **5.2 Dead/duplicate source removal** (code-health priority 3): the
   `_bak` files are already excluded by the build — delete them; sort the
   `GameHelpers`/`GameFunctions`/`GamePacketFunctions` exclusion graveyard

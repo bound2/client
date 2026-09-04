@@ -62,6 +62,67 @@ Wire::BugReportTarget () throw ()
 }
 
 //----------------------------------------------------------------------
+// The encrypt-seed inputs.
+//----------------------------------------------------------------------
+// Zone 0 and server 0 with no host, which is what the seed would be
+// built from before the player is in a zone. There is no better answer
+// to invent: the caller is dead code (see WireEncryptSeed), and a
+// binary with no host has no zone and no account.
+//----------------------------------------------------------------------
+ZoneID_t
+Wire::EncryptZoneID () throw ()
+{
+	if (s_pHost==NULL || s_pHost->EncryptZoneID==NULL)
+	{
+		return 0;
+	}
+
+	return s_pHost->EncryptZoneID();
+}
+
+int
+Wire::EncryptServerID () throw ()
+{
+	if (s_pHost==NULL || s_pHost->EncryptServerID==NULL)
+	{
+		return 0;
+	}
+
+	return s_pHost->EncryptServerID();
+}
+
+bool
+Wire::EncryptUsesEnglishSeed () throw ()
+{
+	if (s_pHost==NULL || s_pHost->EncryptUsesEnglishSeed==NULL)
+	{
+		return false;
+	}
+
+	return s_pHost->EncryptUsesEnglishSeed();
+}
+
+//----------------------------------------------------------------------
+// The stream cipher's seed.
+//----------------------------------------------------------------------
+// Preserved from ClientPlayer::setEncryptCode() unchanged, including
+// the parentheses, so the two formulas can be compared with the
+// server's without reading past a rewrite. What is gone is the
+// duplication: the Netmarble, Chinese and default branches were the
+// same expression written three times.
+//----------------------------------------------------------------------
+uchar
+WireEncryptSeed ( ZoneID_t zoneID , int serverID , bool bEnglishSeed ) throw ()
+{
+	if (bEnglishSeed)
+	{
+		return (uchar)( ( ( ( zoneID ) >> 8 ) ^ ( zoneID ) ) ^ ( ( ( serverID ) + 1 ) * 51 ) );
+	}
+
+	return (uchar)( ( ( ( zoneID ) >> 8 ) ^ ( zoneID ) ) ^ ( ( ( serverID ) + 1 ) << 4 ) );
+}
+
+//----------------------------------------------------------------------
 // Send Bug Report
 //----------------------------------------------------------------------
 // Moved here verbatim from Client/PacketFunction.cpp, with the

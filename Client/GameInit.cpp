@@ -3017,7 +3017,23 @@ static int	WireMaxRequestService()	{ return g_pClientConfig!=NULL ? g_pClientCon
 static uint	WireUDPPort()			{ return g_pClientConfig!=NULL ? (uint)g_pClientConfig->CLIENT_COMMUNICATION_UDP_PORT : WIRE_DEFAULT_UDP_PORT; }
 static Player*	WireBugReportTarget()	{ return g_pSocket; }
 
-static const WireHost	s_WireHost = { WireMaxProcessPacket, WireMaxRequestService, WireUDPPort, WireBugReportTarget };
+// The encrypt-seed inputs. Never asked for in this build - nothing
+// defines __USE_ENCRYPTER__, so ClientPlayer::setEncryptCode()'s body is
+// not compiled - but they are what it would read, and they are the
+// reason ClientPlayer.cpp no longer includes MZone.h or
+// UserInformation.h. Each is guarded, because the seed is derived
+// before the player is necessarily in a zone.
+static ZoneID_t	WireEncryptZoneID()		{ return g_pZone!=NULL ? g_pZone->GetID() : 0; }
+static int	WireEncryptServerID()		{ return g_pUserInformation!=NULL ? g_pUserInformation->ServerID : 0; }
+static bool	WireEncryptUsesEnglishSeed()
+{
+	// Of the four original branches only the English one differed; the
+	// Netmarble, Chinese and default cases were the same expression.
+	return g_pUserInformation!=NULL && g_pUserInformation->bEnglish;
+}
+
+static const WireHost	s_WireHost = { WireMaxProcessPacket, WireMaxRequestService, WireUDPPort, WireBugReportTarget,
+					WireEncryptZoneID, WireEncryptServerID, WireEncryptUsesEnglishSeed };
 
 //-----------------------------------------------------------------------------
 // Init GameObject
