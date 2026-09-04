@@ -30,7 +30,7 @@ throw ( ProtocolException , Error )
 
 	// PCS를 띄운다.
 	char pName[128];
-	strcpy(pName, pPacket->getName().c_str());
+	snprintf(pName, sizeof(pName), "%s", pPacket->getName().c_str());
 
 //	UI_OnLinePCS(pName, pcsNumber);
 

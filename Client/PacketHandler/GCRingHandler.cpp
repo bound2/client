@@ -25,7 +25,7 @@ throw ( ProtocolException , Error )
 	int pcsNumber = pPacket->getPhoneNumber();
 	char pName[128];
 
-	strcpy(pName, pPacket->getName().c_str());
+	snprintf(pName, sizeof(pName), "%s", pPacket->getName().c_str());
 
 	// 
 //	UI_OnLinePCS(pName, pcsNumber);

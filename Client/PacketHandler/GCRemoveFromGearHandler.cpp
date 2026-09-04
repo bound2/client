@@ -56,7 +56,7 @@ throw ( ProtocolException , Error )
 				
 				if (pRemovedItem->IsEmptyItemOptionList() )
 				{
-					sprintf(str, "%s %s",					
+					snprintf(str, sizeof(str), "%s %s",					
 						pRemovedItem->GetName(),
 						(*g_pGameStringTable)[STRING_MESSAGE_ITEM_BROKEN].GetString());
 				}
@@ -69,7 +69,7 @@ throw ( ProtocolException , Error )
 						if(i != pRemovedItem->GetItemOptionListCount())
 							option_name += " ";
 					}
-					sprintf(str, "%s%s %s",					
+					snprintf(str, sizeof(str), "%s%s %s",					
 						option_name.c_str(),	
 						pRemovedItem->GetName(),
 						(*g_pGameStringTable)[STRING_MESSAGE_ITEM_BROKEN].GetString());
@@ -172,7 +172,7 @@ throw ( ProtocolException , Error )
 				
 				if (pRemovedItem->IsEmptyItemOptionList())
 				{
-					sprintf(str, "%s %s",					
+					snprintf(str, sizeof(str), "%s %s",					
 						pRemovedItem->GetName(),
 						(*g_pGameStringTable)[STRING_MESSAGE_ITEM_BROKEN].GetString());
 				}
@@ -185,7 +185,7 @@ throw ( ProtocolException , Error )
 						if(i != pRemovedItem->GetItemOptionListCount())
 							option_name += " ";
 					}
-					sprintf(str, "%s%s %s",					
+					snprintf(str, sizeof(str), "%s%s %s",					
 						option_name.c_str(),	
 						pRemovedItem->GetName(),
 						(*g_pGameStringTable)[STRING_MESSAGE_ITEM_BROKEN].GetString());
@@ -284,7 +284,7 @@ throw ( ProtocolException , Error )
 				
 				if (pRemovedItem->IsEmptyItemOptionList())
 				{
-					sprintf(str, "%s %s",					
+					snprintf(str, sizeof(str), "%s %s",					
 						pRemovedItem->GetName(),
 						(*g_pGameStringTable)[STRING_MESSAGE_ITEM_BROKEN].GetString());
 				}
@@ -297,7 +297,7 @@ throw ( ProtocolException , Error )
 						if(i != pRemovedItem->GetItemOptionListCount())
 							option_name += " ";
 					}
-					sprintf(str, "%s%s %s",					
+					snprintf(str, sizeof(str), "%s%s %s",					
 						option_name.c_str(),	
 						pRemovedItem->GetName(),
 						(*g_pGameStringTable)[STRING_MESSAGE_ITEM_BROKEN].GetString());

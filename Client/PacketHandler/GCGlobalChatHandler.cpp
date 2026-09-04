@@ -53,7 +53,7 @@ throw ( ProtocolException , Error )
 		// 완성형 --> 조합형
 		//---------------------------------------------------------------
 		//UI_WansungToJohap( pPacket->getMessage().c_str(), str );
-		strcpy( str, pPacket->getMessage().c_str() );
+		snprintf(str, sizeof(str), "%s", pPacket->getMessage().c_str());
 
 		//UI_AddChatToHistory( str );
 		char* pLB = strchr( str, ' ' );
@@ -65,7 +65,7 @@ throw ( ProtocolException , Error )
 				// ' '를 NULL로
 				*pLB = NULL;
 
-				strcpy(strName, str);
+				snprintf(strName, sizeof(strName), "%s", str);
  
 //				bool bMasterWords = (strstr(strName, "GM")!=NULL);
 				bool bMasterWords = strncmp( strName, (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetString(), (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetLength() ) == 0 ;

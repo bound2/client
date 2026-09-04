@@ -34,10 +34,12 @@
 #include "ModifyInfo.h"
 #include "InventoryInfo.h"
 #include "Gpackets/GCUpdateInfo.h"
+#include "Gpackets/GCGlobalChat.h"
 #include "Exception.h"
 
 #include <string>
 #include <string.h>
+#include <vector>
 
 namespace {
 
@@ -335,4 +337,91 @@ TEST(InventoryInfo, OversizedCountHitsTheUnderflowGuard)
 		bThrew = true;
 	}
 	CHECK(bThrew);
+}
+
+//----------------------------------------------------------------------
+// The chat length guards the handlers' buffers rest on
+//----------------------------------------------------------------------
+//
+// Every one of these packets carries a BYTE length and then that many
+// bytes of server-supplied text, and each read() decides for itself how
+// long is too long. The handlers copy the result into a fixed buffer,
+// so these numbers and those buffer sizes have to be read together -
+// and until the R3 pass they were not. GCNPCSayDynamic accepts 2048
+// where its handler copied into char[256], which is a 1792-byte stack
+// overflow a server could send at will; the copy is bounded now
+// (docs/code-health-review-2026-08-29.md, the packet-tree copy pass).
+//
+// Pinned here because the packets are library code and the handlers are
+// not: if someone widens one of these limits, this is the only place
+// that can notice.
+//----------------------------------------------------------------------
+namespace {
+
+// A GCGlobalChat body, in the order read() takes it: a uint colour,
+// a BYTE length, that many bytes of text, then a Race_t.
+void	PreloadGlobalChat(StreamFixture& f, unsigned int declaredLength, unsigned int textBytes)
+{
+	std::vector<unsigned char> body;
+
+	for (unsigned int i = 0; i < sizeof(uint); ++i)
+		body.push_back(0);			// colour
+
+	body.push_back((unsigned char)declaredLength);
+
+	for (unsigned int i = 0; i < textBytes; ++i)
+		body.push_back('A');
+
+	for (unsigned int i = 0; i < sizeof(Race_t); ++i)
+		body.push_back(0);			// race
+
+	f.Preload(&body[0], (unsigned int)body.size());
+}
+
+bool	GlobalChatReadThrows(unsigned int declaredLength, unsigned int textBytes)
+{
+	StreamFixture f(4096);
+	PreloadGlobalChat(f, declaredLength, textBytes);
+
+	GCGlobalChat packet;
+
+	try {
+		packet.read(f.m_Stream);
+	} catch (ProtocolException&) {
+		return true;
+	} catch (Error&) {
+		return true;
+	}
+
+	return false;
+}
+
+} // namespace
+
+TEST(GCGlobalChat, RejectsAZeroLengthAndAnOverLongMessage)
+{
+	// Zero is rejected outright.
+	CHECK_EQ(true, GlobalChatReadThrows(0, 0));
+
+	// 128 is the limit the handler's char[256] is sized against, so it
+	// has to be accepted...
+	CHECK_EQ(false, GlobalChatReadThrows(128, 128));
+
+	// ...and 129 refused. If this ever stops throwing, the buffer in
+	// GCGlobalChatHandler is the thing to look at.
+	CHECK_EQ(true, GlobalChatReadThrows(129, 129));
+	CHECK_EQ(true, GlobalChatReadThrows(255, 255));
+}
+
+TEST(GCGlobalChat, KeepsTheWholeMessageItAccepted)
+{
+	StreamFixture f(4096);
+	PreloadGlobalChat(f, 128, 128);
+
+	GCGlobalChat packet;
+	packet.read(f.m_Stream);
+
+	// Truncating here rather than at the copy would hide the defect the
+	// R3 pass fixed, so the packet has to hand over all 128 bytes.
+	CHECK_EQ(128, (int)packet.getMessage().size());
 }

@@ -216,7 +216,28 @@ check "R2 (packet cpps defining execute)" "$R2" "$R2_BASELINE"
 # preceding 'w'. R7 below counts all 31, which is why both exist - each
 # is blind to something the other sees.
 #----------------------------------------------------------------------
-R3_BASELINE=18
+# 0: 18 - 18. The packet-tree copy pass bounded all seventeen live sites
+# in Client/PacketHandler - sprintf(dst, ...) became
+# snprintf(dst, sizeof(dst), ...) and strcpy(dst, src) became
+# snprintf(dst, sizeof(dst), "%s", src), every destination checked by
+# hand to be a real array so sizeof() is the right bound - and deleted
+# the eighteenth, which was inside a /* */ block in ClientPlayer.cpp
+# that also named three executable symbols from a library source.
+#
+# One of the seventeen was a live overflow, not a regression guard:
+# GCNPCSayDynamic::read accepts a message of up to 2048 bytes and
+# GCNPCSayDynamicHandler strcpy'd it into char[256] - 1792 bytes of
+# stack, at a server's discretion. The wire-side limits the other
+# handlers rest on are pinned by tests now
+# (tests/unit/test_packetwire_parsers.cpp), because the packets are
+# library code and the handlers are not.
+#
+# From here this holds a line rather than tracking a retreat: a new
+# unbounded copy in either directory fails the suite. Read the zero the
+# way R7's comment says to read its own - it is a statement about this
+# grep, which is line-based, strips only // comments, and cannot see a
+# copy whose destination or call is spelled some other way.
+R3_BASELINE=0
 
 for d in Client/Packet Client/PacketHandler; do
 	if [ ! -d "$d" ]; then

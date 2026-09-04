@@ -112,7 +112,7 @@ throw ( ProtocolException , Error )
 				// 완성형 --> 조합형
 				//---------------------------------------------------------------
 				//UI_WansungToJohap( pPacket->getMessage().c_str(), str );
-				strcpy( str, pPacket->getMessage().c_str() );
+				snprintf(str, sizeof(str), "%s", pPacket->getMessage().c_str());
 				bool	bTranslation = g_pSkillAvailable->IsEnableSkill(SKILL_HOLYLAND_BLOOD_BIBLE_HILLEL) || 
 					!g_pZoneTable->Get( g_pZone->GetID() )->ChatMaskByRace ||
 					g_pPlayer->HasEffectStatus( EFFECTSTATUS_TRANSLATION ) ||
@@ -214,9 +214,9 @@ throw ( ProtocolException , Error )
 
 				// 종족이 다르면 hallu name을 읽어온다
 				if(!bMasterWords && !g_pUserInformation->IsMaster && g_pPlayer->GetRace() != pCreature->GetRace() && !bTranslation)
-					strcpy(strName, pCreature->GetHalluName());
+					snprintf(strName, sizeof(strName), "%s", pCreature->GetHalluName());
 				else
-					strcpy(strName, pCreature->GetName());
+					snprintf(strName, sizeof(strName), "%s", pCreature->GetName());
 
 				// player인 경우만 채팅창에 글 넣는다.
 				if (isPlayerCharacter /*|| IsGildre*/) // 질드레 일경우 존 채팅으로 날린다고 해서 막음..

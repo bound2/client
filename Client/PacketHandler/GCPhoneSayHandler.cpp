@@ -29,7 +29,7 @@ throw ( ProtocolException , Error )
 	int slot = pPacket->getSlotID();
 
 	char message[128];
-	sprintf(message, "[%s] %s", 
+	snprintf(message, sizeof(message), "[%s] %s", 
 						g_pUserInformation->PCSUserName[ slot ].GetString(), 
 						pPacket->getMessage().c_str());
 

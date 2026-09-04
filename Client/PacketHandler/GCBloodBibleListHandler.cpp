@@ -77,7 +77,7 @@ throw ( ProtocolException , Error )
 	g_pPCTalkBox->AddString( szMsg.c_str() );
 
 
-	strcpy(str, (*g_pGameStringTable)[UI_STRING_MESSAGE_RENT_BLOOD_BIBLE].GetString());
+	snprintf(str, sizeof(str), "%s", (*g_pGameStringTable)[UI_STRING_MESSAGE_RENT_BLOOD_BIBLE].GetString());
 
 	g_pPCTalkBox->SetContent( str );
 
