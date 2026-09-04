@@ -60,6 +60,8 @@ A subsystem-by-subsystem review surfaced **197 findings**. Every area graded **D
 
 ## Remediation Status
 
+**Updated 2026-09-04, later:** two Medium findings in *Rendering & Sprites* — `BltAlphaSpritePal` refusing partially visible sprites, and the SDL effect function tables never populated — are fixed in `6fd3f34`, taking the total to 85 fixed and Medium to 16 fixed / 65 open. They turned out to be two of the three defects behind a runtime symptom rather than cosmetic ones: every screen-blend skill effect drew nothing. That symptom and the third defect are recorded under *Runtime defects* and *Found by reading* below.
+
 **Updated 2026-09-04:** C19 — data-file strings used as printf formats — is fixed by `docs/RESTRUCTURING.md` task 5.4's fifth slice, taking the total to 83 fixed and **Critical to 28 fixed / 0 open**. Read its entry before relying on that: the same finding was marked fixed earlier the same day on one ratchet reading zero, and had to be retracted within the hour.
 
 **Updated 2026-09-03:** the Medium dead-code finding below — roughly 400KB of stub and duplicate source excluded from the build — is fixed by `docs/RESTRUCTURING.md` task 5.2's first and fourth slices, taking the total to 82 fixed and Medium to 14 fixed / 67 open.
@@ -156,6 +158,8 @@ A seventh phase (2026-09-03, branch `harden/checked-format`) returned to C19, th
 | Data-file strings as printf formats: 321 call sites checked at the point of use (C19) | 🔴 Critical | `31f5f2f`, then `docs/RESTRUCTURING.md` task 5.4 |
 | Gear tooltip's second item passed through a 32-bit `long` and dereferenced (C21) | 🔴 Critical | `c0df91c` |
 | SDL text pointer passed through a 32-bit `long` (C23, dead path, removed) | 🔴 Critical | `2a531a9` |
+| `BltAlphaSpritePal` refusing partially visible sprites | 🟡 Medium | `6fd3f34` |
+| SDL effect function tables never populated (the `EFFECT_SCREEN` entry; the rest deliberately left, see its entry) | 🟡 Medium | `6fd3f34` |
 
 ### Fixed, not in this review: the `SendMessage` pointer-truncation family
 
@@ -242,7 +246,7 @@ The reviewer independently verified the bound arithmetic in `CSprite555`, `CAlph
 
 ### Runtime defects
 
-Nine defects in the `DarkEden` executable, found by running the client against a live server rather than by this review. None are among the 197 findings, and none were reachable from a test binary. Each one blocked login, ended the session, or produced visibly wrong behaviour in play.
+Ten defects in the `DarkEden` executable, found by running the client against a live server rather than by this review. None are among the 197 findings, and none were reachable from a test binary. Each one blocked login, ended the session, or produced visibly wrong behaviour in play.
 
 | Defect | Symptom | Commit |
 |---|---|---|
@@ -255,9 +259,10 @@ Nine defects in the `DarkEden` executable, found by running the client against a
 | A percentage believed from a stale `ClientConfig.inf` record | every creature bleeding permanently at full health | `7660574` |
 | Quest XML parsed without checking that the file opened | null pointer walked as a character buffer | `d31bf57` |
 | Effect start position set only on the "start at user" and "start at target" branches | `/RTC1` failure on casting Meteor: `MAGIC_METEOR`, `RESULT_MAGIC_METEOR` and `SKILL_ERUPTION` are flagged sky-only in `Action.inf`, so `x`/`y` reached the effect generator uninitialised | `6b57bfa` |
+| `CSpriteSurface::BltSpritePalEffect` an empty stub since the SDL port, over an effect table that was all NULL | every `BLT_SCREEN` skill effect drew nothing: the character swung and no lightning, slash or bolt appeared. Reported as "sword skill animations are broken" — Thunder Spark, Lightning Hand, Thunder Bolt, Thunder Storm and Wide Lightning among them. `Action.inf` and `EffectSpriteType.inf` put **118 of the 209 skills with effects** on this path, through 606 of the 2631 effect sprite types; the newer alpha-blend effects (Infinity Thunderbolt, for one) were the ones that showed | `6fd3f34` |
 ### Found by reading, not by running
 
-Defects of the same weight as the nine above, kept out of that table because they do not meet its definition: each was found by reading during a remediation pass, and none has been observed in play.
+Defects of the same weight as the ten above, kept out of that table because they do not meet its definition: each was found by reading during a remediation pass, and none has been observed in play.
 
 | Defect | Symptom | Commit |
 |---|---|---|
@@ -265,6 +270,7 @@ Defects of the same weight as the nine above, kept out of that table because the
 | `GCNPCSayDynamic`'s message `strcpy`'d into `char[256]` | `GCNPCSayDynamic::read` accepts a message of up to **2048** bytes; the handler copied it into a 256-byte stack buffer and passed it to `MCreature::SetChatString`. 1792 bytes of stack past the end, at a server's discretion, on the ordinary NPC-dialogue path | the packet-tree copy pass |
 | The four PCS handlers index `UserInformation` with an unbounded wire slot | `SlotID_t` is a `BYTE` and no `read()` bounds it, against `PCSUserName[3]` and `OtherPCSNumber[3]`. `MString::operator=` reads `m_pString` out of whatever lies at that offset and `delete[]`s it, so `GCPhoneConnected`, `GCPhoneDisconnected`, `GCPhoneSay` and `GCRing` gave a server an **arbitrary free and an arbitrary write** into the heap | the packet-index pass |
 | `GCRemoveFromGear` reads `addonSlot[slotID]` past the end of a stack array | `MSlayerGear::RemoveItem` bounds `slotID` to `m_Size` — `MAX_GEAR_SLAYER` (27), or 28 for the other two races — while the `addonSlot` arrays hold 15 and 16 entries. Unequipping a ZAP, a PDA, a shoulder or a blood bible read up to **twelve ints** past the array and handed the result to `RemoveAddon`. **No hostile server needed**: this fires in ordinary play | the packet-index pass |
+| The screen blend's green table 32 wide under a 6-bit green | `memcpyPalEffectScreen` indexes `s_EffectScreenTableG[d][s]` with `ColorDraw::Green`, which on this backend decodes the full 6-bit field of a 5:6:5 pixel; the table was declared `[32][32]`, so any green of 32 or more read past the row and, from the last rows, past the table. Latent only because the table was never filled and the blit that used it was a stub — the fix for those two would have made it live. The green table is 64 wide now, filled with the 6-bit form of the same formula, and `tests/unit/test_spritesurface_pal_blit.cpp` pins its entry for a green of 63 | `6fd3f34` |
 | `GCLearnSkillReady` reads `SKILLDOMAIN_NAME[domainType]` from an unbounded `BYTE` | `SkillDomainType_t` is a `BYTE`, `read()` does not bound it, and `SKILLDOMAIN_NAME` is a plain `int[MAX_SKILLDOMAIN]`. The out-of-range read was then handed to the string table as an id. (`(*g_pSkillManager)[domainType]` on the line above survives it — `MSkillManager` is a `CTypeTable`, which range-checks in every build) | the packet-index pass |
 
 ### Open, found during the packet-index pass and not fixed
@@ -1081,6 +1087,8 @@ Lines 73-341 define the standalone/SDL CSpriteSurface, and lines 350-579 define 
 
 **Category:** correctness  |  **Location:** `Client/SpriteLib/CSpriteSurface_Adapter.cpp:624`
 
+> ✅ **Fixed** in `6fd3f34`. The refusal is gone: `BltAlphaSpritePal` clips through `CAlphaSpritePal`'s existing `BltClip*` variants, chosen by a new `CSpriteSurface::ClipSpriteToSurface`. The coupling this finding describes was already broken by the C4 fixes — `CSpritePalBase::LoadFromFile` validates every scanline and `CAlphaSpritePal::Blt` bounds its walk — so the clamp no longer depends on the caller. Covered by `tests/unit/test_spritesurface_pal_blit.cpp`, which drives the static `BltAlphaSpritePalTo` against a plain array and checks every pixel outside the expected footprint untouched. The symptom in play was a tall bolt from the sky vanishing near the top edge: the 2026-09-03 log shows a 99x195 sprite at y=-104 dropped by this check.
+
 Lines 624-634 bail out with a warning whenever `pPoint->x < 0 || pPoint->y < 0 || pPoint->x + spriteWidth > surfaceWidth || pPoint->y + spriteHeight > surfaceHeight`, with the comment 'TODO: implement proper partial clipping'. Because CAlphaSpritePal::Blt itself does no clamping at all (see the critical finding above), this is currently the only thing preventing an out-of-bounds surface write — so the safety and the visual bug are coupled: fixing the pop-out requires fixing the clamp first. CAlphaSpritePal already provides BltClipLeft/BltClipRight/BltClipWidth/BltClipHeight (CAlphaSpritePal.cpp:517, 649, 746, 935) that are simply never called from the SDL adapter.
 
 **Recommendation:** Wire the existing BltClip* variants into BltAlphaSpritePal for the partial cases, and add the width clamp inside CAlphaSpritePal::Blt so correctness does not depend on the caller's screening.
@@ -1088,6 +1096,8 @@ Lines 624-634 bail out with a warning whenever `pPoint->x < 0 || pPoint->y < 0 |
 #### 🟡 Medium -- The SDL backend never populates the effect function tables, so SetEffect/SetPalEffect always install NULL and every sprite effect silently degrades to a plain copy.
 
 **Category:** dead-code  |  **Location:** `Client/SpriteLib/CSpriteSurface_SDL.cpp:35`
+
+> ✅ **Fixed** in `6fd3f34`, for the one entry any call site selects. `EFFECT_SCREEN` is registered in the palette table and `InitEffectTable` fills the screen tables; every `DRAW_NORMALSPRITEPAL_EFFECT` in `MTopView.cpp` passes `EFFECT_SCREEN`, and nothing else calls `SetPalEffect`. The other twelve palette routines stay at NULL on purpose: they assume three 5-bit channels, and `ColorDraw::Green` on this backend returns the 6-bit field — `memcpyPalEffectColorDodge` divides by `(32 - green)`. The non-palette table stays empty because its routines were never compiled for SDL (the header declares `memcpyEffectDarker` and siblings; no SDL translation unit defines them), which is what makes the `EFFECT_WIPE_OUT` call site this finding names a plain copy still. This was not merely dead code: it was the second of three defects behind every screen-blend skill effect drawing nothing — see *Runtime defects*. Filling the tables also exposed the third, the 32-wide green table under *Found by reading*.
 
 s_pMemcpyEffectFunctionTable and s_pMemcpyPalEffectFunctionTable are defined as `{0}` at lines 35 and 37, and InitEffectTable() at lines 361-364 is an empty body. SetEffect (line 795) and SetPalEffect (line 800) therefore always assign NULL, and memcpyEffect (line 806) falls through to `dest[i] = src[i]`. Meanwhile the effect implementations exist and are compiled (Client/SpriteLib/CSpriteSurface_Effects.cpp defines memcpyPalEffectDarker, memcpyPalEffectGrayScale, memcpyPalEffectLighten, memcpyPalEffectDarken and more), and live call sites still invoke the API — e.g. Client/DrawCreatureEffect.cpp:882 calls `CSpriteSurface::SetEffect(CSpriteSurface::EFFECT_WIPE_OUT)`. A contributor reading either side reasonably concludes the feature works.
 
