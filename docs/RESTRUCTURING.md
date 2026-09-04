@@ -123,13 +123,18 @@ an unrecorded drop, so tightening lands in the same commit as the progress.
 | R5 | Direct packet `execute()` call sites outside `Client/Packet` (handlers under `Client/PacketHandler` are in scope) | 1 (a commented-out block in `CGameUpdate.cpp`; added 2026-09-01 after the review found live local-echo callers the receive-loop enumeration had missed; task 2.4 found two more inside handlers — `GCReconnectLoginHandler`/`LCReconnectHandler` fabricating a `CGConnectSetKey` — invisible while handlers lived under the excluded `Client/Packet`, caught by the compiler once `Packet::execute` was deleted, and routed through the dispatcher; a live caller is now a compile error before it is a ratchet failure) | see `ratchets.sh` |
 | R6 | *retired* — `packetwire` members calling `SendBugReport`, which the executable used to define | — (lived for one slice, 2026-09-03. Task 5.1's first slice added it to replace the failed-link detector that stubbing the symbol had disabled — a library file calling an executable-side *function* is invisible to W1/W2, which read includes, and to R4, which greps `g_p*`. It fired on the very next thing done to the tree: promoting `ClientCommunicationManager.cpp` took the count to 2, which is what said to move the function rather than grow the seam. `SendBugReport` is in `Client/Packet/WireHost.cpp` now, so the ratchet measures a symbol nothing is on the wrong side of, and the stub that disabled the link detector is gone with it. Note what came back is narrower than what left: a failed link catches an executable-side call only in a library `unit_tests` links, and only in an object some test forces the linker to pull in — which is what the address-taking link proofs in `test_wire_host.cpp` and `test_player_base.cpp` exist to guarantee. R6 grepped every membership file unconditionally. `ratchets.sh` keeps the history where the check was) | — |
 
-| R7 | Call sites handing a game string table entry to `printf` as its **format** argument, **where the lookup is spelled at the call site** (`sprintf` family and `AddFormat`, across `Client` and `VS_UI`) | **0** - every site it can see is converted, so it holds a line instead of tracking a retreat. **It is not a measure of finding C19 being closed**, and was briefly mistaken for one: an entry copied into a static array or a local and used as a format from there is invisible to it, and about 25 live sites do that (37 before task 5.4's fourth slice took the last of them; 64 before task 5.4's third slice took the `AddFormat` family through `CMessageArray::AddSafeFormat`, leaving 37 ordinary `sprintf` sites - `UIMessageManager.cpp` 14, `MTopView.cpp` 10, `GameUI.cpp` 7, `ModifyStatusManager.cpp` 3, `CGameUpdate.cpp` 2, `PacketFunction.cpp` 1; 262 before task 5.4's second slice converted every `VS_UI` site, leaving only the executable's own - of which three are the `AddFormat` family in `Client/PacketHandler`; 293 before its first slice converted `Client/PacketHandler`'s 31; the split is `Client` 64 — of which `ModifyStatusManager.cpp` 19, `UIMessageManager.cpp` 14, `MTopView.cpp` 10, `PacketFunction.cpp` 9, `GameUI.cpp` 7 — and `VS_UI` 198, where `VS_UI_GameCommon.cpp` alone holds 89. First recorded as 287 → 256: the review round found the pattern could not match a counted call in **any** form, because it wanted the format at argument two, where `snprintf` and `swprintf` take a size — so it missed a live site and, worse, could not have caught a new one. Added 2026-09-03; finding C19 as a number) | see `ratchets.sh` — **four** alternatives: the format sits at a different argument in each of the three call families, and the offset-append form `sprintf(buf + strlen(buf), …)` needs its own because the destination class forbids parentheses. The tree is joined before matching, because four sites put the destination and the format on different lines |
+| R7 | Call sites handing a game string table entry to `printf` as its **format** argument, **where the lookup is spelled at the call site** (`sprintf` family including `fprintf`, the counted family, `AddFormat`, the offset-append form and `.Format`, across `Client` and `VS_UI`) | **0** - every site it can see is converted, so it holds a line instead of tracking a retreat. **On its own it is not a measure of finding C19 being closed**, and was once mistaken for one: an entry copied into a static array or a local and used as a format from there is invisible to it, and 24 live sites did exactly that until task 5.4's fifth slice. R8 below is the ratchet that can see them, and C19's closure rests on the pair plus three hand audits, never on this number alone (37 before task 5.4's fourth slice took the last of them; 64 before task 5.4's third slice took the `AddFormat` family through `CMessageArray::AddSafeFormat`, leaving 37 ordinary `sprintf` sites - `UIMessageManager.cpp` 14, `MTopView.cpp` 10, `GameUI.cpp` 7, `ModifyStatusManager.cpp` 3, `CGameUpdate.cpp` 2, `PacketFunction.cpp` 1; 262 before task 5.4's second slice converted every `VS_UI` site, leaving only the executable's own - of which three are the `AddFormat` family in `Client/PacketHandler`; 293 before its first slice converted `Client/PacketHandler`'s 31; the split is `Client` 64 — of which `ModifyStatusManager.cpp` 19, `UIMessageManager.cpp` 14, `MTopView.cpp` 10, `PacketFunction.cpp` 9, `GameUI.cpp` 7 — and `VS_UI` 198, where `VS_UI_GameCommon.cpp` alone holds 89. First recorded as 287 → 256: the review round found the pattern could not match a counted call in **any** form, because it wanted the format at argument two, where `snprintf` and `swprintf` take a size — so it missed a live site and, worse, could not have caught a new one. Added 2026-09-03; finding C19 as a number) | see `ratchets.sh` — **five** alternatives: the format sits at a different argument in each of the three call families, the offset-append form `sprintf(buf + strlen(buf), …)` needs its own because the destination class forbids parentheses, and `MString::Format` is a printf reached as a method, which no pattern matching on a printf's name can see. The tree is joined before matching, because four sites put the destination and the format on different lines |
+| R8 | printf-family calls whose **format argument is not a string literal**, across `Client`, `VS_UI` and `basic` | **13** - the population R7 measures a spelling of. Every one of the 13 was read: 11 vararg forwarders where the format is the function's own parameter, and 2 `sprintf(szTemp, TEXT("…"))` where a literal hides behind a macro. This is the weaker question, which is exactly why it is the right floor - it cannot tell a table entry from a legitimately forwarded format, so it cannot be satisfied by renaming anything. Added 2026-09-04 by task 5.4's fifth slice, because R7 reaching 0 had been read as C19 being closed and was not (37 at first measurement, taken during the fourth slice's review round to find out how much R7 was missing; 24 of those were the fifth slice's work) | see `ratchets.sh` — the family list was enumerated from the tree rather than written from memory, which is how `fprintf` (550 calls) and `vswprintf` got in. It cannot see a destination containing parentheses; those were audited by hand at 16 sites, all with literal formats |
 
 R1 is the headline number: it counts what still cannot be unit-tested. R2 is
-the client twin of the server's R4 (which it drove to 0). R3 and R7 track
-code-health priority 2 mechanically, from two directions: R3 counts the
-unbounded copies in the packet tree, R7 counts data-file format strings
-everywhere they are still used as formats.
+the client twin of the server's R4 (which it drove to 0). R3, R7 and R8 track
+code-health priority 2 mechanically, from three directions: R3 counts the
+unbounded copies in the packet tree, R7 counts data-file format strings where
+the lookup is spelled at the format argument, and R8 counts every format
+argument that is not a literal, whatever it is spelled as. R7 and R8 exist as a
+pair on purpose. R7 is precise and blind to indirection; R8 is coarse and
+cannot be evaded by spelling. Reading either one alone as the state of finding
+C19 is the mistake that cost a retraction on 2026-09-04.
 
 ---
 
@@ -1976,7 +1981,7 @@ starting each — the scan is one grep, and the ranking below is from a
   > unit at all. Whether the client still draws its FPS counter, its
   > network-condition warning and its debug overlays is what running it
   > shows.
-- [ ] **5.4 Format-string audit** (code-health C19/C20/C22, the sprintf
+- [x] **5.4 Format-string audit** (code-health C19/C20/C22, the sprintf
   sites fed by data files) — becomes tractable per-library as R3-style
   counts once the owning code is in libs.
   > **Status:** first slice done, 2026-09-03. The population is
@@ -2297,6 +2302,68 @@ starting each — the scan is one grep, and the ranking below is from a
   > surplus-argument direction, where an English entry takes no
   > conversion and the localised entry it was written against carries a
   > `%s`. Both audit floors rise with the slice.
+  >
+  > **Fifth slice (2026-09-04): the 24 R7 cannot see, and the ratchet
+  > that can.** `VS_UI_ExtraDialog.cpp`'s twenty-one go through a new
+  > `AllocAskMessage`, which allocates and formats in one place so the
+  > bound cannot drift from the destination — the mistake the
+  > hand-written `new char[strlen(fmt)+n]` / `sprintf` pairs kept
+  > making, and at two of them the entry carries two `%s` while the
+  > allocation budgeted for one. `VS_UI_GameCommon.cpp`'s three take the
+  > array overload directly. **321 sites converted.**
+  >
+  > **The instrument is the point of this slice, not the conversions.**
+  > R7 counts a spelling; the shape it missed was live for four slices.
+  > **R8** counts the population instead: printf-family calls whose
+  > format argument is not a string literal. It cannot tell a table entry
+  > from a legitimate forward, which is precisely why it cannot be
+  > satisfied by renaming anything. 37 → 13, and the 13 are read
+  > individually in its comment.
+  >
+  > **Building R8 immediately found three more sites, which is the
+  > argument for building it.** Its family list was enumerated from the
+  > tree rather than written from memory — every `*printf*` identifier
+  > in `Client`, `VS_UI` and `basic` — which added `fprintf` (550 calls,
+  > none with a variable format today) and `vswprintf`. Asking what else
+  > could be a printf without being named like one turned up
+  > `MString::Format`, a varargs printf reached as a *method*, taking a
+  > `String.inf` entry at three `GameUI.cpp` sites. No sweep in the first
+  > four slices could have found those. `MString` is in `gamemodel`, so
+  > its checked sibling `MString::FormatChecked` is **library code with
+  > five tests** — this task's first fix at the call-site end that a test
+  > binary can reach.
+  >
+  > Two defects fell out on the way, both worth more than the
+  > conversions. `C_VS_UI_ASK_DIALOG` never assigned six rows of
+  > `m_sz_question_msg`: upstream commented the `ASK_FRIEND_*`
+  > assignments and their string ids out of `InitString()` and left the
+  > six cases that read them live, so opening any friend dialog ran
+  > `strlen()` over an indeterminate pointer and handed it to `sprintf`
+  > as a format — server-triggered, through `GCFriendChatting`. The six
+  > ids are added, every row is initialised, and the rows are subscripted
+  > by the enum so a new type cannot silently move one. And
+  > `MString::operator=` keeps no allocation for an empty string, so
+  > `GetString()` comes back NULL — which `UI_MasterLairMessage` passes
+  > straight to `g_pSystemMessage->Add`. `FormatChecked` guarantees a
+  > readable string; the test that pins it is what found this.
+  >
+  > **Finding C19 is closed**, and the entry in the code-health review
+  > lists the five separate measurements it rests on rather than a
+  > ratchet reading zero. The lesson from the fourth slice's retraction
+  > held in one direction that mattered: the new test written for the
+  > allocation invariant was, in its first form, unable to fail — it
+  > asserted that the output fit in `nSize`, which `FormatV` guarantees
+  > by truncating. It now compares against the format text, and was run
+  > against a deliberately broken expectation to confirm it fails when it
+  > should.
+  >
+  > Final state: **321 converted call sites**. The arity audit reports
+  > **301 sites, 289 checked, 0 failures, 8 notes** — a smaller number
+  > for a good reason, and the two must not be quoted as one: it counts
+  > text, and `AllocAskMessage` is a single textual site standing in for
+  > twenty-one dialog rows. **338 tests / 4,545 checks / 0 failed** in
+  > both trees; ratchets green at R1 493, R2 0, R3 18, R4 21, R5 1, R7 0,
+  > **R8 13**.
 
 ---
 

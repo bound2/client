@@ -222,7 +222,8 @@ baseline: **332 tests, 4,510 checks, 0 failed** in both trees.
 
 ## Current focus
 
-`docs/code-health-review-2026-08-29.md` holds 197 findings, 82 fixed. In priority order:
+`docs/code-health-review-2026-08-29.md` holds 197 findings, 83 fixed — every
+Critical among them. In priority order:
 
 1. **Unvalidated network input is the top open risk.** `Client/Packet/Gpackets/` passes
    server-supplied lengths, indices and item classes straight into array subscripts,
@@ -234,19 +235,21 @@ baseline: **332 tests, 4,510 checks, 0 failed** in both trees.
 2. Fixed-size buffers fed by variable-length server strings (the 21-byte chat rows
    are fixed; 128-byte stack buffers remain in other handlers), and format strings
    loaded from data files passed to sprintf (C19/C20/C22). That last one is
-   **0 call sites** - ratchet R7 holds it at zero, so a new one fails the suite. It
-   has a fix to apply rather than a policy to argue about: `SafeFormat::Format`
-   in `basic/SafeFormat.h` checks a table entry's conversions against the
-   arguments the call site really passed. 294 sites are converted, across
-   `Client`, `VS_UI` and the `AddFormat` family (through
-   `CMessageArray::AddSafeFormat`). **R7 being 0 does not mean C19 is closed**,
-   and this file said it did for about an hour on 2026-09-04: R7 sees a format
-   *spelled at the call site* as a table lookup, and **24 live sites
-   read the entry out of a static array or a local first** — 21 of them in
-   `VS_UI_ExtraDialog.cpp`, 12 passing no varargs at all, into buffers sized
-   from the format string. That is C19's exploitable half, still open. Measure
-   it with `scratchpad`-style sweeps or extend R7; do not trust R7 alone for
-   this finding.
+   **closed** (C19, 2026-09-04, task 5.4's fifth slice). **321 sites** are
+   converted to `SafeFormat::Format` in `basic/SafeFormat.h`, which checks a
+   table entry's conversions against the arguments the call site really passed,
+   across `Client`, `VS_UI`, the `AddFormat` family (through
+   `CMessageArray::AddSafeFormat`) and `MString::FormatChecked`.
+   **Two ratchets hold it, and the pair is the point.** R7 counts a lookup
+   *spelled at the format argument*; R8 counts every printf-family call whose
+   format is not a string literal, whatever it is spelled as. This file claimed
+   C19 was closed once before, for about an hour on 2026-09-04, on R7 alone —
+   and 24 live sites were reading the entry out of a static array or a local
+   first, invisible to it. **A ratchet at zero is a claim about the ratchet.**
+   If you need to know the state of this finding, read the C19 entry in the
+   review: it lists five measurements, and R7 is one of them. If you need to
+   look for a new site, sweep the *format argument*, never another spelling of
+   the lookup.
    `tests/tools/check_format_arity.pl` (ctest `format_arity`) audits every
    converted site against the built-in English table and fails the suite when an
    entry asks for more arguments than its call site passes; it also ratchets how

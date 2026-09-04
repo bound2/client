@@ -2054,6 +2054,17 @@ InitGameStringTable()
 	(*g_pGameStringTable)[UI_STRING_MESSAGE_DELETE_INPUT_NAME] = "Enter the character's name to confirm.";
 	(*g_pGameStringTable)[UI_STRING_MESSAGE_DELETE_NAME_MISMATCH] = "The name does not match the character you selected.";
 
+	// The friend list's six ask dialogs. Every one of them is raised by a
+	// GCFriendChatting packet and names the other player, so the %s is
+	// the argument each call site passes and not an entry the operator
+	// may drop.
+	(*g_pGameStringTable)[UI_STRING_MESSAGE_ASK_FRIEND_REQUEST] = "%s wants to add you as a friend.";
+	(*g_pGameStringTable)[UI_STRING_MESSAGE_ASK_FRIEND_REFUSE] = "%s has declined your friend request.";
+	(*g_pGameStringTable)[UI_STRING_MESSAGE_ASK_FRIEND_WAIT] = "Waiting for %s to answer.";
+	(*g_pGameStringTable)[UI_STRING_MESSAGE_ASK_FRIEND_EXIST] = "%s is already on your friend list.";
+	(*g_pGameStringTable)[UI_STRING_MESSAGE_ASK_FRIEND_BLACK] = "%s is on your block list.";
+	(*g_pGameStringTable)[UI_STRING_MESSAGE_ASK_FRIEND_DELETE] = "Remove %s from your friend list?";
+
 	return;
 }
 

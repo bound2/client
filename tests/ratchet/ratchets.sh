@@ -455,8 +455,10 @@ done
 # GetGameString(...), ...) could not have raised the count.
 GAMESTRING='(\(\*g_pGameStringTable\)\[|GetGameString[[:space:]]*\()'
 
-# sprintf family: format at argument 2.
-R7_PATTERN="\\b(sprintf|wsprintf|swprintf|vsprintf)[[:space:]]*\\([[:space:]]*[^,;()\"]+,[[:space:]]*$GAMESTRING"
+# sprintf family: format at argument 2. fprintf is in the list for the
+# same reason R8 has it - none of its 550 calls takes a table entry
+# today, and nothing was stopping the next one.
+R7_PATTERN="\\b(sprintf|wsprintf|swprintf|vsprintf|fprintf)[[:space:]]*\\([[:space:]]*[^,;()\"]+,[[:space:]]*$GAMESTRING"
 
 # counted family: format at argument 3, argument 2 being a size, which is
 # usually sizeof(dst) and so may contain parentheses - bounded instead by
@@ -465,6 +467,14 @@ R7_PATTERN="$R7_PATTERN|\\b(_?snprintf|_?vsnprintf|_?swprintf)[[:space:]]*\\([[:
 
 # message array family: format at argument 1.
 R7_PATTERN="$R7_PATTERN|\\bAddFormat(VL)?[[:space:]]*\\([[:space:]]*$GAMESTRING"
+
+# MString::Format: a printf spelled as a method, and so invisible to
+# every pattern that matches on a printf's name. Three live sites in
+# GameUI.cpp handed it a String.inf entry - the bound is fine, since it
+# forwards to vsnprintf, but the read is not - and task 5.4's fifth
+# slice moved them to MString::FormatChecked. This alternative is what
+# keeps a fourth from being written.
+R7_PATTERN="$R7_PATTERN|\\.Format[[:space:]]*\\([[:space:]]*$GAMESTRING"
 
 # appending at an offset: sprintf(buf + strlen(buf), <entry>, ...). The
 # destination class above forbids parentheses, so it cannot match this -
@@ -480,6 +490,103 @@ R7=$(find Client VS_UI -name '*.cpp' -print0 2>/dev/null | xargs -0 cat 2>/dev/n
 	| grep -aoE "$R7_PATTERN" \
 	| wc -l)
 check "R7 (data-file format strings passed to printf)" "$R7" "$R7_BASELINE"
+
+#----------------------------------------------------------------------
+# R8 - printf-family calls whose format argument is not a literal.
+#
+# R7 above is the same finding measured by what it can see: a table
+# lookup SPELLED AT THE FORMAT ARGUMENT. It reached 0 at task 5.4's
+# fourth slice and was read, for about an hour, as C19 being closed. It
+# was not. VS_UI_ExtraDialog.cpp copies twenty-one entries into
+# m_sz_question_msg in InitString() and formats with them from there, and
+# VS_UI_GameCommon.cpp does the same through three const char* arrays.
+# Both reviewers of that slice found them by hand; neither ratchet could,
+# because neither was looking at the format ARGUMENT - they were looking
+# for a particular spelling of it.
+#
+# So this one asks the question the other cannot: at a printf-family
+# call, is the format a string literal? If it is not, the format is a
+# variable, and a variable in this client is a String.inf entry until
+# shown otherwise. That is a weaker claim than R7's - it cannot tell a
+# table entry from a legitimately forwarded format - which is exactly why
+# it is the right shape for a floor. It sees the population; R7 sees the
+# part of it that is easy to name.
+#
+# The 13 that remain are all one of two harmless shapes, and were read
+# one by one when this was written:
+#
+#   - eleven vararg forwarders, where the format IS the function's own
+#     parameter and passing it on is the whole point: five vsprintf in
+#     the two DebugInfo.cpp, and six vsnprintf in CMessageArray.cpp (2),
+#     WireHost.cpp, PacketDiagnostics.cpp, MString.cpp and Client.cpp.
+#     Their callers are where a table entry can enter, and those are what
+#     R7 and the format_arity audit cover.
+#   - two sprintf(szTemp, TEXT("...")) in vs_ui_gamecommon2.cpp: a
+#     literal behind a macro, which this pattern cannot see through.
+#
+# A new call formatting with anything else raises this, which is the
+# property the fourth slice needed and did not have.
+#
+# What it still cannot see, written down rather than discovered later:
+# a destination expression containing parentheses, because the
+# destination class forbids them so that a joined stream cannot run
+# across two statements. A cast - vswprintf((wchar_t*)dst, n, fmt, ap) -
+# is enough to hide a call. The probe that established the families
+# above was written that way by accident and counted three of its four
+# shapes, which is how this paragraph came to exist. R7 has the same
+# hole and answers it with a fourth alternative for the one form that
+# actually occurred; no site here needs one yet.
+#----------------------------------------------------------------------
+# 13: 37 - 24. Task 5.4's fifth slice converted the twenty-one sites in
+# VS_UI_ExtraDialog.cpp (through AllocAskMessage, which allocates and
+# formats in one place so the bound cannot drift from the destination)
+# and the three in VS_UI_GameCommon.cpp. 37 was the first measurement,
+# taken during the fourth slice's review round to find out how much R7
+# was missing - the number that showed the closure claim was wrong.
+R8_BASELINE=13
+
+for d in Client VS_UI; do
+	if [ ! -d "$d" ]; then
+		echo "FAIL R8: directory $d is missing - fix the path list in this script"
+		FAIL=1
+	fi
+done
+
+# The character after the format's comma decides it: a quote opens a
+# literal, anything else is an expression. L is excluded with the quote
+# so that L"..." counts as a literal too; it costs the handful of
+# identifiers beginning with a capital L, and no call site here has one.
+# As in R7, the format sits at a different argument in each family, the
+# tree is joined before matching, and // matches are stripped first.
+#
+# The family list is the whole ratchet, so it was taken from the tree
+# rather than from memory: every identifier matching *printf* in Client,
+# VS_UI and basic, counted on a joined stream. That is how fprintf got
+# in - 550 calls, none of them with a variable format today, and not one
+# of them visible to the first draft of this pattern - and vswprintf
+# with it. Re-run that enumeration when adding a family:
+#
+#   find Client VS_UI basic -name '*.cpp' -o -name '*.h' | xargs cat \
+#     | grep -aoE '\b[A-Za-z_][A-Za-z0-9_]*printf[A-Za-z0-9_]*[[:space:]]*\('
+#
+# and note the -a and the single stream: run per file, the same
+# enumeration reports 453 sprintf rather than 510, because grep calls
+# this tree's UTF-8 sources binary and stops inside them.
+R8_PATTERN="\\b(sprintf|wsprintf|vsprintf|fprintf)[[:space:]]*\\([[:space:]]*[^,;()\"]+,[[:space:]]*[^\"L[:space:]]"
+R8_PATTERN="$R8_PATTERN|\\b(_?snprintf|_?vsnprintf|_?swprintf|vswprintf)[[:space:]]*\\([[:space:]]*[^,;()\"]+,[^;\"]{0,60},[[:space:]]*[^\"L[:space:]]"
+
+# A printf does not have to be named like one. MString::Format is an
+# ordinary varargs printf reached as a method, which is why no pattern
+# here saw the three GameUI.cpp sites that passed it a String.inf entry
+# until they were looked for by hand. Its checked sibling is
+# FormatChecked, which this deliberately does not match.
+R8_PATTERN="$R8_PATTERN|\\.Format[[:space:]]*\\([[:space:]]*[^\"L[:space:])]"
+
+R8=$(find Client VS_UI -name '*.cpp' -print0 2>/dev/null | xargs -0 cat 2>/dev/null \
+	| sed -e 's://.*::' | tr '\n' ' ' \
+	| grep -aoE "$R8_PATTERN" \
+	| wc -l)
+check "R8 (printf-family calls whose format is not a literal)" "$R8" "$R8_BASELINE"
 
 #----------------------------------------------------------------------
 # R6 was here for exactly one slice, and retired by doing its job.

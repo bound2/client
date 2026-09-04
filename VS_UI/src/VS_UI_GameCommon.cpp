@@ -14386,7 +14386,10 @@ grade :			str[2]=NULL;
 			if(!((_y-125)/20 < 3 && _x > m_rt_char_box.x+35 && g_char_slot_ingame.bonus_point > 0))
 			{
 				int num=(_y-125)/20;
-				wsprintf(temp_str[0],info_vampire_title_string[num]);
+				// A String.inf entry as the format, with no arguments at
+				// all - the array hides the lookup from ratchet R7, but
+				// the entry is as much a format here as anywhere else.
+				SafeFormat::Format(temp_str[0],info_vampire_title_string[num]);
 				switch(num)
 				{
 				case 0 :
@@ -14588,7 +14591,7 @@ grade :			str[2]=NULL;
 				if(!((_y-125)/20 < 3 && _x > m_rt_char_box.x+35 && g_char_slot_ingame.bonus_point > 0))
 				{
 					int num=(_y-125)/20;
-					wsprintf(temp_str[0],info_ousters_title_string[num]);
+					SafeFormat::Format(temp_str[0],info_ousters_title_string[num]);
 					switch(num)
 					{
 					case 0 :
@@ -17025,7 +17028,7 @@ const char * C_VS_UI_INFO::GetChinhoLevel(int level)
 	memset(strtemp,0,256);
 	// edit by Coffee 2007-5-20 修正转职业显示问题
 	//wsprintf(strtemp, chingho_name[cur_ching_num],  last_num);
-	wsprintf(strtemp, chingho_name[0],  level);
+	SafeFormat::Format(strtemp, chingho_name[0],  level);
 	return strtemp;
 }
 

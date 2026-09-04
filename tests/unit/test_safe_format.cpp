@@ -501,3 +501,75 @@ TEST(SafeFormat, TakesTheDestinationSizeFromARealArray)
 
 	CHECK(Is("abc", small));
 }
+
+//----------------------------------------------------------------------
+// The allocation invariant
+//----------------------------------------------------------------------
+//
+// C_VS_UI_ASK_DIALOG sizes each message row as strlen(entry) plus the
+// room its own arguments need, and twelve of its call sites pass no
+// arguments at all - so for those the whole allocation is
+// strlen(entry)+1 (VS_UI/src/VS_UI_ExtraDialog.cpp, AllocAskMessage,
+// task 5.4's fifth slice). That is safe only because a conversion this
+// formatter refuses is copied out as the text it already was: refusing
+// cannot make the output longer than the format it came from. If that
+// ever stops holding, every one of those rows overflows by exactly the
+// difference, so it is pinned here rather than left as a reading of the
+// implementation.
+//
+// The guard bytes past the stated size are the point. An overrun in C++
+// writes into whatever follows and carries on, so the assertion has to
+// be that the bytes outside the destination were not touched.
+//----------------------------------------------------------------------
+TEST(SafeFormat, RefusingAConversionNeverWritesMoreThanTheFormatItCameFrom)
+{
+	static const char* const pFormats[] =
+	{
+		"%s",
+		"%s%s%s",
+		"%.*f",
+		"%*d",
+		"%n",
+		"%hn",
+		"%ls",
+		"%p",
+		"%08.3f",
+		"%",
+		"Store your pet? %s",
+		"%s is asking to join your %s.",
+		"Buy a storage box for $%d?",
+	};
+
+	const size_t nFormats = sizeof(pFormats) / sizeof(pFormats[0]);
+
+	for (size_t i = 0; i < nFormats; ++i)
+	{
+		// Exactly the arithmetic AllocAskMessage performs when it has no
+		// arguments to budget for.
+		const size_t	nSize	= std::strlen(pFormats[i]) + 1;
+		char			buf[128];
+
+		std::memset(buf, '\xCD', sizeof(buf));
+
+		SafeFormat::Format(buf, nSize, pFormats[i]);
+
+		// The format back verbatim, and that is the whole assertion.
+		// Checking only that the result fits would prove nothing at
+		// all - FormatV bounds itself by nSize, so a refusal that grew
+		// would still come back inside the bound, with the difference
+		// quietly truncated away. Comparing against the format is what
+		// makes the growth visible, because the truncated tail is
+		// missing from the text. (%% is the one shape that legitimately
+		// shrinks; it has its own test above.)
+		CHECK(Is(pFormats[i], buf));
+
+		// And nothing outside the stated size was touched. One check
+		// for the whole guard region rather than one per byte, so a
+		// failure names the format instead of drowning the suite's
+		// check count in a hundred passes per case.
+		char untouched[sizeof(buf)];
+		std::memset(untouched, '\xCD', sizeof(untouched));
+
+		CHECK_EQ(0, std::memcmp(buf + nSize, untouched, sizeof(buf) - nSize));
+	}
+}

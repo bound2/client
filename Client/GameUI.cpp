@@ -4447,14 +4447,17 @@ void		UI_MasterLairMessage(BYTE type, short value, TYPE_ZONEID ZoneID)
 	
 	switch( type ) 
 	{
-	case 0 :			// 마스터레어가 열렸습니다.
-		msg.Format((*g_pGameStringTable)[STRING_MESSAGE_OPEN_LAIR].GetString(), g_pZoneTable->Get( ZoneID )->Name.GetString() );
+	// The master lair has opened.
+	case 0 :
+		msg.FormatChecked(GetGameString(STRING_MESSAGE_OPEN_LAIR), g_pZoneTable->Get( ZoneID )->Name.GetString() );
 		break;
-	case 1 :			// 마스터레어가 닫혔습니다.
-		msg.Format((*g_pGameStringTable)[STRING_MESSAGE_CLOSED_LAIR].GetString(), g_pZoneTable->Get( ZoneID )->Name.GetString() );
+	// The master lair has closed.
+	case 1 :
+		msg.FormatChecked(GetGameString(STRING_MESSAGE_CLOSED_LAIR), g_pZoneTable->Get( ZoneID )->Name.GetString() );
 		break;
-	case 2 :			// 마스터레어의 출입가능 시간이 %d 분 남았습니다.
-		msg.Format((*g_pGameStringTable)[STRING_MESSAGE_LEFT_TIME_LAIR].GetString(), g_pZoneTable->Get( ZoneID )->Name.GetString() , value );
+	// %d minutes left to enter the master lair.
+	case 2 :
+		msg.FormatChecked(GetGameString(STRING_MESSAGE_LEFT_TIME_LAIR), g_pZoneTable->Get( ZoneID )->Name.GetString() , value );
 		break;
 	default :
 		return;
