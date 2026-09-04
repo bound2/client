@@ -16,6 +16,7 @@
 #include "ClientConfig.h"
 
 #include "MGameStringTable.h"
+#include "SafeFormat.h"
 #include "MZoneTable.h"
 #include "MTimeItemManager.h"
 #include "SystemAvailabilities.h"
@@ -375,7 +376,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 
 				if( p_item->GetGrade() != -1 )
 				{
-					sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_PET_DEAD_DAY].GetString(), p_item->GetGrade());				
+					SafeFormat::Format(sz_buf, GetGameString(UI_STRING_MESSAGE_DESC_PET_DEAD_DAY), p_item->GetGrade());				
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
 					py += SMALL_FONT_Y_GAP;
 				}
@@ -409,19 +410,19 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 					{
 						if( day > 0 )
 						{
-							sprintf( sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_DAY].GetString(), day );
+							SafeFormat::Format(sz_buf, GetGameString(UI_STRING_MESSAGE_DAY), day );
 							time = sz_buf;
 							time += " ";
 						}
 						if( hour > 0 )
 						{
-							sprintf( sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_HOUR].GetString(), hour );
+							SafeFormat::Format(sz_buf, GetGameString(UI_STRING_MESSAGE_HOUR), hour );
 							time += sz_buf;
 							time += " ";
 						}
 						if( minute > 0 )
 						{
-							sprintf( sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_MINUTE].GetString(), minute );
+							SafeFormat::Format(sz_buf, GetGameString(UI_STRING_MESSAGE_MINUTE), minute );
 							time += sz_buf;					
 						}
 					}
@@ -598,7 +599,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 
 					if(eType != ITEMTABLE_INFO::ELEMENTAL_TYPE_ANY)
 					{
-						sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_OUSTERS_STONE].GetString(), (*g_pGameStringTable)[g_ELEMENTAL_STRING_ID[eType]].GetString());
+						SafeFormat::Format(sz_buf, GetGameString(UI_STRING_MESSAGE_OUSTERS_STONE), (*g_pGameStringTable)[g_ELEMENTAL_STRING_ID[eType]].GetString());
 						vx = g_PrintColorStr(px, py, sz_buf, gpC_base->m_item_desc_pi, stoneRGB[eType]);
 						sprintf(sz_buf, "%d", eNum);
 						g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
@@ -609,14 +610,14 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				{
 					vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_OPTION].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
 
-					sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_CORE_ZAP_BLACK+p_item->GetItemType()].GetString(), p_item->GetGrade());
+					SafeFormat::Format(sz_buf, GetGameString(UI_STRING_CORE_ZAP_BLACK+p_item->GetItemType()), p_item->GetGrade());
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_PEARL);				
 					py += SMALL_FONT_Y_GAP;
 
-					sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_CORE_ZAP_REWARD_ALL_STAT].GetString(), 3);
+					SafeFormat::Format(sz_buf, GetGameString(UI_STRING_CORE_ZAP_REWARD_ALL_STAT), 3);
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_DARKGRAY);				
 					py += SMALL_FONT_Y_GAP;
-					sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_CORE_ZAP_REWARD_ALL_REG].GetString(), 9);
+					SafeFormat::Format(sz_buf, GetGameString(UI_STRING_CORE_ZAP_REWARD_ALL_REG), 9);
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_DARKGRAY);				
 					py += SMALL_FONT_Y_GAP;
 					
@@ -968,7 +969,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
 				py += SMALL_FONT_Y_GAP;
 				
-				sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_ZONEINFO_XY].GetString(), temp_item->GetZoneX(), temp_item->GetZoneY());
+				SafeFormat::Format(sz_buf, GetGameString(UI_STRING_MESSAGE_ZONEINFO_XY), temp_item->GetZoneX(), temp_item->GetZoneY());
 				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
 			}
 			else
@@ -1122,17 +1123,17 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 					if(optionList.size() ==0 && DefaultOptionList.size() == 0)
 						vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_OPTION].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
 					
-					sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_CORE_ZAP_BLACK+p_AddItem->GetItemType()].GetString(), p_AddItem->GetGrade());
+					SafeFormat::Format(sz_buf, GetGameString(UI_STRING_CORE_ZAP_BLACK+p_AddItem->GetItemType()), p_AddItem->GetGrade());
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_PEARL);				
 					py += SMALL_FONT_Y_GAP;
 					
 					DWORD TempColor = RGB_DARKGRAY;
 					if(gC_vs_ui.IsHasAllCoreZap())
 						TempColor = RGB_GREEN;
-					sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_CORE_ZAP_REWARD_ALL_STAT].GetString(), 3);
+					SafeFormat::Format(sz_buf, GetGameString(UI_STRING_CORE_ZAP_REWARD_ALL_STAT), 3);
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, TempColor);				
 					py += SMALL_FONT_Y_GAP;
-					sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_CORE_ZAP_REWARD_ALL_REG].GetString(), 9);
+					SafeFormat::Format(sz_buf, GetGameString(UI_STRING_CORE_ZAP_REWARD_ALL_REG), 9);
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, TempColor);				
 					py += SMALL_FONT_Y_GAP;
 					
@@ -1182,7 +1183,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 							bl_required = true;
 							
 							vx = g_PrintColorStr(vx, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_ENG_STR].GetString(), gpC_base->m_item_desc_pi, required_rgb);
-							sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE_STAT].GetString(), p_item->GetRequireSTR());
+							SafeFormat::Format(sz_buf, GetGameString(UI_STRING_MESSAGE_DESC_REQUIRE_STAT), p_item->GetRequireSTR());
 							vx = g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);
 							
 							if (p_item->GetRequireDEX() > 0 ||
@@ -1203,7 +1204,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 							bl_required = true;
 							
 							vx = g_PrintColorStr(vx, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_ENG_DEX].GetString(), gpC_base->m_item_desc_pi, required_rgb);
-							sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE_STAT].GetString(), p_item->GetRequireDEX());
+							SafeFormat::Format(sz_buf, GetGameString(UI_STRING_MESSAGE_DESC_REQUIRE_STAT), p_item->GetRequireDEX());
 							vx = g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);
 							
 							if (p_item->GetRequireINT() > 0 ||
@@ -1223,7 +1224,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 							bl_required = true;
 							
 							vx = g_PrintColorStr(vx, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_ENG_INT].GetString(), gpC_base->m_item_desc_pi, required_rgb);
-							sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE_STAT].GetString(), p_item->GetRequireINT());
+							SafeFormat::Format(sz_buf, GetGameString(UI_STRING_MESSAGE_DESC_REQUIRE_STAT), p_item->GetRequireINT());
 							vx = g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);
 							
 							if (//p_item->GetRequireLevel() > 0 ||
@@ -1245,7 +1246,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 							bl_required = true;
 							
 							vx = g_PrintColorStr(vx, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ALL_STAT_SUM].GetString(), gpC_base->m_item_desc_pi, required_rgb);
-							sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE_STAT].GetString(), p_item->GetRequireSUM());
+							SafeFormat::Format(sz_buf, GetGameString(UI_STRING_MESSAGE_DESC_REQUIRE_STAT), p_item->GetRequireSUM());
 							vx = g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);
 							
 							//				if (p_item->GetRequireLevel() > 0)
@@ -1265,7 +1266,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 							bl_required = true;
 							
 							vx = g_PrintColorStr(vx, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LEVEL].GetString(), gpC_base->m_item_desc_pi, required_rgb);
-							sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE_STAT].GetString(), p_item->GetRequireLevel());
+							SafeFormat::Format(sz_buf, GetGameString(UI_STRING_MESSAGE_DESC_REQUIRE_STAT), p_item->GetRequireLevel());
 							vx = g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);
 							
 							py += SMALL_FONT_Y_GAP;
@@ -1285,7 +1286,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 						int LevelUnits = (RequireAdvancementLevel-1)%10;
 
 						//sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_REQUIRE_ADVANCEMENT_LEVEL_0+LevelGrade].GetString(), LevelUnits+1);
-						sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_REQUIRE_ADVANCEMENT_LEVEL_0+LevelGrade].GetString(), RequireAdvancementLevel);
+						SafeFormat::Format(sz_buf, GetGameString(UI_STRING_MESSAGE_REQUIRE_ADVANCEMENT_LEVEL_0+LevelGrade), RequireAdvancementLevel);
 						// edit end 
 						if(g_char_slot_ingame.m_AdvancementLevel >= RequireAdvancementLevel)
 							vx = g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);
@@ -1863,7 +1864,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_LEFT_TIME].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB );
 				strcat(temp, " ");
 				char tempSecond[10];
-				wsprintf(tempSecond, (*g_pGameStringTable)[UI_STRING_MESSAGE_SECOND].GetString() , g_pTimeItemManager->GetSecond( objectID ) );
+				SafeFormat::Format(tempSecond, GetGameString(UI_STRING_MESSAGE_SECOND), g_pTimeItemManager->GetSecond( objectID ) );
 				strcat(temp, tempSecond );
 			}
 		} else
@@ -1875,7 +1876,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			{
 				char tempDay[30] = {0,};
 				strcat(temp, " ");
-				wsprintf(tempDay, (*g_pGameStringTable)[UI_STRING_MESSAGE_DAY].GetString() , tempInt );
+				SafeFormat::Format(tempDay, GetGameString(UI_STRING_MESSAGE_DAY), tempInt );
 				strcat ( temp, tempDay );
 				bContinue = true;
 			}
@@ -1883,7 +1884,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			{
 				char tempDay[30] = {0,};
 				strcat(temp, " ");
-				wsprintf(tempDay, (*g_pGameStringTable)[UI_STRING_MESSAGE_HOUR].GetString() , tempInt );
+				SafeFormat::Format(tempDay, GetGameString(UI_STRING_MESSAGE_HOUR), tempInt );
 				strcat ( temp, tempDay );
 				bContinue = true;
 			}
@@ -1891,7 +1892,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			{
 				char tempDay[30] = {0,};
 				strcat(temp, " ");
-				wsprintf(tempDay, (*g_pGameStringTable)[UI_STRING_MESSAGE_MINUTE].GetString() , tempInt );
+				SafeFormat::Format(tempDay, GetGameString(UI_STRING_MESSAGE_MINUTE), tempInt );
 				strcat ( temp, tempDay );
 				bContinue = true;
 			}			
@@ -2079,7 +2080,7 @@ void	_Skill_Description_Show(Rect rect, void * void_ptr, long left, long right)
 		{
 			int elemental_point[5] = { sInfo.Fire, sInfo.Water, sInfo.Earth, sInfo.Wind, sInfo.Sum };
 			
-			sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_REQUIRE_ELEMENTAL_LEVEL].GetString(), (*g_pGameStringTable)[g_ELEMENTAL_STRING_ID[sInfo.ElementalDomain]].GetString(), elemental_point[sInfo.ElementalDomain]);
+			SafeFormat::Format(sz_buf, GetGameString(UI_STRING_MESSAGE_REQUIRE_ELEMENTAL_LEVEL), (*g_pGameStringTable)[g_ELEMENTAL_STRING_ID[sInfo.ElementalDomain]].GetString(), elemental_point[sInfo.ElementalDomain]);
 			g_PrintColorStr(px, py, sz_buf, gpC_base->m_chatting_pi, g_ELEMENTAL_COLOR[sInfo.ElementalDomain]);
 			py += SMALL_FONT_Y_GAP;
 		}
@@ -2415,16 +2416,16 @@ void	_SkillTree_Description_Show(Rect rect, void * void_ptr, long left, long rig
 	if(g_eRaceInterface == RACE_OUSTERS)
 	{
 		if(status==MSkillDomain::SKILLSTATUS_LEARNED)
-			sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_REQUIRE_SKILL_POINT].GetString(), (*g_pSkillInfoTable)[left].LevelUpPoint );
+			SafeFormat::Format(sz_buf, GetGameString(UI_STRING_MESSAGE_REQUIRE_SKILL_POINT), (*g_pSkillInfoTable)[left].LevelUpPoint );
 		else
-			sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_REQUIRE_SKILL_POINT].GetString(),  (*g_pSkillInfoTable)[left].SkillPoint);
+			SafeFormat::Format(sz_buf, GetGameString(UI_STRING_MESSAGE_REQUIRE_SKILL_POINT),  (*g_pSkillInfoTable)[left].SkillPoint);
 		g_PrintColorStr(px, py, sz_buf, gpC_base->m_chatting_pi, ITEM_DESC_RGB);
 		py += SMALL_FONT_Y_GAP;
 
 		// 2004, 10, 16, sobeit add start
 		if((*g_pSkillInfoTable)[left].GetLearnLevel()> 1)
 		{
-			sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_LEARN_SKILL_LEVEL].GetString(), (*g_pSkillInfoTable)[left].GetLearnLevel());
+			SafeFormat::Format(sz_buf, GetGameString(UI_STRING_LEARN_SKILL_LEVEL), (*g_pSkillInfoTable)[left].GetLearnLevel());
 			g_PrintColorStr(px, py, sz_buf, gpC_base->m_chatting_pi, ITEM_DESC_RGB);
 			py += SMALL_FONT_Y_GAP;
 		}
@@ -2480,7 +2481,7 @@ void	_SkillTree_Description_Show(Rect rect, void * void_ptr, long left, long rig
 		{
 			int elemental_point[5] = { sInfo.Fire, sInfo.Water, sInfo.Earth, sInfo.Wind, sInfo.Sum };
 			
-			sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_REQUIRE_ELEMENTAL_LEVEL].GetString(), (*g_pGameStringTable)[g_ELEMENTAL_STRING_ID[sInfo.ElementalDomain]].GetString(), elemental_point[sInfo.ElementalDomain]);
+			SafeFormat::Format(sz_buf, GetGameString(UI_STRING_MESSAGE_REQUIRE_ELEMENTAL_LEVEL), (*g_pGameStringTable)[g_ELEMENTAL_STRING_ID[sInfo.ElementalDomain]].GetString(), elemental_point[sInfo.ElementalDomain]);
 			g_PrintColorStr(px, py, sz_buf, gpC_base->m_chatting_pi, g_ELEMENTAL_COLOR[sInfo.ElementalDomain]);
 			py += SMALL_FONT_Y_GAP;
 		}
@@ -2838,19 +2839,19 @@ void _Item_Description_Calculator(void (*fp_show)(Rect, void *, long, long), int
 				
 				if( day > 0 )
 				{
-					sprintf( sz_name, (*g_pGameStringTable)[UI_STRING_MESSAGE_DAY].GetString(), day );
+					SafeFormat::Format(sz_name, GetGameString(UI_STRING_MESSAGE_DAY), day );
 					time += sz_name;
 					time += " ";
 				}
 				if( hour > 0 )
 				{
-					sprintf( sz_name, (*g_pGameStringTable)[UI_STRING_MESSAGE_HOUR].GetString(), hour );
+					SafeFormat::Format(sz_name, GetGameString(UI_STRING_MESSAGE_HOUR), hour );
 					time += sz_name;
 					time += " ";
 				}
 				if( minute > 0 )
 				{
-					sprintf( sz_name, (*g_pGameStringTable)[UI_STRING_MESSAGE_MINUTE].GetString(), minute );
+					SafeFormat::Format(sz_name, GetGameString(UI_STRING_MESSAGE_MINUTE), minute );
 					time += sz_name;					
 				}
 
@@ -3094,7 +3095,7 @@ void _Item_Description_Calculator(void (*fp_show)(Rect, void *, long, long), int
 				strcpy(temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_LEFT_TIME].GetString() );
 				strcat(temp, " ");
 				char tempSecond[10];
-				wsprintf(tempSecond, (*g_pGameStringTable)[UI_STRING_MESSAGE_SECOND].GetString() , g_pTimeItemManager->GetSecond( objectID ) );
+				SafeFormat::Format(tempSecond, GetGameString(UI_STRING_MESSAGE_SECOND), g_pTimeItemManager->GetSecond( objectID ) );
 				strcat(temp, tempSecond );
 			}
 		} else
@@ -3105,7 +3106,7 @@ void _Item_Description_Calculator(void (*fp_show)(Rect, void *, long, long), int
 			{
 				char tempDay[30] = {0,};
 				strcat(temp, " ");
-				wsprintf(tempDay, (*g_pGameStringTable)[UI_STRING_MESSAGE_DAY].GetString() , tempInt );
+				SafeFormat::Format(tempDay, GetGameString(UI_STRING_MESSAGE_DAY), tempInt );
 				strcat(temp, tempDay );
 				bContinue = true;
 			}
@@ -3113,7 +3114,7 @@ void _Item_Description_Calculator(void (*fp_show)(Rect, void *, long, long), int
 			{
 				char tempDay[30] = {0,};
 				strcat(temp, " ");
-				wsprintf(tempDay, (*g_pGameStringTable)[UI_STRING_MESSAGE_HOUR].GetString() , tempInt );
+				SafeFormat::Format(tempDay, GetGameString(UI_STRING_MESSAGE_HOUR), tempInt );
 				strcat ( temp, tempDay );
 				bContinue = true;
 			}
@@ -3121,7 +3122,7 @@ void _Item_Description_Calculator(void (*fp_show)(Rect, void *, long, long), int
 			{
 				char tempDay[30] = {0,};
 				strcat(temp, " ");
-				wsprintf(tempDay, (*g_pGameStringTable)[UI_STRING_MESSAGE_MINUTE].GetString() , tempInt );
+				SafeFormat::Format(tempDay, GetGameString(UI_STRING_MESSAGE_MINUTE), tempInt );
 				strcat ( temp, tempDay );
 				bContinue = true;
 			}			

@@ -17,6 +17,7 @@
 #include "DebugInfo.h"
 #include "MEventManager.h"
 #include "MGameStringTable.h"
+#include "SafeFormat.h"
 #include "SkinManager.h"
 #include "assert.h"
 #include "MHelpDef.h"
@@ -1823,7 +1824,7 @@ if(gbl_info_show)
 					party_string.sz_main_str = info->Name;
 					char xy[20];
 					char zonename[20];
-					wsprintf(xy, (*g_pGameStringTable)[UI_STRING_MESSAGE_ZONEINFO_XY].GetString(), info->zoneX, info->zoneY);
+					SafeFormat::Format(xy, GetGameString(UI_STRING_MESSAGE_ZONEINFO_XY), info->zoneX, info->zoneY);
 					party_string.sz_sub_str = xy;
 					wsprintf(zonename, "%s", g_pZoneTable->Get(info->zoneID)->Name.GetString());
 					party_string.sz_main_str2 = zonename;

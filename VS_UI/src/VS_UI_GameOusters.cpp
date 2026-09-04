@@ -6,6 +6,7 @@
 #include "VS_UI_mouse_pointer.h"
 #include "VS_UI.h"
 #include "MGameStringTable.h"
+#include "SafeFormat.h"
 #include "UserOption.h"
 #include "ExperienceTable.h"
 #include "UserInformation.h"
@@ -362,16 +363,16 @@ void C_VS_UI_OUSTERS::Show()
 			gpC_base->m_p_DDSurface_back->Unlock();
 
 			g_FL2_GetDC();
-			sprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_LEVEL_DESCRIPTION].GetString(), g_char_slot_ingame.level);
+			SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_HPBAR_LEVEL_DESCRIPTION), g_char_slot_ingame.level);
 			g_PrintColorStrShadow(x+num_x, y+bar_y-3, sz_temp, gpC_base->m_chatting_pi, RGB_GRAY, RGB_BLACK);
 			
-			sprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_ELEMENTAL_FIRE_DESCRIPTION].GetString(), g_char_slot_ingame.ElementalFire);
+			SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_ELEMENTAL_FIRE_DESCRIPTION), g_char_slot_ingame.ElementalFire);
 			g_PrintColorStrShadow(x+num_x, y+bar_y-3+bar_gap*1+8, sz_temp, gpC_base->m_chatting_pi, g_ELEMENTAL_COLOR[ITEMTABLE_INFO::ELEMENTAL_TYPE_FIRE], RGB_BLACK);
 			
-			sprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_ELEMENTAL_WATER_DESCRIPTION].GetString(), g_char_slot_ingame.ElementalWater);
+			SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_ELEMENTAL_WATER_DESCRIPTION), g_char_slot_ingame.ElementalWater);
 			g_PrintColorStrShadow(x+num_x, y+bar_y-3+bar_gap*2+8, sz_temp, gpC_base->m_chatting_pi, g_ELEMENTAL_COLOR[ITEMTABLE_INFO::ELEMENTAL_TYPE_WATER], RGB_BLACK);
 			
-			sprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_ELEMENTAL_EARTH_DESCRIPTION].GetString(), g_char_slot_ingame.ElementalEarth);
+			SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_ELEMENTAL_EARTH_DESCRIPTION), g_char_slot_ingame.ElementalEarth);
 			g_PrintColorStrShadow(x+num_x, y+bar_y-3+bar_gap*3+9, sz_temp, gpC_base->m_chatting_pi, g_ELEMENTAL_COLOR[ITEMTABLE_INFO::ELEMENTAL_TYPE_EARTH], RGB_BLACK);
 			
 			g_FL2_ReleaseDC();

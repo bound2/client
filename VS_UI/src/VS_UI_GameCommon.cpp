@@ -22,6 +22,7 @@
 #include "UserInformation.h"
 #include "MItemOptionTable.h"
 #include "MGameStringTable.h"
+#include "SafeFormat.h"
 //#include "ex\DebugInfo.h"
 #include "RankBonusDef.h"
 #include "RankBonusTable.h"
@@ -553,7 +554,7 @@ void g_StartSellAllConfirmDialog(int _x, int _y, int price)
 		if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
 	sprintf(sz_buf, "%s", sstr.c_str());	
 	
-	wsprintf(temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_ALL_PRICE].GetString(), sz_buf);
+	SafeFormat::Format(temp, GetGameString(UI_STRING_MESSAGE_ALL_PRICE), sz_buf);
 	
 	static char *pp_dmsg_sellall_confirm[2] = {
 		temp, 
@@ -583,7 +584,7 @@ void g_StartRepairAllConfirmDialog(int _x, int _y, int price)
 		if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
 	sprintf(sz_buf, "%s", sstr.c_str());	
 
-	wsprintf(temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_ALL_PRICE].GetString(), sz_buf);
+	SafeFormat::Format(temp, GetGameString(UI_STRING_MESSAGE_ALL_PRICE), sz_buf);
 	
 	static char *pp_dmsg_repairall_confirm[2] = {		
 		temp,
@@ -2396,7 +2397,7 @@ bool C_VS_UI_TRIBE::MouseControl(UINT message, int _x, int _y)
 				
 				
 				// 숫자사이에 ,넣기
-				wsprintf(temp_str[0], (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW].GetString(), g_GetNumberString(num[0]).c_str(), g_GetNumberString(num[1]).c_str());
+				SafeFormat::Format(temp_str[0], GetGameString(UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW), g_GetNumberString(num[0]).c_str(), g_GetNumberString(num[1]).c_str());
 				
 				if(num[0] < 0)
 					bMax = true;	// 레벨업맥스
@@ -2431,7 +2432,7 @@ bool C_VS_UI_TRIBE::MouseControl(UINT message, int _x, int _y)
 				char temp_string[512];
 
 				int LeftExp = g_char_slot_ingame.EXP_REMAIN;//g_pExperienceTable->GetOustersInfo(g_char_slot_ingame.level).AccumExp - g_char_slot_ingame.EXP_CUR;
-				wsprintf(temp_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_LEVEL_DESCRIPTION].GetString(), g_char_slot_ingame.level);
+				SafeFormat::Format(temp_string, GetGameString(UI_STRING_MESSAGE_HPBAR_LEVEL_DESCRIPTION), g_char_slot_ingame.level);
 				hpbar_string[0]=temp_string;
 				
 				int fame = g_pFameInfoTable->GetFameForLevel( SKILLDOMAIN_OUSTERS, g_char_slot_ingame.level );
@@ -2473,7 +2474,7 @@ bool C_VS_UI_TRIBE::MouseControl(UINT message, int _x, int _y)
 //						if(temp[2].size() > i)temp[2].insert(temp[2].size()-i, ",");
 //					}
 					
-					wsprintf(temp_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW].GetString(), 
+					SafeFormat::Format(temp_string, GetGameString(UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW), 
 						temp[0].c_str(),temp[1].c_str());//,temp[2].c_str());
 					//						g_char_slot_ingame.EXP_CUR, 
 					//						g_pExperienceTable->GetVampireInfo(g_char_slot_ingame.level).AccumExp, 	LeftExp);
@@ -11611,13 +11612,20 @@ bool	C_VS_UI_PARTY_MANAGER::MouseControl(UINT message, int _x, int _y)
 					PARTY_INFO *info = g_pParty->GetMemberInfo(m_away_focused-1);
 					if(info != NULL)
 					{
-						static char zonename[20];
-						static char zonexy[10];
+						static char zonename[64];
+						// "X:%d Y:%d" against two BYTEs needs 12 bytes, and
+						// this held 10: the old sprintf ran two past the end
+						// of the static for any party member beyond x/y 99,
+						// and bounding the call without widening the buffer
+						// would have truncated the coordinates instead. The
+						// zone name is a data-file string, so it is bounded
+						// here too rather than left to fit by luck.
+						static char zonexy[20];
 						static S_DEFAULT_HELP_STRING party_string;
 						party_string.sz_main_str = zonename;
 						party_string.sz_sub_str = zonexy;
-						wsprintf(zonename, "%s", g_pZoneTable->Get(info->zoneID)->Name.GetString());
-						wsprintf(zonexy, (*g_pGameStringTable)[UI_STRING_MESSAGE_ZONEINFO_XY].GetString(), info->zoneX, info->zoneY);
+						SafeFormat::Format(zonename, "%s", g_pZoneTable->Get(info->zoneID)->Name.GetString());
+						SafeFormat::Format(zonexy, GetGameString(UI_STRING_MESSAGE_ZONEINFO_XY), info->zoneX, info->zoneY);
 						g_descriptor_manager.Set(DID_HELP, x+9, y+1+window_gap*m_away_focused+window_default_height, (void *)&party_string,0,0);
 					}
 				}
@@ -14004,7 +14012,7 @@ bool	C_VS_UI_INFO::CharacterInfoMouseControl(UINT message, int _x, int _y)
 					if(sstr2.size() > i)sstr2.insert(sstr2.size()-i, ",");
 				}
 
-				sprintf(temp_str[0], (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW].GetString(), sstr1.c_str(), sstr2.c_str());
+				SafeFormat::Format(temp_str[0], GetGameString(UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW), sstr1.c_str(), sstr2.c_str());
 //					strcat(temp_str[j], sstr.c_str());
 					
 				if(num1 < 0)bMax = true;	// 레벨업맥스
@@ -14198,7 +14206,7 @@ grade :			str[2]=NULL;
 					wsprintf(temp_str[0],"%s%s",(*g_pGameStringTable)[UI_STRING_MESSAGE_GRADE_NAME].GetString(),slayer_grade[(g_char_slot_ingame.GRADE-1)/5]);
 					wsprintf(temp_str[1],"%s%d",(*g_pGameStringTable)[UI_STRING_MESSAGE_GRADE_LEVEL].GetString(),g_char_slot_ingame.GRADE);
 					__int64 goal_exp = g_pExperienceTable->GetRankInfo(g_char_slot_ingame.GRADE, g_eRaceInterface).GoalExp;
-					wsprintf(temp_str[2], (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW].GetString(), g_GetNumberString(g_char_slot_ingame.GRADE_EXP_REMAIN).c_str(), g_GetNumberString((goal_exp - g_char_slot_ingame.GRADE_EXP_REMAIN)*100/max(1, (goal_exp))).c_str());
+					SafeFormat::Format(temp_str[2], GetGameString(UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW), g_GetNumberString(g_char_slot_ingame.GRADE_EXP_REMAIN).c_str(), g_GetNumberString((goal_exp - g_char_slot_ingame.GRADE_EXP_REMAIN)*100/max(1, (goal_exp))).c_str());
 //					wsprintf(temp_str[2],"%s%d",(*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_GRADE_EXP].GetString(),g_char_slot_ingame.GRADE_EXP);
 					str[1]=temp_str[1];											
 					str[2]=temp_str[2];
@@ -14288,7 +14296,7 @@ grade :			str[2]=NULL;
 				temp[1] = szTemp;
 				for(int i = 3; i <= 13; i += 4)
 					if(temp[1].size() > i)temp[1].insert(temp[1].size()-i, ",");
-				wsprintf(temp_str[0], (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW].GetString(), temp[0].c_str(), temp[1].c_str());
+				SafeFormat::Format(temp_str[0], GetGameString(UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW), temp[0].c_str(), temp[1].c_str());
 				int fame = g_pFameInfoTable->GetFameForLevel( SKILLDOMAIN_VAMPIRE, g_char_slot_ingame.level );
 
 				if(g_char_slot_ingame.FAME < fame )
@@ -14329,7 +14337,7 @@ grade :			str[2]=NULL;
 					wsprintf(temp_str[0],"%s : %s",(*g_pGameStringTable)[UI_STRING_MESSAGE_GRADE_NAME].GetString(),vampire_grade[(g_char_slot_ingame.GRADE-1)/5]);
 					wsprintf(temp_str[1],"%s%d",(*g_pGameStringTable)[UI_STRING_MESSAGE_GRADE_LEVEL].GetString(),g_char_slot_ingame.GRADE);	
 					__int64 goal_exp = g_pExperienceTable->GetRankInfo(g_char_slot_ingame.GRADE, g_eRaceInterface).GoalExp;
-					wsprintf(temp_str[2], (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW].GetString(), g_GetNumberString(g_char_slot_ingame.GRADE_EXP_REMAIN).c_str(), g_GetNumberString((goal_exp - g_char_slot_ingame.GRADE_EXP_REMAIN)*100/max(1, (goal_exp))).c_str());
+					SafeFormat::Format(temp_str[2], GetGameString(UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW), g_GetNumberString(g_char_slot_ingame.GRADE_EXP_REMAIN).c_str(), g_GetNumberString((goal_exp - g_char_slot_ingame.GRADE_EXP_REMAIN)*100/max(1, (goal_exp))).c_str());
 					str[1]=temp_str[1];									
 					str[2]=temp_str[2];
 				}
@@ -14491,7 +14499,7 @@ grade :			str[2]=NULL;
 					temp[1] = szTemp;
 					for(int i = 3; i <= 13; i += 4)
 						if(temp[1].size() > i)temp[1].insert(temp[1].size()-i, ",");
-					wsprintf(temp_str[0], (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW].GetString(), temp[0].c_str(), temp[1].c_str());
+					SafeFormat::Format(temp_str[0], GetGameString(UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW), temp[0].c_str(), temp[1].c_str());
 					int fame = g_pFameInfoTable->GetFameForLevel( SKILLDOMAIN_OUSTERS, g_char_slot_ingame.level );
 
 					if(g_char_slot_ingame.FAME < fame )
@@ -14531,7 +14539,7 @@ grade :			str[2]=NULL;
 						wsprintf(temp_str[0],"%s%s",(*g_pGameStringTable)[UI_STRING_MESSAGE_GRADE_NAME].GetString(),ousters_grade[(g_char_slot_ingame.GRADE-1)/5]);
 						wsprintf(temp_str[1],"%s%d",(*g_pGameStringTable)[UI_STRING_MESSAGE_GRADE_LEVEL].GetString(),g_char_slot_ingame.GRADE);	
 					__int64 goal_exp = g_pExperienceTable->GetRankInfo(g_char_slot_ingame.GRADE, g_eRaceInterface).GoalExp;
-					wsprintf(temp_str[2], (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW].GetString(), g_GetNumberString(g_char_slot_ingame.GRADE_EXP_REMAIN).c_str(), g_GetNumberString((goal_exp - g_char_slot_ingame.GRADE_EXP_REMAIN)*100/max(1, (goal_exp))).c_str());
+					SafeFormat::Format(temp_str[2], GetGameString(UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW), g_GetNumberString(g_char_slot_ingame.GRADE_EXP_REMAIN).c_str(), g_GetNumberString((goal_exp - g_char_slot_ingame.GRADE_EXP_REMAIN)*100/max(1, (goal_exp))).c_str());
 						str[1]=temp_str[1];									
 						str[2]=temp_str[2];
 					}
@@ -14726,7 +14734,7 @@ bool	C_VS_UI_INFO::SkillInfoMouseControl(UINT message, int _x, int _y)
 								for(int i = 3; i <= 13; i += 4)
 									if(sstr2.size() > i)sstr2.insert(sstr2.size()-i, ",");
 									
-									wsprintf(temp_str[0], (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW].GetString(), sstr.c_str(), sstr2.c_str());
+									SafeFormat::Format(temp_str[0], GetGameString(UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW), sstr.c_str(), sstr2.c_str());
 									
 									int fame = g_pFameInfoTable->GetFameForLevel( (SKILLDOMAIN) m_skill_domain, level );
 									
@@ -15497,7 +15505,7 @@ bool C_VS_UI_INFO::MouseControl(UINT message, int _x, int _y)
 				if(_x>37&& _y>49 &&_x<287&&_y<61)
 				{
 					__int64	goal_exp = max(1, g_pExperienceTable->GetAdvanceMent(g_char_slot_ingame.m_AdvancementLevel+1).GoalExp);
-					wsprintf(temp_str[0], (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW].GetString(), g_GetNumberString(g_char_slot_ingame.EXP_REMAIN).c_str(), g_GetNumberString((goal_exp - g_char_slot_ingame.EXP_REMAIN)*100/max(1, (goal_exp))).c_str());
+					SafeFormat::Format(temp_str[0], GetGameString(UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW), g_GetNumberString(g_char_slot_ingame.EXP_REMAIN).c_str(), g_GetNumberString((goal_exp - g_char_slot_ingame.EXP_REMAIN)*100/max(1, (goal_exp))).c_str());
 					g_descriptor_manager.Set(DID_STRINGS,x+_x,y+_y,(void*)str, 1);
 				}
 
@@ -15559,7 +15567,7 @@ bool C_VS_UI_INFO::MouseControl(UINT message, int _x, int _y)
 							const ExpInfo* expinf = &g_pExperienceTable->GetRankInfo(g_char_slot_ingame.GRADE, g_eRaceInterface);
 							__int64 goal_exp = expinf->GoalExp;
 
-							wsprintf(temp_str[0], (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW].GetString(), g_GetNumberString(g_char_slot_ingame.GRADE_EXP_REMAIN).c_str(), g_GetNumberString((goal_exp - g_char_slot_ingame.GRADE_EXP_REMAIN)*100/max(1, (goal_exp))).c_str());
+							SafeFormat::Format(temp_str[0], GetGameString(UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW), g_GetNumberString(g_char_slot_ingame.GRADE_EXP_REMAIN).c_str(), g_GetNumberString((goal_exp - g_char_slot_ingame.GRADE_EXP_REMAIN)*100/max(1, (goal_exp))).c_str());
 //							wsprintf(temp_str[0],"%s%d / %d",(*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_GRADE_EXP].GetString(),g_char_slot_ingame.GRADE_EXP,NextLevelExp);
 //							wsprintf(temp_str[1],"%s%d",(*g_pGameStringTable)[UI_STRING_MESSAGE_LEFT_EXP].GetString(),NextLevelExp - g_char_slot_ingame.GRADE_EXP);
 						
@@ -17385,23 +17393,23 @@ void	C_VS_UI_INFO::_Show2()
 			// desc box
 			int px = x+desc_box_x+5, py = y+desc_box_y+5;
 			
-			wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_STR_PURE].GetString(), g_char_slot_ingame.STR_PURE);
+			SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_STR_PURE), g_char_slot_ingame.STR_PURE);
 			g_PrintColorStr(px, py, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			py += 16;
 			
-			wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DEX_PURE].GetString(), g_char_slot_ingame.DEX_PURE);
+			SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DEX_PURE), g_char_slot_ingame.DEX_PURE);
 			g_PrintColorStr(px, py, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			py += 16;
 			
-			wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_INT_PURE].GetString(), g_char_slot_ingame.INT_PURE);
+			SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_INT_PURE), g_char_slot_ingame.INT_PURE);
 			g_PrintColorStr(px, py, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			py += 16;
 			
-			wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_STATUS_SUM_PURE].GetString(), g_char_slot_ingame.STR_PURE+g_char_slot_ingame.DEX_PURE+g_char_slot_ingame.INT_PURE);
+			SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_STATUS_SUM_PURE), g_char_slot_ingame.STR_PURE+g_char_slot_ingame.DEX_PURE+g_char_slot_ingame.INT_PURE);
 			g_PrintColorStr(px, py, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			py += 16;
 			
-			wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_STATUS_SUM].GetString(), g_char_slot_ingame.STR_CUR+g_char_slot_ingame.DEX_CUR+g_char_slot_ingame.INT_CUR);
+			SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_STATUS_SUM), g_char_slot_ingame.STR_CUR+g_char_slot_ingame.DEX_CUR+g_char_slot_ingame.INT_CUR);
 			g_PrintColorStr(px, py, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			py += 16;
 			
@@ -17412,7 +17420,7 @@ void	C_VS_UI_INFO::_Show2()
 				(*g_pGameStringTable)[UI_STRING_MESSAGE_SPEED_FAST].GetString(),
 			};
 			
-			wsprintf(sz_temp,(*g_pGameStringTable)[UI_STRING_MESSAGE_ATTACK_SPEED].GetString(), weapon_speed_string[g_char_slot_ingame.WS], g_char_slot_ingame.WeaponSpeed);
+			SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_ATTACK_SPEED), weapon_speed_string[g_char_slot_ingame.WS], g_char_slot_ingame.WeaponSpeed);
 			g_PrintColorStr(px, py, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			py += 16;
 
@@ -17758,23 +17766,23 @@ void	C_VS_UI_INFO::_Show2()
 			// desc box
 			int px = x+desc_box_x+5, py = y+desc_box_y+5;
 			
-			wsprintf(sz_temp,(*g_pGameStringTable)[UI_STRING_MESSAGE_STR_PURE].GetString(), g_char_slot_ingame.STR_PURE);
+			SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_STR_PURE), g_char_slot_ingame.STR_PURE);
 			g_PrintColorStr(px, py, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			py += 16;
 			
-			wsprintf(sz_temp, 	(*g_pGameStringTable)[UI_STRING_MESSAGE_DEX_PURE].GetString(), g_char_slot_ingame.DEX_PURE);
+			SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DEX_PURE), g_char_slot_ingame.DEX_PURE);
 			g_PrintColorStr(px, py, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			py += 16;
 			
-			wsprintf(sz_temp,(*g_pGameStringTable)[UI_STRING_MESSAGE_INT_PURE].GetString(), g_char_slot_ingame.INT_PURE);
+			SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_INT_PURE), g_char_slot_ingame.INT_PURE);
 			g_PrintColorStr(px, py, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			py += 16;
 			
-			wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_STATUS_SUM_PURE].GetString(), g_char_slot_ingame.STR_PURE+g_char_slot_ingame.DEX_PURE+g_char_slot_ingame.INT_PURE);
+			SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_STATUS_SUM_PURE), g_char_slot_ingame.STR_PURE+g_char_slot_ingame.DEX_PURE+g_char_slot_ingame.INT_PURE);
 			g_PrintColorStr(px, py, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			py += 16;
 			
-			wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_STATUS_SUM].GetString(), g_char_slot_ingame.STR_CUR+g_char_slot_ingame.DEX_CUR+g_char_slot_ingame.INT_CUR);
+			SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_STATUS_SUM), g_char_slot_ingame.STR_CUR+g_char_slot_ingame.DEX_CUR+g_char_slot_ingame.INT_CUR);
 			g_PrintColorStr(px, py, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			py += 16;
 			
@@ -17785,7 +17793,7 @@ void	C_VS_UI_INFO::_Show2()
 					(*g_pGameStringTable)[UI_STRING_MESSAGE_SPEED_FAST].GetString(),
 			};
 			
-			wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_ATTACK_SPEED].GetString(), weapon_speed_string[g_char_slot_ingame.WS], g_char_slot_ingame.WeaponSpeed);
+			SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_ATTACK_SPEED), weapon_speed_string[g_char_slot_ingame.WS], g_char_slot_ingame.WeaponSpeed);
 			g_PrintColorStr(px, py, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			py += 16;
 
@@ -18162,23 +18170,23 @@ void	C_VS_UI_INFO::_Show2()
 			// desc box
 			int px = x+desc_box_x+5, py = y+desc_box_y+5;
 			
-			wsprintf(sz_temp,(*g_pGameStringTable)[UI_STRING_MESSAGE_STR_PURE].GetString(), g_char_slot_ingame.STR_PURE);
+			SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_STR_PURE), g_char_slot_ingame.STR_PURE);
 			g_PrintColorStr(px, py, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			py += 16;
 			
-			wsprintf(sz_temp, 	(*g_pGameStringTable)[UI_STRING_MESSAGE_DEX_PURE].GetString(), g_char_slot_ingame.DEX_PURE);
+			SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DEX_PURE), g_char_slot_ingame.DEX_PURE);
 			g_PrintColorStr(px, py, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			py += 16;
 			
-			wsprintf(sz_temp,(*g_pGameStringTable)[UI_STRING_MESSAGE_INT_PURE].GetString(), g_char_slot_ingame.INT_PURE);
+			SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_INT_PURE), g_char_slot_ingame.INT_PURE);
 			g_PrintColorStr(px, py, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			py += 16;
 			
-			wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_STATUS_SUM_PURE].GetString(), g_char_slot_ingame.STR_PURE+g_char_slot_ingame.DEX_PURE+g_char_slot_ingame.INT_PURE);
+			SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_STATUS_SUM_PURE), g_char_slot_ingame.STR_PURE+g_char_slot_ingame.DEX_PURE+g_char_slot_ingame.INT_PURE);
 			g_PrintColorStr(px, py, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			py += 16;
 			
-			wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_STATUS_SUM].GetString(), g_char_slot_ingame.STR_CUR+g_char_slot_ingame.DEX_CUR+g_char_slot_ingame.INT_CUR);
+			SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_STATUS_SUM), g_char_slot_ingame.STR_CUR+g_char_slot_ingame.DEX_CUR+g_char_slot_ingame.INT_CUR);
 			g_PrintColorStr(px, py, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			py += 16;
 			
@@ -18189,25 +18197,25 @@ void	C_VS_UI_INFO::_Show2()
 					(*g_pGameStringTable)[UI_STRING_MESSAGE_SPEED_FAST].GetString(),
 			};
 			
-			wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_ATTACK_SPEED].GetString(), weapon_speed_string[g_char_slot_ingame.WS], g_char_slot_ingame.WeaponSpeed);
+			SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_ATTACK_SPEED), weapon_speed_string[g_char_slot_ingame.WS], g_char_slot_ingame.WeaponSpeed);
 			g_PrintColorStr(px, py, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			py += 16;
 
 			int vx = 0;
 
-			wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_OUSTERS_STONE].GetString(), (*g_pGameStringTable)[UI_STRING_MESSAGE_ELEMENTAL_FIRE].GetString());
+			SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_OUSTERS_STONE), (*g_pGameStringTable)[UI_STRING_MESSAGE_ELEMENTAL_FIRE].GetString());
 			vx = g_PrintColorStr(px, py, sz_temp, gpC_base->m_chatting_pi, g_ELEMENTAL_COLOR[ITEMTABLE_INFO::ELEMENTAL_TYPE_FIRE]);
 			wsprintf(sz_temp, "%d", g_char_slot_ingame.ElementalFire);
 			g_PrintColorStr(vx, py, sz_temp, gpC_base->m_chatting_pi, g_ELEMENTAL_COLOR[ITEMTABLE_INFO::ELEMENTAL_TYPE_FIRE]);
 			py += 16;
 			
-			wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_OUSTERS_STONE].GetString(), (*g_pGameStringTable)[UI_STRING_MESSAGE_ELEMENTAL_WATER].GetString());
+			SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_OUSTERS_STONE), (*g_pGameStringTable)[UI_STRING_MESSAGE_ELEMENTAL_WATER].GetString());
 			vx = g_PrintColorStr(px, py, sz_temp, gpC_base->m_chatting_pi, g_ELEMENTAL_COLOR[ITEMTABLE_INFO::ELEMENTAL_TYPE_WATER]);
 			wsprintf(sz_temp, "%d", g_char_slot_ingame.ElementalWater);
 			g_PrintColorStr(vx, py, sz_temp, gpC_base->m_chatting_pi, g_ELEMENTAL_COLOR[ITEMTABLE_INFO::ELEMENTAL_TYPE_WATER]);
 			py += 16;
 			
-			wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_OUSTERS_STONE].GetString(), (*g_pGameStringTable)[UI_STRING_MESSAGE_ELEMENTAL_EARTH].GetString());
+			SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_OUSTERS_STONE), (*g_pGameStringTable)[UI_STRING_MESSAGE_ELEMENTAL_EARTH].GetString());
 			vx = g_PrintColorStr(px, py, sz_temp, gpC_base->m_chatting_pi, g_ELEMENTAL_COLOR[ITEMTABLE_INFO::ELEMENTAL_TYPE_EARTH]);
 			wsprintf(sz_temp, "%d", g_char_slot_ingame.ElementalEarth);
 			g_PrintColorStr(vx, py, sz_temp, gpC_base->m_chatting_pi, g_ELEMENTAL_COLOR[ITEMTABLE_INFO::ELEMENTAL_TYPE_EARTH]);
@@ -20686,7 +20694,7 @@ bool C_VS_UI_HPBAR::MouseControl(UINT message, int _x, int _y)
 			{
 			case RACE_SLAYER:
 				{
-					wsprintf(temp_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_MP_DESCRIPTION].GetString(), g_char_slot_ingame.MP, g_char_slot_ingame.MP_MAX);
+					SafeFormat::Format(temp_string, GetGameString(UI_STRING_MESSAGE_HPBAR_MP_DESCRIPTION), g_char_slot_ingame.MP, g_char_slot_ingame.MP_MAX);
 					hpbar_string[0]=temp_string;
 				}
 				break;
@@ -20694,7 +20702,7 @@ bool C_VS_UI_HPBAR::MouseControl(UINT message, int _x, int _y)
 			case RACE_VAMPIRE:
 				{				
 					int exp_remain = g_char_slot_ingame.EXP_REMAIN;
-					wsprintf(temp_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_LEVEL_DESCRIPTION].GetString(), g_char_slot_ingame.level);
+					SafeFormat::Format(temp_string, GetGameString(UI_STRING_MESSAGE_HPBAR_LEVEL_DESCRIPTION), g_char_slot_ingame.level);
 					hpbar_string[0]=temp_string;
 					
 					int fame = g_pFameInfoTable->GetFameForLevel( SKILLDOMAIN_VAMPIRE, g_char_slot_ingame.level );
@@ -20716,7 +20724,7 @@ bool C_VS_UI_HPBAR::MouseControl(UINT message, int _x, int _y)
 						const ExpInfo* expinf = &g_pExperienceTable->GetVampireInfo(g_char_slot_ingame.level);
 						__int64 goal_exp = expinf->GoalExp;
 
-						wsprintf(temp_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW].GetString(), g_GetNumberString(exp_remain).c_str(), g_GetNumberString((goal_exp - exp_remain)*100/max(1, (goal_exp))).c_str());
+						SafeFormat::Format(temp_string, GetGameString(UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW), g_GetNumberString(exp_remain).c_str(), g_GetNumberString((goal_exp - exp_remain)*100/max(1, (goal_exp))).c_str());
 
 	//						g_char_slot_ingame.EXP_CUR, 
 	//						g_pExperienceTable->GetVampireInfo(g_char_slot_ingame.level).AccumExp, 	LeftExp);
@@ -20729,13 +20737,13 @@ bool C_VS_UI_HPBAR::MouseControl(UINT message, int _x, int _y)
 			case RACE_OUSTERS:
 				if(descType == 2)
 				{
-					wsprintf(temp_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_EP_DESCRIPTION].GetString(), g_char_slot_ingame.MP, g_char_slot_ingame.MP_MAX);
+					SafeFormat::Format(temp_string, GetGameString(UI_STRING_MESSAGE_HPBAR_EP_DESCRIPTION), g_char_slot_ingame.MP, g_char_slot_ingame.MP_MAX);
 					hpbar_string[0]=temp_string;
 				}
 				else
 				{
 					int exp_remain = g_char_slot_ingame.EXP_REMAIN;
-					wsprintf(temp_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_LEVEL_DESCRIPTION].GetString(), g_char_slot_ingame.level);
+					SafeFormat::Format(temp_string, GetGameString(UI_STRING_MESSAGE_HPBAR_LEVEL_DESCRIPTION), g_char_slot_ingame.level);
 					hpbar_string[0]=temp_string;
 					
 					int fame = g_pFameInfoTable->GetFameForLevel( SKILLDOMAIN_OUSTERS, g_char_slot_ingame.level );
@@ -20755,7 +20763,7 @@ bool C_VS_UI_HPBAR::MouseControl(UINT message, int _x, int _y)
 					{
 						__int64 goal_exp = g_pExperienceTable->GetOustersInfo( g_char_slot_ingame.level ).GoalExp;
 				
-						wsprintf(temp_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW].GetString(), g_GetNumberString(exp_remain).c_str(), g_GetNumberString((goal_exp - exp_remain)*100/max(1, (goal_exp))).c_str());
+						SafeFormat::Format(temp_string, GetGameString(UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW), g_GetNumberString(exp_remain).c_str(), g_GetNumberString((goal_exp - exp_remain)*100/max(1, (goal_exp))).c_str());
 						//						g_char_slot_ingame.EXP_CUR, 
 						//						g_pExperienceTable->GetVampireInfo(g_char_slot_ingame.level).AccumExp, 	LeftExp);
 						hpbar_string[1]=temp_string;
@@ -20771,9 +20779,9 @@ bool C_VS_UI_HPBAR::MouseControl(UINT message, int _x, int _y)
 			g_char_slot_ingame.SILVER_HP = 10;
 #endif
 			if(g_eRaceInterface != RACE_SLAYER && g_char_slot_ingame.SILVER_HP > 0)				
-				wsprintf(temp_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_HP_DESCRIPTION_WITH_SILVERING].GetString(), g_char_slot_ingame.HP, g_char_slot_ingame.HP_MAX, g_char_slot_ingame.SILVER_HP);
+				SafeFormat::Format(temp_string, GetGameString(UI_STRING_MESSAGE_HPBAR_HP_DESCRIPTION_WITH_SILVERING), g_char_slot_ingame.HP, g_char_slot_ingame.HP_MAX, g_char_slot_ingame.SILVER_HP);
 			else
-				wsprintf(temp_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_HP_DESCRIPTION].GetString(), g_char_slot_ingame.HP, g_char_slot_ingame.HP_MAX);
+				SafeFormat::Format(temp_string, GetGameString(UI_STRING_MESSAGE_HPBAR_HP_DESCRIPTION), g_char_slot_ingame.HP, g_char_slot_ingame.HP_MAX);
 			
 			hpbar_string[0]=temp_string;
 			if(g_eRaceInterface == RACE_SLAYER && g_char_slot_ingame.bl_drained)
@@ -20781,10 +20789,10 @@ bool C_VS_UI_HPBAR::MouseControl(UINT message, int _x, int _y)
 				if(g_char_slot_ingame.CHANGE_VAMPIRE > 60)
 				{
 					if(g_char_slot_ingame.CHANGE_VAMPIRE > 60*24)
-						wsprintf(temp_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_CHANGE_VAMPIRE_DAY].GetString(), g_char_slot_ingame.CHANGE_VAMPIRE/60/24, (g_char_slot_ingame.CHANGE_VAMPIRE/60)%24, g_char_slot_ingame.CHANGE_VAMPIRE%60);
+						SafeFormat::Format(temp_string, GetGameString(UI_STRING_MESSAGE_HPBAR_CHANGE_VAMPIRE_DAY), g_char_slot_ingame.CHANGE_VAMPIRE/60/24, (g_char_slot_ingame.CHANGE_VAMPIRE/60)%24, g_char_slot_ingame.CHANGE_VAMPIRE%60);
 					else
 					{
-						wsprintf(temp_string,(*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_CHANGE_VAMPIRE_HOUR].GetString(), g_char_slot_ingame.CHANGE_VAMPIRE/60, g_char_slot_ingame.CHANGE_VAMPIRE%60);
+						SafeFormat::Format(temp_string, GetGameString(UI_STRING_MESSAGE_HPBAR_CHANGE_VAMPIRE_HOUR), g_char_slot_ingame.CHANGE_VAMPIRE/60, g_char_slot_ingame.CHANGE_VAMPIRE%60);
 						color = RGB_YELLOW;
 					}
 					hpbar_string[1] = temp_string;
@@ -20795,7 +20803,7 @@ bool C_VS_UI_HPBAR::MouseControl(UINT message, int _x, int _y)
 						hpbar_string[1]=(*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_CHANGE_VAMPIRE_SOON].GetString();
 					else
 					{
-						wsprintf(temp_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_CHANGE_VAMPIRE_MINUTE].GetString(),
+						SafeFormat::Format(temp_string, GetGameString(UI_STRING_MESSAGE_HPBAR_CHANGE_VAMPIRE_MINUTE),
 							g_char_slot_ingame.CHANGE_VAMPIRE);
 						hpbar_string[1]=temp_string;
 					}					
@@ -21572,7 +21580,7 @@ bool C_VS_UI_EFFECT_STATUS::MouseControl(UINT message, int _x, int _y)
 					{
 					case WAR_GUILD:
 						{
-						sprintf(temp2,(*g_pGameStringTable)[UI_STRING_MESSAGE_STATUS_TIME_FORMAT].GetString(),hours,min);
+						SafeFormat::Format(temp2, GetGameString(UI_STRING_MESSAGE_STATUS_TIME_FORMAT),hours,min);
 						sprintf(temp_string,"%s, %s : %s, %s : %s, %s : %s",
 							(*g_pGameStringTable)[UI_STRING_MESSAGE_GUILD_WAR].GetString(),
 							(*g_pGameStringTable)[UI_STRING_MESSAGE_BLOOD_BIBLE_STATUS_ATTACK_GUILD].GetString(),
@@ -21595,7 +21603,7 @@ bool C_VS_UI_EFFECT_STATUS::MouseControl(UINT message, int _x, int _y)
 
 					case WAR_RACE:
 						{
-						sprintf(temp2,(*g_pGameStringTable)[UI_STRING_MESSAGE_STATUS_TIME_FORMAT].GetString(),hours,min);
+						SafeFormat::Format(temp2, GetGameString(UI_STRING_MESSAGE_STATUS_TIME_FORMAT),hours,min);
 						sprintf(temp_string,"%s, %s : %s",
 							(*g_pGameStringTable)[UI_STRING_MESSAGE_RACE_WAR].GetString(),
 							(*g_pGameStringTable)[UI_STRING_MESSAGE_STATUS_LEFT_TIME].GetString(),
@@ -21615,7 +21623,7 @@ bool C_VS_UI_EFFECT_STATUS::MouseControl(UINT message, int _x, int _y)
 
 					case WAR_LEVEL:
 						{
-							sprintf(temp2,(*g_pGameStringTable)[UI_STRING_MESSAGE_STATUS_TIME_FORMAT].GetString(),hours,min);
+							SafeFormat::Format(temp2, GetGameString(UI_STRING_MESSAGE_STATUS_TIME_FORMAT),hours,min);
 							sprintf(temp_string,"%s, %s : %s",
 								(*g_pGameStringTable)[UI_STRING_MESSAGE_LEVEL_WAR].GetString(),
 								(*g_pGameStringTable)[UI_STRING_MESSAGE_STATUS_LEFT_TIME].GetString(),
@@ -21691,17 +21699,17 @@ bool C_VS_UI_EFFECT_STATUS::MouseControl(UINT message, int _x, int _y)
 					{
 						if(day > 0)
 						{
-							wsprintf(temp_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_CHANGE_VAMPIRE_DAY].GetString(), day, time, minute);
+							SafeFormat::Format(temp_string, GetGameString(UI_STRING_MESSAGE_HPBAR_CHANGE_VAMPIRE_DAY), day, time, minute);
 							color = 0;	// 검은색이 아니다 default값이다
 						}
 						else if(time > 0)
 						{
-							wsprintf(temp_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_CHANGE_VAMPIRE_HOUR].GetString(), time, minute);
+							SafeFormat::Format(temp_string, GetGameString(UI_STRING_MESSAGE_HPBAR_CHANGE_VAMPIRE_HOUR), time, minute);
 							color = RGB_YELLOW;
 						}
 						else if(minute > 0)
 						{
-							wsprintf(temp_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_HPBAR_CHANGE_VAMPIRE_MINUTE].GetString(), minute);
+							SafeFormat::Format(temp_string, GetGameString(UI_STRING_MESSAGE_HPBAR_CHANGE_VAMPIRE_MINUTE), minute);
 							color = RGB_RED;
 						}
 						else
@@ -21724,7 +21732,7 @@ bool C_VS_UI_EFFECT_STATUS::MouseControl(UINT message, int _x, int _y)
 
 					if(day > 0)
 					{
-						sprintf(temp_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_DAY].GetString(), day);
+						SafeFormat::Format(temp_string, GetGameString(UI_STRING_MESSAGE_DAY), day);
 						effectstatus_string[1] += temp_string;
 						effectstatus_string[1] += " ";
 						bPrint = true;
@@ -21732,7 +21740,7 @@ bool C_VS_UI_EFFECT_STATUS::MouseControl(UINT message, int _x, int _y)
 
 					if(time > 0 || bPrint)
 					{
-						sprintf(temp_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_HOUR].GetString(), time);
+						SafeFormat::Format(temp_string, GetGameString(UI_STRING_MESSAGE_HOUR), time);
 						effectstatus_string[1] += temp_string;
 						effectstatus_string[1] += " ";
 						bPrint = true;
@@ -21740,14 +21748,14 @@ bool C_VS_UI_EFFECT_STATUS::MouseControl(UINT message, int _x, int _y)
 					
 					if(minute > 0 || bPrint)
 					{
-						sprintf(temp_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_MINUTE].GetString(), minute);
+						SafeFormat::Format(temp_string, GetGameString(UI_STRING_MESSAGE_MINUTE), minute);
 						effectstatus_string[1] += temp_string;
 						effectstatus_string[1] += " ";
 						bPrint = true;
 					}
 					
 					// 초는 무조건 찍는다
-					sprintf(temp_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_SECOND].GetString(), second);
+					SafeFormat::Format(temp_string, GetGameString(UI_STRING_MESSAGE_SECOND), second);
 					effectstatus_string[1] += temp_string;
 					
 					break;
@@ -24848,7 +24856,7 @@ bool	C_VS_UI_TEAM_MEMBER_LIST::MouseControl(UINT message, int _x, int _y)
 				strcpy(m_SelectedID, m_v_member_list[m_focus].MEMBER_NAME.c_str());
 				if(strlen(m_SelectedID)>0)
 				{
-					sprintf(m_AskingMessage, (*g_pGameStringTable)[UI_STRING_MESSAGE_ASKING_RECALL].GetString(), m_SelectedID);
+					SafeFormat::Format(m_AskingMessage, GetGameString(UI_STRING_MESSAGE_ASKING_RECALL), m_SelectedID);
 					g_StartAskingRecall(-1,-1, m_AskingMessage);
 				}
 			}
@@ -26642,7 +26650,7 @@ void C_VS_UI_TEAM_INFO::Show()
 	{	
 		if(m_scroll < 1)
 		{
-			wsprintf(sz_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_NAME].GetString(), m_ready_info.TEAM_NAME.c_str());
+			SafeFormat::Format(sz_string, GetGameString(UI_STRING_MESSAGE_TEAM_INFO_NAME), m_ready_info.TEAM_NAME.c_str());
 			g_PrintColorStr(print_x, py, sz_string, gpC_base->m_chatting_pi, RGB_BLACK);
 			gpC_base->m_p_DDSurface_back->HLine(print_x, py+line_gap, w - (print_x - x) -30, 0);
 			py += print_gap;
@@ -26650,7 +26658,7 @@ void C_VS_UI_TEAM_INFO::Show()
 		
 		if(m_scroll < 2)
 		{
-			wsprintf(sz_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_LEADER].GetString(), m_ready_info.LEADER_NAME.c_str());
+			SafeFormat::Format(sz_string, GetGameString(UI_STRING_MESSAGE_TEAM_INFO_LEADER), m_ready_info.LEADER_NAME.c_str());
 			g_PrintColorStr(print_x, py, sz_string, gpC_base->m_chatting_pi, RGB_BLACK);
 			gpC_base->m_p_DDSurface_back->HLine(print_x, py+line_gap, w - (print_x - x) -30, 0);
 			py += print_gap;
@@ -26664,7 +26672,7 @@ void C_VS_UI_TEAM_INFO::Show()
 			for(int i = 3; i <= 13; i += 4)
 				if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
 				
-				wsprintf(sz_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_REG_FEE].GetString(), sstr.c_str());
+				SafeFormat::Format(sz_string, GetGameString(UI_STRING_MESSAGE_TEAM_INFO_REG_FEE), sstr.c_str());
 				g_PrintColorStr(print_x, py, sz_string, gpC_base->m_chatting_pi, RGB_BLACK);
 				gpC_base->m_p_DDSurface_back->HLine(print_x, py+line_gap, w - (print_x - x) -30, 0);
 				py += print_gap;
@@ -26764,7 +26772,7 @@ void C_VS_UI_TEAM_INFO::Show()
 	{				
 		if(m_scroll < 1)
 		{
-			wsprintf(sz_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_NAME].GetString(), m_regist_info.TEAM_NAME.c_str());
+			SafeFormat::Format(sz_string, GetGameString(UI_STRING_MESSAGE_TEAM_INFO_NAME), m_regist_info.TEAM_NAME.c_str());
 			g_PrintColorStr(print_x, py, sz_string, gpC_base->m_chatting_pi, RGB_BLACK);
 			gpC_base->m_p_DDSurface_back->HLine(print_x, py+line_gap, w - (print_x - x) -30, 0);
 			py += print_gap;
@@ -26772,7 +26780,7 @@ void C_VS_UI_TEAM_INFO::Show()
 		
 		if(m_scroll < 2)
 		{
-			wsprintf(sz_string,(*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_LEADER].GetString(), m_regist_info.LEADER_NAME.c_str());
+			SafeFormat::Format(sz_string, GetGameString(UI_STRING_MESSAGE_TEAM_INFO_LEADER), m_regist_info.LEADER_NAME.c_str());
 			g_PrintColorStr(print_x, py, sz_string, gpC_base->m_chatting_pi, RGB_BLACK);
 			gpC_base->m_p_DDSurface_back->HLine(print_x, py+line_gap, w - (print_x - x) -30, 0);
 			py += print_gap;
@@ -26788,7 +26796,7 @@ void C_VS_UI_TEAM_INFO::Show()
 		
 		if(m_scroll < 4)
 		{
-			wsprintf(sz_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_RANKING].GetString(), m_regist_info.RANKING);
+			SafeFormat::Format(sz_string, GetGameString(UI_STRING_MESSAGE_TEAM_INFO_RANKING), m_regist_info.RANKING);
 			g_PrintColorStr(print_x, py, sz_string, gpC_base->m_chatting_pi, RGB_BLACK);
 			gpC_base->m_p_DDSurface_back->HLine(print_x, py+line_gap, w - (print_x - x) -30, 0);
 			py += print_gap;
@@ -27335,7 +27343,7 @@ void C_VS_UI_TEAM_MEMBER_INFO::Show()
 	
 	if(m_scroll < 1)
 	{
-		wsprintf(sz_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_NAME].GetString(), m_member_info.NAME.c_str());
+		SafeFormat::Format(sz_string, GetGameString(UI_STRING_MESSAGE_TEAM_INFO_NAME), m_member_info.NAME.c_str());
 		g_PrintColorStr(print_x, py, sz_string, gpC_base->m_chatting_pi, RGB_BLACK);
 		gpC_base->m_p_DDSurface_back->HLine(print_x, py+line_gap, w - (print_x - x) -30, 0);
 		py += print_gap;
@@ -27350,7 +27358,7 @@ void C_VS_UI_TEAM_MEMBER_INFO::Show()
 			(*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_GRADE_SUB_MASTER].GetString(),
 			(*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_GRADE_WAIT].GetString(),
 		};
-		wsprintf(sz_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_GRADE].GetString(), grade_string[m_member_info.GRADE]);
+		SafeFormat::Format(sz_string, GetGameString(UI_STRING_MESSAGE_TEAM_INFO_GRADE), grade_string[m_member_info.GRADE]);
 		g_PrintColorStr(print_x, py, sz_string, gpC_base->m_chatting_pi, RGB_BLACK);
 		gpC_base->m_p_DDSurface_back->HLine(print_x, py+line_gap, w - (print_x - x) -30, 0);
 		py += print_gap;
@@ -27911,15 +27919,15 @@ void C_VS_UI_TEAM_REGIST::Show()
 		switch(g_eRaceInterface)
 		{
 		case RACE_SLAYER:
-			wsprintf(sz_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_TEAM_NAME].GetString(), m_team_name.c_str());
+			SafeFormat::Format(sz_string, GetGameString(UI_STRING_MESSAGE_TEAM_INFO_TEAM_NAME), m_team_name.c_str());
 			break;
 			
 		case RACE_VAMPIRE:
-			wsprintf(sz_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_CLAN_NAME].GetString(), m_team_name.c_str());
+			SafeFormat::Format(sz_string, GetGameString(UI_STRING_MESSAGE_TEAM_INFO_CLAN_NAME), m_team_name.c_str());
 			break;
 			
 		case RACE_OUSTERS:
-			wsprintf(sz_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_GUILD_NAME].GetString(), m_team_name.c_str());
+			SafeFormat::Format(sz_string, GetGameString(UI_STRING_MESSAGE_TEAM_INFO_GUILD_NAME), m_team_name.c_str());
 			break;
 		}
 
@@ -27927,7 +27935,7 @@ void C_VS_UI_TEAM_REGIST::Show()
 		gpC_base->m_p_DDSurface_back->HLine(m_print_x, py+line_gap, w - (m_print_x - x) -30, 0);
 		py += m_print_gap;
 		
-		wsprintf(sz_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_NAME].GetString(), g_char_slot_ingame.sz_name.c_str());
+		SafeFormat::Format(sz_string, GetGameString(UI_STRING_MESSAGE_TEAM_INFO_NAME), g_char_slot_ingame.sz_name.c_str());
 		g_PrintColorStr(m_print_x, py, sz_string, gpC_base->m_chatting_pi, RGB_BLACK);
 		gpC_base->m_p_DDSurface_back->HLine(m_print_x, py+line_gap, w - (m_print_x - x) -30, 0);
 		py += m_print_gap;
@@ -27940,7 +27948,7 @@ void C_VS_UI_TEAM_REGIST::Show()
 			for(int i = 3; i <= 13; i += 4)
 				if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
 				
-			wsprintf(sz_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_REGISTRATION_FEE].GetString(), sstr.c_str());
+			SafeFormat::Format(sz_string, GetGameString(UI_STRING_MESSAGE_TEAM_INFO_REGISTRATION_FEE), sstr.c_str());
 			g_PrintColorStr(m_print_x, py, sz_string, gpC_base->m_chatting_pi, RGB_BLACK);
 			gpC_base->m_p_DDSurface_back->HLine(m_print_x, py+line_gap, w - (m_print_x - x) -30, 0);
 			py += m_print_gap;
@@ -28014,7 +28022,7 @@ void C_VS_UI_TEAM_REGIST::Show()
 		{
 			vampire_width = -20;
 		}
-		wsprintf(sz_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_NAME].GetString(), g_char_slot_ingame.sz_name.c_str());
+		SafeFormat::Format(sz_string, GetGameString(UI_STRING_MESSAGE_TEAM_INFO_NAME), g_char_slot_ingame.sz_name.c_str());
 		g_PrintColorStr(m_print_x, py, sz_string, gpC_base->m_chatting_pi, RGB_BLACK);
 		gpC_base->m_p_DDSurface_back->HLine(m_print_x, py+line_gap, w - (m_print_x - x) -30+vampire_width, 0);
 		py += m_print_gap;
@@ -28025,7 +28033,7 @@ void C_VS_UI_TEAM_REGIST::Show()
 		for(int i = 3; i <= 13; i += 4)
 			if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
 			
-		wsprintf(sz_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_REGISTRATION_FEE].GetString(), sstr.c_str());
+		SafeFormat::Format(sz_string, GetGameString(UI_STRING_MESSAGE_TEAM_INFO_REGISTRATION_FEE), sstr.c_str());
 		g_PrintColorStr(m_print_x, py, sz_string, gpC_base->m_chatting_pi, RGB_BLACK);
 		gpC_base->m_p_DDSurface_back->HLine(m_print_x, py+line_gap, w - (m_print_x - x) -30+vampire_width, 0);
 		py += m_print_gap;
@@ -28033,15 +28041,15 @@ void C_VS_UI_TEAM_REGIST::Show()
 		switch(g_eRaceInterface)
 		{
 		case RACE_SLAYER:
-			wsprintf(sz_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_TEAM_NAME].GetString(), "");
+			SafeFormat::Format(sz_string, GetGameString(UI_STRING_MESSAGE_TEAM_INFO_TEAM_NAME), "");
 			break;
 			
 		case RACE_VAMPIRE:
-			wsprintf(sz_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_CLAN_NAME].GetString(), "");
+			SafeFormat::Format(sz_string, GetGameString(UI_STRING_MESSAGE_TEAM_INFO_CLAN_NAME), "");
 			break;
 			
 		case RACE_OUSTERS:
-			wsprintf(sz_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_GUILD_NAME].GetString(), "");
+			SafeFormat::Format(sz_string, GetGameString(UI_STRING_MESSAGE_TEAM_INFO_GUILD_NAME), "");
 			break;
 		}
 	
@@ -30113,7 +30121,7 @@ void	C_VS_UI_TRACE::Run(id_t id)
 				status = true;
 				name = str;
 				char temp[100];
-				wsprintf(temp,(*g_pGameStringTable)[UI_STRING_MESSAGE_TRACE].GetString(),name.c_str());
+				SafeFormat::Format(temp, GetGameString(UI_STRING_MESSAGE_TRACE),name.c_str());
 				m_status_msg = temp;
 				gpC_base->SendMessage(UI_SEND_NAME_FOR_SOUL_CHAIN,0,0,(void*)name.c_str());				
 			}
@@ -30285,7 +30293,7 @@ void	C_VS_UI_TRACE::SetCannotTrace()
 {
 	status = false;
 	char temp[100];
-	wsprintf(temp,(*g_pGameStringTable)[UI_STRING_MESSAGE_CANNOT_TRACE].GetString(),name.c_str());
+	SafeFormat::Format(temp, GetGameString(UI_STRING_MESSAGE_CANNOT_TRACE),name.c_str());
 	m_status_msg = temp;
 	m_lev_name.Acquire();
 	m_lev_name.SetInputStringColor(RGB_WHITE);
@@ -33183,13 +33191,13 @@ void	C_VS_UI_QUEST_STATUS::Show()
 			switch(g_eRaceInterface)
 			{
 			case RACE_SLAYER:
-				sprintf(sz_temp,(*g_pGameStringTable)[UI_STRING_MESSAGE_PET_QUEST_SLAYER].GetString(),QuestInfo->GetTimeLimit()/60, QuestInfo->GetName(), QuestInfo->GetGoal());
+				SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_PET_QUEST_SLAYER),QuestInfo->GetTimeLimit()/60, QuestInfo->GetName(), QuestInfo->GetGoal());
 				break;
 			case RACE_VAMPIRE:
-				sprintf(sz_temp,(*g_pGameStringTable)[UI_STRING_MESSAGE_PET_QUEST_VAMPIRE].GetString(),QuestInfo->GetTimeLimit()/60, QuestInfo->GetName(), QuestInfo->GetGoal());
+				SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_PET_QUEST_VAMPIRE),QuestInfo->GetTimeLimit()/60, QuestInfo->GetName(), QuestInfo->GetGoal());
 				break;
 			case RACE_OUSTERS:
-				sprintf(sz_temp,(*g_pGameStringTable)[UI_STRING_MESSAGE_PET_QUEST_OUSTERS].GetString(),QuestInfo->GetTimeLimit()/60, QuestInfo->GetName(), QuestInfo->GetGoal());
+				SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_PET_QUEST_OUSTERS),QuestInfo->GetTimeLimit()/60, QuestInfo->GetName(), QuestInfo->GetGoal());
 				break;
 			}
 			ShowDesc( x+20,y+20, sz_temp );
@@ -33307,7 +33315,7 @@ void	C_VS_UI_QUEST_STATUS::Show()
 				if(m_quest_status.current_point == 0)
 					wsprintf(sz_temp, "Completed");
 				else
-					wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_MEET_NPC].GetString(), (*g_pCreatureTable)[m_quest_status.current_point].Name.GetString());
+					SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_MEET_NPC), (*g_pCreatureTable)[m_quest_status.current_point].Name.GetString());
 				break;
 
 			case QUEST_INFO_GATHER_ITEM:
@@ -33355,7 +33363,7 @@ void	C_VS_UI_QUEST_STATUS::Show()
 				memset( sz_temp, 0 ,sizeof( sz_temp ) );			
 				if(hour)
 				{
-					wsprintf(temp_str, (*g_pGameStringTable)[UI_STRING_MESSAGE_HOUR].GetString(), hour);
+					SafeFormat::Format(temp_str, GetGameString(UI_STRING_MESSAGE_HOUR), hour);
 					strcat(sz_temp, temp_str);
 					wsprintf(temp_str, " ");
 					strcat(sz_temp, temp_str);
@@ -33363,7 +33371,7 @@ void	C_VS_UI_QUEST_STATUS::Show()
 				}
 				if(minute || bContinue)
 				{
-					wsprintf(temp_str, (*g_pGameStringTable)[UI_STRING_MESSAGE_MINUTE].GetString(), minute);
+					SafeFormat::Format(temp_str, GetGameString(UI_STRING_MESSAGE_MINUTE), minute);
 					strcat(sz_temp, temp_str);
 					wsprintf(temp_str, " ");
 					strcat(sz_temp, temp_str);
@@ -33371,7 +33379,7 @@ void	C_VS_UI_QUEST_STATUS::Show()
 				}
 				if(!hour)  
 				{
-					wsprintf(temp_str, (*g_pGameStringTable)[UI_STRING_MESSAGE_SECOND].GetString(), second);
+					SafeFormat::Format(temp_str, GetGameString(UI_STRING_MESSAGE_SECOND), second);
 					strcat(sz_temp, temp_str);
 				}
 				g_PrintColorStrOut( x+83-g_GetStringWidth(sz_temp, gpC_base->m_chatting_pi.hfont)/2+tab_x,
@@ -33736,21 +33744,21 @@ void	C_VS_UI_QUEST_STATUS::ShowQuestDescription(int _x, int _y)
 			
 			if(hour)
 			{
-				wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_HOUR].GetString(), hour);
+				SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_HOUR), hour);
 				strcat(temp_str[i], sz_temp);
 				wsprintf(sz_temp, " ");
 				strcat(temp_str[i], sz_temp);
 			}
 			if(minute)
 			{
-				wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_MINUTE].GetString(), minute);
+				SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_MINUTE), minute);
 				strcat(temp_str[i], sz_temp);
 				wsprintf(sz_temp, " ");
 				strcat(temp_str[i], sz_temp);				
 			}
 			if(!hour && second)
 			{
-				wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_SECOND].GetString(), second);
+				SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_SECOND), second);
 				strcat(temp_str[i], sz_temp);
 			}
 		}
@@ -34221,7 +34229,7 @@ void	C_VS_UI_LOTTERY_CARD::Show()
 		{
 		case LOTTERY_TYPE_WAIT_CLIENT :
 		case LOTTERY_TYPE_READY:		
-			wsprintf(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_SELECT_EVENT_GIFT].GetString(), m_step);
+			SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_SELECT_EVENT_GIFT), m_step);
 			g_PrintColorStrOut( x+14, y+83, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE, RGB_BLACK);			
 			
 			for(int i=0;i<m_GiftList.size();i++)
