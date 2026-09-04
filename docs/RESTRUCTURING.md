@@ -124,7 +124,7 @@ an unrecorded drop, so tightening lands in the same commit as the progress.
 | R6 | *retired* — `packetwire` members calling `SendBugReport`, which the executable used to define | — (lived for one slice, 2026-09-03. Task 5.1's first slice added it to replace the failed-link detector that stubbing the symbol had disabled — a library file calling an executable-side *function* is invisible to W1/W2, which read includes, and to R4, which greps `g_p*`. It fired on the very next thing done to the tree: promoting `ClientCommunicationManager.cpp` took the count to 2, which is what said to move the function rather than grow the seam. `SendBugReport` is in `Client/Packet/WireHost.cpp` now, so the ratchet measures a symbol nothing is on the wrong side of, and the stub that disabled the link detector is gone with it. Note what came back is narrower than what left: a failed link catches an executable-side call only in a library `unit_tests` links, and only in an object some test forces the linker to pull in — which is what the address-taking link proofs in `test_wire_host.cpp` and `test_player_base.cpp` exist to guarantee. R6 grepped every membership file unconditionally. `ratchets.sh` keeps the history where the check was) | — |
 
 | R7 | Call sites handing a game string table entry to `printf` as its **format** argument, **where the lookup is spelled at the call site** (`sprintf` family including `fprintf`, the counted family, `AddFormat`, the offset-append form and `.Format`, across `Client` and `VS_UI`) | **0** - every site it can see is converted, so it holds a line instead of tracking a retreat. **On its own it is not a measure of finding C19 being closed**, and was once mistaken for one: an entry copied into a static array or a local and used as a format from there is invisible to it, and 24 live sites did exactly that until task 5.4's fifth slice. R8 below is the ratchet that can see them, and C19's closure rests on the pair plus three hand audits, never on this number alone (37 before task 5.4's fourth slice took the last of them; 64 before task 5.4's third slice took the `AddFormat` family through `CMessageArray::AddSafeFormat`, leaving 37 ordinary `sprintf` sites - `UIMessageManager.cpp` 14, `MTopView.cpp` 10, `GameUI.cpp` 7, `ModifyStatusManager.cpp` 3, `CGameUpdate.cpp` 2, `PacketFunction.cpp` 1; 262 before task 5.4's second slice converted every `VS_UI` site, leaving only the executable's own - of which three are the `AddFormat` family in `Client/PacketHandler`; 293 before its first slice converted `Client/PacketHandler`'s 31; the split is `Client` 64 — of which `ModifyStatusManager.cpp` 19, `UIMessageManager.cpp` 14, `MTopView.cpp` 10, `PacketFunction.cpp` 9, `GameUI.cpp` 7 — and `VS_UI` 198, where `VS_UI_GameCommon.cpp` alone holds 89. First recorded as 287 → 256: the review round found the pattern could not match a counted call in **any** form, because it wanted the format at argument two, where `snprintf` and `swprintf` take a size — so it missed a live site and, worse, could not have caught a new one. Added 2026-09-03; finding C19 as a number) | see `ratchets.sh` — **five** alternatives: the format sits at a different argument in each of the three call families, the offset-append form `sprintf(buf + strlen(buf), …)` needs its own because the destination class forbids parentheses, and `MString::Format` is a printf reached as a method, which no pattern matching on a printf's name can see. The tree is joined before matching, because four sites put the destination and the format on different lines |
-| R8 | printf-family calls whose **format argument is not a string literal**, across `Client`, `VS_UI` and `basic` | **13** - the population R7 measures a spelling of. Every one of the 13 was read: 11 vararg forwarders where the format is the function's own parameter, and 2 `sprintf(szTemp, TEXT("…"))` where a literal hides behind a macro. This is the weaker question, which is exactly why it is the right floor - it cannot tell a table entry from a legitimately forwarded format, so it cannot be satisfied by renaming anything. Added 2026-09-04 by task 5.4's fifth slice, because R7 reaching 0 had been read as C19 being closed and was not (37 at first measurement, taken during the fourth slice's review round to find out how much R7 was missing; 24 of those were the fifth slice's work) | see `ratchets.sh` — the family list was enumerated from the tree rather than written from memory, which is how `fprintf` (550 calls) and `vswprintf` got in. It cannot see a destination containing parentheses; those were audited by hand at 16 sites, all with literal formats |
+| R8 | printf-family calls whose **format argument is not a string literal**, across `Client`, `VS_UI` and `basic`, **headers included** | **43** - the population R7 measures a spelling of. Every one of the 43 was read: 28 vararg forwarders where the format is the function's own parameter, 6 inside `SafeFormat`'s own `Emit`, 3 literals behind `TEXT()`/`_T()`, and 6 declarations rather than calls. This is the weaker question, which is exactly why it is the right floor - it cannot tell a table entry from a legitimately forwarded format, so it cannot be satisfied by renaming anything. Added 2026-09-04 by task 5.4's fifth slice, because R7 reaching 0 had been read as C19 being closed and was not (37 on the narrow pattern before that slice; 24 of those were its work, taking the narrow count to 13. **First recorded as 13, and 13 was not the population** — the slice's own review round found the pattern missing the `AddFormat` family, bare `printf`, `basic/` and every header, and widening it to what this row's scope column had claimed all along gave 43 with nothing in the tree changed) | see `ratchets.sh` — the family list was enumerated from the tree rather than written from memory, which is how `fprintf` (550 calls) and `vswprintf` got in; the enumeration command itself had to be fixed, since as first written it could not have matched a bare `printf(`. It cannot see a destination containing parentheses; those were audited by hand at 16 sites, all with literal formats |
 
 R1 is the headline number: it counts what still cannot be unit-tested. R2 is
 the client twin of the server's R4 (which it drove to 0). R3, R7 and R8 track
@@ -2317,8 +2317,26 @@ starting each — the scan is one grep, and the ranking below is from a
   > **R8** counts the population instead: printf-family calls whose
   > format argument is not a string literal. It cannot tell a table entry
   > from a legitimate forward, which is precisely why it cannot be
-  > satisfied by renaming anything. 37 → 13, and the 13 are read
-  > individually in its comment.
+  > satisfied by renaming anything. 37 → 13 on the sites this slice
+  > converted, and the residue is read individually in its comment.
+  >
+  > **And then R8 was wrong in exactly the way R7 had been**, which the
+  > slice's own review round caught. It was recorded at 13, and 13 was
+  > not the population: the pattern was missing the `AddFormat` family —
+  > the one sink this task built a checked front end for — bare
+  > `printf`, `basic/` (including `SafeFormat.cpp` itself), and every
+  > header, of which `Client/MinTr.h` alone holds eleven matches. Worse,
+  > the enumeration command written into the comment as the authority
+  > for the family list **could not have produced a bare `printf(`**:
+  > `\b[A-Za-z_][A-Za-z0-9_]*printf` requires a character before it.
+  > Widened, R8 reads **43** with nothing in the tree changed. Every one
+  > of the 30 it gained was then read, and none is a data-file format —
+  > so the conclusion held, but until that round it had not been
+  > measured over the population it claimed. **Three documents cited
+  > that command as evidence.** The lesson is the task's own, at its
+  > sharpest yet: an instrument built to answer for another instrument's
+  > blind spot needs the same adversarial reading, and it will not get
+  > it from the person who just built it.
   >
   > **Building R8 immediately found three more sites, which is the
   > argument for building it.** Its family list was enumerated from the
@@ -2347,6 +2365,19 @@ starting each — the scan is one grep, and the ranking below is from a
   > straight to `g_pSystemMessage->Add`. `FormatChecked` guarantees a
   > readable string; the test that pins it is what found this.
   >
+  > **Recorded, not fixed:** `C_VS_UI_INFO::GetChinhoLevel` holds its
+  > eleven table entries in a function-local `const static char*[11]`,
+  > so the pointers are captured on the first call and never refreshed —
+  > and `InitGameStringTable()` runs at least twice per session, each
+  > time deleting every `MString` and its buffer. The cache is stale by
+  > construction if it is ever populated before the last init; today
+  > both inits finish before any in-game UI runs, so it does not fire.
+  > This slice makes it safer in one respect and cannot touch the other:
+  > a NULL entry now yields `""` instead of being handed to `wsprintf`
+  > as a format, and the write is bounded to 256 — but a **dangling**
+  > non-NULL pointer is indistinguishable from a live one, and no
+  > formatter can help there.
+  >
   > **Finding C19 is closed**, and the entry in the code-health review
   > lists the five separate measurements it rests on rather than a
   > ratchet reading zero. The lesson from the fourth slice's retraction
@@ -2361,9 +2392,10 @@ starting each — the scan is one grep, and the ranking below is from a
   > **301 sites, 289 checked, 0 failures, 8 notes** — a smaller number
   > for a good reason, and the two must not be quoted as one: it counts
   > text, and `AllocAskMessage` is a single textual site standing in for
-  > twenty-one dialog rows. **338 tests / 4,545 checks / 0 failed** in
+  > twenty-one dialog rows. **338 tests / 4,547 checks / 0 failed** in
   > both trees; ratchets green at R1 493, R2 0, R3 18, R4 21, R5 1, R7 0,
-  > **R8 13**.
+  > **R8 43** (13 as first recorded, before the review round widened the
+  > pattern to the scope this row already claimed).
 
 ---
 

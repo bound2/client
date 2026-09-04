@@ -132,8 +132,11 @@ the failure count, so the exit code is 0 only when the suite is clean.
 - **Then run the same suite under ASan**, where the invalid access aborts the process.
   Both trees green, or the fix is not verified.
 - **Executable-only code has no test path.** It gets verified by running the client
-  against a live server. The eight defects under *Runtime defects* in the review were
-  all found that way, and none were reachable from a test binary.
+  against a live server. The nine defects under *Runtime defects* in the review were
+  all found that way, and none were reachable from a test binary. The tenth, in the
+  short table below them, was found by reading and is filed separately for exactly
+  that reason — the heading is a claim about how a defect was found, not a bin for
+  anything executable-side.
 - A fix that could not be reproduced is called a **regression guard** in its commit
   message, not described as a reproduction.
 - Substantial remediation work gets an **adversarial review** afterwards. The last one
@@ -150,7 +153,7 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **332 tests, 4,510 checks, 0 failed** in both trees.
+baseline: **338 tests, 4,547 checks, 0 failed** in both trees.
 
 ## Traps
 

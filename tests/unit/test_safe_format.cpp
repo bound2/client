@@ -534,6 +534,14 @@ TEST(SafeFormat, RefusingAConversionNeverWritesMoreThanTheFormatItCameFrom)
 		"%ls",
 		"%p",
 		"%08.3f",
+		// A format that ends inside a specification. This one and "%"
+		// take FormatV's end-of-format branch rather than its refusal
+		// branch, so they pin less than the rest: that branch always
+		// breaks out of the loop, so it is always the last write, and
+		// growth there would be clipped by the bound instead of showing
+		// up in the comparison below. Kept because the branch should
+		// still round-trip, not because it would catch it growing.
+		"%12.5",
 		"%",
 		"Store your pet? %s",
 		"%s is asking to join your %s.",

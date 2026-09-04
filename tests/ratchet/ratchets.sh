@@ -460,6 +460,13 @@ GAMESTRING='(\(\*g_pGameStringTable\)\[|GetGameString[[:space:]]*\()'
 # today, and nothing was stopping the next one.
 R7_PATTERN="\\b(sprintf|wsprintf|swprintf|vsprintf|fprintf)[[:space:]]*\\([[:space:]]*[^,;()\"]+,[[:space:]]*$GAMESTRING"
 
+# printf itself, where the format is the FIRST argument. It was in
+# neither ratchet until the fifth slice's review round, and the leading
+# alternation rather than \b is what lets it match: \b[A-Za-z_]... in
+# R8's first draft required a character before printf and so could never
+# see the bare call. 86 of them in the tree, none with a table entry.
+R7_PATTERN="$R7_PATTERN|(^|[^A-Za-z0-9_])printf[[:space:]]*\\([[:space:]]*$GAMESTRING"
+
 # counted family: format at argument 3, argument 2 being a size, which is
 # usually sizeof(dst) and so may contain parentheses - bounded instead by
 # refusing a semicolon or a quote and by a length cap.
@@ -512,20 +519,49 @@ check "R7 (data-file format strings passed to printf)" "$R7" "$R7_BASELINE"
 # it is the right shape for a floor. It sees the population; R7 sees the
 # part of it that is easy to name.
 #
-# The 13 that remain are all one of two harmless shapes, and were read
-# one by one when this was written:
+# The 43 that remain are all one of four harmless shapes, and were read
+# one by one:
 #
-#   - eleven vararg forwarders, where the format IS the function's own
-#     parameter and passing it on is the whole point: five vsprintf in
-#     the two DebugInfo.cpp, and six vsnprintf in CMessageArray.cpp (2),
-#     WireHost.cpp, PacketDiagnostics.cpp, MString.cpp and Client.cpp.
-#     Their callers are where a table entry can enter, and those are what
-#     R7 and the format_arity audit cover.
-#   - two sprintf(szTemp, TEXT("...")) in vs_ui_gamecommon2.cpp: a
-#     literal behind a macro, which this pattern cannot see through.
+#   - 28 vararg forwarders, where the format IS the function's own
+#     parameter and passing it on is the whole point. Client/MinTr.h
+#     (10), the two DebugInfo.cpp (6) and DebugInfo.h (1),
+#     CMessageArray.cpp (2) plus its 5 AddFormatVL(first, vl) call
+#     sites, MString.cpp, WireHost.cpp, PacketDiagnostics.cpp,
+#     Client.cpp, basic/DebugLog.cpp and basic/Platform.h's wsprintf
+#     shim. Their CALLERS are where a table entry can enter, and those
+#     are what R7 and the format_arity audit cover.
+#   - 6 inside basic/SafeFormat.cpp's own Emit, where pSpec is a
+#     specification the checked formatter built and validated itself -
+#     the one place in the tree where a computed format is the point.
+#   - 3 literals behind a macro: two sprintf(szTemp, TEXT("...")) in
+#     vs_ui_gamecommon2.cpp and one wsprintf(buf, _T("...")) in
+#     Client/MinTr.h. This pattern cannot see through a macro.
+#   - 6 declarations rather than calls: the AddFormat/AddFormatVL
+#     prototypes and definitions, and Platform.h's wsprintf signature.
 #
 # A new call formatting with anything else raises this, which is the
 # property the fourth slice needed and did not have.
+#
+# THIS COMMENT SAID 13, AND 13 WAS NOT THE POPULATION. The review round
+# of the fifth slice found three holes in the pattern that produced it,
+# and every one of them is the same mistake this whole task keeps
+# making - a measurement mistaken for the thing measured:
+#
+#   - AddFormat/AddFormatVL, the ONE sink family this task built a
+#     checked front end for, was in R7 and not here. Proven by
+#     injection, not by reading: an AddFormat with a hoisted table entry
+#     raised neither ratchet.
+#   - bare printf() was in neither, and the enumeration command below -
+#     offered as the authority for the family list - provably cannot
+#     produce it, because \b[A-Za-z_][A-Za-z0-9_]*printf demands an
+#     identifier character BEFORE printf. 86 bare printf( calls in the
+#     tree, 0 with a variable format today. The command is fixed below;
+#     the lesson is that an enumeration is only as good as its own
+#     regex, and this one was quoted as evidence in three documents.
+#   - the scope said "Client, VS_UI and basic" and the find said
+#     "Client VS_UI", .cpp only. basic/SafeFormat.cpp - the formatter
+#     this task exists to install - was never scanned, nor was any
+#     header, and Client/MinTr.h alone holds 11 matches.
 #
 # What it still cannot see, written down rather than discovered later:
 # a destination expression containing parentheses, because the
@@ -535,15 +571,27 @@ check "R7 (data-file format strings passed to printf)" "$R7" "$R7_BASELINE"
 # above was written that way by accident and counted three of its four
 # shapes, which is how this paragraph came to exist. R7 has the same
 # hole and answers it with a fourth alternative for the one form that
-# actually occurred; no site here needs one yet.
+# actually occurred; no site here needs one yet. Also unseen: a printf
+# reached through a macro, and one reached as a method under any name
+# but Format.
 #----------------------------------------------------------------------
-# 13: 37 - 24. Task 5.4's fifth slice converted the twenty-one sites in
+# 43. First recorded as 13, which was this pattern's answer before its
+# review round widened it to the families and files the paragraph above
+# describes; nothing in the tree changed between the two numbers. Of the
+# 30 the widening added, none is a data-file format - they are
+# forwarders, SafeFormat's own Emit, macro literals and declarations -
+# so the conclusion held, but it had not been measured over the
+# population it claimed.
+#
+# Task 5.4's fifth slice converted the twenty-one sites in
 # VS_UI_ExtraDialog.cpp (through AllocAskMessage, which allocates and
 # formats in one place so the bound cannot drift from the destination)
-# and the three in VS_UI_GameCommon.cpp. 37 was the first measurement,
-# taken during the fourth slice's review round to find out how much R7
-# was missing - the number that showed the closure claim was wrong.
-R8_BASELINE=13
+# and the three in VS_UI_GameCommon.cpp: 37 -> 13 on the narrow pattern,
+# which is the shrink this baseline records. 37 was the first
+# measurement, taken during the fourth slice's review round to find out
+# how much R7 was missing - the number that showed the closure claim was
+# wrong.
+R8_BASELINE=43
 
 for d in Client VS_UI; do
 	if [ ! -d "$d" ]; then
@@ -560,20 +608,43 @@ done
 # tree is joined before matching, and // matches are stripped first.
 #
 # The family list is the whole ratchet, so it was taken from the tree
-# rather than from memory: every identifier matching *printf* in Client,
+# rather than from memory: every identifier ending in printf in Client,
 # VS_UI and basic, counted on a joined stream. That is how fprintf got
 # in - 550 calls, none of them with a variable format today, and not one
 # of them visible to the first draft of this pattern - and vswprintf
 # with it. Re-run that enumeration when adding a family:
 #
-#   find Client VS_UI basic -name '*.cpp' -o -name '*.h' | xargs cat \
-#     | grep -aoE '\b[A-Za-z_][A-Za-z0-9_]*printf[A-Za-z0-9_]*[[:space:]]*\('
+#   find Client VS_UI basic \( -name '*.cpp' -o -name '*.h' \) -print0 \
+#     | xargs -0 cat \
+#     | grep -aoE '(^|[^A-Za-z0-9_])[A-Za-z_]*printf[A-Za-z0-9_]*[[:space:]]*\('
 #
-# and note the -a and the single stream: run per file, the same
-# enumeration reports 453 sprintf rather than 510, because grep calls
-# this tree's UTF-8 sources binary and stops inside them.
-R8_PATTERN="\\b(sprintf|wsprintf|vsprintf|fprintf)[[:space:]]*\\([[:space:]]*[^,;()\"]+,[[:space:]]*[^\"L[:space:]]"
-R8_PATTERN="$R8_PATTERN|\\b(_?snprintf|_?vsnprintf|_?swprintf|vswprintf)[[:space:]]*\\([[:space:]]*[^,;()\"]+,[^;\"]{0,60},[[:space:]]*[^\"L[:space:]]"
+# Three things about that command are load-bearing, and the first draft
+# of this comment got two of them wrong. The leading alternation, not
+# \b[A-Za-z_][A-Za-z0-9_]*printf, because that form REQUIRES a character
+# before printf and so can never match bare printf( - the review round
+# proved it with `printf 'printf("x");' | grep`. The parenthesised -name
+# group, because `-name '*.cpp' -o -name '*.h'` without it applies the
+# implicit -print to the second branch only. And the -a with a single
+# stream: run per file, the same enumeration reports 453 sprintf rather
+# than 510, because grep calls this tree's UTF-8 sources binary and
+# stops inside them.
+R8_PATTERN="(^|[^A-Za-z0-9_])(sprintf|wsprintf|vsprintf|fprintf)[[:space:]]*\\([[:space:]]*[^,;()\"]+,[[:space:]]*[^\"L[:space:]]"
+R8_PATTERN="$R8_PATTERN|(^|[^A-Za-z0-9_])(_?snprintf|_?vsnprintf|_?swprintf|vswprintf)[[:space:]]*\\([[:space:]]*[^,;()\"]+,[^;\"]{0,60},[[:space:]]*[^\"L[:space:]]"
+
+# Bare printf takes its format FIRST, so it needs its own alternative
+# rather than a place in the list above - which is where it was put at
+# the first attempt, and the injection probe then caught only three of
+# its four shapes: printf(GetGameString(id), n) does not match a pattern
+# that wants a destination before the format, because the destination
+# class forbids the parentheses in the lookup.
+R8_PATTERN="$R8_PATTERN|(^|[^A-Za-z0-9_])printf[[:space:]]*\\([[:space:]]*[^\"L[:space:])]"
+
+# The message-array family, which R7 has carried since it was written
+# and this did not until its review round. It is the one sink family
+# this task built a checked front end for (CMessageArray::AddSafeFormat,
+# task 5.4's third slice), so a new AddFormat with a hoisted table entry
+# is exactly what both ratchets exist to stop - and it raised neither.
+R8_PATTERN="$R8_PATTERN|\\bAddFormat(VL)?[[:space:]]*\\([[:space:]]*[^\"L[:space:])]"
 
 # A printf does not have to be named like one. MString::Format is an
 # ordinary varargs printf reached as a method, which is why no pattern
@@ -582,7 +653,14 @@ R8_PATTERN="$R8_PATTERN|\\b(_?snprintf|_?vsnprintf|_?swprintf|vswprintf)[[:space
 # FormatChecked, which this deliberately does not match.
 R8_PATTERN="$R8_PATTERN|\\.Format[[:space:]]*\\([[:space:]]*[^\"L[:space:])]"
 
-R8=$(find Client VS_UI -name '*.cpp' -print0 2>/dev/null | xargs -0 cat 2>/dev/null \
+# basic and the headers are in scope, unlike R7's. The row for this in
+# docs/RESTRUCTURING.md said "across Client, VS_UI and basic" while this
+# line said `find Client VS_UI -name '*.cpp'`, so the checked formatter
+# this task installs was itself never scanned, and neither was any
+# header - Client/MinTr.h alone holds 11 matches. A formatter defined
+# inline in a header is exactly the shape that would hide here.
+R8=$(find Client VS_UI basic \( -name '*.cpp' -o -name '*.h' \) -print0 2>/dev/null \
+	| xargs -0 cat 2>/dev/null \
 	| sed -e 's://.*::' | tr '\n' ' ' \
 	| grep -aoE "$R8_PATTERN" \
 	| wc -l)
