@@ -479,45 +479,155 @@ void	Fill(CLLogin& p)
 	p.setMacAddress(mac);
 }
 
+std::string	ExchangeHighBytes(size_t length, unsigned char seed)
+{
+	std::string value;
+	value.reserve(length);
+	for (size_t i = 0; i < length; i++)
+		value.push_back((char)(unsigned char)(0x80 + ((seed + i) % 0x7F)));
+	return value;
+}
+
+ExchangeListing	MakeFullExchangeListing()
+{
+	ExchangeListing listing;
+	listing.listingID = static_cast<int64_t>(0x8899AABBCCDDEEFFULL);
+	listing.serverID = (int16_t)0x9A8B;
+	listing.sellerAccount = "sellerAcct";
+	listing.sellerPlayer = "SellerHero";
+	listing.sellerRace = 0x81;
+	listing.itemClass = 0x92;
+	listing.itemType = 0xA3B4;
+	listing.itemID = static_cast<int64_t>(0xC5D6E7F899A8B7C6ULL);
+	listing.objectID = (int)0xB4C5D6E7;
+	listing.pricePoint = (int)0xC6D7E8F9;
+	listing.currency = 0xD9;
+	listing.status = 0xEA;
+	listing.buyerAccount = "buyerAcct";
+	listing.buyerPlayer = "BuyerHero";
+	listing.taxRate = 0xFB;
+	listing.taxAmount = (int)0x8C9DAEBF;
+	listing.createdAt = "2026-08-30 12:34:56";
+	listing.expireAt = "2026-09-06 12:34:56";
+	listing.version = (int)0x9DAEBFC8;
+	listing.itemName = "Blood Sword";
+	listing.enchantLevel = 0x8D;
+	listing.grade = 0xAEBF;
+	listing.durability = (int)0xBFC8D9EA;
+	listing.silver = 0xC8D9;
+	listing.optionType1 = 0xE2;
+	listing.optionType2 = 0xF3;
+	listing.optionType3 = 0x84;
+	listing.optionValue1 = 0x95A6;
+	listing.optionValue2 = 0xA6B7;
+	listing.optionValue3 = 0xB7C8;
+	listing.stackCount = (int)0xD8E9FA8B;
+	return listing;
+}
+
+ExchangeListing	MakeEmptyStringExchangeListing()
+{
+	ExchangeListing listing;
+	listing.listingID = static_cast<int64_t>(0x91A2B3C4D5E6F788ULL);
+	listing.serverID = (int16_t)0xABCC;
+	listing.sellerRace = 0x83;
+	listing.itemClass = 0x94;
+	listing.itemType = 0xA5B6;
+	listing.itemID = static_cast<int64_t>(0xA2B3C4D5E6F78899ULL);
+	listing.objectID = (int)0xB3C4D5E6;
+	listing.pricePoint = (int)0xC4D5E6F7;
+	listing.currency = 0xDB;
+	listing.status = 0xEC;
+	listing.taxRate = 0xFD;
+	listing.taxAmount = (int)0x8E9FA8B1;
+	listing.version = (int)0x9FA8B1C2;
+	listing.enchantLevel = 0x8F;
+	listing.grade = 0xB8C1;
+	listing.durability = (int)0xC1D2E3F4;
+	listing.silver = 0xD2E3;
+	listing.optionType1 = 0xE4;
+	listing.optionType2 = 0xF5;
+	listing.optionType3 = 0x86;
+	listing.optionValue1 = 0x97A8;
+	listing.optionValue2 = 0xA8B9;
+	listing.optionValue3 = 0xB9CA;
+	listing.stackCount = (int)0xE8F19293;
+	return listing;
+}
+
+ExchangeListing	MakeMaxStringExchangeListing()
+{
+	ExchangeListing listing = MakeFullExchangeListing();
+	const size_t length = GCExchangeList::kMaxListingString;
+	listing.sellerAccount = ExchangeHighBytes(length, 0x01);
+	listing.sellerPlayer = ExchangeHighBytes(length, 0x11);
+	listing.buyerAccount = ExchangeHighBytes(length, 0x21);
+	listing.buyerPlayer = ExchangeHighBytes(length, 0x31);
+	listing.createdAt = ExchangeHighBytes(length, 0x41);
+	listing.expireAt = ExchangeHighBytes(length, 0x51);
+	listing.itemName = ExchangeHighBytes(length, 0x61);
+	return listing;
+}
+
 void	Fill(GCExchangeList& p)
 {
-	p.setPage(0x11223344);
-	p.setPageSize(0x55667788);
-	p.setTotal(0x10203040);
+	p.setPage((int)0x8A9BACBD);
+	p.setPageSize((int)0x9BACBDCE);
+	p.setTotal((int)0xACBDCEDF);
+	std::vector<ExchangeListing> listings;
+	listings.push_back(MakeFullExchangeListing());
+	listings.push_back(MakeEmptyStringExchangeListing());
+	p.setListings(listings);
+}
 
-	ExchangeListing listing;
-	listing.listingID = 0x1122334455667788LL;
-	listing.serverID = (int16_t)0x99AA;
-	listing.sellerAccount = "seller-account";
-	listing.sellerPlayer = "seller-player";
-	listing.sellerRace = 0xB1;
-	listing.itemClass = 0xC2;
-	listing.itemType = 0xD3E4;
-	listing.itemID = 0x2132435465768798LL;
-	listing.objectID = 0x31425364;
-	listing.pricePoint = 0x41526374;
-	listing.currency = 0xD5;
-	listing.status = 0xE6;
-	listing.buyerAccount = "buyer-account";
-	listing.buyerPlayer = "buyer-player";
-	listing.taxRate = 0xA7;
-	listing.taxAmount = 0x52637415;
-	listing.createdAt = "2026-09-04 12:34:56";
-	listing.expireAt = "2026-09-11 12:34:56";
-	listing.version = 0x63748526;
-	listing.itemName = "span-wire-item";
-	listing.enchantLevel = 0xB8;
-	listing.grade = 0xC9DA;
-	listing.durability = 0x74859637;
-	listing.silver = 0xDBEC;
-	listing.optionType1 = 0x81;
-	listing.optionType2 = 0x92;
-	listing.optionType3 = 0xA3;
-	listing.optionValue1 = 0xB4C5;
-	listing.optionValue2 = 0xC6D7;
-	listing.optionValue3 = 0xD8E9;
-	listing.stackCount = 0x596A7B4C;
-	p.addListing(listing);
+void	CheckExchangeListingEqual(const ExchangeListing& expected,
+	const ExchangeListing& actual)
+{
+	CHECK_EQ(expected.listingID, actual.listingID);
+	CHECK_EQ(expected.serverID, actual.serverID);
+	CHECK(expected.sellerAccount == actual.sellerAccount);
+	CHECK(expected.sellerPlayer == actual.sellerPlayer);
+	CHECK_EQ(expected.sellerRace, actual.sellerRace);
+	CHECK_EQ(expected.itemClass, actual.itemClass);
+	CHECK_EQ(expected.itemType, actual.itemType);
+	CHECK_EQ(expected.itemID, actual.itemID);
+	CHECK_EQ(expected.objectID, actual.objectID);
+	CHECK_EQ(expected.pricePoint, actual.pricePoint);
+	CHECK_EQ(expected.currency, actual.currency);
+	CHECK_EQ(expected.status, actual.status);
+	CHECK(expected.buyerAccount == actual.buyerAccount);
+	CHECK(expected.buyerPlayer == actual.buyerPlayer);
+	CHECK_EQ(expected.taxRate, actual.taxRate);
+	CHECK_EQ(expected.taxAmount, actual.taxAmount);
+	CHECK(expected.createdAt == actual.createdAt);
+	CHECK(expected.expireAt == actual.expireAt);
+	CHECK_EQ(expected.version, actual.version);
+	CHECK(expected.itemName == actual.itemName);
+	CHECK_EQ(expected.enchantLevel, actual.enchantLevel);
+	CHECK_EQ(expected.grade, actual.grade);
+	CHECK_EQ(expected.durability, actual.durability);
+	CHECK_EQ(expected.silver, actual.silver);
+	CHECK_EQ(expected.optionType1, actual.optionType1);
+	CHECK_EQ(expected.optionType2, actual.optionType2);
+	CHECK_EQ(expected.optionType3, actual.optionType3);
+	CHECK_EQ(expected.optionValue1, actual.optionValue1);
+	CHECK_EQ(expected.optionValue2, actual.optionValue2);
+	CHECK_EQ(expected.optionValue3, actual.optionValue3);
+	CHECK_EQ(expected.stackCount, actual.stackCount);
+}
+
+void	CheckExchangeListEqual(const GCExchangeList& expected,
+	const GCExchangeList& actual)
+{
+	CHECK_EQ(expected.getPage(), actual.getPage());
+	CHECK_EQ(expected.getPageSize(), actual.getPageSize());
+	CHECK_EQ(expected.getTotal(), actual.getTotal());
+	CHECK_EQ(expected.getListings().size(), actual.getListings().size());
+	if (expected.getListings().size() == actual.getListings().size())
+	{
+		for (size_t i = 0; i < expected.getListings().size(); i++)
+			CheckExchangeListingEqual(expected.getListings()[i], actual.getListings()[i]);
+	}
 }
 
 } // namespace
@@ -785,21 +895,38 @@ TEST(GCExchangeList, SpanMigrationPreservesTheWireLayout)
 	Fill(src);
 	CHECK(EncrypterFree(src));
 	RoundTrip(src, dst, 0);
+	CheckExchangeListEqual(src, dst);
+	ExpectGolden("GCExchangeList", 0, WriteBody(src, 0));
+}
 
-	CHECK_EQ(src.getPage(), dst.getPage());
-	CHECK_EQ(src.getPageSize(), dst.getPageSize());
-	CHECK_EQ(src.getTotal(), dst.getTotal());
+TEST(GCExchangeList, SpanMigrationPreservesMaxLengthStrings)
+{
+	GCExchangeList src, dst;
+	Fill(src);
+	std::vector<ExchangeListing> listings;
+	listings.push_back(MakeMaxStringExchangeListing());
+	src.setListings(listings);
+
+	RoundTrip(src, dst, 0);
+	CheckExchangeListEqual(src, dst);
 	CHECK_EQ(1, dst.getListings().size());
 	if (dst.getListings().size() == 1)
 	{
-		const ExchangeListing& listing = dst.getListings()[0];
-		CHECK_EQ(0x1122334455667788LL, listing.listingID);
-		CHECK(listing.sellerAccount == std::string("seller-account"));
-		CHECK(listing.buyerPlayer == std::string("buyer-player"));
-		CHECK(listing.itemName == std::string("span-wire-item"));
-		CHECK_EQ(0x596A7B4C, listing.stackCount);
+		CHECK_EQ(GCExchangeList::kMaxListingString,
+			dst.getListings()[0].sellerAccount.size());
+		CHECK_EQ(GCExchangeList::kMaxListingString,
+			dst.getListings()[0].sellerPlayer.size());
+		CHECK_EQ(GCExchangeList::kMaxListingString,
+			dst.getListings()[0].buyerAccount.size());
+		CHECK_EQ(GCExchangeList::kMaxListingString,
+			dst.getListings()[0].buyerPlayer.size());
+		CHECK_EQ(GCExchangeList::kMaxListingString,
+			dst.getListings()[0].createdAt.size());
+		CHECK_EQ(GCExchangeList::kMaxListingString,
+			dst.getListings()[0].expireAt.size());
+		CHECK_EQ(GCExchangeList::kMaxListingString,
+			dst.getListings()[0].itemName.size());
 	}
-	ExpectGolden("GCExchangeList", 0, WriteBody(src, 0));
 }
 
 // CLLogin is written by this client and read by the login server, whose

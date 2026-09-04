@@ -17,6 +17,7 @@
 
 #include <array>
 #include <cstddef>
+#include <limits>
 #include <span>
 
 namespace {
@@ -56,6 +57,28 @@ TEST(SocketInputStream, SpanReadRejectsLengthBeyondDestination)
 	CHECK_EQ(0x7A, (unsigned char)destination[0]);
 	CHECK_EQ(0x7A, (unsigned char)destination[1]);
 	CHECK_EQ(0x7A, (unsigned char)destination[2]);
+}
+
+TEST(SocketInputStream, SpanReadRejectsSizeTBeforeNarrowing)
+{
+	SpanStreamFixture f;
+	const unsigned char bytes[] = { 0x11, 0x22, 0x33, 0x44 };
+	SocketInputStreamTestAccess::Preload(f.m_Input, bytes, sizeof(bytes));
+
+	std::array<char, 4> destination = { (char)0x7A, (char)0x7A, (char)0x7A, (char)0x7A };
+	const std::size_t requested =
+		static_cast<std::size_t>((std::numeric_limits<uint>::max)()) + 2;
+	bool bThrew = false;
+	try {
+		f.m_Input.read(std::span<char>(destination), requested);
+	} catch (InvalidProtocolException&) {
+		bThrew = true;
+	}
+
+	CHECK(bThrew);
+	CHECK_EQ(4, f.m_Input.length());
+	for (size_t i = 0; i < destination.size(); i++)
+		CHECK_EQ(0x7A, (unsigned char)destination[i]);
 }
 
 TEST(SocketInputStream, ByteSpanReadReassemblesWrappedData)

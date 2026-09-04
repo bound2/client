@@ -63,7 +63,7 @@ public :
 	// read data from stream (input buffer)
 	uint read ( char * buf , uint len ) throw ( ProtocolException , Error );
 	uint read ( std::span<char> buf ) throw ( ProtocolException , Error );
-	uint read ( std::span<char> buf , uint len ) throw ( ProtocolException , Error );
+	uint read ( std::span<char> buf , std::size_t len ) throw ( ProtocolException , Error );
 	uint read ( std::span<std::byte> buf ) throw ( ProtocolException , Error );
 	uint read ( std::string & str , uint len ) throw ( ProtocolException , Error );
 	void read ( Packet * p ) throw ( ProtocolException , Error );

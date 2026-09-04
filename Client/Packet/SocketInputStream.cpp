@@ -154,11 +154,13 @@ uint SocketInputStream::read ( std::span<char> buf )
 //////////////////////////////////////////////////////////////////////
 // read a prefix into a bounded destination
 //////////////////////////////////////////////////////////////////////
-uint SocketInputStream::read ( std::span<char> buf , uint len )
+uint SocketInputStream::read ( std::span<char> buf , std::size_t len )
 	throw ( ProtocolException , Error )
 {
 	if ( len > buf.size() )
 		throw InvalidProtocolException("read length exceeds destination span");
+	if ( len > (std::numeric_limits<uint>::max)() )
+		throw InvalidProtocolException("read length exceeds stream limit");
 
 	return read(buf.first(len));
 }
