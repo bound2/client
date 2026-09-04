@@ -147,22 +147,23 @@ public:
 	Surface(int width, int height)
 		: m_Width(width), m_Height(height), m_Pixels((size_t)(width * height), 0) {}
 
+	void	Fill(WORD value)	{ m_Pixels.assign(m_Pixels.size(), value); }
+
 	WORD*	Pixels()		{ return &m_Pixels[0]; }
 	int	Pitch() const		{ return m_Width * (int)sizeof(WORD); }
 	int	Width() const		{ return m_Width; }
 	int	Height() const		{ return m_Height; }
 	WORD	At(int x, int y) const	{ return m_Pixels[(size_t)(y * m_Width + x)]; }
 
-	bool	FootprintIs(int left, int top, int width, int height) const
+	bool	FootprintIs(int left, int top, int width, int height,
+				WORD inside = ColorDraw::Color(kRed, kGreen, kBlue), WORD outside = 0) const
 	{
-		WORD	colour = ColorDraw::Color(kRed, kGreen, kBlue);
-
 		for (int y = 0; y < m_Height; y++)
 		{
 			for (int x = 0; x < m_Width; x++)
 			{
-				bool	inside = (x >= left && x < left + width && y >= top && y < top + height);
-				WORD	expected = inside ? colour : 0;
+				bool	covered = (x >= left && x < left + width && y >= top && y < top + height);
+				WORD	expected = covered ? inside : outside;
 
 				if (At(x, y) != expected)
 					return false;
@@ -410,6 +411,38 @@ TEST(BltSpritePalEffectTo, DrawsTheWholeSpriteWhenItFits)
 	ScreenBlit(surface, 1, 1, sprite, pal);
 
 	CHECK(surface.FootprintIs(1, 1, kSpriteWidth, kSpriteHeight));
+}
+
+//----------------------------------------------------------------------
+// Over a black surface the screen blend and a plain copy produce the
+// same bytes, so the footprint tests above cannot tell them apart.
+// This one draws over a grey and asserts the blended value: per
+// channel, high + low * (max - high) / max, with red and blue out of
+// 32 and green out of 64. A plain copy would leave the palette colour.
+//----------------------------------------------------------------------
+TEST(BltSpritePalEffectTo, BlendsOverANonBlackSurface)
+{
+	CSpriteSurface::InitEffectTable();
+
+	CSpritePal	sprite;
+	CHECK(LoadOpaqueSprite(sprite, false));
+
+	MPalette	pal;
+	FillPalette(pal);
+
+	const WORD	grey = ColorDraw::Color(16, 32, 16);
+
+	// red:   16 + 10 * (32 - 16) / 32 = 21
+	// green: 40 + 32 * (64 - 40) / 64 = 52
+	// blue:  20 + 16 * (32 - 20) / 32 = 26
+	const WORD	blended = ColorDraw::Color(21, 52, 26);
+
+	Surface		surface(6, 4);
+	surface.Fill(grey);
+	ScreenBlit(surface, 1, 1, sprite, pal);
+
+	CHECK(blended != ColorDraw::Color(kRed, kGreen, kBlue));
+	CHECK(surface.FootprintIs(1, 1, kSpriteWidth, kSpriteHeight, blended, grey));
 }
 
 //----------------------------------------------------------------------
