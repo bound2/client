@@ -1875,7 +1875,7 @@ bool	C_VS_UI_GAME::IsEmptyChatting()
 //
 // 
 //-----------------------------------------------------------------------------
-void	C_VS_UI_GAME::AddChatToHistory(char * str, char * sz_id, CHAT_LINE_CONDITION condition, DWORD color)
+void	C_VS_UI_GAME::AddChatToHistory(const char * str, const char * sz_id, CHAT_LINE_CONDITION condition, DWORD color)
 { 
 	assert(m_pC_tribe_interface != NULL);
 
@@ -2816,7 +2816,7 @@ void C_VS_UI_GAME::CloseDescDialog()
 //
 // 파일창을 실행한다.
 //-----------------------------------------------------------------------------
-void C_VS_UI_GAME::RunFileDialog(C_VS_UI_FILE_DIALOG::MODE Mode, char *type)
+void C_VS_UI_GAME::RunFileDialog(C_VS_UI_FILE_DIALOG::MODE Mode, const char *type)
 {
 //	if (gpC_base->EventOccured() == true)
 //		return;

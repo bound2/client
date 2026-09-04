@@ -19,7 +19,6 @@
 #include "MEffectStatusDef.h"
 #include <fstream>
 
-using namespace std;
 
 //----------------------------------------------------------------------
 //

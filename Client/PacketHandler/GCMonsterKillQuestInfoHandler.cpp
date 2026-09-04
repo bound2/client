@@ -12,6 +12,8 @@
 #include "MMonsterKillQuestInfo.h"
 #include "MCreatureTable.h"
 
+#include <memory>
+
 //////////////////////////////////////////////////////////////////////
 //
 // 클라이언트에서 서버로부터 메시지를 받았을때 실행되는 메쏘드이다.
@@ -27,7 +29,7 @@ throw ( ProtocolException , Error )
 		
 	while(! pPacket->empty() )
 	{
-		std::auto_ptr<GCMonsterKillQuestInfo::QuestInfo> pInfo( pPacket->popQuestInfo() );
+		std::unique_ptr<GCMonsterKillQuestInfo::QuestInfo> pInfo( pPacket->popQuestInfo() );
 //		GCMonsterKillQuestInfo::QuestInfo* pInfo = pPacket->popQuestInfo();	
 		std::string str;
 		//pInfo->sType

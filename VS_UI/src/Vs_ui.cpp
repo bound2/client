@@ -457,7 +457,7 @@ void C_VS_UI::UnlockGear()
 - AddChatToHistory
 - Chat history에 str을 추가한다.
 -----------------------------------------------------------------------------*/
-void C_VS_UI::AddChatToHistory(char * str, char * sz_id, CHAT_LINE_CONDITION condition, DWORD color)
+void C_VS_UI::AddChatToHistory(const char * str, const char * sz_id, CHAT_LINE_CONDITION condition, DWORD color)
 {
 	if (m_pC_game)
 		m_pC_game->AddChatToHistory(str, sz_id, condition, color);
@@ -2732,7 +2732,7 @@ void C_VS_UI::CloseDescDialog()
 //
 // 설명창을 띄운다.
 //-----------------------------------------------------------------------------
-void C_VS_UI::RunFileDialog(C_VS_UI_FILE_DIALOG::MODE Mode, char *type)
+void C_VS_UI::RunFileDialog(C_VS_UI_FILE_DIALOG::MODE Mode, const char *type)
 {
 	if (m_pC_game)
 		m_pC_game->RunFileDialog(Mode, type);

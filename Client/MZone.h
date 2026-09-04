@@ -63,7 +63,6 @@ class CSpriteSetManager;
 #include "SoundNode.h"
 
 #include <fstream>
-using namespace std;
 
 struct UI_PORTAL_FLAG
 {

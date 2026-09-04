@@ -5053,13 +5053,18 @@ MCreature::SetPersnalString(char *str, COLORREF color)
 // String을 추가한다. 끝에~..
 //----------------------------------------------------------------------
 void		
-MCreature::SetChatString(char *str, COLORREF color)
+MCreature::SetChatString(const char *input, COLORREF color)
 {
-	if (str==NULL)
+	if (input==NULL)
 	{
 		DEBUG_ADD("[SetChatString] str == NULL");
 		return;
 	}
+
+	// The Christmas-tree path splits the text in place. Keep that legacy
+	// parsing local instead of requiring every caller to supply writable text.
+	std::string mutableString(input);
+	char* str = mutableString.data();
 
 //	if(CurPernalShop() == 1)
 //		return;

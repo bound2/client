@@ -14,8 +14,8 @@ public:
 	CAVI();
 	//CAVI(HWND hwnd, LPSTR szName, int w=320, int h=240);
 
-	int OpenMPG(HWND hwnd, LPSTR szName, int w=320, int h=240);
-	int OpenAVI(HWND hwnd, LPSTR szName, int w=320, int h=240);
+	int OpenMPG(HWND hwnd, LPCSTR szName, int w=320, int h=240);
+	int OpenAVI(HWND hwnd, LPCSTR szName, int w=320, int h=240);
 	void Close();
 	int Play();
 	void Stop();

@@ -1097,7 +1097,7 @@ void C_VS_UI_SLAYER_QUICKITEM::Show()
 	
 
 	// show hot-key
-	char * p_hotkey_mark[] = {"F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8"};
+	const char * p_hotkey_mark[] = {"F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8"};
 	if (m_focus_slot != NOT_SELECTED)
 	//for (i=0; i < GetPocketCount(); i++)
 	{

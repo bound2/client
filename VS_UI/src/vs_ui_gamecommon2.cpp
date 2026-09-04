@@ -11332,7 +11332,7 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 	}
 }
 
-char* C_VS_UI_HELPDESC::findkey(const char* tagstr ,char* keyword)
+char* C_VS_UI_HELPDESC::findkey(const char* tagstr, const char* keyword)
 {
 	if(tagstr == NULL) return NULL;
 	
@@ -14362,35 +14362,35 @@ bool	C_VS_UI_QUEST_MANAGER::UpdateQuestInfo(_GQuestInfo *QInfo, int nType)
 	return false;
 }
 // xml에서 퀘스트의 title을 가져온다
-char*	C_VS_UI_QUEST_MANAGER::GetQuestTitle(const XMLTree *pElement)
+const char*	C_VS_UI_QUEST_MANAGER::GetQuestTitle(const XMLTree *pElement)
 {
-	char* TempTitle = "";
+	const char* TempTitle = "";
 //	const XMLTree *pElement = m_Quest_XML_Tree.GetChild( qID );
 	if(NULL != pElement)
 	{
 		const XMLTree *pChildElement = pElement->GetChild( "Title" );
 		if(NULL != pChildElement)
-			return (char*)pChildElement->GetText().c_str();
+			return pChildElement->GetText().c_str();
 	}
 	return TempTitle;
 }
 // xml에서 퀘스트의 description을 가져온다
-char*	C_VS_UI_QUEST_MANAGER::GetQuestDescription(const XMLTree *pElement)
+const char*	C_VS_UI_QUEST_MANAGER::GetQuestDescription(const XMLTree *pElement)
 {
-	char* TempTitle = "";
+	const char* TempTitle = "";
 //	const XMLTree *pElement = m_Quest_XML_Tree.GetChild( qID );
 	if(NULL != pElement)
 	{
 		const XMLTree *pChildElement = pElement->GetChild( "Script" );
 		if(NULL != pChildElement)
-			return (char*)pChildElement->GetText().c_str();
+			return pChildElement->GetText().c_str();
 	}
 	return TempTitle;
 }
 // xml에서 퀘스트 내의 미션 타이틀을 가져온다.
-char*	C_VS_UI_QUEST_MANAGER::GetMissionTitle(const XMLTree *pElement, WORD Index, BYTE Condition)
+const char*	C_VS_UI_QUEST_MANAGER::GetMissionTitle(const XMLTree *pElement, WORD Index, BYTE Condition)
 {
-	char* TempTitle = "";
+	const char* TempTitle = "";
 //	const XMLTree *pElement = m_Quest_XML_Tree.GetChild( qID );
 	if(NULL != pElement)
 	{
@@ -14406,7 +14406,7 @@ char*	C_VS_UI_QUEST_MANAGER::GetMissionTitle(const XMLTree *pElement, WORD Index
 			// 미션 리스트는 "index"로 찾는다..복잡시럽네.-_-;;;
 			const XMLTree *pChildElement2 = pChildElement->GetChildByAttr(Index, "index");
 			if(NULL != pChildElement2)
-				return (char*)pChildElement2->GetText().c_str();
+				return pChildElement2->GetText().c_str();
 		}
 	}
 	return TempTitle;

@@ -24,7 +24,6 @@
 #include "Client_PCH.h"
 #include "MTypeDef.h"
 #include <fstream>
-using namespace std;
 
 
 class MObject {

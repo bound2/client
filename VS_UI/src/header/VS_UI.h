@@ -265,7 +265,7 @@ public:
 	void	DeleteCharacter(int slot);
 	void	ChangeToSlayerInterface();
 	void	ChangeToVampireInterface();
-	void	AddChatToHistory(char * str, char * sz_id, CHAT_LINE_CONDITION condition=CLD_NORMAL, DWORD color = g_color[3][3]);
+	void	AddChatToHistory(const char * str, const char * sz_id, CHAT_LINE_CONDITION condition=CLD_NORMAL, DWORD color = g_color[3][3]);
 	void	PickUpItem(MItem * p_item, int item_x=INT_MIN, int item_y=INT_MIN);
 	void	DropItem();
 	void	SetProgress(WORD cur_val, WORD max_val);
@@ -330,7 +330,7 @@ public:
 	void	FinishItemSilvering();
 	void	RunDescDialog(int type, void* ptr, void *ptr2 = NULL);
 	void	CloseDescDialog();
-	void	RunFileDialog(C_VS_UI_FILE_DIALOG::MODE Mode, char *type = NULL);
+	void	RunFileDialog(C_VS_UI_FILE_DIALOG::MODE Mode, const char *type = NULL);
 	void	CloseFileDialog();
 	void	RunElevator();
 	void	CloseElevator();

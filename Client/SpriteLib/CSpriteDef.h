@@ -11,8 +11,9 @@
 #include <cstdint>
 #include "DrawTypeDef.h"
 #include "TArray.h"
-std::ifstream;
-std::ofstream;
+using std::ifstream;
+using std::ios;
+using std::ofstream;
 
 // int list
 typedef	std::list<int>	INT_LIST;

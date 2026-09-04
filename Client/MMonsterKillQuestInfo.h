@@ -25,7 +25,6 @@
 #include "CTypeMap.h"
 
 #include <fstream>
-using namespace std;
 
 enum MINI_GAME_TYPE 
 {	

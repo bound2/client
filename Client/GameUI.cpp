@@ -1080,7 +1080,7 @@ UI_CloseExchangeCancel()
 // UI_BackupID
 //--------------------------------------------------------------------------------
 void		
-UI_BackupLoginID(char *id)
+UI_BackupLoginID(const char *id)
 {
 	if( id != NULL && strlen( id ) < 20 )
 		gC_vs_ui.BackupPrevId( id );
@@ -3084,7 +3084,7 @@ UI_SetMP(int current, int max)
 // Add Chat To History
 //-----------------------------------------------------------------------------
 void
-UI_AddChatToHistory(char* str, char* sz_id, int cond, DWORD color) // const로 하면 안됨! (6/23, KJTINC)
+UI_AddChatToHistory(const char* str, const char* sz_id, int cond, DWORD color)
 {
 	if(g_pUserOption->ChatWhite)
 		color = gpC_base->m_chatting_pi.text_color;

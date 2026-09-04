@@ -19,7 +19,6 @@
 #include "SoundDef.h"
 #include <fstream>
 
-using namespace std;
 
 
 //----------------------------------------------------------------------

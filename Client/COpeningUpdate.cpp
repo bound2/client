@@ -34,7 +34,7 @@ COpeningUpdate::Init()
 // Opening AVI
 //---------------------------------------------------------------------------
 void
-COpeningUpdate::PlayMPG(char* filename)
+COpeningUpdate::PlayMPG(const char* filename)
 {
 	// AVI
 	if (g_pAvi != NULL)

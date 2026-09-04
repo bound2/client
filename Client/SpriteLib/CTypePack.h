@@ -4,13 +4,11 @@
 #ifdef PLATFORM_WINDOWS
 	#include <windows.h>
 	#include <fstream>
-	using namespace std;
 #else
 	#include "../basic/Platform.h"
 	#include <fstream>
 	#include <cstring>
 	#include <cstdio>
-	using namespace std;
 #endif
 #include "CSpriteSetManager.h"
 #include "COrderedList.h"
@@ -19,7 +17,12 @@
 #else
 	// CDirectDraw include removed - using ColorDraw instead
 #endif
+#include <algorithm>
 #include <vector>
+
+using std::ifstream;
+using std::ios;
+using std::ofstream;
 
 #include "../../basic/ColorDraw.h"
 #include <cstdint>
@@ -172,7 +175,7 @@ Type &CTypePack<Type>::Get(WORD n)
 template <class Type>
 bool CTypePack<Type>::LoadFromFile(LPCTSTR lpszFilename)
 {
-	std::ifstream file(lpszFilename, ios::binary);
+	std::ifstream file(lpszFilename, std::ios::binary);
 	bool re = LoadFromFile(file);
 	file.close();
 
@@ -185,8 +188,8 @@ bool CTypePack<Type>::SaveToFile(LPCTSTR lpszFilename)
 	char szIndexFilename[512];
 	snprintf(szIndexFilename, sizeof(szIndexFilename), "%si", lpszFilename);
 
-	std::ofstream dataFile(lpszFilename, ios::binary);
-	std::ofstream indexFile(szIndexFilename, ios::binary);
+	std::ofstream dataFile(lpszFilename, std::ios::binary);
+	std::ofstream indexFile(szIndexFilename, std::ios::binary);
 
 	bool re = SaveToFile(dataFile, indexFile);
 
@@ -227,7 +230,7 @@ bool CTypePack<Type>::LoadFromFileRunning(LPCTSTR lpszFilename)
 	//인덱스 파일 로딩
 	std::string filename = lpszFilename;
 	filename += 'i';
-	std::ifstream indexFile(filename.c_str(), ios::binary);
+	std::ifstream indexFile(filename.c_str(), std::ios::binary);
 	indexFile.read((char *)&m_Size, 2); 
 	Init(m_Size);
 
@@ -244,7 +247,7 @@ bool CTypePack<Type>::LoadFromFileRunning(LPCTSTR lpszFilename)
 	indexFile.close();
 	
 	// file에서 sprite 개수를 읽어온다.	
-	m_file->open(lpszFilename, ios::binary);
+	m_file->open(lpszFilename, std::ios::binary);
 	
 	m_file->read((char*)&m_Size, 2);
 	
@@ -326,7 +329,7 @@ bool CTypePack<Type>::SaveToFile(std::ofstream&dataFile, std::ofstream&indexFile
 template <class Type>
 bool CTypePack<Type>::LoadFromFilePart(int first, int last)
 {
-	last = min(last, 0xFFFE);
+	last = (std::min)(last, 0xFFFE);
 	for(int i = first; i <= last; i++)
 		operator[](i);
 
@@ -404,14 +407,14 @@ bool CTypePack<Type>::LoadFromFileData(int dataID, int fileID, LPCTSTR packFilen
 		return false;
 	}
 
-	std::ifstream dataFile(packFilename, ios::binary);
+	std::ifstream dataFile(packFilename, std::ios::binary);
 	
 	if (!dataFile.is_open())
 	{
 		return false;
 	}
 	
-	std::ifstream indexFile(indexFilename, ios::binary);
+	std::ifstream indexFile(indexFilename, std::ios::binary);
 	
 	if (!indexFile.is_open())
 	{
@@ -665,7 +668,7 @@ TypeBase &CTypePack2<TypeBase, Type1, Type2>::Get(WORD n)
 template <class TypeBase, class Type1, class Type2>
 bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFile(LPCTSTR lpszFilename)
 {
-	std::ifstream file(lpszFilename, ios::binary);
+	std::ifstream file(lpszFilename, std::ios::binary);
 	bool re = LoadFromFile(file);
 	file.close();
 
@@ -678,8 +681,8 @@ bool CTypePack2<TypeBase, Type1, Type2>::SaveToFile(LPCTSTR lpszFilename)
 	char szIndexFilename[512];
 	snprintf(szIndexFilename, sizeof(szIndexFilename), "%si", lpszFilename);
 
-	std::ofstream dataFile(lpszFilename, ios::binary);
-	std::ofstream indexFile(szIndexFilename, ios::binary);
+	std::ofstream dataFile(lpszFilename, std::ios::binary);
+	std::ofstream indexFile(szIndexFilename, std::ios::binary);
 
 	bool re = SaveToFile(dataFile, indexFile);
 
@@ -720,7 +723,7 @@ bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFileRunning(LPCTSTR lpszFilenam
 	//인덱스 파일 로딩
 	std::string filename = lpszFilename;
 	filename += 'i';
-	std::ifstream indexFile(filename.c_str(), ios::binary);
+	std::ifstream indexFile(filename.c_str(), std::ios::binary);
 
 	// Check if index file opened successfully
 	if (!indexFile.is_open() || !indexFile.good())
@@ -758,7 +761,7 @@ bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFileRunning(LPCTSTR lpszFilenam
 	indexFile.close();
 
 	// file에서 sprite 개수를 읽어온다.	
-	m_file->open(lpszFilename, ios::binary);
+	m_file->open(lpszFilename, std::ios::binary);
 
 	// Check if data file opened successfully
 	if (!m_file->is_open() || !m_file->good())
@@ -864,7 +867,7 @@ bool CTypePack2<TypeBase, Type1, Type2>::SaveToFile(std::ofstream&dataFile, std:
 template <class TypeBase, class Type1, class Type2>
 bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFilePart(int first, int last)
 {
-	last = min(last, 0xFFFE);
+	last = (std::min)(last, 0xFFFE);
 	for(int i = first; i <= last; i++)
 		operator[](i);
 
@@ -943,14 +946,14 @@ bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFileData(int dataID, int fileID
 		return false;
 	}
 
-	std::ifstream dataFile(packFilename, ios::binary);
+	std::ifstream dataFile(packFilename, std::ios::binary);
 	
 	if (!dataFile.is_open())
 	{
 		return false;
 	}
 	
-	std::ifstream indexFile(indexFilename, ios::binary);
+	std::ifstream indexFile(indexFilename, std::ios::binary);
 	
 	if (!indexFile.is_open())
 	{

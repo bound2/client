@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.20)
 
 # Set SDL2 include path before project() for it to take effect
 if(EXISTS "/opt/homebrew/include/SDL2")
@@ -10,7 +10,7 @@ endif()
 project(DarkEdenClient VERSION 1.0.0)
 
 # C++ standard
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Note: We do NOT define _DEBUG here because it conflicts with DebugInfo.h

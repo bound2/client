@@ -22,7 +22,6 @@
 #include "SpriteLib/CShadowSprite.h"
 class CFileIndexTable;
 
-using namespace std;
 
 // <전체개수, 사용개수, 사용Data>
 class CShadowPartManager : public CPartManager<WORD, WORD, CSpriteSurface*>

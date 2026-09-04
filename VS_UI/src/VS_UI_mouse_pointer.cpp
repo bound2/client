@@ -532,7 +532,7 @@ void	C_VS_UI_MOUSE_POINTER::CursorDescriptionToggle()
 	m_bl_description = !m_bl_description; 
 }
 
-void	C_VS_UI_MOUSE_POINTER::SetCursorPickUp(LPSTR str, COLORREF color)
+void	C_VS_UI_MOUSE_POINTER::SetCursorPickUp(LPCSTR str, COLORREF color)
 {
 	switch(g_eRaceInterface)
 	{

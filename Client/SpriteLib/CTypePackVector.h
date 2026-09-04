@@ -8,7 +8,6 @@
 	#include "../basic/Platform.h"
 	#include <fstream>
 	#include <cstring>
-	using namespace std;
 #endif
 #include <vector>
 
@@ -57,7 +56,7 @@ protected:
 template <class Type>
 bool CTypePackVector<Type>::LoadFromFile(LPCTSTR lpszFilename)
 {
-	std::ifstream file(lpszFilename, ios::binary);
+	std::ifstream file(lpszFilename, std::ios::binary);
 	bool re = LoadFromFile(file);
 	file.close();
 
@@ -70,8 +69,8 @@ bool CTypePackVector<Type>::SaveToFile(LPCTSTR lpszFilename)
 	char szIndexFilename[512];
 	sprintf(szIndexFilename, "%si", lpszFilename);
 
-	ofstream dataFile(lpszFilename, ios::binary);
-	ofstream indexFile(szIndexFilename, ios::binary);
+	std::ofstream dataFile(lpszFilename, std::ios::binary);
+	std::ofstream indexFile(szIndexFilename, std::ios::binary);
 
 	bool re = SaveToFile(dataFile, indexFile);
 

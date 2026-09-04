@@ -11,7 +11,6 @@
 #include "CTypeTable.h"
 
 #include <fstream>
-using namespace std;
 
 //---------------------------------------------------------------------------------
 // Exp Info

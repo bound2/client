@@ -537,7 +537,7 @@ void C_VS_UI_PETSTORAGE::Run(id_t id)
 //-----------------------------------------------------------------------------
 void C_VS_UI_PETSTORAGE::ShowButtonDescription(C_VS_UI_EVENT_BUTTON * p_button)
 {
-	static char*	m_help_string[5] = {
+	static const char*	m_help_string[5] = {
 		"",
 		"",
 		"",
@@ -1348,7 +1348,7 @@ void C_VS_UI_PERSNALSHOP::Run(id_t id)
 //-----------------------------------------------------------------------------
 void C_VS_UI_PERSNALSHOP::ShowButtonDescription(C_VS_UI_EVENT_BUTTON * p_button)
 {
-	static char*	m_help_string[5] = {
+	static const char*	m_help_string[5] = {
 		(*g_pGameStringTable)[UI_STRING_MESSAGE_PERSNALSHOP_OK].GetString(),
 		(*g_pGameStringTable)[UI_STRING_MESSAGE_CLOSE_WINDOW].GetString(),
 		(*g_pGameStringTable)[UI_STRING_MESSAGE_PERSNALSHOP_WRITE_MESSAGE].GetString(),

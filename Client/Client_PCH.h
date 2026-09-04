@@ -24,10 +24,15 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
+#include <fstream>
 #include <iostream>
 
-/* Use standard namespace for convenience */
-using namespace std;
+/* Keep the legacy shorthand without importing every C++20 library name. */
+using std::cout;
+using std::endl;
+using std::ifstream;
+using std::ios;
+using std::ofstream;
 
 /* RECT definition for non-Windows platforms */
 #ifndef PLATFORM_WINDOWS

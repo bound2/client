@@ -14,7 +14,6 @@
 #include "CTypeTable.h"
 
 #include <fstream>
-using namespace std;
 
 
 class USINGCOLORSET_NODE {

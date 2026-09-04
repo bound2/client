@@ -454,7 +454,7 @@ public:
 	void	CloseDescDialog();
 	void	RunDescDialog(int type, void *ptr , void* ptr2 = NULL);
 	void	CloseFileDialog();
-	void	RunFileDialog(C_VS_UI_FILE_DIALOG::MODE Mode, char *type);
+	void	RunFileDialog(C_VS_UI_FILE_DIALOG::MODE Mode, const char *type);
 	void	CloseElevator();
 	void	RunElevator();
 
@@ -515,7 +515,7 @@ public:
 
 	void	ChangeToSlayerInterface();
 	void	ChangeToVampireInterface();
-	void	AddChatToHistory(char * str, char * sz_id, CHAT_LINE_CONDITION condition, DWORD color);
+	void	AddChatToHistory(const char * str, const char * sz_id, CHAT_LINE_CONDITION condition, DWORD color);
 
 	void	LockItemTrade();
 	void	UnlockItemTrade();

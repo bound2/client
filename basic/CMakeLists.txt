@@ -1,11 +1,11 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.20)
 
 # Basic library - Platform abstraction and utilities
 # This is the lowest level library that all others depend on
 
 project(basic)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Platform detection and library selection

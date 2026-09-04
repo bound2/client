@@ -18,8 +18,8 @@ CAVI::CAVI()
 // NOTE: COpeningUpdate::PlayMPG() (COpeningUpdate.cpp) pops up a blocking
 // "Not Found <file>" MessageBox when OpenMPG() fails, which now always
 // happens - see 참고자료/작업필요stub.md.
-int CAVI::OpenMPG(HWND hwnd, LPSTR szName, int w, int h) { (void)hwnd; (void)szName; (void)w; (void)h; return FALSE; }
-int CAVI::OpenAVI(HWND hwnd, LPSTR szName, int w, int h) { (void)hwnd; (void)szName; (void)w; (void)h; return FALSE; }
+int CAVI::OpenMPG(HWND hwnd, LPCSTR szName, int w, int h) { (void)hwnd; (void)szName; (void)w; (void)h; return FALSE; }
+int CAVI::OpenAVI(HWND hwnd, LPCSTR szName, int w, int h) { (void)hwnd; (void)szName; (void)w; (void)h; return FALSE; }
 void CAVI::Close() {}
 int CAVI::Play() { return FALSE; }
 void CAVI::Stop() {}

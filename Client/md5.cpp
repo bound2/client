@@ -27,7 +27,7 @@ const ULONG CMd5::Context[4]=  {0X01234567,
 								0Xfedcba98,
 								0X76543210
 								};*/
-const LPSTR CMd5::ErrInfo[5][2]={
+LPCSTR const CMd5::ErrInfo[5][2]={
 								{"",""},
 								{"The Memory is not enough !","内存分配失败!"},
 								{"Have not assign a file !","未指定文件!"},

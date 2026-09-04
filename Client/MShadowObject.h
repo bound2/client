@@ -13,7 +13,6 @@
 #include "MImageObject.h"
 
 #include <fstream>
-using namespace std;
 
 //----------------------------------------------------------------------
 //

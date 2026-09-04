@@ -18,7 +18,6 @@
 #include "MAnimationObject.h"
 
 #include <fstream>
-using namespace std;
 
 
 //----------------------------------------------------------------------

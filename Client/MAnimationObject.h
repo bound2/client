@@ -32,7 +32,6 @@
 #include "ShowTimeChecker.h"
 
 #include <fstream>
-using namespace std;
 
 //----------------------------------------------------------------------
 //

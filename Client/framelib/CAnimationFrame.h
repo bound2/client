@@ -29,7 +29,6 @@
 #endif
 #include "DrawTypeDef.h"
 #include <fstream>
-using namespace std;
 
 
 class CAnimationFrame {

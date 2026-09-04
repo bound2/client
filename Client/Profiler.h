@@ -28,7 +28,6 @@
 #include <fstream>
 #include "DebugInfo.h"
 
-using namespace std;
 
 //----------------------------------------------------------------------
 // ProfilerInfo

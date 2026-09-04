@@ -92,7 +92,7 @@ C_VS_UI_PROGRESS::C_VS_UI_PROGRESS()
 	else
 	{
 		m_pC_progress = new CSpritePack;
-		char* pSpk_progressPathc;
+		const char* pSpk_progressPathc;
 		if(g_MyFull)
 		{
 			pSpk_progressPathc =SPK_PROGRESS_1024;

@@ -24,7 +24,6 @@
 #include "../../basic/Platform.h"
 #endif
 #include <fstream>
-using namespace std;
 
 template <class DataType, class SizeType>
 class TArray {

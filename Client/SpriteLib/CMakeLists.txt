@@ -1,7 +1,7 @@
 # SpriteLib - Cross-platform sprite rendering library
 # Uses DirectDraw on Windows, SDL2 on other platforms
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.20)
 
 # Determine backend to use
 if(DEFINED USE_SDL_BACKEND)
