@@ -118,14 +118,18 @@ an unrecorded drop, so tightening lands in the same commit as the progress.
 |---|--------|---------:|---------|
 | R1 | Translation units compiled directly into the DarkEden target | **493** (492 before task 5.3 split `TextService::RenderText` out as `Client/TextServiceScreen.cpp` — a recorded growth, the price of a TextSystem that links without a test stub; 493 before task 5.1's second slice moved `ClientCommunicationManager.cpp` into `packetwire`, the three tuning values it read from the executable's config having gone behind `WireHost`; 495 before task 5.1 moved `Player.cpp` and `DatagramSocket.cpp` into `packetwire`, the two holdouts the debug facilities were the only thing keeping out; 497 before 4.4's fourth slice moved `MSkillManager.cpp`, `MSkillInfoTable.cpp` and `SkillDef.cpp` into `gamemodel` and split the player-facing half out as `MSkillAvailable.cpp`, −3 +1; 502 before 4.4's third slice moved `MPlayerGear.cpp`, the three race gears and `MShop.cpp` into `gamemodel`; 503 before 4.2's third slice moved `MPriceManager.cpp` into `gamemodel`; 505 before 4.2's second slice moved `MTradeManager.cpp` and `MSortedItemManager.cpp` into `gamemodel`; 508 before 4.3's second slice moved `MInventory.cpp`, `MStorage.cpp` and `MShopShelf.cpp` into `gamemodel`; 512 before 4.3's first slice moved the three item managers and `MQuickSlot.cpp` into `gamemodel`; 515 before 4.4's second slice moved `MItem.cpp`, `MObject.cpp`, `UserInformation.cpp`, `ClientConfig.cpp` and `MTimeItemManager.cpp` into `gamemodel` and split their executable halves out as `MItemUse.cpp` and `MObjectScreen.cpp`, +2 −5; 516 before 5.2 deleted the dead `MitemTableInit.cpp`; 517 before 4.4's first slice moved `MItemTable.cpp`; 518 before 4.2 moved `MMoneyManager.cpp`, another double-compiled VS_UI entry; 528 before task 4.1's `gamemodel` took its ten members out — the four support sources, and the six tables that the relative `VS_UI_CLIENT_SOURCES` list had never actually removed from the exe glob, so they compiled into both VS_UI and the executable — as the 36 files still on that list do; 529 before task 2.5 deleted the dead `CRRequest2Handler.cpp`; 992 before task 2.4 moved the 465 packet/table/info sources into `packetwire`, +1 for the split-out `GCExchangeBuyHandler.cpp`; 1,044 before task 1.1; the task-2.2 composition root `PacketHandlerRegistry.cpp` was a recorded +1, offset when finishing the migration deleted `CGHandlersStub.cpp`) | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj` — `ratchets.sh` reads the generated vcxproj, preferring the ctest run's own build dir; on generators with no vcxproj it reports SKIP, not PASS |
 | R2 | Packet `.cpp` files still defining a packet-style `::execute(Player` | **0** (448 → 432 in slice 1 → 0 when 2.2/2.3 finished; regex refined at 0 to stop matching comments and the in-file handler body in `GCExchangeBuy.cpp`) | `grep -rlE '^void\s+\w+::execute\s*\(\s*Player' Client/Packet/{Gpackets,Cpackets,Lpackets,Rpackets,Upackets} --include='*.cpp' \| grep -v Handler \| wc -l` |
-| R3 | Live `sprintf`/`strcpy`/`strcat` lines under `Client/Packet` **and `Client/PacketHandler`** | 46 (unchanged by task 2.4, which widened the scope to follow the handlers out of `Client/Packet`; 61 at first measurement — the 2026-09-01 adversarial review showed a quarter of that was commented-out code, so the measurement now excludes `//` matches) | see `ratchets.sh` — the grep excludes comment-prefixed matches |
+| R3 | Live `sprintf`/`strcpy`/`strcat` lines under `Client/Packet` **and `Client/PacketHandler`** | **18** (19 before the review round of task 5.4's first slice found a pre-existing overflow one line below a converted site — `GCBloodBibleListHandler` `sprintf`ing `"%3d %s"` into `char[192]` from a `char[192]`, four bytes short — and bounding it converted a 28th `sprintf` line whose format is a literal and was never a C19 site, which is the difference between R3 and R7 in one example; 46 before task 5.4's first slice converted all 31 game-string-table format sites in `Client/PacketHandler` to `SafeFormat::Format`; only 27 of the 31 move this number, because `\b` rejects the `w` in `wsprintf` — R7 counts all 31, and each ratchet is blind to something the other sees; 46 was unchanged by task 2.4, which widened the scope to follow the handlers out of `Client/Packet`; 61 at first measurement — the 2026-09-01 adversarial review showed a quarter of that was commented-out code, so the measurement now excludes `//` matches) | see `ratchets.sh` — the grep excludes comment-prefixed matches |
 | R4 | Library-compiled `.cpp` files referencing `g_p*` client globals **no library file defines**, comment lines excluded | **21** (25 before task 5.3, which both cut a real reach and refined the measurement: `TextService.cpp` lost its live `g_pLast` when `RenderText` moved to the executable, and R4 — unlike R3 and R5 — counted comment lines, so the sentence 5.3 wrote *about* that cut kept the file in the number. Stripping comments drops three more that never had a reach: `SocketOutputStream.cpp`, `SpriteLibBackendSDL.cpp`, `VS_UI_WebBrowser.cpp`. All 21 remaining are real and every one is a `VS_UI` file; 27 before 4.4's fourth slice moved the skill core into `gamemodel` — a reclassification again: `VS_UI_SKILL_VIEW.cpp` and `VS_UI_skill_tree.cpp` reached past the libraries only for `g_pSkillInfoTable`, `g_pSkillManager` and `g_pSkillAvailable`, which `MSkillManager.cpp` defines; 28 before 4.4's third slice moved the gear into `gamemodel` — a reclassification: `VS_UI_Game.cpp`'s only reaches past the libraries were `g_pSlayerGear`, `g_pVampireGear` and `g_pOustersGear`, which the gear sources define; 35 before 4.4's second slice — a reclassification again, 35 + 1 − 8: the subtraction became library-wide, so a library file reading a global another library file defines is no longer a seam; `MItem.cpp` joined reading `gamemodel`'s own tables, +1 under the old per-file rule, and the union rule excludes it with seven earlier members — `Datagram.cpp` reading `packetwire`'s factory manager, and six `VS_UI` sources whose only reaches are `gamemodel`'s tables, `packetwire`'s `g_pFileDef` or `VS_UI`'s own globals; 59 before task 4.0 — a reclassification, not seam-cutting: the 36 `VS_UI_CLIENT_SOURCES` files stopped being library-compiled, so the 24 of them that reach globals are executable debt now, counted by R1 and outside this ratchet; 61 before task 4.1 cut the two `g_pFileDef` seams in `MGameStringTable` and `SystemAvailabilities` and added the `gamemodel` membership file, whose four new members reference no game global; 81 before task 2.4 grew the membership from 52 to 518 files; the number fell because the measurement stopped counting a file's references to globals it defines — the packet tables own `g_pPacketFactoryManager`/`g_pPacketValidator` — and the two dead server-only bodies that reached game globals were deleted; 83 at first measurement, before two never-compiled files were filtered) | `ratchets.sh` computes it over the library dirs (minus CMake-excluded files) plus the `packetwire` and `gamemodel` membership files |
 | R5 | Direct packet `execute()` call sites outside `Client/Packet` (handlers under `Client/PacketHandler` are in scope) | 1 (a commented-out block in `CGameUpdate.cpp`; added 2026-09-01 after the review found live local-echo callers the receive-loop enumeration had missed; task 2.4 found two more inside handlers — `GCReconnectLoginHandler`/`LCReconnectHandler` fabricating a `CGConnectSetKey` — invisible while handlers lived under the excluded `Client/Packet`, caught by the compiler once `Packet::execute` was deleted, and routed through the dispatcher; a live caller is now a compile error before it is a ratchet failure) | see `ratchets.sh` |
 | R6 | *retired* — `packetwire` members calling `SendBugReport`, which the executable used to define | — (lived for one slice, 2026-09-03. Task 5.1's first slice added it to replace the failed-link detector that stubbing the symbol had disabled — a library file calling an executable-side *function* is invisible to W1/W2, which read includes, and to R4, which greps `g_p*`. It fired on the very next thing done to the tree: promoting `ClientCommunicationManager.cpp` took the count to 2, which is what said to move the function rather than grow the seam. `SendBugReport` is in `Client/Packet/WireHost.cpp` now, so the ratchet measures a symbol nothing is on the wrong side of, and the stub that disabled the link detector is gone with it. Note what came back is narrower than what left: a failed link catches an executable-side call only in a library `unit_tests` links, and only in an object some test forces the linker to pull in — which is what the address-taking link proofs in `test_wire_host.cpp` and `test_player_base.cpp` exist to guarantee. R6 grepped every membership file unconditionally. `ratchets.sh` keeps the history where the check was) | — |
 
+| R7 | Call sites handing a game string table entry to `printf` as its **format** argument (`sprintf` family and `AddFormat`, across `Client` and `VS_UI`) | **257** (288 before task 5.4's first slice converted `Client/PacketHandler`'s 31; the split is `Client` 64 — of which `ModifyStatusManager.cpp` 19, `UIMessageManager.cpp` 14, `MTopView.cpp` 10, `PacketFunction.cpp` 9, `GameUI.cpp` 7 — and `VS_UI` 193, where `VS_UI_GameCommon.cpp` alone holds 89. First recorded as 287 → 256: the review round found the pattern could not match a counted call in **any** form, because it wanted the format at argument two, where `snprintf` and `swprintf` take a size — so it missed a live site and, worse, could not have caught a new one. Added 2026-09-03; finding C19 as a number) | see `ratchets.sh` — three alternatives, because the format sits at a different argument in each of the three families, and the tree is joined before matching, because four sites put the destination and the format on different lines |
+
 R1 is the headline number: it counts what still cannot be unit-tested. R2 is
-the client twin of the server's R4 (which it drove to 0). R3 tracks
-code-health priority 2 mechanically.
+the client twin of the server's R4 (which it drove to 0). R3 and R7 track
+code-health priority 2 mechanically, from two directions: R3 counts the
+unbounded copies in the packet tree, R7 counts data-file format strings
+everywhere they are still used as formats.
 
 ---
 
@@ -1972,10 +1976,80 @@ starting each — the scan is one grep, and the ranking below is from a
   > unit at all. Whether the client still draws its FPS counter, its
   > network-condition warning and its debug overlays is what running it
   > shows.
-- [ ] **5.4 Format-string audit** (code-health C19/C20/C22, ~600 sprintf
+- [ ] **5.4 Format-string audit** (code-health C19/C20/C22, the sprintf
   sites fed by data files) — becomes tractable per-library as R3-style
   counts once the owning code is in libs.
-  > **Status:** not started.
+  > **Status:** first slice done, 2026-09-03. The population is
+  > **288 call sites**, measured rather than estimated: ratchet **R7**
+  > now counts every place a `Data/Info/String.inf` entry is handed to
+  > `printf` as its *format* argument. This slice built the thing that
+  > converts one and converted the first 31; **R7 288 → 257**. (Both numbers are one higher than this record first carried: the review round found R7 could not match a counted call in any form — it wanted the format at argument two, where `snprintf` and `swprintf` take a size — so it had been missing a live site in `vs_ui_gamecommon2.cpp` and, worse, could not have caught a new one.)
+  >
+  > **`basic/SafeFormat.{h,cpp}` — the checked formatter.** `printf`'s
+  > contract is that the format and the argument list agree, and on
+  > these call sites they cannot: the format is read off disk, the
+  > arguments are fixed in the source. `SafeFormat::Format` is the only
+  > place both are known, so it is where they get checked. A conversion
+  > consumes the next argument only if that argument's type can satisfy
+  > it; a conversion with no argument left, an argument of the wrong
+  > type, a `%n`, or a width taken from an argument is not performed at
+  > all — the specification is copied out as text. So the entry
+  > `"[System]%s%s%s%s%n"` against one argument prints
+  > `[System]hello%s%s%s%n` instead of reading three stack words as
+  > `char*` and writing through a fourth. The destination is bounded by
+  > its own size, and the array overload takes that size from the
+  > declaration, so a call site cannot state it wrongly.
+  >
+  > **Why `basic`.** The call sites are in the executable, in `VS_UI`
+  > and in the packet handlers, and `basic` is the one library all
+  > three already link — the same reason task 5.1 put `DebugLog` there.
+  > It needs nothing but the C library, which is what makes it
+  > **39 unit tests / 61 checks** in `tests/unit/test_safe_format.cpp`,
+  > against a defect class that had no test path at all before: every
+  > earlier fix for C19 was a build-verified regression guard.
+  >
+  > **What this is not.** It is the use-time half. The load-time half is
+  > `SanitizeGameStringTable`, which scrubs `String.inf` as it is read,
+  > cannot check arity, and does not run in the default English build at
+  > all. Neither half can tell that an entry *means* what the call site
+  > passes — a mistranslated entry still prints wrongly. What is gone is
+  > printing something the caller never owned.
+  >
+  > **The first 31 sites: `Client/PacketHandler`.** Every
+  > `sprintf`/`wsprintf` there whose format came from the table, across
+  > seven files. Two things came out of doing them:
+  > `GCBloodBibleListHandler` indexed the table with a packet field and
+  > then `sprintf`'d the result into a buffer four bytes too small for
+  > it (`"%3d %s"` into `char[192]` from a `char[192]`), which the
+  > bounded formatter closes. **The first draft of this record claimed
+  > the index itself was unchecked outside Debug, and that was false** —
+  > `CTypeTable::operator[]` has range-checked in every build since
+  > `e65ab7a`; the sentence was stale text carried over from the
+  > 2026-09-01 C19 note and re-asserted as a fresh finding, which the
+  > review round caught in all four places it had been copied to. What
+  > `GetGameString()` really adds there is that an out-of-range lookup
+  > answers `""` rather than the NULL `GetString()` of a
+  > default-constructed `MString`, and a NULL passed to a `%s` is
+  > undefined rather than merely empty. And four sites in
+  > `GCPartyLeaveHandler` put the
+  > destination and the format on **different lines**, which the
+  > line-based grep used to find candidates could not see. That is why
+  > R7 joins the tree before matching: had it not, converting those four
+  > would have measured as a no-op — the exact failure mode task 5.3
+  > found in R4 and fixed there.
+  >
+  > **Also learned, and now in the script.** Measuring `VS_UI` without
+  > `grep -a` reports **113** where the truth is **192**: its sources are
+  > CP949 encoded, so grep decides they are binary and stops at the
+  > first byte it dislikes. Any future metric over `VS_UI` needs `-a`.
+  >
+  > **Left for the next slices, deliberately:** the 3 `AddFormat` sites
+  > in `Client/PacketHandler` and the 24 elsewhere. `CMessageArray`
+  > already bounds its own buffer (C20, fixed in `0e9d247`), so what is
+  > left there is the arity half alone, and converting it needs a new
+  > entry point on `CMessageArray` that touches all 27 at once — its own
+  > slice. Then `Client`'s remaining 64 and `VS_UI`'s 193, where
+  > `VS_UI_GameCommon.cpp` alone holds 89.
 
 ---
 

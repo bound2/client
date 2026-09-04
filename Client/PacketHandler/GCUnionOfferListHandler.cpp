@@ -9,6 +9,7 @@
 #include "Client_PCH.h"
 #include "Gpackets/GCUnionOfferList.h"
 #include "MGameStringTable.h"
+#include "SafeFormat.h"
 #include "VS_UI.h"
 #include "DebugInfo.h"
 //////////////////////////////////////////////////////////////////////
@@ -37,9 +38,9 @@ throw ( ProtocolException , Error )
 		memset(sztemp,0,2048); 
 
 		if(offerlist->getGuildType() == SingleGuildUnionOffer::JOIN)
-			sprintf(sztemp,(*g_pGameStringTable)[UI_STRING_MESSAGE_TOTAL_UNION_JOIN_MSG].GetString(), offerlist->getGuildName().c_str() );
+			SafeFormat::Format(sztemp, GetGameString(UI_STRING_MESSAGE_TOTAL_UNION_JOIN_MSG), offerlist->getGuildName().c_str() );
 		else if(offerlist->getGuildType() == SingleGuildUnionOffer::QUIT)
-			sprintf(sztemp,(*g_pGameStringTable)[UI_STRING_MESSAGE_TOTAL_UNION_DEPORT_MSG].GetString(), offerlist->getGuildName().c_str() );
+			SafeFormat::Format(sztemp, GetGameString(UI_STRING_MESSAGE_TOTAL_UNION_DEPORT_MSG), offerlist->getGuildName().c_str() );
 		else
 		{
 			DEBUG_ADD("[GCUnionOfferListHandler] - SingleGuildUnionOffer guild type error");

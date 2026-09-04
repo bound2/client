@@ -75,7 +75,10 @@ and the ratchet script, and `tests/arch/packetwire_holdouts.txt` says what keeps
 each of the remaining six out). The logging facility (`DebugLog.h`) is in
 `basic`, so every library may log; `Client/DebugInfo.h` is the executable's
 front end to it and pulls in `MinTr.h`, which is why the libraries may not
-include it. Game logic compiled straight into the `DarkEden` executable —
+include it. The checked formatter (`SafeFormat.h`, `docs/RESTRUCTURING.md`
+task 5.4) is in `basic` for the same reason — the call sites that need it are
+in the executable, in `VS_UI` and in the packet handlers, and `basic` is the
+one library all three link. Game logic compiled straight into the `DarkEden` executable —
 including the packet *handlers* under `Client/PacketHandler/` — cannot be linked into
 a test binary. That is a structural limit, and it is the single biggest constraint on
 how work gets verified here.
@@ -147,7 +150,7 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **293 tests, 4,449 checks, 0 failed** in both trees.
+baseline: **332 tests, 4,510 checks, 0 failed** in both trees.
 
 ## Traps
 
@@ -230,6 +233,13 @@ baseline: **293 tests, 4,449 checks, 0 failed** in both trees.
    hostile *or merely buggy* server can still corrupt the client heap.
 2. Fixed-size buffers fed by variable-length server strings (the 21-byte chat rows
    are fixed; 128-byte stack buffers remain in other handlers), and format strings
-   loaded from data files passed to sprintf in ~600 places (C19/C20/C22).
+   loaded from data files passed to sprintf (C19/C20/C22). That last one is
+   **257 call sites**, measured by ratchet R7 rather than estimated, and it now
+   has a fix to apply rather than a policy to argue about: `SafeFormat::Format`
+   in `basic/SafeFormat.h` checks a table entry's conversions against the
+   arguments the call site really passed. Every `sprintf`-family site in
+   `Client/PacketHandler` is converted; what is left is the `AddFormat` family
+   (3 there, 28 in all — `CMessageArray` bounds its own buffer already, so only
+   the arity half remains) plus `Client`'s other 61 and `VS_UI`'s 193.
 3. Dead and duplicate source sitting alongside live code, which is a correctness trap
    when the wrong file gets edited.

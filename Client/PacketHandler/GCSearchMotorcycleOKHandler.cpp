@@ -13,6 +13,7 @@
 #include "UIDialog.h"
 #include "MZoneTable.h"
 #include "MGameStringTable.h"
+#include "SafeFormat.h"
 
 void GCSearchMotorcycleOKHandler::execute ( GCSearchMotorcycleOK * pPacket , Player * pPlayer )
 	 
@@ -34,7 +35,7 @@ throw ( ProtocolException , Error )
 	{
 		char str[128];
 
-		sprintf(str, (*g_pGameStringTable)[STRING_MESSAGE_FIND_MOTOR_OK].GetString(), 
+		SafeFormat::Format(str, GetGameString(STRING_MESSAGE_FIND_MOTOR_OK), 
 						pZoneInfo->Name.GetString(),
 						pPacket->getX(),
 						pPacket->getY());

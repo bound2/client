@@ -18,6 +18,7 @@
 #include "MOustersGear.h"
 #include "MMoneyManager.h"
 #include "MGameStringTable.h"
+#include "SafeFormat.h"
 #include "TempInformation.h"
 #include "MSkillManager.h"
 #include "UIDialog.h"
@@ -598,7 +599,7 @@ throw ( ProtocolException , Error )
 		break;
 
 		case NPC_RESPONSE_TEAM_REGIST_FAIL_ALREADY_JOIN:			// 어디 한번 볼까? 자네는 이미 <team_name> 팀 소속이라고 나와 있군
-			sprintf(sz_temp, (*g_pGameStringTable)[STRING_MESSAGE_TEAM_REGIST_FAIL_ALREADY_JOIN].GetString(), g_pUserInformation->GuildName.GetString());
+			SafeFormat::Format(sz_temp, GetGameString(STRING_MESSAGE_TEAM_REGIST_FAIL_ALREADY_JOIN), g_pUserInformation->GuildName.GetString());
 			g_pUIDialog->PopupFreeMessageDlg( sz_temp );
 		break;
 
@@ -619,7 +620,7 @@ throw ( ProtocolException , Error )
 		break;
 
 		case NPC_RESPONSE_TEAM_REGIST_FAIL_FAME:					// <player_name>이라.. 난 아직 그런 이름은 들어보지도 못했다네. 그건 자네가 풋내기라는 것을 의미하지. 실력을 닦고 다시 찾아오게나
-			sprintf(sz_temp, (*g_pGameStringTable)[STRING_MESSAGE_TEAM_REGIST_FAIL_FAME].GetString(), g_pUserInformation->CharacterID.GetString());
+			SafeFormat::Format(sz_temp, GetGameString(STRING_MESSAGE_TEAM_REGIST_FAIL_FAME), g_pUserInformation->CharacterID.GetString());
 			g_pUIDialog->PopupFreeMessageDlg( sz_temp );
 		break;
 
@@ -649,12 +650,12 @@ throw ( ProtocolException , Error )
 		break;
 
 		case NPC_RESPONSE_TEAM_STARTING_FAIL_MONEY:				// <player_name>, 팀 등록을 위해서는 돈이 더 필요하다네
-			sprintf(sz_temp, (*g_pGameStringTable)[STRING_MESSAGE_TEAM_STARTING_FAIL_MONEY].GetString(), g_pUserInformation->CharacterID.GetString());
+			SafeFormat::Format(sz_temp, GetGameString(STRING_MESSAGE_TEAM_STARTING_FAIL_MONEY), g_pUserInformation->CharacterID.GetString());
 			g_pUIDialog->PopupFreeMessageDlg( sz_temp );
 		break;
 
 		case NPC_RESPONSE_TEAM_STARTING_FAIL_FAME:				// <player_name>이라.. 난 아직 그런 이름은 들어보지도 못했다네. 그건 자네가 풋내기라는 것을 의미하지. 실력을 닦고 다시 찾아오게나
-			sprintf(sz_temp, (*g_pGameStringTable)[STRING_MESSAGE_TEAM_STARTING_FAIL_FAME].GetString(), g_pUserInformation->CharacterID.GetString());
+			SafeFormat::Format(sz_temp, GetGameString(STRING_MESSAGE_TEAM_STARTING_FAIL_FAME), g_pUserInformation->CharacterID.GetString());
 			g_pUIDialog->PopupFreeMessageDlg( sz_temp );
 		break;
 
@@ -663,7 +664,7 @@ throw ( ProtocolException , Error )
 		break;
 
 		case NPC_RESPONSE_CLAN_REGIST_FAIL_ALREADY_JOIN:			// 어디 한번 볼까? 자네는 이미 <clan_name> 클랜과 서약을 맺은 상태라고 나와 있군
-			sprintf(sz_temp, (*g_pGameStringTable)[STRING_MESSAGE_CLAN_REGIST_FAIL_ALREADY_JOIN].GetString(), g_pUserInformation->GuildName.GetString());
+			SafeFormat::Format(sz_temp, GetGameString(STRING_MESSAGE_CLAN_REGIST_FAIL_ALREADY_JOIN), g_pUserInformation->GuildName.GetString());
 			g_pUIDialog->PopupFreeMessageDlg( sz_temp );
 		break;
 
@@ -684,7 +685,7 @@ throw ( ProtocolException , Error )
 		break;
 
 		case NPC_RESPONSE_CLAN_REGIST_FAIL_FAME:					// <player_name>이라.. 아직 어린 뱀파이어인가보군. 더 많은 피를 마시고 다시 찾아오게나.
-			sprintf(sz_temp, (*g_pGameStringTable)[STRING_MESSAGE_CLAN_REGIST_FAIL_FAME].GetString(), g_pUserInformation->CharacterID.GetString());
+			SafeFormat::Format(sz_temp, GetGameString(STRING_MESSAGE_CLAN_REGIST_FAIL_FAME), g_pUserInformation->CharacterID.GetString());
 			g_pUIDialog->PopupFreeMessageDlg( sz_temp );
 		break;
 
@@ -718,7 +719,7 @@ throw ( ProtocolException , Error )
 		break;
 
 		case NPC_RESPONSE_CLAN_STARTING_FAIL_FAME:				// <player_name>이라.. 난 아직 그런 이름은 들어보지도 못했다네. 그건 자네가 풋내기라는 것을 의미하지. 실력을 닦고 다시 찾아오게나
-			sprintf(sz_temp, (*g_pGameStringTable)[STRING_MESSAGE_CLAN_STARTING_FAIL_FAME].GetString(), g_pUserInformation->CharacterID.GetString());
+			SafeFormat::Format(sz_temp, GetGameString(STRING_MESSAGE_CLAN_STARTING_FAIL_FAME), g_pUserInformation->CharacterID.GetString());
 			g_pUIDialog->PopupFreeMessageDlg( sz_temp );
 		break;
 
@@ -851,7 +852,7 @@ throw ( ProtocolException , Error )
 			break;
 
 		case NPC_RESPONSE_RACE_WAR_JOIN_FAILED :               // <사용자> 님 레벨대의 종족 전쟁 신청인원이 꽉 찼습니다.
-			sprintf(sz_temp, (*g_pGameStringTable)[STRING_MESSAGE_RACE_WAR_JOIN_FAILED].GetString(), g_pUserInformation->CharacterID.GetString());
+			SafeFormat::Format(sz_temp, GetGameString(STRING_MESSAGE_RACE_WAR_JOIN_FAILED), g_pUserInformation->CharacterID.GetString());
 			g_pUIDialog->PopupFreeMessageDlg( sz_temp );
 			break;
 
@@ -1016,7 +1017,7 @@ throw ( ProtocolException , Error )
 			break;
 			
 		case NPC_RESPONSE_GUILD_REGIST_FAIL_ALREADY_JOIN :		// 어디 한번 볼까? 자네는 이미 <guild_name> 길드 소속이라고 나와 있군
-			wsprintf(sz_temp, (*g_pGameStringTable)[STRING_MESSAGE_GUILD_REGIST_FAIL_ALREADY_JOIN].GetString(), g_pUserInformation->GuildName.GetString());
+			SafeFormat::Format(sz_temp, GetGameString(STRING_MESSAGE_GUILD_REGIST_FAIL_ALREADY_JOIN), g_pUserInformation->GuildName.GetString());
 			g_pUIDialog->PopupFreeMessageDlg( sz_temp );
 			break;
 		case NPC_RESPONSE_GUILD_REGIST_FAIL_QUIT_TIMEOUT :		// 자네는 다른 길드를 탈퇴한지 얼마 되지 않았군. 조금 더 신중하게 생각하고 행동하게
@@ -1032,7 +1033,7 @@ throw ( ProtocolException , Error )
 			UI_PopupMessage( STRING_MESSAGE_GUILD_REGIST_FAIL_MONEY );
 			break;
 		case NPC_RESPONSE_GUILD_REGIST_FAIL_FAME :				// <player_name>이라.. 난 아직 그런 이름은 들어보지도 못했다네. 그건 자네가 풋내기라는 것을 의미하지. 실력을 닦고 다시 찾아오게나
-			wsprintf(sz_temp, (*g_pGameStringTable)[STRING_MESSAGE_GUILD_REGIST_FAIL_FAME].GetString(), g_pUserInformation->CharacterID.GetString() );
+			SafeFormat::Format(sz_temp, GetGameString(STRING_MESSAGE_GUILD_REGIST_FAIL_FAME), g_pUserInformation->CharacterID.GetString() );
 			g_pUIDialog->PopupFreeMessageDlg( sz_temp );
 			break;
 		case NPC_RESPONSE_GUILD_REGIST_FAIL_NAME :				// 길드 이름이 이미 쓰이고 있군, 다른 이름을 생각해 보게
@@ -1054,11 +1055,11 @@ throw ( ProtocolException , Error )
 			UI_PopupMessage( STRING_MESSAGE_GUILD_STARTING_FAIL_LEVEL );
 			break;
 		case NPC_RESPONSE_GUILD_STARTING_FAIL_MONEY :				// <player_name>, 길드 등록을 위해서는 돈이 더 필요하다네
-			wsprintf( sz_temp, (*g_pGameStringTable)[STRING_MESSAGE_GUILD_STARTING_FAIL_MONEY].GetString(), g_pUserInformation->CharacterID.GetString() );
+			SafeFormat::Format(sz_temp, GetGameString(STRING_MESSAGE_GUILD_STARTING_FAIL_MONEY), g_pUserInformation->CharacterID.GetString() );
 			g_pUIDialog->PopupFreeMessageDlg( sz_temp );
 			break;
 		case NPC_RESPONSE_GUILD_STARTING_FAIL_FAME :				// <player_name>이라.. 난 아직 그런 이름은 들어보지도 못했다네. 그건 자네가 풋내기라는 것을 의미하지. 실력을 닦고 다시 찾아오게나
-			wsprintf( sz_temp, (*g_pGameStringTable)[STRING_MESSAGE_GUILD_STARTING_FAIL_FAME].GetString(), g_pUserInformation->CharacterID.GetString() );
+			SafeFormat::Format(sz_temp, GetGameString(STRING_MESSAGE_GUILD_STARTING_FAIL_FAME), g_pUserInformation->CharacterID.GetString() );
 			g_pUIDialog->PopupFreeMessageDlg( sz_temp );
 			break;
 		case NPC_RESPONSE_GUILD_STARTING_FAIL_DENY :			// 거부되었습니다.

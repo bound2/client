@@ -7,6 +7,7 @@
 #include "Client_PCH.h"
 #include "Gpackets/GCPartyLeave.h"
 #include "MGameStringTable.h"
+#include "SafeFormat.h"
 #include "MParty.h"
 #include "UIDialog.h"
 #include "UserInformation.h"
@@ -80,8 +81,7 @@ throw ( ProtocolException , Error )
 		//----------------------------------------------------------
 		else if (g_pParty->RemoveMember( pExpellee ))
 		{
-			sprintf(str, 
-					(*g_pGameStringTable)[STRING_MESSAGE_REMOVE_PARTY_HIMSELF].GetString(), 
+			SafeFormat::Format(str, GetGameString(STRING_MESSAGE_REMOVE_PARTY_HIMSELF), 
 					pExpellee);		
 			
 			//g_pUIDialog->PopupFreeMessageDlg( str );
@@ -102,8 +102,7 @@ throw ( ProtocolException , Error )
 		{		
 			if (g_pParty->RemoveMember( pExpellee ))
 			{
-				sprintf(str, 
-						(*g_pGameStringTable)[STRING_MESSAGE_KICK_PARTY_MEMBER_OK].GetString(), 
+				SafeFormat::Format(str, GetGameString(STRING_MESSAGE_KICK_PARTY_MEMBER_OK), 
 						pExpellee);
 
 				//g_pUIDialog->PopupFreeMessageDlg( str );
@@ -120,8 +119,7 @@ throw ( ProtocolException , Error )
 			g_pParty->UnSetPlayerParty();
 			g_pParty->Release();	// 나의 party가 해체되는 것이당..			
 
-			sprintf(str, 
-						(*g_pGameStringTable)[STRING_MESSAGE_KICKED_FROM_PARTY].GetString(), 
+			SafeFormat::Format(str, GetGameString(STRING_MESSAGE_KICKED_FROM_PARTY), 
 						pExpeller);		
 			
 			//g_pUIDialog->PopupFreeMessageDlg( str );
@@ -134,8 +132,7 @@ throw ( ProtocolException , Error )
 		//-------------------------------------------------------------------
 		else if (g_pParty->RemoveMember( pExpellee ))
 		{
-			sprintf(str, 
-					(*g_pGameStringTable)[STRING_MESSAGE_KICK_PARTY_MEMBER].GetString(), 
+			SafeFormat::Format(str, GetGameString(STRING_MESSAGE_KICK_PARTY_MEMBER), 
 					pExpeller, pExpellee);
 
 			//g_pUIDialog->PopupFreeMessageDlg( str );
