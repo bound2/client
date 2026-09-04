@@ -312,3 +312,60 @@ The port is complete when all of the following are true:
 
 Modernizing unrelated raw pointers, containers, rendering code, platform APIs, or
 the remaining warning backlog is explicitly outside these criteria.
+
+## Post-migration C++20 modernization backlog
+
+These items are not required to declare the language-mode migration complete.
+They are follow-up opportunities that use the new baseline to reduce defects and
+maintenance cost. PR #83 establishes the Windows/MSVC C++20 build milestone; the
+items below should be delivered separately in small, reviewable subsystem PRs.
+
+The occurrence counts are approximate static-scan results recorded on 2026-09-04.
+They indicate where to investigate, not how many mechanical replacements are safe.
+
+| Priority | Opportunity | Likely payoff | Suggested first slice | Size |
+|---:|---|---|---|---:|
+| 1 | `std::source_location` for diagnostics | Records file, line, and function without manually forwarding `__FILE__` and `__LINE__`. | Adapt `basic/BasicException.h` and `basic/DebugLog.h` while retaining compatibility wrappers for existing call sites. | Small |
+| 2 | C++20 container and string helpers | `contains`, `starts_with`, `ends_with`, and `std::erase_if` express intent and remove repeated iterator boilerplate. | Convert a few table/manager membership checks and add focused tests; do not mix this with behavioral changes. | Small |
+| 3 | `std::span` at packet and buffer boundaries | Couples a buffer with its extent and prevents pointer/length disagreement. The scan found roughly 217 pointer-plus-size interfaces. | Add span overloads to `SocketInputStream` and `SocketOutputStream`, keep the old overloads as adapters, and migrate one packet family. | Medium |
+| 4 | Typed packet serialization with concepts | Constrains wire reads/writes to supported fixed-width integral and enum types, producing clearer compile-time errors. | Introduce an internal `WireScalar` concept plus size assertions without changing existing packet bytes or public packet IDs. | Medium |
+| 5 | `std::chrono::steady_clock` and typed durations | Avoids unit confusion and the rollover-prone `previous + delay <= now` pattern. About 259 `GetTickCount`/`timeGetTime` calls remain. | Add a central monotonic-clock adapter, then migrate `basic/Timer2` and one UI timer with wraparound tests. | Medium |
+| 6 | `std::filesystem` for path and directory work | Removes manual search-handle lifetime and path-buffer handling. About 34 Win32/CRT enumeration calls remain. | Migrate profile discovery or log cleanup first, preserving filename ordering, case handling, and wildcard behavior. | Medium |
+| 7 | Bounded modern formatting | Reduces format/argument mismatches and destination-buffer mistakes. The scan found about 628 printf-family and 443 `strcpy`/`strcat` calls. | Use `std::format` or `format_to_n` only for developer-owned logging strings at first. | Large/staged |
+| 8 | `std::jthread` and `std::stop_token` for owned workers | Makes join and cancellation responsibilities explicit and exception-safe. Raw Win32 thread/synchronization primitives appear in about 36 locations. | Prototype on one clearly owned worker; preserve required Windows event and message-loop integration. | Large/staged |
+| 9 | Ownership RAII | Replacing proven owning raw pointers with `unique_ptr` prevents leaks and partial-initialization cleanup bugs. This is not C++20-specific, but the migration makes it a natural follow-up. | Inventory ownership in one manager and convert only pointers with unambiguous single ownership. | Large/staged |
+
+### Packet modernization guardrails
+
+Packet I/O is the highest-value area but also the easiest place to cause a silent
+compatibility break. A span/concepts change should:
+
+- retain the existing packet wire inventory and golden-byte tests;
+- use fixed-width wire types and add compile-time width checks;
+- make byte order explicit with `std::endian` where multi-byte values cross the
+  network boundary;
+- avoid serializing whole C++ structs or using `std::bit_cast` across padding;
+- add new overloads before migrating call sites, rather than changing every packet
+  in one patch.
+
+### Formatting guardrails
+
+`basic/SafeFormat` intentionally tolerates malformed or data-controlled legacy
+format strings. A blanket conversion to `std::format` would change that behavior
+and may introduce exceptions. Keep `SafeFormat` for localized or server/data-owned
+formats unless their grammar and failure policy are deliberately migrated. Begin
+with compile-time, developer-owned log messages and bounded destinations.
+
+### Suggested delivery order
+
+1. Land `source_location` diagnostics and the simple C++20 container/string helpers.
+2. Add a backward-compatible span layer to packet streams and migrate one packet
+   family with unchanged wire goldens.
+3. Add typed wire helpers and concepts after the span boundary is established.
+4. Migrate clocks and filesystem operations one subsystem at a time.
+5. Treat formatting, thread ownership, and raw-pointer ownership as dedicated
+   stabilization projects with their own tests and runtime smoke checks.
+
+Modules, coroutines, mass ranges rewrites, blanket `char8_t` conversion, and broad
+syntax-only modernization are deliberately not priorities. They offer less defect
+reduction than the boundary, lifetime, timing, and diagnostics work above.
