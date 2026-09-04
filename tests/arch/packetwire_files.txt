@@ -38,9 +38,9 @@ Client/Packet/SocketImpl.cpp
 Client/Packet/Player.cpp
 
 # The connection to the game server. Its last two game-code includes
-# were MZone.h and UserInformation.h, wanted only by
-# setEncryptCode() - a function the build never compiles, since
-# nothing defines __USE_ENCRYPTER__ - and they are behind WireHost
+# were MZone.h and UserInformation.h, wanted by setEncryptCode() -
+# which IS compiled and IS called on every login, Encrypter.h being
+# where __USE_ENCRYPTER__ is defined - and they are behind WireHost
 # now (task 5.1)
 Client/Packet/ClientPlayer.cpp
 

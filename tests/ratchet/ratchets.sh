@@ -113,11 +113,16 @@ check () {
 # 492: 493 - 1. Task 5.1's third slice took ClientPlayer.cpp into
 # packetwire. Its last two game-code includes - MZone.h and
 # UserInformation.h - were wanted by setEncryptCode() alone, and both
-# are behind WireHost now. Read that carefully before trusting it: no
-# target in this build defines __USE_ENCRYPTER__, so the body those
-# includes served is never compiled, and moving them proves nothing at
-# runtime. What it does is make the file's dead branch expressible
-# without game headers, which is the only reason the file was a holdout.
+# are behind WireHost now.
+#
+# That slice said the body those includes served is never compiled,
+# because nothing defines __USE_ENCRYPTER__. THAT WAS WRONG.
+# Client/Packet/Encrypter.h defines it, ClientPlayer.cpp includes
+# SocketEncryptInputStream.h two lines before its first #ifdef on it,
+# and GCUpdateInfoHandler calls setEncryptCode() on every login. The
+# move is therefore load-bearing rather than cosmetic, and the seed
+# collapse it performed is a live behaviour change - one a test now
+# pins across every server number a byte can hold.
 #
 # 489: 492 - 3. Task 5.1's fourth slice took the request-service family
 # bar one: RequestClientPlayer.cpp, RequestServerPlayer.cpp and

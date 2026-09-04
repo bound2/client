@@ -3019,12 +3019,14 @@ static int	WireMaxRequestService()	{ return g_pClientConfig!=NULL ? g_pClientCon
 static uint	WireUDPPort()			{ return g_pClientConfig!=NULL ? (uint)g_pClientConfig->CLIENT_COMMUNICATION_UDP_PORT : WIRE_DEFAULT_UDP_PORT; }
 static Player*	WireBugReportTarget()	{ return g_pSocket; }
 
-// The encrypt-seed inputs. Never asked for in this build - nothing
-// defines __USE_ENCRYPTER__, so ClientPlayer::setEncryptCode()'s body is
-// not compiled - but they are what it would read, and they are the
-// reason ClientPlayer.cpp no longer includes MZone.h or
-// UserInformation.h. Each is guarded, because the seed is derived
-// before the player is necessarily in a zone.
+// The encrypt-seed inputs, and they are asked for on every login:
+// Encrypter.h defines __USE_ENCRYPTER__, so ClientPlayer::setEncryptCode()
+// IS compiled, and GCUpdateInfoHandler calls it right after
+// MoveZone/LoadZone. (The slice that introduced these said the opposite.
+// It was wrong, and both reviewers of the next slice caught it.) They
+// are also the reason ClientPlayer.cpp no longer includes MZone.h or
+// UserInformation.h. Each is guarded anyway: the guards cost nothing,
+// and a wrong seed is a silently dead connection rather than a crash.
 static ZoneID_t	WireEncryptZoneID()		{ return g_pZone!=NULL ? g_pZone->GetID() : 0; }
 static int	WireEncryptServerID()		{ return g_pUserInformation!=NULL ? g_pUserInformation->ServerID : 0; }
 static bool	WireEncryptUsesEnglishSeed()
@@ -3043,6 +3045,14 @@ static bool	WireEncryptUsesEnglishSeed()
 // g_pRequestFileManager is built after start-up and the request players
 // outlive it at shutdown - which is what the NULL tests they used to
 // write at the call site were for.
+//
+// The guard is not complete, and saying so is better than implying it
+// is. At shutdown the pointer is deleted AND nulled, so the test holds.
+// On the re-login path it is deleted without nulling and the accept
+// thread is started fifteen lines before it is reassigned, so for that
+// window `g_pRequestFileManager != NULL` is a test on a dangling
+// pointer. The old call sites tested the same expression, so nothing
+// here widens the window - but nothing here closes it either.
 //-----------------------------------------------------------------------------
 static DWORD	WireCurrentTime()		{ return g_CurrentTime; }
 static bool	WireInGameMode()		{ return g_Mode == MODE_GAME; }

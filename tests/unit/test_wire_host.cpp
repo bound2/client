@@ -287,12 +287,18 @@ TEST(WireHostSeam, AHostAnswersTheEncryptSeedInputs)
 // The stream cipher's seed
 //----------------------------------------------------------------------
 //
-// Pinned rather than trusted, because nothing exercises it: no target
-// in this build defines __USE_ENCRYPTER__, so the only caller -
-// ClientPlayer::setEncryptCode() - is not compiled. If the encrypter is
-// ever turned back on, these are the bytes the server has to agree
-// with, and the expectations below were computed from the expression
-// that stood in ClientPlayer.cpp before it moved.
+// These are the bytes the server has to agree with on every login, and
+// the expectations below were computed from the expression that stood
+// in ClientPlayer.cpp before it moved.
+//
+// This comment used to say the opposite - that nothing exercises the
+// seed, because no target defines __USE_ENCRYPTER__. Encrypter.h
+// defines it, ClientPlayer.cpp pulls that in two lines before its first
+// #ifdef, and GCUpdateInfoHandler calls setEncryptCode() right after
+// MoveZone/LoadZone. The slice that wrote the claim also collapsed four
+// branches into two on the strength of it; the collapse happens to be
+// correct, and TheThreeNonEnglishRegionsAgreedAndStillDo is what makes
+// that a checked fact rather than a lucky one.
 //----------------------------------------------------------------------
 TEST(WireEncryptSeed, MatchesTheExpressionItWasExtractedFrom)
 {
@@ -373,12 +379,22 @@ TEST(WireHostSeam, TheRequestSeamsAnswerConservativelyWithNoHost)
 	CHECK_EQ(false, Wire::RemoveOtherRequest("peer"));
 
 	// A host that answers nothing answers the same way, one entry at a
-	// time - the accessors test the pointer, not just the host.
+	// time - the accessors test the pointer, not just the host. All
+	// eight, because with s_pHost NULL the first half of each guard
+	// short-circuits and the member test never runs: a guard written
+	// as `s_pHost->HasMyRequest==NULL` inside Wire::RemoveMyRequest
+	// would pass everything above. The review round of this slice
+	// found four of the eight were only covered the short-circuiting
+	// way.
 	Wire::SetHost(&s_EmptyHost);
 	CHECK_EQ(0, (int)Wire::CurrentTime());
 	CHECK_EQ(false, Wire::InGameMode());
+	CHECK_EQ(false, Wire::ReceiveMyRequest("peer", NULL));
 	CHECK_EQ(false, Wire::HasMyRequest("peer"));
+	CHECK_EQ(false, Wire::RemoveMyRequest("peer"));
+	CHECK_EQ(false, Wire::SendOtherRequest("peer", NULL));
 	CHECK_EQ(false, Wire::HasOtherRequest("peer"));
+	CHECK_EQ(false, Wire::RemoveOtherRequest("peer"));
 }
 
 TEST(WireHostSeam, AHostAnswersTheRequestSeamsAndIsAskedTheRightOne)
@@ -403,6 +419,15 @@ TEST(WireHostSeam, AHostAnswersTheRequestSeamsAndIsAskedTheRightOne)
 	// exactly how one gets wired to the wrong host entry. Each records
 	// its own name, so the test says which was reached rather than only
 	// that something was.
+	//
+	// Read what that does and does not cover. It proves WireHost.cpp's
+	// six forwarders each call their matching member. It CANNOT see the
+	// initialiser actually at risk - s_WireHost in Client/GameInit.cpp -
+	// because unit_tests never links the executable, so transposing two
+	// of the four identical bool(*)(const std::string&) entries there
+	// would compile and pass this whole suite. The slice that wrote
+	// this test claimed otherwise; both its reviewers said so, and both
+	// then checked all fifteen entries by hand and found them correct.
 	Wire::ReceiveMyRequest("a", NULL);
 	Wire::HasMyRequest("b");
 	Wire::RemoveMyRequest("c");

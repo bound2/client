@@ -1797,19 +1797,35 @@ starting each — the scan is one grep, and the ranking below is from a
   > cipher's seed. All three are behind `WireHost` now, so R1 493 → 492
   > and packetwire 521 → 522 files.
   >
-  > **Read that carefully.** Nothing in this repository or its build
-  > ever defines `__USE_ENCRYPTER__`, so the encrypted socket streams
-  > are never constructed and `setEncryptCode()`'s body is not
-  > compiled. Moving its inputs behind the host proves nothing at
-  > runtime; what it does is make the dead branch expressible without
-  > game headers, which was the only thing keeping the file out. The
-  > seed itself is extracted as `WireEncryptSeed` and pinned by tests,
-  > because if the encrypter is ever turned back on those are the bytes
-  > the server has to agree with. Its four original branches -
+  > **This slice claimed `setEncryptCode()` is never compiled, and it is
+  > wrong.** The claim was that nothing in the repository defines
+  > `__USE_ENCRYPTER__`, so the encrypted socket streams are never
+  > constructed, so moving the function's inputs behind the host proved
+  > nothing at runtime. `Client/Packet/Encrypter.h` defines it;
+  > `ClientPlayer.cpp` includes `SocketEncryptInputStream.h` two lines
+  > before its first `#ifdef` on it; and `GCUpdateInfoHandler` calls
+  > `setEncryptCode()` on every login, immediately after
+  > `MoveZone`/`LoadZone`. Both reviewers of the *next* slice found it.
+  >
+  > **The truth was already written down in this repository.**
+  > `tests/unit/test_packet_goldens.cpp` opens with "0 is the plain
+  > branch, 1..5 the `__USE_ENCRYPTER__` branch"; the claim was made by
+  > grepping for `#define` and not reading what the tests said. The
+  > lesson is the one task 5.4 kept teaching, arriving from a new
+  > direction: a search that finds nothing is a fact about the search.
+  >
+  > What follows from the correction is that the move is **load-bearing
+  > rather than cosmetic**, and that the seed extraction is a **live
+  > behaviour change**. `WireEncryptSeed`'s four original branches -
   > Netmarble, Chinese, English, default - computed only **two** distinct
-  > expressions; the three non-English ones were identical, which a test
-  > asserts across every server number a byte can hold rather than
-  > leaving to a comment.
+  > expressions; the three non-English ones were identical. That
+  > collapse is correct, and a test asserts it across every server
+  > number a byte can hold rather than leaving it to a comment - which
+  > is the only reason a wrong claim about deadness did not become a
+  > silently dead connection. The ordering is safe too: `Wire::SetHost`
+  > runs in `InitGameObject()` during start-up, long before any packet
+  > handler, and `g_pZone` is set by the `MoveZone`/`LoadZone` on the
+  > line above the call.
   >
   > **The first version of the link proof proved nothing**, and it is
   > the lesson worth carrying: it took the address of `processCommand`
@@ -1870,11 +1886,23 @@ starting each — the scan is one grep, and the ranking below is from a
   > `ClientPlayer.cpp`'s old `g_pZone` and `g_pUserInformation`, and
   > does).
   >
+  > **That control worked for the wrong reason, and the review round
+  > caught it.** `__USE_ENCRYPTER__` was on the tool's list of macros
+  > "this build never defines", and it is defined — by `Encrypter.h`.
+  > The control still demonstrated what it was built to demonstrate
+  > (the stripper removes a guarded block, and stops removing it when
+  > told the guard is live), and none of the three files here carries a
+  > conditional on any of the four listed macros other than the
+  > `OUTPUT_DEBUG` ones this slice deleted, so the conclusion holds. But
+  > the list is wrong as stated, and a future use of that tool on a file
+  > that *does* have an `__USE_ENCRYPTER__` branch would under-report.
+  > The correction is written into the third slice's entry above.
+  >
   > **R4 caught what the move would otherwise have hidden.** It rose 21
   > → 24, because it is line-based on purpose and counts a `g_p*` name
   > on a dead line just as readily as on a live one. Raising the
   > baseline would have recorded a debt that is not there; instead the
-  > dead code went — five `OUTPUT_DEBUG` blocks and `ProcessMode`'s
+  > dead code went — seven `OUTPUT_DEBUG` blocks and `ProcessMode`'s
   > entire body, which upstream left commented out. R4 is back at 21
   > with no baseline moved, which is the honest outcome. The comment
   > sweep after that removal found two orphans: a `//#include
@@ -1889,7 +1917,25 @@ starting each — the scan is one grep, and the ranking below is from a
   > The six file-transfer host entries come in same-signature pairs,
   > which is how one gets wired to the wrong entry and still answers, so
   > the test records which was reached rather than only that something
-  > was.
+  > was. **Read what that covers.** It proves `WireHost.cpp`'s six
+  > forwarders each call their matching member. It cannot see the
+  > initialiser actually at risk — `s_WireHost` in `GameInit.cpp`, which
+  > `unit_tests` never links — so transposing two of the four identical
+  > `bool(*)(const std::string&)` entries there would compile and pass
+  > the whole suite. This slice claimed otherwise; both reviewers said
+  > so, then checked all fifteen entries by hand and found them right.
+  >
+  > Two more from that round. `Wire::ReceiveMyRequest` and
+  > `Wire::SendOtherRequest` were declared `throw ()` while the manager
+  > behind them throws by design — `RequestFileManager::SendOtherRequest`
+  > throws `ConnectException("No File to Send")`, and that unwinds to
+  > `RequestServerPlayerManager::Update`'s `catch (Throwable&)`, which
+  > is how a peer transfer ends. MSVC at C++11 propagates it anyway, so
+  > nothing broke today; under `/std:c++17`, or on clang or gcc, it is
+  > `std::terminate`. The specification is gone from those two. And the
+  > no-host tests exercised the *per-member* guard for only four of the
+  > eight new entries — with `s_pHost` NULL the first half of each guard
+  > short-circuits — so all eight are covered now.
   >
   > **One holdout left**: `RequestClientPlayerManager.cpp`, which really
   > does reach game state — `g_pWhisperManager` (4), `g_pUserInformation`
@@ -1897,7 +1943,7 @@ starting each — the scan is one grep, and the ranking below is from a
   > `g_Mode` and the `WHISPER_MESSAGE` type. That is the whisper queue
   > and the logged-in character, a bigger seam than a host of function
   > pointers wants to be.
-  > Suite: 345 tests (4,839 checks).
+  > Suite: 345 tests (4,839 checks). Both numbers rose to 347 / 4,853 with the review round's extra guard assertions.
 - [ ] **5.2 Dead/duplicate source removal** (code-health priority 3): the
   `_bak` files are already excluded by the build — delete them; sort the
   `GameHelpers`/`GameFunctions`/`GamePacketFunctions` exclusion graveyard

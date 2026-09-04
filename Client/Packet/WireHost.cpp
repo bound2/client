@@ -66,8 +66,8 @@ Wire::BugReportTarget () throw ()
 //----------------------------------------------------------------------
 // Zone 0 and server 0 with no host, which is what the seed would be
 // built from before the player is in a zone. There is no better answer
-// to invent: the caller is dead code (see WireEncryptSeed), and a
-// binary with no host has no zone and no account.
+// to invent: a binary with no host has no zone and no account, and the
+// one caller runs only after MoveZone/LoadZone (see WireEncryptSeed).
 //----------------------------------------------------------------------
 ZoneID_t
 Wire::EncryptZoneID () throw ()
@@ -138,7 +138,7 @@ Wire::InGameMode () throw ()
 }
 
 bool
-Wire::ReceiveMyRequest ( const std::string & name , RequestClientPlayer * pPlayer ) throw ()
+Wire::ReceiveMyRequest ( const std::string & name , RequestClientPlayer * pPlayer )
 {
 	if (s_pHost==NULL || s_pHost->ReceiveMyRequest==NULL)
 	{
@@ -171,7 +171,7 @@ Wire::RemoveMyRequest ( const std::string & name ) throw ()
 }
 
 bool
-Wire::SendOtherRequest ( const std::string & name , RequestServerPlayer * pPlayer ) throw ()
+Wire::SendOtherRequest ( const std::string & name , RequestServerPlayer * pPlayer )
 {
 	if (s_pHost==NULL || s_pHost->SendOtherRequest==NULL)
 	{
