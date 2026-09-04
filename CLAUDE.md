@@ -236,12 +236,19 @@ Critical among them. In priority order:
    - **Lengths into copies: ratchet R3, at 0.** Every `sprintf`/`strcpy`/`strcat`
      under `Client/Packet` and `Client/PacketHandler` is bounded or gone, so a
      new one fails the suite.
-   - **Indices into subscripts: ctest `packet_indices`.** It walks the *value*,
-     not the spelling — `array[pPacket->getSlotID()]` has two live instances
-     while `int slot = pPacket->getSlotID();` twenty lines above `array[slot]`
-     has a hundred. 102 packet-indexed subscripts, 91 of them into a
-     `CTypeTable` that range-checks itself, **11 into a raw container**, all
-     guarded. A twelfth fails the suite and has to be read.
+   - **Indices into subscripts: ctest `packet_indices`**, over `Client/Packet`
+     and `Client/PacketHandler`. It walks the *value*, not the spelling —
+     `array[pPacket->getSlotID()]` has two live instances while
+     `int slot = pPacket->getSlotID();` twenty lines above `array[slot]` has a
+     hundred. **114** packet-indexed subscripts, 101 of them into a named,
+     verified `CTypeTable` that range-checks itself, **13 into a container that
+     is not**, all guarded. A fourteenth fails the suite and has to be read.
+     It **fails closed**: a container it does not recognise counts as raw, so
+     adding a name to its allowlist is a deliberate act. Its first version
+     hardcoded the receiver name `pPacket` and so was blind to the 19 handlers
+     that call their parameter something else — the same
+     measure-the-spelling mistake it was built to answer for R7, which is why
+     its header is long.
    - Both passes found live defects, listed under *Found by reading* in the
      review — including one that needs no hostile server at all.
    What remains unaudited is everything the two instruments do not model: a

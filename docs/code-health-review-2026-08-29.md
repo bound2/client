@@ -257,7 +257,7 @@ Nine defects in the `DarkEden` executable, found by running the client against a
 | Effect start position set only on the "start at user" and "start at target" branches | `/RTC1` failure on casting Meteor: `MAGIC_METEOR`, `RESULT_MAGIC_METEOR` and `SKILL_ERUPTION` are flagged sky-only in `Action.inf`, so `x`/`y` reached the effect generator uninitialised | `6b57bfa` |
 ### Found by reading, not by running
 
-Defects of the same weight as the ten above, kept out of that table because they do not meet its definition: each was found by reading during a remediation pass, and none has been observed in play.
+Defects of the same weight as the nine above, kept out of that table because they do not meet its definition: each was found by reading during a remediation pass, and none has been observed in play.
 
 | Defect | Symptom | Commit |
 |---|---|---|
@@ -266,6 +266,12 @@ Defects of the same weight as the ten above, kept out of that table because they
 | The four PCS handlers index `UserInformation` with an unbounded wire slot | `SlotID_t` is a `BYTE` and no `read()` bounds it, against `PCSUserName[3]` and `OtherPCSNumber[3]`. `MString::operator=` reads `m_pString` out of whatever lies at that offset and `delete[]`s it, so `GCPhoneConnected`, `GCPhoneDisconnected`, `GCPhoneSay` and `GCRing` gave a server an **arbitrary free and an arbitrary write** into the heap | the packet-index pass |
 | `GCRemoveFromGear` reads `addonSlot[slotID]` past the end of a stack array | `MSlayerGear::RemoveItem` bounds `slotID` to `m_Size` — `MAX_GEAR_SLAYER` (27), or 28 for the other two races — while the `addonSlot` arrays hold 15 and 16 entries. Unequipping a ZAP, a PDA, a shoulder or a blood bible read up to **twelve ints** past the array and handed the result to `RemoveAddon`. **No hostile server needed**: this fires in ordinary play | the packet-index pass |
 | `GCLearnSkillReady` reads `SKILLDOMAIN_NAME[domainType]` from an unbounded `BYTE` | `SkillDomainType_t` is a `BYTE`, `read()` does not bound it, and `SKILLDOMAIN_NAME` is a plain `int[MAX_SKILLDOMAIN]`. The out-of-range read was then handed to the string table as an id. (`(*g_pSkillManager)[domainType]` on the line above survives it — `MSkillManager` is a `CTypeTable`, which range-checks in every build) | the packet-index pass |
+
+### Open, found during the packet-index pass and not fixed
+
+**`GCRemoveFromGearHandler`'s vampire `addonSlot[]` maps both hand slots to `ADDON_NULL`.** The table's entries 10 and 11 are labelled `GEAR_VAMPIRE_WEAPON1` / `WEAPON2` — names that no longer exist in `MVampireGear::GEAR_VAMPIRE`, where positions 10 and 11 are `LEFTHAND` and `RIGHTHAND`. The slayer and ousters tables map their hand slots to `ADDON_LEFTHAND` / `ADDON_RIGHTHAND`; the vampire one does not. So a vampire unequipping a weapon never has the hand addon removed, and the two-hand fixup directly above it — which exists only to redirect the removal to the right hand — is a no-op by construction.
+
+It is upstream drift from a rename, and the fix looks obvious (map 10 and 11 like the other two races). It is **left open deliberately**: it changes what a vampire looks like after unequipping, which is executable-side and can only be verified by running the client, and the pass that found it was about memory safety rather than rendering. Whoever takes it should confirm against a live server that the addon frames for vampire hands exist and are the ones those two slots should drive.
 
 ### Caveats
 

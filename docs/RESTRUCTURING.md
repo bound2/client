@@ -144,10 +144,22 @@ English table. `check_packet_indices.pl` (ctest `packet_indices`) is the
 index half of code-health priority 1: it walks the **value** rather than
 the spelling, because `array[pPacket->getSlotID()]` has two live
 instances in the tree while `int slot = pPacket->getSlotID();` twenty
-lines above `array[slot]` has a hundred. It reports 102 packet-indexed
-subscripts, 91 of them into a `CTypeTable` that range-checks itself, and
-holds a ceiling of **11 into a raw container** — all guarded today, and a
-twelfth has to be read before the number moves.
+lines above `array[slot]` has a hundred. Over `Client/Packet` and
+`Client/PacketHandler` it reports **114** packet-indexed subscripts, 101
+of them into a named, verified `CTypeTable`, and holds a ceiling of **13
+into a container that is not** — all guarded today, and a fourteenth has
+to be read before the number moves.
+
+**It made the mistake it exists to catch, and its review round found
+it.** The first version hardcoded the receiver name `pPacket`, while 19
+handlers call their parameter something else; it also missed the direct
+`array[p->getX()]` form it claimed to supersede, subscripts split across
+lines, and one hop between locals. Fixing all four took 102 → 114 with
+nothing in the tree changed. Its exclusion of range-checked containers
+was a *pattern* over `(*g_p...)` too, which would have silently excluded
+`(*g_pGameMessage)[i]` — `CMessageArray::operator[]` does truncating
+arithmetic rather than a range test — so it is a named allowlist now and
+fails closed.
 
 ---
 
