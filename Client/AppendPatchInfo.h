@@ -16,7 +16,6 @@
 #include "CTypeTable.h"
 #include <fstream>
 #include <vector>
-using namespace std;
 
 //-----------------------------------------------------------------------------
 // APPEND_PATCH_NODE

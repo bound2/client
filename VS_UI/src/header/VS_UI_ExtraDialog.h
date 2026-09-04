@@ -169,7 +169,7 @@ public:
 	bool	GetParentDir(char *sz_name);
 
 	const char *	GetFileName()	{ if(m_filename.empty())return NULL; return m_filename.c_str(); }
-	void	Start(char *type);
+	void	Start(const char *type);
 	void	Finish();
 
 	void	Show();
@@ -231,7 +231,7 @@ private:
 	bool							m_bl_up_focused;
 	bool							m_bl_down_focused;
 
-	char *				m_sz_question_msg[1];
+	const char *			m_sz_question_msg[1];
 
 	void	ScrollButton(bool up);
 
@@ -285,7 +285,7 @@ private:
 
 	//static char *				m_sz_question_msg[1];	// 주석처리 by sigi
 	//static char *				m_sz_question_msg_for_storage[1];	// 주석처리 by sigi
-	char *					m_sz_question_msg[MAX_MONEY_DIALOG_TYPE][1];		// by sigi
+	const char *			m_sz_question_msg[MAX_MONEY_DIALOG_TYPE][1];		// by sigi
 
 	TYPE_MONEY_DIALOG		m_type;	// dialog type	 by sigi
 	
@@ -347,7 +347,7 @@ private:
 	TYPE_ASK_DIALOG			m_type;
 
 	char *						m_sz_question_msg_temp[2];
-	char *						m_sz_question_msg[MAX_ASK_DIALOG_TYPE][5];
+	const char *				m_sz_question_msg[MAX_ASK_DIALOG_TYPE][5];
 	
 	DWORD	m_dwTemporayValue;
 	void*	m_pTemporayValue;

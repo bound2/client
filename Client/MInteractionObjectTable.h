@@ -22,7 +22,6 @@
 #include "MTypeDef.h"
 
 #include <fstream>
-using namespace std;
 
 //----------------------------------------------------------------------
 //

@@ -53,7 +53,6 @@
 #include "MObject.h"
 #include "DrawTypeDef.h"
 
-using namespace std;
 
 #define	IMAGEOBJECT_NULL	0xFFFF
 #define OBJECT_TRANS_FLAG	1

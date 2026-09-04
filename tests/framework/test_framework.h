@@ -4,7 +4,7 @@
 //
 // Minimal self-registering unit test framework.
 //
-// The project targets C++11 and has no test dependency available through
+// The project targets C++20 and has no test dependency available through
 // vcpkg, so this replaces GoogleTest with the smallest thing that supports
 // the workflow we need: declare a test, assert inside it, get a non-zero
 // exit code when something fails so CTest reports it.

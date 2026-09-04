@@ -62,7 +62,6 @@
 #include <map>
 #include <queue>
 
-using namespace std;
 
 //----------------------------------------------------------------------
 //
@@ -158,10 +157,10 @@ class MTopView : public MRequestMode {
 		//
 		//------------------------------------------------------		
 		void		LoadMinimap(const char* filename);//, MZoneInfo* pZoneInfo=NULL);
-		bool		LoadFromFileTileSPKLargeZone(ifstream & file);	// zone관련 spk load
-		bool		LoadFromFileImageObjectSPKLargeZone(ifstream & file);	// zone관련 spk load
-		bool		LoadFromFileTileSPKSmallZone(ifstream & file);	// zone관련 spk load
-		bool		LoadFromFileImageObjectSPKSmallZone(ifstream & file);	// zone관련 spk load
+		bool		LoadFromFileTileSPKLargeZone(std::ifstream & file);	// zone관련 spk load
+		bool		LoadFromFileImageObjectSPKLargeZone(std::ifstream & file);	// zone관련 spk load
+		bool		LoadFromFileTileSPKSmallZone(std::ifstream & file);	// zone관련 spk load
+		bool		LoadFromFileImageObjectSPKSmallZone(std::ifstream & file);	// zone관련 spk load
 		void		LoadFromFileCreatureSPK(int n);			// creature load		
 // 		void		LoadFromFileAddonSPK(int frame, int action);		// addon load		
 //		void		LoadFromFileCreatureActionSPK(int frame, int action);		// addon load		

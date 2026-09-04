@@ -120,7 +120,6 @@
 //#include "SkillDef.h"
 #include "MString.h"
 #include <fstream>
-using namespace std;
 
 //----------------------------------------------------------------------
 // 기술의 속성에 대한 flag

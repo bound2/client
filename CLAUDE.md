@@ -1,7 +1,7 @@
 # OpenDarkEden Client
 
 Isometric horror MMORPG client — slayers, vampires, ousters. Korean original from
-roughly 2000-2010, ported from Win32 + DirectX to SDL2. C++11, CMake, MSVC.
+roughly 2000-2010, ported from Win32 + DirectX to SDL2. C++20, CMake, MSVC.
 
 `README.md` is the human setup guide: prerequisites, vcpkg, generating the solution,
 running the game, troubleshooting. **Link to it rather than restating it.** This file
@@ -109,7 +109,7 @@ and checked but kept out of the rendered file, because the server deleted its co
 
 ### The framework
 
-`tests/framework/test_framework.h` — a minimal self-registering C++11 framework, not
+`tests/framework/test_framework.h` — a minimal self-registering framework, not
 GoogleTest. Tests register during static initialisation and `tests/unit/*.cpp` is
 globbed, so adding a test means adding a file; there is no runner to edit.
 

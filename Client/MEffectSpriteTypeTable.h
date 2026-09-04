@@ -23,7 +23,6 @@
 
 #include <fstream>
 #include <list>
-using namespace std;
 //#include "EffectSpriteTypeDef.h"
 
 //----------------------------------------------------------------------

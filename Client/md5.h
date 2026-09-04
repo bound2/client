@@ -71,7 +71,7 @@ protected:
 	char fname[MAX_PATH];
 	LONG64 FileLen;
 	static const ULONG Context[4];
-	static const LPSTR ErrInfo[5][2];
+	static LPCSTR ErrInfo[5][2];
 	char strErr[50];
 	char Digest[33];
 };

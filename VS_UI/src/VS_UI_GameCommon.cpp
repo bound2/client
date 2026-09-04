@@ -605,7 +605,7 @@ void g_StartSellFinishDialog(int _x, int _y)
 	DeleteNew(gpC_dialog_sell_finish);
 	
 	gpC_dialog_sell_finish = new C_VS_UI_DIALOG(_x, _y, 2, 1, ExecF_SellFinish, DIALOG_OK);
-	static char * pp_dmsg_sell_finish[4] = {
+	static const char * pp_dmsg_sell_finish[4] = {
 		(*g_pGameStringTable)[UI_STRING_MESSAGE_CLICK_TRADE_ITEM].GetString(),
 		(*g_pGameStringTable)[UI_STRING_MESSAGE_CLICK_OK_BUTTON_TO_END].GetString(),
 		"",
@@ -35866,4 +35866,3 @@ bool C_VS_UI_WORLDMAP::TimerMinimap()
 	
 	return false;
 }
-

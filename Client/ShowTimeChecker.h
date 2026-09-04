@@ -11,7 +11,6 @@
 #include "../../basic/Platform.h"
 
 #include <fstream>
-using namespace std;
 #endif
 
 class ShowTimeChecker {

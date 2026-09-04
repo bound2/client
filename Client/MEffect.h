@@ -58,7 +58,6 @@ MEffect: Effect anchored to a Tile
 #include "EffectResourceContainer.h"
 
 #include <fstream>
-using namespace std;
 
 
 

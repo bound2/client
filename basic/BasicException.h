@@ -27,6 +27,6 @@ enum EXCEPTION_CODE
 };
 
 void g_SetNewHandler();
-void g_BasicException(EXCEPTION_CODE code, char * sz_error, char * file, unsigned long line);
+void g_BasicException(EXCEPTION_CODE code, const char* sz_error, const char* file, unsigned long line);
 
 #endif

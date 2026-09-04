@@ -14,7 +14,6 @@
 #include "MZoneDef.h"
 
 #include <fstream>
-using namespace std;
 
 //----------------------------------------------------------------------
 // FILEINFO_ZONE_HEADER

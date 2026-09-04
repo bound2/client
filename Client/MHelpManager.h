@@ -40,7 +40,6 @@
 #include "Client_PCH.h"
 #include <fstream>
 #include <list>
-using namespace std;
 #ifdef __GAME_CLIENT__
 	#include "UserOption.h"
 #endif

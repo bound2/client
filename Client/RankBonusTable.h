@@ -13,7 +13,6 @@
 #include "RaceType.h"
 
 #include <fstream>
-using namespace std;
 
 
 //---------------------------------------------------------------------------------

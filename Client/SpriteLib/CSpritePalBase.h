@@ -7,7 +7,6 @@
 #else
 	#include "../basic/Platform.h"
 	#include <cstring>
-	using namespace std;
 #endif
 
 // Included here rather than only on the non-Windows branch: the

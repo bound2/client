@@ -29,6 +29,7 @@ using std::map;
 using std::list;
 using std::deque;
 using std::bitset;
+using std::endl;
 using std::ifstream;
 using std::ofstream;
 

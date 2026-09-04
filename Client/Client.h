@@ -17,7 +17,6 @@
 #else
 #include "../basic/Platform.h"
 #include <fstream>
-using namespace std;
 #endif
 #include "DebugInfo.h"
 
@@ -301,7 +300,7 @@ void		SetWeather(int weather, int level);
 void		SetLightning(DWORD delay);
 
 // file열기
-bool		FileOpenBinary(const char* filename, ifstream& file);
+bool		FileOpenBinary(const char* filename, std::ifstream& file);
 
 // 2004, 3, 29 sobeit add start
 void		Add_GDR_Ghost(int ZoneID);

@@ -964,7 +964,7 @@ public:
 	void	HelpDescPasing();
 	void    LoadCustomstr(char * customstrfilename);
 	void	DrawImg(int m_width, int m_height ,const char * filename,const char * pos, int linecnt);
-	char*   findkey(const char* tagstr ,char* keyword);
+	char*   findkey(const char* tagstr, const char* keyword);
 //
 	std::vector<std::string>	parsing_data;	
 	std::vector<std::string>	custom_strting;
@@ -1437,9 +1437,9 @@ private:
 	std::vector<_GQuestExcuteElement*>	m_QuestExcutElement; // 퀘스트 ExcuteElement 리스트
 	
 	bool						UpdateQuestInfo(_GQuestInfo *QInfo, int nType = -1);
-	char*						GetQuestTitle(const XMLTree *pElement);
-	char*						GetQuestDescription(const XMLTree *pElement);
-	char*						GetMissionTitle(const XMLTree *pElement, WORD Index, BYTE Condition);
+	const char*					GetQuestTitle(const XMLTree *pElement);
+	const char*					GetQuestDescription(const XMLTree *pElement);
+	const char*					GetMissionTitle(const XMLTree *pElement, WORD Index, BYTE Condition);
 	const XMLTree *				GetMissionElement(const XMLTree *pElement, BYTE Condition);
 public:
 	enum INFO_SPK

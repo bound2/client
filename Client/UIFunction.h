@@ -138,7 +138,7 @@ extern void		UI_UnlockGear();
 //-----------------------------------------------------------------------------
 // Chat
 //-----------------------------------------------------------------------------
-extern void		UI_AddChatToHistory(char* str, char* sz_id, int cond, DWORD color);
+extern void		UI_AddChatToHistory(const char* str, const char* sz_id, int cond, DWORD color);
 
 //-----------------------------------------------------------------------------
 // Tutorial
@@ -246,7 +246,7 @@ extern int		UI_GetHotKey(int hotkey);
 //-----------------------------------------------------------------------------
 // ID기억
 //-----------------------------------------------------------------------------
-extern void		UI_BackupLoginID(char *);
+extern void		UI_BackupLoginID(const char *);
 
 //-----------------------------------------------------------------------------
 // mouse pointer

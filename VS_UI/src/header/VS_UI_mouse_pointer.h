@@ -86,7 +86,7 @@ public:
 
 	void	SetCursor(int cursor)						{ m_cursor = cursor; }
 	void	SetCursorDefault();
-	void	SetCursorPickUp(LPSTR str, COLORREF color);
+	void	SetCursorPickUp(LPCSTR str, COLORREF color);
 	void	SetCursorAttack();
 	void	SetCursorAddFriend();
 	void	CursorDescriptionToggle();

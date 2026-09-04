@@ -12,7 +12,6 @@
 
 #include <fstream>
 #include <map>
-using namespace std;
 
 //----------------------------------------------------------------------
 // GUILD_INFO

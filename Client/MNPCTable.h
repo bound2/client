@@ -12,7 +12,7 @@
 		} // 반복
 		
 		int DescriptionLength; // 설명의 길이
-		string Description; // 설명 내용
+		std::string Description; // 설명 내용
 		
 	} // 반복
 
@@ -30,7 +30,6 @@
 #include "MString.h"
 
 #include <fstream>
-using namespace std;
 
 //----------------------------------------------------------------------
 // NPC_INFO

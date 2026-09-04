@@ -16,7 +16,7 @@ class COpeningUpdate : public CWinUpdate {
 
 		void		Init();
 
-		void		PlayMPG(char* filename);				
+		void		PlayMPG(const char* filename);
 		void		Update();		
 
 	protected :

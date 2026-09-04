@@ -32,7 +32,6 @@ typedef struct IDirectSoundBuffer* LPDIRECTSOUNDBUFFER;
 #include <map>
 
 #include <fstream>
-using namespace std;
 
 //-----------------------------------------------------------------------------
 // ZONESOUND_NODE

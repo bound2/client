@@ -37,9 +37,9 @@ extern RECT g_GameRect;
 // the subscript answers a default MString whose GetString() is NULL, and
 // these rows are handed to strlen().
 //-----------------------------------------------------------------------------
-static char* AskString(int nStringID)
+static const char* AskString(int nStringID)
 {
-	return const_cast<char*>(GetGameString(nStringID));
+	return GetGameString(nStringID);
 }
 
 Window* g_desc_dialog_window_id = NULL;
@@ -2479,7 +2479,7 @@ C_VS_UI_FILE_DIALOG::~C_VS_UI_FILE_DIALOG()
 // 여러개의 파일 검색 가능.	; 로 구분
 // ex> C_VS_UI_FILE_DIALOG::Start(".bmp;.jpg;.pcx;.tga;.gif"); by sonee
 //-----------------------------------------------------------------------------
-void C_VS_UI_FILE_DIALOG::Start(char *type)
+void C_VS_UI_FILE_DIALOG::Start(const char *type)
 {
 	PI_Processor::Start();
 	m_pC_button_group->Init();
@@ -2490,7 +2490,7 @@ void C_VS_UI_FILE_DIALOG::Start(char *type)
 	for(i=0,nType=1;i<strlen(type);i++)
 		if(type[i]==';') nType++;
 
-	char *p_type;
+	const char *p_type;
 	
 	if(type == NULL)
 		m_filter.clear();		
@@ -2501,7 +2501,7 @@ void C_VS_UI_FILE_DIALOG::Start(char *type)
 		m_filter.reserve(nType);
 		for(i=0;i<nType;i++)
 		{
-			char *p_type_end;
+			const char *p_type_end;
 			
 			if(i==nType-1)
 				p_type_end=&type[strlen(type)];

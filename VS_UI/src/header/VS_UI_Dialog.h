@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 struct DIALOG_MENU
 {
-	char *		sz_menu_str;
+	const char *	sz_menu_str;
 	id_t		exec_id;
 };
 
@@ -193,7 +193,7 @@ public:
 	virtual void	Start();
 	void	Finish();
 
-	void	SetMessage(char ** sz_msg, UINT line_count, SETMESSAGE_MODE_OPTION mode=SMO_FIT);
+	void	SetMessage(const char * const * sz_msg, UINT line_count, SETMESSAGE_MODE_OPTION mode=SMO_FIT);
 	void	SetMenu(const DIALOG_MENU * p_dialog_menu, UINT menu_count, bool menu_only=true);
 
 	void	StartByPinMode();

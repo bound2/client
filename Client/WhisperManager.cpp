@@ -24,7 +24,7 @@ WhisperManager*		g_pWhisperManager = NULL;
 //----------------------------------------------------------------------
 	extern ClientPlayer*		g_pSocket;
 
-extern void		UI_AddChatToHistory(char* str, char* sz_id, int cond, DWORD color);
+extern void		UI_AddChatToHistory(const char* str, const char* sz_id, int cond, DWORD color);
 
 
 //----------------------------------------------------------------------

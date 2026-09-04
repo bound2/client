@@ -20,7 +20,6 @@
 #include "MString.h"
 #include <fstream>
 
-using namespace std;
 
 //----------------------------------------------------------------------
 // Flag CreatureType

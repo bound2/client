@@ -8,7 +8,7 @@ void g_SetNewHandler()
 	// For SDL backend, this is a stub
 }
 
-void g_BasicException(EXCEPTION_CODE code, char* sz_error, char* file, unsigned long line)
+void g_BasicException(EXCEPTION_CODE code, const char* sz_error, const char* file, unsigned long line)
 {
 	// Basic exception handler
 	if (sz_error == NULL)

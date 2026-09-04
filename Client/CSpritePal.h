@@ -8,7 +8,6 @@
 #endif
 #include "CTypeTable.h"
 #include <fstream>
-using namespace std;
 
 class MPalette
 {
@@ -51,8 +50,8 @@ public:
 	//--------------------------------------------------------
 	// file I/O
 	//--------------------------------------------------------
-	bool LoadFromFile(ifstream &file);
-	bool SaveToFile(ofstream &file);
+	bool LoadFromFile(std::ifstream &file);
+	bool SaveToFile(std::ofstream &file);
 };
 
 class MPalette565 : public MPalette
@@ -61,8 +60,8 @@ public:
 	//--------------------------------------------------------
 	// file I/O
 	//--------------------------------------------------------
-	bool LoadFromFile(ifstream &file);
-	bool SaveToFile(ofstream &file);
+	bool LoadFromFile(std::ifstream &file);
+	bool SaveToFile(std::ofstream &file);
 };
 
 class MPalettePack
@@ -91,8 +90,8 @@ public:
 	//--------------------------------------------------------
 	// file I/O
 	//--------------------------------------------------------
-	bool LoadFromFile(ifstream &file, bool b565 = true);
-	bool SaveToFile(ofstream &file);
+	bool LoadFromFile(std::ifstream &file, bool b565 = true);
+	bool SaveToFile(std::ofstream &file);
 
 	bool LoadFromFile(LPCTSTR lpszFilename, bool b565 = true);
 	bool SaveToFile(LPCTSTR lpszFilename);
@@ -127,8 +126,8 @@ public:
 	//--------------------------------------------------------
 	// file I/O
 	//--------------------------------------------------------
-	bool LoadFromFile(ifstream &file);
-	bool SaveToFile(ofstream &file);
+	bool LoadFromFile(std::ifstream &file);
+	bool SaveToFile(std::ofstream &file);
 
 	//--------------------------------------------------------
 	// Get Functions
@@ -191,8 +190,8 @@ public:
 	//--------------------------------------------------------
 	// file I/O
 	//--------------------------------------------------------
-	bool LoadFromFile(ifstream &file);
-	bool SaveToFile(ofstream &file);
+	bool LoadFromFile(std::ifstream &file);
+	bool SaveToFile(std::ofstream &file);
 	
 	bool LoadFromFile(LPCTSTR lpszFilename);
 	bool SaveToFile(LPCTSTR lpszFilename);

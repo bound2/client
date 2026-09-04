@@ -12,7 +12,6 @@
 #include "MString.h"
 
 #include <fstream>
-using namespace std;
 
 //#define	MAX_PARTNAME_LENGTH		48
 #define UNIQUE_ITEM_COLOR		0xffff

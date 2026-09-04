@@ -4,7 +4,6 @@
 #include "CTypeTable.h"
 
 #include <fstream>
-using namespace std;
 
 
 typedef unsigned char	BYTE;

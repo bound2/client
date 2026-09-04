@@ -882,7 +882,7 @@ void C_VS_UI_DIALOG::Finish()
 // 만약 일반 다이알로그에서 문제가 생길시 주석처리된 ----[Fix] 부분을 주석처리를 해제해주도록 한다.
 // 수정사항에서는 이부분만 변경되었다.
 //-----------------------------------------------------------------------------
-void C_VS_UI_DIALOG::SetMessage(char ** sz_msg, UINT line_count, SETMESSAGE_MODE_OPTION mode)
+void C_VS_UI_DIALOG::SetMessage(const char * const * sz_msg, UINT line_count, SETMESSAGE_MODE_OPTION mode)
 {
 	assert(sz_msg != NULL);
 	assert(line_count > 0);

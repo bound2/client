@@ -13,7 +13,6 @@
 #include "MString.h"
 
 #include <fstream>
-using namespace std;
 
 //----------------------------------------------------------------------
 // SERVER_INFO

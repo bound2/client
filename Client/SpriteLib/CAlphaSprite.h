@@ -16,8 +16,9 @@
 #include "SpriteLibBackend.h"
 #endif
 
-std::ofstream;
-std::ifstream;
+using std::ifstream;
+using std::ios;
+using std::ofstream;
 
 
 //----------------------------------------------------------------------
