@@ -49,8 +49,8 @@ void GCExchangeBuy::read(SocketInputStream & iStream)
 		m_Message.clear();
 	}
 
-	// no 64-bit stream overload exists - read the raw 8 bytes directly
-	iStream.read((char*)&m_OrderID, sizeof(ulonglong));
+	// The wire scalar constraint pins this identifier to its exact 64-bit width.
+	iStream.readWire(m_OrderID);
 
 	__END_CATCH
 }
@@ -75,8 +75,8 @@ void GCExchangeBuy::write(SocketOutputStream & oStream) const
 	if (szMessage > 0)
 		oStream.write(m_Message.c_str(), szMessage);
 
-	// no 64-bit stream overload exists - write the raw 8 bytes directly
-	oStream.write((const char*)&m_OrderID, sizeof(ulonglong));
+	// The wire scalar constraint pins this identifier to its exact 64-bit width.
+	oStream.writeWire(m_OrderID);
 
 	__END_CATCH
 }

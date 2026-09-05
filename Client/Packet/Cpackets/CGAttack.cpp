@@ -44,10 +44,12 @@ void CGAttack::read (SocketInputStream & iStream)
 	else
 #endif
 	{
-		iStream.read((char*)&m_ObjectID , szObjectID);
-		iStream.read((char*)&m_X , szCoord);
-		iStream.read((char*)&m_Y , szCoord);
-		iStream.read((char*)&m_Dir , szDir);
+		std::uint32_t objectID = 0;
+		iStream.readWire(objectID);
+		m_ObjectID = static_cast<ObjectID_t>(objectID);
+		iStream.readWire(m_X);
+		iStream.readWire(m_Y);
+		iStream.readWire(m_Dir);
 	}
 
 	__END_CATCH
@@ -73,10 +75,10 @@ void CGAttack::write (SocketOutputStream & oStream) const
 	else
 #endif
 	{
-		oStream.write((char*)&m_ObjectID , szObjectID);
-		oStream.write((char*)&m_X , szCoord);
-		oStream.write((char*)&m_Y , szCoord);
-		oStream.write((char*)&m_Dir , szDir);
+		oStream.writeWire(static_cast<std::uint32_t>(m_ObjectID));
+		oStream.writeWire(m_X);
+		oStream.writeWire(m_Y);
+		oStream.writeWire(m_Dir);
 	}
 
 	__END_CATCH

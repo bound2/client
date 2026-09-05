@@ -344,6 +344,17 @@ a pre-migration golden pins the complete body byte-for-byte. Future slices shoul
 migrate small packet families behind equivalent round-trip/golden coverage rather
 than expanding this into a mechanical whole-tree rewrite.
 
+**Typed-scalar status (2026-09-04):** the first priority-4 slice is implemented
+in PR #85. The stream layer accepts only exact-width signed
+and unsigned integers, or enums backed by those types, through constrained
+`readWire`/`writeWire` entry points. Existing plain and encrypted scalar overloads
+remain compatible and delegate to that implementation; ambiguous `bool` and plain
+`char` behavior is deliberately unchanged. The Exchange buy/list 64-bit identifiers
+and the ordinary `CGAttack` combat path are the representative migrations,
+protected by client/server-shared goldens across every encryption code. Later
+slices can migrate remaining raw scalar casts family by family without widening
+the accepted type set.
+
 ### Packet modernization guardrails
 
 Packet I/O is the highest-value area but also the easiest place to cause a silent

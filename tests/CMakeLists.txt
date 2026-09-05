@@ -106,6 +106,7 @@ set_source_files_properties(
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_factories.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_goldens.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_span_io.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_wire_scalar.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_stringstream.cpp
 	# gamemodel compiles with the same definitions: its headers reach
 	# Client/Packet/Exception.h, whose inline bodies switch on __WIN32__,
