@@ -105,8 +105,11 @@ struct SDirectoryEntry
 
 /*-----------------------------------------------------------------------------
   Whether subdirectories join the result. LIST_FILES_ONLY is the sane
-  default for new code; LIST_FILES_AND_DIRECTORIES is what a legacy
-  _findfirst walk saw and is what a migrated one asks for.
+  default for new code. LIST_FILES_AND_DIRECTORIES is what a legacy
+  _findfirst walk saw; a migrated walk asks for it only when its body
+  could act on a directory (InitProfiles does), and a walk that only
+  remove()s or opens each entry lists files, because neither call can
+  act on a directory.
 -----------------------------------------------------------------------------*/
 enum EListFilter
 {

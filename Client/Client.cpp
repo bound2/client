@@ -3977,34 +3977,53 @@ WinMain(HINSTANCE hInstance,
 			if (errno==ENOENT)
 			{				
 			}
-			// 뭔가 있어서 안 지워진 경우..		
+			// Not removed because something is inside.
 			else //if (errno==ENOTEMPTY)
 			{
-				// 현재 directory를 기억해둔다.				
+				// The current directory is already remembered in CWD.
 				if (_chdir( UpdateDir ) == 0)
 				{
 					//---------------------------------------------------
-					// file하나하나를 지워준다. T_T;
+					// Delete the files one by one. T_T;
+					//
+					// The _chdir dance above is kept, so remove() still
+					// takes a bare name relative to the Update directory
+					// and the working directory is restored below exactly
+					// as it was.
+					//
+					// Files only, where the legacy "*.*" also matched
+					// subdirectories: remove() cannot delete a directory
+					// on Windows, so the entries no longer listed are
+					// exactly the ones this loop could never have acted
+					// on. The pattern is "*" and not "*.*" because a '.'
+					// is a literal to Basic::ListDirectory while Win32
+					// read "*.*" as "everything"; asking for "*.*" here
+					// would silently drop every dotless name.
 					//---------------------------------------------------
-					struct _finddata_t	FileData;
-					long				hFile;
+					std::vector<Basic::SDirectoryEntry>	vUpdateFiles;
 
-					// 모든 화일을 읽어온다.
-					if( (hFile = _findfirst( "*.*", &FileData )) != -1L )					
+					// Read every file.
+					if ( Basic::ListDirectory( ".", "*", vUpdateFiles ) )
 					{
-						while (_findnext( hFile, &FileData ) == 0)
+						for (size_t iFile=0; iFile<vUpdateFiles.size(); iFile++)
 						{
-							// .으로 시작하는 건 지울 필요 없당..
-							if (FileData.name[0] != '.')
+							const std::string&	sFilename = vUpdateFiles[iFile].sName;
+
+							// No need to delete names starting with a dot.
+							// "." and ".." are never listed, so the test
+							// now only skips dotfiles - and every listed
+							// entry is processed, where the legacy
+							// while/_findnext loop dropped the entry
+							// _findfirst itself had returned. On NTFS
+							// "*.*" returned "." first, so the skip only
+							// ever lost ".".
+							if (!sFilename.empty() && sFilename[0] != '.')
 							{
-								remove( FileData.name );
+								remove( sFilename.c_str() );
 							}
 						}
-
-						// 끝
-						_findclose( hFile );			
 					}
-					
+
 					_chdir( CWD );
 
 					if (_rmdir( UpdateDir )==0)

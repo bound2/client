@@ -7,6 +7,12 @@
 #include "UpdateUtility.h"
 //#include "SPKFileLib.h"
 #include "CFileIndexTable.h"
+// std::filesystem directory enumeration, in place of the _findfirst /
+// _findnext walks UUFDeleteDirectory() and UUFDeleteFiles() used to run
+// (docs/cpp17-cpp20-compatibility-assessment-2026-09-04.md, priority 6).
+// Included before the NULL redefinition below so that the standard
+// headers it pulls in see the compiler's own NULL.
+#include "DirectoryListing.h"
 
 
 #define	NULL	0
@@ -106,43 +112,68 @@ UUFDeleteDirectory(const char* dirName)
 		{
 			return true;
 		}
-		// 뭔가 있어서 안 지워진 경우..
+		// Not removed because something is inside.
 		else //if (errno!=ENOENT)
 		{
 			char CWD[_MAX_PATH];
 
-			// 현재 directory를 기억해둔다.				
+			// Remember the current directory.
 			GetCurrentDirectory(_MAX_PATH, CWD);
 			
 			if (_chdir( dirName ) == 0)
 			{
 				//---------------------------------------------------
-				// file하나하나를 지워준다. T_T;
+				// Delete the files one by one. T_T;
+				//
+				// The _chdir dance is kept, so remove() still takes a
+				// bare name relative to dirName and the working
+				// directory is restored below exactly as it was.
+				//
+				// Files only, where the legacy "*.*" also matched
+				// subdirectories: remove() cannot delete a directory on
+				// Windows, so the entries no longer listed are exactly
+				// the ones this loop could never have acted on. The
+				// pattern is "*" and not "*.*" because a '.' is a
+				// literal to Basic::ListDirectory while Win32 read
+				// "*.*" as "everything".
 				//---------------------------------------------------
-				struct _finddata_t	FileData;
-				long				hFile;
+				std::vector<Basic::SDirectoryEntry>	vFiles;
 
-				// 모든 화일을 읽어온다.
-				if( (hFile = _findfirst( "*.*", &FileData )) != -1L )					
+				// Read every file.
+				if ( Basic::ListDirectory( ".", "*", vFiles ) )
 				{
-					do
+					for (size_t iFile=0; iFile<vFiles.size(); iFile++)
 					{
-						// .으로 시작하는 건 지울 필요 없당..
-						if (FileData.name[0] != '.')
+						const std::string&	sFilename = vFiles[iFile].sName;
+
+						// No need to delete names starting with a dot.
+						// "." and ".." are never listed, so the test now
+						// only skips dotfiles.
+						if (!sFilename.empty() && sFilename[0] != '.')
 						{
-							remove( FileData.name );
+							remove( sFilename.c_str() );
 						}
 					}
-					while (_findnext( hFile, &FileData ) == 0);
-
-					// 끝
-					_findclose( hFile );			
 				}
 				else
 				{
+					// A readable but empty directory lists nothing and
+					// returns true, which is what _findfirst( "*.*" ) did
+					// - "." always matched, so the legacy walk never took
+					// this branch for a directory it had just chdir'd
+					// into. This branch is taken for a directory that
+					// cannot be enumerated, as before, and also for a
+					// mid-walk error, which the listing treats as
+					// all-or-nothing where the legacy walk kept what it
+					// had already deleted.
+					//
+					// This early return leaves the working directory in
+					// dirName. The leak is pre-existing and deliberately
+					// not fixed here, though the widened failure set
+					// means slightly more runs can reach it.
 					return false;
 				}
-				
+
 //				_chdir( "..\\" );
 				SetCurrentDirectory(CWD);
 				if (_rmdir( dirName )==0)
@@ -177,29 +208,52 @@ UUFDeleteFiles(const char *path, const char *fileext)
 	if (_chdir( path ) == 0)
 	{
 		//---------------------------------------------------
-		// file하나하나를 지워준다. T_T;
+		// Delete the files one by one. T_T;
+		//
+		// The _chdir dance is kept, so remove() still takes a bare
+		// name relative to path and the working directory is restored
+		// below exactly as it was.
+		//
+		// Files only, where the legacy pattern could also match a
+		// subdirectory: remove() cannot delete a directory on Windows,
+		// so the entries no longer listed are exactly the ones this
+		// loop could never have acted on.
 		//---------------------------------------------------
-		struct _finddata_t	FileData;
-		long				hFile;
-		
-		// 모든 화일을 읽어온다.
-		if( (hFile = _findfirst( fileext, &FileData )) != -1L )					
+
+		//---------------------------------------------------
+		// fileext is caller-supplied and was a _findfirst pattern, and
+		// Win32 reads "*.*" as "everything" rather than as "names
+		// containing a dot". Basic::ListDirectory takes the '.'
+		// literally, so the spelling is translated here rather than at
+		// a call site: this function has no caller in the tree, so
+		// there is no call site to fix, and the header keeps
+		// advertising the DOS spelling callers would reach for. The
+		// remaining DOS-only quirks - "*." meaning "no extension", a
+		// trailing '?' matching zero characters - are not translated;
+		// no pattern in this tree uses either.
+		//---------------------------------------------------
+		const char*	pPattern = (fileext != NULL && strcmp( fileext, "*.*" ) == 0) ? "*" : fileext;
+
+		std::vector<Basic::SDirectoryEntry>	vFiles;
+
+		// Read every file.
+		if ( Basic::ListDirectory( ".", pPattern, vFiles ) )
 		{
-			do
+			for (size_t iFile=0; iFile<vFiles.size(); iFile++)
 			{
-				// .으로 시작하는 건 지울 필요 없당..
-				if (FileData.name[0] != '.')
+				const std::string&	sFilename = vFiles[iFile].sName;
+
+				// No need to delete names starting with a dot. "." and
+				// ".." are never listed, so the test now only skips
+				// dotfiles.
+				if (!sFilename.empty() && sFilename[0] != '.')
 				{
-					remove( FileData.name );
+					remove( sFilename.c_str() );
 				}
 			}
-			while (_findnext( hFile, &FileData ) == 0);
-			
-			// 끝
-			_findclose( hFile );			
 		}
-		
-	}		
+
+	}
 	_chdir(cwd);
 
 	return true;
