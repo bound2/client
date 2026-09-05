@@ -432,8 +432,43 @@ its `_chdir` dance and its dotfile skip, asks for `*` where it asked for `*.*`,
 and lists files only. `UpdateUtility.cpp` is compiled into no target and does
 not build on its own for four pre-existing reasons in untouched functions; the
 migrated code was proven to compile with those patched temporarily. No
-`_findfirst` call remains in live code. The three `FindFirstFile` walks,
-including the startup DLL whitelist, are left for a later slice.
+`_findfirst` call remains in live code. A third slice took the four
+`FindFirstFile` call sites that were left: the `Updater2.exe` existence test
+in `Client/Client.cpp`, which never closed its search handle and is now a
+`std::filesystem::exists` through the `std::error_code` overload; the startup
+DLL whitelist in the same file; the older copy of that whitelist in
+`Client/GameInit.cpp`, whose `g_wAuthKeyMap` assignment fires only when the
+listing is non-empty and every name on it is whitelisted; and
+`C_VS_UI_FILE_DIALOG::RefreshFileList` in `VS_UI/src/VS_UI_ExtraDialog.cpp`,
+the profile-picture file dialog. The whitelist keeps its silent `return -1`
+out of `WinMain` - no message box and no log line, because logging is not up
+yet - and both whitelists list directories as well as files, because they
+judge the name alone and a subdirectory whose name ends in `.dll` used to
+reject the client too. The 8.3-alias deviation applies to them: a file such
+as `foo.dllx` was matched through its `FOO~1.DLL` short name and stopped
+startup, and is no longer listed, so the check only ever gets looser and no
+name that was listed stops being listed. The file dialog synthesises the `..`
+entry `directory_iterator` never yields, first in the sequence and only for a
+directory that has a parent - `path::has_relative_path()` decides that, and
+`dir /a` confirms it, listing `..` for `C:\Users` and not for `C:\`. Reading
+that function turned up a pre-existing defect left for its own fix: the inner
+`for(int i = 0; ...)` shadows the outer `i`, so the
+`if(i == m_vs_file_list.size())` after it tests the filter loop's counter
+instead, and since the inner loop never breaks for a file, every file is
+dropped unless `m_filter.size()` happens to equal the list size. The `..`
+entry is synthesised outside the success branch, because the helper is all
+or nothing where `FindFirstFile` had delivered `..` before any `FindNextFile`
+could fail; the same all-or-nothing rule is a deviation of the two whitelists
+too, and there it can only skip the check. A dangling junction is the one
+entry the helper classifies differently from `FindFirstFile`: it follows the
+link and reports a file where the legacy walk reported the reparse point's
+own directory bit, so the dialog no longer shows one.
+`tests/unit/test_directory_listing.cpp` now also pins the trailing-separator
+directory string the dialog is the only caller to pass. No `FindFirstFile` call
+remains in live code - only the commented-out loop in
+`VS_UI/src/VS_UI_Tutorial.cpp` - and the `FindFirstFileA`, `FindNextFileA`
+and `FindClose` shims in `basic/Platform.h` now have no caller either, so
+they can go with the `_findfirst` ones in a later sweep.
 
 ### Packet modernization guardrails
 
