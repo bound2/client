@@ -424,9 +424,16 @@ migrated walks; the latter also drops a `long` that truncated the CRT's
 `intptr_t` search handle on x64. `tests/unit/test_directory_listing.cpp` pins
 the matcher, the order and the failure contract over a scratch directory. The
 migrated callers are executable-only and need the runtime check that the login
-screen still lists profiles. The `_findfirst` walk that empties the `Update`
-directory and the three `FindFirstFile` walks, including the startup DLL
-whitelist, are left for later slices.
+screen still lists profiles. A second slice migrated the last three `_findfirst`
+walks: the one that empties the `Update` directory in `Client/Client.cpp`, and
+`UUFDeleteDirectory` and `UUFDeleteFiles` in `Client/Updater/UpdateUtility.cpp`,
+all of which stored the CRT's `intptr_t` search handle in a `long`. Each keeps
+its `_chdir` dance and its dotfile skip, asks for `*` where it asked for `*.*`,
+and lists files only. `UpdateUtility.cpp` is compiled into no target and does
+not build on its own for four pre-existing reasons in untouched functions; the
+migrated code was proven to compile with those patched temporarily. No
+`_findfirst` call remains in live code. The three `FindFirstFile` walks,
+including the startup DLL whitelist, are left for a later slice.
 
 ### Packet modernization guardrails
 
