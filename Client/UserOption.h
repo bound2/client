@@ -81,6 +81,7 @@ class UserOption {
 		// 2004, 12, 21, sobeit add end
 		// 2005, 1, 20, sobeit add start - 개인상점 메세지 안보기
 		BOOL	DoNotShowPersnalShopMsg;
+		BOOL	UseXbrz;
 		// 2005, 1, 20, sobeit add end
 };
 

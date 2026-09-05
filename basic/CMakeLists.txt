@@ -41,6 +41,7 @@ set(BASIC_SOURCES
 	# callers being migrated off _findfirst are in the executable, and
 	# basic is the one library every target already links.
 	DirectoryListing.cpp
+	DisplaySettings.cpp
 	BasicData.cpp
 	Timer2.cpp
 	BasicException.cpp

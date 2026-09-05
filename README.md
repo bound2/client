@@ -317,6 +317,29 @@ statically from `basic/`, `Client/DXLib`, `Client/SpriteLib` and
 `Client/framelib`. You do not need to copy any of them — only `Data/` and
 `UserSet/`.
 
+### Toggle xBRZ rendering
+
+Open **Options > Graphics** and use **xBRZ smoothing**, immediately below the FPS
+option. It is enabled by default, including with older settings files. Changes
+apply immediately and are saved with the other options when you close the menu.
+Uncheck it to restore original presentation. No restart or environment variable
+is needed. Fullscreen and resolution are also available in Graphics; those two
+settings take effect after restarting the client.
+
+This filters the completed frame, including the world, effects, and UI. It uses
+the existing assets and preserves game coordinates, mouse mapping, aspect ratio
+and letterboxing. It does not add widescreen world visibility or replace artwork.
+Because filtering happens after composition, character edges may differ from
+the individual transparent sprites in the offline comparison gallery.
+
+xBRZ runs on up to four CPU threads at an integer scale of 2x to 4x, then SDL fits the result to
+the window. Buffers and textures are reused, and unchanged frames reuse the
+filtered texture. The intermediate image is capped at 64 MiB; texture/allocation
+failures restore original presentation. Moving scenes still require filtering
+each new frame, so compare frame time with the toggle on your machine.
+
+The pinned xBRZ source and upstream license are under `third_party/xbrz/`.
+
 ### Point the build at the data
 
 `DarkEden.exe` resolves game files relative to its working directory, which is
@@ -338,11 +361,26 @@ Repeat for `bin\Release` if you build that configuration.
 
 ### Launch
 
-Run the executable with a display-mode argument:
+Double-click `DarkEden.exe`, or run it without arguments:
 
 ```powershell
-.\build\vs2022\bin\Debug\DarkEden.exe 0000000001
+.\build\vs2022\bin\Debug\DarkEden.exe
 ```
+
+The default is **borderless fullscreen**, with the original 800x600 game view
+scaled to your desktop and xBRZ smoothing enabled. In **Options > Graphics**:
+
+- **Borderless fullscreen (restart)**: uncheck for a window.
+- **1024x768 resolution (restart)**: check for the larger game view and UI layout;
+  uncheck for the original 800x600 view.
+- **xBRZ smoothing**: switches instantly.
+
+Close Options to save. Display preferences live in `UserSet/Display.ini` and are
+read before creating the window. On Windows, paths resolve from the EXE folder
+even when a shortcut has a different working directory. Restart after changing
+fullscreen or resolution; no launch arguments are needed.
+
+Existing launcher arguments remain optional overrides for compatibility:
 
 | Argument | Mode |
 | --- | --- |

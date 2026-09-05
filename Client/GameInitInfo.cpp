@@ -21,6 +21,7 @@
 // including it conflicts with basic/Platform.h's timeGetTime()/GetTickCount()
 // macros (see basic/Platform.h).
 #include "DebugLog.h"
+#include "SpriteLib/SpriteLibBackend.h"
 #include <algorithm>
 //#include "MFileDef.h"
 #include "Properties.h"
@@ -142,6 +143,7 @@ InitUserOption()
 		//return FALSE;
 	}
 	
+	spritectl_set_xbrz_enabled(g_pUserOption->UseXbrz);
 	g_pUserOption->persnalShopupdatetime = GetPersnalShopUpdateTime();
 	g_pUserOption->PlayWaveMusic = TRUE;
 

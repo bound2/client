@@ -34,6 +34,7 @@
 #ifndef PLATFORM_WINDOWS
 
 #include "Client_PCH.h"
+#include "DisplaySettings.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_main.h>
 #include <SDL_ttf.h>
@@ -112,7 +113,7 @@ static BOOL InitApp(int nCmdShow)
 	extern bool g_MyFull;
 
 	if (g_bFullScreen) {
-		flags |= SDL_WINDOW_FULLSCREEN;
+		flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 		flags |= SDL_WINDOW_BORDERLESS;
 
 		// Get screen dimensions
@@ -192,6 +193,7 @@ static BOOL InitApp(int nCmdShow)
 static void CleanupSDL()
 {
 	if (g_pSDLRenderer) {
+		spritectl_release_present_resources(g_pSDLRenderer);
 		SDL_DestroyRenderer(g_pSDLRenderer);
 		g_pSDLRenderer = NULL;
 	}
@@ -214,10 +216,10 @@ int main(int argc, char* argv[])
 	fflush(stderr);
 
 	// Parse command line
-	const char* cmdLine = "0000000001";  // Default: window mode
-	if (argc > 1 && argv[1] != NULL) {
-		cmdLine = argv[1];
-	}
+	auto& displaySettings = GetDisplaySettings();
+	displaySettings.Load();
+	const auto launchCommand = displaySettings.LaunchCommand(argc > 1 && argv[1] ? argv[1] : "");
+	const char* cmdLine = launchCommand.c_str();
 
 	fprintf(stderr, "Command line: %s\n", cmdLine);
 	fflush(stderr);

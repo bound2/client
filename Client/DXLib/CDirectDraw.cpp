@@ -116,6 +116,7 @@ void CSDLGraphics::ReleaseAll()
 {
 	if (m_pSDLRenderer != NULL)
 	{
+		spritectl_release_present_resources(m_pSDLRenderer);
 		SDL_DestroyRenderer(m_pSDLRenderer);
 		m_pSDLRenderer = NULL;
 	}

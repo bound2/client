@@ -149,6 +149,12 @@ int spritectl_present_surface(spritectl_surface_t surface, void* renderer);
  */
 void spritectl_window_to_game_coords(int* x, int* y);
 
+/* Render-thread-only whole-frame filter. Enabled by default; controlled by UserOption. */
+void spritectl_set_xbrz_enabled(int enabled);
+int spritectl_get_xbrz_enabled(void);
+/* Must run before SDL_DestroyRenderer. NULL releases all presentation resources. */
+void spritectl_release_present_resources(void* renderer);
+
 /* ============================================================================
  * Sprite Functions
  * ============================================================================ */
