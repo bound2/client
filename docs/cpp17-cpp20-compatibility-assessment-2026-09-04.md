@@ -353,6 +353,19 @@ is what proves the nested defaulted `current()` reports the call site rather
 than the header. No call site elsewhere in the tree is converted; that is a
 later slice.
 
+**Container-helper status (2026-09-05):** the first priority-2 slice is
+implemented. Twelve membership and line-trimming sites in library code -
+`PacketIDSet`, `GCTimeLimitItemInfo`, `GCNPCAskVariable`, `Properties`,
+`SystemAvailabilities` and the item, sorted-item, time-item and skill-domain
+managers - are written as `contains`, `starts_with` and `ends_with`. Every
+converted site is reached through a public entry point by
+`tests/unit/test_cpp20_container_helpers.cpp`, which was run against the
+pre-conversion sources as well and gave the same result. No container type
+changed, no packet byte changed, and the candidates that were not equivalent
+(an erase of one element where `std::erase` would remove all matches, and a
+linear scan over a map by `operator==`) are listed in the commit and left
+alone.
+
 **Span status (2026-09-04):** the first priority-3 slice is implemented in PR
 #84. `SocketInputStream` and `SocketOutputStream` now expose
 bounded `std::span<char>` and `std::span<std::byte>` overloads while retaining the
@@ -396,6 +409,24 @@ SDL init) nor resolution (about 15.6 ms versus 1 ms), and nothing in the source
 marks which sites use which. Moving a site off `GetTickCount()` therefore also
 takes it off the 15.6 ms quantisation, which is a small change in when it fires
 and has to be stated each time it is made.
+
+**Filesystem status (2026-09-05):** the first priority-6 slice is implemented.
+`basic/DirectoryListing.{h,cpp}` lists a directory through
+`std::filesystem::directory_iterator` against a DOS-style wildcard and returns
+a snapshot sorted in the case-insensitive ordinal order an NTFS `_findnext`
+walk produced, so a caller owns no search handle and cannot be handed a file it
+created inside its own loop. The header carries a measured semantics table:
+`*` and `?` matching, case-insensitive ASCII folding and the NTFS order are
+preserved; 8.3 short-name aliases, `.` and `..`, and Win32's zero-or-one
+trailing `?` are deliberately not. Profile discovery and deletion in
+`Client/ProfileManager.cpp` and the log cleanup in `Client/Client.cpp` are the
+migrated walks; the latter also drops a `long` that truncated the CRT's
+`intptr_t` search handle on x64. `tests/unit/test_directory_listing.cpp` pins
+the matcher, the order and the failure contract over a scratch directory. The
+migrated callers are executable-only and need the runtime check that the login
+screen still lists profiles. The `_findfirst` walk that empties the `Update`
+directory and the three `FindFirstFile` walks, including the startup DLL
+whitelist, are left for later slices.
 
 ### Packet modernization guardrails
 
