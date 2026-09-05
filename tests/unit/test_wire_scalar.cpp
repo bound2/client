@@ -3,9 +3,9 @@
 //----------------------------------------------------------------------
 //
 // C++20 typed scalar serialization at the packet stream boundary.
-// Supported fixed-width integers and exact-width-underlying-type enums retain
-// the legacy little-endian bytes; ambiguous and non-scalar types must be
-// rejected at compile time.
+// Supported fixed-width integers and scoped, exact-width-underlying-type enums
+// retain the legacy little-endian bytes; ambiguous and non-scalar types must
+// be rejected at compile time.
 //
 //----------------------------------------------------------------------
 
@@ -13,12 +13,15 @@
 #include "packet_stream_access.h"
 
 #include "Socket.h"
+#include "SocketEncryptInputStream.h"
+#include "SocketEncryptOutputStream.h"
 #include "SocketImpl.h"
 #include "WireScalar.h"
 
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -27,6 +30,18 @@ namespace {
 enum class TestWireCode : std::uint16_t
 {
 	Value = 0xA1B2
+};
+
+enum ImplicitWireCode
+{
+	ImplicitZero,
+	ImplicitOne
+};
+
+template <typename T>
+concept StreamWireReadable = requires(SocketInputStream& stream, T& value)
+{
+	stream.readWire(value);
 };
 
 static_assert(packetwire::WireScalar<std::int8_t>);
@@ -38,13 +53,16 @@ static_assert(packetwire::WireScalar<std::uint32_t>);
 static_assert(packetwire::WireScalar<std::int64_t>);
 static_assert(packetwire::WireScalar<std::uint64_t>);
 static_assert(packetwire::WireScalar<TestWireCode>);
+static_assert(StreamWireReadable<std::uint32_t>);
 
 static_assert(!packetwire::WireScalar<bool>);
 static_assert(!packetwire::WireScalar<char>);
+static_assert(!packetwire::WireScalar<ImplicitWireCode>);
 static_assert(!packetwire::WireScalar<float>);
 static_assert(!packetwire::WireScalar<double>);
 static_assert(!packetwire::WireScalar<std::string>);
 static_assert(!packetwire::WireScalar<void*>);
+static_assert(!StreamWireReadable<const std::uint32_t>);
 
 struct WireScalarFixture
 {
@@ -59,6 +77,110 @@ struct WireScalarFixture
 	{
 	}
 };
+
+struct EncryptedWireScalarFixture
+{
+	Socket				m_Socket;
+	SocketEncryptInputStream	m_Input;
+	SocketEncryptOutputStream	m_Output;
+
+	EncryptedWireScalarFixture()
+	: m_Socket((EnsureSocketsInitialised(), new SocketImpl())),
+	  m_Input(&m_Socket, 64),
+	  m_Output(&m_Socket, 64)
+	{
+	}
+};
+
+template <typename T>
+void CheckSignedWireValues(const std::array<T, 3>& values,
+			   const std::array<unsigned char, sizeof(T) * 3>& expected)
+{
+	WireScalarFixture f;
+	for (T value : values)
+		f.m_Output.writeWire(value);
+
+	const std::vector<unsigned char> actual =
+		SocketOutputStreamTestAccess::Bytes(f.m_Output);
+	CHECK_EQ(expected.size(), actual.size());
+	if (actual.size() == expected.size())
+	{
+		for (std::size_t i = 0; i < expected.size(); i++)
+			CHECK_EQ(expected[i], actual[i]);
+	}
+
+	SocketInputStreamTestAccess::Preload(f.m_Input, expected.data(),
+		static_cast<unsigned int>(expected.size()));
+	for (T expectedValue : values)
+	{
+		T actualValue = 0;
+		f.m_Input.readWire(actualValue);
+		CHECK_EQ(expectedValue, actualValue);
+	}
+	CHECK(f.m_Input.isEmpty());
+}
+
+void CheckHighBitEncryptionCode(uchar code,
+				const std::array<unsigned char, 31>& expected)
+{
+	EncryptedWireScalarFixture f;
+	const std::array<short, 3> shortValues = {
+		(std::numeric_limits<short>::min)(), -1,
+		(std::numeric_limits<short>::max)()
+	};
+	const std::array<int, 3> intValues = {
+		(std::numeric_limits<int>::min)(), -1,
+		(std::numeric_limits<int>::max)()
+	};
+	const std::array<long, 3> longValues = {
+		(std::numeric_limits<long>::min)(), -1,
+		(std::numeric_limits<long>::max)()
+	};
+
+	f.m_Output.setEncryptCode(code);
+	f.m_Output.writeEncrypt(static_cast<uchar>(0));
+	for (short value : shortValues)
+		f.m_Output.writeEncrypt(value);
+	for (int value : intValues)
+		f.m_Output.writeEncrypt(value);
+	for (long value : longValues)
+		f.m_Output.writeEncrypt(value);
+
+	const std::vector<unsigned char> actual =
+		SocketOutputStreamTestAccess::Bytes(f.m_Output);
+	CHECK_EQ(expected.size(), actual.size());
+	if (actual.size() == expected.size())
+	{
+		for (std::size_t i = 0; i < expected.size(); i++)
+			CHECK_EQ(expected[i], actual[i]);
+	}
+
+	SocketInputStreamTestAccess::Preload(f.m_Input, expected.data(),
+		static_cast<unsigned int>(expected.size()));
+	f.m_Input.setEncryptCode(code);
+	uchar byteValue = 1;
+	f.m_Input.readEncrypt(byteValue);
+	CHECK_EQ(0, byteValue);
+	for (short expectedValue : shortValues)
+	{
+		short actualValue = 0;
+		f.m_Input.readEncrypt(actualValue);
+		CHECK_EQ(expectedValue, actualValue);
+	}
+	for (int expectedValue : intValues)
+	{
+		int actualValue = 0;
+		f.m_Input.readEncrypt(actualValue);
+		CHECK_EQ(expectedValue, actualValue);
+	}
+	for (long expectedValue : longValues)
+	{
+		long actualValue = 0;
+		f.m_Input.readEncrypt(actualValue);
+		CHECK_EQ(expectedValue, actualValue);
+	}
+	CHECK(f.m_Input.isEmpty());
+}
 
 } // namespace
 
@@ -118,6 +240,52 @@ TEST(WireScalar, ReadsFixedWidthAndEnumValues)
 	CHECK_EQ(0x8899AABBCCDDEEFFULL, longValue);
 	CHECK(enumValue == TestWireCode::Value);
 	CHECK(f.m_Input.isEmpty());
+}
+
+TEST(WireScalar, SignedBoundariesHaveExactBytesAndRoundTrip)
+{
+	CheckSignedWireValues<std::int8_t>(
+		{ (std::numeric_limits<std::int8_t>::min)(), -1,
+		  (std::numeric_limits<std::int8_t>::max)() },
+		{ 0x80, 0xFF, 0x7F });
+	CheckSignedWireValues<std::int16_t>(
+		{ (std::numeric_limits<std::int16_t>::min)(), -1,
+		  (std::numeric_limits<std::int16_t>::max)() },
+		{ 0x00, 0x80, 0xFF, 0xFF, 0xFF, 0x7F });
+	CheckSignedWireValues<std::int32_t>(
+		{ (std::numeric_limits<std::int32_t>::min)(), -1,
+		  (std::numeric_limits<std::int32_t>::max)() },
+		{ 0x00, 0x00, 0x00, 0x80,
+		  0xFF, 0xFF, 0xFF, 0xFF,
+		  0xFF, 0xFF, 0xFF, 0x7F });
+	CheckSignedWireValues<std::int64_t>(
+		{ (std::numeric_limits<std::int64_t>::min)(), -1,
+		  (std::numeric_limits<std::int64_t>::max)() },
+		{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80,
+		  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+		  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x7F });
+}
+
+TEST(WireScalar, EncryptedAdaptersHandleHighBitCodes)
+{
+	CheckHighBitEncryptionCode(0x80,
+		{ 0x80,
+		  0x80, 0x80, 0x7F, 0xFF, 0x7F, 0x7F,
+		  0x80, 0x00, 0x00, 0x80,
+		  0x7F, 0xFF, 0xFF, 0xFF,
+		  0x7F, 0xFF, 0xFF, 0x7F,
+		  0x80, 0x00, 0x00, 0x80,
+		  0x7F, 0xFF, 0xFF, 0xFF,
+		  0x7F, 0xFF, 0xFF, 0x7F });
+	CheckHighBitEncryptionCode(0xFF,
+		{ 0xFF,
+		  0xFF, 0x80, 0x00, 0xFF, 0x00, 0x7F,
+		  0xFF, 0x00, 0x00, 0x80,
+		  0x00, 0xFF, 0xFF, 0xFF,
+		  0x00, 0xFF, 0xFF, 0x7F,
+		  0xFF, 0x00, 0x00, 0x80,
+		  0x00, 0xFF, 0xFF, 0xFF,
+		  0x00, 0xFF, 0xFF, 0x7F });
 }
 
 TEST(WireScalar, UnderflowLeavesDestinationUnchanged)

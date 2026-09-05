@@ -69,13 +69,13 @@ public :
 	uint read ( std::string & str , uint len ) throw ( ProtocolException , Error );
 	void read ( Packet * p ) throw ( ProtocolException , Error );
 
-	template <packetwire::WireScalar T>
+	template <packetwire::WritableWireScalar T>
 	uint readWire ( T & value )
 	{
 		using Storage = packetwire::WireStorageT<T>;
 		Storage storage = 0;
 		const uint count = read(std::as_writable_bytes(std::span(&storage, 1)));
-		if constexpr (std::is_enum_v<T>)
+		if constexpr (std::is_enum_v<std::remove_cv_t<T>>)
 			value = static_cast<T>(storage);
 		else
 			value = storage;

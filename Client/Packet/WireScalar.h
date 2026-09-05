@@ -40,10 +40,20 @@ concept FixedWidthInteger =
 	std::same_as<std::remove_cv_t<T>, std::uint64_t>;
 
 template <typename T>
+concept ScopedWireEnum =
+	std::is_enum_v<std::remove_cv_t<T>> &&
+	!std::is_convertible_v<std::remove_cv_t<T>, WireStorageT<T>>;
+
+template <typename T>
 concept WireScalar =
-	(std::is_integral_v<std::remove_cv_t<T>> ||
-	 std::is_enum_v<std::remove_cv_t<T>>) &&
-	FixedWidthInteger<WireStorageT<T>>;
+	FixedWidthInteger<T> ||
+	// Scoped enums always have a fixed underlying type. C++20 cannot
+	// portably make that guarantee for an arbitrary unscoped enum.
+	(ScopedWireEnum<T> && FixedWidthInteger<WireStorageT<T>>);
+
+template <typename T>
+concept WritableWireScalar =
+	WireScalar<T> && !std::is_const_v<T>;
 
 static_assert(std::endian::native == std::endian::little,
 	"The packet protocol requires a little-endian target");
