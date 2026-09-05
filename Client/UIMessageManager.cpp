@@ -5,6 +5,7 @@
 // 지금 UI에서 타이밍 문제가 있어서 못 고치고 있음.
 //-----------------------------------------------------------------------------
 #include "Client_PCH.h"
+#include "DisplaySettings.h"
 #ifdef PLATFORM_WINDOWS
 #include <io.h>
 #include <process.h>
@@ -8060,6 +8061,8 @@ UIMessageManager::Execute_UI_CHANGE_OPTION(intptr_t left, intptr_t right, void* 
 void
 UIMessageManager::Execute_UI_CLOSE_OPTION(intptr_t left, intptr_t right, void* void_ptr)
 {
+	if (!GetDisplaySettings().Save())
+		DEBUG_ADD("[Error] Could not save UserSet/Display.ini");
 	DEBUG_ADD("[UI] Execute_UI_CLOSE_TITLE_OPTION");
 
 //	if (g_Mode!=MODE_MAINMENU)

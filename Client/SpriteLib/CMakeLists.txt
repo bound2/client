@@ -32,6 +32,7 @@ endif()
 set(SPRITELIB_SOURCES
 	# Backend implementation
 	SpriteLibBackendSDL.cpp
+	FrameUpscaler.cpp
 
 	# SDL-specific CSpriteSurface implementation
 	# NOTE: CSpriteSurface_Adapter.cpp is #include-d directly by
@@ -158,6 +159,14 @@ add_library(SpriteLib STATIC ${SPRITELIB_SOURCES})
 # link edge, which a static archive needs so that SpriteLib's consumers
 # get basic on the final link line.
 target_link_libraries(SpriteLib PUBLIC basic)
+
+# Pinned, vendored xBRZ: the renderer filter also works in offline builds.
+add_library(darkeden_xbrz STATIC ${CMAKE_SOURCE_DIR}/third_party/xbrz/xbrz.cpp)
+target_include_directories(darkeden_xbrz PUBLIC ${CMAKE_SOURCE_DIR}/third_party/xbrz)
+target_compile_features(darkeden_xbrz PUBLIC cxx_std_20)
+set_target_properties(darkeden_xbrz PROPERTIES POSITION_INDEPENDENT_CODE ON)
+find_package(Threads REQUIRED)
+target_link_libraries(SpriteLib PRIVATE darkeden_xbrz Threads::Threads)
 
 # Include directories
 target_include_directories(SpriteLib

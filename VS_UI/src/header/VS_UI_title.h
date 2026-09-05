@@ -1117,6 +1117,9 @@ public :
 		LIST_ID,
 	};
 
+	// Fit thirteen graphics rows within the existing ten-row panel.
+	static constexpr int GRAPHIC_CHECK_GAP = 15;
+
 	enum EXEC_CHECK_ID
 	{
 		//CONTROL
@@ -1134,6 +1137,9 @@ public :
 		CHECK_GAMMA,
 		CHECK_CHATBOX,
 		CHECK_FPS,
+		CHECK_XBRZ,
+		CHECK_FULLSCREEN,
+		CHECK_HIGH_RESOLUTION,
 		CHECK_DEFAULT_ALPHA,
 		CHECK_ALPHA_DEPTH,
 		CHECK_DO_NOT_SHOW_PERSNALSHOP_MSG,
@@ -1168,7 +1174,7 @@ public :
 		CHECK_MAX,
 
 		CHECK_CONTROL_MAX = 1,
-		CHECK_GRAPHIC_MAX = 10,
+		CHECK_GRAPHIC_MAX = 13,
 		CHECK_SOUND_MAX = 2,
 		//CHECK_GAME_MAX = 7,
 		CHECK_GAME_MAX = 10,

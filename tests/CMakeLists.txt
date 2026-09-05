@@ -131,6 +131,17 @@ set_source_files_properties(
 
 add_test(NAME unit_tests COMMAND unit_tests)
 
+# Exercise the actual settings reader/writer and key bindings, including old files.
+add_executable(user_option_tests
+	framework/test_main.cpp
+	support/test_user_option.cpp
+	${CMAKE_SOURCE_DIR}/Client/UserOption.cpp
+)
+target_include_directories(user_option_tests PRIVATE ${CMAKE_SOURCE_DIR}/Client)
+target_compile_definitions(user_option_tests PRIVATE ${PACKETWIRE_TEST_DEFINITIONS})
+target_link_libraries(user_option_tests PRIVATE test_framework VS_UI basic)
+add_test(NAME user_option_tests COMMAND user_option_tests)
+
 #----------------------------------------------------------------------
 # Shrink-only ratchets (tests/ratchet/ratchets.sh) - fails when a debt
 # metric rises AND when it falls unrecorded (tighten the baseline in

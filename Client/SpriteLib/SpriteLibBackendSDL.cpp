@@ -10,6 +10,7 @@
 -----------------------------------------------------------------------------*/
 
 #include "SpriteLibBackendSDL.h"
+#include "FrameUpscaler.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -20,6 +21,8 @@
 
 static int g_spritectl_initialized = 0;
 static SDL_Renderer* g_spritectl_default_renderer = NULL;
+static FrameUpscaler g_frame_upscaler;
+static bool g_xbrz_enabled = true;
 
 /* Reused scratch surface for spritectl_blt_sprite()'s non-RLE fallback path
  * (see below) - grows to the largest sprite blitted so far instead of being
@@ -53,6 +56,7 @@ void spritectl_shutdown(void) {
 	}
 
 	/* Clean up default renderer */
+	spritectl_release_present_resources(NULL);
 	if (g_spritectl_default_renderer) {
 		SDL_DestroyRenderer(g_spritectl_default_renderer);
 		g_spritectl_default_renderer = NULL;
@@ -1354,6 +1358,24 @@ static SDL_Renderer* g_scale_tex_renderer = NULL;
 static int g_scale_tex_w = 0;
 static int g_scale_tex_h = 0;
 
+void spritectl_set_xbrz_enabled(int enabled) {
+	g_xbrz_enabled = enabled != 0;
+	if (!g_xbrz_enabled) g_frame_upscaler.Release();
+}
+
+int spritectl_get_xbrz_enabled(void) { return g_xbrz_enabled ? 1 : 0; }
+
+void spritectl_release_present_resources(void* renderer_ptr) {
+	SDL_Renderer* renderer = static_cast<SDL_Renderer*>(renderer_ptr);
+	g_frame_upscaler.Release(renderer);
+	if (!renderer || renderer == g_scale_tex_renderer) {
+		if (g_scale_tex) SDL_DestroyTexture(g_scale_tex);
+		g_scale_tex = NULL;
+		g_scale_tex_renderer = NULL;
+		g_scale_tex_w = g_scale_tex_h = 0;
+	}
+}
+
 /* The two-pass sharp-bilinear is only worth it on a GPU. A software renderer
  * (SDL_RENDER_DRIVER=software) would run both scaling passes on the CPU at
  * output resolution every frame - there, a single linear pass is the right
@@ -1437,6 +1459,14 @@ int spritectl_present_surface(spritectl_surface_t surface, void* renderer_ptr) {
 	g_present_dest = dest_rect;
 	g_present_game_w = sdl_surface->w;
 	g_present_game_h = sdl_surface->h;
+
+	if (g_xbrz_enabled) {
+		if (g_frame_upscaler.Draw(sdl_surface, renderer, dest_rect)) return 0;
+		// Restore the original path if filtering cannot allocate/convert/draw.
+		// Disable it until explicitly toggled again instead of retrying every frame.
+		spritectl_set_xbrz_enabled(0);
+		SDL_LogWarn(SDL_LOG_CATEGORY_RENDER, "xBRZ unavailable; restored original presentation: %s", SDL_GetError());
+	}
 
 	/* This is called every frame (e.g. to present the fixed-size g_pBack
 	 * backbuffer). Recreating and destroying a full-screen SDL_Texture on

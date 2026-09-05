@@ -1,4 +1,5 @@
 ﻿#include "Client_PCH.h"
+#include "DisplaySettings.h"
 #define __NPROTECT__
 // EXECryptor include removed (SDL2) - Copy protection no longer needed
 // APICheck (legacy WPE anti-cheat probe) removed - see code health review C28
@@ -3001,18 +3002,21 @@ WinMain(HINSTANCE hInstance,
 	tttt += lpCmdLine;
 #endif
 
-	//add by Soargon
-	DEVMODE   DevMode; 
-	EnumDisplaySettings( NULL, ENUM_CURRENT_SETTINGS, &DevMode );
-	if(DevMode.dmBitsPerPel != 16)
-	{
-		DEVMODE	tempDevMode = DevMode;
-		tempDevMode.dmBitsPerPel = 16;
-		ChangeDisplaySettings( &tempDevMode, CDS_RESET );
-	}
-	//end
+	GetModuleFileName(NULL, g_CWD, _MAX_PATH);
+	char *tempCut = strrchr(g_CWD, '\\');
+	if(tempCut == NULL)
+		return FALSE;
+
+	*tempCut = '\0';
+	SetCurrentDirectory(g_CWD);
+
+	auto& displaySettings = GetDisplaySettings();
+	displaySettings.Load();
+	std::string launchCommand = displaySettings.LaunchCommand(lpCmdLine);
+	lpCmdLine = launchCommand.data();
+
 	//add by zdj
-	bool cmpFullScreen;
+	bool cmpFullScreen = displaySettings.fullscreen;
 	if (lpCmdLine[strlen(lpCmdLine)-1] == '1')
 	{
 		g_MyFull=false;
@@ -3168,17 +3172,7 @@ WinMain(HINSTANCE hInstance,
 	
 		// 현재 directory를 저장해둔다.
 //	strcpy(g_CWD, __argv[0]);
- 	GetModuleFileName(NULL, g_CWD, _MAX_PATH);
-	char *tempCut = strrchr(g_CWD, '\\');
-	if(tempCut == NULL)
-		return FALSE;
 
-	*tempCut = '\0';
-
-//	GetCurrentDirectory( _MAX_PATH, g_CWD );
-
-	
-	SetCurrentDirectory(g_CWD);
 	
 // 	//	// 새로운 updater실행화일이 존재하면..
 //	if (_access(UPDATER_NEW_FILENAME, 0) == 0/* && _access(UPDATER_FILENAME, 0)*/)//updaterNewFile)
@@ -4324,7 +4318,7 @@ WinMain(HINSTANCE hInstance,
 	//	InitFail("Initialize Failed!");        
 	}
 	//add by Soargon
-	ChangeDisplaySettings( &DevMode, CDS_RESET );
+	// Borderless presentation leaves the desktop display mode unchanged.
 	//end
 	//-----------------------------------------------------------------------------
 	// 타이머 이상으로 종료하는 경우

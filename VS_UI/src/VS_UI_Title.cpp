@@ -8,6 +8,8 @@
 #include "VS_UI_mouse_pointer.h"
 #include "VS_UI_GameCommon.h"
 #include "UserOption.h"
+#include "DisplaySettings.h"
+#include "SpriteLib/SpriteLibBackend.h"
 #include "ClientConfig.h"
 #include "../../basic/timer2.h"
 
@@ -5498,6 +5500,9 @@ C_VS_UI_OPTION::C_VS_UI_OPTION(bool IsTitle)
 
 	m_check[CHECK_CHATBOX] = g_pUserOption->DrawChatBoxOutline?CHECK_CHECK:CHECK_NOT;
 	m_check[CHECK_FPS] = g_pUserOption->DrawFPS?CHECK_CHECK:CHECK_NOT;
+	m_check[CHECK_XBRZ] = g_pUserOption->UseXbrz?CHECK_CHECK:CHECK_NOT;
+	m_check[CHECK_FULLSCREEN] = GetDisplaySettings().fullscreen?CHECK_CHECK:CHECK_NOT;
+	m_check[CHECK_HIGH_RESOLUTION] = GetDisplaySettings().highResolution?CHECK_CHECK:CHECK_NOT;
 	m_check[CHECK_AUTOHIDE_SMOOTH] = g_pUserOption->AutoHideSmoothScroll?CHECK_CHECK:CHECK_NOT;
 
 	// SOUND TAB
@@ -5649,7 +5654,7 @@ C_VS_UI_OPTION::C_VS_UI_OPTION(bool IsTitle)
 		// graphic_tab 버튼들
 		m_pC_graphic_button_group = new ButtonGroup(this);
 		for(i = 0; i < CHECK_GRAPHIC_MAX; i++)
-			m_pC_graphic_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x, m_check_y+m_check_gap*i, m_pC_etc_spk->GetWidth(CHECK_BACK_DISABLE), m_pC_etc_spk->GetHeight(CHECK_BACK_DISABLE), CHECK_GRAPHIC_TAB+i, this, CHECK_BACK_DISABLE) );
+			m_pC_graphic_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x, m_check_y+GRAPHIC_CHECK_GAP*i, m_pC_etc_spk->GetWidth(CHECK_BACK_DISABLE), m_pC_etc_spk->GetHeight(CHECK_BACK_DISABLE), CHECK_GRAPHIC_TAB+i, this, CHECK_BACK_DISABLE) );
 		// sound_tab 버튼들
 		m_pC_sound_button_group = new ButtonGroup(this);
 		for(i = 0; i < CHECK_SOUND_MAX; i++)
@@ -5660,10 +5665,10 @@ C_VS_UI_OPTION::C_VS_UI_OPTION(bool IsTitle)
 		for(i = 0; i < CHECK_GAME_MAX; i++)
 			m_pC_game_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x, m_check_y+m_check_gap*i, m_pC_etc_spk->GetWidth(CHECK_BACK_DISABLE), m_pC_etc_spk->GetHeight(CHECK_BACK_DISABLE), CHECK_GAME_TAB+i, this, CHECK_BACK_DISABLE) );
 
-		m_rt_value[1].Set(m_check_x+120, m_check_y+m_check_gap*(CHECK_GAMMA-CHECK_GRAPHIC_TAB) , m_pC_etc_spk->GetWidth(VOLUME_BAR), 15);
+		m_rt_value[1].Set(m_check_x+120, m_check_y+GRAPHIC_CHECK_GAP*(CHECK_GAMMA-CHECK_GRAPHIC_TAB) , m_pC_etc_spk->GetWidth(VOLUME_BAR), 15);
 		m_rt_value[2].Set(m_check_x+120, m_check_y+m_check_gap*(CHECK_SOUND-CHECK_SOUND_TAB), m_pC_etc_spk->GetWidth(VOLUME_BAR), 15);
 		m_rt_value[3].Set(m_check_x+120, m_check_y+m_check_gap*(CHECK_MUSIC-CHECK_SOUND_TAB), m_pC_etc_spk->GetWidth(VOLUME_BAR), 15);
-		m_rt_value[4].Set(m_check_x+120, m_check_y+m_check_gap*(CHECK_ALPHA_DEPTH-CHECK_GRAPHIC_TAB), m_pC_etc_spk->GetWidth(VOLUME_BAR), 15);
+		m_rt_value[4].Set(m_check_x+120, m_check_y+GRAPHIC_CHECK_GAP*(CHECK_ALPHA_DEPTH-CHECK_GRAPHIC_TAB), m_pC_etc_spk->GetWidth(VOLUME_BAR), 15);
 
 	}
 	else
@@ -5695,7 +5700,7 @@ C_VS_UI_OPTION::C_VS_UI_OPTION(bool IsTitle)
 		// graphic_tab 버튼들
 		m_pC_graphic_button_group = new ButtonGroup(this);
 		for(i = 0; i < CHECK_GRAPHIC_MAX; i++)
-			m_pC_graphic_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x, m_check_y+m_check_gap*i, m_pC_main_spk->GetWidth(TITLE_CHECK_BACK), m_pC_main_spk->GetHeight(TITLE_CHECK_BACK), CHECK_GRAPHIC_TAB+i, this, TITLE_CHECK_BACK) );
+			m_pC_graphic_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x, m_check_y+GRAPHIC_CHECK_GAP*i, m_pC_main_spk->GetWidth(TITLE_CHECK_BACK), m_pC_main_spk->GetHeight(TITLE_CHECK_BACK), CHECK_GRAPHIC_TAB+i, this, TITLE_CHECK_BACK) );
 		// sound_tab 버튼들
 		m_pC_sound_button_group = new ButtonGroup(this);
 		for(i = 0; i < CHECK_SOUND_MAX; i++)
@@ -5705,10 +5710,10 @@ C_VS_UI_OPTION::C_VS_UI_OPTION(bool IsTitle)
 		for(i = 0; i < CHECK_GAME_MAX; i++)
 			m_pC_game_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x, m_check_y+m_check_gap*i, m_pC_main_spk->GetWidth(TITLE_CHECK_BACK), m_pC_main_spk->GetHeight(TITLE_CHECK_BACK), CHECK_GAME_TAB+i, this, TITLE_CHECK_BACK) );
 
-		m_rt_value[1].Set(m_check_x+120, m_check_y+m_check_gap*(CHECK_GAMMA-CHECK_GRAPHIC_TAB) , m_pC_main_spk->GetWidth(TITLE_VOLUME_BAR), 15);
+		m_rt_value[1].Set(m_check_x+120, m_check_y+GRAPHIC_CHECK_GAP*(CHECK_GAMMA-CHECK_GRAPHIC_TAB) , m_pC_main_spk->GetWidth(TITLE_VOLUME_BAR), 15);
 		m_rt_value[2].Set(m_check_x+120, m_check_y+m_check_gap*(CHECK_SOUND-CHECK_SOUND_TAB), m_pC_main_spk->GetWidth(TITLE_VOLUME_BAR), 15);
 		m_rt_value[3].Set(m_check_x+120, m_check_y+m_check_gap*(CHECK_MUSIC-CHECK_SOUND_TAB), m_pC_main_spk->GetWidth(TITLE_VOLUME_BAR), 15);
-		m_rt_value[4].Set(m_check_x+120, m_check_y+m_check_gap*(CHECK_ALPHA_DEPTH-CHECK_GRAPHIC_TAB), m_pC_main_spk->GetWidth(TITLE_VOLUME_BAR), 15);
+		m_rt_value[4].Set(m_check_x+120, m_check_y+GRAPHIC_CHECK_GAP*(CHECK_ALPHA_DEPTH-CHECK_GRAPHIC_TAB), m_pC_main_spk->GetWidth(TITLE_VOLUME_BAR), 15);
 
 	}
 
@@ -5981,6 +5986,9 @@ void C_VS_UI_OPTION::Process()
 void C_VS_UI_OPTION::Start()
 {
 	m_bLBPush = false;
+	m_check[CHECK_XBRZ] = g_pUserOption->UseXbrz?CHECK_CHECK:CHECK_NOT;
+	m_check[CHECK_FULLSCREEN] = GetDisplaySettings().fullscreen?CHECK_CHECK:CHECK_NOT;
+	m_check[CHECK_HIGH_RESOLUTION] = GetDisplaySettings().highResolution?CHECK_CHECK:CHECK_NOT;
 
 	PI_Processor::Start();
 
@@ -6220,6 +6228,22 @@ void C_VS_UI_OPTION::Run(id_t id)
 			m_check[CHECK_FPS] = (m_check[CHECK_FPS] == CHECK_CHECK)?CHECK_NOT:CHECK_CHECK;
 			g_pUserOption->DrawFPS = m_check[CHECK_FPS] == CHECK_CHECK;
 		}
+		break;
+
+	case CHECK_XBRZ:
+		m_check[CHECK_XBRZ] = (m_check[CHECK_XBRZ] == CHECK_CHECK)?CHECK_NOT:CHECK_CHECK;
+		g_pUserOption->UseXbrz = m_check[CHECK_XBRZ] == CHECK_CHECK;
+		spritectl_set_xbrz_enabled(g_pUserOption->UseXbrz);
+		break;
+
+	case CHECK_FULLSCREEN:
+		GetDisplaySettings().fullscreen = !GetDisplaySettings().fullscreen;
+		m_check[CHECK_FULLSCREEN] = GetDisplaySettings().fullscreen?CHECK_CHECK:CHECK_NOT;
+		break;
+
+	case CHECK_HIGH_RESOLUTION:
+		GetDisplaySettings().highResolution = !GetDisplaySettings().highResolution;
+		m_check[CHECK_HIGH_RESOLUTION] = GetDisplaySettings().highResolution?CHECK_CHECK:CHECK_NOT;
 		break;
 
 	case CHECK_DEFAULT_ALPHA:
@@ -6990,6 +7014,9 @@ void C_VS_UI_OPTION::Show()
 				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_GAME_BRIGHT].GetString(),
 				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_CHATTING_TALK].GetString(),
 				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_PUT_FPS].GetString(),
+				"xBRZ smoothing",
+				"Borderless fullscreen (restart)",
+				"1024x768 resolution (restart)",
 				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_WINDOW_ALPHA].GetString(),
 				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_DENSITY_ALPHA].GetString(),
 				(*g_pGameStringTable)[UI_STRING_MESSAGE_DO_NOT_SHOW_PERSNALSHOP_MSG].GetString(),				
@@ -6998,7 +7025,7 @@ void C_VS_UI_OPTION::Show()
 
 			g_FL2_GetDC();
 			for (i = 0; i < CHECK_GRAPHIC_MAX; i++)
-				g_PrintColorStr(x + m_vampire_plus_x + m_check_x + 15, y + m_vampire_plus_y + m_check_y + m_check_gap * i, check_string[i], gpC_base->m_user_id_pi, RGB_BLACK);
+				g_PrintColorStr(x + m_vampire_plus_x + m_check_x + 15, y + m_vampire_plus_y + m_check_y + GRAPHIC_CHECK_GAP * i, check_string[i], gpC_base->m_user_id_pi, RGB_BLACK);
 			g_FL2_ReleaseDC();
 
 			if(gpC_base->m_p_DDSurface_back->Lock())

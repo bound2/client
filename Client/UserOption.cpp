@@ -76,6 +76,7 @@ UserOption::UserOption()
 	persnalShopupdatetime = 0;
 	ShowGameMoneyWithHANGUL = FALSE;
 	DoNotShowPersnalShopMsg = FALSE;
+	UseXbrz = TRUE;
 }
 
 UserOption::~UserOption()
@@ -149,6 +150,8 @@ UserOption::SaveToFile(const char* filename)
 	fprintf(file, "%d	DoNotShowHolyLandMsg\n", DoNotShowHolyLandMsg);
 	fprintf(file, "%d	ShowGameMoneyWithHANGUL\n", ShowGameMoneyWithHANGUL);
 	fprintf(file, "%d	DoNotShowPersnalShopMsg\n", DoNotShowPersnalShopMsg);
+	// Append new options so existing settings retain their field order.
+	fprintf(file, "%d\tUseXbrz\n", UseXbrz);
 
 	fclose(file);
 }
@@ -159,6 +162,7 @@ UserOption::SaveToFile(const char* filename)
 bool	
 UserOption::LoadFromFile(const char* filename)
 {
+	UseXbrz = TRUE; // Older or missing settings files enable smoothing.
 	FILE *file = fopen(filename, "r");
 	if (file == NULL) {
 		return false;
@@ -222,6 +226,11 @@ UserOption::LoadFromFile(const char* filename)
 	fscanf(file, "%d %s\n", &DoNotShowHolyLandMsg, ignore);
 	fscanf(file, "%d %s\n", &ShowGameMoneyWithHANGUL, ignore);
 	fscanf(file, "%d %s\n", &DoNotShowPersnalShopMsg, ignore);
+
+	int xbrz = 1;
+	if (fscanf(file, "%d %255s", &xbrz, ignore) == 2 && strcmp(ignore, "UseXbrz") == 0
+		&& (xbrz == 0 || xbrz == 1))
+		UseXbrz = xbrz;
 
 	fclose(file);
 	return true;
