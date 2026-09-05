@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.21)
 
 # Set SDL2 include path before project() for it to take effect
 if(EXISTS "/opt/homebrew/include/SDL2")
@@ -31,6 +31,10 @@ set(USE_SDL_BACKEND ON CACHE BOOL "Use SDL backend instead of native Windows API
 
 option(BUILD_ENGINE "Build new SDL-based engine" ON)
 option(BUILD_TESTS "Build unit tests for the static libraries" OFF)
+option(REQUIRE_TEST_TOOLS "Require the complete CTest suite and its Bash/Perl tools" OFF)
+if(REQUIRE_TEST_TOOLS AND NOT BUILD_TESTS)
+    message(FATAL_ERROR "REQUIRE_TEST_TOOLS requires BUILD_TESTS=ON")
+endif()
 
 # Set output directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

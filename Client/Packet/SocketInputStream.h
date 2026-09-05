@@ -123,7 +123,7 @@ public :
 	uint size () const throw () { return length(); }
 
 	// check if buffer is empty
-	bool isEmpty () const throw () { return m_Head == m_Tail; }
+	bool isEmpty () const throw () { return length() == 0; }
 
 	// get debug string
 	std::string toString () const throw ();
@@ -153,6 +153,12 @@ private :
 	// buffer head/tail
 	uint m_Head;
 	uint m_Tail;
+
+	// While read(Packet*) is parsing a frame, every body read is limited to
+	// the size declared in that frame's header. This prevents a malformed
+	// body from consuming bytes that belong to the following packet.
+	bool m_bFrameBounded;
+	uint m_FrameRemaining;
 public :
 
 	// There is no transport encryption on this stream. The EncryptData that

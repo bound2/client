@@ -18,6 +18,7 @@
 #include "PacketFactoryManager.h"
 #include "DebugLog.h"
 #include "WireHost.h"
+#include <memory>
 
 
 //////////////////////////////////////////////////////////////////////
@@ -159,15 +160,15 @@ void Player::processCommand ()
 		// add by Coffee 藤속룐관埼죗
 		SequenceSize_t packetSequence;
 
-		Packet * pPacket;
+		std::unique_ptr<Packet> pPacket;
 
 		// 입력버퍼에 들어있는 완전한 패킷들을 모조리 처리한다.
 		while ( true ) {
 		
-			// 입력스트림에서 패킷헤더크기만큼 읽어본다.
-			// 만약 지정한 크기만큼 스트림에서 읽을 수 없다면,
-			// Insufficient 예외가 발생하고, 루프를 빠져나간다.
-			m_pInputStream->peek( header , szPacketHeader );
+			// A partial header is normal transport fragmentation. Leave it in
+			// the stream until a later fill completes it.
+			if (!m_pInputStream->peek( header , szPacketHeader ))
+				break;
 
 			// 패킷아이디 및 패킷크기를 알아낸다.
 			// 이때 패킷크기는 헤더를 포함한다.
@@ -194,12 +195,12 @@ void Player::processCommand ()
 			// 여기까지 왔다면 입력버퍼에는 완전한 패킷 하나 이상이 들어있다는 뜻이다.
 			// 패킷팩토리매니저로부터 패킷아이디를 사용해서 패킷 스트럭처를 생성하면 된다.
 			// 패킷아이디가 잘못될 경우는 패킷팩토리매니저에서 처리한다.
-			pPacket = g_pPacketFactoryManager->createPacket( packetID );
+			pPacket.reset(g_pPacketFactoryManager->createPacket( packetID ));
 
 			// 이제 이 패킷스트럭처를 초기화한다.
 			// 패킷하위클래스에 정의된 read()가 virtual 메커니즘에 의해서 호출되어
 			// 자동적으로 초기화된다.
-			m_pInputStream->read( pPacket );
+			m_pInputStream->read( pPacket.get() );
 /*
 	#ifdef __DEBUG_OUTPUT__
 			FILE* fp = fopen("packet.log", "a");
@@ -209,10 +210,10 @@ void Player::processCommand ()
 */		
 			// Now run the packet's handler through the dispatch table
 			// (RESTRUCTURING.md tasks 2.1-2.4); an unregistered id throws.
-			PacketDispatcher::dispatch( pPacket , this );
+			PacketDispatcher::dispatch( pPacket.get() , this );
 			
 			// 패킷을 삭제한다
-			delete pPacket;
+			pPacket.reset();
 
 		}
 

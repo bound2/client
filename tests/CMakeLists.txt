@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.21)
 
 #----------------------------------------------------------------------
 # Unit tests
@@ -134,7 +134,11 @@ add_test(NAME unit_tests COMMAND unit_tests)
 # the same commit). Needs bash (Git for Windows ships one); without it
 # the check is skipped, not passed.
 #----------------------------------------------------------------------
-find_program(BASH_EXECUTABLE bash)
+if(REQUIRE_TEST_TOOLS)
+	find_program(BASH_EXECUTABLE bash REQUIRED)
+else()
+	find_program(BASH_EXECUTABLE bash)
+endif()
 if(BASH_EXECUTABLE)
 	add_test(
 		NAME ratchets
@@ -153,7 +157,11 @@ endif()
 # it used to sit further down, which would leave any earlier test
 # silently unregistered on the first configure of a fresh tree.
 #----------------------------------------------------------------------
-find_program(PERL_EXECUTABLE perl)
+if(REQUIRE_TEST_TOOLS)
+	find_program(PERL_EXECUTABLE perl REQUIRED)
+else()
+	find_program(PERL_EXECUTABLE perl)
+endif()
 if(PERL_EXECUTABLE)
 	add_test(
 		NAME arch_includes

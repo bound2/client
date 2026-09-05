@@ -31,6 +31,7 @@
 #include "SocketInputStream.h"
 #include "Socket.h"
 #include "SocketImpl.h"
+#include "Packet.h"
 #include "ModifyInfo.h"
 #include "InventoryInfo.h"
 #include "Gpackets/GCUpdateInfo.h"
@@ -41,6 +42,7 @@
 
 #include <string>
 #include <string.h>
+#include <stdexcept>
 #include <vector>
 
 namespace {
@@ -75,6 +77,99 @@ class TestModifyInfo : public ModifyInfo
 public:
 	PacketID_t getPacketID() const  { return 0; }
 };
+
+//----------------------------------------------------------------------
+// A deliberately simple packet for exercising the stream's frame boundary.
+// Its parser reads a fixed number of body bytes regardless of the size in the
+// wire header, making both over-consumption and under-consumption observable.
+//----------------------------------------------------------------------
+class FixedReadPacket : public Packet
+{
+public:
+	explicit FixedReadPacket(unsigned int bytesToRead)
+	: m_BytesToRead(bytesToRead), m_LastByte(0)
+	{
+	}
+
+	void read(SocketInputStream& iStream)
+	{
+		for (unsigned int i = 0; i < m_BytesToRead; i++)
+			iStream.read(m_LastByte);
+	}
+
+	void write(SocketOutputStream&) const {}
+	PacketID_t getPacketID() const { return 1; }
+	PacketSize_t getPacketSize() const { return m_BytesToRead; }
+	unsigned char getLastByte() const { return (unsigned char)m_LastByte; }
+
+private:
+	unsigned int m_BytesToRead;
+	char m_LastByte;
+};
+
+class ExplicitUnderflowPacket : public FixedReadPacket
+{
+public:
+	ExplicitUnderflowPacket() : FixedReadPacket(0) {}
+	void read(SocketInputStream&) { throw InsufficientDataException(); }
+};
+
+class StandardExceptionPacket : public FixedReadPacket
+{
+public:
+	StandardExceptionPacket() : FixedReadPacket(0) {}
+	void read(SocketInputStream&) { throw std::runtime_error("test parser failure"); }
+};
+
+enum BoundaryOperation
+{
+	BOUNDARY_STRING_READ,
+	BOUNDARY_PEEK,
+	BOUNDARY_SKIP
+};
+
+class BoundaryOperationPacket : public FixedReadPacket
+{
+public:
+	explicit BoundaryOperationPacket(BoundaryOperation operation)
+	: FixedReadPacket(0), m_Operation(operation)
+	{
+	}
+
+	void read(SocketInputStream& iStream)
+	{
+		char bytes[2];
+		switch (m_Operation)
+		{
+		case BOUNDARY_STRING_READ:
+		{
+			std::string text;
+			iStream.read(text, 2);
+			break;
+		}
+		case BOUNDARY_PEEK:
+			iStream.peek(bytes, 2);
+			break;
+		case BOUNDARY_SKIP:
+			iStream.skip(2);
+			break;
+		}
+	}
+
+private:
+	BoundaryOperation m_Operation;
+};
+
+void AppendFrame(std::vector<unsigned char>& wire, PacketID_t packetID,
+	PacketSize_t bodySize, const std::vector<unsigned char>& body)
+{
+	wire.push_back((unsigned char)(packetID & 0xFF));
+	wire.push_back((unsigned char)((packetID >> 8) & 0xFF));
+	for (unsigned int i = 0; i < szPacketSize; i++)
+		wire.push_back((unsigned char)((bodySize >> (i * 8)) & 0xFF));
+	wire.push_back(0); // sequence
+	wire.insert(wire.end(), body.begin(), body.end());
+}
 
 } // namespace
 
@@ -135,6 +230,197 @@ TEST(SocketInputStream, WrappedReadReassemblesAcrossBufferEnd)
 	f.m_Stream.read(out, 6);
 	CHECK_EQ(0, memcmp(out, bytes, 6));
 	CHECK(f.m_Stream.isEmpty());
+}
+
+TEST(SocketInputStream, PacketReadDoesNotCrossDeclaredBodyIntoNextFrame)
+{
+	StreamFixture f(32);
+	std::vector<unsigned char> wire;
+	AppendFrame(wire, 1, 1, std::vector<unsigned char>{ 0xA1 });
+	const size_t secondFrameOffset = wire.size();
+	AppendFrame(wire, 1, 1, std::vector<unsigned char>{ 0xB2 });
+
+	// Start close enough to the end that the malformed body and the following
+	// header straddle the ring boundary.
+	f.Preload(&wire[0], (unsigned int)wire.size(), 29);
+
+	FixedReadPacket malformed(2);
+	bool bThrew = false;
+	try {
+		f.m_Stream.read(&malformed);
+	} catch (InvalidProtocolException&) {
+		bThrew = true;
+	}
+	CHECK(bThrew);
+
+	// The parser consumed its one declared byte, but was refused before it
+	// could steal the first byte of the next packet's header.
+	CHECK_EQ(wire.size() - secondFrameOffset, f.m_Stream.length());
+	char nextHeader[szPacketHeader];
+	CHECK(f.m_Stream.peek(nextHeader, sizeof(nextHeader)));
+	CHECK_EQ(0, memcmp(nextHeader, &wire[secondFrameOffset], sizeof(nextHeader)));
+
+	FixedReadPacket valid(1);
+	f.m_Stream.read(&valid);
+	CHECK_EQ(0xB2, valid.getLastByte());
+	CHECK(f.m_Stream.isEmpty());
+}
+
+TEST(SocketInputStream, PacketReadRejectsAndDiscardsAnUnderConsumedBody)
+{
+	StreamFixture f(32);
+	std::vector<unsigned char> wire;
+	AppendFrame(wire, 1, 2, std::vector<unsigned char>{ 0xA1, 0xA2 });
+	const size_t secondFrameOffset = wire.size();
+	AppendFrame(wire, 1, 1, std::vector<unsigned char>{ 0xB2 });
+	f.Preload(&wire[0], (unsigned int)wire.size());
+
+	FixedReadPacket malformed(1);
+	bool bThrew = false;
+	try {
+		f.m_Stream.read(&malformed);
+	} catch (InvalidProtocolException&) {
+		bThrew = true;
+	}
+	CHECK(bThrew);
+
+	// Exact consumption is part of accepting a frame. The unread byte belongs
+	// to the malformed frame and is discarded; the next header stays aligned.
+	CHECK_EQ(wire.size() - secondFrameOffset, f.m_Stream.length());
+	FixedReadPacket valid(1);
+	f.m_Stream.read(&valid);
+	CHECK_EQ(0xB2, valid.getLastByte());
+	CHECK(f.m_Stream.isEmpty());
+}
+
+TEST(SocketInputStream, FragmentedPacketReadConsumesNothingUntilBodyIsComplete)
+{
+	StreamFixture f(32);
+	std::vector<unsigned char> wire;
+	AppendFrame(wire, 1, 2, std::vector<unsigned char>{ 0xA1, 0xA2 });
+
+	// A complete header and only the first body byte. The receive loop normally
+	// performs this check too, but the packet-reading API must be safe on its own.
+	f.Preload(&wire[0], szPacketHeader + 1, 30);
+	FixedReadPacket packet(2);
+	bool bThrew = false;
+	try {
+		f.m_Stream.read(&packet);
+	} catch (InsufficientDataException&) {
+		bThrew = true;
+	}
+	CHECK(bThrew);
+	CHECK_EQ(szPacketHeader + 1, f.m_Stream.length());
+
+	char stillBuffered[szPacketHeader + 1];
+	f.m_Stream.read(stillBuffered, (uint)sizeof(stillBuffered));
+	CHECK_EQ(0, memcmp(stillBuffered, &wire[0], sizeof(stillBuffered)));
+}
+
+TEST(SocketInputStream, FragmentedPacketHeaderConsumesNothing)
+{
+	StreamFixture f(16);
+	std::vector<unsigned char> wire;
+	AppendFrame(wire, 1, 1, std::vector<unsigned char>{ 0xA1 });
+
+	// Leave the last header byte for a later fill and wrap the fragment around
+	// the end of the ring. A direct packet read must preserve every byte.
+	const uint fragmentSize = szPacketHeader - 1;
+	f.Preload(&wire[0], fragmentSize, 14);
+	FixedReadPacket packet(1);
+	bool bThrew = false;
+	try {
+		f.m_Stream.read(&packet);
+	} catch (InsufficientDataException&) {
+		bThrew = true;
+	}
+	CHECK(bThrew);
+	CHECK_EQ(fragmentSize, f.m_Stream.length());
+
+	char stillBuffered[szPacketHeader - 1];
+	f.m_Stream.read(stillBuffered, (uint)sizeof(stillBuffered));
+	CHECK_EQ(0, memcmp(stillBuffered, &wire[0], sizeof(stillBuffered)));
+}
+
+TEST(SocketInputStream, CompleteBodyUnderflowIsAProtocolErrorAndNotFragmentation)
+{
+	StreamFixture f(32);
+	std::vector<unsigned char> wire;
+	AppendFrame(wire, 1, 1, std::vector<unsigned char>{ 0xA1 });
+	AppendFrame(wire, 1, 1, std::vector<unsigned char>{ 0xB2 });
+	f.Preload(&wire[0], (unsigned int)wire.size());
+
+	ExplicitUnderflowPacket malformed;
+	bool bProtocolError = false;
+	try {
+		f.m_Stream.read(&malformed);
+	} catch (InvalidProtocolException&) {
+		bProtocolError = true;
+	}
+	CHECK(bProtocolError);
+
+	// The explicit underflow cannot be mistaken for a partial transport frame.
+	FixedReadPacket valid(1);
+	f.m_Stream.read(&valid);
+	CHECK_EQ(0xB2, valid.getLastByte());
+	CHECK(f.m_Stream.isEmpty());
+}
+
+TEST(SocketInputStream, StandardParserExceptionRestoresTheFrameBoundary)
+{
+	StreamFixture f(32);
+	std::vector<unsigned char> wire;
+	AppendFrame(wire, 1, 1, std::vector<unsigned char>{ 0xA1 });
+	AppendFrame(wire, 1, 1, std::vector<unsigned char>{ 0xB2 });
+	f.Preload(&wire[0], (unsigned int)wire.size());
+
+	StandardExceptionPacket malformed;
+	bool bThrew = false;
+	try {
+		f.m_Stream.read(&malformed);
+	} catch (const std::runtime_error&) {
+		bThrew = true;
+	}
+	CHECK(bThrew);
+
+	FixedReadPacket valid(1);
+	f.m_Stream.read(&valid);
+	CHECK_EQ(0xB2, valid.getLastByte());
+	CHECK(f.m_Stream.isEmpty());
+}
+
+TEST(SocketInputStream, EveryBodyOperationStopsAtTheFrameBoundary)
+{
+	const BoundaryOperation operations[] = {
+		BOUNDARY_STRING_READ,
+		BOUNDARY_PEEK,
+		BOUNDARY_SKIP
+	};
+
+	for (size_t i = 0; i < sizeof(operations) / sizeof(operations[0]); i++)
+	{
+		StreamFixture f(32);
+		std::vector<unsigned char> wire;
+		AppendFrame(wire, 1, 1, std::vector<unsigned char>{ 0xA1 });
+		const size_t secondFrameOffset = wire.size();
+		AppendFrame(wire, 1, 1, std::vector<unsigned char>{ 0xB2 });
+		f.Preload(&wire[0], (unsigned int)wire.size(), 29);
+
+		BoundaryOperationPacket malformed(operations[i]);
+		bool bThrew = false;
+		try {
+			f.m_Stream.read(&malformed);
+		} catch (InvalidProtocolException&) {
+			bThrew = true;
+		}
+		CHECK(bThrew);
+		CHECK_EQ(wire.size() - secondFrameOffset, f.m_Stream.length());
+
+		FixedReadPacket valid(1);
+		f.m_Stream.read(&valid);
+		CHECK_EQ(0xB2, valid.getLastByte());
+		CHECK(f.m_Stream.isEmpty());
+	}
 }
 
 //----------------------------------------------------------------------

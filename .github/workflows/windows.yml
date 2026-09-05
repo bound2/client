@@ -1,0 +1,81 @@
+name: Windows build and tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: ${{ matrix.preset }}
+    runs-on: windows-2022
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [windows, windows-asan]
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      VCPKG_ROOT: ${{ github.workspace }}/build/vcpkg
+      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/build/vcpkg-cache,readwrite
+      VCPKG_DISABLE_METRICS: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Read dependency baseline
+        id: baseline
+        run: |
+          $baseline = (Get-Content vcpkg.json -Raw | ConvertFrom-Json).'builtin-baseline'
+          if ($baseline -notmatch '^[0-9a-f]{40}$') { throw 'Invalid vcpkg baseline' }
+          "commit=$baseline" >> $env:GITHUB_OUTPUT
+          "image=$env:ImageVersion" >> $env:GITHUB_OUTPUT
+
+      - name: Check out the matching vcpkg toolchain
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: microsoft/vcpkg
+          ref: ${{ steps.baseline.outputs.commit }}
+          path: build/vcpkg
+          persist-credentials: false
+
+      - name: Restore dependency binaries
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: build/vcpkg-cache
+          key: windows-2022-vcpkg-${{ steps.baseline.outputs.image }}-${{ hashFiles('vcpkg.json') }}
+
+      - name: Bootstrap vcpkg
+        run: |
+          & "$env:VCPKG_ROOT/bootstrap-vcpkg.bat" -disableMetrics
+          if ($LASTEXITCODE -ne 0) { throw 'vcpkg bootstrap failed' }
+
+      - name: Build and test Debug and Release
+        if: matrix.preset == 'windows'
+        run: ./tools/ci/verify-windows.ps1 -ConfigurePreset windows -BuildPresets windows-debug,windows-release
+
+      - name: Build and test AddressSanitizer
+        if: matrix.preset == 'windows-asan'
+        run: ./tools/ci/verify-windows.ps1 -ConfigurePreset windows-asan -BuildPresets windows-asan
+
+      - name: Upload build and test diagnostics
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: diagnostics-${{ matrix.preset }}
+          retention-days: 7
+          path: |
+            build/verification/
+            build/presets/${{ matrix.preset }}/Testing/Temporary/
+            build/presets/${{ matrix.preset }}/CMakeFiles/CMakeConfigureLog.yaml
+            build/presets/${{ matrix.preset }}/vcpkg-manifest-install.log

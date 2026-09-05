@@ -226,7 +226,8 @@ void	ExpectGolden(const std::string& name, uchar code, const std::vector<unsigne
 // what write() emitted (the framing header advertises it), and read()
 // must consume exactly that (a byte left over desyncs every packet
 // after it).
-void	RoundTrip(const Packet& src, Packet& dst, uchar code)
+template <class PacketT>
+void	RoundTrip(const PacketT& src, PacketT& dst, uchar code)
 {
 	std::vector<unsigned char> body = WriteBody(src, code);
 	CHECK_EQ(src.getPacketSize(), body.size());
@@ -237,6 +238,27 @@ void	RoundTrip(const Packet& src, Packet& dst, uchar code)
 					     (unsigned int)body.size());
 	dst.read(f.m_Stream);
 	CHECK(f.m_Stream.isEmpty());
+
+	// Exercise the production framing entry point too. Use the number of bytes
+	// actually serialized as the declared size so this check isolates whether
+	// read() consumes exactly one body without changing any golden wire bytes.
+	std::vector<unsigned char> frame(szPacketHeader);
+	const PacketID_t packetID = src.getPacketID();
+	const PacketSize_t packetSize = (PacketSize_t)body.size();
+	const SequenceSize_t sequence = 0;
+	std::memcpy(&frame[0], &packetID, szPacketID);
+	std::memcpy(&frame[szPacketID], &packetSize, szPacketSize);
+	std::memcpy(&frame[szPacketID + szPacketSize], &sequence, szSequenceSize);
+	frame.insert(frame.end(), body.begin(), body.end());
+
+	PacketT framedDst;
+	InFixture framed;
+	framed.m_Stream.setEncryptCode(code);
+	SocketInputStreamTestAccess::Preload(framed.m_Stream, &frame[0],
+		(unsigned int)frame.size());
+	framed.m_Stream.read(&framedDst);
+	CHECK(framed.m_Stream.isEmpty());
+	CHECK(WriteBody(framedDst, 0) == WriteBody(src, 0));
 }
 
 // Parse `body` into a fresh packet through an input stream set to
