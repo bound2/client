@@ -127,7 +127,7 @@ bool	SystemAvailabilitiesManager::LoadFromStream(std::istream& in)
 	{
 		// CRarFile::GetString used to hand out the line without its
 		// newline; a CR left by a Windows file is dropped the same way.
-		if( !line.empty() && line[line.size()-1] == '\r' )
+		if( line.ends_with( '\r' ) )
 			line.erase( line.size()-1 );
 		strncpy( szLine, line.c_str(), sizeof(szLine)-1 );
 		szLine[sizeof(szLine)-1] = '\0';

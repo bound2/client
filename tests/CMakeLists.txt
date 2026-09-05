@@ -122,6 +122,9 @@ set_source_files_properties(
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_price_manager.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_player_gear.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_skill_core.cpp
+	# The C++20 container/string helper slice spans both libraries: the
+	# packet and Properties sites and the gamemodel manager sites.
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_cpp20_container_helpers.cpp
 	PROPERTIES
 		COMPILE_DEFINITIONS "${PACKETWIRE_TEST_DEFINITIONS};WIRE_GOLDEN_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/golden\""
 )

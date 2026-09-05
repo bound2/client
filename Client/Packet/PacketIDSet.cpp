@@ -77,10 +77,8 @@ bool PacketIDSet::hasPacketID ( PacketID_t packetID ) const
 
 	if ( m_PacketIDSetType == PIST_NORMAL ) {
 
-		// 일반적인 경우, 존재할 때에만 true 를 리턴한다.
-		PACKET_ID_SET::const_iterator itr = m_PacketIDSet.find( packetID );
-
-		return itr != m_PacketIDSet.end();
+		// The ordinary case: true only when the id is in the set.
+		return m_PacketIDSet.contains( packetID );
 
 	} else if ( m_PacketIDSetType == PIST_ANY ) {
 
@@ -89,11 +87,9 @@ bool PacketIDSet::hasPacketID ( PacketID_t packetID ) const
 
 	} else if ( m_PacketIDSetType == PIST_IGNORE_EXCEPT ) {
 
-		// 패킷이 존재할 경우, true 를 리턴한다.
-		// 패킷이 존재하지 않으면, 무시해야 한다.
-		PACKET_ID_SET::const_iterator itr = m_PacketIDSet.find( packetID );
-
-		if ( itr != m_PacketIDSet.end() ) {
+		// True when the packet is in the set. A packet that is not in
+		// it has to be ignored.
+		if ( m_PacketIDSet.contains( packetID ) ) {
 			return true;
 		} else {
 			throw IgnorePacketException();

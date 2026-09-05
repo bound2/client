@@ -828,14 +828,10 @@ MSkillDomain::AddSkill(ACTIONINFO id)
 		while (iNextSkill != listNextSkill.end())
 		{
 			//--------------------------------------------------
-			// Find the skill whose id is *iNextSkill.
+			// Add the skill whose id is *iNextSkill when the
+			// domain does not hold it yet.
 			//--------------------------------------------------
-			iSkill = m_mapSkillID.find( *iNextSkill );
-
-			//--------------------------------------------------
-			// Add it when it is not in yet.
-			//--------------------------------------------------
-			if (iSkill == m_mapSkillID.end())
+			if (!m_mapSkillID.contains( *iNextSkill ))
 			{
 				AddSkill( *iNextSkill );
 			}

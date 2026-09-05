@@ -110,12 +110,12 @@ void Properties::load ()
 			break;
 
 		// Remove trailing \r (Windows CRLF files on Unix/macOS)
-		if ( !line.empty() && line[line.size() - 1] == '\r' ) {
+		if ( line.ends_with( '\r' ) ) {
 			line.erase( line.size() - 1 );
 		}
 
-		// 코멘트 라인이거나 빈 라인이므로 skip 한다.
-		if ( line[0] == Comment || line.size() == 0 )
+		// A comment line or an empty line, so skip it.
+		if ( line.starts_with( Comment ) || line.empty() )
 			continue;
 
 		// key 의 시작문자(white space가 아닌 문자)를 찾는다. 
