@@ -4873,8 +4873,8 @@ C_VS_UI_TITLE::C_VS_UI_TITLE()
 
 	m_pC_credit = NULL;
 
-	m_dw_prev_tickcount = GetTickCount();
-	m_dw_millisec = 30;
+	m_tp_prev = MonotonicClock::Now();
+	m_d_scroll_interval = MonotonicClock::Millis(30);
 	m_credit_scroll = 0;
 
 }
@@ -5274,12 +5274,28 @@ void C_VS_UI_TITLE::Show()
 //-----------------------------------------------------------------------------
 // C_VS_UI_TITLE::Timer
 //
+// Advances the credit scroll one step every 30 ms. Called once per frame
+// from Show(), unconditionally, so m_credit_scroll keeps counting while
+// the credits are not on screen and is never reset after construction.
+// That is pre-existing and deliberately left alone here.
+//
+// This was "m_dw_prev_tickcount + m_dw_millisec <= GetTickCount()", the
+// shape that stops working when that sum carries past 2^32 and lands
+// behind the current tick: from then on it is true on every frame and
+// the scroll runs at the frame rate instead of at 30 ms. It is the
+// subtraction of two time points over a 64-bit millisecond rep now, which
+// has no 2^32 to carry past (basic/MonotonicClock.h). The current time is
+// also read once instead
+// of twice, so the interval no longer drifts by the few microseconds
+// between the two reads.
 //-----------------------------------------------------------------------------
 bool	C_VS_UI_TITLE::Timer()
 {
-	if(m_dw_prev_tickcount+m_dw_millisec <= GetTickCount())
+	const MonotonicClock::TimePoint tp_now = MonotonicClock::Now();
+
+	if(tp_now - m_tp_prev >= m_d_scroll_interval)
 	{
-		m_dw_prev_tickcount = GetTickCount();
+		m_tp_prev = tp_now;
 		m_credit_scroll++;
 		return true;
 	}

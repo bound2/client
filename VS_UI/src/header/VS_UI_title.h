@@ -26,6 +26,8 @@
 #include "VS_UI_Dialog.h"
 #include "VS_UI_DESC.h"
 
+#include "MonotonicClock.h"
+
 #include <vector>
 
 enum MAIN_SPK_INDEX
@@ -1382,8 +1384,14 @@ private:
 
 	ButtonGroup *				m_pC_button_group;
 	bool							m_bl_credit;
-	DWORD						m_dw_prev_tickcount;
-	DWORD						m_dw_millisec;
+	//
+	// The credit scroll's timer. A time point and a duration over a
+	// 64-bit millisecond rep rather than a pair of DWORD tick counts, so
+	// the "previous + delay <= now" test in Timer() has no 32-bit wrap
+	// to carry past (basic/MonotonicClock.h).
+	//
+	MonotonicClock::TimePoint	m_tp_prev;
+	MonotonicClock::Duration	m_d_scroll_interval;
 	bool	Timer();
 	int							m_credit_scroll;
 
