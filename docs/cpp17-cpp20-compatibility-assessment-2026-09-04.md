@@ -373,6 +373,30 @@ protected by client/server-shared goldens across every encryption code. Later
 slices can migrate remaining raw scalar casts family by family without widening
 the accepted type set.
 
+**Clock status (2026-09-05):** the first priority-5 slice is implemented.
+`basic/MonotonicClock.{h,cpp}` is the central adapter: `Now()` is
+`std::chrono::steady_clock` truncated to milliseconds, `Duration` is
+`std::chrono::milliseconds`, and `SetTestSource()`/`ScopedTestSource` inject a
+deterministic clock so timing tests are neither sleeps nor flakes.
+`LegacyTicks()` is deliberately **not** derived from `Now()`: on the real clock
+it is `platform_get_ticks()`, so a class that is only half converted keeps
+comparing against the same epoch it always did, and later slices can migrate
+call sites one at a time. `basic/Timer2` is migrated internally with its public
+`C_TIMER2` API - `DWORD` milliseconds, `timer_id_t`, `INVALID_TID` - unchanged,
+and `C_VS_UI_TITLE::Timer()` (the title-screen credit scroll) is the
+representative UI site. `tests/unit/test_monotonic_clock.cpp` and
+`tests/unit/test_timer2.cpp` pin the firing rule and drive the injected clock
+across the 32-bit tick's wrap and past 2^32 ms of elapsed time.
+
+Reading the code for this recorded one thing that is worth knowing before the
+next slice: on `PLATFORM_WINDOWS`, `Platform.h` redefines only `timeGetTime()`
+as `platform_get_ticks()`. `GetTickCount()` is still kernel32's, so the client
+already reads two counters that share neither epoch (since boot versus since
+SDL init) nor resolution (about 15.6 ms versus 1 ms), and nothing in the source
+marks which sites use which. Moving a site off `GetTickCount()` therefore also
+takes it off the 15.6 ms quantisation, which is a small change in when it fires
+and has to be stated each time it is made.
+
 ### Packet modernization guardrails
 
 Packet I/O is the highest-value area but also the easiest place to cause a silent
