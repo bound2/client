@@ -2,7 +2,7 @@ name: Windows build and tests
 
 on:
   push:
-  pull_request:
+    branches: [master]
   workflow_dispatch:
 
 permissions:

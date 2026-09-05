@@ -149,8 +149,9 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& ./tools/ci/verify-
 This builds every configured target, then runs the unit suite, ratchets,
 include-graph rules, format-arity audit, packet-index audit, and wire-inventory
 freshness check. Logs go under `build/verification/`. The Windows Actions
-workflow runs these commands on pushes and pull requests, caches dependency
-binaries, and retains diagnostic artifacts for seven days. It does not require
+workflow runs these commands on pushes to `master` (including merged PRs) or
+manual dispatch, caches dependency binaries, and retains diagnostic artifacts
+for seven days. PR updates do not trigger CI. It does not require
 game assets or launch the game; live-server smoke testing remains separate.
 
 Use `CMakeUserPresets.json` for local overrides; it is ignored by git. When

@@ -24,10 +24,12 @@ Owner: `tools/ci/verify-windows.ps1` builds all configured targets, checks that
 the vcpkg checkout matches the baseline and the six required CTest entries exist,
 and runs them. The Windows Actions workflow
 runs ordinary Debug/Release and ASan Debug as two jobs and retains logs and test
-reports. The ordinary Debug configuration retains `/RTC1`; ASan uses its own
+reports. Automatic runs are limited to pushes to `master`, including merged PRs,
+to conserve Actions minutes; manual dispatch remains available. PR updates do
+not trigger CI. The ordinary Debug configuration retains `/RTC1`; ASan uses its own
 configuration and runtime. The workflow does not launch the client or fetch game
-assets. Running it on GitHub and making it a required branch-protection check
-are repository-side verification and configuration steps.
+assets. Hosted verification runs after merge; local verification and live-server
+smoke tests provide the pre-merge checks.
 
 ## UI text preparation
 
@@ -91,5 +93,6 @@ and reconnect therefore still require a live-server smoke test before merge.
 - The Actions workflow passed actionlint, and the PowerShell script was executed
   locally with Windows PowerShell 5, including native warning handling.
 
-The hosted Actions run and in-game smoke test have not been performed. No merge
-or deployment is part of this change.
+The initial hosted Actions runs were canceled to conserve minutes; hosted
+verification remains pending after merge. The in-game smoke test has not been
+performed. No merge or deployment is part of this change.
