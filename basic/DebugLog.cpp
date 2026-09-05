@@ -45,6 +45,11 @@ static LogConfig g_config = {
 
 static bool g_initialized = false;
 
+// Test seam (see DebugLog.h). NULL in every shipped build, and read without
+// the lock for the same reason the level below is: it is only ever installed
+// by a single-threaded test binary.
+static LogSiteObserver g_site_observer = NULL;
+
 //-----------------------------------------------------------------------------
 // Thread safety
 //-----------------------------------------------------------------------------
@@ -208,30 +213,55 @@ void log_set_array_output(bool enable) {
 }
 
 //-----------------------------------------------------------------------------
+// Test Seam
+//-----------------------------------------------------------------------------
+
+LogSiteObserver log_set_site_observer(LogSiteObserver observer) {
+	LogSiteObserver previous = g_site_observer;
+	g_site_observer = observer;
+	return previous;
+}
+
+//-----------------------------------------------------------------------------
 // Core Logging Function
 //-----------------------------------------------------------------------------
 
-void log_write(LogLevel level,
-			   const char *file,
-			   int line,
-			   const char *fmt,
-			   ...)
+// True when a log call still has something to do. An installed observer wants
+// every site whatever the level is; otherwise the level filter decides. Kept
+// out of log_emit so the entry points below can still return before va_start
+// on the filtered-out path, exactly as log_write did before.
+static bool log_wants(LogLevel level) {
+	if (g_site_observer != NULL) {
+		return true;
+	}
+
+	return !(level < g_config.level || !g_initialized);
+}
+
+// The one body behind both entry points, so a converted call site and an
+// unconverted one cannot drift apart.
+static void log_emit(const LogSite &site,
+					 LogLevel level,
+					 const char *fmt,
+					 va_list args)
 {
+	// Test seam: reported before the level filter (see DebugLog.h).
+	if (g_site_observer != NULL) {
+		g_site_observer(site, level);
+	}
+
 	// Fast path: level filtering (no lock needed)
 	if (level < g_config.level || !g_initialized) {
 		return;
 	}
 
 	// Extract filename
-	const char *filename = get_filename(file);
+	const char *filename = get_filename(site.file);
 	const char *level_str = get_level_string(level);
 
 	// Format message
 	char message[2048];
-	va_list args;
-	va_start(args, fmt);
 	vsnprintf(message, sizeof(message), fmt, args);
-	va_end(args);
 
 	// Build full log line
 	char log_line[2048];
@@ -240,7 +270,7 @@ void log_write(LogLevel level,
 
 	snprintf(log_line, sizeof(log_line),
 			 "[%s] [%s] [%s:%d] %s",
-			 timestamp, level_str, filename, line, message);
+			 timestamp, level_str, filename, site.line, message);
 
 	// Critical section for output
 	EnterCriticalSection(&g_log_lock);
@@ -259,4 +289,45 @@ void log_write(LogLevel level,
 
 
 	LeaveCriticalSection(&g_log_lock);
+}
+
+//-----------------------------------------------------------------------------
+// Entry Points
+//-----------------------------------------------------------------------------
+
+// The C entry point the LOG_* and DEBUG_ADD* macros expand to. Unchanged in
+// signature and in what it writes.
+void log_write(LogLevel level,
+			   const char *file,
+			   int line,
+			   const char *fmt,
+			   ...)
+{
+	// Fast path: level filtering (no lock needed)
+	if (!log_wants(level)) {
+		return;
+	}
+
+	va_list args;
+	va_start(args, fmt);
+	log_emit(LogSite(file, line), level, fmt, args);
+	va_end(args);
+}
+
+// The C++20 entry point. See DebugLog.h: the site is built by the caller
+// because a std::source_location cannot follow a C variadic '...'.
+void log_write_at(const LogSite &site,
+				  LogLevel level,
+				  const char *fmt,
+				  ...)
+{
+	// Fast path: level filtering (no lock needed)
+	if (!log_wants(level)) {
+		return;
+	}
+
+	va_list args;
+	va_start(args, fmt);
+	log_emit(site, level, fmt, args);
+	va_end(args);
 }

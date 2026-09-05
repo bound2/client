@@ -335,6 +335,24 @@ They indicate where to investigate, not how many mechanical replacements are saf
 | 8 | `std::jthread` and `std::stop_token` for owned workers | Makes join and cancellation responsibilities explicit and exception-safe. Raw Win32 thread/synchronization primitives appear in about 36 locations. | Prototype on one clearly owned worker; preserve required Windows event and message-loop integration. | Large/staged |
 | 9 | Ownership RAII | Replacing proven owning raw pointers with `unique_ptr` prevents leaks and partial-initialization cleanup bugs. This is not C++20-specific, but the migration makes it a natural follow-up. | Inventory ownership in one manager and convert only pointers with unambiguous single ownership. | Large/staged |
 
+**Source-location status (2026-09-05):** priority 1 is implemented for both
+diagnostics facilities. `basic/BasicException.h` gains an `ExceptionSite` whose
+default constructor captures the caller through a defaulted
+`std::source_location::current()`, plus a `g_BasicException(code, sz_error,
+site)` entry point; `_Error`, `_ErrorStr` and `CheckMemAlloc` no longer spell
+`__FILE__` and `__LINE__` out, and the `(code, sz_error, file, line)` function
+stays as a compatibility wrapper for call sites that name a location
+explicitly. `basic/DebugLog.h` gains the equivalent `LogSite` and a
+`log_write_at(site, level, fmt, ...)` entry point, with the site in front of
+the format because a `std::source_location` cannot follow a C variadic `...`;
+the `LOG_*` and `DEBUG_ADD*` macros are untouched and both entry points share
+one core. The log line written to console and file is unchanged - the function
+name is captured but not printed. `tests/unit/test_source_location_diagnostics.cpp`
+pins every capture against the test file's own `__FILE__` and `__LINE__`, which
+is what proves the nested defaulted `current()` reports the call site rather
+than the header. No call site elsewhere in the tree is converted; that is a
+later slice.
+
 **Span status (2026-09-04):** the first priority-3 slice is implemented in PR
 #84. `SocketInputStream` and `SocketOutputStream` now expose
 bounded `std::span<char>` and `std::span<std::byte>` overloads while retaining the

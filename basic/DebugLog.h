@@ -86,4 +86,72 @@ void log_write(LogLevel level,
 }
 #endif
 
+#ifdef __cplusplus
+
+#include <source_location>
+
+//-----------------------------------------------------------------------------
+// C++20 diagnostics seam
+//-----------------------------------------------------------------------------
+//
+// log_write is a C variadic function, so a std::source_location parameter can
+// neither follow its '...' nor be defaulted there. LogSite is that parameter
+// moved in front of the format: default-construct one and it captures the
+// caller's file, line and function, because a
+// std::source_location::current() written as a default argument is evaluated
+// at the call site rather than here. The standard states that as recommended
+// practice rather than a guarantee; MSVC, Clang and GCC all do it, and
+// tests/unit/test_source_location_diagnostics.cpp pins it against __LINE__.
+//
+//     log_write_at(LogSite(), LOG_LEVEL_INFO, "zone %d loaded", nZoneID);
+//
+// The LOG_* and DEBUG_ADD* macros above are untouched and still forward
+// __FILE__ and __LINE__. Both entry points reach the same core and produce
+// the same log line: the function name is captured but deliberately NOT
+// printed, so the console and on-disk format is exactly what it was.
+//-----------------------------------------------------------------------------
+struct LogSite
+{
+	const char	*file;
+	int		line;
+	const char	*function;	// NULL when only a file and a line were supplied
+
+	LogSite(const std::source_location &location = std::source_location::current())
+		: file(location.file_name()),
+		  line((int)location.line()),
+		  function(location.function_name())
+	{
+	}
+
+	LogSite(const char *site_file, int site_line)
+		: file(site_file),
+		  line(site_line),
+		  function(NULL)
+	{
+	}
+};
+
+// C++20 entry point. The site comes first because it cannot follow the '...'.
+void log_write_at(const LogSite &site,
+				  LogLevel level,
+				  const char *fmt,
+				  ...);
+
+//-----------------------------------------------------------------------------
+// Test seam
+//-----------------------------------------------------------------------------
+//
+// Reports the site of every log call, from either entry point, BEFORE the
+// level filter - so a test can observe what was recorded without initialising
+// the logging system, moving the level or redirecting the output. The
+// observer is NULL in every shipped build and nothing else about logging
+// changes; tests/unit/test_source_location_diagnostics.cpp is the only user.
+//-----------------------------------------------------------------------------
+typedef void (*LogSiteObserver)(const LogSite &site, LogLevel level);
+
+// Installs an observer and returns the one it replaced.
+LogSiteObserver log_set_site_observer(LogSiteObserver observer);
+
+#endif // __cplusplus
+
 #endif // __DEBUG_LOG_H__
