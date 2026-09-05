@@ -64,6 +64,16 @@ public:
 			throw std::runtime_error("receive loop parser failure");
 		if (g_nReceiveLoopThrowMode == 2)
 			throw 17;
+		if (g_nReceiveLoopThrowMode == 3)
+		{
+			// Model a legacy nested decoder that consumes the available field,
+			// logs/ignores the missing next field, and returns to its caller.
+			char byte;
+			iStream.read(byte);
+			try { iStream.read(byte); }
+			catch (Throwable&) {}
+			return;
+		}
 
 		char body[2];
 		iStream.read(body, (uint)sizeof(body));
@@ -122,6 +132,17 @@ private:
 void ReceiveLoopHandler(Packet*, Player*)
 {
 	g_nReceiveLoopDispatches++;
+}
+
+void EnsureReceiveLoopHandlerRegistered()
+{
+	// The dispatch table is initialized once per process and rejects duplicate
+	// registrations. Both fixtures use this same handler, in either test order.
+	static const bool registered = [] {
+		PacketDispatcher::registerHandler(RECEIVE_LOOP_PACKET_ID, &ReceiveLoopHandler);
+		return true;
+	}();
+	(void)registered;
 }
 
 void AppendReceiveLoopFrame(std::vector<unsigned char>& wire,
@@ -271,8 +292,7 @@ TEST(PlayerReceiveLoop, FragmentationAndMalformedBodiesNeverDispatchOrLeak)
 	PacketFactoryManager manager;
 	manager.addFactory(new ReceiveLoopPacketFactory());
 	FactoryManagerScope managerScope(&manager);
-	PacketDispatcher::registerHandler(RECEIVE_LOOP_PACKET_ID,
-		&ReceiveLoopHandler);
+	EnsureReceiveLoopHandlerRegistered();
 
 	g_nReceiveLoopPacketsCreated = 0;
 	g_nReceiveLoopPacketsDestroyed = 0;
@@ -368,6 +388,41 @@ TEST(PlayerReceiveLoop, FragmentationAndMalformedBodiesNeverDispatchOrLeak)
 		CHECK(player.inputStream().isEmpty());
 	}
 	g_nReceiveLoopThrowMode = 0;
+}
+
+TEST(PlayerReceiveLoop, SwallowedReadFailureNeverReachesTheHandler)
+{
+	PacketFactoryManager manager;
+	manager.addFactory(new ReceiveLoopPacketFactory());
+	FactoryManagerScope managerScope(&manager);
+	EnsureReceiveLoopHandlerRegistered();
+	g_nReceiveLoopPacketsCreated = 0;
+	g_nReceiveLoopPacketsDestroyed = 0;
+	g_nReceiveLoopDispatches = 0;
+	g_nReceiveLoopThrowMode = 3;
+	struct ResetMode { ~ResetMode() { g_nReceiveLoopThrowMode = 0; } } resetMode;
+
+	ReceiveLoopPlayer player;
+	std::vector<unsigned char> wire;
+	AppendReceiveLoopFrame(wire, 1, { 0xA1 });
+	AppendReceiveLoopFrame(wire, 2, { 0xB1, 0xB2 });
+	SocketInputStreamTestAccess::Preload(player.inputStream(), wire.data(),
+		(uint)wire.size(), player.inputStream().capacity() - 3);
+	bool rejected = false;
+	try { player.processCommand(); }
+	catch (InvalidProtocolException&) { rejected = true; }
+	CHECK(rejected);
+	CHECK_EQ(1, g_nReceiveLoopPacketsCreated);
+	CHECK_EQ(1, g_nReceiveLoopPacketsDestroyed);
+	CHECK_EQ(0, g_nReceiveLoopDispatches);
+	CHECK_EQ(szPacketHeader + 2, player.inputStream().length());
+
+	g_nReceiveLoopThrowMode = 0;
+	player.processCommand();
+	CHECK_EQ(2, g_nReceiveLoopPacketsCreated);
+	CHECK_EQ(2, g_nReceiveLoopPacketsDestroyed);
+	CHECK_EQ(1, g_nReceiveLoopDispatches);
+	CHECK(player.inputStream().isEmpty());
 }
 
 //----------------------------------------------------------------------

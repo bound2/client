@@ -771,6 +771,72 @@ TEST(GCAddNewItemToZone, BodyBytesMatchTheSharedGoldenForEveryEncryptCode)
 		ExpectGolden("GCAddNewItemToZone", kEncryptCodes[i], WriteBody(packet, kEncryptCodes[i]));
 }
 
+namespace {
+
+// A short transport fragment must wait for more bytes. A complete frame whose
+// declared body is a shortened valid body must be rejected, even when a nested
+// legacy decoder logs and swallows its read error. Follow every malformed frame
+// with a valid one to check both alignment and recovery on the same stream.
+template <class PacketT>
+void CheckItemBodyPrefixes(uchar code)
+{
+	PacketT source;
+	FillItemBase(source);
+	const std::vector<unsigned char> valid = WriteFramed(source, code);
+	const PacketSize_t bodySize = source.getPacketSize();
+	CHECK_EQ(szPacketHeader + bodySize, valid.size());
+
+	for (PacketSize_t prefix = 0; prefix < bodySize; ++prefix)
+	{
+		InFixture input;
+		input.m_Stream.setEncryptCode(code);
+		const uint head = input.m_Stream.capacity() - szPacketHeader - 2;
+		const uint fragmentSize = szPacketHeader + prefix;
+		SocketInputStreamTestAccess::Preload(input.m_Stream, valid.data(), fragmentSize, head);
+		PacketT fragment;
+		bool incomplete = false;
+		try { input.m_Stream.read(&fragment); }
+		catch (InsufficientDataException&) { incomplete = true; }
+		CHECK(incomplete);
+		CHECK_EQ(fragmentSize, input.m_Stream.length());
+		std::vector<char> unchanged(fragmentSize);
+		CHECK(input.m_Stream.peek(unchanged.data(), fragmentSize));
+		CHECK_EQ(0, std::memcmp(unchanged.data(), valid.data(), fragmentSize));
+
+		std::vector<unsigned char> wire(valid.begin(), valid.begin() + fragmentSize);
+		std::memcpy(wire.data() + szPacketID, &prefix, szPacketSize);
+		wire.insert(wire.end(), valid.begin(), valid.end());
+		SocketInputStreamTestAccess::Preload(input.m_Stream, wire.data(), (uint)wire.size(), head);
+		PacketT malformed;
+		bool rejected = false;
+		try { input.m_Stream.read(&malformed); }
+		catch (InvalidProtocolException&) { rejected = true; }
+		if (!rejected)
+			std::fprintf(stderr, "accepted short item body: packet=%u code=%u bytes=%u/%u\n",
+				(unsigned)source.getPacketID(), (unsigned)code, (unsigned)prefix, (unsigned)bodySize);
+		CHECK(rejected);
+		CHECK_EQ(valid.size(), input.m_Stream.length());
+		PacketT following;
+		input.m_Stream.read(&following);
+		CHECK(input.m_Stream.isEmpty());
+		CHECK(WriteFramed(following, code) == valid);
+	}
+}
+
+} // namespace
+
+TEST(GCAddNewItemToZone, EveryShortBodyIsRejectedAndTransportFragmentsArePreserved)
+{
+	for (uchar code : kEncryptCodes)
+		CheckItemBodyPrefixes<GCAddNewItemToZone>(code);
+}
+
+TEST(GCAddInstalledMineToZone, EveryShortBodyIsRejectedAndTransportFragmentsArePreserved)
+{
+	for (uchar code : kEncryptCodes)
+		CheckItemBodyPrefixes<GCAddInstalledMineToZone>(code);
+}
+
 TEST(GCAddInstalledMineToZone, RoundTripsForEveryEncryptCode)
 {
 	for (size_t i = 0; i < kEncryptCodeCount; i++)
