@@ -53,6 +53,11 @@ set(BASIC_SOURCES
 	# the one library all of them already link. It needs nothing but the
 	# C library.
 	SafeFormat.cpp
+	# The monotonic clock adapter (docs/cpp17-cpp20-compatibility-assessment-2026-09-04.md,
+	# modernization backlog priority 5). Timer2.cpp is its first caller
+	# and lives here already; the UI timers that follow are in VS_UI and
+	# in the executable, both of which link basic.
+	MonotonicClock.cpp
 )
 
 # Platform-specific sources
@@ -121,5 +126,6 @@ install(FILES
 	InputCodes.h
 	AudioTypes.h
 	SafeFormat.h
+	MonotonicClock.h
 	DESTINATION include/basic
 )
