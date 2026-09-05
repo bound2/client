@@ -81,9 +81,7 @@ void GCNPCAskVariable::addScriptParameter( ScriptParameter* pParam )
 {
 	__BEGIN_TRY
 
-	HashMapScriptParameterItor itr = m_ScriptParameters.find( pParam->getName() );
-
-	if ( itr != m_ScriptParameters.end() )
+	if ( m_ScriptParameters.contains( pParam->getName() ) )
 	{
 		throw DuplicatedException( "Dup Parameter Variable name" );
 		return;

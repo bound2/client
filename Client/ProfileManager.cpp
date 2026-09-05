@@ -24,6 +24,14 @@
 #include "UtilityFunction.h"
 #include "ProfileManager.h"
 
+// std::filesystem directory enumeration, in place of the _findfirst /
+// _findnext walks these two functions used to run
+// (docs/cpp17-cpp20-compatibility-assessment-2026-09-04.md, priority 6).
+#include "DirectoryListing.h"
+
+#include <string>
+#include <vector>
+
 #ifdef __GAME_CLIENT__
 	#include "RequestUserManager.h"
 
@@ -443,18 +451,22 @@ ProfileManager::InitProfiles()
 		}		
 	}
 
-	char profileFiles[256];
-	sprintf(profileFiles, "%s\\*.*", g_pFileDef->getProperty("DIR_PROFILE").c_str());
-	
+	const std::string sProfileDir = g_pFileDef->getProperty("DIR_PROFILE");
+
 	char bmpFilename[256];
 
-	struct _finddata_t	FileData;
-	intptr_t			hFile;	// _findfirst/_findnext는 intptr_t를 주고받는다 - x64에서 long(4byte)에 담으면 상위 32bit가 잘려서 핸들이 깨진다.
+	//-----------------------------------------------------------------
+	// Every entry in the profile directory, which is what the legacy
+	// "<dir>\*.*" _findfirst walk saw: on Win32 that pattern matches
+	// every name - a name with no dot included - and subdirectories with
+	// it, so the listing is asked for the same set. The only entries the
+	// old walk produced that this one cannot are "." and "..", and both
+	// are shorter than the eight characters the loop below requires.
+	//-----------------------------------------------------------------
+	std::vector<Basic::SDirectoryEntry>	vProfileFiles;
 
-	//-----------------------------------------------------------------
-	// *.spr file을 찾는다.
-	//-----------------------------------------------------------------
-	if ( (hFile = _findfirst( profileFiles, &FileData )) != -1L )
+	if ( Basic::ListDirectory( sProfileDir.c_str(), "*", vProfileFiles,
+			Basic::LIST_FILES_AND_DIRECTORIES ) )
 	{
 		CSpritePack SPK;
 
@@ -474,23 +486,37 @@ ProfileManager::InitProfiles()
 
 		// Note: SDL backend doesn't have InitOffsurface, surface will be created when needed
 
-		do
+		for (size_t iFile=0; iFile<vProfileFiles.size(); iFile++)
 		{
-			sprintf(bmpFilename, "%s\\%s", g_pFileDef->getProperty("DIR_PROFILE").c_str(), FileData.name);
-	
+			const std::string&	sFilename = vProfileFiles[iFile].sName;
+
 			//---------------------------------------------------------
-			// bmp를 읽어서 sprite로 바꾼다.
+			// _finddata_t::name capped a name at 259 bytes; a listing
+			// entry carries no such cap, and the .spki path built below
+			// is one byte longer than the path built here. An entry
+			// that would not leave room for both is skipped rather than
+			// written past the end of these 256-byte buffers.
+			//---------------------------------------------------------
+			if (sProfileDir.size() + 1 + sFilename.size() + 1 >= sizeof(bmpFilename))
+			{
+				continue;
+			}
+
+			sprintf(bmpFilename, "%s\\%s", sProfileDir.c_str(), sFilename.c_str());
+
+			//---------------------------------------------------------
+			// Read the bmp and turn it into a sprite.
 			//---------------------------------------------------------
 			char charName[256], spkFilename[256], spkiFilename[256];
-			int lenFilename = strlen(FileData.name);
+			int lenFilename = (int)sFilename.size();
 
-			// "이름.bmp"
+			// "name.bmp"
 			if (lenFilename< 8)
 			{
 				continue;
 			}
 
-			strncpy( charName, FileData.name, lenFilename-4 );	// .bmp를 짜른다.
+			strncpy( charName, sFilename.c_str(), lenFilename-4 );	// cut the .bmp off
 			charName[lenFilename-4] = '\0';
 
 			// CDirectDrawSurface-based loading used to run here on Windows,
@@ -540,9 +566,6 @@ ProfileManager::InitProfiles()
 
 			g_pProfileManager->AddProfile( charName, spkFilename );
 		}
-		while (_findnext( hFile, &FileData ) == 0);
-
-		_findclose( hFile );
 	}
 }
 
@@ -556,43 +579,55 @@ ProfileManager::InitProfiles()
 void		
 ProfileManager::DeleteProfiles()
 {
-	char profileFiles[256], tempProfileFiles[256];
-	sprintf(profileFiles, "%s\\*.spk*", g_pFileDef->getProperty("DIR_PROFILE").c_str());
-	sprintf(tempProfileFiles, "%s\\*-spk*", g_pFileDef->getProperty("DIR_PROFILE").c_str());
-	
+	const std::string sProfileDir = g_pFileDef->getProperty("DIR_PROFILE");
+
 	char spkFilename[256];
 
-	struct _finddata_t	FileData;
-	intptr_t			hFile;	// _findfirst/_findnext는 intptr_t를 주고받는다 - x64에서 long(4byte)에 담으면 상위 32bit가 잘려서 핸들이 깨진다.
+	//-----------------------------------------------------------------
+	// Both walks below list files only, where the legacy _findfirst
+	// patterns also matched a subdirectory of the same name. remove()
+	// cannot delete a directory on Windows, so the entries that are no
+	// longer listed are exactly the ones the loop body could never have
+	// acted on.
+	//-----------------------------------------------------------------
+	std::vector<Basic::SDirectoryEntry>	vProfileFiles;
 
 	//-----------------------------------------------------------------
-	// *.spk file을 찾는다.
+	// Find the *.spk files.
 	//-----------------------------------------------------------------
-	if ( (hFile = _findfirst( profileFiles, &FileData )) != -1L )
+	if ( Basic::ListDirectory( sProfileDir.c_str(), "*.spk*", vProfileFiles ) )
 	{
-		do
+		for (size_t iFile=0; iFile<vProfileFiles.size(); iFile++)
 		{
-			sprintf(spkFilename, "%s\\%s", g_pFileDef->getProperty("DIR_PROFILE").c_str(), FileData.name);			
+			const std::string&	sFilename = vProfileFiles[iFile].sName;
+
+			if (sProfileDir.size() + 1 + sFilename.size() >= sizeof(spkFilename))
+			{
+				continue;
+			}
+
+			sprintf(spkFilename, "%s\\%s", sProfileDir.c_str(), sFilename.c_str());
 			remove(spkFilename);
 		}
-		while (_findnext( hFile, &FileData ) == 0);
-
-		_findclose( hFile );			
 	}
 
 	//-----------------------------------------------------------------
-	// *.spk.tmp file을 찾는다.
+	// Find the *-spk temporary files.
 	//-----------------------------------------------------------------
-	if ( (hFile = _findfirst( tempProfileFiles, &FileData )) != -1L )
+	if ( Basic::ListDirectory( sProfileDir.c_str(), "*-spk*", vProfileFiles ) )
 	{
-		do
+		for (size_t iFile=0; iFile<vProfileFiles.size(); iFile++)
 		{
-			sprintf(spkFilename, "%s\\%s", g_pFileDef->getProperty("DIR_PROFILE").c_str(), FileData.name);			
+			const std::string&	sFilename = vProfileFiles[iFile].sName;
+
+			if (sProfileDir.size() + 1 + sFilename.size() >= sizeof(spkFilename))
+			{
+				continue;
+			}
+
+			sprintf(spkFilename, "%s\\%s", sProfileDir.c_str(), sFilename.c_str());
 			remove(spkFilename);
 		}
-		while (_findnext( hFile, &FileData ) == 0);
-
-		_findclose( hFile );			
 	}
 }
 

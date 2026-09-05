@@ -15,15 +15,7 @@ MTimeItemManager::~MTimeItemManager()
 
 bool	MTimeItemManager::IsExist(TYPE_OBJECTID objectID)
 {
-	if( empty() )
-		return false;
-
-	TIMEITEM_MAP::const_iterator c_itr = find( objectID );
-
-	if(c_itr == end())
-		return false;
-
-	return true;
+	return contains( objectID );
 }
 
 bool	MTimeItemManager::AddTimeItem(TYPE_OBJECTID objectID, DWORD time)

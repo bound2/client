@@ -64,30 +64,26 @@ MItemManager::Release()
 //----------------------------------------------------------------------
 // Add Item
 //----------------------------------------------------------------------
-// mapItem에 pointer만 저장시켜 둔다.
+// Only the pointer is stored in mapItem.
 //----------------------------------------------------------------------
-bool		
+bool
 MItemManager::AddItem(MItem* pItem)
 {
-	ITEM_MAP::iterator	iItem;
-
-	iItem = m_mapItem.find(pItem->GetID());
-	
 	//-----------------------------------------------
-	// 아직 없는 Item이면 추가	
+	// Add the item when it is not held yet.
 	//-----------------------------------------------
-	if (iItem == m_mapItem.end())
+	if (!m_mapItem.contains(pItem->GetID()))
 	{
 		m_mapItem.insert(ITEM_MAP::value_type(pItem->GetID(), pItem));
 
-		// 착용 여부 체크
-		CheckAffectStatus( pItem );			
+		// Check whether it is worn.
+		CheckAffectStatus( pItem );
 
 		return true;
 	}
 
 	//-----------------------------------------------
-	// 이미 있는 Item이면 false
+	// An item the manager already holds gives false.
 	//-----------------------------------------------
 	return false;
 }

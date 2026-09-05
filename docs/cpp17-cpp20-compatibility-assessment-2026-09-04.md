@@ -335,6 +335,37 @@ They indicate where to investigate, not how many mechanical replacements are saf
 | 8 | `std::jthread` and `std::stop_token` for owned workers | Makes join and cancellation responsibilities explicit and exception-safe. Raw Win32 thread/synchronization primitives appear in about 36 locations. | Prototype on one clearly owned worker; preserve required Windows event and message-loop integration. | Large/staged |
 | 9 | Ownership RAII | Replacing proven owning raw pointers with `unique_ptr` prevents leaks and partial-initialization cleanup bugs. This is not C++20-specific, but the migration makes it a natural follow-up. | Inventory ownership in one manager and convert only pointers with unambiguous single ownership. | Large/staged |
 
+**Source-location status (2026-09-05):** priority 1 is implemented for both
+diagnostics facilities. `basic/BasicException.h` gains an `ExceptionSite` whose
+default constructor captures the caller through a defaulted
+`std::source_location::current()`, plus a `g_BasicException(code, sz_error,
+site)` entry point; `_Error`, `_ErrorStr` and `CheckMemAlloc` no longer spell
+`__FILE__` and `__LINE__` out, and the `(code, sz_error, file, line)` function
+stays as a compatibility wrapper for call sites that name a location
+explicitly. `basic/DebugLog.h` gains the equivalent `LogSite` and a
+`log_write_at(site, level, fmt, ...)` entry point, with the site in front of
+the format because a `std::source_location` cannot follow a C variadic `...`;
+the `LOG_*` and `DEBUG_ADD*` macros are untouched and both entry points share
+one core. The log line written to console and file is unchanged - the function
+name is captured but not printed. `tests/unit/test_source_location_diagnostics.cpp`
+pins every capture against the test file's own `__FILE__` and `__LINE__`, which
+is what proves the nested defaulted `current()` reports the call site rather
+than the header. No call site elsewhere in the tree is converted; that is a
+later slice.
+
+**Container-helper status (2026-09-05):** the first priority-2 slice is
+implemented. Twelve membership and line-trimming sites in library code -
+`PacketIDSet`, `GCTimeLimitItemInfo`, `GCNPCAskVariable`, `Properties`,
+`SystemAvailabilities` and the item, sorted-item, time-item and skill-domain
+managers - are written as `contains`, `starts_with` and `ends_with`. Every
+converted site is reached through a public entry point by
+`tests/unit/test_cpp20_container_helpers.cpp`, which was run against the
+pre-conversion sources as well and gave the same result. No container type
+changed, no packet byte changed, and the candidates that were not equivalent
+(an erase of one element where `std::erase` would remove all matches, and a
+linear scan over a map by `operator==`) are listed in the commit and left
+alone.
+
 **Span status (2026-09-04):** the first priority-3 slice is implemented in PR
 #84. `SocketInputStream` and `SocketOutputStream` now expose
 bounded `std::span<char>` and `std::span<std::byte>` overloads while retaining the
@@ -354,6 +385,55 @@ and the ordinary `CGAttack` combat path are the representative migrations,
 protected by client/server-shared goldens across every encryption code. Later
 slices can migrate remaining raw scalar casts family by family without widening
 the accepted type set.
+
+**Clock status (2026-09-05):** the first priority-5 slice is implemented.
+`basic/MonotonicClock.{h,cpp}` is the central adapter: `Now()` is
+`std::chrono::steady_clock` truncated to milliseconds, `Duration` is
+`std::chrono::milliseconds`, and `SetTestSource()`/`ScopedTestSource` inject a
+deterministic clock so timing tests are neither sleeps nor flakes.
+`LegacyTicks()` is deliberately **not** derived from `Now()`: on the real clock
+it is `platform_get_ticks()`, so a class that is only half converted keeps
+comparing against the same epoch it always did, and later slices can migrate
+call sites one at a time. `basic/Timer2` is migrated internally with its public
+`C_TIMER2` API - `DWORD` milliseconds, `timer_id_t`, `INVALID_TID` - unchanged,
+and `C_VS_UI_TITLE::Timer()` (the title-screen credit scroll) is the
+representative UI site. `tests/unit/test_monotonic_clock.cpp` and
+`tests/unit/test_timer2.cpp` pin the firing rule and drive the injected clock
+across the 32-bit tick's wrap and past 2^32 ms of elapsed time.
+
+Reading the code for this recorded one thing that is worth knowing before the
+next slice: on `PLATFORM_WINDOWS`, `Platform.h` redefines only `timeGetTime()`
+as `platform_get_ticks()`. `GetTickCount()` is still kernel32's, so the client
+already reads two counters that share neither epoch (since boot versus since
+SDL init) nor resolution (about 15.6 ms versus 1 ms), and nothing in the source
+marks which sites use which. Moving a site off `GetTickCount()` therefore also
+takes it off the 15.6 ms quantisation, which is a small change in when it fires
+and has to be stated each time it is made.
+
+**Filesystem status (2026-09-05):** the first priority-6 slice is implemented.
+`basic/DirectoryListing.{h,cpp}` lists a directory through
+`std::filesystem::directory_iterator` against a DOS-style wildcard and returns
+a snapshot sorted in the case-insensitive ordinal order an NTFS `_findnext`
+walk produced, so a caller owns no search handle and cannot be handed a file it
+created inside its own loop. The header carries a measured semantics table:
+`*` and `?` matching, case-insensitive ASCII folding and the NTFS order are
+preserved; 8.3 short-name aliases, `.` and `..`, and Win32's zero-or-one
+trailing `?` are deliberately not. Profile discovery and deletion in
+`Client/ProfileManager.cpp` and the log cleanup in `Client/Client.cpp` are the
+migrated walks; the latter also drops a `long` that truncated the CRT's
+`intptr_t` search handle on x64. `tests/unit/test_directory_listing.cpp` pins
+the matcher, the order and the failure contract over a scratch directory. The
+migrated callers are executable-only and need the runtime check that the login
+screen still lists profiles. A second slice migrated the last three `_findfirst`
+walks: the one that empties the `Update` directory in `Client/Client.cpp`, and
+`UUFDeleteDirectory` and `UUFDeleteFiles` in `Client/Updater/UpdateUtility.cpp`,
+all of which stored the CRT's `intptr_t` search handle in a `long`. Each keeps
+its `_chdir` dance and its dotfile skip, asks for `*` where it asked for `*.*`,
+and lists files only. `UpdateUtility.cpp` is compiled into no target and does
+not build on its own for four pre-existing reasons in untouched functions; the
+migrated code was proven to compile with those patched temporarily. No
+`_findfirst` call remains in live code. The three `FindFirstFile` walks,
+including the startup DLL whitelist, are left for a later slice.
 
 ### Packet modernization guardrails
 

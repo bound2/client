@@ -57,10 +57,8 @@ MSortedItemManager::AddItem(MItem* pItem)
 {
 	ULONGLONG key = GetKey( pItem );
 
-	ITEM_MAP::const_iterator iItem = find( key );
-
 	// Not held yet: take it.
-	if (iItem == end())
+	if (!contains( key ))
 	{
 		insert( ITEM_MAP::value_type( key, pItem ) );
 

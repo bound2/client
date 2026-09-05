@@ -33,7 +33,7 @@ void GCTimeLimitItemInfo::read(SocketInputStream& iStream)
 		iStream.read( objectID );
 		iStream.read( time );
 
-		if ( m_TimeLimitItemInfos.find(objectID) == m_TimeLimitItemInfos.end() )
+		if ( !m_TimeLimitItemInfos.contains(objectID) )
 		{
 			m_TimeLimitItemInfos[objectID] = time;
 		}
@@ -94,9 +94,9 @@ void GCTimeLimitItemInfo::addTimeLimit(ObjectID_t objectID, DWORD time)
 {
 	__BEGIN_TRY
 
-	ItemTimeLimitMap::const_iterator	itr = m_TimeLimitItemInfos.find(objectID);
-
-	if ( itr != m_TimeLimitItemInfos.end() ) throw Error( "아이템 오브젝트 아이디가 겹치네용.");
+	// The same item object id twice is a caller error. The message is
+	// upstream's and is left byte-for-byte as it was.
+	if ( m_TimeLimitItemInfos.contains(objectID) ) throw Error( "아이템 오브젝트 아이디가 겹치네용.");
 
 	m_TimeLimitItemInfos[ objectID ] = time;
 
