@@ -17,6 +17,7 @@
 
 #include "MGameStringTable.h"
 #include "SafeFormat.h"
+#include "UISafeText.h"
 #include "MZoneTable.h"
 #include "MTimeItemManager.h"
 #include "SystemAvailabilities.h"
@@ -47,6 +48,90 @@ extern RECT g_GameRect;
 #define ITEM_NAME_OPTION_SHADE			RGB(100,100,0)
 #define ITEM_ENAME_RARE_COLOR			RGB(15<<3,15<<3,31<<3)
 #define ITEM_DESC_RGB					RGB(192, 192, 255)
+
+
+//-----------------------------------------------------------------------------
+// BuildItemTooltipNames
+//
+// The renderer and sizing pass used to repeat this construction, including
+// different option limits. Keep one authoritative byte-preserving result so
+// the box always measures the exact name rows it later renders.
+//-----------------------------------------------------------------------------
+static UISafeText::ItemTooltipNames
+BuildItemTooltipNames(MItem* pItem)
+{
+	std::string namePrefix;
+	std::string englishPrefix("(");
+
+	if (g_pTimeItemManager->IsExist(pItem->GetID()))
+	{
+		namePrefix += (*g_pGameStringTable)[UI_STRING_MESSAGE_QUEST_HAN].GetString();
+		namePrefix += " ";
+		englishPrefix += (*g_pGameStringTable)[UI_STRING_MESSAGE_QUEST_ENG].GetString();
+		englishPrefix += " ";
+	}
+
+	if (pItem->IsIdentified() && !pItem->IsUniqueItem() && !pItem->IsQuestItem())
+	{
+		if (pItem->GetItemClass()==ITEM_CLASS_PET_ITEM)
+		{
+			if (pItem->GetSilver() > 0)
+			{
+				MPetItem* const pPetItem = (MPetItem*)pItem;
+				namePrefix += pPetItem->GetPetOptionName();
+				englishPrefix += pPetItem->GetPetOptionEName();
+			}
+		}
+		else if (!pItem->IsEmptyItemOptionList()
+			&& pItem->GetItemClass()!=ITEM_CLASS_COUPLE_RING
+			&& pItem->GetItemClass()!=ITEM_CLASS_VAMPIRE_COUPLE_RING
+			&& pItem->GetItemClass()!=ITEM_CLASS_CODE_SHEET)
+		{
+			for (int i=0; i<min(3, pItem->GetItemOptionListCount()); i++)
+			{
+				if (pItem->GetItemOptionName(i) != NULL)
+				{
+					namePrefix += pItem->GetItemOptionName(i);
+					namePrefix += " ";
+				}
+
+				if (pItem->GetItemOptionEName(i) != NULL)
+				{
+					englishPrefix += pItem->GetItemOptionEName(i);
+					englishPrefix += " ";
+				}
+			}
+		}
+	}
+
+	const bool bShowGrade = pItem->GetGrade()>0 && pItem->GetGrade()<=10
+		&& pItem->IsGearItem() && !pItem->IsUniqueItem()
+		&& pItem->GetItemClass()!=ITEM_CLASS_CORE_ZAP;
+	const char* const pGradeTable = bShowGrade
+		? (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_GRADE].GetString()
+		: NULL;
+
+	UISafeText::ItemTooltipNames names = UISafeText::FinishItemTooltipNames(
+		namePrefix, englishPrefix,
+		pItem->GetName(), pItem->GetEName(), pGradeTable,
+		bShowGrade ? pItem->GetGrade() : 0);
+
+	if (!pItem->IsIdentified())
+	{
+		for (size_t i=0; i<names.local.size(); i++)
+		{
+			names.local[i] = '?';
+		}
+
+		for (size_t i=0; i<names.english.size(); i++)
+		{
+			names.english[i] = '?';
+		}
+	}
+
+	return names;
+}
+
 
 //-----------------------------------------------------------------------------
 // _Item_Description_Show
@@ -119,24 +204,13 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 //	gpC_base->m_item_name_pi.text_color = ITEM_NAME_NORMAL_RGB;
 
 
-	char sz_name[NAME_STRING_LEN];
-	char sz_ename[NAME_STRING_LEN];
-	sz_name[0] = '\0'; // for strcat()
-	sz_ename[0] = '\0'; // for strcat()
+	const UISafeText::ItemTooltipNames tooltipNames = BuildItemTooltipNames(p_item);
+	std::string sz_name = tooltipNames.local;
+	std::string sz_ename = tooltipNames.english;
 	
 	COLORREF name_color = ITEM_NAME_NORMAL_COLOR;
 	COLORREF ename_color = ITEM_ENAME_NORMAL_COLOR;
 	COLORREF shadow_color = ITEM_NAME_NORMAL_SHADE;
-
-	strcat(sz_ename, "(");
-
-	if (g_pTimeItemManager->IsExist( p_item->GetID() ) )
-	{
-		strcat( sz_name, (*g_pGameStringTable)[UI_STRING_MESSAGE_QUEST_HAN].GetString() );
-		strcat(sz_name, " "); // add 'space'
-		strcat( sz_ename,(*g_pGameStringTable)[UI_STRING_MESSAGE_QUEST_ENG].GetString() );
-		strcat(sz_ename, " "); // add 'space'
-	}
 
 	if (p_item->IsIdentified())
 	{
@@ -164,34 +238,12 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				shadow_color = ITEM_NAME_OPTION_SHADE;
 				ename_color = ITEM_ENAME_OPTION_COLOR;
 
-				MPetItem *pPetItem = (MPetItem *)p_item;
-				
-				strcat(sz_name, pPetItem->GetPetOptionName().c_str());
-//				strcat(sz_name, " "); // add 'space'
-
-				strcat(sz_ename, pPetItem->GetPetOptionEName().c_str());
-//				strcat(sz_ename, " "); // add 'space'
 			}
 		}
 		else if (!p_item->IsEmptyItemOptionList() && p_item->GetItemClass() != ITEM_CLASS_COUPLE_RING &&
 				p_item->GetItemClass() != ITEM_CLASS_VAMPIRE_COUPLE_RING
 				&& p_item->GetItemClass() != ITEM_CLASS_CODE_SHEET )
 		{
-
-			//for(int i=0;i<min(2,p_item->GetItemOptionListCount());i++)
-			for(int i=0;i<min(3,p_item->GetItemOptionListCount());i++)
-			{
-				if(p_item->GetItemOptionName(i)!=NULL)
-				{
-					strcat(sz_name, p_item->GetItemOptionName(i));
-					strcat(sz_name, " "); // add 'space'
-				}
-				if(p_item->GetItemOptionEName(i)!=NULL)
-				{
-					strcat(sz_ename, p_item->GetItemOptionEName(i));
-					strcat(sz_ename, " "); // add 'space'
-				}
-			}
 			if(p_item->GetItemOptionListCount() == 2 )
 			{
 				name_color = g_pClientConfig->COLOR_NAME_ITEM_RARE_OPTION;
@@ -217,37 +269,14 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 
 	char sz_buf[50];
 
-	strcat(sz_name, p_item->GetName());
-	strcat(sz_ename, p_item->GetEName());
-
-	if( p_item->GetGrade() > 0 &&  p_item->GetGrade() <= 10 && p_item->IsGearItem() && !p_item->IsUniqueItem() && p_item->GetItemClass() != ITEM_CLASS_CORE_ZAP)
-	{
-		static char *szGrade = (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_GRADE].GetString();
-		strncat( sz_name, szGrade+p_item->GetGrade()*2, 2 );
-		strncat( sz_ename, szGrade+p_item->GetGrade()*2, 2 );
-	}
-	
-	strcat(sz_ename, ")");
-
-	if(!p_item->IsIdentified())
-	{
-		for(int i = 0; i < strlen(sz_name); i++)
-			sz_name[i] = '?';
-		
-		for(int i = 0; i < strlen(sz_ename); i++)
-			sz_ename[i] = '?';
-	}
-
-	
-
 	g_FL2_GetDC();
 	// name
 
-	g_PrintColorStr(px+1, py+1, sz_name, gpC_base->m_item_name_pi, shadow_color);
-	g_PrintColorStr(px, py, sz_name, gpC_base->m_item_name_pi, name_color);
+	g_PrintColorStr(px+1, py+1, sz_name.c_str(), gpC_base->m_item_name_pi, shadow_color);
+	g_PrintColorStr(px, py, sz_name.c_str(), gpC_base->m_item_name_pi, name_color);
 	py += NORMAL_FONT_Y_GAP;
-	g_PrintColorStr(px+1, py+1, sz_ename, gpC_base->m_item_desc_pi, shadow_color);
-	g_PrintColorStr(px, py, sz_ename, gpC_base->m_item_desc_pi, ename_color);
+	g_PrintColorStr(px+1, py+1, sz_ename.c_str(), gpC_base->m_item_desc_pi, shadow_color);
+	g_PrintColorStr(px, py, sz_ename.c_str(), gpC_base->m_item_desc_pi, ename_color);
 	py += SMALL_FONT_Y_GAP+5;
 
 	int vx;
@@ -2743,7 +2772,6 @@ void _Item_Description_Calculator(void (*fp_show)(Rect, void *, long, long), int
 {
 	Rect rect(0,0,0,0);
 	char sz_name[NAME_STRING_LEN];
-	char sz_ename[NAME_STRING_LEN];
 	
 	//////////////////////////////// start calculation
 	MItem * p_item = (MItem *)void_ptr;
@@ -3022,60 +3050,6 @@ void _Item_Description_Calculator(void (*fp_show)(Rect, void *, long, long), int
 		}
 	}
 	
-	sz_name[0] = '\0'; // for strcat()
-	sz_ename[0] = '\0'; // for strcat()
-	strcat(sz_ename, "(");
-
-	if (g_pTimeItemManager->IsExist( p_item->GetID() ) )
-	{
-		strcat( sz_name, (*g_pGameStringTable)[UI_STRING_MESSAGE_QUEST_HAN].GetString() );
-		strcat(sz_name, " "); // add 'space'
-		strcat( sz_ename,(*g_pGameStringTable)[UI_STRING_MESSAGE_QUEST_ENG].GetString() );
-		strcat(sz_ename, " "); // add 'space'
-	}
-	
-	if(p_item->GetItemClass() == ITEM_CLASS_PET_ITEM)
-	{
-		if(p_item->GetSilver() > 0)
-		{
-			MPetItem *pPetItem = (MPetItem *)p_item;
-			
-			strcat(sz_name, pPetItem->GetPetOptionName().c_str());
-//				strcat(sz_name, " "); // add 'space'
-
-			strcat(sz_ename, pPetItem->GetPetOptionEName().c_str());
-//				strcat(sz_ename, " "); // add 'space'
-		}
-	}
-	else if (!p_item->IsEmptyItemOptionList() && p_item->GetItemClass() != ITEM_CLASS_CODE_SHEET )
-	{
-		for(int i=0;i<min(2,p_item->GetItemOptionListCount());i++)
-		{
-			if(p_item->GetItemOptionName(i)!=NULL)
-			{
-				strcat(sz_name, p_item->GetItemOptionName(i));
-				strcat(sz_name, " "); // add 'space'
-			}
-			if(p_item->GetItemOptionEName(i)!=NULL)
-			{
-				strcat(sz_ename, p_item->GetItemOptionEName(i));
-				strcat(sz_ename, " "); // add 'space'
-			}
-		}
-	}
-
-//	strcat(sz_name, p_item->GetName());
-//	strcat(sz_ename, p_item->GetEName());
-//	strcat(sz_ename, ")");
-//
-//	rect.w = max(g_GetStringWidth(sz_name, gpC_base->m_item_name_pi.hfont), g_GetStringWidth(sz_ename, gpC_base->m_item_desc_pi.hfont));
-//	rect.h = NORMAL_FONT_Y_GAP+(line_count-1)*SMALL_FONT_Y_GAP+5;
-//
-//	if((*g_pItemTable)[p_item->GetItemClass()][p_item->GetItemType()].Description.GetLength() != 0)
-//		rect.w = max(rect.w, g_GetStringWidth((*g_pItemTable)[p_item->GetItemClass()][p_item->GetItemType()].Description.GetString(), gpC_base->m_item_desc_pi.hfont));
-
-	
-
 	if(g_pTimeItemManager->IsExist( p_item->GetID() ) )
 	{
 		char	temp[256] = {0,};	
@@ -3137,11 +3111,9 @@ void _Item_Description_Calculator(void (*fp_show)(Rect, void *, long, long), int
 			gpC_base->m_item_desc_pi.hfont) );
 	}
 
-	strcat(sz_name, p_item->GetName());
-	strcat(sz_ename, p_item->GetEName());
-	strcat(sz_ename, ")");
+	const UISafeText::ItemTooltipNames tooltipNames = BuildItemTooltipNames(p_item);
 
-	rect.w = max(rect.w,max(g_GetStringWidth(sz_name, gpC_base->m_item_name_pi.hfont), g_GetStringWidth(sz_ename, gpC_base->m_item_desc_pi.hfont)));
+	rect.w = max(rect.w,max(g_GetStringWidth(tooltipNames.local.c_str(), gpC_base->m_item_name_pi.hfont), g_GetStringWidth(tooltipNames.english.c_str(), gpC_base->m_item_desc_pi.hfont)));
 	rect.h = NORMAL_FONT_Y_GAP+(line_count-1)*SMALL_FONT_Y_GAP+5;
 
 	if((*g_pItemTable)[p_item->GetItemClass()][p_item->GetItemType()].Description.GetLength() != 0)

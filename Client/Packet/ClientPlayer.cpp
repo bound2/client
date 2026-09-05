@@ -20,6 +20,7 @@
 //#include "MPlayer.h"
 //#include "minTR.H" 
 #include <fstream>
+#include <memory>
 
 // DebugKit.h, the four externs that went with it and the DEBUG_INFO
 // message log that used them are all gone. The log was commented out by
@@ -109,7 +110,7 @@ void ClientPlayer::processCommand ()
 {
 	__BEGIN_TRY
 
-	Packet * pPacket;
+	std::unique_ptr<Packet> pPacket;
 
 	try {
 		try {
@@ -118,7 +119,7 @@ void ClientPlayer::processCommand ()
 			char header[szPacketHeader];
 			PacketID_t packetID = 0;
 			PacketSize_t packetSize = 0;		
-			pPacket = NULL;
+			pPacket.reset();
 
 			//---------------------------------------------------------
 			// 이번 Loop에서 처리한 packet의 개수
@@ -133,9 +134,8 @@ void ClientPlayer::processCommand ()
 			// 입력버퍼에 들어있는 완전한 패킷들을 모조리 처리한다.
 			while ( true ) {
 			
-				// 입력스트림에서 패킷헤더크기만큼 읽어본다.
-				// 만약 지정한 크기만큼 스트림에서 읽을 수 없다면,
-				// Insufficient 예외가 발생하고, 루프를 빠져나간다.
+				// A partial header is normal transport fragmentation. Leave it in
+				// the stream until a later fill completes it.
 				if (m_pInputStream->peek( header , szPacketHeader ) == false) {
 					break;
 				}
@@ -253,12 +253,12 @@ void ClientPlayer::processCommand ()
 				// 여기까지 왔다면 입력버퍼에는 완전한 패킷 하나 이상이 들어있다는 뜻이다.
 				// 패킷팩토리매니저로부터 패킷아이디를 사용해서 패킷 스트럭처를 생성하면 된다.
 				// 패킷아이디가 잘못될 경우는 패킷팩토리매니저에서 처리한다.
-				pPacket = g_pPacketFactoryManager->createPacket( packetID );
+				pPacket.reset(g_pPacketFactoryManager->createPacket( packetID ));
 
 				// 이제 이 패킷스트럭처를 초기화한다.
 				// 패킷하위클래스에 정의된 read()가 virtual 메커니즘에 의해서 호출되어
 				// 자동적으로 초기화된다.
-				m_pInputStream->read( pPacket );
+				m_pInputStream->read( pPacket.get() );
 
 				// 이제 이 패킷스트럭처를 가지고 패킷핸들러를 수행하면 된다.
 				// 패킷아이디가 잘못될 경우는 패킷핸들러매니저에서 처리한다.			
@@ -275,7 +275,7 @@ void ClientPlayer::processCommand ()
 					// (RESTRUCTURING.md tasks 2.1-2.4); an id with no
 					// registered handler throws InvalidProtocolException,
 					// which is a protocol violation, not a no-op.
-					PacketDispatcher::dispatch( pPacket , this );
+					PacketDispatcher::dispatch( pPacket.get() , this );
 
 					//DEBUG_ADD_FORMAT("[Executed] %s", pPacket->toString().c_str());
 					DEBUG_ADD("[PacketExecute OK1]");
@@ -283,8 +283,8 @@ void ClientPlayer::processCommand ()
 				
 				
 				// 현재 패킷을 패킷 히스토리의 맨 뒤에 넣는다.
-				m_PacketHistory.push_back(pPacket);
-				pPacket = NULL;
+				m_PacketHistory.push_back(pPacket.get());
+				pPacket.release();
 
 				// 패킷을 nPacketHistory 개만큼만 저장한다.
 				while ( m_PacketHistory.size() > nPacketHistory ) {
@@ -313,13 +313,6 @@ void ClientPlayer::processCommand ()
 		}
 
 	} catch (Throwable&)	{
-		
-		if (pPacket!=NULL)
-		{
-			delete pPacket;
-			pPacket = NULL;
-		}
-
 		throw;
 	}
 

@@ -10,6 +10,8 @@
 # Written by Visual Studio when it opens the folder directly; local IntelliSense
 # configuration, not part of the build.
 CppProperties.json
+CMakeUserPresets.json
+vcpkg_installed/
 
 # Visual Studio Build Outputs & Folders
 Debug/

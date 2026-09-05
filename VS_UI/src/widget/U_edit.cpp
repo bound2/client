@@ -1,6 +1,7 @@
 #include "U_edit.h"
 #include "../hangul/Ci.h"
 #include "../InputFocusManager.h"
+#include "../header/UISafeText.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -31,65 +32,6 @@ extern CSpriteSurface* g_pLast;  // UI renders to g_pLast, not g_pBack!
 // ============================================================================
 // UTF-8 <-> UTF-32 Conversion (from textbox_demo.c)
 // ============================================================================
-
-// Decodes a NUL terminated UTF-8 string into UTF-32.
-//
-// The length a lead byte promises is a claim about the input, not a fact, and
-// there is no length parameter here to check it against - so every
-// continuation byte is tested before it is read. Consuming them on the lead
-// byte's word alone steps over the terminator and keeps going until some
-// later byte happens to be zero, which is a read off the end of whatever the
-// caller owns: SDL_TEXTEDITING supplies a 32-byte event field that a chunked
-// IME composition can end mid sequence, and AddString takes arbitrary caller
-// strings.
-//
-// A sequence that ends early or is followed by a non-continuation byte is
-// dropped, which is what the original did for an unusable lead byte. The
-// review that found this suggested emitting U+FFFD instead; that is right for
-// a rendering decoder - TextService::Utf8Decode does exactly that - but this
-// one fills an edit buffer whose contents are echoed back to the user and
-// sent to the server, and a replacement character typed into someone's chat
-// line is worse than a byte that never arrives. Decoding of well formed input
-// is unchanged.
-static int utf8_to_utf32(const char* s, uint32_t* out, int cap) {
-	int n = 0;
-
-	if (s == NULL || out == NULL)
-		return 0;
-
-	while (*s && n < cap) {
-		unsigned char b = (unsigned char)*s++;
-		uint32_t c = 0;
-		int need = 0;
-
-		if (b < 0x80) {
-			out[n++] = b;
-			continue;
-		} else if ((b >> 5) == 0x6) {
-			c = b & 0x1F;
-			need = 1;
-		} else if ((b >> 4) == 0xE) {
-			c = b & 0x0F;
-			need = 2;
-		} else if ((b >> 3) == 0x1E) {
-			c = b & 0x07;
-			need = 3;
-		} else {
-			continue;  // Continuation byte or 0xF8..0xFF: not a lead byte
-		}
-
-		// A NUL is not 0b10xxxxxx, so the terminator ends this loop instead
-		// of being consumed, and the outer loop then sees it and stops.
-		while (need > 0 && ((unsigned char)*s & 0xC0) == 0x80) {
-			c = (c << 6) | ((unsigned char)*s++ & 0x3F);
-			--need;
-		}
-
-		if (need == 0)
-			out[n++] = c;
-	}
-	return n;
-}
 
 static int utf32_to_utf8(uint32_t c, char out[5]) {
 	if (c < 0x80) {
@@ -224,7 +166,7 @@ void LineEditor::HandleTextInput(const char* text)
 	if (text == NULL || text[0] == '\0') return;
 
 	uint32_t utf32[32];
-	int len = utf8_to_utf32(text, utf32, 32);
+	int len = (int)UISafeText::Utf8ToUtf32(text, utf32, 32);
 
 	if (IsComposing()) {
 		EndComposition();
@@ -238,7 +180,7 @@ void LineEditor::HandleTextEditing(const char* text, int start, int length)
 {
 	if (length > 0) {
 		// Currently composing - store composition text
-		m_ComposingLen = utf8_to_utf32(text, m_Composing, MAX_TEXT);
+		m_ComposingLen = (int)UISafeText::Utf8ToUtf32(text, m_Composing, MAX_TEXT);
 	} else {
 		// Composition ended
 		EndComposition();
@@ -289,7 +231,7 @@ void LineEditor::AddString(const char* pStr)
 	if (pStr == NULL) return;
 
 	uint32_t utf32[MAX_TEXT];
-	int len = utf8_to_utf32(pStr, utf32, MAX_TEXT);
+	int len = (int)UISafeText::Utf8ToUtf32(pStr, utf32, MAX_TEXT);
 
 	if (m_TextLen + len <= m_Limit) {
 		InsertText(utf32, len);
@@ -513,16 +455,13 @@ void LineEditorVisual::Show() const
 {
 	// Get the text to display (as UTF-8)
 	const char* textToDisplay = m_Editor.GetBuffer();
+	std::string displayText;
 
-	// Handle password mode (show asterisks instead of actual text)
-	char displayBuffer[1024];
+	// Password mode has always shown one asterisk per UTF-8 byte. Dynamic
+	// storage preserves that count for the editor's full 4,092-byte result.
 	if (m_bPasswordMode) {
-		int len = strlen(textToDisplay);
-		for (int i = 0; i < len && i < (int)sizeof(displayBuffer) - 1; i++) {
-			displayBuffer[i] = '*';
-		}
-		displayBuffer[len] = '\0';
-		textToDisplay = displayBuffer;
+		displayText = UISafeText::MakePasswordMask(textToDisplay);
+		textToDisplay = displayText.c_str();
 	}
 
 #ifdef PLATFORM_MACOS
@@ -550,25 +489,12 @@ void LineEditorVisual::Show() const
 		// Calculate cursor X position using TextService
 		int cursorX = m_X;
 		if (m_Editor.m_CursorPos > 0) {
-			// Get text before cursor
-			char cursorBuffer[1024];
 			const char* fullText = textToDisplay;
-
-			// Convert cursor position (characters) to byte position
-			int bytePos = 0;
-			int charPos = 0;
-			while (charPos < m_Editor.m_CursorPos && fullText[bytePos] != '\0') {
-				if ((fullText[bytePos] & 0xC0) != 0x80) {  // Not a continuation byte
-					charPos++;
-				}
-				bytePos++;
-			}
-
-			strncpy(cursorBuffer, fullText, bytePos);
-			cursorBuffer[bytePos] = '\0';
+			const std::string cursorPrefix = UISafeText::Utf8Prefix(
+				fullText, (size_t)m_Editor.m_CursorPos);
 
 			// Measure text width using TextService
-			TextSystem::Metrics metrics = TextSystem::TextService::Get().MeasureText(cursorBuffer, style, 0);
+			TextSystem::Metrics metrics = TextSystem::TextService::Get().MeasureText(cursorPrefix, style, 0);
 			cursorX = m_X + metrics.width;
 		}
 
@@ -593,22 +519,10 @@ void LineEditorVisual::Show() const
 		// Calculate cursor position
 		int cursorX = m_X;
 		if (m_Editor.m_CursorPos > 0) {
-			char cursorBuffer[1024];
 			const char* fullText = m_Editor.GetBuffer();
-
-			// Convert cursor position to bytes (UTF-8 aware)
-			int bytePos = 0;
-			int charPos = 0;
-			while (charPos < m_Editor.m_CursorPos && fullText[bytePos] != '\0') {
-				if ((fullText[bytePos] & 0xC0) != 0x80) {  // Not a continuation byte
-					charPos++;
-				}
-				bytePos++;
-			}
-
-			strncpy(cursorBuffer, fullText, bytePos);
-			cursorBuffer[bytePos] = '\0';
-			cursorX = m_X + g_GetStringWidth(cursorBuffer, NULL);
+			const std::string cursorPrefix = UISafeText::Utf8Prefix(
+				fullText, (size_t)m_Editor.m_CursorPos);
+			cursorX = m_X + g_GetStringWidth(cursorPrefix.c_str(), NULL);
 		}
 
 		// Draw cursor using text rendering

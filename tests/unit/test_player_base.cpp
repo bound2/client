@@ -23,11 +23,121 @@
 
 #include "packet_stream_access.h"		// EnsureSocketsInitialised
 #include "DatagramSocket.h"
+#include "Packet.h"
+#include "PacketDispatcher.h"
+#include "PacketFactory.h"
+#include "PacketFactoryManager.h"
 #include "Player.h"
 #include "Socket.h"
 #include "SocketImpl.h"
+#include "SocketInputStream.h"
 
 #include <cstring>
+#include <stdexcept>
+#include <vector>
+
+namespace {
+
+const PacketID_t RECEIVE_LOOP_PACKET_ID = Packet::PACKET_MAX - 8;
+
+int g_nReceiveLoopPacketsCreated = 0;
+int g_nReceiveLoopPacketsDestroyed = 0;
+int g_nReceiveLoopDispatches = 0;
+int g_nReceiveLoopThrowMode = 0;
+
+class ReceiveLoopPacket : public Packet
+{
+public:
+	ReceiveLoopPacket()
+	{
+		g_nReceiveLoopPacketsCreated++;
+	}
+
+	~ReceiveLoopPacket()
+	{
+		g_nReceiveLoopPacketsDestroyed++;
+	}
+
+	void read(SocketInputStream& iStream)
+	{
+		if (g_nReceiveLoopThrowMode == 1)
+			throw std::runtime_error("receive loop parser failure");
+		if (g_nReceiveLoopThrowMode == 2)
+			throw 17;
+
+		char body[2];
+		iStream.read(body, (uint)sizeof(body));
+	}
+
+	void write(SocketOutputStream&) const {}
+	PacketID_t getPacketID() const { return RECEIVE_LOOP_PACKET_ID; }
+	PacketSize_t getPacketSize() const { return 2; }
+	std::string getPacketName() const { return "ReceiveLoopPacket"; }
+	std::string toString() const { return getPacketName(); }
+};
+
+class ReceiveLoopPacketFactory : public PacketFactory
+{
+public:
+	Packet* createPacket() throw () { return new ReceiveLoopPacket(); }
+#ifdef __DEBUG_OUTPUT__
+	std::string getPacketName() const throw () { return "ReceiveLoopPacket"; }
+#endif
+	PacketID_t getPacketID() const throw () { return RECEIVE_LOOP_PACKET_ID; }
+	PacketSize_t getPacketMaxSize() const throw () { return 2; }
+};
+
+class ReceiveLoopPlayer : public Player
+{
+public:
+	ReceiveLoopPlayer()
+	: Player(new Socket((EnsureSocketsInitialised(), new SocketImpl())))
+	{
+	}
+
+	SocketInputStream& inputStream()
+	{
+		return *m_pInputStream;
+	}
+};
+
+class FactoryManagerScope
+{
+public:
+	explicit FactoryManagerScope(PacketFactoryManager* pManager)
+	: m_pPrevious(g_pPacketFactoryManager)
+	{
+		g_pPacketFactoryManager = pManager;
+	}
+
+	~FactoryManagerScope()
+	{
+		g_pPacketFactoryManager = m_pPrevious;
+	}
+
+private:
+	PacketFactoryManager* m_pPrevious;
+};
+
+void ReceiveLoopHandler(Packet*, Player*)
+{
+	g_nReceiveLoopDispatches++;
+}
+
+void AppendReceiveLoopFrame(std::vector<unsigned char>& wire,
+	PacketSize_t declaredSize, const std::vector<unsigned char>& body)
+{
+	const size_t oldSize = wire.size();
+	wire.resize(oldSize + szPacketHeader);
+	const SequenceSize_t sequence = 0;
+	std::memcpy(&wire[oldSize], &RECEIVE_LOOP_PACKET_ID, szPacketID);
+	std::memcpy(&wire[oldSize + szPacketID], &declaredSize, szPacketSize);
+	std::memcpy(&wire[oldSize + szPacketID + szPacketSize],
+		&sequence, szSequenceSize);
+	wire.insert(wire.end(), body.begin(), body.end());
+}
+
+} // namespace
 
 //----------------------------------------------------------------------
 // The socket-free constructor
@@ -154,6 +264,110 @@ TEST(PlayerBase, ASocketBuiltPlayerHasNoKeyToGiveBack)
 		player.setKey(4, 88);
 		CHECK(player.pHashTable != NULL);
 	}
+}
+
+TEST(PlayerReceiveLoop, FragmentationAndMalformedBodiesNeverDispatchOrLeak)
+{
+	PacketFactoryManager manager;
+	manager.addFactory(new ReceiveLoopPacketFactory());
+	FactoryManagerScope managerScope(&manager);
+	PacketDispatcher::registerHandler(RECEIVE_LOOP_PACKET_ID,
+		&ReceiveLoopHandler);
+
+	g_nReceiveLoopPacketsCreated = 0;
+	g_nReceiveLoopPacketsDestroyed = 0;
+	g_nReceiveLoopDispatches = 0;
+	g_nReceiveLoopThrowMode = 0;
+
+	std::vector<unsigned char> validWire;
+	AppendReceiveLoopFrame(validWire, 2,
+		std::vector<unsigned char>{ 0xA1, 0xA2 });
+
+	// A partial header is left byte-for-byte in the ring. No packet exists yet,
+	// so there is neither a dispatch nor an allocation to hand off.
+	{
+		ReceiveLoopPlayer player;
+		const uint fragmentSize = szPacketHeader - 1;
+		SocketInputStreamTestAccess::Preload(player.inputStream(),
+			&validWire[0], fragmentSize, player.inputStream().capacity() - 2);
+		player.processCommand();
+		CHECK_EQ(fragmentSize, player.inputStream().length());
+		CHECK_EQ(0, g_nReceiveLoopPacketsCreated);
+		CHECK_EQ(0, g_nReceiveLoopPacketsDestroyed);
+		CHECK_EQ(0, g_nReceiveLoopDispatches);
+	}
+
+	// A complete header with a partial body has the same transport semantics.
+	{
+		ReceiveLoopPlayer player;
+		const uint fragmentSize = szPacketHeader + 1;
+		SocketInputStreamTestAccess::Preload(player.inputStream(),
+			&validWire[0], fragmentSize);
+		player.processCommand();
+		CHECK_EQ(fragmentSize, player.inputStream().length());
+		CHECK_EQ(0, g_nReceiveLoopPacketsCreated);
+		CHECK_EQ(0, g_nReceiveLoopPacketsDestroyed);
+		CHECK_EQ(0, g_nReceiveLoopDispatches);
+	}
+
+	// The first complete frame lies about its one-byte body. The factory-owned
+	// parser is destroyed during exception unwinding, its handler is not called,
+	// and the following valid frame remains available to the receive loop.
+	{
+		ReceiveLoopPlayer player;
+		std::vector<unsigned char> wire;
+		AppendReceiveLoopFrame(wire, 1,
+			std::vector<unsigned char>{ 0xB1 });
+		const size_t secondFrameOffset = wire.size();
+		AppendReceiveLoopFrame(wire, 2,
+			std::vector<unsigned char>{ 0xC1, 0xC2 });
+		SocketInputStreamTestAccess::Preload(player.inputStream(),
+			&wire[0], (uint)wire.size());
+
+		bool bProtocolError = false;
+		try {
+			player.processCommand();
+		} catch (InvalidProtocolException&) {
+			bProtocolError = true;
+		}
+		CHECK(bProtocolError);
+		CHECK_EQ(1, g_nReceiveLoopPacketsCreated);
+		CHECK_EQ(1, g_nReceiveLoopPacketsDestroyed);
+		CHECK_EQ(0, g_nReceiveLoopDispatches);
+		CHECK_EQ(wire.size() - secondFrameOffset,
+			player.inputStream().length());
+
+		player.processCommand();
+		CHECK_EQ(2, g_nReceiveLoopPacketsCreated);
+		CHECK_EQ(2, g_nReceiveLoopPacketsDestroyed);
+		CHECK_EQ(1, g_nReceiveLoopDispatches);
+		CHECK(player.inputStream().isEmpty());
+	}
+
+	// Ownership also survives exceptions outside the project's Throwable tree.
+	// Both the standard-library and primitive cases unwind the receive loop
+	// before dispatch and delete the factory-created packet exactly once.
+	for (int throwMode = 1; throwMode <= 2; throwMode++)
+	{
+		ReceiveLoopPlayer player;
+		SocketInputStreamTestAccess::Preload(player.inputStream(),
+			&validWire[0], (uint)validWire.size());
+		g_nReceiveLoopThrowMode = throwMode;
+		bool bCaughtExpected = false;
+		try {
+			player.processCommand();
+		} catch (const std::runtime_error&) {
+			bCaughtExpected = throwMode == 1;
+		} catch (int value) {
+			bCaughtExpected = throwMode == 2 && value == 17;
+		}
+		CHECK(bCaughtExpected);
+		CHECK_EQ(2 + throwMode, g_nReceiveLoopPacketsCreated);
+		CHECK_EQ(2 + throwMode, g_nReceiveLoopPacketsDestroyed);
+		CHECK_EQ(1, g_nReceiveLoopDispatches);
+		CHECK(player.inputStream().isEmpty());
+	}
+	g_nReceiveLoopThrowMode = 0;
 }
 
 //----------------------------------------------------------------------

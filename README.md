@@ -54,7 +54,8 @@ nothing:
 & "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -products * -requires Microsoft.VisualStudio.Component.VC.ATL -property installationPath
 ```
 
-Install CMake 3.20+ and reopen your terminal so it lands on `PATH`:
+Install CMake 3.21+ (the first version with the VS2022 generator) and reopen
+your terminal so it lands on `PATH`:
 
 ```bash
 winget install Kitware.CMake
@@ -62,22 +63,23 @@ winget install Kitware.CMake
 
 ### 2. Install the dependencies with vcpkg
 
-`CMakeLists.txt` calls `find_package(SDL2 REQUIRED)`, so configure will fail
-until these exist. Clone and bootstrap vcpkg:
+`vcpkg.json` declares the dependencies and pins their baseline. Clone vcpkg,
+then select that same revision before bootstrapping (run from this repo):
 
 ```bash
 git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
 ```
 
-```bash
+```powershell
+$baseline = (Get-Content vcpkg.json -Raw | ConvertFrom-Json).'builtin-baseline'
+git -C C:\vcpkg checkout $baseline
 C:\vcpkg\bootstrap-vcpkg.bat
 ```
 
-Then install the libraries (this compiles from source and takes a while):
-
-```bash
-C:\vcpkg\vcpkg install sdl2:x64-windows sdl2-image:x64-windows sdl2-ttf:x64-windows sdl2-mixer:x64-windows libiconv:x64-windows libjpeg-turbo:x64-windows
-```
+CMake installs these dependencies automatically when configuring a fresh build.
+The first install can compile libraries from source and take a while. Existing
+classic-mode build trees keep their old dependency setup; use the presets below
+to validate the pinned manifest without changing those trees.
 
 | Package | Used for |
 | --- | --- |
@@ -108,6 +110,53 @@ Or open `build/vs2022/DarkEdenClient.sln` in Visual Studio, set **DarkEden** as
 the startup project, and build from there.
 
 The executable lands in `build/vs2022/bin/Debug/DarkEden.exe`.
+
+### Reproducible builds and the complete test suite
+
+The checked-in presets use separate trees under `build/presets/`, enable all
+tests, and require Bash and Perl from Git for Windows. Add Git's `usr/bin`
+directory to your terminal's `PATH`, or use the verification script below,
+which locates those tools explicitly. Set `VCPKG_ROOT` for this terminal:
+
+```powershell
+$env:VCPKG_ROOT = 'C:/vcpkg'
+cmake --preset windows
+cmake --build --preset windows-debug
+ctest --preset windows-debug
+```
+
+The same configured tree supports `windows-release` build and test presets.
+For ASan, configure `windows-asan`, then use the `windows-asan` build and test
+presets (the component described in step 5 is required). Configure the two
+trees sequentially: they share a manifest dependency installation under
+`build/presets/vcpkg_installed`.
+
+To run the same complete verification as CI, including checking that every
+required CTest entry is registered:
+
+```powershell
+./tools/ci/verify-windows.ps1 -ConfigurePreset windows -BuildPresets windows-debug,windows-release
+./tools/ci/verify-windows.ps1 -ConfigurePreset windows-asan -BuildPresets windows-asan
+```
+
+If Windows PowerShell reports that scripts are disabled, run the script in a
+child process with a policy override limited to that process:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& ./tools/ci/verify-windows.ps1 -ConfigurePreset windows -BuildPresets windows-debug,windows-release"
+```
+
+This builds every configured target, then runs the unit suite, ratchets,
+include-graph rules, format-arity audit, packet-index audit, and wire-inventory
+freshness check. Logs go under `build/verification/`. The Windows Actions
+workflow runs these commands on pushes to `master` (including merged PRs) or
+manual dispatch, caches dependency binaries, and retains diagnostic artifacts
+for seven days. PR updates do not trigger CI. It does not require
+game assets or launch the game; live-server smoke testing remains separate.
+
+Use `CMakeUserPresets.json` for local overrides; it is ignored by git. When
+updating dependencies, change the manifest baseline deliberately and check
+the deployed DLL names against the client's startup whitelist.
 
 ### 5. AddressSanitizer (optional)
 

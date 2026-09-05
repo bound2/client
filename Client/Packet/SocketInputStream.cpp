@@ -39,7 +39,8 @@ extern uint receiveWithDebug (Socket *pSock, void * buf , uint len);
 //////////////////////////////////////////////////////////////////////
 SocketInputStream::SocketInputStream ( Socket * sock , uint BufferLen )
 	throw ( ProtocolException , Error )
-: m_pSocket(sock), m_Buffer(NULL), m_BufferLen(BufferLen), m_Head(0), m_Tail(0)
+: m_pSocket(sock), m_Buffer(NULL), m_BufferLen(BufferLen), m_Head(0), m_Tail(0),
+	m_bFrameBounded(false), m_FrameRemaining(0)
 {
 	__BEGIN_TRY
 		
@@ -97,6 +98,9 @@ uint SocketInputStream::read ( std::span<char> buf )
 		throw InvalidProtocolException("span is too large");
 
 	const uint len = static_cast<uint>(buf.size());
+
+	if ( m_bFrameBounded && len > m_FrameRemaining )
+		throw InvalidProtocolException("packet parser read past declared body");
 	
 	// 요청한 만큼의 데이타가 버퍼내에 존재하지 않을 경우 예외를 던진다.
 	// 만약 모든 read 가 peek() 로 체크한 후 호출된다면, 아래 if-throw 는 
@@ -135,6 +139,8 @@ uint SocketInputStream::read ( std::span<char> buf )
 	}
 
 	m_Head = ( m_Head + len ) % m_BufferLen;
+	if ( m_bFrameBounded )
+		m_FrameRemaining -= len;
 /*
 	#ifdef __DEBUG_OUTPUT__
 		if (len > 0) {
@@ -183,6 +189,8 @@ throw ( ProtocolException , Error ) {
 		
 	if ( len == 0 )
 		throw InvalidProtocolException("len==0");
+	if ( m_bFrameBounded && len > m_FrameRemaining )
+		throw InvalidProtocolException("packet parser read past declared body");
 	
 	// 요청한 만큼의 데이타가 버퍼내에 존재하지 않을 경우 예외를 던진다.
 	// 만약 모든 read 가 peek() 로 체크한 후 호출된다면, 아래 if-throw 는 
@@ -231,6 +239,8 @@ throw ( ProtocolException , Error ) {
 	}
 
 	m_Head = ( m_Head + len ) % m_BufferLen;
+	if ( m_bFrameBounded )
+		m_FrameRemaining -= len;
 
 	/*
 	#ifdef __DEBUG_OUTPUT__
@@ -258,18 +268,65 @@ void SocketInputStream::read ( Packet * pPacket )
 {
 	__BEGIN_TRY
 		
-	// 이미 상위 레벨에서 ID, Size를 읽고 ID에 맞는 패킷객체를 만들어서
-	// 파라미터로 넘겼으므로 ID 는 skip 한다. Size는 객체의 바이너리 
-	// 이미지가 모두 도착했는지만 체크할뿐, 객체의 초기화와는 무관하기
-	// 때문에 skip 한다.
-	skip( szPacketHeader );
+	// The caller selected a packet type from the header. This method owns the
+	// complete framed read: it waits for the declared body, consumes the header,
+	// bounds the parser to that body, and requires exact body consumption.
+	Assert( pPacket != NULL );
+	if ( m_bFrameBounded )
+		throw InvalidProtocolException("nested packet read");
 
-	// 이제 하위 패킷 클래스에 정의된 메쏘드를 수행하면, 내부에서
-	// 알아서 잘 초기화하게 된다.
-	// 단 어떤 패킷의 read()에서 틀리게 되면 그 이후의 모든 패킷은
-	// 파싱이 불가능하게 된다. 따라서, 패킷 클래스를 디자인할 때
-	// 주의해야 한다.
-	pPacket->read( *this );
+	// Refuse a fragmented frame before consuming its header. The connection
+	// loops already perform this check, but keeping it here makes the framing
+	// operation safe for every caller and preserves the bytes for the next fill.
+	char header[szPacketHeader];
+	if ( !peek(header, szPacketHeader) )
+		throw InsufficientDataException(szPacketHeader - length());
+
+	PacketSize_t packetSize = 0;
+	memcpy(&packetSize, &header[szPacketID], szPacketSize);
+	const uint buffered = length();
+	const uint bufferedBody = buffered - szPacketHeader;
+	if ( packetSize > bufferedBody )
+		throw InsufficientDataException(packetSize - bufferedBody);
+
+	// The header is outside the body bound. Once it is consumed, reads made by
+	// the packet parser may consume exactly packetSize bytes and no more.
+	skip( szPacketHeader );
+	m_bFrameBounded = true;
+	m_FrameRemaining = packetSize;
+
+	try {
+		pPacket->read( *this );
+
+		if ( m_FrameRemaining != 0 ) {
+			// The unread bytes still belong to the malformed frame. Discard them
+			// so the following frame remains aligned, then reject this one.
+			m_Head = (m_Head + m_FrameRemaining) % m_BufferLen;
+			m_FrameRemaining = 0;
+			m_bFrameBounded = false;
+			throw InvalidProtocolException("packet parser did not consume declared body");
+		}
+
+		m_bFrameBounded = false;
+	} catch (InsufficientDataException&) {
+		// The complete declared body was buffered before parsing began. An
+		// underflow from here is therefore a malformed body, not fragmentation;
+		// receive loops must not swallow it as "wait for another fill".
+		m_Head = (m_Head + m_FrameRemaining) % m_BufferLen;
+		m_FrameRemaining = 0;
+		m_bFrameBounded = false;
+		throw InvalidProtocolException("packet parser underflowed declared body");
+	} catch (...) {
+		// Any parser failure owns the rest of this frame, never the next one.
+		// The whole declared body was preflighted above, so this advance cannot
+		// run past the bytes currently buffered.
+		if ( m_bFrameBounded ) {
+			m_Head = (m_Head + m_FrameRemaining) % m_BufferLen;
+			m_FrameRemaining = 0;
+			m_bFrameBounded = false;
+		}
+		throw;
+	}
 
 //    printf("%s:%d:%s read packet: %d size: %d\n", pPacket->getPacketID(), pPacket->getPacketSize());
 	
@@ -288,6 +345,8 @@ bool SocketInputStream::peek ( char * buf , uint len ) throw ( ProtocolException
 
 	if ( len == 0 )
 		throw InvalidProtocolException("len==0");
+	if ( m_bFrameBounded && len > m_FrameRemaining )
+		throw InvalidProtocolException("packet parser peeked past declared body");
 	
 	// 요청한 크기보다 버퍼의 데이타가 적은 경우, 예외를 던진다.
 	if ( len > length() ) {
@@ -356,6 +415,8 @@ void SocketInputStream::skip ( uint len )
 		
 	if ( len == 0 )
 		throw InvalidProtocolException("len==0");
+	if ( m_bFrameBounded && len > m_FrameRemaining )
+		throw InvalidProtocolException("packet parser skipped past declared body");
 	
 	if ( len > length() )
 		throw InsufficientDataException( len - length() );
@@ -364,6 +425,8 @@ void SocketInputStream::skip ( uint len )
 
 	uint pos = m_Head;
 	m_Head = ( m_Head + len ) % m_BufferLen;
+	if ( m_bFrameBounded )
+		m_FrameRemaining -= len;
 
 /*
 	#ifdef __DEBUG_OUTPUT__
@@ -743,13 +806,15 @@ uint SocketInputStream::length () const
 {
 	__BEGIN_TRY
 
+	uint buffered = 0;
 	if ( m_Head < m_Tail )
-		return m_Tail - m_Head;
-	
-	else if ( m_Head > m_Tail ) 
-		return m_BufferLen - m_Head + m_Tail;
-	
-	return 0;
+		buffered = m_Tail - m_Head;
+	else if ( m_Head > m_Tail )
+		buffered = m_BufferLen - m_Head + m_Tail;
+
+	if ( m_bFrameBounded && buffered > m_FrameRemaining )
+		return m_FrameRemaining;
+	return buffered;
 
 	__END_CATCH
 }

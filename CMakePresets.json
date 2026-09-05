@@ -1,0 +1,56 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": { "major": 3, "minor": 21, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "windows",
+      "displayName": "VS2022 x64 with all tests",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/build/presets/windows",
+      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+      "cacheVariables": {
+        "BUILD_TESTS": "ON",
+        "REQUIRE_TEST_TOOLS": "ON",
+        "USE_ASAN": "OFF",
+        "USE_TSAN": "OFF",
+        "USE_UBSAN": "OFF",
+        "VCPKG_TARGET_TRIPLET": "x64-windows",
+        "VCPKG_HOST_TRIPLET": "x64-windows",
+        "VCPKG_INSTALLED_DIR": "${sourceDir}/build/presets/vcpkg_installed",
+        "VCPKG_MANIFEST_MODE": "ON"
+      }
+    },
+    {
+      "name": "windows-asan",
+      "displayName": "VS2022 x64 with AddressSanitizer and all tests",
+      "inherits": "windows",
+      "binaryDir": "${sourceDir}/build/presets/windows-asan",
+      "cacheVariables": { "USE_ASAN": "ON" }
+    }
+  ],
+  "buildPresets": [
+    { "name": "windows-debug", "configurePreset": "windows", "configuration": "Debug", "jobs": 2 },
+    { "name": "windows-release", "configurePreset": "windows", "configuration": "Release", "jobs": 2 },
+    { "name": "windows-asan", "configurePreset": "windows-asan", "configuration": "Debug", "jobs": 2 }
+  ],
+  "testPresets": [
+    {
+      "name": "windows-debug",
+      "configurePreset": "windows",
+      "configuration": "Debug",
+      "output": { "outputOnFailure": true },
+      "execution": { "noTestsAction": "error", "timeout": 300 }
+    },
+    {
+      "name": "windows-release",
+      "inherits": "windows-debug",
+      "configuration": "Release"
+    },
+    {
+      "name": "windows-asan",
+      "inherits": "windows-debug",
+      "configurePreset": "windows-asan"
+    }
+  ]
+}
