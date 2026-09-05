@@ -160,6 +160,65 @@ private:
 	BoundaryOperation m_Operation;
 };
 
+enum SwallowedOperation
+{
+	SWALLOWED_SCALAR,
+	SWALLOWED_SPAN,
+	SWALLOWED_STRING,
+	SWALLOWED_PEEK,
+	SWALLOWED_SKIP,
+	SWALLOWED_DESTINATION_LENGTH,
+	SWALLOWED_EMPTY_SPAN,
+	SWALLOWED_EMPTY_STRING,
+	SWALLOWED_EMPTY_PEEK,
+	SWALLOWED_EMPTY_SKIP,
+	SWALLOWED_NESTED_FRAME,
+	SWALLOWED_OPERATION_COUNT
+};
+
+class SwallowedFailurePacket : public FixedReadPacket
+{
+public:
+	SwallowedFailurePacket(SwallowedOperation operation, bool consumeFirst)
+	: FixedReadPacket(1), m_Operation(operation), m_ConsumeFirst(consumeFirst), m_Caught(false) {}
+
+	void read(SocketInputStream& stream)
+	{
+		if (m_ConsumeFirst)
+			FixedReadPacket::read(stream);
+		try {
+			char bytes[2] = {};
+			std::string text;
+			uint16_t scalar = 0;
+			switch (m_Operation) {
+			case SWALLOWED_SCALAR: stream.readWire(scalar); break;
+			case SWALLOWED_SPAN: stream.read(std::as_writable_bytes(std::span(bytes))); break;
+			case SWALLOWED_STRING: stream.read(text, 2); break;
+			case SWALLOWED_PEEK: stream.peek(bytes, 2); break;
+			case SWALLOWED_SKIP: stream.skip(2); break;
+			case SWALLOWED_DESTINATION_LENGTH: stream.read(std::span<char>(bytes, 1), 2); break;
+			case SWALLOWED_EMPTY_SPAN: stream.read(std::span<char>()); break;
+			case SWALLOWED_EMPTY_STRING: stream.read(text, 0); break;
+			case SWALLOWED_EMPTY_PEEK: stream.peek(bytes, 0); break;
+			case SWALLOWED_EMPTY_SKIP: stream.skip(0); break;
+			case SWALLOWED_NESTED_FRAME: stream.read(static_cast<Packet*>(this)); break;
+			default: CHECK(false); break;
+			}
+		} catch (InvalidProtocolException&) {
+			m_Caught = true;
+		}
+		if (!m_ConsumeFirst)
+			FixedReadPacket::read(stream);
+	}
+
+	bool caughtFailure() const { return m_Caught; }
+
+private:
+	SwallowedOperation m_Operation;
+	bool m_ConsumeFirst;
+	bool m_Caught;
+};
+
 void AppendFrame(std::vector<unsigned char>& wire, PacketID_t packetID,
 	PacketSize_t bodySize, const std::vector<unsigned char>& body)
 {
@@ -291,6 +350,32 @@ TEST(SocketInputStream, PacketReadRejectsAndDiscardsAnUnderConsumedBody)
 	f.m_Stream.read(&valid);
 	CHECK_EQ(0xB2, valid.getLastByte());
 	CHECK(f.m_Stream.isEmpty());
+}
+
+TEST(SocketInputStream, SwallowedStreamErrorsStillRejectTheFrame)
+{
+	for (int operation = 0; operation < SWALLOWED_OPERATION_COUNT; ++operation)
+	{
+		for (bool consumeFirst : { false, true })
+		{
+			StreamFixture input(32);
+			std::vector<unsigned char> wire;
+			AppendFrame(wire, 1, 1, { 0xA1 });
+			AppendFrame(wire, 1, 1, { 0xB2 });
+			input.Preload(wire.data(), (uint)wire.size(), 29);
+			SwallowedFailurePacket malformed((SwallowedOperation)operation, consumeFirst);
+			bool rejected = false;
+			try { input.m_Stream.read(&malformed); }
+			catch (InvalidProtocolException&) { rejected = true; }
+			CHECK(malformed.caughtFailure());
+			CHECK(rejected);
+			CHECK_EQ(szPacketHeader + 1, input.m_Stream.length());
+			FixedReadPacket valid(1);
+			input.m_Stream.read(&valid);
+			CHECK_EQ(0xB2, valid.getLastByte());
+			CHECK(input.m_Stream.isEmpty());
+		}
+	}
 }
 
 TEST(SocketInputStream, FragmentedPacketReadConsumesNothingUntilBodyIsComplete)

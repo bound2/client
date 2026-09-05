@@ -134,6 +134,12 @@ public :
 //////////////////////////////////////////////////
 private :
 
+	// A decoder may catch a stream exception itself. Remember the failure until
+	// the outer framed read finishes so partially decoded packets cannot pass.
+	[[noreturn]] void failRead(const char* message);
+	[[noreturn]] void failUnderflow(uint missing);
+	void finishFrame() noexcept;
+
 	// Test seam: lets tests/unit preload the ring buffer with hostile
 	// bytes without a connected socket (fill() is the only production
 	// writer, and it needs a live peer). Friendship changes access only -
@@ -158,6 +164,7 @@ private :
 	// the size declared in that frame's header. This prevents a malformed
 	// body from consuming bytes that belong to the following packet.
 	bool m_bFrameBounded;
+	bool m_bFrameReadFailed;
 	uint m_FrameRemaining;
 public :
 
