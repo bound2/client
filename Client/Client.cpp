@@ -58,7 +58,12 @@
 #endif
 #include <time.h>
 #include <string>
+#include <vector>
 #include <sys/stat.h>
+// std::filesystem directory enumeration, in place of the _findfirst /
+// _findnext walk CheckLogFile() used to run
+// (docs/cpp17-cpp20-compatibility-assessment-2026-09-04.md, priority 6).
+#include "DirectoryListing.h"
 #include "Client.h"
 #include "GameObject.h"
 #include "VS_UI.h"
@@ -2824,20 +2829,30 @@ ApplyPatch()
 		char buffer[256] = { 0, };
 		char computerName[256] = { 0, };
 
-		struct _finddata_t	FileData;
-		long				hFile;
-
 		_mkdir( "Log" );
-		
+
 		//-----------------------------------------------------------------
-		// *.spk file을 찾는다.
+		// Find the Log\Log*.txt files. Files only, where the legacy
+		// _findfirst pattern also matched a subdirectory of the same
+		// name; opening one as a stream failed and remove() could never
+		// delete it, so nothing this loop does is lost by the change.
 		//-----------------------------------------------------------------
-		if ( (hFile = _findfirst( "Log\\Log*.txt", &FileData )) != -1L )
+		std::vector<Basic::SDirectoryEntry>	vLogFiles;
+
+		if ( Basic::ListDirectory( "Log", "Log*.txt", vLogFiles ) )
 		{
-			do
+			for (size_t iFile=0; iFile<vLogFiles.size(); iFile++)
 			{
-				sprintf(filename, "Log\\%s", FileData.name);
-				
+				const std::string&	sFilename = vLogFiles[iFile].sName;
+
+				// "Log\" plus the name plus the terminator.
+				if (4 + sFilename.size() >= sizeof(filename))
+				{
+					continue;
+				}
+
+				sprintf(filename, "Log\\%s", sFilename.c_str());
+
 				std::ifstream file( filename, ios::binary );
 				file.seekg( 0, ios::end );
 				
@@ -2876,14 +2891,9 @@ ApplyPatch()
 					}
 				}
 			}
-			
-			
-			while (_findnext( hFile, &FileData ) == 0);
-			
-			_findclose( hFile );			
 		}
 	}
-	
+
 	//-----------------------------------------------------------------------------
 	// Check Flush LogFile
 	//-----------------------------------------------------------------------------

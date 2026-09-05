@@ -35,6 +35,12 @@ endif()
 # Basic library sources
 set(BASIC_SOURCES
 	Directory.cpp
+	# Directory enumeration on std::filesystem
+	# (docs/cpp17-cpp20-compatibility-assessment-2026-09-04.md, priority
+	# 6). Here for the same reason DebugLog and SafeFormat are: the
+	# callers being migrated off _findfirst are in the executable, and
+	# basic is the one library every target already links.
+	DirectoryListing.cpp
 	BasicData.cpp
 	Timer2.cpp
 	BasicException.cpp
@@ -118,6 +124,7 @@ install(FILES
 	Typedef.h
 	PlatformUtil.h
 	Directory.h
+	DirectoryListing.h
 	BasicMemory.h
 	BasicException.h
 	DLL.h
